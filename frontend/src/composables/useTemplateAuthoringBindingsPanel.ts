@@ -1,4 +1,5 @@
 import { computed, onMounted, ref, type Ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { getMaster } from '@/api/masters'
@@ -31,6 +32,8 @@ export function useTemplateAuthoringBindingsPanel(
   structuredEditorRef: Ref<StructuredBindingEditorExpose | null>,
 ) {
   const { t, te } = useI18n()
+  const route = useRoute()
+  const router = useRouter()
   const templatesStore = useTemplatesStore()
 
   const masterAnchors = ref<MasterAnchor[]>([])
@@ -69,12 +72,28 @@ export function useTemplateAuthoringBindingsPanel(
     try {
       const master = await getMaster(props.masterId)
       masterAnchors.value = master.anchors
+      openAnchorFromQueryIfPresent()
     } catch {
       ElMessage.error(t('templates.authoring.masterAnchorsLoadFailed'))
     } finally {
       loadingMaster.value = false
     }
   })
+
+  function openAnchorFromQueryIfPresent() {
+    const anchorId = typeof route.query.anchorId === 'string' ? route.query.anchorId : null
+    if (!anchorId) {
+      return
+    }
+    const row = edit.anchorRowsSource.value.find((candidate) => candidate.anchorId === anchorId)
+    if (!row) {
+      return
+    }
+    edit.openEditPanel(row)
+    const nextQuery = { ...route.query }
+    delete nextQuery.anchorId
+    void router.replace({ query: nextQuery })
+  }
 
   function resolveValidationStatusLabel(status: string | undefined | null): string {
     if (!status) {

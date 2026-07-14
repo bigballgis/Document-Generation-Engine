@@ -1210,6 +1210,7 @@ export default {
         UNSUPPORTED_STRUCTURED_NODES: '不支持的结构化节点',
         PASTE_CLEANING_BLOCKERS: '粘贴清洗阻断',
         BLOCKER_STATUS: '阻塞项状态',
+        FIDELITY_WARNINGS_VIEWED: '保真警告已审阅',
       },
     },
     publishSummary: {
@@ -1587,6 +1588,10 @@ export default {
         viewedOnly: '仅已查看',
         unviewedOnly: '仅未查看',
         markViewed: '标记已查看',
+        markViewedFailed: '无法将该保真警告标记为已查看。',
+        showTechnical: '显示技术详情',
+        hideTechnical: '隐藏技术详情',
+        editBinding: '编辑绑定',
         reset: '重置筛选',
         availableCodes: '{count} 个不同警告代码',
         viewedState: {
@@ -1614,6 +1619,12 @@ export default {
       severities: {
         WARNING: '警告',
         BLOCKER: '阻塞',
+      },
+      fidelityMessages: {
+        UNRESOLVED_VARIABLE: '变量引用未在模板 schema 中声明。',
+        IMAGE_SCALING_ADJUSTED: '渲染时可能调整图片缩放。',
+        UNSUPPORTED_NODE: '检测到不支持的结构化内容节点。',
+        MISSING_STYLE_REFERENCE: '样式引用缺失或不在已批准母版样式目录中。',
       },
     },
     previewHistory: {

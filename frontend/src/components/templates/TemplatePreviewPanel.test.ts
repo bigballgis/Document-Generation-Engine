@@ -1,5 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -21,6 +22,13 @@ describe('TemplatePreviewPanel', () => {
     document.body.innerHTML = ''
     vi.mocked(templatesApi.getPreview).mockReset()
   })
+
+  function createTestRouter() {
+    return createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/templates/:templateId/dev/:devVersionId', component: { template: '<div />' } }],
+    })
+  }
 
   const preview: PreviewRecord = {
     previewId: 'prev-1',
@@ -77,7 +85,7 @@ describe('TemplatePreviewPanel', () => {
         bindings: [],
         preview,
       },
-      global: { plugins: [createPinia(), i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus, createTestRouter()] },
     })
 
     await flushPromises()
@@ -87,7 +95,11 @@ describe('TemplatePreviewPanel', () => {
     expect(wrapper.text()).toContain('header-logo')
     expect(wrapper.text()).toContain('Logo anchor shifted beyond tolerance.')
     expect(wrapper.text()).toContain('rendering.fidelity.layoutShift')
+    expect(wrapper.find('[data-testid="fidelity-warning-technical-toggle"]').exists()).toBe(true)
+    await wrapper.find('[data-testid="fidelity-warning-technical-toggle"]').trigger('click')
+    await flushPromises()
     expect(wrapper.text()).toContain('LAYOUT_SHIFT')
+    expect(wrapper.find('[data-testid="fidelity-warning-edit-binding"]').exists()).toBe(true)
   })
 
   it('shows empty state when no preview record exists', async () => {
@@ -103,7 +115,7 @@ describe('TemplatePreviewPanel', () => {
         bindings: [],
         preview: null,
       },
-      global: { plugins: [createPinia(), i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus, createTestRouter()] },
     })
 
     await flushPromises()

@@ -54,6 +54,18 @@ export async function getPreview(templateId: string, previewId: string): Promise
   return unwrapEnvelope(response.data)
 }
 
+export async function markFidelityWarningViewed(
+  templateId: string,
+  previewId: string,
+  warningIndex: number,
+): Promise<PreviewRecord> {
+  const response = await http.put<ApiEnvelope<PreviewRecord>>(
+    `/templates/${templateId}/previews/${previewId}/fidelity-warnings/viewed`,
+    { warningIndex },
+  )
+  return unwrapEnvelope(response.data)
+}
+
 export async function listPreviewRuns(templateId: string): Promise<PreviewRunSummary[]> {
   const response = await http.get<ApiEnvelope<PreviewRunSummary[]>>(
     `/templates/${templateId}/previews`,

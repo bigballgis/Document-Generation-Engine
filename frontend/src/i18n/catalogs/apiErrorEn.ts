@@ -104,6 +104,7 @@ export const apiErrorEn = {
   },
   rendering: {
     previewNotFound: "The preview record was not found.",
+    fidelityWarningIndexOutOfRange: "The fidelity warning index is out of range for this preview.",
     previewArtifactNotAvailable: "The preview artifact is not available for download.",
     previewArtifactExpired: "The preview artifact has expired. Please regenerate the preview.",
     generationFailed: "Document generation failed.",

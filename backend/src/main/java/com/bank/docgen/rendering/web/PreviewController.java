@@ -3,11 +3,13 @@ package com.bank.docgen.rendering.web;
 import com.bank.docgen.rendering.api.AsyncPreviewStartResponse;
 import com.bank.docgen.rendering.api.BatchTestGenerateRequest;
 import com.bank.docgen.rendering.api.BatchTestSummaryView;
+import com.bank.docgen.rendering.api.MarkFidelityWarningViewedRequest;
 import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.api.PreviewSummaryView;
 import com.bank.docgen.rendering.api.TestGenerateRequest;
 import com.bank.docgen.rendering.service.AsyncPreviewOrchestrator;
 import com.bank.docgen.rendering.service.BatchTestGenerationService;
+import com.bank.docgen.rendering.service.FidelityWarningViewedService;
 import com.bank.docgen.rendering.service.PreviewArtifactDownloadService;
 import com.bank.docgen.rendering.service.PreviewArtifactDownloadService.PreviewArtifactFormat;
 import com.bank.docgen.rendering.service.PreviewGenerationService;
@@ -29,6 +31,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -43,6 +46,7 @@ public class PreviewController {
     private final BatchTestGenerationService batchTestGenerationService;
     private final PreviewArtifactDownloadService previewArtifactDownloadService;
     private final AsyncPreviewOrchestrator asyncPreviewOrchestrator;
+    private final FidelityWarningViewedService fidelityWarningViewedService;
     private final TraceIdProvider traceIdProvider;
 
     public PreviewController(
@@ -50,12 +54,14 @@ public class PreviewController {
             BatchTestGenerationService batchTestGenerationService,
             PreviewArtifactDownloadService previewArtifactDownloadService,
             AsyncPreviewOrchestrator asyncPreviewOrchestrator,
+            FidelityWarningViewedService fidelityWarningViewedService,
             TraceIdProvider traceIdProvider
     ) {
         this.previewGenerationService = previewGenerationService;
         this.batchTestGenerationService = batchTestGenerationService;
         this.previewArtifactDownloadService = previewArtifactDownloadService;
         this.asyncPreviewOrchestrator = asyncPreviewOrchestrator;
+        this.fidelityWarningViewedService = fidelityWarningViewedService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -98,6 +104,23 @@ public class PreviewController {
             HttpServletRequest request
     ) {
         return envelope(request, previewGenerationService.getPreview(templateId, previewId, session));
+    }
+
+    @PutMapping("/{previewId}/fidelity-warnings/viewed")
+    public SuccessEnvelope<PreviewRecordView> markFidelityWarningViewed(
+            @PathVariable UUID templateId,
+            @PathVariable UUID previewId,
+            @Valid @RequestBody MarkFidelityWarningViewedRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        PreviewRecordView result = fidelityWarningViewedService.markWarningViewed(
+                templateId,
+                previewId,
+                body.warningIndex(),
+                session
+        );
+        return envelope(request, result);
     }
 
     @GetMapping("/{previewId}/artifacts/docx")

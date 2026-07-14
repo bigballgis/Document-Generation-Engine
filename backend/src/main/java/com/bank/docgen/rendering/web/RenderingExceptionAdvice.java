@@ -10,6 +10,7 @@ import com.bank.docgen.rendering.service.PreviewArtifactNotAvailableException;
 import com.bank.docgen.rendering.service.PreviewConcurrencyLimitException;
 import com.bank.docgen.rendering.service.PreviewGenerationException;
 import com.bank.docgen.rendering.service.PreviewNotFoundException;
+import com.bank.docgen.rendering.service.PreviewValidationException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
@@ -86,6 +87,19 @@ public class RenderingExceptionAdvice {
                 HttpStatus.NOT_FOUND,
                 ApiErrorCodes.BATCH_TEST_RUN_NOT_FOUND,
                 "api.error.rendering.batchTestRunNotFound"
+        );
+    }
+
+    @ExceptionHandler(PreviewValidationException.class)
+    public ResponseEntity<ErrorEnvelope> handlePreviewValidation(
+            HttpServletRequest request,
+            PreviewValidationException ex
+    ) {
+        return errorEnvelopeFactory.renderingDomainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorCodes.REQUEST_BODY_INVALID,
+                ex.messageKey()
         );
     }
 

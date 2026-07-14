@@ -27,6 +27,9 @@ const {
   severityTagType,
   locationLabel,
   previewArtifact,
+  devVersionId,
+  markingViewedIndex,
+  markWarningViewed,
   canDownloadDocx,
   canDownloadPdf,
   downloadArtifact,
@@ -107,6 +110,10 @@ const {
         v-if="latestPreview.fidelityWarnings.length"
         :warnings="latestPreview.fidelityWarnings"
         :artifact-hint="previewArtifact"
+        :template-id="templateId"
+        :dev-version-id="devVersionId"
+        :marking-viewed-index="markingViewedIndex"
+        @mark-viewed="markWarningViewed"
       />
       <el-empty
         v-else

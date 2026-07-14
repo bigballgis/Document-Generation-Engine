@@ -228,4 +228,9 @@ public class PreviewRecordEntity {
     public String getErrorDetails() {
         return errorDetails;
     }
+
+    public void updateFidelityWarningsJson(String fidelityWarningsJson) {
+        this.fidelityWarningsJson = fidelityWarningsJson;
+        this.updatedAt = Instant.now();
+    }
 }

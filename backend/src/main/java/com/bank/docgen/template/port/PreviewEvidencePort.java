@@ -17,4 +17,9 @@ public interface PreviewEvidencePort {
     Set<String> successfulPreviewTestDataSetExternalIds(UUID templateId, UUID templateVersionId);
 
     Optional<BatchTestRunGateSnapshot> latestBatchTestRun(UUID templateId);
+
+    /**
+     * Unviewed fidelity warnings on the latest successful preview for the given dev version.
+     */
+    int countUnviewedFidelityWarnings(UUID templateId, UUID templateVersionId);
 }

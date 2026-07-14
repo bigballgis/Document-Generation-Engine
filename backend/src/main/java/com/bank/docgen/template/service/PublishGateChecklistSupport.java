@@ -39,6 +39,7 @@ final class PublishGateChecklistSupport {
         checklistItems.add(items.ruleBoundsItem(ruleValidation));
         checklistItems.add(items.testResultsItem(templateId));
         checklistItems.add(items.previewPresentItem(templateId, version.getId()));
+        checklistItems.add(items.fidelityWarningsViewedItem(templateId, version.getId()));
         checklistItems.add(items.changeDiffItem(changeDiff));
         checklistItems.add(items.approvalSummaryItem(templateId));
         checklistItems.add(items.coverageThresholdsItem(coverage));

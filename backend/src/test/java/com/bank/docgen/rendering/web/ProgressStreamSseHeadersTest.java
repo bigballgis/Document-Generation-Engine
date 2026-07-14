@@ -10,6 +10,7 @@ import com.bank.docgen.rendering.service.AsyncPreviewOrchestrator;
 import com.bank.docgen.rendering.service.BatchTestHistoryService;
 import com.bank.docgen.rendering.service.BatchTestGenerationService;
 import com.bank.docgen.rendering.service.PreviewArtifactDownloadService;
+import com.bank.docgen.rendering.service.FidelityWarningViewedService;
 import com.bank.docgen.rendering.service.PreviewGenerationService;
 import com.bank.docgen.rendering.service.SubmitTestEligibilityService;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
@@ -37,6 +38,8 @@ class ProgressStreamSseHeadersTest {
     @Mock
     private AsyncPreviewOrchestrator asyncPreviewOrchestrator;
     @Mock
+    private FidelityWarningViewedService fidelityWarningViewedService;
+    @Mock
     private AsyncBatchTestOrchestrator batchTestOrchestrator;
     @Mock
     private BatchTestHistoryService batchTestHistoryService;
@@ -57,6 +60,7 @@ class ProgressStreamSseHeadersTest {
                 batchTestGenerationService,
                 previewArtifactDownloadService,
                 asyncPreviewOrchestrator,
+                fidelityWarningViewedService,
                 traceIdProvider
         );
 

@@ -57,7 +57,8 @@ public class PreviewGenerationService {
             ObjectMapper objectMapper,
             PreviewComparisonService previewComparisonService,
             RenderProfileService renderProfileService,
-            FidelityValidationService fidelityValidationService
+            FidelityValidationService fidelityValidationService,
+            FidelityWarningJsonSupport fidelityWarningJsonSupport
     ) {
         this.previewAuthorizationPort = previewAuthorizationPort;
         this.testDataSetEvidencePort = testDataSetEvidencePort;
@@ -69,6 +70,7 @@ public class PreviewGenerationService {
                 previewComparisonService,
                 anchorBindingRepository,
                 testDataSetEvidencePort,
+                fidelityWarningJsonSupport,
                 objectMapper
         );
         this.assembly = new PreviewGenerationAssemblySupport(

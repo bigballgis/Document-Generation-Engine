@@ -145,6 +145,7 @@ class PublishGateServiceTest {
                 .thenReturn(Optional.of(new BatchTestRunGateSnapshot(0)));
         lenient().when(previewEvidencePort.countSuccessfulPreviews(templateId, versionId)).thenReturn(1);
         lenient().when(previewEvidencePort.countFailedPreviews(templateId, versionId)).thenReturn(0);
+        lenient().when(previewEvidencePort.countUnviewedFidelityWarnings(templateId, versionId)).thenReturn(0);
         lenient().when(contentModuleReferenceService.validateReferences(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 0, 0));
         lenient().when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
@@ -614,5 +615,36 @@ class PublishGateServiceTest {
                 null,
                 "10000007"
         );
+    }
+
+    @Test
+    void publishGate_blocksWhenLatestPreviewHasUnviewedFidelityWarnings() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        when(previewEvidencePort.countUnviewedFidelityWarnings(templateId, versionId)).thenReturn(2);
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.ready()).isFalse();
+        assertThat(checklist.items().stream()
+                .anyMatch(item -> item.checkCode() == PublishGateCheckCode.FIDELITY_WARNINGS_VIEWED
+                        && item.blocker()))
+                .isTrue();
+    }
+
+    @Test
+    void publishGate_readyWhenAllFidelityWarningsViewed() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        when(previewEvidencePort.countUnviewedFidelityWarnings(templateId, versionId)).thenReturn(0);
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.FIDELITY_WARNINGS_VIEWED)
+                .findFirst()
+                .orElseThrow()
+                .ready())
+                .isTrue();
     }
 }

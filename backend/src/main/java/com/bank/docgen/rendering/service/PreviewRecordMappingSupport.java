@@ -10,11 +10,8 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.port.TestDataSetEvidencePort;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,17 +26,20 @@ final class PreviewRecordMappingSupport {
     private final PreviewComparisonService previewComparisonService;
     private final AnchorBindingRepository anchorBindingRepository;
     private final TestDataSetEvidencePort testDataSetEvidencePort;
+    private final FidelityWarningJsonSupport fidelityWarningJsonSupport;
     private final ObjectMapper objectMapper;
 
     PreviewRecordMappingSupport(
             PreviewComparisonService previewComparisonService,
             AnchorBindingRepository anchorBindingRepository,
             TestDataSetEvidencePort testDataSetEvidencePort,
+            FidelityWarningJsonSupport fidelityWarningJsonSupport,
             ObjectMapper objectMapper
     ) {
         this.previewComparisonService = previewComparisonService;
         this.anchorBindingRepository = anchorBindingRepository;
         this.testDataSetEvidencePort = testDataSetEvidencePort;
+        this.fidelityWarningJsonSupport = fidelityWarningJsonSupport;
         this.objectMapper = objectMapper;
     }
 
@@ -118,44 +118,10 @@ final class PreviewRecordMappingSupport {
     }
 
     String writeWarnings(List<FidelityWarningView> warnings) {
-        try {
-            return objectMapper.writeValueAsString(warnings);
-        } catch (JsonProcessingException ex) {
-            return "[]";
-        }
+        return fidelityWarningJsonSupport.writeWarnings(warnings);
     }
 
     List<FidelityWarningView> readWarnings(String json) {
-        if (json == null || json.isBlank()) {
-            return List.of();
-        }
-        try {
-            JsonNode root = objectMapper.readTree(json);
-            if (!root.isArray()) {
-                return List.of();
-            }
-            List<FidelityWarningView> warnings = new ArrayList<>();
-            for (JsonNode node : root) {
-                warnings.add(new FidelityWarningView(
-                        node.path("code").asText(""),
-                        node.path("messageKey").asText(""),
-                        textOrNull(node, "location"),
-                        textOrNull(node, "artifact"),
-                        Boolean.valueOf(node.path("viewed").asBoolean(false))
-                ));
-            }
-            return List.copyOf(warnings);
-        } catch (JsonProcessingException ex) {
-            return List.of();
-        }
-    }
-
-    private static String textOrNull(JsonNode node, String field) {
-        JsonNode value = node.get(field);
-        if (value == null || value.isNull()) {
-            return null;
-        }
-        String text = value.asText();
-        return text.isBlank() ? null : text;
+        return fidelityWarningJsonSupport.readWarnings(json);
     }
 }

@@ -103,6 +103,7 @@ export const apiErrorZhCn = {
   },
   rendering: {
     previewNotFound: "未找到预览记录。",
+    fidelityWarningIndexOutOfRange: "该预览的保真警告索引超出范围。",
     previewArtifactNotAvailable: "预览产物暂不可下载。",
     previewArtifactExpired: "预览产物已过期，请重新生成预览。",
     generationFailed: "文档生成失败。",

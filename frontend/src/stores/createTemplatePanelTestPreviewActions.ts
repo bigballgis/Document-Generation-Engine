@@ -122,6 +122,17 @@ export function createTemplatePanelTestPreviewActions(deps: {
     }
   }
 
+  async function markFidelityWarningViewed(
+    templateId: string,
+    previewId: string,
+    warningIndex: number,
+  ): Promise<PreviewRecord> {
+    const preview = await templatesApi.markFidelityWarningViewed(templateId, previewId, warningIndex)
+    const entry = entryFor(templateId)
+    entry.previewsById = { ...entry.previewsById, [previewId]: preview }
+    return preview
+  }
+
   async function downloadPreviewArtifact(
     templateId: string,
     previewId: string,
@@ -157,6 +168,7 @@ export function createTemplatePanelTestPreviewActions(deps: {
     fetchCoverage,
     fetchPreviewRuns,
     fetchPreview,
+    markFidelityWarningViewed,
     downloadPreviewArtifact,
     fetchBatchTestHistory,
     runBatchTest,

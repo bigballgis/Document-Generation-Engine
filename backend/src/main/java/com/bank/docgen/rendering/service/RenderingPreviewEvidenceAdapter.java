@@ -2,9 +2,11 @@ package com.bank.docgen.rendering.service;
 
 import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
+import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
 import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
 import com.bank.docgen.template.port.BatchTestRunGateSnapshot;
 import com.bank.docgen.template.port.PreviewEvidencePort;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -16,13 +18,16 @@ public class RenderingPreviewEvidenceAdapter implements PreviewEvidencePort {
 
     private final PreviewRecordRepository previewRecordRepository;
     private final BatchTestRunRepository batchTestRunRepository;
+    private final FidelityWarningJsonSupport fidelityWarningJsonSupport;
 
     public RenderingPreviewEvidenceAdapter(
             PreviewRecordRepository previewRecordRepository,
-            BatchTestRunRepository batchTestRunRepository
+            BatchTestRunRepository batchTestRunRepository,
+            FidelityWarningJsonSupport fidelityWarningJsonSupport
     ) {
         this.previewRecordRepository = previewRecordRepository;
         this.batchTestRunRepository = batchTestRunRepository;
+        this.fidelityWarningJsonSupport = fidelityWarningJsonSupport;
     }
 
     @Override
@@ -59,5 +64,17 @@ public class RenderingPreviewEvidenceAdapter implements PreviewEvidencePort {
             return Optional.empty();
         }
         return Optional.of(new BatchTestRunGateSnapshot(runs.getFirst().getBlockerCount()));
+    }
+
+    @Override
+    public int countUnviewedFidelityWarnings(UUID templateId, UUID templateVersionId) {
+        Optional<PreviewRecordEntity> latestSuccessful = previewRecordRepository
+                .findByTemplateIdAndTemplateVersionIdAndStatus(templateId, templateVersionId, PreviewStatus.SUCCEEDED)
+                .stream()
+                .max(Comparator.comparing(PreviewRecordEntity::getCreatedAt));
+        return latestSuccessful
+                .map(preview -> fidelityWarningJsonSupport.countUnviewed(
+                        fidelityWarningJsonSupport.readWarnings(preview.getFidelityWarningsJson())))
+                .orElse(0);
     }
 }

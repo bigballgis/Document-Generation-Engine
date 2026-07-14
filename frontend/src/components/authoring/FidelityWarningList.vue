@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import type { FidelityWarning } from '@/types/template'
 import {
@@ -8,10 +9,14 @@ import {
   uniqueArtifacts,
   uniqueWarningCodes,
 } from '@/utils/fidelityWarningFilters'
+import { buildFidelityBindingEditLink } from '@/utils/fidelityBindingEditLink'
 
 const props = defineProps<{
   warnings: FidelityWarning[]
   artifactHint?: string | null
+  templateId?: string
+  devVersionId?: string
+  markingViewedIndex?: number | null
 }>()
 
 const emit = defineEmits<{
@@ -22,6 +27,7 @@ const { t, te } = useI18n()
 
 const localWarnings = ref<FidelityWarning[]>([])
 const filters = ref({ ...DEFAULT_FIDELITY_WARNING_FILTERS })
+const expandedCodes = ref<Record<number, boolean>>({})
 
 watch(
   () => props.warnings,
@@ -62,28 +68,56 @@ const emptyDescriptionKey = computed(() =>
       : 'templates.preview.noWarnings',
 )
 
-function warningLabel(messageKey: string): string {
-  return te(messageKey) ? t(messageKey) : messageKey
+function humanWarningLabel(warning: FidelityWarning): string {
+  if (te(warning.messageKey)) {
+    return t(warning.messageKey)
+  }
+  const codeKey = `templates.preview.fidelityMessages.${warning.code}`
+  if (te(codeKey)) {
+    return t(codeKey)
+  }
+  return warning.messageKey
 }
 
 function severityTagType(code: string): 'danger' | 'warning' {
   return code.includes('UNRESOLVED') || code.includes('MISSING') ? 'danger' : 'warning'
 }
 
-function markViewed(index: number) {
+function globalIndexForFiltered(index: number): number {
   const warning = filteredWarnings.value[index]
   if (!warning) {
-    return
+    return -1
   }
-  const globalIndex = localWarnings.value.findIndex(
+  return localWarnings.value.findIndex(
     (item) =>
       item.code === warning.code &&
       item.messageKey === warning.messageKey &&
       item.location === warning.location,
   )
+}
+
+function markViewed(index: number) {
+  const globalIndex = globalIndexForFiltered(index)
   if (globalIndex >= 0) {
-    localWarnings.value[globalIndex] = { ...localWarnings.value[globalIndex], viewed: true }
     emit('markViewed', globalIndex)
+  }
+}
+
+function bindingEditLink(warning: FidelityWarning): string | null {
+  if (!props.templateId || !props.devVersionId) {
+    return null
+  }
+  return buildFidelityBindingEditLink({
+    templateId: props.templateId,
+    devVersionId: props.devVersionId,
+    anchorId: warning.artifact ?? warning.location,
+  })
+}
+
+function toggleTechnicalDetails(index: number) {
+  expandedCodes.value = {
+    ...expandedCodes.value,
+    [index]: !expandedCodes.value[index],
   }
 }
 
@@ -130,10 +164,39 @@ function resetFilters() {
     />
 
     <el-table v-else :data="filteredWarnings" size="small" class="warning-table">
-      <el-table-column :label="t('templates.preview.warningFilters.warningCode')" prop="code" min-width="160" />
-      <el-table-column :label="t('templates.preview.warningFilters.location')" min-width="140">
-        <template #default="{ row }">
-          {{ row.location ?? t('common.notAvailable') }}
+      <el-table-column :label="t('templates.preview.warningFilters.message')" min-width="280">
+        <template #default="{ row, $index }">
+          <p class="human-message" data-testid="fidelity-warning-human-message">
+            {{ humanWarningLabel(row) }}
+          </p>
+          <button
+            type="button"
+            class="technical-toggle"
+            data-testid="fidelity-warning-technical-toggle"
+            @click="toggleTechnicalDetails($index)"
+          >
+            {{
+              expandedCodes[$index]
+                ? t('templates.preview.warningFilters.hideTechnical')
+                : t('templates.preview.warningFilters.showTechnical')
+            }}
+          </button>
+          <div
+            v-if="expandedCodes[$index]"
+            class="technical-details"
+            data-testid="fidelity-warning-technical-details"
+          >
+            <el-tag :type="severityTagType(row.code)" size="small">{{ row.code }}</el-tag>
+            <span class="technical-location">{{ row.location ?? t('common.notAvailable') }}</span>
+          </div>
+          <RouterLink
+            v-if="bindingEditLink(row)"
+            :to="bindingEditLink(row)!"
+            class="binding-edit-link"
+            data-testid="fidelity-warning-edit-binding"
+          >
+            {{ t('templates.preview.warningFilters.editBinding') }}
+          </RouterLink>
         </template>
       </el-table-column>
       <el-table-column :label="t('templates.preview.warningFilters.artifact')" min-width="120">
@@ -141,15 +204,7 @@ function resetFilters() {
           {{ row.artifact ?? t('common.notAvailable') }}
         </template>
       </el-table-column>
-      <el-table-column :label="t('templates.preview.warningFilters.message')" min-width="220">
-        <template #default="{ row }">
-          <el-tag :type="severityTagType(row.code)" size="small" class="code-tag">
-            {{ row.code }}
-          </el-tag>
-          {{ warningLabel(row.messageKey) }}
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('templates.preview.warningFilters.viewed')" width="120">
+      <el-table-column :label="t('templates.preview.warningFilters.viewed')" width="140">
         <template #default="{ row, $index }">
           <el-tag :type="row.viewed ? 'success' : 'info'" size="small">
             {{
@@ -163,6 +218,7 @@ function resetFilters() {
             link
             type="primary"
             data-testid="mark-warning-viewed"
+            :loading="markingViewedIndex === globalIndexForFiltered($index)"
             @click="markViewed($index)"
           >
             {{ t('templates.preview.warningFilters.markViewed') }}
@@ -189,8 +245,35 @@ function resetFilters() {
   width: 100%;
 }
 
-.code-tag {
-  margin-right: 0.5rem;
+.human-message {
+  margin: 0 0 0.35rem;
+  line-height: 1.45;
+}
+
+.technical-toggle {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.technical-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.binding-edit-link {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
 }
 
 .filter-hint {

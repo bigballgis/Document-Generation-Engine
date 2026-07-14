@@ -1,6 +1,7 @@
 package com.bank.docgen.template.web;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -12,6 +13,7 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.time.Instant;
@@ -197,6 +199,40 @@ abstract class TemplateManagementWebTestSupport {
         return objectMapper.readTree(result.getResponse().getContentAsString()).path("result").path("previewId").asText();
     }
 
+    protected void markAllFidelityWarningsViewed(String templateId, String previewId) throws Exception {
+        MvcResult previewResult = mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/previews/" + previewId)
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode warnings = objectMapper.readTree(previewResult.getResponse().getContentAsString())
+                .path("result")
+                .path("fidelityWarnings");
+        for (int index = 0; index < warnings.size(); index++) {
+            mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/previews/" + previewId
+                            + "/fidelity-warnings/viewed")
+                            .with(authentication(new ManagementAuthentication(templateAuthor)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"warningIndex":%d}
+                                    """.formatted(index)))
+                    .andExpect(status().isOk());
+        }
+    }
+
+    protected void acknowledgeLatestPreviewFidelityWarnings(String templateId) throws Exception {
+        MvcResult listResult = mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/previews")
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode previews = objectMapper.readTree(listResult.getResponse().getContentAsString()).path("result");
+        for (JsonNode preview : previews) {
+            if ("SUCCEEDED".equals(preview.path("status").asText())) {
+                markAllFidelityWarningsViewed(templateId, preview.path("previewId").asText());
+                return;
+            }
+        }
+    }
+
     protected void runLifecycle(String templateId) throws Exception {
         runLifecycle(templateId, "1.0.0", true);
     }
@@ -204,7 +240,8 @@ abstract class TemplateManagementWebTestSupport {
     protected void runLifecycle(String templateId, String releaseVersion, boolean configurePolicyBeforePublish)
             throws Exception {
         String requiredSampleId = createRequiredTestDataSet(templateId);
-        testGenerate(templateId);
+        String previewId = testGenerate(templateId);
+        markAllFidelityWarningsViewed(templateId, previewId);
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/batch-test")
                         .with(authentication(new ManagementAuthentication(templateAuthor)))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -254,6 +291,8 @@ abstract class TemplateManagementWebTestSupport {
         if (configurePolicyBeforePublish) {
             configurePublishApiPolicy(templateId);
         }
+
+        acknowledgeLatestPreviewFidelityWarnings(templateId);
 
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/publish")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))

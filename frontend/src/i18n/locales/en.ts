@@ -1172,6 +1172,7 @@ export default {
         UNSUPPORTED_STRUCTURED_NODES: 'Unsupported structured nodes',
         PASTE_CLEANING_BLOCKERS: 'Paste cleaning blockers',
         BLOCKER_STATUS: 'Blocker status',
+        FIDELITY_WARNINGS_VIEWED: 'Fidelity warnings reviewed',
       },
     },
     publishSummary: {
@@ -1478,6 +1479,10 @@ export default {
         viewedOnly: 'Viewed only',
         unviewedOnly: 'Unviewed only',
         markViewed: 'Mark viewed',
+        markViewedFailed: 'Unable to mark the fidelity warning as viewed.',
+        showTechnical: 'Show technical details',
+        hideTechnical: 'Hide technical details',
+        editBinding: 'Edit binding',
         reset: 'Reset filters',
         availableCodes: '{count} distinct warning code(s)',
         viewedState: {
@@ -1495,6 +1500,12 @@ export default {
       severities: {
         WARNING: 'Warning',
         BLOCKER: 'Blocker',
+      },
+      fidelityMessages: {
+        UNRESOLVED_VARIABLE: 'A variable reference is not declared in the template schema.',
+        IMAGE_SCALING_ADJUSTED: 'Image scaling may be adjusted during rendering.',
+        UNSUPPORTED_NODE: 'An unsupported structured content node was detected.',
+        MISSING_STYLE_REFERENCE: 'A style reference is missing or not in the approved master style catalog.',
       },
     },
     previewHistory: {

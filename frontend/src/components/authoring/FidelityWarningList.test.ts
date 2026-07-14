@@ -45,6 +45,8 @@ describe('FidelityWarningList', () => {
       await textInputs[0].setValue('UNRESOLVED')
       await flushPromises()
       expect(wrapper.findAll('.el-table__row').length).toBe(1)
+      await wrapper.find('[data-testid="fidelity-warning-technical-toggle"]').trigger('click')
+      await flushPromises()
       expect(wrapper.text()).toContain('UNRESOLVED_VARIABLE')
 
       await textInputs[0].setValue('')

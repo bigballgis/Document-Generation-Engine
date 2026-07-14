@@ -112,6 +112,20 @@ final class PublishGateCheckItemSupport {
         );
     }
 
+    PublishGateItemView fidelityWarningsViewedItem(UUID templateId, UUID versionId) {
+        int unviewedCount = previewEvidencePort.countUnviewedFidelityWarnings(templateId, versionId);
+        boolean ready = unviewedCount == 0;
+        return new PublishGateItemView(
+                PublishGateCheckCode.FIDELITY_WARNINGS_VIEWED,
+                ready,
+                !ready,
+                ready
+                        ? "api.publishGate.fidelityWarningsViewed.ready"
+                        : "api.publishGate.fidelityWarningsViewed.blocked",
+                "unviewedCount=" + unviewedCount
+        );
+    }
+
     PublishGateItemView changeDiffItem(ChangeDiffView changeDiff) {
         return new PublishGateItemView(
                 PublishGateCheckCode.CHANGE_DIFF,

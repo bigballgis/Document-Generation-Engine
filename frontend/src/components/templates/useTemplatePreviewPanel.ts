@@ -1,4 +1,5 @@
 import { computed, ref, toValue, watch, type MaybeRefOrGetter } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
@@ -10,8 +11,10 @@ export function useTemplatePreviewPanel(options: {
   preview: MaybeRefOrGetter<PreviewRecord | null>
 }) {
   const { t, te } = useI18n()
+  const route = useRoute()
   const panelDataStore = useTemplatePanelDataStore()
   const downloadingFormat = ref<'docx' | 'pdf' | null>(null)
+  const markingViewedIndex = ref<number | null>(null)
   const latestPreview = ref<PreviewRecord | null>(toValue(options.preview))
 
   watch(
@@ -70,6 +73,32 @@ export function useTemplatePreviewPanel(options: {
 
   const previewArtifact = computed(() => latestPreview.value?.artifactStorageKey ?? null)
 
+  const devVersionId = computed(() => {
+    const fromRoute = route.params?.devVersionId
+    if (typeof fromRoute === 'string' && fromRoute.length > 0) {
+      return fromRoute
+    }
+    return latestPreview.value?.templateVersionId ?? ''
+  })
+
+  async function markWarningViewed(warningIndex: number) {
+    if (!latestPreview.value?.previewId) {
+      return
+    }
+    markingViewedIndex.value = warningIndex
+    try {
+      latestPreview.value = await panelDataStore.markFidelityWarningViewed(
+        toValue(options.templateId),
+        latestPreview.value.previewId,
+        warningIndex,
+      )
+    } catch {
+      ElMessage.error(t('templates.preview.warningFilters.markViewedFailed'))
+    } finally {
+      markingViewedIndex.value = null
+    }
+  }
+
   const canDownloadDocx = computed(
     () =>
       latestPreview.value?.status === 'SUCCEEDED' &&
@@ -112,6 +141,9 @@ export function useTemplatePreviewPanel(options: {
     severityTagType,
     locationLabel,
     previewArtifact,
+    devVersionId,
+    markingViewedIndex,
+    markWarningViewed,
     canDownloadDocx,
     canDownloadPdf,
     downloadArtifact,
