@@ -39,6 +39,8 @@ export interface StructuredContentDocumentModelApi {
   ) => void
   addInlineToBlock: (path: NodePath, type: ConfirmedNodeType, selectedStyleKey: string) => void
   removeBlock: (path: NodePath) => void
+  reorderBlock: (path: NodePath, toIndex: number) => void
+  copyBlock: (path: NodePath) => void
   resetHistoryWithStructure: (structureJson: string) => void
   clearHistoryOnly: () => void
 }

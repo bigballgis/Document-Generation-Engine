@@ -134,3 +134,99 @@ export function appendChildBlockAtPath(
 export function isNestedContainerType(type: string): boolean {
   return type === 'conditionBlock' || type === 'loopBlock'
 }
+
+export function parentPathOf(path: NodePath): NodePath | null {
+  return path.length <= 1 ? null : path.slice(0, -1)
+}
+
+export function areSiblingPaths(left: NodePath, right: NodePath): boolean {
+  if (left.length !== right.length || left.length === 0) {
+    return false
+  }
+  const leftParent = parentPathOf(left)
+  const rightParent = parentPathOf(right)
+  if (leftParent === null && rightParent === null) {
+    return true
+  }
+  if (leftParent === null || rightParent === null) {
+    return false
+  }
+  return pathKey(leftParent) === pathKey(rightParent)
+}
+
+export function siblingCountAtPath(
+  document: StructuredContentDocument,
+  path: NodePath,
+): number {
+  const parentPath = parentPathOf(path)
+  if (parentPath === null) {
+    return document.nodes.length
+  }
+  const parent = getNodeAtPath(document, parentPath)
+  return parent?.children?.length ?? 0
+}
+
+export function reorderBlockAtPath(
+  document: StructuredContentDocument,
+  path: NodePath,
+  toIndex: number,
+): StructuredContentDocument {
+  const fromIndex = path[path.length - 1]
+  if (fromIndex === undefined) {
+    return document
+  }
+  const parentPath = path.slice(0, -1)
+
+  function reorderSiblings(siblings: StructuredContentNode[]): StructuredContentNode[] {
+    if (fromIndex < 0 || fromIndex >= siblings.length || fromIndex === toIndex) {
+      return siblings
+    }
+    const next = [...siblings]
+    const [moved] = next.splice(fromIndex, 1)
+    if (!moved) {
+      return siblings
+    }
+    const clampedTo = Math.max(0, Math.min(toIndex, next.length))
+    next.splice(clampedTo, 0, moved)
+    return next
+  }
+
+  if (parentPath.length === 0) {
+    return { ...document, nodes: reorderSiblings(document.nodes) }
+  }
+  return updateNodeAtPath(document, parentPath, (node) => ({
+    ...node,
+    children: reorderSiblings(node.children ?? []),
+  }))
+}
+
+function deepCloneNode(node: StructuredContentNode): StructuredContentNode {
+  return JSON.parse(JSON.stringify(node)) as StructuredContentNode
+}
+
+export function duplicateBlockAtPath(
+  document: StructuredContentDocument,
+  path: NodePath,
+): StructuredContentDocument {
+  const node = getNodeAtPath(document, path)
+  const index = path[path.length - 1]
+  if (!node || index === undefined) {
+    return document
+  }
+  const parentPath = path.slice(0, -1)
+  const clone = deepCloneNode(node)
+
+  function insertAfter(siblings: StructuredContentNode[]): StructuredContentNode[] {
+    const next = [...siblings]
+    next.splice(index + 1, 0, clone)
+    return next
+  }
+
+  if (parentPath.length === 0) {
+    return { ...document, nodes: insertAfter(document.nodes) }
+  }
+  return updateNodeAtPath(document, parentPath, (parent) => ({
+    ...parent,
+    children: insertAfter(parent.children ?? []),
+  }))
+}

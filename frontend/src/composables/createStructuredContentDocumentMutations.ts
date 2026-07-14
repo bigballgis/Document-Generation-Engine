@@ -2,9 +2,11 @@ import type { Ref } from 'vue'
 import {
   appendChildBlockAtPath,
   canAddNestedBlockChildren,
+  duplicateBlockAtPath,
   getNodeAtPath,
   pathKey,
   removeNodeAtPath,
+  reorderBlockAtPath,
   updateNodeAtPath,
   type NodePath,
 } from '@/utils/structuredContentNodePath'
@@ -102,6 +104,22 @@ export function createStructuredContentDocumentMutations(options: {
     documentModel.value = removeNodeAtPath(documentModel.value, path)
   }
 
+  function reorderBlock(path: NodePath, toIndex: number) {
+    if (isReadonly()) {
+      return
+    }
+    setPendingCoalesceKey(null)
+    documentModel.value = reorderBlockAtPath(documentModel.value, path, toIndex)
+  }
+
+  function copyBlock(path: NodePath) {
+    if (isReadonly()) {
+      return
+    }
+    setPendingCoalesceKey(null)
+    documentModel.value = duplicateBlockAtPath(documentModel.value, path)
+  }
+
   function insertInline(type: ConfirmedNodeType, selectedStyleKey: string) {
     if (isReadonly()) {
       return
@@ -130,5 +148,7 @@ export function createStructuredContentDocumentMutations(options: {
     updateInlineChild,
     addInlineToBlock,
     removeBlock,
+    reorderBlock,
+    copyBlock,
   }
 }

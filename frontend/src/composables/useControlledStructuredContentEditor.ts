@@ -15,6 +15,11 @@ import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
 import type { MasterStyleCatalog } from '@/types/template'
 import {
+  structuredBlockCardTestId,
+  validateStructuredContentDocument,
+  type StructuredContentValidationIssue,
+} from '@/utils/structuredContentBindingValidation'
+import {
   DEFAULT_STRUCTURED_CONTENT_JSON,
   serializeStructuredContent,
   type ConfirmedNodeType,
@@ -79,6 +84,23 @@ export function useControlledStructuredContentEditor(
   const selectedStyleKey = ref('')
   const editorRootRef = ref<HTMLElement | null>(null)
   const blockNodeTypes = STRUCTURED_BLOCK_NODE_TYPES
+  const validationIssues = ref<StructuredContentValidationIssue[]>([])
+  const validationRan = ref(false)
+
+  const declaredVariableKeys = computed(() => {
+    const keys = new Set<string>()
+    for (const key of props.variableKeys ?? []) {
+      if (key.trim()) {
+        keys.add(key.trim())
+      }
+    }
+    for (const variable of props.variables ?? []) {
+      if (variable.variableKey?.trim()) {
+        keys.add(variable.variableKey.trim())
+      }
+    }
+    return keys
+  })
 
   const {
     styleOptions,
@@ -124,8 +146,36 @@ export function useControlledStructuredContentEditor(
     return te(key) ? t(key) : type
   }
 
+  function validateStructure(): StructuredContentValidationIssue[] {
+    validationRan.value = true
+    validationIssues.value = validateStructuredContentDocument(
+      doc.documentModel.value,
+      declaredVariableKeys.value,
+    )
+    return validationIssues.value
+  }
+
+  function scrollToBlock(path: number[]): void {
+    const root = editorRootRef.value
+    if (!root) {
+      return
+    }
+    const target = root.querySelector<HTMLElement>(
+      `[data-testid="${structuredBlockCardTestId(path)}"]`,
+    )
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    const card = target?.closest('.block-card')
+    card?.classList.add('block-card--highlight')
+    window.setTimeout(() => card?.classList.remove('block-card--highlight'), 1600)
+  }
+
+  function handleScrollToIssue(issue: StructuredContentValidationIssue): void {
+    scrollToBlock(issue.blockPath)
+  }
+
   return {
     t,
+    te,
     isReadonly,
     recoveryDraft,
     editorRootRef: editorRootRef as Ref<HTMLElement | null>,
@@ -156,6 +206,8 @@ export function useControlledStructuredContentEditor(
     applySelectedStyle: () => doc.applySelectedStyle(selectedStyleKey.value),
     handlePasteFile: paste.handlePasteFile,
     removeBlock: doc.removeBlock,
+    reorderBlock: doc.reorderBlock,
+    copyBlock: doc.copyBlock,
     updateInlineChild: doc.updateInlineChild,
     addInlineToBlock: (path: number[], type: ConfirmedNodeType) =>
       doc.addInlineToBlock(path, type, selectedStyleKey.value),
@@ -164,5 +216,10 @@ export function useControlledStructuredContentEditor(
     acceptPaste: paste.acceptPaste,
     cancelPaste: paste.cancelPaste,
     serializeStructuredContent,
+    validationIssues,
+    validationRan,
+    validateStructure,
+    scrollToBlock,
+    handleScrollToIssue,
   }
 }
