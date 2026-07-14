@@ -730,8 +730,8 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-14. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. #54 CE-K07 → done (merge e8f996a0). #56 CE-C01+C02 → done (merge da08f3fe). Batch 1 residual in-progress: #55 CE-U03 only. Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). First batch: ce-k07-golden-corpus-skeleton Done; ce-c01-c02-contract-strictness Done; residual ce-u03-testdata-schema-form. Second batch after Batch 1 merges: ce-k01-release-bundle-pinning, ce-u01-nested-editor, ce-g01-self-approval-block. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-14. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1 Done (#54/#55/#56). Batch 2 in-progress: #57 CE-K01, #72 CE-G01. Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1 Done: ce-k07-golden-corpus-skeleton, ce-c01-c02-contract-strictness, ce-u03-testdata-schema-form. Batch 2 in flight: ce-k01-release-bundle-pinning, ce-g01-self-approval-block. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
@@ -754,14 +754,14 @@
       {
         "id": "55",
         "title": "CE-U03: Test data set schema-driven form",
-        "description": "IN PROGRESS 2026-07-14. Slice ce-u03-testdata-schema-form. Replace hand-written JSON textarea with VariableSchema-driven dynamic form + skeleton generator; backend TestDataSetService schema validation. Lane2 first. Formal phase None.",
-        "details": "CE-U03 P0·M. Frontend dynamic form from VariableSchema; skip compute fields (weak couple K03). Backend field-level validation errors. E2E+UIUX required. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U03.",
+        "description": "DONE 2026-07-14. Slice ce-u03-testdata-schema-form. Merge 22bb391f; feature tip 0565e1ae. VariableSchema dynamic form + backend fieldErrors. E2E 9/9 + UIUX PASS_WITH_NOTES. Formal phase None.",
+        "details": "Completed 2026-07-14. Slice ce-u03-testdata-schema-form. Merge 22bb391f; feature tip 0565e1ae. Schema-driven test data form + TestDataSetSchemaValidationException (422 fieldErrors). E2E 9/9; UIUX 4/4 (24 screenshots @1920 dual-brand). Architecture PASS_WITH_NOTES Critical=0. Batch 1 complete. Formal phase remains None.",
         "testStrategy": "1. Schema-driven form + skeleton button. 2. Backend schema validate on save. 3. Frontend gates + E2E docker + UIUX. 4. No compute-field edit requirement.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T09:45:00Z"
       },
       {
         "id": "56",

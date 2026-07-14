@@ -373,6 +373,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-14):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **#54 CE-K07 → Done** (merge `e8f996a0`). **#56 CE-C01+C02 → Done** (merge `da08f3fe`; tip `c942da13`). Batch 1 residual **In Progress:** #55 CE-U03 (`ce-u03-testdata-schema-form`). Formal phase remains **None**. Do **not** implement C03–C06 in this sync.
+**Task Master registry (2026-07-14):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1 Done:** **#54** CE-K07 (merge `e8f996a0`); **#55** CE-U03 (merge `22bb391f`; tip `0565e1ae`); **#56** CE-C01+C02 (merge `da08f3fe`). **Batch 2 In Progress:** #57 CE-K01, #72 CE-G01. Formal phase remains **None**. Do **not** implement C03–C06 in this sync.
 
-**Last reviewed:** 2026-07-14（CE-C01/C02 merged `da08f3fe`；#56 Done；CE-K07/`#54` Done；Batch 1 residual #55 only）
+**Last reviewed:** 2026-07-14（CE-U03 merged `22bb391f`；#55 Done；Batch 1 complete；Batch 2 #57/#72 in flight）
