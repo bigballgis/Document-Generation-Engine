@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1 Done (#54/#55/#56). Batch 2 Done (#57/#72). Batch 3 lane-2: #64/#65/#66/#67/#82 Done; residual CE-U08+ (#83…). Batch 4 Done (#58 CE-K02 merge 2f6792eb; #73 CE-G02 merge 2ea74018). Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1 Done: ce-k07-golden-corpus-skeleton, ce-c01-c02-contract-strictness, ce-u03-testdata-schema-form. Batch 2 Done: ce-k01-release-bundle-pinning, ce-g01-self-approval-block. Batch 3 lane-2: ce-u01/u02/u05/u04/u07 Done (#64/#65/#66/#67/#82 merge fde9342a). Batch 4 Done: ce-k02-master-style-authority (#58 merge 2f6792eb) + ce-g02-specimen-watermark (#73 merge 2ea74018). Residual: CE-K03+ / CE-U08+ / CE-C03+ per plan §9. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–3 Done. Batch 4 Done (#58 CE-K02 merge 2f6792eb; #73 CE-G02 merge 2ea74018). Next wave closed: #59 CE-K03 Done (06cd58ec) + #68 CE-C03 Done (49fa0a70) + #83 CE-U08 Done (dd94c25d). Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1–3 Done. Batch 4 Done: ce-k02-master-style-authority (#58 merge 2f6792eb) + ce-g02-specimen-watermark (#73 merge 2ea74018). Next wave closed: #59 CE-K03 Done (merge 06cd58ec) + #68 CE-C03 Done (merge 49fa0a70) + #83 CE-U08 Done (merge dd94c25d). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T03:36:00.000Z"
+        "updatedAt": "2026-07-15T05:54:00.000Z"
       },
       {
         "id": "54",
@@ -806,16 +806,16 @@
       {
         "id": "59",
         "title": "CE-K03: Variable compute & format engine",
-        "description": "PENDING. Slice ce-k03-variable-compute-engine. Whitelist DSL (COALESCE/SUM/…/SPELL_AMOUNT); evaluate before assembly; locale from context. P0·XL.",
-        "details": "Lane after K02 (#58). No Groovy/JS/SpEL. ADR for DSL bounds. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §3 CE-K03.",
+        "description": "DONE 2026-07-15. Slice ce-k03-variable-compute-engine. Merge 06cd58ec. Whitelist DSL (COALESCE/SUM/…/SPELL_AMOUNT); evaluate before assembly; locale from context; ADR-0056. P0·XL. Formal phase None.",
+        "details": "Completed 2026-07-15. Slice id: ce-k03-variable-compute-engine. Merge 06cd58ec. BDD ready (ce-k03-variable-compute-engine.md; BDD-CE-K03-001…030). Gates: architecture PASS_WITH_NOTES (after Critical fix); frontend lint/type-check/test/build GREEN; DEPLOYED_WITH_NOTES (Flyway). ADR-0056 whitelist DSL bounds. Formal phase remains None. Plan §3 CE-K03 Done. Next wave closed with #68 CE-C03 + #83 CE-U08.",
         "testStrategy": "1. Engine unit matrix per function. 2. E2E compute var → DOCX text. 3. Fail-closed VARIABLE_COMPUTE_FAILED. 4. mvn verify + FE panel validate.",
         "priority": "high",
         "dependencies": [
           "58"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T05:40:00.000Z"
       },
       {
         "id": "60",
@@ -936,16 +936,16 @@
       {
         "id": "68",
         "title": "CE-C03: fidelityWarnings contract align",
-        "description": "PENDING. Slice ce-c03-fidelity-warnings-contract. Full FidelityWarning[] on batch/task query; sync header summary documented. P1·S.",
-        "details": "Lane3 after G02 (#73). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §5 CE-C03.",
+        "description": "DONE 2026-07-15. Slice ce-c03-fidelity-warnings-contract. Merge 49fa0a70. Full FidelityWarning[] on batch/task query; sync header summary documented. P1·S. Formal phase None.",
+        "details": "Completed 2026-07-15. Slice id: ce-c03-fidelity-warnings-contract. Merge 49fa0a70. BDD ready (ce-c03-fidelity-warnings-contract.md; BDD-CE-C03-001…010). Gates: mvn verify GREEN (1515/0/8); architecture PASS_WITH_NOTES; deploy stack healthy / SkipBuild notes. Formal phase remains None. Plan §5 CE-C03 Done. Next wave closed with #59 CE-K03 + #83 CE-U08.",
         "testStrategy": "1. Batch/task return full warnings array. 2. OpenAPI match. 3. mvn verify.",
         "priority": "medium",
         "dependencies": [
           "73"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T05:40:00.000Z"
       },
       {
         "id": "69",
@@ -1149,16 +1149,16 @@
       {
         "id": "83",
         "title": "CE-U08: Content-module review loop",
-        "description": "PENDING. Slice ce-u08-clause-review-loop. Workflow tasks for CM review; rejectionReason; timeline. P1·M.",
-        "details": "Lane after U07 (#82). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U08.",
+        "description": "DONE 2026-07-15. Slice ce-u08-content-module-review-loop. Merge dd94c25d. Dashboard CM pending/rework todos; versions rejectionReason; lifecycle el-timeline review history. P1·M. Formal phase None. Flyway V59.",
+        "details": "Completed 2026-07-15. Slice id: ce-u08-content-module-review-loop (alias ce-u08-clause-review-loop). Merge dd94c25d. BDD ready (ce-u08-content-module-review-loop.md; BDD-CE-U08-CMRL-001…007). Gates: FE GREEN; E2E 3/3; UIUX PASS_WITH_NOTES dual-brand @1920; architecture PASS_WITH_NOTES; Flyway V59. Formal phase remains None. Plan §4 CE-U08 Done. Next wave (#59/#68/#83) closed.",
         "testStrategy": "1. Dashboard CM todos. 2. Rejection visible. 3. Timeline. 4. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "82"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T05:54:00.000Z"
       },
       {
         "id": "84",

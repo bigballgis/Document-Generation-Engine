@@ -110,7 +110,9 @@ Done 时平台应满足：
 **禁止：** 不在本片重写 demo builder（demo 硬编码单独小片清理）。
 **依赖：** 建议先于/并行 K01（互不阻塞，但 K01 钉扎需包含 style catalog 版本）。
 
-### CE-K03 变量计算与格式化引擎 — P0 · XL · `Not Started`
+### CE-K03 变量计算与格式化引擎 — P0 · XL · `Done`
+
+**Status (2026-07-15):** **Done** — Task Master **#59**; slice `ce-k03-variable-compute-engine`. BDD **ready** ([ce-k03-variable-compute-engine.md](../behavior/ce-k03-variable-compute-engine.md); **BDD-CE-K03-001…030**). **Merge:** `06cd58ec`. **Gates:** architecture **PASS_WITH_NOTES** (Critical fix applied); frontend lint/type-check/test/build **GREEN**; **DEPLOYED_WITH_NOTES** (Flyway). Whitelist DSL + FORMAT_*/SPELL_AMOUNT; `VARIABLE_COMPUTE_FAILED`; author validate/evaluate APIs; [ADR-0056](../adr/rendering-authoring/0056-whitelist-variable-compute-dsl-bounds.md). Formal phase **None**; **not** go-live. Next wave closed with **#68** CE-C03 + **#83** CE-U08.
 
 **痛点：** `computeExpression` 是死字段；金额/日期靠调用方预格式化；无中文大写金额。
 **目标行为：**
@@ -205,8 +207,9 @@ condition/loop 块 `children` 数组已在 schema 中但 `StructuredContentBlock
 **Slice:** `ce-u07-clause-outdated-bump` · branch `feat/ce-u07-clause-outdated-bump` · BDD [ce-u07-clause-outdated-bump.md](../behavior/ce-u07-clause-outdated-bump.md) (`ready`, COB-001…004).
 **Status (2026-07-15):** **Done** — out-of-date badge + one-click bump (`upsertReference`) + bulk upgrade confirm + Dashboard author todo deep link. **Gates:** `mvn verify` **GREEN** (1481 tests); frontend lint/type-check/test/build **GREEN**; E2E **3/3** (COB-001/002, COB-004, UIUX); UIUX **PASS_WITH_NOTES** ([CE-U07-uiux-manifest.md](../../frontend/e2e/evidence/CE-U07-uiux-manifest.md)); architecture **PASS_WITH_NOTES** Critical=0 (Majors: export-schema coupling, soft deny empty list — follow-ups OK). **Merge:** `fde9342a` (`fde9342a4c70fc141fdf7c054422472f38387a71`); Task Master **#82**. Formal phase **None**; **not** go-live.
 
-**CE-U08 条款审核闭环 — P1 · M**
+**CE-U08 条款审核闭环 — P1 · M · `Done`**
 后端 review 完整但：Dashboard 无条款审核待办、驳回原因不回显、无审核时间线。目标：`useWorkflowTasks` 增加 content module 待审/返工任务；版本表展示 `rejectionReason`；对齐母版的 `el-timeline` 审核历史。
+**Status (2026-07-15):** **Done** — Task Master **#83**; slice `ce-u08-content-module-review-loop`. BDD **ready** ([ce-u08-content-module-review-loop.md](../behavior/ce-u08-content-module-review-loop.md); **BDD-CE-U08-CMRL-001…007**). **Merge:** `dd94c25d`. **Gates:** FE **GREEN**; E2E **3/3**; UIUX **PASS_WITH_NOTES** dual-brand @1920; architecture **PASS_WITH_NOTES**; Flyway **V59**. Dashboard CM pending/rework todos; versions `rejectionReason`; lifecycle `el-timeline` review history. Next wave (#59/#68/#83) **closed**. **Batch 4 remains Done**. Formal phase **None**; **not** go-live.
 
 **CE-U09 母版审核可达性 — P1 · S**
 审批按钮藏在 revision 详情 Tab；Hub 的 `submitReviewOpen` 接线了却无入口（死代码）；旅程 CTA 被 `showPrimaryCta:false` 关闭。目标：Hub 对 current revision 直接暴露提交/通过/驳回；Dashboard 待办深链 `?workspaceTab=approval`；清死代码。
@@ -243,7 +246,7 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 | --- | --- | --- | --- | --- |
 | CE-C01 | `context` 白名单落地 | P0·S · `Done` | DTO 加 `context`（6 字段 record）；未知子字段 400；`InvocationParameterSanitizer` 写 `contextSummary`。Slice `ce-c01-c02-contract-strictness` · `mvn verify` GREEN | 无 |
 | CE-C02 | unknown-field 严格校验 | P0·S · `Done` | runtime DTO 专用 ObjectMapper `fail-on-unknown-properties` → 统一 `400 REQUEST_BODY_INVALID`；**不**动管理端 DTO。Slice `ce-c01-c02-contract-strictness` · `mvn verify` GREEN | C01 同链 |
-| CE-C03 | fidelityWarnings 契约对齐 | P1·S | 批量项/任务查询返回完整 `FidelityWarning[]`；同步流保留头摘要并在契约注明 | 无 |
+| CE-C03 | fidelityWarnings 契约对齐 | P1·S · `Done` | **Done (2026-07-15)** — Task Master **#68**; slice `ce-c03-fidelity-warnings-contract`; BDD **ready** ([ce-c03-fidelity-warnings-contract.md](../behavior/ce-c03-fidelity-warnings-contract.md); **BDD-CE-C03-001…010**). **Merge:** `49fa0a70`. **Gates:** `mvn verify` **GREEN** (**1515**/0/8); architecture **PASS_WITH_NOTES**; deploy stack healthy / SkipBuild notes. Batch/task → full `FidelityWarning[]`; sync stream header summary documented. Formal phase **None** | 无 |
 | CE-C04 | 凭证 `expires_at` 持久化 + 暴露 | P1·M | 结束 `ApiCredentialLifecycleSupport` 过渡态（R1 项）：Flyway 加列 + 发放/轮换写入；`RuntimeCredentialSummaryView` 加 `expiresAt`/`EXPIRING_SOON`；契约页 callable versions 加可选 `deprecated`/`sunsetAt`（需轻量修订 ADR-0003/0017 展示边界） | 无 |
 | CE-C05 | `originalBatchId` 重试血缘 | P1·M | 请求字段 + 校验（原批次存在且属同凭证）+ 审计关联 + 契约文档 | 无 |
 | CE-C06 | DOCX permissions 边界声明 | P2·S | 短期：契约明确"permissions 仅 PDF 生效"，校验对 DOCX+permissions 返回警告；长期 POI 写保护另立片 | 无 |
@@ -388,6 +391,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1 Done:** **#54** CE-K07 (merge `e8f996a0`); **#55** CE-U03 (merge `22bb391f`; tip `0565e1ae`); **#56** CE-C01+C02 (merge `da08f3fe`). **Batch 2 Done:** **#57** CE-K01 (merge `f2db3346`; tip `720a75bd`); **#72** CE-G01 (merge `c187a230`). **Batch 3 lane-2 Done:** **#64/#65/#66/#67/#82**; residual **CE-U08+** (#83…). **Batch 4 Done:** **#73** CE-G02 (merge `2ea74018`); **#58** CE-K02 (merge `2f6792eb` HEAD). Residual per §9: **CE-K03+** / **CE-C03+** / **CE-U08+**. Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
+**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–3 Done.** **Batch 4 Done** (remains Done): **#73** CE-G02 (merge `2ea74018`); **#58** CE-K02 (merge `2f6792eb` HEAD). **Next wave closed:** **#59** CE-K03 → **Done** (merge `06cd58ec`); **#68** CE-C03 → **Done** (merge `49fa0a70`); **#83** CE-U08 → **Done** (merge `dd94c25d`). Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
 
-**Last reviewed:** 2026-07-15（Batch 4 Done: #73 CE-G02 `2ea74018` + #58 CE-K02 `2f6792eb`）
+**Last reviewed:** 2026-07-15（#59 CE-K03 + #68 CE-C03 + #83 CE-U08 → Done; next wave closed; Batch 4 remains Done）
