@@ -1,5 +1,8 @@
 {
-  "deferred": true,
+  "deferred": false,
   "requireEncrypted": false,
-  "assertions": []
+  "assertions": [
+    {"type": "TEXT_CONTAINS", "substring": "Specimen watermark body"},
+    {"type": "TEXT_NOT_CONTAINS", "substring": "SPECIMEN"}
+  ]
 }

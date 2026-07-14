@@ -24,7 +24,7 @@ public final class GoldenCorpusAssertionLoader {
             "VISUAL_GOLDEN"
     );
 
-    private static final Set<String> DOCX_TYPES = Set.of("XML_CONTAINS", "XPATH_EXISTS");
+    private static final Set<String> DOCX_TYPES = Set.of("XML_CONTAINS", "XML_NOT_CONTAINS", "XPATH_EXISTS");
     private static final Set<String> PDF_TYPES = Set.of("TEXT_CONTAINS", "TEXT_NOT_CONTAINS");
 
     private final ObjectMapper objectMapper;

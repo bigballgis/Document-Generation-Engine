@@ -81,9 +81,9 @@ class GoldenCorpusStructureTest {
                 "cross-page-table",
                 "compute-variables",
                 "chinese-uppercase-amount",
-                "specimen-watermark",
                 "long-clause-limits"
         );
+        assertThat(placeholders).doesNotContain("specimen-watermark");
     }
 
     @Test

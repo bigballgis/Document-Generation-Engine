@@ -1,10 +1,10 @@
 {
   "id": "specimen-watermark",
   "theme": "SPECIMEN watermark on preview / test-generate artifacts",
-  "maturity": "PLACEHOLDER",
-  "title": "Specimen watermark — placeholder (CE-G02)",
+  "maturity": "ACTIVE",
+  "title": "Specimen watermark — formal path has no SPECIMEN; preview path covered by companion tests",
   "renderMode": "STRUCTURED_ASSEMBLE",
   "pdfSource": "LIBREOFFICE",
-  "description": "Placeholder skeleton. SPECIMEN watermark assertions on preview / test-generate artifacts are owned by CE-G02 and will be enriched here.",
+  "description": "ACTIVE CE-G02 package. Formal assemble path asserts body content and absence of SPECIMEN. Preview watermark presence is asserted by SpecimenWatermarkPreviewPathTest (dual-path).",
   "owningFutureSlice": "CE-G02"
 }

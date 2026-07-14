@@ -9,7 +9,7 @@ Regression fixtures for DOCX keypath + PDF text assertions (no pixel/visual comp
 | `nested-clauses` | ACTIVE | CE-K07 sample |
 | `compute-variables` | PLACEHOLDER | CE-K03 |
 | `chinese-uppercase-amount` | PLACEHOLDER | CE-K03 |
-| `specimen-watermark` | PLACEHOLDER | CE-G02 |
+| `specimen-watermark` | ACTIVE | CE-G02 |
 | `encrypted-pdf` | ACTIVE | CE-K07 sample |
 | `long-clause-limits` | PLACEHOLDER | follow-on |
 

@@ -8,7 +8,9 @@ import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.rendering.DocxAssembler;
+import com.bank.docgen.rendering.DocxSpecimenWatermarkStamper;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
+import com.bank.docgen.rendering.PdfSpecimenWatermarkStamper;
 import com.bank.docgen.rendering.api.FidelityWarningView;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.sharedkernel.document.RenderProfile;
@@ -93,6 +95,8 @@ final class PreviewGenerationAssemblySupport {
                     pinnedModuleStructures
             );
         }
+        // CE-G02: SPECIMEN watermark — preview path only (fail-closed).
+        docx = DocxSpecimenWatermarkStamper.apply(docx);
         String storageKey = "previews/" + previewId + "/output.docx";
         objectStoragePort.put(
                 storageKey,
@@ -112,14 +116,17 @@ final class PreviewGenerationAssemblySupport {
         );
         String pdfStorageKey = "previews/" + previewId + "/output.pdf";
         try (pdfArtifact) {
+            byte[] pdfBytes;
             try (InputStream pdfStream = pdfArtifact.spooled().openInputStream()) {
-                objectStoragePort.put(
-                        pdfStorageKey,
-                        pdfStream,
-                        pdfArtifact.spooled().sizeBytes(),
-                        pdfArtifact.contentType()
-                );
+                pdfBytes = pdfStream.readAllBytes();
             }
+            pdfBytes = PdfSpecimenWatermarkStamper.apply(pdfBytes);
+            objectStoragePort.put(
+                    pdfStorageKey,
+                    new ByteArrayInputStream(pdfBytes),
+                    pdfBytes.length,
+                    pdfArtifact.contentType()
+            );
         }
         List<FidelityWarningView> warnings = fidelityValidationService.collectWarningsForVersion(
                 version.getId(),

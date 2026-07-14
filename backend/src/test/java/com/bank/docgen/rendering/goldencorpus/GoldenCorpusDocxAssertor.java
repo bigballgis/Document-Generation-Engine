@@ -31,6 +31,7 @@ public final class GoldenCorpusDocxAssertor {
             String type = assertion.path("type").asText().trim().toUpperCase(Locale.ROOT);
             switch (type) {
                 case "XML_CONTAINS" -> assertXmlContains(docxBytes, assertion);
+                case "XML_NOT_CONTAINS" -> assertXmlNotContains(docxBytes, assertion);
                 case "XPATH_EXISTS" -> assertXpathExists(docxBytes, assertion);
                 default -> throw new GoldenCorpusException("Unsupported DOCX assertion type: " + type);
             }
@@ -47,6 +48,20 @@ public final class GoldenCorpusDocxAssertor {
         if (!xml.contains(substring)) {
             throw new GoldenCorpusException(
                     "DOCX assertion failed: part '" + part + "' does not contain expected substring"
+            );
+        }
+    }
+
+    private void assertXmlNotContains(byte[] docxBytes, JsonNode assertion) {
+        String part = assertion.path("part").asText("word/document.xml");
+        String substring = assertion.path("substring").asText();
+        if (substring.isBlank()) {
+            throw new GoldenCorpusException("XML_NOT_CONTAINS requires substring");
+        }
+        String xml = readZipPartAsString(docxBytes, part);
+        if (xml.contains(substring)) {
+            throw new GoldenCorpusException(
+                    "DOCX assertion failed: part '" + part + "' unexpectedly contains forbidden substring"
             );
         }
     }

@@ -48,9 +48,9 @@ class GoldenCorpusHarnessTest {
                 .map(GoldenCorpusPackage::id)
                 .collect(Collectors.toSet());
 
-        assertThat(active).contains("nested-clauses", "encrypted-pdf");
-        assertThat(placeholders).doesNotContain("nested-clauses", "encrypted-pdf");
-        assertThat(active.size()).isGreaterThanOrEqualTo(2);
+        assertThat(active).contains("nested-clauses", "encrypted-pdf", "specimen-watermark");
+        assertThat(placeholders).doesNotContain("nested-clauses", "encrypted-pdf", "specimen-watermark");
+        assertThat(active.size()).isGreaterThanOrEqualTo(3);
     }
 
     @ParameterizedTest(name = "ACTIVE {0}")

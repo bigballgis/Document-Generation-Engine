@@ -1,4 +1,7 @@
 {
-  "deferred": true,
-  "assertions": []
+  "deferred": false,
+  "assertions": [
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "Specimen watermark body"},
+    {"type": "XML_NOT_CONTAINS", "part": "word/document.xml", "substring": "SPECIMEN"}
+  ]
 }

@@ -1,8 +1,10 @@
-# 06-specimen-watermark (PLACEHOLDER)
+# 06-specimen-watermark (ACTIVE)
 
-Placeholder skeleton for CE-G02 (SPECIMEN watermark).
+CE-G02 SPECIMEN watermark golden package.
 
-- **Maturity:** `PLACEHOLDER` — skeleton validated by harness; business assertions
-  deferred until CE-G02 enriches this package.
-- **Enrichment scope (CE-G02, NOT this slice):** assert SPECIMEN watermark appears
-  in preview / test-generate DOCX/PDF artifacts.
+- **Maturity:** `ACTIVE` — formal assemble path runs in `mvn verify`.
+- **Formal path:** assembled DOCX/PDF must contain body text and must **not** contain
+  `SPECIMEN` (runtime / formal zero-watermark guardrail).
+- **Preview path:** dual-path companion
+  `SpecimenWatermarkPreviewPathTest` applies DOCX header/footer + PDF diagonal
+  stampers and asserts `SPECIMEN` presence (harness formal runner stays watermark-free).

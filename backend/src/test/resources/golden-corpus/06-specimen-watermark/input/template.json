@@ -1,5 +1,5 @@
 {
   "bindings": {
-    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"placeholder\"}]}]}"
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"Specimen watermark body\"}]}]}"
   }
 }

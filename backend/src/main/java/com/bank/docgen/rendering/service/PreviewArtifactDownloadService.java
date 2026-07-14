@@ -5,6 +5,7 @@ import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
+import com.bank.docgen.rendering.PdfSpecimenWatermarkStamper;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
@@ -117,14 +118,18 @@ public class PreviewArtifactDownloadService {
         );
         String pdfKey = "previews/" + preview.getId() + "/output.pdf";
         try (pdfArtifact) {
+            byte[] pdfBytes;
             try (java.io.InputStream pdfStream = pdfArtifact.spooled().openInputStream()) {
-                objectStoragePort.put(
-                        pdfKey,
-                        pdfStream,
-                        pdfArtifact.spooled().sizeBytes(),
-                        pdfArtifact.contentType()
-                );
+                pdfBytes = pdfStream.readAllBytes();
             }
+            // CE-G02: lazy PDF materialization must still apply diagonal SPECIMEN (fail-closed).
+            pdfBytes = PdfSpecimenWatermarkStamper.apply(pdfBytes);
+            objectStoragePort.put(
+                    pdfKey,
+                    new java.io.ByteArrayInputStream(pdfBytes),
+                    pdfBytes.length,
+                    pdfArtifact.contentType()
+            );
         } catch (IOException | RuntimeException ex) {
             LOG.warn("Failed to materialize preview PDF for {}: {}", preview.getId(), ex.getMessage());
             throw new PreviewArtifactNotAvailableException();
