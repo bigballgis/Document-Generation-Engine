@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
@@ -106,7 +107,8 @@ class TemplateLifecycleServiceTest {
                 new ObjectMapper(),
                 masterDocumentRepository,
                 masterRevisionLineRepository,
-                objectStoragePort
+                objectStoragePort,
+                new SelfApprovalGuard()
         );
         author = new ManagementSessionClaims(
                 "10000003",

@@ -4665,6 +4665,15 @@ components:
           type: array
           items:
             type: string
+        selfApprovalException:
+          type: boolean
+          description: >-
+            CE-G01: true when the lifecycle decision was allowed via GROUP_ADMIN /
+            GLOBAL_ADMIN exception intervention despite decisionActor == lastSubmitActor.
+        exceptionReason:
+          type: string
+          maxLength: 2048
+          description: Persisted reason text when selfApprovalException is true.
     ManagementAuditExportResponse:
       type: object
       additionalProperties: false
@@ -4821,6 +4830,38 @@ components:
         rejectionReason:
           description: Required when operation is REJECT_REVIEW.
           type: string
+        exceptionIntervention:
+          type: boolean
+          description: >-
+            CE-G01: when true, GROUP_ADMIN / GLOBAL_ADMIN may bypass the
+            self-approval block for APPROVE_REVIEW / REJECT_REVIEW.
+        exceptionReason:
+          type: string
+          maxLength: 2048
+        secondaryConfirmed:
+          type: boolean
+    DecideMasterReviewRequest:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      description: >-
+        Management UI master review decision payload
+        (POST /api/management/v1/masters/{masterId}/review). CE-G01 adds
+        optional exception-intervention fields for GROUP_ADMIN / GLOBAL_ADMIN.
+      properties:
+        decision:
+          type: string
+          enum: [APPROVED, REJECTED]
+        commentSummary:
+          type: string
+          maxLength: 2048
+        exceptionIntervention:
+          type: boolean
+        exceptionReason:
+          type: string
+          maxLength: 2048
+        secondaryConfirmed:
+          type: boolean
     MasterReviewSnapshot:
       type: object
       additionalProperties: false
@@ -4964,6 +5005,12 @@ components:
         createdAt:
           type: string
           format: date-time
+        selfApprovalException:
+          type: boolean
+          description: CE-G01 durable exception marker on the review decision row.
+        exceptionReason:
+          type: string
+          maxLength: 2048
     MasterRevisionLineDetailView:
       type: object
       additionalProperties: false
@@ -6234,6 +6281,19 @@ components:
         rejectionReason:
           description: Required when operation is REJECT_REVIEW.
           type: string
+        exceptionIntervention:
+          type: boolean
+          description: >-
+            CE-G01: when true, GROUP_ADMIN / GLOBAL_ADMIN may bypass the
+            self-approval block for APPROVE_REVIEW / REJECT_REVIEW. Requires
+            exceptionReason and secondaryConfirmed=true.
+        exceptionReason:
+          type: string
+          maxLength: 2048
+          description: Required when exceptionIntervention is true.
+        secondaryConfirmed:
+          type: boolean
+          description: Must be true when exceptionIntervention is true.
     CreateContentModuleRequest:
       type: object
       additionalProperties: false
@@ -7721,3 +7781,7 @@ components:
         - ITEM_ID_DUPLICATED
         - BATCH_PARTIAL_FAILED
         - BATCH_PROCESSING_FAILED
+        - SELF_APPROVAL_FORBIDDEN
+        - EXCEPTION_INTERVENTION_NOT_ALLOWED
+        - EXCEPTION_REASON_REQUIRED
+        - EXCEPTION_SECONDARY_CONFIRM_REQUIRED

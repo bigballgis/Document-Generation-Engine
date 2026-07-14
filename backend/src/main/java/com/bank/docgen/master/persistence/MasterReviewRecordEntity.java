@@ -36,6 +36,12 @@ public class MasterReviewRecordEntity {
     @Column(name = "actor_username", nullable = false, length = 8)
     private String actorUsername;
 
+    @Column(name = "self_approval_exception", nullable = false)
+    private boolean selfApprovalException;
+
+    @Column(name = "exception_reason", length = 2048)
+    private String exceptionReason;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -51,6 +57,20 @@ public class MasterReviewRecordEntity {
             String commentSummary,
             String actorUsername
     ) {
+        this(id, masterId, action, decision, changeSummary, commentSummary, actorUsername, false, null);
+    }
+
+    public MasterReviewRecordEntity(
+            UUID id,
+            UUID masterId,
+            MasterReviewAction action,
+            String decision,
+            String changeSummary,
+            String commentSummary,
+            String actorUsername,
+            boolean selfApprovalException,
+            String exceptionReason
+    ) {
         this.id = id;
         this.masterId = masterId;
         this.action = action;
@@ -58,6 +78,8 @@ public class MasterReviewRecordEntity {
         this.changeSummary = changeSummary;
         this.commentSummary = commentSummary;
         this.actorUsername = actorUsername;
+        this.selfApprovalException = selfApprovalException;
+        this.exceptionReason = exceptionReason;
         this.createdAt = Instant.now();
     }
 
@@ -91,5 +113,13 @@ public class MasterReviewRecordEntity {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public boolean isSelfApprovalException() {
+        return selfApprovalException;
+    }
+
+    public String getExceptionReason() {
+        return exceptionReason;
     }
 }

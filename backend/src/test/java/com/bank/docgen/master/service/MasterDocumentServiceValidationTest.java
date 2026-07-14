@@ -18,6 +18,7 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -83,6 +84,7 @@ class MasterDocumentServiceValidationTest {
                 docxAnchorExtractor,
                 new GroupAccessService(),
                 managementUserDisplayService,
+                new SelfApprovalGuard(),
                 4096
         );
     }

@@ -237,7 +237,7 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 
 | ID | 标题 | 级/量 | 要点 | 依赖 |
 | --- | --- | --- | --- | --- |
-| CE-G01 | 同人审批阻断 | P0·S | 模板/母版/条款三处 decision service 统一 `decisionActor != lastSubmitActor` → `api.error.lifecycle.selfApprovalForbidden`；GROUP_ADMIN 异常干预路径保留（强制 reason+审计）；三模块各一条回归测试 | 无 |
+| CE-G01 | 同人审批阻断 | P0·S · `In Progress` | 模板/母版/条款三处 decision service 统一 `decisionActor != lastSubmitActor` → `api.error.lifecycle.selfApprovalForbidden`；GROUP_ADMIN/GLOBAL_ADMIN 例外干预（强制 reason+secondary+审计）；Flyway V56；BDD ready ([ce-g01-self-approval-block.md](../behavior/ce-g01-self-approval-block.md); 22 scenarios)。Slice `ce-g01-self-approval-block` · Task Master **#72** · worktree `D:/working/DGE-ce-g01-self-approval-block` · branch `feat/ce-g01-self-approval-block`. **Pending merge** — do not claim Done until stage 11 + MAIN doc-sync. | 无 |
 | CE-G02 | SPECIMEN 水印 | P0·M | 预览/test-generate 路径 DOCX 页眉页脚 + PDF 对角水印（复用 `PdfPageNumberStamper` 的 PDFBox 后处理模式）；**正式 runtime 路径零改动**（金标护栏断言正式产物 bitwise 不变） | K07 骨架 |
 | CE-G03 | 测试数据 PII 治理 | P1·M | 变量 schema `piiCategory` 标签；标记字段保存测试集时强制合成值或显式确认+审计；关闭 `data-storage-view.md` 挂起问题 | U03 先行 |
 | CE-G04 | Legal hold 最小实现 | P2·M | hold 实体（模板+时间窗 / invocation 集合）；两个 retention 清理调度器删除前查豁免；GLOBAL_ADMIN 专属管理页 | 无 |
@@ -373,6 +373,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-14):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1 Done:** **#54** CE-K07 (merge `e8f996a0`); **#55** CE-U03 (merge `22bb391f`; tip `0565e1ae`); **#56** CE-C01+C02 (merge `da08f3fe`). **Batch 2:** **#57** CE-K01 **Done** (merge pending; tip `720a75bd`); **#72** CE-G01 **In Progress**. Formal phase remains **None**. Do **not** implement C03–C06 in this sync.
+**Task Master registry (2026-07-14):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1 Done:** **#54** CE-K07 (merge `e8f996a0`); **#55** CE-U03 (merge `22bb391f`; tip `0565e1ae`); **#56** CE-C01+C02 (merge `da08f3fe`). **Batch 2:** **#57** CE-K01 **Done** (merge `f2db3346`; tip `720a75bd`); **#72** CE-G01 **In Progress**. Formal phase remains **None**. Do **not** implement C03–C06 in this sync.
 
-**Last reviewed:** 2026-07-14（CE-K01 merged；#57 Done；Batch 2 residual #72 G01）
+**Last reviewed:** 2026-07-14（CE-G01 WIP rebased on main；#57 Done；Batch 2 residual #72 G01）

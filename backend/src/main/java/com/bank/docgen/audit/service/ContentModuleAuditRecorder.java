@@ -7,7 +7,9 @@ import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MO
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_VERSION_UPDATED;
 
 import com.bank.docgen.audit.api.ContentModuleLifecycleAuditDetail;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,13 +90,38 @@ class ContentModuleAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
+        recordContentModuleReviewTransition(
+                moduleId, groupCode, moduleCode, operation, semanticVersion, reviewState,
+                actorUsername, actorSummary, false, null
+        );
+    }
+
+    @Transactional
+    void recordContentModuleReviewTransition(
+            UUID moduleId,
+            String groupCode,
+            String moduleCode,
+            String operation,
+            String semanticVersion,
+            String reviewState,
+            String actorUsername,
+            String actorSummary,
+            boolean selfApprovalException,
+            String exceptionReason
+    ) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("selfApprovalException", selfApprovalException);
+        if (exceptionReason != null) {
+            payload.put("exceptionReason", exceptionReason);
+        }
         recordContentModuleEvent(
                 CONTENT_MODULE_REVIEW_TRANSITION,
                 moduleId,
                 groupCode,
                 operation + " on " + moduleCode + "@" + semanticVersion + " -> " + reviewState,
                 actorUsername,
-                actorSummary
+                actorSummary,
+                eventWriter.writeJsonMap(payload)
         );
     }
 

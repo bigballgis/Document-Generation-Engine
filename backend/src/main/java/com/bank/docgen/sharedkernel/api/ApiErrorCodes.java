@@ -76,6 +76,14 @@ public final class ApiErrorCodes {
     public static final String OOXML_VALIDATION_FAILED = "OOXML_VALIDATION_FAILED";
     /** LR-C7: collaboration notification mark-read fail-closed (invisible / missing). */
     public static final String WORK_ITEM_NOT_FOUND = "WORK_ITEM_NOT_FOUND";
+    /** CE-G01: decision actor equals the most recent submitter and no exception intervention applies. */
+    public static final String SELF_APPROVAL_FORBIDDEN = "SELF_APPROVAL_FORBIDDEN";
+    /** CE-G01: exception intervention requested by a role that is not GROUP_ADMIN / GLOBAL_ADMIN. */
+    public static final String EXCEPTION_INTERVENTION_NOT_ALLOWED = "EXCEPTION_INTERVENTION_NOT_ALLOWED";
+    /** CE-G01: exception intervention missing a non-blank exception reason. */
+    public static final String EXCEPTION_REASON_REQUIRED = "EXCEPTION_REASON_REQUIRED";
+    /** CE-G01: exception intervention missing secondary confirmation. */
+    public static final String EXCEPTION_SECONDARY_CONFIRM_REQUIRED = "EXCEPTION_SECONDARY_CONFIRM_REQUIRED";
 
     private ApiErrorCodes() {
     }

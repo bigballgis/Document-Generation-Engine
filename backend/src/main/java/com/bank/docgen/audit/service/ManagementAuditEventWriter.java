@@ -84,6 +84,14 @@ class ManagementAuditEventWriter {
         }
     }
 
+    String writeJsonMap(Map<String, Object> payload) {
+        try {
+            return objectMapper.writeValueAsString(payload);
+        } catch (JsonProcessingException ex) {
+            return "{}";
+        }
+    }
+
     String writePolicyPayload(PolicyUpdateAuditDetail detail) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("configDiffSummary", detail.configDiffSummary());

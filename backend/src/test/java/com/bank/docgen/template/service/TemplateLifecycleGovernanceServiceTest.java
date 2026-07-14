@@ -13,6 +13,7 @@ import com.bank.docgen.apimgmt.service.ApiPolicyMaterializationService;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleGovernanceRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
@@ -108,7 +109,8 @@ class TemplateLifecycleGovernanceServiceTest {
                 new ObjectMapper(),
                 masterDocumentRepository,
                 masterRevisionLineRepository,
-                objectStoragePort
+                objectStoragePort,
+                new SelfApprovalGuard()
         );
         groupAdmin = session(List.of("GROUP_ADMIN"), List.of("RETAIL"));
         templateId = UUID.randomUUID();

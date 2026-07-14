@@ -283,9 +283,28 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
+        recordContentModuleReviewTransition(
+                moduleId, groupCode, moduleCode, operation, semanticVersion, reviewState,
+                actorUsername, actorSummary, false, null
+        );
+    }
+
+    @Transactional
+    public void recordContentModuleReviewTransition(
+            UUID moduleId,
+            String groupCode,
+            String moduleCode,
+            String operation,
+            String semanticVersion,
+            String reviewState,
+            String actorUsername,
+            String actorSummary,
+            boolean selfApprovalException,
+            String exceptionReason
+    ) {
         contentModuleAuditRecorder.recordContentModuleReviewTransition(
                 moduleId, groupCode, moduleCode, operation, semanticVersion, reviewState,
-                actorUsername, actorSummary
+                actorUsername, actorSummary, selfApprovalException, exceptionReason
         );
     }
 

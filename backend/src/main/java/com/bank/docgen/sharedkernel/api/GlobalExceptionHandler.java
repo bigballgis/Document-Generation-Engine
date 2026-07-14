@@ -124,6 +124,26 @@ public class GlobalExceptionHandler {
         );
     }
 
+    /**
+     * CE-G01: self-approval block + exception-intervention failures raised by the
+     * template / master / content-module decision services. The exception carries the
+     * unified-envelope code / category / messageKey / HTTP status directly so this
+     * single handler serves all three modules without per-module advice ambiguity.
+     */
+    @ExceptionHandler(LifecycleAuthorizationException.class)
+    public ResponseEntity<ErrorEnvelope> handleLifecycleAuthorization(
+            HttpServletRequest request,
+            LifecycleAuthorizationException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                ex.httpStatus(),
+                ex.errorCode(),
+                ex.category(),
+                ex.messageKey()
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorEnvelope> handleUnexpected(HttpServletRequest request, Exception ignored) {
         return errorEnvelopeFactory.unexpectedError(request);

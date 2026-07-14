@@ -1075,6 +1075,10 @@ Async task query response structure
 | `AUTHORIZATION` | `AD_GROUP_RESOLUTION_FAILED` | `api.error.authorization.adGroupResolutionFailed` | `true` | Access account groups could not be resolved. |
 | `AUTHORIZATION` | `AD_GROUP_NOT_AUTHORIZED` | `api.error.authorization.adGroupNotAuthorized` | `false` | Access account is not authorized for this API. |
 | `AUTHORIZATION` | `TEMPLATE_ACCESS_DENIED` | `api.error.authorization.templateAccessDenied` | `false` | Access to this template is denied. |
+| `AUTHORIZATION` | `SELF_APPROVAL_FORBIDDEN` | `api.error.lifecycle.selfApprovalForbidden` | `false` | Self-approval is not permitted; the decision actor must differ from the most recent submitter. |
+| `AUTHORIZATION` | `EXCEPTION_INTERVENTION_NOT_ALLOWED` | `api.error.lifecycle.exceptionInterventionNotAllowed` | `false` | Exception intervention is only allowed for group or global administrators. |
+| `VALIDATION` | `EXCEPTION_REASON_REQUIRED` | `api.error.lifecycle.exceptionReasonRequired` | `false` | An exception reason is required for intervention decisions. |
+| `VALIDATION` | `EXCEPTION_SECONDARY_CONFIRM_REQUIRED` | `api.error.lifecycle.exceptionSecondaryConfirmRequired` | `false` | Secondary confirmation is required for exception intervention. |
 | `VERSION_ROUTING` | `ENVIRONMENT_MISMATCH` | `api.error.versionRouting.environmentMismatch` | `false` | Requested environment does not match the deployment environment. |
 | `VERSION_ROUTING` | `RELEASE_VERSION_REQUIRED` | `api.error.versionRouting.releaseVersionRequired` | `false` | Release version is required for this route. |
 | `VERSION_ROUTING` | `RELEASE_VERSION_FORMAT_INVALID` | `api.error.versionRouting.releaseVersionFormatInvalid` | `false` | Release version must be a semantic version. |
@@ -1133,11 +1137,11 @@ Async task query response structure
 | 202 Accepted | 异步单笔或批量生成请求已受理。 | 请求已通过基础校验并创建任务，结果通过任务查询获取。 |
 | 400 Bad Request | `ENVIRONMENT_MISMATCH`、`RELEASE_VERSION_REQUIRED`、`RELEASE_VERSION_FORMAT_INVALID`、`OUTPUT_FORMAT_NOT_ALLOWED`、`OUTPUT_MODE_NOT_ALLOWED`、`BATCH_LIMIT_EXCEEDED`、`ENCRYPTION_NOT_ALLOWED`、`REQUEST_BODY_INVALID`、`REQUEST_ID_REQUIRED`、`OUTPUT_FORMAT_REQUIRED`、`OUTPUT_MODE_REQUIRED`、`VARIABLES_REQUIRED`、`ENCRYPTION_PARAMETER_INVALID`、`BATCH_ITEMS_REQUIRED`、`BATCH_ITEM_COUNT_INVALID`、`ITEM_ID_REQUIRED`、`ITEM_ID_DUPLICATED`。 | 请求结构、必填字段、格式类错误或 API 管理策略拒绝。 |
 | 401 Unauthorized | `API_CREDENTIAL_REQUIRED`、`API_CREDENTIAL_INVALID`、`API_CREDENTIAL_EXPIRED`、`API_CREDENTIAL_REVOKED`、`ACCESS_ACCOUNT_REQUIRED`。 | API 凭证或访问账号认证失败。 |
-| 403 Forbidden | `AD_GROUP_NOT_AUTHORIZED`、`TEMPLATE_ACCESS_DENIED`。 | 调用方已被识别，但未获得模板 API 访问授权；消息不得泄露未授权资源细节。 |
+| 403 Forbidden | `AD_GROUP_NOT_AUTHORIZED`、`TEMPLATE_ACCESS_DENIED`、`SELF_APPROVAL_FORBIDDEN`、`EXCEPTION_INTERVENTION_NOT_ALLOWED`。 | 调用方已被识别，但未获得模板 API 访问授权，或管理端同人审批 / 例外干预被拒绝；消息不得泄露未授权资源细节。 |
 | 404 Not Found | `RELEASE_VERSION_NOT_FOUND`、`ASYNC_TASK_NOT_FOUND`、`DOCUMENT_NOT_FOUND`。 | 授权范围内请求的发布版本、任务或文档不存在。 |
 | 409 Conflict | `RELEASE_VERSION_DISABLED`、`DEFAULT_ROUTE_NOT_CONFIGURED`、`DEFAULT_ROUTE_TARGET_UNAVAILABLE`、`TEMPLATE_DISABLED`、`TEMPLATE_DEPRECATED`、`IDEMPOTENCY_KEY_CONFLICT`、`IDEMPOTENCY_RETRY_NOT_ALLOWED`、`ASYNC_TASK_CANCELLATION_NOT_ALLOWED`。 | 请求与当前版本、模板、default 配置、幂等状态或异步任务当前状态冲突。 |
 | 410 Gone | `DOWNLOAD_URL_EXPIRED`、`RESULT_RETENTION_EXPIRED`、`ASYNC_TASK_EXPIRED`。 | 资源曾可用，但下载地址、任务或结果已过期。 |
-| 422 Unprocessable Entity | `VARIABLE_REQUIRED`、`VARIABLE_TYPE_INVALID`、`VARIABLE_FORMAT_INVALID`、`VARIABLE_RULE_FAILED`、`OOXML_VALIDATION_FAILED`。 | 请求结构可解析，但模板变量、业务规则校验未通过，或装配后 DOCX 未通过 OOXML 输出校验（fail-closed，不落库/不预览）。 |
+| 422 Unprocessable Entity | `VARIABLE_REQUIRED`、`VARIABLE_TYPE_INVALID`、`VARIABLE_FORMAT_INVALID`、`VARIABLE_RULE_FAILED`、`OOXML_VALIDATION_FAILED`、`EXCEPTION_REASON_REQUIRED`、`EXCEPTION_SECONDARY_CONFIRM_REQUIRED`。 | 请求结构可解析，但模板变量、业务规则校验未通过，装配后 DOCX 未通过 OOXML 输出校验（fail-closed，不落库/不预览），或 CE-G01 例外干预字段缺失。 |
 | 500 Internal Server Error | `TEMPLATE_CONTRACT_INVALID`、`TEMPLATE_ANCHOR_MISSING`、`DOCX_GENERATION_FAILED`、`PDF_CONVERSION_FAILED`、`ENCRYPTION_FAILED`、`BATCH_PROCESSING_FAILED`。 | 平台处理、模板资产、生成、转换、加密或整批处理失败。 |
 | 503 Service Unavailable | `AD_GROUP_RESOLUTION_FAILED`、`IDEMPOTENCY_STORE_UNAVAILABLE`、`GENERATION_SERVICE_UNAVAILABLE`。 | 权限依赖、幂等存储或生成服务临时不可用。 |
 | 504 Gateway Timeout | `GENERATION_TIMEOUT`。 | 文档生成超时。 |

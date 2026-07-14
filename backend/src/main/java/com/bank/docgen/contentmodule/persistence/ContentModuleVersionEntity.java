@@ -45,6 +45,9 @@ public class ContentModuleVersionEntity {
     @Column(name = "rejection_reason", length = 2048)
     private String rejectionReason;
 
+    @Column(name = "submitted_by", length = 8)
+    private String submittedBy;
+
     @Column(name = "created_by", nullable = false, length = 8)
     private String createdBy;
 
@@ -127,6 +130,15 @@ public class ContentModuleVersionEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public String getSubmittedBy() {
+        return submittedBy;
+    }
+
+    public void setSubmittedBy(String submittedBy) {
+        this.submittedBy = submittedBy;
+        this.updatedAt = Instant.now();
     }
 
     public boolean isReferencable() {

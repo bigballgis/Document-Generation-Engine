@@ -16,6 +16,7 @@ import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.PublishTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
@@ -108,7 +109,8 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 new ObjectMapper(),
                 masterDocumentRepository,
                 masterRevisionLineRepository,
-                objectStoragePort
+                objectStoragePort,
+                new SelfApprovalGuard()
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",

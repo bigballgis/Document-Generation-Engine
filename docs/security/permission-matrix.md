@@ -493,6 +493,13 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 | `manageApiPolicy` | GLOBAL, GROUP |
 | `readAudit` | GLOBAL, GROUP, AUDIT_ADMIN |
 
+**CE-G01 同人审批阻断 / 例外干预（2026-07-14）：**
+
+- 同人阻断对**全部**角色生效（含 `GLOBAL_ADMIN` 自提自批）：模板 `recordApprovalDecision`、母版 `decideReview`、条款 `APPROVE_REVIEW`/`REJECT_REVIEW` 在决策执行人 username 与最近一次提交人 username 精确相等时 fail-closed 返回 `403 SELF_APPROVAL_FORBIDDEN`（`api.error.lifecycle.selfApprovalForbidden`）。
+- **例外干预权仅** `GROUP_ADMIN` / `GLOBAL_ADMIN`；必须 `exceptionIntervention=true` + 非空 `exceptionReason` + `secondaryConfirmed=true`。`TEMPLATE_APPROVER` / `MASTER_DESIGNER` / `TEMPLATE_TESTER` **无**例外权。
+- 例外成功决策在生命周期审计行永久保留 `selfApprovalException=true` + `exceptionReason`；读取权限沿用既有 `AUDIT_ADMIN` / `GLOBAL_ADMIN` / `GROUP_ADMIN(+groupScope+templateId)` 矩阵（§10 / §348），本片不放宽。
+- 不做四眼双人复核（ADR-0021 维持；用户 D1 拍板）。
+
 ### 13.3 禁止路由访问（forbidden-route）行为基线
 
 - 已登录但无目标路由权限时返回禁止访问结果（前端阻断 + 统一无权访问反馈），并采用 fail-closed。

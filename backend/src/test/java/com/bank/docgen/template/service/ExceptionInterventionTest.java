@@ -11,6 +11,7 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.apimgmt.service.ApiPolicyMaterializationService;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
 import com.bank.docgen.template.domain.LifecycleDecision;
@@ -102,7 +103,8 @@ class ExceptionInterventionTest {
                 new ObjectMapper(),
                 masterDocumentRepository,
                 masterRevisionLineRepository,
-                objectStoragePort
+                objectStoragePort,
+                new SelfApprovalGuard()
         );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(

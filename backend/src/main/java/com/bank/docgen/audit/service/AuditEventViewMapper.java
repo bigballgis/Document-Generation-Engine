@@ -118,7 +118,9 @@ final class AuditEventViewMapper {
                 record.getActorUsername(),
                 actorDisplayName,
                 record.getCommentSummary(),
-                List.of()
+                List.of(),
+                record.isSelfApprovalException(),
+                record.getExceptionReason()
         );
     }
 

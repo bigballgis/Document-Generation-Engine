@@ -13,6 +13,7 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.util.List;
 import java.util.UUID;
@@ -28,19 +29,22 @@ public class ContentModuleReviewService {
     private final GroupAccessService groupAccessService;
     private final ContentModuleAccessService accessSupport;
     private final ManagementAuditRecorder auditRecorder;
+    private final SelfApprovalGuard selfApprovalGuard;
 
     public ContentModuleReviewService(
             ContentModuleRepository moduleRepository,
             ContentModuleVersionRepository versionRepository,
             GroupAccessService groupAccessService,
             ContentModuleAccessService accessSupport,
-            ManagementAuditRecorder auditRecorder
+            ManagementAuditRecorder auditRecorder,
+            SelfApprovalGuard selfApprovalGuard
     ) {
         this.moduleRepository = moduleRepository;
         this.versionRepository = versionRepository;
         this.groupAccessService = groupAccessService;
         this.accessSupport = accessSupport;
         this.auditRecorder = auditRecorder;
+        this.selfApprovalGuard = selfApprovalGuard;
     }
 
     @Transactional
@@ -54,6 +58,7 @@ public class ContentModuleReviewService {
         assertOperationRole(request, session);
 
         ContentModuleVersionEntity version = resolveTargetVersion(module.getId(), request.operation());
+        SelfApprovalGuard.EnforceOutcome outcome = enforceSelfApproval(version, request, session);
         applyTransition(version, request, session.username());
 
         versionRepository.save(version);
@@ -68,7 +73,9 @@ public class ContentModuleReviewService {
                 version.getSemanticVersion(),
                 version.getReviewState().name(),
                 session.username(),
-                accessSupport.actorSummary(session)
+                accessSupport.actorSummary(session),
+                outcome.selfApprovalException(),
+                outcome.exceptionReason()
         );
 
         return new ContentModuleReviewTransitionResultView(
@@ -77,6 +84,33 @@ public class ContentModuleReviewService {
                 null,
                 toSnapshot(module, version)
         );
+    }
+
+    /**
+     * CE-G01: enforce the self-approval block only on APPROVE_REVIEW / REJECT_REVIEW.
+     * SUBMIT_FOR_REVIEW records the submitter on the version (Q1) and never blocks.
+     */
+    private SelfApprovalGuard.EnforceOutcome enforceSelfApproval(
+            ContentModuleVersionEntity version,
+            ContentModuleReviewTransitionRequest request,
+            ManagementSessionClaims session
+    ) {
+        if (request.operation() == ContentModuleReviewOperation.SUBMIT_FOR_REVIEW) {
+            return new SelfApprovalGuard.EnforceOutcome(false, null);
+        }
+        String lastSubmitActor = version.getSubmittedBy();
+        return selfApprovalGuard.enforce(new SelfApprovalGuard.EnforceRequest(
+                session.username(),
+                lastSubmitActor,
+                Boolean.TRUE.equals(request.exceptionIntervention()),
+                request.exceptionReason(),
+                request.secondaryConfirmed(),
+                session,
+                "api.error.lifecycle.selfApprovalForbidden",
+                "api.error.lifecycle.exceptionInterventionNotAllowed",
+                "api.error.lifecycle.exceptionReasonRequired",
+                "api.error.lifecycle.exceptionSecondaryConfirmRequired"
+        ));
     }
 
     private void validateRequest(ContentModuleReviewTransitionRequest request) {
@@ -172,6 +206,7 @@ public class ContentModuleReviewService {
                 }
                 version.setReviewState(ContentModuleReviewState.SUBMITTED);
                 version.setChangeDescription(request.changeDescription().trim());
+                version.setSubmittedBy(actorUsername);
             }
             case APPROVE_REVIEW -> {
                 if (version.getReviewState() != ContentModuleReviewState.SUBMITTED) {

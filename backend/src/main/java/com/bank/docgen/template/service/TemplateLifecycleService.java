@@ -9,6 +9,7 @@ import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
@@ -63,7 +64,8 @@ public class TemplateLifecycleService {
             ObjectMapper objectMapper,
             MasterDocumentRepository masterDocumentRepository,
             MasterRevisionLineRepository masterRevisionLineRepository,
-            ObjectStoragePort objectStoragePort
+            ObjectStoragePort objectStoragePort,
+            SelfApprovalGuard selfApprovalGuard
     ) {
         this.templateService = templateService;
         this.groupAccessService = groupAccessService;
@@ -106,7 +108,8 @@ public class TemplateLifecycleService {
                 masterDocumentRepository,
                 masterRevisionLineRepository,
                 objectStoragePort,
-                objectMapper
+                objectMapper,
+                selfApprovalGuard
         );
     }
 

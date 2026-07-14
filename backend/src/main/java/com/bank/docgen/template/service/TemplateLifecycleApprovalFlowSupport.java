@@ -2,6 +2,7 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.apimgmt.service.ApiPolicyMaterializationService;
 import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.master.domain.MasterDocumentStatus;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
@@ -58,6 +59,7 @@ final class TemplateLifecycleApprovalFlowSupport {
     private final MasterRevisionLineRepository masterRevisionLineRepository;
     private final ObjectStoragePort objectStoragePort;
     private final ObjectMapper objectMapper;
+    private final SelfApprovalGuard selfApprovalGuard;
 
     TemplateLifecycleApprovalFlowSupport(
             TemplateService templateService,
@@ -77,7 +79,8 @@ final class TemplateLifecycleApprovalFlowSupport {
             MasterDocumentRepository masterDocumentRepository,
             MasterRevisionLineRepository masterRevisionLineRepository,
             ObjectStoragePort objectStoragePort,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            SelfApprovalGuard selfApprovalGuard
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -97,6 +100,7 @@ final class TemplateLifecycleApprovalFlowSupport {
         this.masterRevisionLineRepository = masterRevisionLineRepository;
         this.objectStoragePort = objectStoragePort;
         this.objectMapper = objectMapper;
+        this.selfApprovalGuard = selfApprovalGuard;
     }
 
     TemplateDetailView submitForApproval(
@@ -122,17 +126,32 @@ final class TemplateLifecycleApprovalFlowSupport {
         TemplateEntity template = eligibility.requireApprovableTemplate(templateId, session);
         eligibility.requireStatus(template, TemplateLifecycleStatus.APPROVAL);
         decisionFormService.validateApprovalDecision(request, session);
+        String lastSubmitActor = transitions.latestSubmitForApprovalActor(templateId);
+        SelfApprovalGuard.EnforceOutcome outcome = selfApprovalGuard.enforce(new SelfApprovalGuard.EnforceRequest(
+                session.username(),
+                lastSubmitActor,
+                Boolean.TRUE.equals(request.exceptionIntervention()),
+                request.exceptionReason(),
+                request.secondaryConfirmed(),
+                session,
+                "api.error.lifecycle.selfApprovalForbidden",
+                "api.error.template.exceptionInterventionNotAllowed",
+                "api.error.template.exceptionReasonRequired",
+                "api.error.template.exceptionSecondaryConfirmRequired"
+        ));
         String persistedComment = decisionComments.formatDecisionComment(request, session);
         if (request.decision() == LifecycleDecision.APPROVED) {
             transitions.transition(template, TemplateLifecycleStatus.PENDING_RELEASE, LifecycleAction.RECORD_APPROVAL_DECISION,
-                    request.decision(), persistedComment, session);
+                    request.decision(), persistedComment, session,
+                    outcome.selfApprovalException(), outcome.exceptionReason());
             apiPolicyMaterializationService.ensureApiPolicySkeleton(templateId, session.username());
             String orchestrator = collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, session)
                     .orElseGet(template::getCreatedBy);
             collaborationWorkItemWriter.upsertPendingReleaseWorkItem(template, orchestrator, session);
         } else {
             transitions.transition(template, TemplateLifecycleStatus.DRAFT, LifecycleAction.RECORD_APPROVAL_DECISION,
-                    request.decision(), persistedComment, session);
+                    request.decision(), persistedComment, session,
+                    outcome.selfApprovalException(), outcome.exceptionReason());
             String orchestrator = collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, session)
                     .orElseGet(template::getCreatedBy);
             collaborationWorkItemWriter.upsertApprovalFailureRemediationWorkItem(template, orchestrator, session);

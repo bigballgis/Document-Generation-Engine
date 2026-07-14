@@ -20,6 +20,7 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.service.MasterCurrentRevisionUnavailableException;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.PublishTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
@@ -99,7 +100,8 @@ class TemplateLifecyclePublishPinningTest {
                 masterDocumentRepository,
                 masterRevisionLineRepository,
                 objectStoragePort,
-                objectMapper
+                objectMapper,
+                new SelfApprovalGuard()
         );
         publisher = new ManagementSessionClaims(
                 "10000009", "Publisher", "pub@example.com",

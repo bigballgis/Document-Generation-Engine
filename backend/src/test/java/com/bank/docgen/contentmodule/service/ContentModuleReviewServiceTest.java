@@ -19,6 +19,7 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
@@ -61,7 +62,8 @@ class ContentModuleReviewServiceTest {
                 versionRepository,
                 groupAccessService,
                 accessSupport,
-                auditRecorder
+                auditRecorder,
+                new SelfApprovalGuard()
         );
         module = new ContentModuleEntity(
                 MODULE_ID,
@@ -112,7 +114,7 @@ class ContentModuleReviewServiceTest {
         assertThat(result.snapshot().state()).isEqualTo("SUBMITTED");
         assertThat(draftVersion.getReviewState()).isEqualTo(ContentModuleReviewState.SUBMITTED);
         verify(auditRecorder).recordContentModuleReviewTransition(
-                any(), any(), any(), any(), any(), any(), any(), any()
+                any(), any(), any(), any(), any(), any(), any(), any(), eq(false), eq(null)
         );
     }
 

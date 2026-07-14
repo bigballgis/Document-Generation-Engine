@@ -40,11 +40,30 @@ final class TemplateLifecycleTransitionSupport {
             String comment,
             ManagementSessionClaims session
     ) {
+        transition(template, toStatus, action, decision, comment, session, false, null);
+    }
+
+    /**
+     * CE-G01: transition overload that persists the self-approval exception marker
+     * and reason on the lifecycle audit row when a GROUP_ADMIN / GLOBAL_ADMIN
+     * exception intervention bypassed the self-approval block.
+     */
+    void transition(
+            TemplateEntity template,
+            TemplateLifecycleStatus toStatus,
+            LifecycleAction action,
+            LifecycleDecision decision,
+            String comment,
+            ManagementSessionClaims session,
+            boolean selfApprovalException,
+            String exceptionReason
+    ) {
         TemplateLifecycleStatus from = template.getLifecycleStatus();
         template.setLifecycleStatus(toStatus);
         template.setUpdatedBy(session.username());
         templateRepository.save(template);
-        recordLifecycle(template, action, from, toStatus, decision, comment, null, session);
+        recordLifecycle(template, action, from, toStatus, decision, comment, null, session,
+                selfApprovalException, exceptionReason);
     }
 
     void recordLifecycle(
@@ -57,6 +76,22 @@ final class TemplateLifecycleTransitionSupport {
             String releaseVersion,
             ManagementSessionClaims session
     ) {
+        recordLifecycle(template, action, from, to, decision, comment, releaseVersion, session,
+                false, null);
+    }
+
+    void recordLifecycle(
+            TemplateEntity template,
+            LifecycleAction action,
+            TemplateLifecycleStatus from,
+            TemplateLifecycleStatus to,
+            LifecycleDecision decision,
+            String comment,
+            String releaseVersion,
+            ManagementSessionClaims session,
+            boolean selfApprovalException,
+            String exceptionReason
+    ) {
         lifecycleRecordRepository.save(new TemplateLifecycleRecordEntity(
                 UUID.randomUUID(),
                 template.getId(),
@@ -66,7 +101,9 @@ final class TemplateLifecycleTransitionSupport {
                 decision,
                 comment,
                 releaseVersion,
-                session.username()
+                session.username(),
+                selfApprovalException,
+                exceptionReason
         ));
     }
 
@@ -101,5 +138,18 @@ final class TemplateLifecycleTransitionSupport {
                 .anyMatch(version -> version.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED
                         && version.getReleaseVersion() != null
                         && !version.getReleaseVersion().isBlank());
+    }
+
+    /**
+     * CE-G01: resolve the actor username of the most recent {@code SUBMIT_FOR_APPROVAL}
+     * lifecycle record for the template, or {@code null} when no submit record exists
+     * (CMP-2 / CMP-3 — migration gaps do not trigger the self-approval block).
+     */
+    String latestSubmitForApprovalActor(UUID templateId) {
+        return lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId).stream()
+                .filter(record -> record.getAction() == LifecycleAction.SUBMIT_FOR_APPROVAL)
+                .map(TemplateLifecycleRecordEntity::getActorUsername)
+                .findFirst()
+                .orElse(null);
     }
 }

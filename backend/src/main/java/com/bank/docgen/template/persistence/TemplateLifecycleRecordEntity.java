@@ -47,6 +47,12 @@ public class TemplateLifecycleRecordEntity {
     @Column(name = "actor_username", nullable = false, length = 8)
     private String actorUsername;
 
+    @Column(name = "self_approval_exception", nullable = false)
+    private boolean selfApprovalException;
+
+    @Column(name = "exception_reason", length = 2048)
+    private String exceptionReason;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -64,6 +70,23 @@ public class TemplateLifecycleRecordEntity {
             String releaseVersion,
             String actorUsername
     ) {
+        this(id, templateId, action, fromStatus, toStatus, decision, commentSummary,
+                releaseVersion, actorUsername, false, null);
+    }
+
+    public TemplateLifecycleRecordEntity(
+            UUID id,
+            UUID templateId,
+            LifecycleAction action,
+            TemplateLifecycleStatus fromStatus,
+            TemplateLifecycleStatus toStatus,
+            LifecycleDecision decision,
+            String commentSummary,
+            String releaseVersion,
+            String actorUsername,
+            boolean selfApprovalException,
+            String exceptionReason
+    ) {
         this.id = id;
         this.templateId = templateId;
         this.action = action;
@@ -73,6 +96,8 @@ public class TemplateLifecycleRecordEntity {
         this.commentSummary = commentSummary;
         this.releaseVersion = releaseVersion;
         this.actorUsername = actorUsername;
+        this.selfApprovalException = selfApprovalException;
+        this.exceptionReason = exceptionReason;
         this.createdAt = Instant.now();
     }
 
@@ -114,5 +139,13 @@ public class TemplateLifecycleRecordEntity {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public boolean isSelfApprovalException() {
+        return selfApprovalException;
+    }
+
+    public String getExceptionReason() {
+        return exceptionReason;
     }
 }

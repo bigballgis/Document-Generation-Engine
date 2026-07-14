@@ -992,16 +992,16 @@
       {
         "id": "72",
         "title": "CE-G01: Self-approval block",
-        "description": "PENDING. Slice ce-g01-self-approval-block. decisionActor != lastSubmitActor on template/master/content-module; GROUP_ADMIN override with reason+audit. P0·S.",
-        "details": "Lane3 after C01+C02 (#56). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G01.",
-        "testStrategy": "1. Three modules block self-approval. 2. Override path audited. 3. Regression tests each module. 4. mvn verify.",
+        "description": "IN PROGRESS. Slice ce-g01-self-approval-block. decisionActor != lastSubmitActor on template/master/content-module; GROUP_ADMIN/GLOBAL_ADMIN override with reason+audit. P0·S.",
+        "details": "Lane3 after C01+C02 (#56). Worktree D:/working/DGE-ce-g01-self-approval-block · feat/ce-g01-self-approval-block. BDD ready docs/behavior/ce-g01-self-approval-block.md (22 scenarios). Gates before Done: mvn verify; worktree merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G01. Do NOT claim Done until merge.",
+        "testStrategy": "1. Three modules block self-approval. 2. Override path audited. 3. Regression tests each module + X-001..X-008. 4. mvn verify.",
         "priority": "high",
         "dependencies": [
           "56"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T05:55:00.000Z"
       },
       {
         "id": "73",

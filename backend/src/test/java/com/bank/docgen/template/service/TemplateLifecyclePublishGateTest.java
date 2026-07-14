@@ -8,6 +8,7 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.apimgmt.service.ApiPolicyMaterializationService;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
 import com.bank.docgen.template.api.PublishTemplateRequest;
@@ -100,7 +101,8 @@ class TemplateLifecyclePublishGateTest {
                 new ObjectMapper(),
                 masterDocumentRepository,
                 masterRevisionLineRepository,
-                objectStoragePort
+                objectStoragePort,
+                new SelfApprovalGuard()
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",

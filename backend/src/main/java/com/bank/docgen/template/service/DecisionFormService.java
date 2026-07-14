@@ -30,7 +30,6 @@ public class DecisionFormService {
     }
 
     public void validateApprovalDecision(LifecycleDecisionRequest request, ManagementSessionClaims session) {
-        validateExceptionIntervention(request, session);
         if (request.decision() == LifecycleDecision.APPROVED) {
             if (isBlank(request.commentSummary())) {
                 throw new TemplateValidationException("api.error.template.decisionRationaleRequired");
@@ -92,6 +91,7 @@ public class DecisionFormService {
     }
 
     public boolean isGroupAdminException(LifecycleDecisionRequest request, ManagementSessionClaims session) {
-        return Boolean.TRUE.equals(request.exceptionIntervention()) && session.roles().contains("GROUP_ADMIN");
+        return Boolean.TRUE.equals(request.exceptionIntervention())
+                && (session.roles().contains("GROUP_ADMIN") || session.roles().contains("GLOBAL_ADMIN"));
     }
 }

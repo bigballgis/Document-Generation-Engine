@@ -22,6 +22,7 @@ import com.bank.docgen.master.persistence.MasterDocumentRepositoryCustom.MasterC
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
+import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.time.Instant;
 import java.util.List;
@@ -69,6 +70,7 @@ class MasterDocumentServiceCatalogPaginationTest {
                 docxAnchorExtractor,
                 groupAccessService,
                 managementUserDisplayService,
+                new SelfApprovalGuard(),
                 50L * 1024L * 1024L
         );
         session = new ManagementSessionClaims(

@@ -16,7 +16,9 @@ public record LifecycleAuditEventView(
         String actorId,
         String actorDisplayName,
         String summary,
-        List<String> warningCodes
+        List<String> warningCodes,
+        boolean selfApprovalException,
+        String exceptionReason
 ) {
     public LifecycleAuditEventView {
         warningCodes = DefensiveCopies.copyStringList(warningCodes);
