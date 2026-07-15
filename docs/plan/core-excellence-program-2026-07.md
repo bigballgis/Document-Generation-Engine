@@ -125,7 +125,9 @@ Done 时平台应满足：
 **禁止：** 不引入脚本引擎（Groovy/JS/SpEL 完整版）；ADR 记录 DSL 边界。
 **依赖：** 无；与 K01/K02 并行安全（不同文件面）。
 
-### CE-K04 语义级变更对比 + release A/B 对比 — P1 · L · `Not Started`
+### CE-K04 语义级变更对比 + release A/B 对比 — P1 · L · `Done`
+
+**Status (2026-07-15):** **Done** — Task Master **#60**; slice `ce-k04-semantic-change-diff`. BDD **ready** ([ce-k04-semantic-change-diff.md](../behavior/ce-k04-semantic-change-diff.md); **BDD-CE-K04-SCD-001…009**). **Merge:** `d95e4bfd` (feature tip `f871e0d3`). **Gates:** `SemanticContentDiffEngine` / `ChangeDiffService` tests + FE Vitest (release compare + approval/publish summary); OpenAPI release A/B. Sentence-level CONTENT semantic diff; `computeBetween`; release multi-select compare UI; human-readable approval/publish summaries. Next wave (#60/#84/#85) **closed** (**#84** CE-U09 + **#85** CE-U10 also **Done**). Formal phase **None**; **not** go-live.
 
 **痛点：** `diffContent` 只比 `masterCatalogVersion`，`diffAnchors` 只比 `bindingHash`；`PreviewComparisonService` 只比绑定状态码；无任意两 release 对比入口。法务看不到"哪句话变了"。
 **目标行为：**
@@ -211,11 +213,13 @@ condition/loop 块 `children` 数组已在 schema 中但 `StructuredContentBlock
 后端 review 完整但：Dashboard 无条款审核待办、驳回原因不回显、无审核时间线。目标：`useWorkflowTasks` 增加 content module 待审/返工任务；版本表展示 `rejectionReason`；对齐母版的 `el-timeline` 审核历史。
 **Status (2026-07-15):** **Done** — Task Master **#83**; slice `ce-u08-content-module-review-loop`. BDD **ready** ([ce-u08-content-module-review-loop.md](../behavior/ce-u08-content-module-review-loop.md); **BDD-CE-U08-CMRL-001…007**). **Merge:** `dd94c25d`. **Gates:** FE **GREEN**; E2E **3/3**; UIUX **PASS_WITH_NOTES** dual-brand @1920; architecture **PASS_WITH_NOTES**; Flyway **V59**. Dashboard CM pending/rework todos; versions `rejectionReason`; lifecycle `el-timeline` review history. Next wave (#59/#68/#83) **closed**. **Batch 4 remains Done**. Formal phase **None**; **not** go-live.
 
-**CE-U09 母版审核可达性 — P1 · S**
+**CE-U09 母版审核可达性 — P1 · S · `Done`**
 审批按钮藏在 revision 详情 Tab；Hub 的 `submitReviewOpen` 接线了却无入口（死代码）；旅程 CTA 被 `showPrimaryCta:false` 关闭。目标：Hub 对 current revision 直接暴露提交/通过/驳回；Dashboard 待办深链 `?workspaceTab=approval`；清死代码。
+**Status (2026-07-15):** **Done** — Task Master **#84**; slice `ce-u09-master-review-reachability`. BDD **ready** ([ce-u09-master-review-reachability.md](../behavior/ce-u09-master-review-reachability.md); **BDD-CE-U09-MRR-001…007**). **Merge:** `2af22254` (feature tip `71a59ce0`). **Gates:** E2E **4/4** + UIUX **2/2 PASS** dual-brand @1920 ([CE-U09-manifest.md](../../frontend/e2e/evidence/CE-U09-manifest.md); [CE-U09-uiux-manifest.md](../../frontend/e2e/evidence/CE-U09-uiux-manifest.md)). Hub Submit/Approve/Reject + Dashboard `workspaceTab=approval` deep link. Next wave (#60/#84/#85) **closed** (**#60** CE-K04 + **#85** CE-U10 also **Done**). Formal phase **None**; **not** go-live.
 
-**CE-U10 sharedGroupCodes 配置 UI — P1 · S**
+**CE-U10 sharedGroupCodes 配置 UI — P1 · S · `Done`**
 后端/API 全通，前端零入口。目标：条款创建与设置对话框加多选"共享到组"，详情摘要展示共享范围。
+**Status (2026-07-15):** **Done** — Task Master **#85**; slice `ce-u10-shared-group-codes-ui`. BDD **ready** ([ce-u10-shared-group-codes-ui.md](../behavior/ce-u10-shared-group-codes-ui.md); **BDD-CE-U10-SGC-001…007**). **Merge:** `10aa5c70` (feature tip `1e4df8a8`). **Gates:** E2E **6/6** + UIUX **2/2 PASS** dual-brand @1920 ([CE-U10-manifest.md](../../frontend/e2e/evidence/CE-U10-manifest.md); [CE-U10-uiux-manifest.md](../../frontend/e2e/evidence/CE-U10-uiux-manifest.md)); PUT shared-group-codes API. Create/settings Share to groups + detail summary. Next wave (#60/#84/#85) **closed**. Formal phase **None**; **not** go-live.
 
 **CE-U11 调用排障 + 召回检索 — P1 · M**（合并 R3 GAP-07）
 Drawer 无 errorCode/messageKey；管理查询无 `resolvedReleaseVersion` 过滤（实体有字段、predicates 没接）。目标：`ManagementInvocationFilters` + repository + controller + 前端筛选器加 releaseVersion；detail view 与 Drawer 暴露统一 error envelope；列表可导出 CSV（召回圈定的最小闭环）。
@@ -391,6 +395,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–3 Done.** **Batch 4 Done** (remains Done): **#73** CE-G02 (merge `2ea74018`); **#58** CE-K02 (merge `2f6792eb` HEAD). **Next wave closed:** **#59** CE-K03 → **Done** (merge `06cd58ec`); **#68** CE-C03 → **Done** (merge `49fa0a70`); **#83** CE-U08 → **Done** (merge `dd94c25d`). Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
+**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior next wave closed: **#59**/**#68**/**#83** → **Done**. **Next wave closed:** **#60** CE-K04 + **#84** CE-U09 + **#85** CE-U10 → **Done**. Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
 
-**Last reviewed:** 2026-07-15（#59 CE-K03 + #68 CE-C03 + #83 CE-U08 → Done; next wave closed; Batch 4 remains Done）
+**Last reviewed:** 2026-07-15（#60/#84/#85 Done; prior #59/#68/#83 Done; Batch 4 remains Done）

