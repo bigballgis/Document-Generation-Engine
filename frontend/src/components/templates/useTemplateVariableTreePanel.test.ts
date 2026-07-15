@@ -411,7 +411,7 @@ describe('useTemplateVariableTreePanel rename cascade', () => {
     panel.openAddVariable()
     expect(panel.variableDialogOpen.value).toBe(false)
     panel.openEditVariable(schema({ variableKey: 'customer' }))
-    panel.variableForm.variableKey = 'party'
+    expect(panel.variableDialogOpen.value).toBe(false)
     await panel.handleSaveVariable()
     expect(upsertVariableApi).not.toHaveBeenCalled()
   })

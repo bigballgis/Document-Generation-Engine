@@ -222,6 +222,83 @@ describe('analyze + build transforms', () => {
     expect(transforms.unlockedTestSetUpdates[0].payload.variables).toEqual({ party: 1 })
     expect(transforms.lockedSkippedCount).toBe(1)
   })
+
+  it('preserves piiCategory (and sibling schema fields) on compute-expression cascade upserts', () => {
+    const transforms = buildVariableRenameTransforms(
+      'customer',
+      'party',
+      [],
+      [],
+      [
+        variable({ variableKey: 'customer', piiCategory: 'NONE' }),
+        variable({
+          variableKey: 'label',
+          variableType: 'COMPUTED',
+          required: false,
+          defaultValue: 'n/a',
+          enumValues: null,
+          description: 'derived label',
+          computeExpression: 'COALESCE(${customer}, "")',
+          piiCategory: 'PERSONAL_NAME',
+        }),
+      ],
+      [],
+    )
+    expect(transforms.computeUpdates).toHaveLength(1)
+    expect(transforms.computeUpdates[0].payload).toEqual({
+      variableKey: 'label',
+      variableType: 'COMPUTED',
+      required: false,
+      defaultValue: 'n/a',
+      enumValues: null,
+      description: 'derived label',
+      computeExpression: 'COALESCE(${party}, "")',
+      piiCategory: 'PERSONAL_NAME',
+    })
+  })
+
+  it('supplies SYNTHETIC piiHandling for unlocked PII test-set key remaps', () => {
+    const transforms = buildVariableRenameTransforms(
+      'customerName',
+      'partyName',
+      [],
+      [],
+      [variable({ variableKey: 'customerName', piiCategory: 'PERSONAL_NAME' })],
+      [
+        dataSet({
+          testDataSetId: 'pii-set',
+          locked: false,
+          variables: { customerName: 'Ada Lovelace' },
+        }),
+      ],
+    )
+    expect(transforms.unlockedTestSetUpdates).toHaveLength(1)
+    expect(transforms.unlockedTestSetUpdates[0].payload.variables).toEqual({
+      partyName: 'Ada Lovelace',
+    })
+    expect(transforms.unlockedTestSetUpdates[0].payload.piiHandling).toBe('SYNTHETIC')
+  })
+
+  it('omits piiHandling when unlocked remap does not touch PII-marked values', () => {
+    const transforms = buildVariableRenameTransforms(
+      'status',
+      'lifecycleStatus',
+      [],
+      [],
+      [
+        variable({ variableKey: 'status', piiCategory: 'NONE' }),
+        variable({ variableKey: 'customerName', piiCategory: 'PERSONAL_NAME' }),
+      ],
+      [
+        dataSet({
+          testDataSetId: 'non-pii',
+          locked: false,
+          variables: { status: 'ACTIVE' },
+        }),
+      ],
+    )
+    expect(transforms.unlockedTestSetUpdates[0].payload.piiHandling).toBeUndefined()
+  })
 })
 
 describe('executeVariableRenameCascade', () => {
@@ -320,5 +397,63 @@ describe('executeVariableRenameCascade', () => {
 
     expect(upsertVariable).toHaveBeenCalledWith('tpl-1', 'soloKey', expect.any(Object))
     expect(deleteVariable).toHaveBeenCalledWith('tpl-1', 'lonelyKey')
+  })
+
+  it('renames PII-marked key with unlocked PII test set using piiHandling (no CE-G03 half-state)', async () => {
+    const upsertVariable = vi.fn().mockResolvedValue(undefined)
+    const deleteVariable = vi.fn().mockResolvedValue(undefined)
+    const updateTestDataSet = vi.fn().mockImplementation(async (_tid, _id, payload) => {
+      if (!payload.piiHandling) {
+        throw new Error('CE-G03: piiHandling required')
+      }
+    })
+    const refreshTemplate = vi.fn().mockResolvedValue(undefined)
+
+    await executeVariableRenameCascade({
+      templateId: 'tpl-1',
+      oldKey: 'customerName',
+      newKey: 'partyName',
+      variablePayload: {
+        variableKey: 'partyName',
+        variableType: 'TEXT',
+        required: true,
+        piiCategory: 'PERSONAL_NAME',
+      },
+      bindings: [],
+      rules: [],
+      variables: [
+        variable({
+          variableKey: 'customerName',
+          piiCategory: 'PERSONAL_NAME',
+        }),
+      ],
+      testDataSets: [
+        dataSet({
+          testDataSetId: 'pii-u1',
+          locked: false,
+          variables: { customerName: 'Ada' },
+        }),
+      ],
+      upsertVariable,
+      deleteVariable,
+      upsertBinding: vi.fn(),
+      saveRules: vi.fn(),
+      updateTestDataSet,
+      refreshTemplate,
+    })
+
+    expect(deleteVariable).toHaveBeenCalledWith('tpl-1', 'customerName')
+    expect(updateTestDataSet).toHaveBeenCalledWith(
+      'tpl-1',
+      'pii-u1',
+      expect.objectContaining({
+        variables: { partyName: 'Ada' },
+        piiHandling: 'SYNTHETIC',
+      }),
+    )
+    const deleteOrder = deleteVariable.mock.invocationCallOrder[0] ?? 0
+    const updateOrder = updateTestDataSet.mock.invocationCallOrder[0] ?? 0
+    expect(deleteOrder).toBeLessThan(updateOrder)
+    expect(refreshTemplate).toHaveBeenCalledWith('tpl-1')
   })
 })

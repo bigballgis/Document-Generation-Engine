@@ -8,6 +8,7 @@ import type {
   VariableSchema,
 } from '@/types/template'
 import { toCompositionRuleInput } from '@/utils/mergeAnchorVisibilityRule'
+import { payloadTouchesPiiFields } from '@/utils/testDataSetPii'
 
 /** Matches compute / condition `${path}` identifier roots (CE-K03 / F3). */
 export const VARIABLE_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_.-]*$/
@@ -249,6 +250,7 @@ export function buildVariableRenameTransforms(
   rules: CompositionRule[],
   variables: VariableSchema[],
   testDataSets: TestDataSet[],
+  renamedVariable?: Pick<VariableSchema, 'piiCategory'> | null,
 ): VariableRenameTransforms {
   const renamedBindings: RenamedBinding[] = []
   for (const binding of bindings) {
@@ -300,9 +302,24 @@ export function buildVariableRenameTransforms(
         enumValues: variable.enumValues ?? null,
         description: variable.description ?? null,
         computeExpression: nextExpression || null,
+        // Preserve CE-G03 classification — omit would let backend default to NONE.
+        piiCategory: variable.piiCategory ?? 'NONE',
       },
     })
   }
+
+  // Post-rename schema for CE-G03 touch detection (oldKey remapped to newKey).
+  // Prefer the upsert payload's piiCategory when the author also changed classification.
+  const schemaAfterRename: VariableSchema[] = variables.map((item) => {
+    if (item.variableKey !== oldKey) {
+      return item
+    }
+    return {
+      ...item,
+      variableKey: newKey,
+      piiCategory: renamedVariable?.piiCategory ?? item.piiCategory,
+    }
+  })
 
   const unlockedTestSetUpdates: VariableRenameTransforms['unlockedTestSetUpdates'] = []
   let lockedSkippedCount = 0
@@ -315,16 +332,21 @@ export function buildVariableRenameTransforms(
       continue
     }
     const { variables: nextVariables } = renameTestSetVariableKeys(set.variables, oldKey, newKey)
+    const payload: UpsertTestDataSetPayload = {
+      name: set.name,
+      description: set.description ?? undefined,
+      variables: nextVariables,
+      required: set.required,
+      scenarioName: set.scenarioName ?? undefined,
+      coverageTags: set.coverageTags,
+    }
+    // Key-only remap: SYNTHETIC satisfies CE-G03 fail-closed without claiming EXPLICIT.
+    if (payloadTouchesPiiFields(schemaAfterRename, nextVariables)) {
+      payload.piiHandling = 'SYNTHETIC'
+    }
     unlockedTestSetUpdates.push({
       testDataSetId: set.testDataSetId,
-      payload: {
-        name: set.name,
-        description: set.description ?? undefined,
-        variables: nextVariables,
-        required: set.required,
-        scenarioName: set.scenarioName ?? undefined,
-        coverageTags: set.coverageTags,
-      },
+      payload,
     })
   }
 
@@ -378,6 +400,7 @@ export async function executeVariableRenameCascade(
     deps.rules,
     deps.variables,
     deps.testDataSets,
+    deps.variablePayload,
   )
 
   await deps.upsertVariable(deps.templateId, deps.newKey, {

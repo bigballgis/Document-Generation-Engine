@@ -134,6 +134,9 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
   }
 
   function openEditVariable(variable: VariableSchema) {
+    if (!canWriteVariables.value) {
+      return
+    }
     editingVariableKey.value = variable.variableKey
     variableForm.variableKey = variable.variableKey
     variableForm.variableType = variable.variableType
