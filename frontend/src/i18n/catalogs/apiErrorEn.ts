@@ -55,8 +55,7 @@ export const apiErrorEn = {
     currentRevisionUnavailable: "The current letterhead revision could not be resolved for pinning.",
     revisionInUseByPublishedRelease:
       "The letterhead revision is pinned by one or more published releases and cannot be deleted.",
-    revisionDeleteFailed: "Unable to delete the letterhead revision.",
-    styleCatalogParseFailed: "Unable to parse the letterhead style catalog from styles.xml."
+    revisionDeleteFailed: "Unable to delete the letterhead revision."
   },
   template: {
     notFound: "The template was not found.",
@@ -64,6 +63,8 @@ export const apiErrorEn = {
     testDataSetLocked: "The test data set is locked by test evidence and cannot be modified.",
     testDataSetSchemaInvalid: "The test data set variables do not match the template variable schema.",
     accessDenied: "You do not have permission to access this template.",
+    changeDiffReleaseVersionsRequired:
+      "Both releaseVersionA and releaseVersionB are required for release change-diff comparison.",
     confirmationRequired: "Secondary confirmation is required for this operation.",
     invalidState: "The template is not in a valid state for this operation.",
     devLineInFlight: "A development version line is already in progress. Finish or abandon it before cloning a published release.",

@@ -3,6 +3,7 @@ package com.bank.docgen.template.service;
 import com.bank.docgen.template.api.ChangeDiffDimensionView;
 import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.domain.ChangeDiffDimension;
+import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
@@ -37,9 +38,13 @@ final class ChangeDiffDimensionHelperSupport {
 
     Map<String, String> anchorHashes(UUID versionId) {
         Map<String, String> hashes = new HashMap<>();
-        anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)
+        anchorBindings(versionId)
                 .forEach(binding -> hashes.put(binding.getAnchorId(), fingerprint(binding.getStructuredContentJson())));
         return hashes;
+    }
+
+    List<AnchorBindingEntity> anchorBindings(UUID versionId) {
+        return anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId);
     }
 
     Map<String, VariableSchemaEntity> variableMap(UUID versionId) {

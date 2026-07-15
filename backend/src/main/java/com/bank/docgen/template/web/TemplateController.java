@@ -107,6 +107,20 @@ public class TemplateController {
         return envelope(request, changeDiffService.compute(templateId, session));
     }
 
+    @GetMapping("/{templateId}/change-diff/releases")
+    public SuccessEnvelope<ChangeDiffView> changeDiffReleases(
+            @PathVariable UUID templateId,
+            @RequestParam String releaseVersionA,
+            @RequestParam String releaseVersionB,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(
+                request,
+                changeDiffService.computeBetweenReleases(templateId, releaseVersionA, releaseVersionB, session)
+        );
+    }
+
     @GetMapping("/{templateId}/publish-gate")
     public SuccessEnvelope<PublishGateChecklistView> publishGate(
             @PathVariable UUID templateId,

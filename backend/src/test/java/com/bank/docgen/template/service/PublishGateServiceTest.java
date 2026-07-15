@@ -133,7 +133,7 @@ class PublishGateServiceTest {
                 .thenReturn(validRules());
         lenient().when(changeDiffService.compute(templateId, admin))
                 .thenReturn(new com.bank.docgen.template.api.ChangeDiffView(
-                        templateId.toString(), "1.0.0", versionId.toString(), false, 0, List.of()));
+                        templateId.toString(), "1.0.0", versionId.toString(), null, false, 0, List.of(), List.of()));
         lenient().when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
                 .thenReturn(List.of(approvalRecord()));
         lenient().when(apiPolicyRepository.findByTemplateId(templateId))
@@ -508,7 +508,7 @@ class PublishGateServiceTest {
                 .thenReturn(greenCoverage());
         when(changeDiffService.computeForVersion(templateId, published, admin))
                 .thenReturn(new com.bank.docgen.template.api.ChangeDiffView(
-                        templateId.toString(), null, publishedVersionId.toString(), false, 0, List.of()));
+                        templateId.toString(), null, publishedVersionId.toString(), null, false, 0, List.of(), List.of()));
         when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(publishedVersionId))
                 .thenReturn(List.of(new VariableSchemaEntity(
                         UUID.randomUUID(), publishedVersionId, "field", VariableType.TEXT, true, null, null, "desc", null)));

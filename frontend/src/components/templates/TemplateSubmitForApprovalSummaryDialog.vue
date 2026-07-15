@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ChangeDiffHumanReadableList from '@/components/templates/ChangeDiffHumanReadableList.vue'
 import type { ChangeDiffSummary, CoverageSummary, PreviewComparison } from '@/types/template'
 import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
 
@@ -75,7 +76,7 @@ function confirm() {
   <el-dialog
     v-model="visible"
     :title="t('templates.submitApprovalSummary.title')"
-    width="560px"
+    width="640px"
     :close-on-click-modal="false"
     @close="close"
   >
@@ -122,6 +123,7 @@ function confirm() {
             : t('templates.submitApprovalSummary.changeDiffUnavailable')
         }}
       </p>
+      <ChangeDiffHumanReadableList :change-diff-summary="changeDiffSummary" />
       <p>
         {{
           previewComparison

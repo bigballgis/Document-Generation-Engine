@@ -66,7 +66,8 @@ class BatchExecutionFidelityWarningsTest {
 
     @Test
     void bddCeC03_001_succeededItemsCarryFullFidelityWarningObjects() {
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), anyString()))
+        when(documentGenerationEngine.generate(
+                any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
                 .thenReturn(generated(
                         "DOC-1",
                         List.of(FidelityWarningCode.CONTROLLED_STYLE_FALLBACK.name())
@@ -97,7 +98,8 @@ class BatchExecutionFidelityWarningsTest {
 
     @Test
     void bddCeC03_002_noWarningsYieldEmptyArray() {
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), anyString()))
+        when(documentGenerationEngine.generate(
+                any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
                 .thenReturn(generated("DOC-2", List.of()));
 
         BatchResultItemView item = service.execute(

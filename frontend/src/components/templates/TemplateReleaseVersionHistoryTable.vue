@@ -27,15 +27,17 @@ defineProps<{
 const emit = defineEmits<{
   'update:versionsCurrentPage': [page: number]
   versionAction: [releaseVersion: string, action: 'deactivate' | 'restore']
+  selectionChange: [rows: TemplateReleaseVersion[]]
 }>()
 </script>
 
 <template>
   <div>
-    <AppDataTable :data="paginatedVersions">
+    <AppDataTable :data="paginatedVersions" @selection-change="emit('selectionChange', $event)">
       <template #empty>
         <el-empty :description="t('templates.versions.empty')" />
       </template>
+      <el-table-column type="selection" width="48" />
       <el-table-column prop="releaseVersion" sortable min-width="140">
         <template #header>
           <TableColumnHeader

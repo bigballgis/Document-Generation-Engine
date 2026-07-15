@@ -1141,6 +1141,9 @@ export default {
       error: {
         load: '无法加载变更差异。',
       },
+      humanReadableTitle: '语义变更',
+      humanReadableUnavailable: '暂无语义变更详情。',
+      humanReadableEmpty: '未检测到语义内容变更。',
     },
     riskPrompt: {
       title: '测试与审批退回原因',
@@ -1851,6 +1854,14 @@ export default {
       deactivateSuccess: '发布版本已停用。',
       restoreSuccess: '发布版本已恢复。',
       empty: '暂无已发布版本。',
+      compare: '对比',
+      compareTitle: '发布版本对比',
+      compareDescription: '发布版本 {a} 与 {b} 之间的语义变更。',
+      compareLoadError: '无法加载发布版本对比。',
+      compareHintNone: '请恰好选择两个发布版本以进行对比。',
+      compareHintOne: '再选择一个发布版本以启用对比。',
+      compareHintTooMany: '请恰好选择两个发布版本（请取消多余选项）。',
+      compareHintReady: '已就绪，可对比所选发布版本。',
     },
     metadata: {
       edit: '编辑基本信息',

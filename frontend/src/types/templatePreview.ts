@@ -8,14 +8,18 @@ type ChangeDiffDimensionCode =
   | 'RULES'
   | 'CONTRACT_SUMMARY'
 
-/** Not yet modeled in `openapi-v1.yaml` (management change diff). */
+export interface ChangeDiffHumanReadableEntry {
+  changeType: string
+  path: string
+  summary: string
+}
+
 interface ChangeDiffModification {
   key: string
   changeType: string
   summary: string
 }
 
-/** Not yet modeled in `openapi-v1.yaml` (management change diff). */
 interface ChangeDiffDimension {
   dimension: ChangeDiffDimensionCode
   added: string[]
@@ -23,14 +27,15 @@ interface ChangeDiffDimension {
   modified: ChangeDiffModification[]
 }
 
-/** Not yet modeled in `openapi-v1.yaml` (management change diff). */
 export interface ChangeDiffSummary {
   templateId: string
   baselineReleaseVersion: string | null
   candidateVersionId: string
+  candidateReleaseVersion?: string | null
   hasChanges: boolean
   totalChangeCount: number
   dimensions: ChangeDiffDimension[]
+  humanReadableEntries?: ChangeDiffHumanReadableEntry[]
 }
 
 type PreviewComparisonLocationType = 'PAGE' | 'ANCHOR' | 'SECTION' | 'COMPONENT'
