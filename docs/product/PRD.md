@@ -534,6 +534,8 @@ v1 将模板可验证性作为模板发布前的产品基线能力。
 
 模板测试数据集默认使用脱敏或合成数据；确需使用敏感测试值时，必须按敏感数据保护。审计、摘要、预览记录和发布证据仅保存数据集版本、`variablesHash` 和非敏感统计，不保存模板变量测试值明文。
 
+**CE-G03（2026-07-15）：** 变量 Schema 可选 `piiCategory`（缺省 `NONE`）。create/update 测试数据集时，若 PII 标记字段提供非空值，必须声明 `piiHandling=SYNTHETIC`（合成/脱敏）或 `piiHandling=EXPLICIT_SENSITIVE`（原因 + 二次确认 + 管理审计，审计无变量明文）；否则 fail-closed。禁止无声明的「掩码后静默入库」。存储裁定见 [data-storage-view.md](../architecture/data-storage-view.md)；行为 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。
+
 v1 支持对模板发布候选选择多组测试样例执行批量测试生成。批量测试需要生成逐样例测试生成记录、预览产物、警告摘要、阻断项摘要、覆盖率摘要和批量测试汇总。
 
 样例覆盖率和模板综合覆盖率至少覆盖变量取值与必填字段、条件/循环/规则分支、锚点/章节、表格等受控组件和 DOCX/PDF 输出格式。覆盖率摘要不得保存模板变量测试值明文。
@@ -1006,6 +1008,8 @@ v1 建立敏感数据分级处理基线：
 - 授权响应例外。
 
 禁止明文持久化或展示的内容包括 API 凭证 secret、DOCX/PDF 加密密码、模板变量原值、模板测试数据敏感值、完整请求体、完整下载地址、完整 AD Group 成员、未授权组详情、历史密文、敏感配置明文和未授权生成文档内容。
+
+**CE-G03 澄清：** 「模板测试数据敏感值」禁明文适用于日志、审计摘要、契约示例、导出、发布证据与未授权展示；授权维护者经 `SYNTHETIC` / `EXPLICIT_SENSITIVE` 闸门写入测试数据集存储的值是测试资产本体（见 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)）。不修订 ADR-0020 正文。
 
 允许以摘要或指纹表达的内容包括 API 凭证标识或指纹摘要、`idempotencyKey` 摘要、请求语义 hash、`variablesHash`、`itemsHash`、加密策略摘要、AD Group 授权摘要、下载地址脱敏值、`contextSummary`、`policyVersion`、`changedAreas` 和配置差异摘要。
 

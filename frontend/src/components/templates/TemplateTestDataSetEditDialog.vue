@@ -20,6 +20,12 @@ import {
   validateVariablesAgainstSchema,
   type SchemaFieldError,
 } from '@/utils/testDataSetSchemaForm'
+import {
+  isPiiMarkedField,
+  payloadTouchesPiiFields,
+  type TestDataSetPiiHandling,
+  type TestDataSetSavePayload,
+} from '@/utils/testDataSetPii'
 
 const props = defineProps<{
   modelValue: boolean
@@ -40,7 +46,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   'update:coverageTagsText': [value: string]
-  save: [variables: Record<string, unknown>]
+  save: [payload: TestDataSetSavePayload]
   'clear-server-errors': []
 }>()
 
@@ -56,8 +62,33 @@ const applyingJson = ref(false)
 const applyingForm = ref(false)
 const complexFieldText = reactive<Record<string, string>>({})
 
+/** CE-G03 — recommended default when PII gate is active. */
+const piiHandling = ref<TestDataSetPiiHandling | null>('SYNTHETIC')
+const explicitConfirmVisible = ref(false)
+const piiConfirmReason = ref('')
+const secondaryConfirmed = ref(false)
+const explicitConfirmErrorKey = ref<string | null>(null)
+const pendingSaveVariables = ref<Record<string, unknown> | null>(null)
+
 const enterable = computed(() => enterableVariables(props.variables))
 const schemaEmpty = computed(() => enterable.value.length === 0)
+
+const touchesPii = computed(() =>
+  payloadTouchesPiiFields(props.variables, { ...variablesModel }),
+)
+
+watch(touchesPii, (active) => {
+  if (active && piiHandling.value == null) {
+    piiHandling.value = 'SYNTHETIC'
+  }
+  if (!active) {
+    piiHandling.value = 'SYNTHETIC'
+    explicitConfirmVisible.value = false
+    piiConfirmReason.value = ''
+    secondaryConfirmed.value = false
+    explicitConfirmErrorKey.value = null
+  }
+})
 
 function clearClientErrors() {
   fieldErrorKeys.value = {}
@@ -97,6 +128,15 @@ function replaceModel(source: Record<string, unknown>) {
   })
 }
 
+function resetPiiControls() {
+  piiHandling.value = 'SYNTHETIC'
+  explicitConfirmVisible.value = false
+  piiConfirmReason.value = ''
+  secondaryConfirmed.value = false
+  explicitConfirmErrorKey.value = null
+  pendingSaveVariables.value = null
+}
+
 function resetModelFromInitial() {
   const source =
     props.editingId != null || Object.keys(props.initialVariables).length > 0
@@ -107,6 +147,7 @@ function resetModelFromInitial() {
     ? ['advanced']
     : []
   clearClientErrors()
+  resetPiiControls()
 }
 
 watch(
@@ -235,6 +276,21 @@ function stringModelValue(key: string): string {
   return value == null ? '' : String(value)
 }
 
+function emitSave(variables: Record<string, unknown>, pii?: Partial<TestDataSetSavePayload>) {
+  clearClientErrors()
+  const payload: TestDataSetSavePayload = { variables }
+  if (pii?.piiHandling) {
+    payload.piiHandling = pii.piiHandling
+  }
+  if (pii?.piiConfirmReason) {
+    payload.piiConfirmReason = pii.piiConfirmReason
+  }
+  if (pii?.secondaryConfirmed != null) {
+    payload.secondaryConfirmed = pii.secondaryConfirmed
+  }
+  emit('save', payload)
+}
+
 function handleSave() {
   if (!props.form.name.trim()) {
     applyErrors([
@@ -261,9 +317,89 @@ function handleSave() {
     return
   }
 
-  clearClientErrors()
-  emit('save', stripped)
+  const needsPiiGate = payloadTouchesPiiFields(props.variables, stripped)
+  if (needsPiiGate) {
+    if (piiHandling.value !== 'SYNTHETIC' && piiHandling.value !== 'EXPLICIT_SENSITIVE') {
+      applyErrors([
+        {
+          field: 'piiHandling',
+          reason: 'REQUIRED',
+          messageKey: 'templates.testDataSets.pii.handlingRequired',
+        },
+      ])
+      return
+    }
+    if (piiHandling.value === 'EXPLICIT_SENSITIVE') {
+      pendingSaveVariables.value = stripped
+      piiConfirmReason.value = ''
+      secondaryConfirmed.value = false
+      explicitConfirmErrorKey.value = null
+      explicitConfirmVisible.value = true
+      return
+    }
+    emitSave(stripped, { piiHandling: 'SYNTHETIC' })
+    return
+  }
+
+  emitSave(stripped)
 }
+
+function submitExplicitConfirm() {
+  const reason = piiConfirmReason.value.trim()
+  if (!reason) {
+    explicitConfirmErrorKey.value = 'templates.testDataSets.pii.reasonRequired'
+    return
+  }
+  if (!secondaryConfirmed.value) {
+    explicitConfirmErrorKey.value = 'templates.testDataSets.pii.secondaryConfirmRequired'
+    return
+  }
+  const variables = pendingSaveVariables.value
+  if (!variables) {
+    return
+  }
+  explicitConfirmVisible.value = false
+  emitSave(variables, {
+    piiHandling: 'EXPLICIT_SENSITIVE',
+    piiConfirmReason: reason,
+    secondaryConfirmed: true,
+  })
+}
+
+function cancelExplicitConfirm() {
+  explicitConfirmVisible.value = false
+  pendingSaveVariables.value = null
+  explicitConfirmErrorKey.value = null
+}
+
+function onExplicitDialogClosed() {
+  pendingSaveVariables.value = null
+  explicitConfirmErrorKey.value = null
+}
+
+/** Test / fail-closed helper — clears handling so client gate can block (BDD-013). */
+function clearPiiHandling() {
+  piiHandling.value = null
+}
+
+function setPiiHandlingForTest(value: TestDataSetPiiHandling | null) {
+  piiHandling.value = value
+}
+
+function setExplicitConfirmFieldsForTest(reason: string, confirmed: boolean) {
+  piiConfirmReason.value = reason
+  secondaryConfirmed.value = confirmed
+}
+
+defineExpose({
+  clearPiiHandling,
+  setPiiHandlingForTest,
+  setExplicitConfirmFieldsForTest,
+  piiHandling,
+  secondaryConfirmed,
+  piiConfirmReason,
+  explicitConfirmVisible,
+})
 </script>
 
 <template>
@@ -319,7 +455,6 @@ function handleSave() {
             v-for="variable in enterable"
             :key="variable.variableKey"
             :required="variable.required"
-            :label="fieldLabel(variable)"
             :error="
               fieldErrorKeys[variable.variableKey]
                 ? t(fieldErrorKeys[variable.variableKey])
@@ -327,6 +462,21 @@ function handleSave() {
             "
             :data-testid="`schema-field-${variable.variableKey}`"
           >
+            <template #label>
+              <span class="schema-field-label">
+                <span>{{ fieldLabel(variable) }}</span>
+                <el-tag
+                  v-if="isPiiMarkedField(variable)"
+                  size="small"
+                  type="warning"
+                  effect="plain"
+                  class="pii-field-badge"
+                  :data-testid="`pii-badge-${variable.variableKey}`"
+                >
+                  {{ t('templates.testDataSets.pii.badge') }}
+                </el-tag>
+              </span>
+            </template>
             <el-input
               v-if="variable.variableType === 'TEXT' || variable.variableType === 'DATE'"
               :model-value="stringModelValue(variable.variableKey)"
@@ -381,6 +531,40 @@ function handleSave() {
         </template>
       </div>
 
+      <div
+        v-if="touchesPii"
+        class="pii-handling-section"
+        data-testid="pii-handling-group"
+      >
+        <h3 class="pii-handling-section__title">
+          {{ t('templates.testDataSets.pii.handlingTitle') }}
+        </h3>
+        <p class="pii-handling-section__hint">
+          {{ t('templates.testDataSets.pii.handlingHint') }}
+        </p>
+        <el-radio-group v-model="piiHandling" class="pii-handling-radios">
+          <el-radio
+            value="SYNTHETIC"
+            data-testid="pii-handling-synthetic"
+          >
+            {{ t('templates.testDataSets.pii.synthetic') }}
+          </el-radio>
+          <el-radio
+            value="EXPLICIT_SENSITIVE"
+            data-testid="pii-handling-explicit"
+          >
+            {{ t('templates.testDataSets.pii.explicitSensitive') }}
+          </el-radio>
+        </el-radio-group>
+        <p
+          v-if="fieldErrorKeys.piiHandling"
+          class="pii-handling-error"
+          data-testid="pii-handling-error"
+        >
+          {{ t(fieldErrorKeys.piiHandling) }}
+        </p>
+      </div>
+
       <el-collapse v-model="advancedActiveNames" class="advanced-json-collapse">
         <el-collapse-item
           :title="t('templates.testDataSets.advancedJson')"
@@ -426,6 +610,56 @@ function handleSave() {
       </el-button>
     </template>
   </el-dialog>
+
+  <el-dialog
+    v-model="explicitConfirmVisible"
+    :title="t('templates.testDataSets.pii.explicitConfirmTitle')"
+    width="560px"
+    :teleported="false"
+    data-testid="pii-explicit-confirm-dialog"
+    @closed="onExplicitDialogClosed"
+  >
+    <p class="pii-explicit-intro">
+      {{ t('templates.testDataSets.pii.explicitConfirmIntro') }}
+    </p>
+    <el-form label-position="top">
+      <el-form-item
+        :label="t('templates.testDataSets.pii.confirmReason')"
+        :error="explicitConfirmErrorKey ? t(explicitConfirmErrorKey) : undefined"
+        required
+      >
+        <el-input
+          v-model="piiConfirmReason"
+          type="textarea"
+          :rows="3"
+          maxlength="2048"
+          show-word-limit
+          data-testid="pii-confirm-reason"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-checkbox
+          v-model="secondaryConfirmed"
+          class="pii-secondary-confirm"
+          data-testid="pii-secondary-confirm"
+        >
+          {{ t('templates.testDataSets.pii.secondaryConfirm') }}
+        </el-checkbox>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button data-testid="pii-explicit-confirm-cancel" @click="cancelExplicitConfirm">
+        {{ t('common.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        data-testid="pii-explicit-confirm-submit"
+        @click="submitExplicitConfirm"
+      >
+        {{ t('templates.testDataSets.pii.confirmSave') }}
+      </el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <style scoped lang="scss">
@@ -452,10 +686,80 @@ function handleSave() {
   margin-bottom: var(--space-3, 12px);
 }
 
+.schema-field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  flex-wrap: wrap;
+}
+
+.pii-field-badge {
+  font-weight: 600;
+}
+
 .schema-number-input,
 .schema-enum-select {
   width: 100%;
 }
+
+.pii-handling-section {
+  margin-block: var(--space-4, 16px);
+  padding: var(--space-3, 12px);
+  border: 1px solid var(--color-border, #e4e7eb);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--color-surface-muted, #f7f8fa);
+}
+
+.pii-handling-section__title {
+  margin: 0 0 var(--space-2, 8px);
+  font-size: var(--font-size-md, 14px);
+  font-weight: 600;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.pii-handling-section__hint {
+  margin: 0 0 var(--space-3, 12px);
+  font-size: var(--font-size-sm, 12px);
+  color: var(--color-text-secondary, #5c6670);
+  line-height: 1.5;
+}
+
+.pii-handling-radios {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2, 8px);
+}
+
+.pii-handling-error {
+  margin: var(--space-2, 8px) 0 0;
+  color: var(--el-color-danger);
+  font-size: var(--font-size-sm, 12px);
+}
+
+.pii-explicit-intro {
+  margin: 0 0 var(--space-3, 12px);
+  font-size: var(--font-size-sm, 13px);
+  color: var(--color-text-secondary, #5c6670);
+  line-height: 1.5;
+}
+
+.pii-secondary-confirm {
+  align-items: flex-start;
+  height: auto;
+  white-space: normal;
+
+  :deep(.el-checkbox__label) {
+    white-space: normal;
+    line-height: 1.45;
+    color: var(--color-text-primary, #1a1a1a);
+  }
+
+  :deep(.el-checkbox__input) {
+    margin-top: 2px;
+  }
+}
+
 
 .advanced-json-collapse {
   margin-top: var(--space-3, 12px);

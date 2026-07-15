@@ -150,7 +150,8 @@ public class TemplateViewMapper {
                 entity.getDefaultValue(),
                 entity.getEnumValues(),
                 entity.getDescription(),
-                entity.getComputeExpression()
+                entity.getComputeExpression(),
+                entity.getPiiCategory()
         );
     }
 

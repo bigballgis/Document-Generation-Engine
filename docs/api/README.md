@@ -60,3 +60,18 @@ Management write paths `POST /api/management/v1/masters` and `PUT /api/managemen
 | Bad ZIP magic or missing OPC required entries | 422 | `api.error.master.docxCorrupt` |
 
 Do **not** introduce `api.error.master.invalidDocxContent`. Multipart / nginx oversize must still surface a readable, localizable error (JSON envelope and/or UI mapping). Virus scanning is **pending**, not confirmed. Full scenarios: [LR-A3 upload validation](../behavior/lrp-a3-master-docx-upload-validation.md).
+
+### Template test-data PII governance (CE-G03)
+
+Management test-data-set create/update and variable-schema `piiCategory` are **management-API** contracts (documented in [contract-outline.md](contract-outline.md) «测试数据集 PII 治理（CE-G03）」). Caller-facing generate paths are unchanged. Export/import bundle variables carry optional `piiCategory` in [openapi-v1.yaml](openapi-v1.yaml) (`VariablePiiCategory` / `TemplateExportVariableSchemaView`).
+
+Stable English-first fail-closed keys (implement in `messages_en.properties` + frontend catalog):
+
+| Condition | HTTP | `error.messageKey` |
+| --- | --- | --- |
+| PII values without / illegal `piiHandling` | 422 | `api.error.template.testDataSetPiiHandlingRequired` |
+| `EXPLICIT_SENSITIVE` missing reason | 422 | `api.error.template.piiConfirmReasonRequired` |
+| `EXPLICIT_SENSITIVE` without secondary confirm | 422 | `api.error.template.piiSecondaryConfirmRequired` |
+| Illegal `piiCategory` | 422 | `api.error.template.piiCategoryInvalid` |
+
+Behavior SoT: [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md). Storage ruling: [data-storage-view.md](../architecture/data-storage-view.md).

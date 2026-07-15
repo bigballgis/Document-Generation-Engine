@@ -10,6 +10,7 @@ import com.bank.docgen.authoring.structured.TableComponentService;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.domain.AnchorContentType;
 import com.bank.docgen.template.domain.BindingValidationStatus;
+import com.bank.docgen.template.domain.VariablePiiCategory;
 import com.bank.docgen.template.domain.VariableType;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
@@ -109,6 +110,18 @@ final class TemplateBindingStatusSupport {
         if (request.variableType() == VariableType.ENUM
                 && (request.enumValues() == null || request.enumValues().isBlank())) {
             throw new TemplateValidationException("api.error.template.enumValuesRequired");
+        }
+        resolvePiiCategory(request.piiCategory());
+    }
+
+    static VariablePiiCategory resolvePiiCategory(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return VariablePiiCategory.NONE;
+        }
+        try {
+            return VariablePiiCategory.valueOf(raw.trim());
+        } catch (IllegalArgumentException ex) {
+            throw new TemplateValidationException("api.error.template.piiCategoryInvalid");
         }
     }
 

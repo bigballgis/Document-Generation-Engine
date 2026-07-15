@@ -182,4 +182,22 @@ describe('useTemplateVariableTreePanel compute paths', () => {
     expect(panel.sampleError.value).toBe('templates.authoring.computeSampleJsonInvalid')
     expect(evaluateComputeExpression).not.toHaveBeenCalled()
   })
+
+  it('includes piiCategory when saving a variable (CE-G03)', async () => {
+    upsertVariable.mockResolvedValue(undefined)
+    const panel = useTemplateVariableTreePanel({ templateId, variables, onUpdated })
+    panel.openAddVariable()
+    panel.variableForm.variableKey = 'customerName'
+    panel.variableForm.variableType = 'TEXT'
+    panel.variableForm.piiCategory = 'PERSONAL_NAME'
+    await panel.handleSaveVariable()
+    expect(upsertVariable).toHaveBeenCalledWith(
+      'tpl-1',
+      'customerName',
+      expect.objectContaining({
+        variableKey: 'customerName',
+        piiCategory: 'PERSONAL_NAME',
+      }),
+    )
+  })
 })

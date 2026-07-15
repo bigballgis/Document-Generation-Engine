@@ -554,6 +554,8 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 列表/数组。
 - 对象/嵌套结构。
 
+变量 Schema 可选 `piiCategory`（CE-G03）：`NONE`（缺省）、`PERSONAL_NAME`、`GOVERNMENT_ID`、`FINANCIAL_ACCOUNT`、`CONTACT`、`ADDRESS`、`OTHER_SENSITIVE`。`NONE` 以外视为 PII 标记字段，约束测试数据集保存闸门（见测试数据集规则与 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)）。
+
 变量/规则还需要支持：
 
 - 计算表达式。
@@ -715,6 +717,7 @@ PRD §6.4.2 与 [P14-T01](../plan/detail/P14-confirmed-large-domains.md) 使用�
 - 同一 Template 或 Release Candidate 支持多组命名 Template Test Data Set；每组测试样例默认绑定单个 Template 或 Release Candidate，可标记场景名称、必选或可选、覆盖标签和数据集版本；同组内可复制或派生，跨模板或跨组共享测试数据集库不属于 v1 已确认范围。
 - Template Test Data Set Draft 在关联 Test Generation Record、Template Test Record、Approval Material 或 Release Evidence 前可编辑；一旦进入证据链即锁定不可变，后续修改必须复制或派生新数据集版本并重新执行测试生成、测试判定和后续审批发布流程。
 - Template Test Data Set 默认使用脱敏或合成数据；确需使用敏感测试值时，必须按 Sensitive Data Classification 保护，审计、摘要、Preview Artifact 和 Release Evidence 仅保存数据集版本、`variablesHash` 和非敏感统计，不保存模板变量测试值明文。
+- **CE-G03（2026-07-15）：** 对 `piiCategory ≠ NONE` 的字段，create/update 测试数据集时必须提供 `piiHandling=SYNTHETIC`（合成/脱敏声明）或 `piiHandling=EXPLICIT_SENSITIVE`（显式确认：非空 `piiConfirmReason` + `secondaryConfirmed=true` + 耐久管理审计）。禁止无声明静默入库。审计可含 PII 字段键名、类别、原因与 `variablesHash`，不得含变量明文。权威场景：[ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。
 - Batch Test Summary 记录同一 Release Candidate 上多组测试样例的批量测试结果，至少包含参与样例清单、必选/可选标记、逐样例测试生成记录引用、Preview Artifact 引用、警告摘要、阻断项摘要、覆盖率摘要、批量状态和非敏感统计。
 - Sample Coverage Summary 记录单组测试样例覆盖率；Template Coverage Summary 汇总当前发布候选的综合覆盖率。覆盖维度至少包括变量取值与必填字段、条件/循环/规则分支、锚点/章节、表格等受控组件和 DOCX/PDF 输出格式。
 - Release Candidate 需要至少一组必选测试样例；所有必选测试样例必须测试通过且无未解决阻断项。模板综合覆盖率和关键维度覆盖率必须达到可配置阈值，低于阈值属于发布阻断项。
@@ -1128,6 +1131,8 @@ API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 
 - 授权响应例外。
 
 禁止明文持久化或展示的内容包括 API 凭证 secret、DOCX/PDF 加密密码、模板变量原值、模板测试数据敏感值、完整请求体、完整下载地址、完整 AD Group 成员、未授权组详情、历史密文、敏感配置明文、内部渲染诊断明文和未授权生成文档内容；保真警告不得包含模板变量原值、粘贴原文、客户数据、完整请求体或生成文档敏感内容。
+
+**CE-G03 澄清（2026-07-15）：** 「模板测试数据敏感值」禁明文的适用范围为日志、审计摘要、契约示例、导出、发布证据与未授权展示。授权维护者在 Template Test Data Set 存储中的变量值是测试资产本体，须经 `SYNTHETIC` 或 `EXPLICIT_SENSITIVE` 闸门（见 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md) G03-C14/C22）；不修订 ADR-0020 正文。
 
 允许以摘要或指纹表达的内容包括 API 凭证标识或指纹摘要、`idempotencyKey` 摘要、请求语义 hash、`variablesHash`、`itemsHash`、加密策略摘要、AD Group 授权摘要、下载地址脱敏值、`contextSummary`、`fidelityWarnings` 非敏感摘要、`policyVersion`、`changedAreas` 和配置差异摘要。
 

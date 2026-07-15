@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -43,6 +44,8 @@ class TestDataSetGovernanceServiceTest {
     private TemplateCurrentVersionResolver templateCurrentVersionResolver;
     @Mock
     private VariableSchemaRepository variableSchemaRepository;
+    @Mock
+    private ManagementAuditRecorder managementAuditRecorder;
 
     private TestDataSetService service;
     private UUID templateId;
@@ -59,7 +62,8 @@ class TestDataSetGovernanceServiceTest {
                 groupAccessService,
                 new ObjectMapper(),
                 templateCurrentVersionResolver,
-                variableSchemaRepository
+                variableSchemaRepository,
+                managementAuditRecorder
         );
         templateId = UUID.randomUUID();
         versionId = UUID.randomUUID();

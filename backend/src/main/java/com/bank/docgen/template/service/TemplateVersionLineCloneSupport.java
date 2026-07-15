@@ -53,7 +53,8 @@ final class TemplateVersionLineCloneSupport {
                     variable.getDefaultValue(),
                     variable.getEnumValues(),
                     variable.getDescription(),
-                    variable.getComputeExpression()
+                    variable.getComputeExpression(),
+                    variable.getPiiCategory()
             ));
         }
     }
