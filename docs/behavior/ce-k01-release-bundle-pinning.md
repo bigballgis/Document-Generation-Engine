@@ -385,7 +385,7 @@
 | Q1 | `pin_metadata_json` 是否额外存储 `renderProfileSnapshotHash`？ | **否**；render profile 快照已由 `render_profile_json` 列承载，本片不重复 |
 | Q2 | 删除保护接口是否对 Master 管理员返回引用 release 的 releaseVersion 明文？ | **是**；最小必要信息便于运维定位，权限沿用既有 MASTER_ADMIN |
 | Q3 | 回填迁移是否拆为单独 Flyway 版本与列添加迁移分开？ | **建议**：列添加 + 数据回填同一迁移版本（保证原子性），版本号由 backend-engineer 按现有 ratchet 选定 |
-| Q4 | `master_file_hash` 是否在每次生成时重算并与持久化值比对（drift detection）？ | **本片不实现** drift detection；仅持久化供审计。Drift 检测属 CE-G06 审计可复现范围 |
+| Q4 | `master_file_hash` 是否在每次生成时重算并与持久化值比对（drift detection）？ | **本片不实现** drift detection；仅持久化供审计。Drift 检测由 **CE-G06** 落地（再生前比对 invocation.`release_bundle_hash`；见 [ce-g06-audit-reproducible.md](./ce-g06-audit-reproducible.md) G06-C11 / BDD-CE-G06-014） |
 | Q5 | 发布时若 master 当前 revision 的对象存储对象已 404（罕见），是否阻止发布？ | **是**；与 BDD-CE-K01-005 一致，`api.error.master.currentRevisionUnavailable` |
 
 ---

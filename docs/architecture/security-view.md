@@ -9,6 +9,7 @@ owners:
 dependsOn:
   - docs/security/permission-matrix.md
   - docs/adr/authorization-security/0020-unified-authorization-and-sensitive-data-handling.md
+  - docs/adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md
   - docs/adr/authorization-security/0010-ad-group-authorization-resolution.md
   - docs/api/contract-outline.md
 related:
@@ -43,7 +44,7 @@ This view summarizes architecture-level security boundaries. Detailed permission
 | --- | --- |
 | API credential secret | One-time plaintext display only; stored as irreversible digest or equivalent fingerprint. |
 | Output encryption password | Used only for current generation; no plaintext persistence, logging, Kafka, or audit. |
-| Template variable values | Avoid raw persistence in logs/audit; use hashes or safe summaries where tracing is needed. |
+| Template variable values | Logs/audit/management/export: hashes or safe summaries only (ADR-0020). **Exception (ADR-0057):** sanitized values may persist in `api_invocation_record.parameters_storage` for caller reconciliation + CE-G06 regenerate; management APIs must never return them; TTL = invocation retention; column encryption deferred. |
 | AD Group membership | Do not expose full member lists or unauthorized group details. |
 | Download URL | Treat as sensitive; log and audit only masked or summarized values. |
 | Generated document content | Return only after authorization; store according to retention and access rules. |

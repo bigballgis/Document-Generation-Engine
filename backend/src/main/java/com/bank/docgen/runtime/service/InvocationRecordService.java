@@ -28,12 +28,23 @@ public class InvocationRecordService {
     public InvocationRecordService(
             ApiInvocationRecordRepository repository,
             InvocationParameterSanitizer parameterSanitizer,
-            IdempotencyService idempotencyService
+            IdempotencyService idempotencyService,
+            ReleaseBundleFingerprintSupport fingerprintSupport
     ) {
         this.repository = repository;
         this.metadata = new InvocationRecordMetadataSupport(repository, idempotencyService);
-        this.batchItems = new InvocationBatchItemPersistenceSupport(repository, parameterSanitizer, metadata);
-        this.entities = new InvocationRecordEntitySupport(parameterSanitizer, idempotencyService, metadata);
+        this.batchItems = new InvocationBatchItemPersistenceSupport(
+                repository,
+                parameterSanitizer,
+                metadata,
+                fingerprintSupport
+        );
+        this.entities = new InvocationRecordEntitySupport(
+                parameterSanitizer,
+                idempotencyService,
+                metadata,
+                fingerprintSupport
+        );
     }
 
     @Transactional(readOnly = true)

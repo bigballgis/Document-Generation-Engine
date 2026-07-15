@@ -71,6 +71,10 @@ public class ApiInvocationRecordEntity {
     @Column(name = "duration_ms")
     private Long durationMs;
 
+    /**
+     * ADR-0057: retention-scoped sanitized variables (passwords stripped). Purged with row TTL.
+     * Encryption-at-rest deferred (ADR-0045); do not invent ad-hoc column crypto.
+     */
     @Column(name = "parameters_storage", nullable = false, columnDefinition = "TEXT")
     private String parametersStorage;
 
@@ -130,6 +134,14 @@ public class ApiInvocationRecordEntity {
 
     @Column(name = "error_message", length = 1024)
     private String errorMessage;
+
+    /** CE-G06: PUBLISHED template_version.id captured at generation time. */
+    @Column(name = "release_bundle_snapshot_id")
+    private UUID releaseBundleSnapshotId;
+
+    /** CE-G06: copy of template_version.master_file_hash (64-char lowercase hex). */
+    @Column(name = "release_bundle_hash", length = 64)
+    private String releaseBundleHash;
 
     protected ApiInvocationRecordEntity() {
     }
@@ -354,6 +366,23 @@ public class ApiInvocationRecordEntity {
 
     public String getErrorMessage() {
         return errorMessage;
+    }
+
+    public UUID getReleaseBundleSnapshotId() {
+        return releaseBundleSnapshotId;
+    }
+
+    public String getReleaseBundleHash() {
+        return releaseBundleHash;
+    }
+
+    /**
+     * CE-G06: attach release-bundle fingerprint when a PUBLISHED release was resolved.
+     * Passing nulls clears the fingerprint (pre-G06 / unresolved-release rows).
+     */
+    public void applyReleaseBundleFingerprint(UUID releaseBundleSnapshotId, String releaseBundleHash) {
+        this.releaseBundleSnapshotId = releaseBundleSnapshotId;
+        this.releaseBundleHash = releaseBundleHash;
     }
 
     public void applyErrorEnvelope(

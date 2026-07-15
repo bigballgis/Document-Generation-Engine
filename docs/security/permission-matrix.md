@@ -155,6 +155,7 @@ API 管理配置按配置域独立保存；每个配置域操作动线为编辑�
 | 配置调用记录与文档留存 | 是 | 被授权组范围内 | 否 | 否 | 包级 `saveGeneratedDocuments`、`invocationRecordRetentionDays`、`documentRetentionDays`（预设选项；max 7y/1y）；`changedAreas` 含 `INVOCATION_RETENTION`；仅影响新产生的记录 TTL。 |
 | 查看包级调用记录摘要 | 是 | 被授权组范围内 | 是（只读摘要） | 否 | 包 Hub L2 最近调用列表；**无** variables 明文；合规明细仍仅审计角色。 |
 | 查看包级生成审计摘要 | 是 | 被授权组范围内 | 否 | 否 | `GET /api/management/v1/audit/generation?templateExternalId=`；需 `readAudit` + 可读模板组范围；返回 `eventAt/eventType/requestId/outcome/status/accessAccountSummary` 等非敏感摘要；**不得**返回变量明文、完整请求体或下载地址。 |
+| 按 invocation 受控再生（审计样件） | 是 | 被授权组范围内 | 否 | 否（`AUDIT_ADMIN`：是，模板可见/`readAudit` 范围内） | CE-G06：`POST …/templates/{templateId}/api/invocations/{invocationId}/regenerate`；仅指纹齐全且未过期的 `SINGLE`/`BATCH_ITEM`/`ASYNC_TASK`；产物强制 SPECIMEN 水印；**禁止**响应/审计返回 variables 或加密密码；写管理审计 `INVOCATION_REGENERATED`；不新建调用方 runtime SUCCESS 记录。BDD：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。 |
 
 ## 8. API 授权规则
 
@@ -391,8 +392,9 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - 敏感数据分级处理基线为禁止明文持久化/展示、允许摘要或指纹、授权响应例外。
 - 禁止明文持久化或展示的内容包括 API 凭证 secret、DOCX/PDF 加密密码、模板变量原值、模板测试数据敏感值、完整请求体、完整下载地址、完整 AD Group 成员、未授权组详情、历史密文、敏感配置明文、内部渲染诊断明文和未授权生成文档内容；保真警告不得包含模板变量原值、粘贴原文、客户数据、完整请求体或生成文档敏感内容。
 - **CE-G03：** 测试数据集存储中的授权测试值（经 `SYNTHETIC` / `EXPLICIT_SENSITIVE`）不视为对维护者的「未授权展示」；审计/契约/导出仍禁明文。见 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。
+- **CE-G06 / ADR-0057（2026-07-16）：** `api_invocation_record.parameters_storage` **允许**在调用记录留存窗口内持久化**已消毒**的模板变量原值（加密密码仍禁止落库），用途仅限：(1) 调用方 reconciliation（ADR-0040）；(2) 受控再生内部重放。留存 TTL = 调用记录 retention；行清理时一并销毁。**管理端列表/详情/CSV、管理审计、日志、导出、契约示例仍禁止**返回或展示 variables / 密码明文（HIST C6 **不**放宽）。列级/应用层 encryption-at-rest **暂缓**（对齐 ADR-0045；待 KMS）。权威决策：[ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)；行为：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。
 - 允许以摘要或指纹表达的内容包括 API 凭证标识或指纹摘要、`idempotencyKey` 摘要、请求语义 hash、`variablesHash`、`itemsHash`、加密策略摘要、AD Group 授权摘要、下载地址脱敏值、`contextSummary`、`fidelityWarnings` 非敏感摘要、`policyVersion`、`changedAreas` 和配置差异摘要。
-- 授权响应例外仅限已确认安全场景：API 凭证创建或轮换时 secret 明文只展示一次；授权 API 响应可返回可用 `download.url`；同步文件流和下载取文件可在授权通过后返回生成文档内容；`task.queryPath` 只是相对查询路径，不授予额外访问能力。
+- 授权响应例外仅限已确认安全场景：API 凭证创建或轮换时 secret 明文只展示一次；授权 API 响应可返回可用 `download.url`；同步文件流和下载取文件可在授权通过后返回生成文档内容；`task.queryPath` 只是相对查询路径，不授予额外访问能力；调用方 invocation 详情可按 ADR-0040/0057 返回已消毒 parameters；**管理端** invocation API 仍不得返回 variables。
 - 脱敏规则适用于日志、审计、管理界面、API 契约展示、契约示例、错误响应、导出文件和支持排查材料；未知或未分类字段默认按敏感处理。
 
 ## 12. 待确认权限设计议题
@@ -508,6 +510,13 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - `EXPLICIT_SENSITIVE` **不**要求 `GROUP_ADMIN`（与 G01 例外干预不同）；凡具备测试集维护权的角色均可走确认路径。
 - 测试人员 / 审批人员仍只读；不可维护 schema PII 标签或测试集。
 - `EXPLICIT_SENSITIVE` 成功审计摘要可读性沿用既有 `readAudit` + 组范围；审计**不得**含变量明文。行为 SoT：[ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。
+
+**CE-G06 受控再生（2026-07-16）：**
+
+- **无新 capability bit。** 再生授权复用管理员矩阵 + `readAudit` 可见边界：`GLOBAL_ADMIN`、同组 `GROUP_ADMIN`、模板可见范围内 `AUDIT_ADMIN`。
+- `TEMPLATE_AUTHOR` / `TEMPLATE_TESTER` / `TEMPLATE_APPROVER` / `MASTER_DESIGNER` / 调用方 **禁止** regenerate（403 fail-closed）。
+- 再生**内部**可读 `parametersStorage`（ADR-0057 授权的留存例外）；响应、审计、管理 UI **仍禁止** variables / 加密密码明文（HIST C6 不放宽）。见 §11 ADR-0057 条。
+- 行为 SoT：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)；ADR：[0057-invocation-parameters-retention-for-regenerate.md](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)。
 
 ### 13.3 禁止路由访问（forbidden-route）行为基线
 

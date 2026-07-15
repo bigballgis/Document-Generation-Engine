@@ -836,6 +836,8 @@ Template Collaboration Work Item 用于站内待办和状态提示，不是 Temp
 - 运行时路径：`GET …/invocations`（`view=logical|flat`，可选 `requestId`）；`GET …/invocations/{invocationId}`。
 - 与 `RuntimeGenerationAuditEvent` 并存：审计摘要合规；invocation 产品化查询/备份。
 - 四层时钟：下载 URL 15m、幂等 7d、document artifact（包级）、record（包级）。
+- **CE-G06（2026-07-16）：** 成功解析到 PUBLISHED release 的生成行持久化 `release_bundle_snapshot_id`（=`template_version.id`）与 `release_bundle_hash`（=`master_file_hash` 拷贝；落库时不重算对象字节）。`SINGLE` / `BATCH_ITEM` / `ASYNC_TASK` 有解析 release 时必须写；`BATCH_ROOT` 不要求；解析失败行保持 NULL；**不**回填历史行。
+- **CE-G06 受控再生：** 管理端 `POST …/templates/{templateId}/api/invocations/{invocationId}/regenerate` 按 invocation 内部重放 parameters + 钉扎母版，强制 CE-G02 SPECIMEN 水印，写 `INVOCATION_REGENERATED` 审计；**不得**新建调用方 runtime SUCCESS 记录；管理查询仍禁止返回 parameters 明文，可返回 snapshot id + hash。再生元数据可独立表或对象键+审计（实现选型，须可按 `regenerationId` 取回）。行为规格：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。
 
 模板发布后需要生成：
 
@@ -1045,6 +1047,7 @@ API 管理侧审计事件包括：
 - 批量上限配置变更。
 - DOCX/PDF 动态加密配置变更。
 - default 路径目标发布版本配置变更。
+- **CE-G06：** 按 invocation 受控再生终态 `INVOCATION_REGENERATED`（成功与失败；摘要含 sourceInvocationId、regenerationId、fingerprint、outcome、actor；禁止 variables 明文）。
 
 API 调用审计至少记录：
 
@@ -1133,6 +1136,8 @@ API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 
 禁止明文持久化或展示的内容包括 API 凭证 secret、DOCX/PDF 加密密码、模板变量原值、模板测试数据敏感值、完整请求体、完整下载地址、完整 AD Group 成员、未授权组详情、历史密文、敏感配置明文、内部渲染诊断明文和未授权生成文档内容；保真警告不得包含模板变量原值、粘贴原文、客户数据、完整请求体或生成文档敏感内容。
 
 **CE-G03 澄清（2026-07-15）：** 「模板测试数据敏感值」禁明文的适用范围为日志、审计摘要、契约示例、导出、发布证据与未授权展示。授权维护者在 Template Test Data Set 存储中的变量值是测试资产本体，须经 `SYNTHETIC` 或 `EXPLICIT_SENSITIVE` 闸门（见 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md) G03-C14/C22）；不修订 ADR-0020 正文。
+
+**CE-G06 / ADR-0057（2026-07-16）：** `api_invocation_record.parameters_storage` 在调用记录留存窗口内可持久化已消毒模板变量（加密密码仍禁），供调用方查询与受控再生内部重放。管理端/审计/日志/导出仍禁 variables 明文。列级 encryption-at-rest 暂缓。权威：[ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)；行为：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。
 
 允许以摘要或指纹表达的内容包括 API 凭证标识或指纹摘要、`idempotencyKey` 摘要、请求语义 hash、`variablesHash`、`itemsHash`、加密策略摘要、AD Group 授权摘要、下载地址脱敏值、`contextSummary`、`fidelityWarnings` 非敏感摘要、`policyVersion`、`changedAreas` 和配置差异摘要。
 

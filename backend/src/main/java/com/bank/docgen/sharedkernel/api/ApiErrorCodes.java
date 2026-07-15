@@ -94,6 +94,19 @@ public final class ApiErrorCodes {
     /** CE-C04 / ADR-0009: credential revoked. */
     public static final String API_CREDENTIAL_REVOKED = "API_CREDENTIAL_REVOKED";
 
+    /** CE-G06: invocation lacks release-bundle fingerprint. */
+    public static final String RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE = "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE";
+    /** CE-G06: pinned master object hash drift. */
+    public static final String RELEASE_BUNDLE_HASH_MISMATCH = "RELEASE_BUNDLE_HASH_MISMATCH";
+    /** CE-G06 / CE-K01: pinned master revision unavailable. */
+    public static final String PINNED_MASTER_UNAVAILABLE = "PINNED_MASTER_UNAVAILABLE";
+    /** CE-G06: BATCH_ROOT (and similar) cannot be regenerated. */
+    public static final String INVOCATION_KIND_NOT_REGENERABLE = "INVOCATION_KIND_NOT_REGENERABLE";
+    /** CE-G06: SPECIMEN watermark application failed. */
+    public static final String SPECIMEN_WATERMARK_FAILED = "SPECIMEN_WATERMARK_FAILED";
+    /** CE-G06: regenerate outputFormat outside DOCX/PDF allow-list. */
+    public static final String OUTPUT_FORMAT_NOT_ALLOWED = "OUTPUT_FORMAT_NOT_ALLOWED";
+
     private ApiErrorCodes() {
     }
 }

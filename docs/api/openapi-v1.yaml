@@ -2688,6 +2688,8 @@ paths:
       description: >-
         Returns non-sensitive invocation detail for administrators. Does not
         include caller variable plaintext. Includes audit deep-link hints.
+        CE-G06 may include releaseBundleSnapshotId and releaseBundleHash when
+        persisted (nullable for pre-G06 / unresolved-release rows).
       parameters:
         - name: templateId
           in: path
@@ -2713,6 +2715,64 @@ paths:
         '403':
           $ref: '#/components/responses/ErrorResponse'
         '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/api/invocations/{invocationId}/regenerate:
+    post:
+      tags: [Admin]
+      operationId: regenerateTemplateManagementInvocation
+      summary: Controlled regenerate SPECIMEN artifact by invocation (CE-G06)
+      description: >-
+        Permissioned audit regenerate for a SINGLE / BATCH_ITEM / ASYNC_TASK
+        invocation that has non-null release-bundle fingerprint fields and is
+        within retention. Replays stored parameters against the K01-pinned
+        master, applies CE-G02 SPECIMEN watermark, writes management audit
+        INVOCATION_REGENERATED, and never returns variables or encryption
+        passwords. Does not create a caller-facing runtime SUCCESS invocation
+        or consume caller idempotency keys. No idempotencyKey required.
+        Authorized roles: GLOBAL_ADMIN, in-scope GROUP_ADMIN, in-scope
+        AUDIT_ADMIN (readAudit + template visibility). FE regenerate CTA is
+        out of scope for this leaf.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: invocationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagementInvocationRegenerateRequest'
+      responses:
+        '200':
+          description: SPECIMEN regeneration accepted and artifact available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementInvocationRegenerateResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '410':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -4690,6 +4750,20 @@ components:
           format: date-time
         accessAccountSummary:
           type: string
+        releaseBundleSnapshotId:
+          type: string
+          format: uuid
+          nullable: true
+          description: >-
+            CE-G06 — PUBLISHED template_version.id captured at generation time;
+            null when release was not resolved or record predates G06.
+        releaseBundleHash:
+          type: string
+          nullable: true
+          description: >-
+            CE-G06 — copy of template_version.master_file_hash (64-char lowercase
+            hex SHA-256); null when snapshot id is null.
+          pattern: '^[0-9a-f]{64}$'
     ManagementInvocationAuditLinkHintView:
       type: object
       additionalProperties: false
@@ -4748,6 +4822,20 @@ components:
           type: boolean
         auditLinkHint:
           $ref: '#/components/schemas/ManagementInvocationAuditLinkHintView'
+        releaseBundleSnapshotId:
+          type: string
+          format: uuid
+          nullable: true
+          description: >-
+            CE-G06 — PUBLISHED template_version.id captured at generation time;
+            null when release was not resolved or record predates G06.
+        releaseBundleHash:
+          type: string
+          nullable: true
+          description: >-
+            CE-G06 — copy of template_version.master_file_hash (64-char lowercase
+            hex SHA-256); null when snapshot id is null.
+          pattern: '^[0-9a-f]{64}$'
         errorCode:
           type: string
           nullable: true
@@ -4765,6 +4853,69 @@ components:
           type: string
           nullable: true
           description: Optional resolved message; may be absent for legacy rows.
+    ManagementInvocationRegenerateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        outputFormat:
+          type: string
+          enum: [DOCX, PDF]
+          description: >-
+            Optional. Defaults to the source invocation output_format; when that
+            is null/empty, defaults to PDF.
+    ManagementInvocationRegenerateView:
+      type: object
+      additionalProperties: false
+      required:
+        - regenerationId
+        - sourceInvocationId
+        - releaseBundleSnapshotId
+        - releaseBundleHash
+        - outputFormat
+        - specimen
+        - encryptionReapplied
+      properties:
+        regenerationId:
+          type: string
+          format: uuid
+        sourceInvocationId:
+          type: string
+        releaseBundleSnapshotId:
+          type: string
+          format: uuid
+        releaseBundleHash:
+          type: string
+          pattern: '^[0-9a-f]{64}$'
+        outputFormat:
+          type: string
+          enum: [DOCX, PDF]
+        specimen:
+          type: boolean
+          description: Always true for CE-G06 regenerate artifacts.
+        encryptionReapplied:
+          type: boolean
+          description: >-
+            Always false — original encryption passwords are not retained;
+            regenerate artifacts are unencrypted SPECIMEN samples.
+        downloadUrl:
+          type: string
+          nullable: true
+          description: Short-lived download URL when issued; may be omitted in favor of artifactPath.
+        artifactPath:
+          type: string
+          nullable: true
+          description: >-
+            Management artifact reference under regenerations/{regenerationId}/…
+            (preferred when downloadUrl is not issued).
+    ManagementInvocationRegenerateResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/ManagementInvocationRegenerateView'
     ManagementInvocationPageResponse:
       type: object
       additionalProperties: false
@@ -8712,7 +8863,7 @@ components:
           type: string
     ErrorCategory:
       type: string
-      enum: [AUTHENTICATION, AUTHORIZATION, VERSION_ROUTING, API_POLICY, IDEMPOTENCY, VALIDATION, TEMPLATE_CONTRACT, GENERATION, ENCRYPTION, BATCH]
+      enum: [AUTHENTICATION, AUTHORIZATION, VERSION_ROUTING, API_POLICY, IDEMPOTENCY, VALIDATION, TEMPLATE_CONTRACT, RENDERING, GENERATION, ENCRYPTION, BATCH]
     ErrorCode:
       type: string
       enum:
@@ -8779,3 +8930,9 @@ components:
         - VARIABLE_COMPUTE_FAILED
         - TEMPLATE_VALIDATION_FAILED
         - OOXML_VALIDATION_FAILED
+        - RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE
+        - RELEASE_BUNDLE_HASH_MISMATCH
+        - PINNED_MASTER_UNAVAILABLE
+        - INVOCATION_KIND_NOT_REGENERABLE
+        - SPECIMEN_WATERMARK_FAILED
+        - INVOCATION_RECORD_EXPIRED

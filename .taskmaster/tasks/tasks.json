@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). #89 CE-U13 → Done (merge ccdfacda). #71 CE-C06 → Done (merge 35f6f47d). No sole-active CE leaf; next queue head #76 CE-G06 pending/parked.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#88/#89 Done. No sole-active CE delivery leaf; next queue head #76 CE-G06 pending (do not activate until deliver). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). #89 CE-U13 → Done (merge ccdfacda). #71 CE-C06 → Done (merge 35f6f47d). Sole-active CE delivery leaf: #76 CE-G06 → in-progress (ISOLATED DGE-ce-g06-audit-reproducible).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#88/#89 Done. Sole-active CE delivery leaf: #76 CE-G06 in-progress. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T05:20:00.000Z"
+        "updatedAt": "2026-07-16T05:27:00.000Z"
       },
       {
         "id": "54",
@@ -1050,16 +1050,16 @@
       {
         "id": "76",
         "title": "CE-G06: Audit-reproducible regenerate",
-        "description": "PENDING. Slice ce-g06-audit-reproducible. Invocation stores bundle snapshot id+hash; controlled regenerate API with SPECIMEN. P2·M.",
-        "details": "Depends K01 (#57). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G06.",
-        "testStrategy": "1. Snapshot recorded. 2. Regenerate API permissioned+audited+watermarked. 3. mvn verify.",
+        "description": "IN PROGRESS 2026-07-16. Sole-active CE delivery leaf (single-lane serial). Slice ce-g06-audit-reproducible. Placement ISOLATED: D:/working/DGE-ce-g06-audit-reproducible · feat/ce-g06-audit-reproducible. BDD ready: docs/behavior/ce-g06-audit-reproducible.md (BDD-CE-G06-001…021). Persist release-bundle snapshot ID + bundle hash on invocation; Admin controlled regenerate-by-invocation API (permissioned + audited); SPECIMEN watermark on regenerate (reuse CE-G02). FE regenerate UI out of scope. Formal phase remains None. Do NOT activate CD-3 / claim go-live. CE-C06 (#71) remains Done — do not reopen.",
+        "details": "Depends K01 (#57) Done. BDD ready. Placement ISOLATED worktree D:/working/DGE-ce-g06-audit-reproducible · branch feat/ce-g06-audit-reproducible. Gates before Done: mvn verify; FE mechanical types only (no E2E/UIUX); queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G06 In Progress (sole-active). Umbrella #53 remains in-progress (program registry only — not a delivery leaf).",
+        "testStrategy": "1. Snapshot recorded on SINGLE/BATCH_ITEM/ASYNC. 2. Regenerate API permissioned+audited+SPECIMEN. 3. Hash drift fail-closed. 4. mvn verify. Scenarios BDD-CE-G06-001…021.",
         "priority": "medium",
         "dependencies": [
           "57"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-16T05:27:00.000Z"
       },
       {
         "id": "77",
@@ -1365,7 +1365,8 @@
       "completedCount": 61,
       "tags": [
         "master"
-      ]
+      ],
+      "updated": "2026-07-16T05:27:00.000Z"
     }
   }
 }

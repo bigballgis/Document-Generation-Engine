@@ -934,6 +934,7 @@ API 管理配置展示字段 v1 基线确认为 `apiPolicy.policyVersion`、`api
 - API 管理 UI **主入口** 为包 Hub「对外接入」；约定大于配置（L1：AD Group、default、留存、路由、凭证；高级策略折叠）。
 - **调用记录**独立于合规审计；调用方可查询自身历史与完整参数（encryption 密码不落库）；包级可配是否保存生成文档及记录/文档留存（默认 save 开 / 90d / 30d；最长 7y / 1y 预设）。
 - 运行时 `GET …/invocations` 支持 logical（真实调用）与 flat（平铺 item 级）视图。
+- **CE-G06（2026-07-16）：** 成功解析到已发布 release 的调用记录持久化发布包快照 ID + bundle hash，供内控证明当时钉扎母版。授权管理员可通过管理端受控再生 API 按 invocation 重放装配，产出带 **SPECIMEN** 水印的审计样件并写入管理审计；正式对外 runtime 生成路径仍无水印。管理端不暴露调用方 variables；本片不交付管理 UI「再生」按钮。`parameters_storage` 留存例外见 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)。行为规格：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。
 
 API 凭证生命周期、轮换、吊销、过期、到期提醒和相关审计策略已确认；API 凭证到期提醒是生命周期专门通知，不改变其他 API 管理配置变更不主动通知调用方或管理员的基线。
 
@@ -1010,6 +1011,8 @@ v1 建立敏感数据分级处理基线：
 禁止明文持久化或展示的内容包括 API 凭证 secret、DOCX/PDF 加密密码、模板变量原值、模板测试数据敏感值、完整请求体、完整下载地址、完整 AD Group 成员、未授权组详情、历史密文、敏感配置明文和未授权生成文档内容。
 
 **CE-G03 澄清：** 「模板测试数据敏感值」禁明文适用于日志、审计摘要、契约示例、导出、发布证据与未授权展示；授权维护者经 `SYNTHETIC` / `EXPLICIT_SENSITIVE` 闸门写入测试数据集存储的值是测试资产本体（见 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)）。不修订 ADR-0020 正文。
+
+**CE-G06 / ADR-0057：** 调用记录 `parameters_storage` 可在留存窗口内保存已消毒模板变量，供调用方查询与受控再生内部重放；管理端/审计仍禁明文；encryption-at-rest 暂缓。见 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)。
 
 允许以摘要或指纹表达的内容包括 API 凭证标识或指纹摘要、`idempotencyKey` 摘要、请求语义 hash、`variablesHash`、`itemsHash`、加密策略摘要、AD Group 授权摘要、下载地址脱敏值、`contextSummary`、`policyVersion`、`changedAreas` 和配置差异摘要。
 

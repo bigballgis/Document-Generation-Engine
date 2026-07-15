@@ -50,7 +50,9 @@ public class ManagementInvocationQueryService {
             "accessAccountSummary",
             "outcome",
             "errorCode",
-            "errorMessageKey"
+            "errorMessageKey",
+            "releaseBundleSnapshotId",
+            "releaseBundleHash"
     );
 
     private final TemplateService templateService;
@@ -145,7 +147,7 @@ public class ManagementInvocationQueryService {
 
     /**
      * Exports all matching filtered rows (up to {@link #MAX_EXPORT_ROWS}) as UTF-8 CSV.
-     * Does not include parameters/variables columns.
+     * Does not include parameters/variables columns (HIST C6 / ADR-0057 display ban).
      */
     @Transactional(readOnly = true)
     public ManagementInvocationCsvExport exportInvocationsCsv(
@@ -202,7 +204,9 @@ public class ManagementInvocationQueryService {
                 entity.getResolvedReleaseVersion(),
                 entity.getRouteType(),
                 entity.getCreatedAt(),
-                maskAccessAccount(entity.getAccessAccount())
+                maskAccessAccount(entity.getAccessAccount()),
+                entity.getReleaseBundleSnapshotId(),
+                entity.getReleaseBundleHash()
         );
     }
 
@@ -225,7 +229,9 @@ public class ManagementInvocationQueryService {
                 entity.getErrorCategory(),
                 entity.getErrorMessageKey(),
                 entity.getErrorRetryable(),
-                entity.getErrorMessage()
+                entity.getErrorMessage(),
+                entity.getReleaseBundleSnapshotId(),
+                entity.getReleaseBundleHash()
         );
     }
 
@@ -242,7 +248,11 @@ public class ManagementInvocationQueryService {
                 csv(maskAccessAccount(entity.getAccessAccount())),
                 csv(entity.getOutcome()),
                 csv(entity.getErrorCode()),
-                csv(entity.getErrorMessageKey())
+                csv(entity.getErrorMessageKey()),
+                csv(entity.getReleaseBundleSnapshotId() == null
+                        ? null
+                        : entity.getReleaseBundleSnapshotId().toString()),
+                csv(entity.getReleaseBundleHash())
         );
     }
 

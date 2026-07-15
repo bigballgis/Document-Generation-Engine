@@ -79,7 +79,9 @@
 | **G02-C9** | 可观测性以 **OOXML 子串 / PDF 文本抽取** 为准；**禁止**像素/截图/SSIM 作为 Done 证据（对齐 K07-C6）。对角角度、字号、透明度为实现细节，只要文本可抽取且肉眼可辨认为对角覆盖即可。 | K07 + 计划 |
 | **G02-C10** | 预览路径 PDF 当前使用 `NO_ENCRYPTION`；本片**不**扩展预览加密。加密 PDF 主题仍由 `encrypted-pdf` / runtime 拥有。 | 现状 `PreviewGenerationAssemblySupport` |
 | **G02-C11** | 本片**不**改管理 UI 文案/按钮（除产物字节导致 CE-U04 内联可见水印）。OpenAPI 契约字段**不**因本片强制新增（水印为渲染副作用，非请求开关）。 | 范围 |
-| **G02-C12** | **明确非目标：** go-live、CD-3、CE-O02、CE-G06 受控再生 API、CE-G03 PII、四眼复核、修改 ADR-0021、对 runtime 加可选水印开关。 | 计划 out of scope |
+| **G02-C12** | **明确非目标：** go-live、CD-3、CE-O02、CE-G06 受控再生 API（由 G06 消费本片水印能力；见 [ce-g06-audit-reproducible.md](./ce-g06-audit-reproducible.md)）、CE-G03 PII、四眼复核、修改 ADR-0021、对 runtime 加可选水印开关。 | 计划 out of scope |
+
+**CE-G06 消费说明（docs-first，2026-07-16）：** G06 regenerate 路径须复用本片 SPECIMEN 语义（DOCX 眉脚字面量 + PDFBox 对角）。实现优先直接调用已有共享组件 `DocxSpecimenWatermarkStamper` / `PdfSpecimenWatermarkStamper`（`com.bank.docgen.rendering`）；**不必**默认再开 rendering-engineer 切片。正式 runtime 路径仍零水印（G02-C5）。
 
 ---
 

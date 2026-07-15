@@ -75,3 +75,20 @@ Stable English-first fail-closed keys (implement in `messages_en.properties` + f
 | Illegal `piiCategory` | 422 | `api.error.template.piiCategoryInvalid` |
 
 Behavior SoT: [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md). Storage ruling: [data-storage-view.md](../architecture/data-storage-view.md).
+
+### Audit-reproducible regenerate (CE-G06)
+
+Management regenerate-by-invocation is a **management-API** contract (documented in [contract-outline.md](contract-outline.md) «审计可复现受控再生（CE-G06）」 and [openapi-v1.yaml](openapi-v1.yaml) `regenerateTemplateManagementInvocation`). Caller-facing generate paths stay watermark-free. FE regenerate CTA is out of scope. Sanitized `parameters_storage` retention for replay is authorized by [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md); management APIs still must not expose variables.
+
+Stable English-first fail-closed keys (implement in `messages_en.properties`):
+
+| Condition | HTTP | `error.messageKey` |
+| --- | --- | --- |
+| Missing fingerprint / pre-G06 row | 409 | `api.error.audit.releaseBundleSnapshotUnavailable` |
+| Bundle hash drift | 409 | `api.error.audit.releaseBundleHashMismatch` |
+| Pinned master unavailable | (K01) | `api.error.rendering.pinnedMasterUnavailable` |
+| Unsupported invocation kind | 422 | `api.error.audit.invocationKindNotRegenerable` |
+| Expired invocation record | 410 | `api.error.audit.invocationRecordExpired` |
+| SPECIMEN watermark failure | 500 | `api.error.audit.specimenWatermarkFailed` |
+
+Behavior SoT: [ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md).

@@ -67,6 +67,8 @@ public class InvocationRetentionCleanupScheduler {
     )
     @Transactional
     public void cleanExpiredRecords() {
+        // ADR-0057 / ADR-0040: hard-delete expired invocation rows — parameters_storage is destroyed
+        // with the row (same TTL; no orphan parameter blobs; no longer regenerable).
         List<ApiInvocationRecordEntity> expiredRecords = repository.findByRecordExpiresAtBefore(Instant.now());
         if (expiredRecords.isEmpty()) {
             return;

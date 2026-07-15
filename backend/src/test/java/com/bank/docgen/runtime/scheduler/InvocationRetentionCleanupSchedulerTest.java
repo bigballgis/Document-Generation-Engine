@@ -50,6 +50,26 @@ class InvocationRetentionCleanupSchedulerTest {
     }
 
     @Test
+    void cleanExpiredRecords_destroysParametersStorageWithInvocationRow_adr0057() {
+        // ADR-0057: parameters_storage shares invocation TTL — no orphan parameter blobs.
+        ApiInvocationRecordEntity expired = sampleRecordWithParameters(
+                "INV-PARAMS01",
+                "{\"variables\":{\"name\":\"Alice\"},\"encryption\":{\"enabled\":false}}"
+        );
+        expired = expiredWithRecordExpiry(expired, Instant.now().minusSeconds(30));
+        when(repository.findByRecordExpiresAtBefore(any(Instant.class))).thenReturn(List.of(expired));
+
+        scheduler.cleanExpiredRecords();
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<ApiInvocationRecordEntity>> captor = ArgumentCaptor.forClass(List.class);
+        verify(repository).deleteAll(captor.capture());
+        assertThat(captor.getValue()).hasSize(1);
+        assertThat(captor.getValue().get(0).getParametersStorage()).contains("Alice");
+        assertThat(captor.getValue().get(0).getInvocationExternalId()).isEqualTo("INV-PARAMS01");
+    }
+
+    @Test
     void cleanExpiredDocumentArtifacts_deletesStorageAndClearsKey() {
         ApiInvocationRecordEntity artifactExpired = artifactExpiredRecord(
                 "INV-DOCEXP1",
@@ -81,6 +101,10 @@ class InvocationRetentionCleanupSchedulerTest {
     }
 
     private ApiInvocationRecordEntity sampleRecord(String externalId, String storageKey) {
+        return sampleRecordWithParameters(externalId, "{}");
+    }
+
+    private ApiInvocationRecordEntity sampleRecordWithParameters(String externalId, String parametersStorage) {
         Instant now = Instant.now();
         return new ApiInvocationRecordEntity(
                 UUID.randomUUID(),
@@ -101,9 +125,9 @@ class InvocationRetentionCleanupSchedulerTest {
                 "SYNC_STREAM",
                 "SUCCESS",
                 null,
-                "{}",
+                parametersStorage,
                 "DOC-1",
-                storageKey,
+                "storage/doc.docx",
                 true,
                 now.plusSeconds(3600),
                 now.plusSeconds(1800),

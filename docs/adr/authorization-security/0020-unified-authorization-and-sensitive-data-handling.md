@@ -17,7 +17,7 @@ related:
 
 ## Status
 
-Accepted
+Accepted (amended 2026-07-16 by [ADR-0057](./0057-invocation-parameters-retention-for-regenerate.md) — retention-scoped invocation `parameters_storage` exception for caller reconciliation + CE-G06 regenerate)
 
 ## Context
 
@@ -53,9 +53,11 @@ v1 uses a three-part sensitive data handling baseline:
 
 Plaintext persistence or display is forbidden for API credential secrets, DOCX/PDF encryption passwords, template variable raw values, sensitive template test data values, full request bodies, full download URLs, full AD Group membership, unauthorized group details, historical ciphertext, sensitive configuration plaintext, and unauthorized generated-document content.
 
+**Amendment (ADR-0057, 2026-07-16):** A **retention-scoped at-rest exception** authorizes sanitized template variable values (encryption passwords still stripped) in `api_invocation_record.parameters_storage` solely for caller reconciliation and CE-G06 regenerate-by-invocation replay. Retention follows the invocation-record TTL; purge destroys the column with the row. **Display / management / audit / log / export bans for template variable raw values are unchanged** — management APIs must never return variables. Full rules: [ADR-0057](./0057-invocation-parameters-retention-for-regenerate.md).
+
 Summary or fingerprint representation is allowed for API credential identifiers or fingerprints, `idempotencyKey` summaries, request semantic hashes, `variablesHash`, `itemsHash`, encryption policy summaries, AD Group authorization summaries, masked download URLs, `contextSummary`, `policyVersion`, `changedAreas`, and configuration-difference summaries.
 
-Authorized response exceptions are limited to confirmed safe cases: API credential secret plaintext is shown once during creation or rotation; authorized API responses can return usable `download.url`; synchronous file-stream and generated-document download responses can return document content after authorization succeeds; `task.queryPath` can be returned because it is only a relative path and grants no additional access.
+Authorized response exceptions are limited to confirmed safe cases: API credential secret plaintext is shown once during creation or rotation; authorized API responses can return usable `download.url`; synchronous file-stream and generated-document download responses can return document content after authorization succeeds; `task.queryPath` can be returned because it is only a relative path and grants no additional access. Caller-facing invocation detail may return sanitized parameters per ADR-0040 / ADR-0057; management invocation APIs remain under the display ban.
 
 The masking baseline applies to logs, audit records, management screens, API contract displays, contract examples, error responses, exported files, and support troubleshooting material.
 
@@ -74,7 +76,7 @@ Unknown or unclassified fields default to sensitive handling. They can be downgr
 - Keep authorization and masking rules local to each API or screen: rejected because local rules can drift and expose different details for the same resource.
 - Let dependency failures fall back to stale authorization data: rejected because stale authorization can preserve access after membership or policy changes.
 - Return detailed denial diagnostics to callers: rejected because unauthorized callers should not learn resource existence, group membership, or configuration details.
-- Store full request and variable values for support troubleshooting: rejected because financial document inputs can contain customer, account, amount, password, or other sensitive data.
+- Store full request and variable values for support troubleshooting: rejected because financial document inputs can contain customer, account, amount, password, or other sensitive data. (Narrow retention-scoped persistence for invocation records + regenerate is separately authorized by ADR-0057; support dumps and management display remain forbidden.)
 
 ## Related Documents
 
@@ -85,3 +87,4 @@ Unknown or unclassified fields default to sensitive handling. They can be downgr
 - [API Contract Outline](../../api/contract-outline.md)
 - [API Contract Visibility, Audit Summary, and Context ADR](../api/0013-api-contract-visibility-audit-and-context.md)
 - [API Management UI and Audit Format ADR](../api-management/0016-api-management-ui-and-audit-format.md)
+- [ADR-0057 Retention-Scoped Invocation Parameters for Audit Regenerate](./0057-invocation-parameters-retention-for-regenerate.md)
