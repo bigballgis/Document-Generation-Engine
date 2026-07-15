@@ -1,10 +1,11 @@
 import { computed, onMounted, reactive, ref, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { listInvocations } from '@/api/apiPolicy'
+import { exportInvocationsCsv, listInvocations } from '@/api/apiPolicy'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import type { ManagementInvocationSummary } from '@/types/template'
+import { downloadBlobExport } from '@/utils/downloadExport'
 
 export interface UseTemplateInvocationsPanelOptions {
   templateId: Ref<string>
@@ -19,18 +20,21 @@ export function useTemplateInvocationsPanel(options: UseTemplateInvocationsPanel
   const totalElements = ref(0)
   const loading = ref(true)
   const loadFailed = ref(false)
+  const exporting = ref(false)
   const rows = ref<ManagementInvocationSummary[]>([])
 
   const filterDraft = reactive({
     status: '',
     invocationKind: '',
     requestId: '',
+    resolvedReleaseVersion: '',
   })
 
   const appliedFilters = reactive({
     status: '',
     invocationKind: '',
     requestId: '',
+    resolvedReleaseVersion: '',
   })
 
   const drawerVisible = ref(false)
@@ -54,6 +58,15 @@ export function useTemplateInvocationsPanel(options: UseTemplateInvocationsPanel
     },
   })
 
+  function currentListFilters() {
+    return {
+      status: appliedFilters.status || undefined,
+      invocationKind: appliedFilters.invocationKind || undefined,
+      requestId: appliedFilters.requestId || undefined,
+      resolvedReleaseVersion: appliedFilters.resolvedReleaseVersion || undefined,
+    }
+  }
+
   async function loadInvocations() {
     loading.value = true
     loadFailed.value = false
@@ -62,11 +75,7 @@ export function useTemplateInvocationsPanel(options: UseTemplateInvocationsPanel
         options.templateId.value,
         currentPage.value - 1,
         pageSize,
-        {
-          status: appliedFilters.status || undefined,
-          invocationKind: appliedFilters.invocationKind || undefined,
-          requestId: appliedFilters.requestId || undefined,
-        },
+        currentListFilters(),
       )
       rows.value = result.content
       totalElements.value = result.totalElements
@@ -83,6 +92,7 @@ export function useTemplateInvocationsPanel(options: UseTemplateInvocationsPanel
     appliedFilters.status = filterDraft.status
     appliedFilters.invocationKind = filterDraft.invocationKind
     appliedFilters.requestId = filterDraft.requestId
+    appliedFilters.resolvedReleaseVersion = filterDraft.resolvedReleaseVersion
     currentPage.value = 1
     void loadInvocations()
   }
@@ -91,9 +101,11 @@ export function useTemplateInvocationsPanel(options: UseTemplateInvocationsPanel
     filterDraft.status = ''
     filterDraft.invocationKind = ''
     filterDraft.requestId = ''
+    filterDraft.resolvedReleaseVersion = ''
     appliedFilters.status = ''
     appliedFilters.invocationKind = ''
     appliedFilters.requestId = ''
+    appliedFilters.resolvedReleaseVersion = ''
     currentPage.value = 1
     void loadInvocations()
   }
@@ -115,6 +127,23 @@ export function useTemplateInvocationsPanel(options: UseTemplateInvocationsPanel
     }
   }
 
+  async function exportCsv() {
+    exporting.value = true
+    try {
+      const result = await exportInvocationsCsv(options.templateId.value, currentListFilters())
+      downloadBlobExport(result.filename, result.blob)
+      if (result.truncated) {
+        ElMessage.warning(t('templates.policy.invocations.exportTruncated'))
+      } else {
+        ElMessage.success(t('templates.policy.invocations.exportSuccess'))
+      }
+    } catch {
+      ElMessage.error(t('templates.policy.invocations.exportFailed'))
+    } finally {
+      exporting.value = false
+    }
+  }
+
   onMounted(() => {
     void loadInvocations()
   })
@@ -126,6 +155,7 @@ export function useTemplateInvocationsPanel(options: UseTemplateInvocationsPanel
     totalElements,
     loading,
     loadFailed,
+    exporting,
     rows,
     filterDraft,
     drawerVisible,
@@ -138,5 +168,6 @@ export function useTemplateInvocationsPanel(options: UseTemplateInvocationsPanel
     clearFilters,
     openInvocationSummary,
     copyTechnicalId,
+    exportCsv,
   }
 }

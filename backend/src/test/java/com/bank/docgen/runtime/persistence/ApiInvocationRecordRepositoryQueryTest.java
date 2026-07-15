@@ -93,12 +93,53 @@ class ApiInvocationRecordRepositoryQueryTest {
                 null,
                 null,
                 CREDENTIAL_A,
+                null,
                 0,
                 20
         );
 
         assertThat(page.content()).extracting(ApiInvocationRecordEntity::getInvocationExternalId)
                 .containsExactly("INV-002");
+    }
+
+    @Test
+    void searchManagementInvocations_filtersByResolvedReleaseVersion() {
+        Instant retentionAfter = Instant.parse("2026-06-15T11:00:00Z");
+        Set<InvocationKind> kinds = EnumSet.of(
+                InvocationKind.SINGLE,
+                InvocationKind.BATCH_ROOT,
+                InvocationKind.ASYNC_TASK
+        );
+        Instant now = Instant.parse("2026-06-15T12:00:00Z");
+        repository.save(record(
+                "INV-120",
+                InvocationKind.SINGLE,
+                "FAILED",
+                CREDENTIAL_A,
+                "version-request-120",
+                now.minusSeconds(10),
+                now.plusSeconds(3600),
+                "1.2.0"
+        ));
+
+        AuditSearchPage<ApiInvocationRecordEntity> page = repository.searchManagementInvocations(
+                TEMPLATE_ID,
+                kinds,
+                retentionAfter,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "1.2.0",
+                0,
+                20
+        );
+
+        assertThat(page.content()).extracting(ApiInvocationRecordEntity::getInvocationExternalId)
+                .containsExactly("INV-120");
+        assertThat(page.totalElements()).isEqualTo(1);
     }
 
     @Test
@@ -120,6 +161,7 @@ class ApiInvocationRecordRepositoryQueryTest {
                 null,
                 null,
                 null,
+                null,
                 0,
                 2
         );
@@ -127,6 +169,7 @@ class ApiInvocationRecordRepositoryQueryTest {
                 TEMPLATE_ID,
                 kinds,
                 retentionAfter,
+                null,
                 null,
                 null,
                 null,
@@ -154,6 +197,28 @@ class ApiInvocationRecordRepositoryQueryTest {
             Instant createdAt,
             Instant recordExpiresAt
     ) {
+        return record(
+                invocationExternalId,
+                kind,
+                outcome,
+                credentialId,
+                requestId,
+                createdAt,
+                recordExpiresAt,
+                "1.0.0"
+        );
+    }
+
+    private ApiInvocationRecordEntity record(
+            String invocationExternalId,
+            InvocationKind kind,
+            String outcome,
+            UUID credentialId,
+            String requestId,
+            Instant createdAt,
+            Instant recordExpiresAt,
+            String resolvedReleaseVersion
+    ) {
         return new ApiInvocationRecordEntity(
                 UUID.randomUUID(),
                 invocationExternalId,
@@ -167,8 +232,8 @@ class ApiInvocationRecordRepositoryQueryTest {
                 requestId,
                 "idem-" + invocationExternalId,
                 "EXPLICIT_VERSION",
-                "1.0.0",
-                "1.0.0",
+                resolvedReleaseVersion,
+                resolvedReleaseVersion,
                 "DOCX",
                 "SYNC_STREAM",
                 outcome,

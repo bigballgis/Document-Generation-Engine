@@ -1167,6 +1167,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/templates/{templateId}/api/invocations/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export filtered management invocation history as CSV
+         * @description Downloads UTF-8 CSV for the current filter set (including resolvedReleaseVersion). Does not include caller variable plaintext. Results are capped; truncated exports set X-Export-Truncated=true.
+         */
+        get: operations["exportTemplateManagementInvocationsCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/templates/{templateId}/api/invocations/{invocationId}": {
         parameters: {
             query?: never;
@@ -1914,6 +1934,13 @@ export interface components {
             createdAt: string;
             documentPresent: boolean;
             auditLinkHint: components["schemas"]["ManagementInvocationAuditLinkHintView"];
+            /** @description Unified error envelope code for failed invocations; omitted/null when unavailable. */
+            errorCode?: string | null;
+            errorCategory?: string | null;
+            errorMessageKey?: string | null;
+            errorRetryable?: boolean | null;
+            /** @description Optional resolved message; may be absent for legacy rows. */
+            errorMessage?: string | null;
         };
         ManagementInvocationPageResponse: {
             metadata: components["schemas"]["Metadata"];
@@ -5794,6 +5821,8 @@ export interface operations {
                 createdAfter?: string;
                 createdBefore?: string;
                 credentialId?: string;
+                /** @description Exact match on resolved release version (semver string). Empty/omitted = no filter. */
+                resolvedReleaseVersion?: string;
             };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
@@ -5813,6 +5842,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ManagementInvocationPageResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    exportTemplateManagementInvocationsCsv: {
+        parameters: {
+            query?: {
+                status?: string;
+                invocationKind?: string;
+                requestId?: string;
+                createdAfter?: string;
+                createdBefore?: string;
+                credentialId?: string;
+                resolvedReleaseVersion?: string;
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CSV attachment returned. */
+            200: {
+                headers: {
+                    "Content-Disposition"?: string;
+                    "X-Export-Truncated"?: string;
+                    "X-Export-Total-Matched"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
                 };
             };
             401: components["responses"]["ErrorResponse"];

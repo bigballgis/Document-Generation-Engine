@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.api.ManagementInvocationDetailView;
@@ -12,6 +15,7 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.domain.AuthSource;
+import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.audit.persistence.AuditSearchPage;
 import com.bank.docgen.runtime.domain.InvocationKind;
 import com.bank.docgen.runtime.domain.InvocationStatus;
@@ -21,6 +25,7 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.service.TemplateService;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +45,8 @@ class ManagementInvocationQueryServiceTest {
     private ApiPolicyRepository apiPolicyRepository;
     @Mock
     private ApiInvocationRecordRepository invocationRecordRepository;
+    @Mock
+    private GroupAccessService groupAccessService;
 
     private ManagementInvocationQueryService service;
     private UUID templateId;
@@ -51,7 +58,8 @@ class ManagementInvocationQueryServiceTest {
         service = new ManagementInvocationQueryService(
                 templateService,
                 apiPolicyRepository,
-                invocationRecordRepository
+                invocationRecordRepository,
+                groupAccessService
         );
         templateId = UUID.randomUUID();
         credentialId = UUID.randomUUID();
@@ -70,19 +78,19 @@ class ManagementInvocationQueryServiceTest {
 
     @Test
     void listRecentInvocations_returnsSummaryWithoutParameters() {
-        stubReadableTemplate();
-        stubPolicy();
-        ApiInvocationRecordEntity entity = sampleEntity("INV-TEST001", "req-1", "SUCCESS");
+        stubManageableTemplate();
+        ApiInvocationRecordEntity entity = sampleEntity("INV-TEST001", "req-1", "SUCCESS", "1.0.0");
         when(invocationRecordRepository.searchManagementInvocations(
                 eq(templateId),
                 any(),
                 any(),
-                eq(null),
-                eq(null),
-                eq(null),
-                eq(null),
-                eq(null),
-                eq(null),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
                 eq(0),
                 eq(10)
         )).thenReturn(new AuditSearchPage<>(List.of(entity), 1, 1));
@@ -96,9 +104,8 @@ class ManagementInvocationQueryServiceTest {
 
     @Test
     void listInvocations_returnsPaginatedSummaryWithoutParameters() {
-        stubReadableTemplate();
-        stubPolicy();
-        ApiInvocationRecordEntity entity = sampleEntity("INV-PAGE001", "req-page", "SUCCESS");
+        stubManageableTemplate();
+        ApiInvocationRecordEntity entity = sampleEntity("INV-PAGE001", "req-page", "SUCCESS", "1.0.0");
         when(invocationRecordRepository.searchManagementInvocations(
                 eq(templateId),
                 any(),
@@ -109,6 +116,7 @@ class ManagementInvocationQueryServiceTest {
                 any(),
                 any(),
                 eq(credentialId),
+                isNull(),
                 eq(1),
                 eq(20)
         )).thenReturn(new AuditSearchPage<>(List.of(entity), 25, 2));
@@ -119,7 +127,8 @@ class ManagementInvocationQueryServiceTest {
                 "req",
                 Instant.parse("2026-06-01T00:00:00Z"),
                 Instant.parse("2026-06-30T23:59:59Z"),
-                credentialId
+                credentialId,
+                null
         );
         PageView<ManagementInvocationSummaryView> result = service.listInvocations(
                 templateId,
@@ -138,11 +147,74 @@ class ManagementInvocationQueryServiceTest {
     }
 
     @Test
-    void listInvocations_normalizesPageSizeToMax100() {
-        stubReadableTemplate();
-        stubPolicy();
+    void listInvocations_filtersByResolvedReleaseVersion() {
+        stubManageableTemplate();
+        ApiInvocationRecordEntity entity = sampleEntity("INV-REL120", "req-rel", "FAILURE", "1.2.0");
         when(invocationRecordRepository.searchManagementInvocations(
                 eq(templateId),
+                any(),
+                any(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                eq("1.2.0"),
+                eq(0),
+                eq(20)
+        )).thenReturn(new AuditSearchPage<>(List.of(entity), 1, 1));
+
+        PageView<ManagementInvocationSummaryView> result = service.listInvocations(
+                templateId,
+                session,
+                0,
+                20,
+                new ManagementInvocationFilters(null, null, null, null, null, null, "1.2.0")
+        );
+
+        assertThat(result.totalElements()).isEqualTo(1);
+        assertThat(result.content().getFirst().resolvedReleaseVersion()).isEqualTo("1.2.0");
+        assertThat(result.content().getFirst().invocationId()).isEqualTo("INV-REL120");
+    }
+
+    @Test
+    void listInvocations_combinesReleaseVersionAndStatusFilters() {
+        stubManageableTemplate();
+        ApiInvocationRecordEntity entity = sampleEntity("INV-COMBINED", "req-c", "FAILURE", "1.2.0");
+        when(invocationRecordRepository.searchManagementInvocations(
+                eq(templateId),
+                any(),
+                any(),
+                eq("FAILED"),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                eq("1.2.0"),
+                eq(0),
+                eq(20)
+        )).thenReturn(new AuditSearchPage<>(List.of(entity), 1, 1));
+
+        PageView<ManagementInvocationSummaryView> result = service.listInvocations(
+                templateId,
+                session,
+                0,
+                20,
+                new ManagementInvocationFilters("FAILED", null, null, null, null, null, "1.2.0")
+        );
+
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().getFirst().invocationId()).isEqualTo("INV-COMBINED");
+    }
+
+    @Test
+    void listInvocations_normalizesPageSizeToMax100() {
+        stubManageableTemplate();
+        when(invocationRecordRepository.searchManagementInvocations(
+                eq(templateId),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -168,9 +240,8 @@ class ManagementInvocationQueryServiceTest {
 
     @Test
     void getInvocationDetail_returnsSummaryWithoutParametersStorage() {
-        stubReadableTemplate();
-        stubPolicy();
-        ApiInvocationRecordEntity entity = sampleEntity("INV-DETAIL", "req-detail", "SUCCESS");
+        stubManageableTemplate();
+        ApiInvocationRecordEntity entity = sampleEntity("INV-DETAIL", "req-detail", "SUCCESS", "1.0.0");
         entity = withAuditAndDocument(entity, "audit-123", "doc-123");
         when(invocationRecordRepository.findByInvocationExternalId("INV-DETAIL"))
                 .thenReturn(Optional.of(entity));
@@ -184,47 +255,71 @@ class ManagementInvocationQueryServiceTest {
         assertThat(detail.documentPresent()).isTrue();
         assertThat(detail.auditLinkHint().requestId()).isEqualTo("req-detail");
         assertThat(detail.auditLinkHint().auditId()).isEqualTo("audit-123");
+        assertThat(detail.errorCode()).isNull();
+    }
+
+    @Test
+    void getInvocationDetail_returnsPersistedErrorEnvelope() {
+        stubManageableTemplate();
+        ApiInvocationRecordEntity entity = sampleEntity("INV-FAIL", "req-fail", "FAILURE", "1.2.0");
+        entity.applyErrorEnvelope(
+                "REQUEST_BODY_INVALID",
+                "RUNTIME",
+                "api.error.validation.requestBodyInvalid",
+                false,
+                "Request body is invalid."
+        );
+        when(invocationRecordRepository.findByInvocationExternalId("INV-FAIL"))
+                .thenReturn(Optional.of(entity));
+
+        ManagementInvocationDetailView detail = service.getInvocationDetail(templateId, "INV-FAIL", session);
+
+        assertThat(detail.errorCode()).isEqualTo("REQUEST_BODY_INVALID");
+        assertThat(detail.errorCategory()).isEqualTo("RUNTIME");
+        assertThat(detail.errorMessageKey()).isEqualTo("api.error.validation.requestBodyInvalid");
+        assertThat(detail.errorRetryable()).isFalse();
+        assertThat(detail.errorMessage()).isEqualTo("Request body is invalid.");
     }
 
     @Test
     void getInvocationDetail_crossTemplateDenied() {
-        stubReadableTemplate();
-        stubPolicy();
+        stubManageableTemplate();
         UUID otherTemplateId = UUID.randomUUID();
-        ApiInvocationRecordEntity entity = new ApiInvocationRecordEntity(
-                UUID.randomUUID(),
-                "INV-OTHER",
-                InvocationKind.SINGLE,
-                InvocationStatus.SUCCEEDED,
-                "dev",
+        ApiInvocationRecordEntity entity = sampleEntity("INV-OTHER", "req-other", "SUCCESS", "1.0.0");
+        entity = new ApiInvocationRecordEntity(
+                entity.getId(),
+                entity.getInvocationExternalId(),
+                entity.getInvocationKind(),
+                entity.getStatus(),
+                entity.getEnvironment(),
                 otherTemplateId,
                 "TPL-OTHER",
-                credentialId,
-                "svc-account-prod",
-                "req-other",
-                "idem-other",
-                "EXPLICIT_VERSION",
-                "1.0.0",
-                "1.0.0",
-                "DOCX",
-                "SYNC_STREAM",
-                "SUCCESS",
-                120L,
-                "{\"variables\":{\"secret\":\"value\"}}",
-                null,
-                null,
-                false,
-                Instant.now().plusSeconds(3600),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                Instant.now(),
-                Instant.now()
+                entity.getCredentialId(),
+                entity.getAccessAccount(),
+                entity.getRequestId(),
+                entity.getIdempotencyKey(),
+                entity.getRouteType(),
+                entity.getRequestedReleaseVersion(),
+                entity.getResolvedReleaseVersion(),
+                entity.getOutputFormat(),
+                entity.getOutputMode(),
+                entity.getOutcome(),
+                entity.getDurationMs(),
+                entity.getParametersStorage(),
+                entity.getDocumentId(),
+                entity.getArtifactStorageKey(),
+                entity.isArtifactSaved(),
+                entity.getRecordExpiresAt(),
+                entity.getDocumentExpiresAt(),
+                entity.getBatchExternalId(),
+                entity.getParentInvocationExternalId(),
+                entity.getItemId(),
+                entity.getTaskExternalId(),
+                entity.getIdempotencyRecordId(),
+                entity.getAuditId(),
+                entity.isBatch(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
         );
         when(invocationRecordRepository.findByInvocationExternalId("INV-OTHER"))
                 .thenReturn(Optional.of(entity));
@@ -235,10 +330,8 @@ class ManagementInvocationQueryServiceTest {
 
     @Test
     void getInvocationDetail_expiredRecordDenied() {
-        stubReadableTemplate();
-        stubPolicy();
-        ApiInvocationRecordEntity entity = sampleEntity("INV-EXPIRED", "req-expired", "SUCCESS");
-        entity = expiredEntity(entity);
+        stubManageableTemplate();
+        ApiInvocationRecordEntity entity = expiredEntity(sampleEntity("INV-EXPIRED", "req-expired", "SUCCESS", "1.0.0"));
         when(invocationRecordRepository.findByInvocationExternalId("INV-EXPIRED"))
                 .thenReturn(Optional.of(entity));
 
@@ -247,11 +340,87 @@ class ManagementInvocationQueryServiceTest {
     }
 
     @Test
+    void exportInvocationsCsv_respectsFiltersAndOmitsParameters() {
+        stubManageableTemplate();
+        ApiInvocationRecordEntity entity = sampleEntity("INV-CSV", "req-csv", "FAILURE", "1.2.0");
+        entity.applyErrorEnvelope("REQUEST_BODY_INVALID", "RUNTIME", "api.error.validation.requestBodyInvalid", false, null);
+        when(invocationRecordRepository.searchManagementInvocations(
+                eq(templateId),
+                any(),
+                any(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                eq("1.2.0"),
+                eq(0),
+                eq(ManagementInvocationQueryService.MAX_EXPORT_ROWS)
+        )).thenReturn(new AuditSearchPage<>(List.of(entity), 1, 1));
+
+        ManagementInvocationCsvExport export = service.exportInvocationsCsv(
+                templateId,
+                session,
+                new ManagementInvocationFilters(null, null, null, null, null, null, "1.2.0")
+        );
+
+        String csv = new String(export.content(), StandardCharsets.UTF_8);
+        assertThat(csv).contains("invocationId,requestId,invocationKind,status,resolvedReleaseVersion");
+        assertThat(csv).contains("INV-CSV");
+        assertThat(csv).contains("1.2.0");
+        assertThat(csv).contains("REQUEST_BODY_INVALID");
+        assertThat(csv).doesNotContain("parameters");
+        assertThat(csv).doesNotContain("secret");
+        assertThat(export.truncated()).isFalse();
+        assertThat(export.filename()).contains(templateId.toString());
+    }
+
+    @Test
+    void listInvocations_deniedWithoutCanManageApiPolicy() {
+        when(groupAccessService.canManageApiPolicy(session)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.listInvocations(
+                templateId,
+                session,
+                0,
+                20,
+                ManagementInvocationFilters.empty()
+        )).isInstanceOf(ApiManagementAccessDeniedException.class);
+
+        verify(invocationRecordRepository, never()).searchManagementInvocations(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(Integer.class), any(Integer.class)
+        );
+    }
+
+    @Test
+    void exportInvocationsCsv_deniedWithoutCanManageApiPolicy() {
+        when(groupAccessService.canManageApiPolicy(session)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.exportInvocationsCsv(
+                templateId,
+                session,
+                ManagementInvocationFilters.empty()
+        )).isInstanceOf(ApiManagementAccessDeniedException.class);
+    }
+
+    @Test
+    void getInvocationDetail_deniedWithoutCanManageApiPolicy() {
+        when(groupAccessService.canManageApiPolicy(session)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.getInvocationDetail(templateId, "INV-ANY", session))
+                .isInstanceOf(ApiManagementAccessDeniedException.class);
+
+        verify(invocationRecordRepository, never()).findByInvocationExternalId(any());
+    }
+
+    @Test
     void maskAccessAccount_masksLongValues() {
         assertThat(ManagementInvocationQueryService.maskAccessAccount("svc-account")).isEqualTo("svc***");
     }
 
-    private void stubReadableTemplate() {
+    private void stubManageableTemplate() {
+        when(groupAccessService.canManageApiPolicy(session)).thenReturn(true);
         TemplateEntity template = new TemplateEntity(
                 templateId,
                 "TPL-001",
@@ -263,14 +432,16 @@ class ManagementInvocationQueryServiceTest {
         );
         template.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
         when(templateService.requireReadableTemplate(templateId, session)).thenReturn(template);
-    }
-
-    private void stubPolicy() {
         when(apiPolicyRepository.findByTemplateId(templateId))
                 .thenReturn(Optional.of(new ApiPolicyEntity(UUID.randomUUID(), templateId, "[]", "10000001")));
     }
 
-    private ApiInvocationRecordEntity sampleEntity(String invocationId, String requestId, String outcome) {
+    private ApiInvocationRecordEntity sampleEntity(
+            String invocationId,
+            String requestId,
+            String outcome,
+            String releaseVersion
+    ) {
         Instant now = Instant.now();
         return new ApiInvocationRecordEntity(
                 UUID.randomUUID(),
@@ -285,8 +456,8 @@ class ManagementInvocationQueryServiceTest {
                 requestId,
                 "idem-1",
                 "EXPLICIT_VERSION",
-                "1.0.0",
-                "1.0.0",
+                releaseVersion,
+                releaseVersion,
                 "DOCX",
                 "SYNC_STREAM",
                 outcome,
@@ -314,7 +485,6 @@ class ManagementInvocationQueryServiceTest {
             String auditId,
             String documentId
     ) {
-        Instant now = Instant.now();
         return new ApiInvocationRecordEntity(
                 entity.getId(),
                 entity.getInvocationExternalId(),

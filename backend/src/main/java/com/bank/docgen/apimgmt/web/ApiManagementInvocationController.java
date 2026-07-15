@@ -2,6 +2,7 @@ package com.bank.docgen.apimgmt.web;
 
 import com.bank.docgen.apimgmt.api.ManagementInvocationDetailView;
 import com.bank.docgen.apimgmt.api.ManagementInvocationSummaryView;
+import com.bank.docgen.apimgmt.service.ManagementInvocationCsvExport;
 import com.bank.docgen.apimgmt.service.ManagementInvocationFilters;
 import com.bank.docgen.apimgmt.service.ManagementInvocationQueryService;
 import com.bank.docgen.authorization.management.api.PageView;
@@ -12,6 +13,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,6 +62,7 @@ public class ApiManagementInvocationController {
             @RequestParam(required = false) Instant createdAfter,
             @RequestParam(required = false) Instant createdBefore,
             @RequestParam(required = false) UUID credentialId,
+            @RequestParam(required = false) String resolvedReleaseVersion,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
@@ -67,7 +72,8 @@ public class ApiManagementInvocationController {
                 requestId,
                 createdAfter,
                 createdBefore,
-                credentialId
+                credentialId,
+                resolvedReleaseVersion
         );
         return envelopes.envelope(request, managementInvocationQueryService.listInvocations(
                 templateId,
@@ -76,6 +82,40 @@ public class ApiManagementInvocationController {
                 size,
                 filters
         ));
+    }
+
+    @GetMapping(value = "/invocations/export", produces = "text/csv")
+    public ResponseEntity<byte[]> exportInvocationsCsv(
+            @PathVariable UUID templateId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String invocationKind,
+            @RequestParam(required = false) String requestId,
+            @RequestParam(required = false) Instant createdAfter,
+            @RequestParam(required = false) Instant createdBefore,
+            @RequestParam(required = false) UUID credentialId,
+            @RequestParam(required = false) String resolvedReleaseVersion,
+            @AuthenticationPrincipal ManagementSessionClaims session
+    ) {
+        ManagementInvocationFilters filters = new ManagementInvocationFilters(
+                status,
+                invocationKind,
+                requestId,
+                createdAfter,
+                createdBefore,
+                credentialId,
+                resolvedReleaseVersion
+        );
+        ManagementInvocationCsvExport export = managementInvocationQueryService.exportInvocationsCsv(
+                templateId,
+                session,
+                filters
+        );
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + export.filename() + "\"")
+                .header("X-Export-Truncated", Boolean.toString(export.truncated()))
+                .header("X-Export-Total-Matched", Long.toString(export.totalMatched()))
+                .contentType(new MediaType("text", "csv"))
+                .body(export.content());
     }
 
     @GetMapping("/invocations/{invocationId}")

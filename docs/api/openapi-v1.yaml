@@ -2535,6 +2535,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: resolvedReleaseVersion
+          in: query
+          required: false
+          description: Exact match on resolved release version (semver string). Empty/omitted = no filter.
+          schema:
+            type: string
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
         '200':
@@ -2543,6 +2549,87 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ManagementInvocationPageResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/api/invocations/export:
+    get:
+      tags: [Admin]
+      operationId: exportTemplateManagementInvocationsCsv
+      summary: Export filtered management invocation history as CSV
+      description: >-
+        Downloads UTF-8 CSV for the current filter set (including resolvedReleaseVersion).
+        Does not include caller variable plaintext. Results are capped; truncated exports
+        set X-Export-Truncated=true.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: invocationKind
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: requestId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: createdAfter
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: createdBefore
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: credentialId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: resolvedReleaseVersion
+          in: query
+          required: false
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: CSV attachment returned.
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+            X-Export-Truncated:
+              schema:
+                type: string
+            X-Export-Total-Matched:
+              schema:
+                type: string
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
@@ -4516,6 +4603,23 @@ components:
           type: boolean
         auditLinkHint:
           $ref: '#/components/schemas/ManagementInvocationAuditLinkHintView'
+        errorCode:
+          type: string
+          nullable: true
+          description: Unified error envelope code for failed invocations; omitted/null when unavailable.
+        errorCategory:
+          type: string
+          nullable: true
+        errorMessageKey:
+          type: string
+          nullable: true
+        errorRetryable:
+          type: boolean
+          nullable: true
+        errorMessage:
+          type: string
+          nullable: true
+          description: Optional resolved message; may be absent for legacy rows.
     ManagementInvocationPageResponse:
       type: object
       additionalProperties: false

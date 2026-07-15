@@ -19,6 +19,7 @@ const {
   totalElements,
   loading,
   loadFailed,
+  exporting,
   rows,
   filterDraft,
   drawerVisible,
@@ -31,6 +32,7 @@ const {
   clearFilters,
   openInvocationSummary,
   copyTechnicalId,
+  exportCsv,
 } = useTemplateInvocationsPanel({
   templateId: toRef(props, 'templateId'),
 })
@@ -67,12 +69,31 @@ const {
           <el-input v-model="filterDraft.requestId" clearable />
         </div>
       </el-form-item>
+      <el-form-item
+        :label="t('templates.policy.invocations.filters.releaseVersion')"
+        class="filter-item"
+      >
+        <div data-testid="invocation-release-version-filter">
+          <el-input
+            v-model="filterDraft.resolvedReleaseVersion"
+            clearable
+            :placeholder="t('templates.policy.invocations.filters.releaseVersionPlaceholder')"
+          />
+        </div>
+      </el-form-item>
       <div class="filters-actions">
-        <el-button type="primary" @click="applyFilters">
+        <el-button type="primary" data-testid="invocation-apply-filters" @click="applyFilters">
           {{ t('templates.policy.invocations.filters.apply') }}
         </el-button>
         <el-button @click="clearFilters">
           {{ t('templates.policy.invocations.filters.clear') }}
+        </el-button>
+        <el-button
+          data-testid="invocation-export-csv"
+          :loading="exporting"
+          @click="exportCsv"
+        >
+          {{ t('templates.policy.invocations.exportCsv') }}
         </el-button>
       </div>
     </div>
@@ -135,6 +156,15 @@ const {
           :label="t('templates.policy.invocations.columns.status')"
           min-width="120"
         />
+        <el-table-column
+          prop="resolvedReleaseVersion"
+          :label="t('templates.policy.invocations.columns.releaseVersion')"
+          min-width="120"
+        >
+          <template #default="{ row }">
+            {{ row.resolvedReleaseVersion || '—' }}
+          </template>
+        </el-table-column>
         <el-table-column
           :label="t('templates.policy.invocations.columns.requestId')"
           min-width="180"

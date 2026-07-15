@@ -36,6 +36,17 @@ const auditLinkTarget = computed(() => {
   }
 })
 
+const showErrorEnvelope = computed(() => {
+  const value = detail.value
+  if (!value) {
+    return false
+  }
+  // U11-C4 / IRC-004: render envelope on failed outcomes; missing fields show "—" (U11-C3).
+  // Runtime persists outcome as SUCCESS | FAILURE; tolerate FAILED / PARTIAL_SUCCEEDED aliases.
+  const outcome = value.outcome?.trim().toUpperCase() ?? ''
+  return outcome === 'FAILURE' || outcome === 'FAILED' || outcome === 'PARTIAL_SUCCEEDED'
+})
+
 function formatRouteSummary(value: ManagementInvocationDetail | null): string {
   if (!value) {
     return '—'
@@ -48,6 +59,13 @@ function formatRouteSummary(value: ManagementInvocationDetail | null): string {
 
 function formatOptionalText(value: string | null | undefined): string {
   return value?.trim() ? value : '—'
+}
+
+function formatRetryable(value: boolean | null | undefined): string {
+  if (value == null) {
+    return '—'
+  }
+  return value ? t('common.yes') : t('common.no')
 }
 
 function formatDuration(value: number | null | undefined): string {
@@ -150,6 +168,36 @@ watch(
         </div>
       </dl>
 
+      <section
+        v-if="showErrorEnvelope"
+        class="error-envelope"
+        data-testid="invocation-error-envelope"
+      >
+        <h3>{{ t('templates.policy.invocations.drawer.errorEnvelopeTitle') }}</h3>
+        <dl class="summary-list">
+          <div class="summary-row">
+            <dt>{{ t('templates.policy.invocations.drawer.fields.errorCode') }}</dt>
+            <dd data-testid="invocation-error-code">{{ formatOptionalText(detail.errorCode) }}</dd>
+          </div>
+          <div class="summary-row">
+            <dt>{{ t('templates.policy.invocations.drawer.fields.errorCategory') }}</dt>
+            <dd>{{ formatOptionalText(detail.errorCategory) }}</dd>
+          </div>
+          <div class="summary-row">
+            <dt>{{ t('templates.policy.invocations.drawer.fields.errorMessageKey') }}</dt>
+            <dd>{{ formatOptionalText(detail.errorMessageKey) }}</dd>
+          </div>
+          <div class="summary-row">
+            <dt>{{ t('templates.policy.invocations.drawer.fields.errorRetryable') }}</dt>
+            <dd>{{ formatRetryable(detail.errorRetryable) }}</dd>
+          </div>
+          <div v-if="detail.errorMessage" class="summary-row">
+            <dt>{{ t('templates.policy.invocations.drawer.fields.errorMessage') }}</dt>
+            <dd>{{ detail.errorMessage }}</dd>
+          </div>
+        </dl>
+      </section>
+
       <div v-if="canLinkAudit && auditLinkTarget" class="drawer-actions">
         <RouterLink :to="auditLinkTarget" class="audit-link">
           {{ t('templates.policy.invocations.drawer.auditLink') }}
@@ -187,6 +235,19 @@ watch(
     color: var(--text-primary);
     font-size: var(--font-size-sm);
     word-break: break-word;
+  }
+}
+
+.error-envelope {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+
+  h3 {
+    margin: 0 0 var(--space-3);
+    color: var(--text-primary);
+    font-size: var(--font-size-md);
+    font-weight: 600;
   }
 }
 

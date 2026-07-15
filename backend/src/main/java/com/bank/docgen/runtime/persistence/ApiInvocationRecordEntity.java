@@ -116,6 +116,21 @@ public class ApiInvocationRecordEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "error_code", length = 128)
+    private String errorCode;
+
+    @Column(name = "error_category", length = 64)
+    private String errorCategory;
+
+    @Column(name = "error_message_key", length = 256)
+    private String errorMessageKey;
+
+    @Column(name = "error_retryable")
+    private Boolean errorRetryable;
+
+    @Column(name = "error_message", length = 1024)
+    private String errorMessage;
+
     protected ApiInvocationRecordEntity() {
     }
 
@@ -319,6 +334,40 @@ public class ApiInvocationRecordEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public String getErrorCategory() {
+        return errorCategory;
+    }
+
+    public String getErrorMessageKey() {
+        return errorMessageKey;
+    }
+
+    public Boolean getErrorRetryable() {
+        return errorRetryable;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void applyErrorEnvelope(
+            String errorCode,
+            String errorCategory,
+            String errorMessageKey,
+            Boolean errorRetryable,
+            String errorMessage
+    ) {
+        this.errorCode = errorCode;
+        this.errorCategory = errorCategory;
+        this.errorMessageKey = errorMessageKey;
+        this.errorRetryable = errorRetryable;
+        this.errorMessage = errorMessage;
     }
 
     public void updateTerminalStatus(InvocationStatus status, String outcome, Instant updatedAt) {

@@ -4,6 +4,7 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
 import com.bank.docgen.runtime.api.BatchResultView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
+import com.bank.docgen.runtime.domain.InvocationErrorEnvelope;
 import com.bank.docgen.runtime.domain.TaskStatus;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordEntity;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordRepository;
@@ -60,6 +61,42 @@ public class InvocationRecordService {
             String outcome,
             String auditId
     ) {
+        return recordSingleSync(
+                template,
+                policy,
+                session,
+                environment,
+                routeType,
+                requestedReleaseVersion,
+                resolvedReleaseVersion,
+                request,
+                documentId,
+                artifactStorageKey,
+                outcome,
+                auditId,
+                null
+        );
+    }
+
+    /**
+     * Records a single sync invocation, optionally attaching a unified error envelope (CE-U11).
+     */
+    @Transactional
+    public String recordSingleSync(
+            TemplateEntity template,
+            ApiPolicyEntity policy,
+            RuntimeSessionClaims session,
+            String environment,
+            String routeType,
+            String requestedReleaseVersion,
+            String resolvedReleaseVersion,
+            GenerateRequestBody request,
+            String documentId,
+            String artifactStorageKey,
+            String outcome,
+            String auditId,
+            InvocationErrorEnvelope errorEnvelope
+    ) {
         Instant now = Instant.now();
         ApiInvocationRecordEntity entity = entities.buildSingleSync(
                 template,
@@ -76,6 +113,15 @@ public class InvocationRecordService {
                 auditId,
                 now
         );
+        if (errorEnvelope != null) {
+            entity.applyErrorEnvelope(
+                    errorEnvelope.code(),
+                    errorEnvelope.category(),
+                    errorEnvelope.messageKey(),
+                    errorEnvelope.retryable(),
+                    errorEnvelope.message()
+            );
+        }
         repository.save(entity);
         return entity.getInvocationExternalId();
     }

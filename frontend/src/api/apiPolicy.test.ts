@@ -321,6 +321,7 @@ describe('apiPolicy API', () => {
       status: 'FAILED',
       invocationKind: 'SINGLE',
       requestId: 'req-abc',
+      resolvedReleaseVersion: '1.2.0',
     })
 
     expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/api/invocations', {
@@ -330,10 +331,36 @@ describe('apiPolicy API', () => {
         status: 'FAILED',
         invocationKind: 'SINGLE',
         requestId: 'req-abc',
+        resolvedReleaseVersion: '1.2.0',
       },
     })
     expect(page.content).toHaveLength(1)
     expect(page.totalElements).toBe(25)
+  })
+
+  it('exports invocations csv with applied filters', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: new Blob(['csv'], { type: 'text/csv' }),
+      headers: {
+        'content-disposition': 'attachment; filename="invocations-tpl-1.csv"',
+        'x-export-truncated': 'false',
+      },
+    })
+
+    const result = await apiPolicyApi.exportInvocationsCsv('tpl-1', {
+      resolvedReleaseVersion: '1.2.0',
+      status: 'FAILED',
+    })
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/api/invocations/export', {
+      params: {
+        resolvedReleaseVersion: '1.2.0',
+        status: 'FAILED',
+      },
+      responseType: 'blob',
+    })
+    expect(result.filename).toBe('invocations-tpl-1.csv')
+    expect(result.truncated).toBe(false)
   })
 
   it('loads invocation detail summary', async () => {
@@ -345,7 +372,7 @@ describe('apiPolicy API', () => {
           requestId: 'req-abc',
           routeType: 'DEFAULT',
           resolvedReleaseVersion: '1.0.0',
-          outcome: 'SUCCEEDED',
+          outcome: 'SUCCESS',
           durationMs: 120,
           accessAccountSummary: 'svc***',
           credentialId: 'cred-1',
@@ -357,6 +384,11 @@ describe('apiPolicy API', () => {
             requestId: 'req-abc',
             auditId: 'audit-1',
           },
+          errorCode: null,
+          errorCategory: null,
+          errorMessageKey: null,
+          errorRetryable: null,
+          errorMessage: null,
         },
       },
     })
@@ -364,8 +396,49 @@ describe('apiPolicy API', () => {
     const detail = await apiPolicyApi.getInvocationDetail('tpl-1', 'inv-1')
 
     expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/api/invocations/inv-1')
-    expect(detail.outcome).toBe('SUCCEEDED')
+    expect(detail.outcome).toBe('SUCCESS')
+    expect(detail.errorCode).toBeNull()
     expect(detail.auditLinkHint.requestId).toBe('req-abc')
+  })
+
+  it('loads invocation detail error envelope fields', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          invocationId: 'inv-fail',
+          requestId: 'req-fail',
+          routeType: 'DEFAULT',
+          resolvedReleaseVersion: '1.2.0',
+          outcome: 'FAILURE',
+          durationMs: 40,
+          accessAccountSummary: 'svc***',
+          credentialId: 'cred-1',
+          batchId: null,
+          parentInvocationId: null,
+          createdAt: '2026-06-23T10:00:00Z',
+          documentPresent: false,
+          auditLinkHint: {
+            requestId: 'req-fail',
+            auditId: null,
+          },
+          errorCode: 'REQUEST_BODY_INVALID',
+          errorCategory: 'VALIDATION',
+          errorMessageKey: 'api.error.validation.requestBodyInvalid',
+          errorRetryable: false,
+          errorMessage: 'Request body is invalid.',
+        },
+      },
+    })
+
+    const detail = await apiPolicyApi.getInvocationDetail('tpl-1', 'inv-fail')
+
+    expect(detail.outcome).toBe('FAILURE')
+    expect(detail.errorCode).toBe('REQUEST_BODY_INVALID')
+    expect(detail.errorCategory).toBe('VALIDATION')
+    expect(detail.errorMessageKey).toBe('api.error.validation.requestBodyInvalid')
+    expect(detail.errorRetryable).toBe(false)
+    expect(detail.errorMessage).toBe('Request body is invalid.')
   })
 
   it('loads routes summary for a template', async () => {

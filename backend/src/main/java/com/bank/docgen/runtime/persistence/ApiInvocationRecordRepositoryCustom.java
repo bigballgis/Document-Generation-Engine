@@ -18,6 +18,7 @@ public interface ApiInvocationRecordRepositoryCustom {
             Instant createdAfter,
             Instant createdBefore,
             UUID credentialId,
+            String resolvedReleaseVersion,
             int page,
             int size
     );
