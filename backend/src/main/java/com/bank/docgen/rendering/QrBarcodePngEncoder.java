@@ -1,5 +1,7 @@
 package com.bank.docgen.rendering;
 
+import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -34,7 +36,8 @@ final class QrBarcodePngEncoder {
         } catch (DocxAssemblyException ex) {
             throw ex;
         } catch (WriterException | IOException | IllegalArgumentException ex) {
-            throw encodeFailed(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage(), ex);
+            // ADR-0020: never put raw ex.getMessage() into assembly detail (logged by assembly support).
+            throw encodeFailed(ex);
         }
     }
 
@@ -61,19 +64,21 @@ final class QrBarcodePngEncoder {
         };
     }
 
-    private static DocxAssemblyException encodeFailed(String detail) {
+    private static DocxAssemblyException encodeFailed(String reason) {
         return new DocxAssemblyException(
+                ApiErrorCodes.RENDERING_FAILED,
+                ApiErrorCategories.RENDERING,
                 "api.error.rendering.qrBarcodeEncodeFailed",
-                "Failed to encode qrBarcodeRef payload: " + detail
+                "Failed to encode qrBarcodeRef payload (" + reason + ")"
         );
     }
 
-    private static DocxAssemblyException encodeFailed(String detail, Throwable cause) {
+    private static DocxAssemblyException encodeFailed(Throwable cause) {
         return new DocxAssemblyException(
-                "RENDERING_FAILED",
-                "RENDERING",
+                ApiErrorCodes.RENDERING_FAILED,
+                ApiErrorCategories.RENDERING,
                 "api.error.rendering.qrBarcodeEncodeFailed",
-                "Failed to encode qrBarcodeRef payload: " + detail,
+                "Failed to encode qrBarcodeRef payload (" + cause.getClass().getSimpleName() + ")",
                 cause
         );
     }

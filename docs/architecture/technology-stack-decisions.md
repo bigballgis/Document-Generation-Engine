@@ -108,6 +108,7 @@ Source-of-truth boundary:
 | Download link security strategy | Presigned URL + short expiration | ADR Accepted | ADR 0034 | 2026-06-08 |
 | File content encryption algorithm strategy | AES-256-GCM | ADR Accepted | ADR 0001 | 2026-06-08 |
 | Template rendering engine strategy | DOCX template engine + separate rendering service | ADR Accepted | ADR 0019 | 2026-06-08 |
+| qrBarcodeRef PNG generation | ZXing core + javase 3.5.3 | Session Confirmed, ADR Pending | CE-K06b; `backend/pom.xml` (`zxing.version`) | 2026-07-15 |
 | PDF conversion engine strategy | LibreOffice headless mode | ADR Accepted | ADR 0019 | 2026-06-08 |
 | Document preview generation strategy | Asynchronous pre-generated preview files | ADR Accepted | ADR 0019 | 2026-06-08 |
 | Frontend package manager lock strategy | Enforce pnpm-lock.yaml | ADR Accepted | ADR 0029 | 2026-06-08 |
