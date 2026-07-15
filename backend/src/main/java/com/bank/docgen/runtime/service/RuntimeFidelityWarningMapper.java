@@ -131,6 +131,12 @@ public class RuntimeFidelityWarningMapper {
                 "region=pdf-page-number",
                 "Page-number stamp post-processing failed without blocking generation.",
                 "Retry generation or inspect the PDF page-number profile if page numbers are required.");
+        put(catalog, "DOCX_PERMISSIONS_NOT_APPLIED",
+                "docxPermissionsNotApplied",
+                "Requested encryption permissions were not applied because permissions map only to PDF output.",
+                "region=encryption-permissions",
+                "Non-empty encryption.permissions were requested for DOCX output.",
+                "Omit permissions for DOCX, or use PDF output when access-permission bits are required.");
         put(catalog, "PARTIAL_TABLE_LAYOUT_ADJUSTMENT",
                 "partialTableLayoutAdjustment",
                 "A partial table layout adjustment was applied during rendering.",

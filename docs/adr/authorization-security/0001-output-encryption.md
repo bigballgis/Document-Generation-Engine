@@ -18,7 +18,7 @@ related:
 
 ## Status
 
-Accepted
+Accepted (operational-mapping amend 2026-07-15 — CE-C06)
 
 ## Context
 
@@ -54,6 +54,18 @@ If `encryption.enabled=false` or `enabled` is omitted while `openPassword`, `own
 
 If encryption parameters are valid but encryption processing fails, the platform returns `500 ENCRYPTION_FAILED` with `retryable=true`. Error responses, logs, and audit records must not expose passwords, internal encryption details, or sensitive configuration values.
 
+## Amendment — 2026-07-15 (permissions mapping boundary only; CE-C06)
+
+**Does not rewrite the Decision history above.** Clarifies v1 operational mapping:
+
+- `encryption.permissions` **apply only when `output.format=PDF`**.
+- DOCX continues to support `openPassword` encryption; non-empty `permissions` on DOCX that pass structural validation **do not** map to DOCX write-protect / permission bits.
+- Such DOCX requests **succeed** with success-path warning `DOCX_PERMISSIONS_NOT_APPLIED` (via `fidelityWarnings` / SYNC_STREAM fidelity headers) — they are **not** rejected with `400` solely for format≠PDF.
+- Apache POI DOCX write-protect remains **out of scope** for CE-C06 (future slice).
+- Structural rules in Decision (ownerPassword required with permissions; enabled consistency; password baseline; unsupported enum values → 400) remain in force.
+
+Behavior SoT: [ce-c06-docx-permissions-boundary.md](../../behavior/ce-c06-docx-permissions-boundary.md).
+
 ## Consequences
 
 - Output encryption becomes a first-class product requirement for both DOCX and PDF.
@@ -63,6 +75,7 @@ If encryption parameters are valid but encryption processing fails, the platform
 - Audit records must capture whether encryption was enabled and the confirmed encryption policy summary: output format, whether `openPassword` was provided, whether `ownerPassword` was provided, and a `permissions` summary.
 - Callers get immediate parameter feedback for weak passwords, missing required password fields, unsupported permission combinations, and inconsistent `enabled` usage.
 - `permissions` stays contract-level and format-neutral while still allowing the platform to map to DOCX/PDF-specific encryption capabilities later.
+- **CE-C06:** v1 maps `permissions` to PDF only; DOCX+permissions warns rather than inventing DOCX write-protect in this slice.
 - Encryption processing failures remain retryable platform failures without exposing sensitive implementation or password details.
 
 ## Alternatives Considered
@@ -73,6 +86,7 @@ If encryption parameters are valid but encryption processing fails, the platform
 - Allow encryption subfields when `enabled` is false or omitted: rejected because callers could incorrectly believe an encrypted file was produced.
 - Make password strength fully caller-defined: rejected because the API needs a clear minimum baseline for financial document outputs.
 - Define separate DOCX and PDF permission objects in the baseline: rejected for now because a unified abstract enum keeps the generated API contract simpler while field naming and schema format are still pending.
+- Hard-fail DOCX+permissions with 400: rejected for CE-C06 in favor of warn-and-continue (product intent).
 
 ## Related Documents
 
@@ -80,3 +94,4 @@ If encryption parameters are valid but encryption processing fails, the platform
 - [PRD](../../product/PRD.md)
 - [Domain Model](../../domain/domain-model.md)
 - [Permission Matrix](../../security/permission-matrix.md)
+- [CE-C06 behavior](../../behavior/ce-c06-docx-permissions-boundary.md)

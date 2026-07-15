@@ -601,7 +601,7 @@ DOCX/PDF 动态加密 API 参数采用标准模型，支持：
 - 是否传入 ownerPassword。
 - permissions 权限摘要。
 
-`encryption.enabled=true` 时，`openPassword` 必填，`ownerPassword` 可选。`permissions` 采用统一抽象权限枚举，按 DOCX/PDF 输出格式映射到对应加密能力；v1 权限枚举确认为 `ALLOW_PRINT`、`ALLOW_COPY`、`ALLOW_EDIT`、`ALLOW_ANNOTATE`、`ALLOW_FORM_FILL`；传入 `permissions` 时必须同时传入 `ownerPassword`。不支持的权限组合、缺少必需密码、`enabled=false` 或未传 `enabled` 时仍传入加密子字段，均返回 `400 ENCRYPTION_PARAMETER_INVALID`。
+`encryption.enabled=true` 时，`openPassword` 必填，`ownerPassword` 可选。`permissions` 采用统一抽象权限枚举；**v1 仅对 PDF 输出映射并生效**（CE-C06）；DOCX 仍可用 `openPassword` 加密，但非空 `permissions` **不**映射为 DOCX 写保护——结构合法时成功并警告 `DOCX_PERMISSIONS_NOT_APPLIED`（见 [ce-c06-docx-permissions-boundary.md](../behavior/ce-c06-docx-permissions-boundary.md)）。v1 权限枚举确认为 `ALLOW_PRINT`、`ALLOW_COPY`、`ALLOW_EDIT`、`ALLOW_ANNOTATE`、`ALLOW_FORM_FILL`；传入 `permissions` 时必须同时传入 `ownerPassword`。不支持的权限枚举值、缺少必需密码、`enabled=false` 或未传 `enabled` 时仍传入加密子字段，均返回 `400 ENCRYPTION_PARAMETER_INVALID`。Apache POI DOCX write-protect 不在 CE-C06 范围。
 
 `openPassword` 和 `ownerPassword` 的密码强度基线为最少 12 字符、最长 128 字符；如果两者同时传入，二者必须不同。不满足时返回 `400 ENCRYPTION_PARAMETER_INVALID`。
 

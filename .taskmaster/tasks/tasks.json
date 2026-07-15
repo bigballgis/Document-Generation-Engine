@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). #89 CE-U13 → Done (merge ccdfacda). No sole-active CE leaf. Next queue head (parked/pending): #71 CE-C06.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#74/#88/#89 Done. No sole-active CE delivery leaf (single-lane serial). Next recommended: #71 CE-C06 parked (pending — do not activate until deliver). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). #89 CE-U13 → Done (merge ccdfacda). Sole-active CE leaf: #71 CE-C06.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#74/#88/#89 Done. Sole-active CE delivery leaf (single-lane serial): #71 CE-C06 (in-progress). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T04:40:00.000Z"
+        "updatedAt": "2026-07-16T04:55:00.000Z"
       },
       {
         "id": "54",
@@ -978,16 +978,16 @@
       {
         "id": "71",
         "title": "CE-C06: DOCX permissions boundary docs",
-        "description": "PENDING (parked — next sole-active recommendation after #89 CE-U13 Done). Slice ce-c06-docx-permissions-boundary. Document permissions PDF-only; warn DOCX+permissions. P2·S. No POI write-protect. Do NOT set in-progress until deliver activates this leaf.",
-        "details": "Soft after C05 (#70). #89 CE-U13 → Done (merge ccdfacda). Remains pending/parked as next single-lane queue head — do not fan-out. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §5 CE-C06.",
-        "testStrategy": "1. Contract text clear. 2. Warning on DOCX+permissions. 3. Tests + docs.",
+        "description": "IN PROGRESS 2026-07-16. Slice ce-c06-docx-permissions-boundary. Worktree D:/working/DGE-ce-c06-docx-permissions-boundary · feat/ce-c06-docx-permissions-boundary. permissions PDF-only; DOCX+permissions → DOCX_PERMISSIONS_NOT_APPLIED warning (not 400). P2·S. No POI write-protect. Dep #70 Done. Activated after #89 CE-U13 Done (merge ccdfacda).",
+        "details": "Activated for deliver after #89 CE-U13 Done. BDD ready: docs/behavior/ce-c06-docx-permissions-boundary.md (BDD-CE-C06-001…012). Soft after C05 (#70 Done). Stage 4 backend-engineer TDD in flight. Gates before Done: mvn verify + frontend as applicable; E2E N/A unless FE changes; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §5 CE-C06 In Progress. Sole-active CE leaf under #53.",
+        "testStrategy": "1. BDD-CE-C06-001…012 Red then Green. 2. Contract text PDF-only. 3. Warning on DOCX+permissions (not 400). 4. PDF permissions unchanged. 5. mvn verify.",
         "priority": "low",
         "dependencies": [
           "70"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T04:40:00.000Z"
+        "updatedAt": "2026-07-16T04:55:00.000Z"
       },
       {
         "id": "72",

@@ -117,4 +117,35 @@ class SyncStreamFidelityWarningHeadersTest {
         assertThat(response.getHeader("fidelityWarningCount")).isEqualTo("0");
         assertThat(response.getHeader("fidelityWarningCodes")).isEmpty();
     }
+
+    @Test
+    void bddCeC06_005_syncStreamHeaderIncludesDocxPermissionsNotApplied() throws Exception {
+        SyncGenerateResult result = new SyncGenerateResult(
+                new byte[]{1, 2, 3},
+                null,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "DOC-C06",
+                "1.0.0",
+                List.of(FidelityWarningCode.DOCX_PERMISSIONS_NOT_APPLIED.name()),
+                "IDEMPOTENCY_NEW"
+        );
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getHeader("X-Trace-Id")).thenReturn("TRACE-C06");
+
+        GenerateRequestBody body = new GenerateRequestBody(
+                new OutputOptionsView("DOCX", "SYNC_STREAM"),
+                null,
+                null,
+                "req-c06",
+                "idem-c06",
+                null
+        );
+
+        support.writeSyncResponse(request, response, "TPL-C06", "EXPLICIT_VERSION", body, result, "INV-1");
+
+        assertThat(response.getHeader("fidelityWarningCount")).isEqualTo("1");
+        assertThat(response.getHeader("fidelityWarningCodes"))
+                .isEqualTo(FidelityWarningCode.DOCX_PERMISSIONS_NOT_APPLIED.name());
+    }
 }

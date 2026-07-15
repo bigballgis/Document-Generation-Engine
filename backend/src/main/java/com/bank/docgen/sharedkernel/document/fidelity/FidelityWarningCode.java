@@ -25,5 +25,7 @@ public enum FidelityWarningCode {
     MISSING_REFERENCE_KEY,
     DUPLICATE_NUMBER,
     BROKEN_NUMBER_CROSS_REFERENCE,
-    PDF_PAGE_NUMBER_STAMP_FAILED
+    PDF_PAGE_NUMBER_STAMP_FAILED,
+    /** CE-C06: DOCX requested encryption.permissions; permissions apply only to PDF. */
+    DOCX_PERMISSIONS_NOT_APPLIED
 }

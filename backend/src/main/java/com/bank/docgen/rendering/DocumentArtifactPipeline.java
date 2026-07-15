@@ -1,7 +1,8 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.document.RenderProfile;
+import com.bank.docgen.sharedkernel.document.fidelity.FidelityWarningCode;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -67,8 +68,22 @@ public class DocumentArtifactPipeline {
                 encryptedDocx,
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 "output.docx",
-                List.of()
+                docxPermissionsBoundaryWarnings(encryption)
         );
+    }
+
+    /**
+     * CE-C06: encryption.permissions apply only to PDF. Non-PDF (DOCX) with a non-empty
+     * permissions list succeeds with a fidelity warning; DocxEncryptionService still uses
+     * openPassword only (no POI write-protect).
+     */
+    private static List<String> docxPermissionsBoundaryWarnings(EncryptionOptionsView encryption) {
+        if (encryption == null
+                || encryption.permissions() == null
+                || encryption.permissions().isEmpty()) {
+            return List.of();
+        }
+        return List.of(FidelityWarningCode.DOCX_PERMISSIONS_NOT_APPLIED.name());
     }
 
     private GeneratedArtifact spoolFinalArtifact(

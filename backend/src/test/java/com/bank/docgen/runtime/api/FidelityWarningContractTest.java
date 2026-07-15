@@ -190,7 +190,8 @@ class FidelityWarningContractTest {
                 "LOW_RISK_TABLE_PAGE_BREAK",
                 "CONTROLLED_STYLE_FALLBACK",
                 "MASTER_STYLE_FALLBACK",
-                "PDF_PAGE_NUMBER_STAMP_FAILED"
+                "PDF_PAGE_NUMBER_STAMP_FAILED",
+                "DOCX_PERMISSIONS_NOT_APPLIED"
         );
     }
 }

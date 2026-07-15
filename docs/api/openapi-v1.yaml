@@ -3757,7 +3757,8 @@ components:
       description: >-
         Caller-visible fidelity warning codes for runtime success paths (JSON `fidelityWarnings[].warningCode`
         and SYNC_STREAM `fidelityWarningCodes` header). Baseline ADR-0019 codes plus engine-emitted codes
-        that may appear on the formal runtime success path (CE-C03 honest enum).
+        that may appear on the formal runtime success path (CE-C03 honest enum). Includes
+        DOCX_PERMISSIONS_NOT_APPLIED (CE-C06) when DOCX requests non-empty encryption.permissions.
       enum:
         - OPTIONAL_CONTENT_EMPTY
         - LOW_RISK_PAGINATION_DIFFERENCE
@@ -3783,6 +3784,7 @@ components:
         - DUPLICATE_NUMBER
         - BROKEN_NUMBER_CROSS_REFERENCE
         - PDF_PAGE_NUMBER_STAMP_FAILED
+        - DOCX_PERMISSIONS_NOT_APPLIED
     IdempotencyStatus:
       type: string
       enum: [IDEMPOTENCY_NEW, IDEMPOTENCY_REPLAYED, IDEMPOTENCY_CONFLICTED]
@@ -3827,7 +3829,12 @@ components:
         required. When permissions are provided, ownerPassword is required.
         When enabled is false, openPassword, ownerPassword, and permissions are
         not allowed. openPassword and ownerPassword must be different when both
-        are present.
+        are present. permissions apply only when output.format is PDF (CE-C06);
+        for DOCX (non-PDF), a non-empty permissions array that passes structural
+        validation does not map to document protection — generation succeeds with
+        fidelity warning DOCX_PERMISSIONS_NOT_APPLIED. Apache POI DOCX
+        write-protect is out of scope for CE-C06. DOCX openPassword encryption
+        remains supported.
       additionalProperties: false
       required: [enabled]
       allOf:
@@ -3868,6 +3875,11 @@ components:
           writeOnly: true
         permissions:
           type: array
+          description: >-
+            Abstract allow-list permissions. Applied only for PDF output.
+            For DOCX, non-empty values are accepted structurally (ownerPassword
+            still required) but ignored for file protection; callers receive
+            DOCX_PERMISSIONS_NOT_APPLIED on the success path.
           items:
             $ref: '#/components/schemas/Permission'
           uniqueItems: true
