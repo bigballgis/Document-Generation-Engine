@@ -7,10 +7,10 @@
 | **编写日期** | 2026-07-15 |
 | **程序** | [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §6 Wave CE-G · CE-G03 |
 | **Slice** | `ce-g03-testdata-pii` |
-| **Worktree** | `D:/working/DGE-ce-g03-testdata-pii` · `feat/ce-g03-testdata-pii` |
-| **Task Master** | **#74** |
+| **Worktree** | Merged to `main` (`50c1a524`); historical `D:/working/DGE-ce-g03-testdata-pii` · `feat/ce-g03-testdata-pii` |
+| **Task Master** | **#74** → **done** |
 | **Formal phase** | **None**（CE 程序切片；不发明 sole-active 正式 P-phase） |
-| **Placement** | ISOLATED |
+| **Placement** | Merged (was ISOLATED) |
 | **上游** | CE-U03 (#55) **Done**；CE-C05 (#70) **Done**（泳道顺序） |
 | **Owning docs** | 本文件（行为 SoT）；[data-storage-view.md](../architecture/data-storage-view.md)（关闭挂起问题）；[domain-model.md](../domain/domain-model.md) §2.8 / 测试数据集规则；[requirements-plan.md](../requirements/requirements-plan.md) |
 

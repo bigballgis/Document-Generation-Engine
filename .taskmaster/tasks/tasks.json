@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). Sole-active CE leaf: #74 CE-G03. Parked: #89 CE-U13, #71 CE-C06.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#88 Done. Sole-active CE delivery leaf: #74 CE-G03 (single-lane serial). #89 U13 + #71 C06 remain parked (pending). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). Sole-active CE leaf: #89 CE-U13. Parked: #71 CE-C06.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#74/#88 Done. Sole-active CE delivery leaf: #89 CE-U13 (single-lane serial). #71 C06 remains parked (pending). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T01:23:00.000Z"
+        "updatedAt": "2026-07-16T03:45:00.000Z"
       },
 
       {
@@ -979,8 +979,8 @@
       {
         "id": "71",
         "title": "CE-C06: DOCX permissions boundary docs",
-        "description": "PENDING. Slice ce-c06-docx-permissions-boundary. Document permissions PDF-only; warn DOCX+permissions. P2·S. No POI write-protect.",
-        "details": "Soft after C05 (#70). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §5 CE-C06.",
+        "description": "PENDING (parked behind #89 CE-U13 sole-active). Slice ce-c06-docx-permissions-boundary. Document permissions PDF-only; warn DOCX+permissions. P2·S. No POI write-protect.",
+        "details": "Soft after C05 (#70). Do not set in-progress while #89 CE-U13 is sole-active (single-lane serial). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §5 CE-C06.",
         "testStrategy": "1. Contract text clear. 2. Warning on DOCX+permissions. 3. Tests + docs.",
         "priority": "low",
         "dependencies": [
@@ -1022,17 +1022,17 @@
       {
         "id": "74",
         "title": "CE-G03: Test-data PII governance",
-        "description": "IN PROGRESS 2026-07-16 (sole-active CE leaf). Slice ce-g03-testdata-pii. piiCategory on schema; force SYNTHETIC or EXPLICIT_SENSITIVE+audit on save; closes data-storage-view hanging Q. P1·M. BDD ready.",
-        "details": "BDD ready: docs/behavior/ce-g03-testdata-pii.md (BDD-CE-G03-001…017). Depends U03 (#55); lane after C05 (#70). Worktree D:/working/DGE-ce-g03-testdata-pii / feat/ce-g03-testdata-pii / placement ISOLATED. Single-lane serial: sole-active delivery leaf under umbrella #53. #89 U13 + #71 C06 remain parked. Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G03 In Progress. Do NOT activate CD-3 / claim go-live.",
+        "description": "DONE 2026-07-16. Slice ce-g03-testdata-pii. Merge 50c1a524; feature 34bf5ad9. piiCategory on schema; SYNTHETIC or EXPLICIT_SENSITIVE+audit on save; closes data-storage-view hanging Q. P1·M. Formal phase None.",
+        "details": "Completed 2026-07-16. Slice ce-g03-testdata-pii. Merge 50c1a524a15e616650f6f0bff5dbefb0d3d207f8; feature 34bf5ad93b611657fcff265ce1bb7ccb902967d4. BDD ready: docs/behavior/ce-g03-testdata-pii.md (BDD-CE-G03-001…017). Gates: mvn verify GREEN; FE lint/type-check/test 1351/build PASS; E2E 5/5 + UIUX PASS Critical=0; arch PASS Critical=0; Stage 10 :8080/:4173 healthy. Formal phase remains None. Plan §6 CE-G03 Done. Do NOT activate CD-3 / claim go-live.",
         "testStrategy": "1. piiCategory schema upsert/default/reject unknown. 2. Save: SYNTHETIC ok; EXPLICIT needs reason+confirm+audit without plaintext; missing handling 422. 3. UI PII badge + handling. 4. Gates green.",
         "priority": "medium",
         "dependencies": [
           "55",
           "70"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T01:23:00.000Z"
+        "updatedAt": "2026-07-16T03:45:00.000Z"
       },
       {
         "id": "75",
@@ -1235,16 +1235,16 @@
       {
         "id": "89",
         "title": "CE-U13: Variable rename cascade + expression autocomplete",
-        "description": "PENDING. Slice ce-u13-variable-rename-autocomplete. Rename propagates; conditionExpression autocomplete. P2·M.",
-        "details": "After U06 (#88). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U13.",
+        "description": "IN PROGRESS 2026-07-16 (sole-active CE leaf after G03). Slice ce-u13-variable-rename-autocomplete. Rename propagates; conditionExpression autocomplete. P2·M. Worktree may stay parked until writer /deliver.",
+        "details": "After U06 (#88) and G03 (#74 Done). Sole-active under umbrella #53 (single-lane serial). Worktree ../DGE-ce-u13-variable-rename may exist parked — activate writer only via next deliver session; do not fan-out with #71. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U13 In Progress. Do NOT activate CD-3 / claim go-live.",
         "testStrategy": "1. Rename cascade. 2. Autocomplete. 3. Gates + E2E.",
         "priority": "medium",
         "dependencies": [
           "88"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-16T03:45:00.000Z"
       },
       {
         "id": "90",
