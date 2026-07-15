@@ -1,8 +1,9 @@
 # BDD 行为规格：CE-C06 — DOCX permissions 边界声明
 
 **文件状态**: `ready`  
-**版本**: 1.0.0  
+**版本**: 1.0.1  
 **编写日期**: 2026-07-15  
+**Stage 1 再确认**: 2026-07-16（产品意图锁定：PDF-only permissions；DOCX+非空 permissions → 警告非静默、非硬失败；无 POI write-protect）  
 **BDD ID 前缀**: `BDD-CE-C06`  
 **来源**: [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) Wave CE-C · CE-C06  
 **Slice**: `ce-c06-docx-permissions-boundary`  
@@ -23,14 +24,15 @@
 | **DOCX 加密本体** | DOCX 仍支持 `openPassword` 动态加密（ADR-0001）；本片只收紧 **permissions 映射边界**，不取消 DOCX 口令加密 |
 | **明确非目标** | Apache POI DOCX write-protect / 文档保护（长期另立片）；前端管理 UI；硬失败拒绝「DOCX+permissions」 |
 
-**现状证据（implementation 输入，非已验收行为）**
+**现状证据（Stage 1 再确认；实现已在分支 tip，验收仍以本规格为准）**
 
 | 发现 | 证据 |
 | --- | --- |
-| SoT 仍写「按 DOCX/PDF 输出格式映射」 | requirements / PRD / domain / contract-outline / ADR-0001 Decision |
-| `DocxEncryptionService` 仅用 `openPassword`，忽略 `permissions` | `backend/.../rendering/DocxEncryptionService.java` |
+| Worktree SoT 已改为 PDF-only + DOCX 警告 | requirements / PRD / domain / permission-matrix / OpenAPI（本分支） |
+| MAIN 仍可能残留「按 DOCX/PDF 映射」旧表述 | 合并前 MAIN `domain-model` / `permission-matrix` 等 — 随本片合入 |
+| `DocxEncryptionService` 仅用 `openPassword`，不映射 `permissions` | `backend/.../rendering/DocxEncryptionService.java` |
 | `PdfEncryptionService` 映射 `ALLOW_*` → PDFBox `AccessPermission` | `backend/.../rendering/PdfEncryptionService.java` |
-| `EncryptionParameterValidator` 对非空 `permissions` 要求 `ownerPassword` + 枚举校验，**不**按 format 区分 | `EncryptionParameterValidator.java` |
+| DOCX+非空 permissions 成功路径发 `DOCX_PERMISSIONS_NOT_APPLIED` | tip `50d5f57f`（待门禁/合并验收） |
 | 成功路径警告信道：`fidelityWarnings[]` / SYNC_STREAM 头（CE-C03） | OpenAPI `FidelityWarning` / CE-C03 |
 
 ---
@@ -289,15 +291,13 @@
 
 ---
 
-## 13. 开放问题（不阻塞 `ready`；实现默认如下）
+## 13. 已关闭问题（2026-07-16 Stage 1 确认；无阻塞项）
 
-| ID | 问题 | 默认（可被用户推翻） | 阻塞？ |
-| --- | --- | --- | --- |
-| **Q1** | 警告走 `fidelityWarnings` 还是独立 encryptionWarnings？ | **`fidelityWarnings` + 新码**（复用 CE-C03） | 否 |
-| **Q2** | DOCX+permissions 时是否仍强制 ownerPassword？ | **是**（保持 ADR 结构规则；警告不替代结构校验） | 否 |
-| **Q3** | `encryptionSummary.permissions` 在 DOCX 是否清空？ | **不清空**；回显请求摘要 + 警告说明未应用 | 否 |
-
-若用户明确推翻 Q1–Q3 默认，再修订本规格后进入实现。
+| ID | 问题 | 确认结论 |
+| --- | --- | --- |
+| **Q1** | 警告信道 | **`fidelityWarnings` + `DOCX_PERMISSIONS_NOT_APPLIED`**（复用 CE-C03）；非独立 encryptionWarnings |
+| **Q2** | DOCX+permissions 是否仍强制 ownerPassword？ | **是** — 结构校验优先；警告不替代 `400 ENCRYPTION_PARAMETER_INVALID` |
+| **Q3** | `encryptionSummary.permissions` 在 DOCX 是否清空？ | **不清空** — 回显请求摘要；结合警告理解「已请求未应用到 DOCX」 |
 
 ---
 
@@ -307,8 +307,8 @@
 bdd_readiness: ready
 owning_doc: docs/behavior/ce-c06-docx-permissions-boundary.md
 task_ids: ["#71", "CE-C06"]
-open_questions: [Q1 fidelity channel, Q2 ownerPassword still required, Q3 summary echo]
-next: plan-orchestrator → backend-engineer (TDD Red on BDD-CE-C06-001…012)
+open_questions: []
+next: plan-orchestrator → backend-engineer / verify (BDD-CE-C06-001…012; tip may already implement — still gate-verify)
 ```
 
-**Handoff note:** 实现先 Red：DOCX+permissions 成功断言警告码；PDF 回归无该码；缺 ownerPassword 仍 400；OpenAPI 枚举与描述；**禁止**引入 POI write-protect。
+**Handoff note:** 验收断言：DOCX+permissions 成功含警告码；PDF 回归无该码；缺 ownerPassword 仍 400；OpenAPI 枚举与 PDF-only 描述；**禁止**引入 POI write-protect。Demo docx churn 不提交。

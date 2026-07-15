@@ -86,7 +86,7 @@ Field names, capability breakdown, error-code names, and response structure are 
 - 同步批量中任一记录因参数校验或 API 管理策略失败时，整批失败且不生成任何文件；响应需要返回每笔失败明细，并按非重试幂等结果记录。
 - 异步批量部分成功后的失败项重试必须使用新批次和新的 `idempotencyKey`，通过 `originalBatchId` 或等效字段关联原批次，原批次结果不被扩展或改写；`originalBatchId` 出现时须通过同凭证 `BATCH_ROOT` 校验，否则 `404 ORIGINAL_BATCH_NOT_FOUND`（CE-C05）。
 - API 支持 DOCX/PDF 动态加密参数，是否允许加密以及可用加密能力由 API 管理配置控制。
-- `encryption.enabled=true` 时，`openPassword` 必填，`ownerPassword` 可选；`permissions` 采用统一抽象权限枚举，**v1 仅对 PDF 映射并生效**（CE-C06）；DOCX + 非空 `permissions` 结构合法时成功并警告 `DOCX_PERMISSIONS_NOT_APPLIED`；传入 `permissions` 时必须同时传入 `ownerPassword`。
+- `encryption.enabled=true` 时，`openPassword` 必填，`ownerPassword` 可选；`permissions` 采用统一抽象权限枚举，**v1 仅对 PDF 映射并生效**（CE-C06）；DOCX + 非空 `permissions` 结构合法时成功并警告 `DOCX_PERMISSIONS_NOT_APPLIED`（`messageKey=generation.warning.fidelity.docxPermissionsNotApplied`）；传入 `permissions` 时必须同时传入 `ownerPassword`。
 - `encryption.enabled=false` 或未传 `enabled` 时，如果仍传入 `openPassword`、`ownerPassword` 或 `permissions`，返回 `400 ENCRYPTION_PARAMETER_INVALID`，不得静默忽略。
 - `openPassword` 和 `ownerPassword` 的密码强度基线为最少 12 字符、最长 128 字符；如果两者同时传入，二者必须不同。
 - 加密参数合法但实际加密处理失败时，返回 `500 ENCRYPTION_FAILED`，`retryable=true`；错误响应、日志和审计不得返回密码、内部加密细节或敏感配置值。
@@ -494,7 +494,7 @@ Generate document request draft
 
 确认基线：模板标识和发布版本号只跟随路径表达，请求体不得重复传入；输出格式、输出模式、业务变量、`requestId` 和 `idempotencyKey` 在单笔生成中必需；加密参数仅在调用方需要加密输出时传入，并且必须受 API 管理配置允许。
 
-加密参数确认：`encryption.enabled=true` 时，`openPassword` 必填，`ownerPassword` 可选。`permissions` 采用统一抽象权限枚举；**v1 仅当 `output.format=PDF` 时映射并应用到输出访问权限**（CE-C06 / [ce-c06-docx-permissions-boundary.md](../behavior/ce-c06-docx-permissions-boundary.md)）。DOCX 仍支持 `openPassword` 动态加密，但 **不**将 `permissions` 映射为 DOCX 写保护/权限位；当 `format=DOCX`（非 PDF）且 `permissions` 非空、其余加密参数结构合法时，生成**成功**并在成功路径发出 `DOCX_PERMISSIONS_NOT_APPLIED`（JSON `fidelityWarnings[]` 或 SYNC_STREAM 保真警告头），**不得**因此返回 `400`。Apache POI DOCX write-protect **不在** CE-C06 范围。传入 `permissions` 时必须同时传入 `ownerPassword`。`encryption.enabled=false` 或未传 `enabled` 时，如果仍传入 `openPassword`、`ownerPassword` 或 `permissions`，返回 `400 ENCRYPTION_PARAMETER_INVALID`，不得静默忽略。
+加密参数确认：`encryption.enabled=true` 时，`openPassword` 必填，`ownerPassword` 可选。`permissions` 采用统一抽象权限枚举；**v1 仅当 `output.format=PDF` 时映射并应用到输出访问权限**（CE-C06 / [ce-c06-docx-permissions-boundary.md](../behavior/ce-c06-docx-permissions-boundary.md)）。DOCX 仍支持 `openPassword` 动态加密，但 **不**将 `permissions` 映射为 DOCX 写保护/权限位；当 `format=DOCX`（非 PDF）且 `permissions` 非空、其余加密参数结构合法时，生成**成功**并在成功路径发出 `DOCX_PERMISSIONS_NOT_APPLIED`（`messageKey=generation.warning.fidelity.docxPermissionsNotApplied`；JSON `fidelityWarnings[]` 或 SYNC_STREAM 保真警告头），**不得**因此返回 `400`。Apache POI DOCX write-protect **不在** CE-C06 范围。传入 `permissions` 时必须同时传入 `ownerPassword`。`encryption.enabled=false` 或未传 `enabled` 时，如果仍传入 `openPassword`、`ownerPassword` 或 `permissions`，返回 `400 ENCRYPTION_PARAMETER_INVALID`，不得静默忽略。
 
 密码强度确认：`openPassword` 和 `ownerPassword` 最少 12 字符、最长 128 字符；如果两者同时传入，二者必须不同。不满足时返回 `400 ENCRYPTION_PARAMETER_INVALID`。
 
@@ -737,7 +737,7 @@ default 路径特殊规则：首次请求创建幂等记录时，应记录当时
 `fidelityWarnings[]` 中每个对象必须包含：
 
 - `warningCode`：稳定警告码。v1 调用方可见枚举以 OpenAPI `FidelityWarningCode` 为准（基线 ADR-0019 五码：`OPTIONAL_CONTENT_EMPTY`、`LOW_RISK_PAGINATION_DIFFERENCE`、`LOW_RISK_TABLE_PAGE_BREAK`、`CONTROLLED_STYLE_FALLBACK`、`IMAGE_SCALING_ADJUSTED`；另含运行时成功路径可发出的引擎码，如 `MASTER_STYLE_FALLBACK`、`PDF_PAGE_NUMBER_STAMP_FAILED`、`DOCX_PERMISSIONS_NOT_APPLIED`（CE-C06）等 — 见 OpenAPI 枚举，诚实契约）。
-- `messageKey`：用于本地化和前端展示的稳定文案键。
+- `messageKey`：用于本地化和前端展示的稳定文案键。CE-C06：`DOCX_PERMISSIONS_NOT_APPLIED` → `generation.warning.fidelity.docxPermissionsNotApplied`。
 - `message`：默认可读提示。
 - `locationSummary`：影响位置摘要，例如锚点、章节、组件或页码范围摘要，不返回敏感正文。
 - `detectedSummary`：检测结果摘要，不返回变量原值、客户数据、粘贴原文或完整生成内容。

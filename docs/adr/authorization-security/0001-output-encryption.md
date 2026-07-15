@@ -60,7 +60,7 @@ If encryption parameters are valid but encryption processing fails, the platform
 
 - `encryption.permissions` **apply only when `output.format=PDF`**.
 - DOCX continues to support `openPassword` encryption; non-empty `permissions` on DOCX that pass structural validation **do not** map to DOCX write-protect / permission bits.
-- Such DOCX requests **succeed** with success-path warning `DOCX_PERMISSIONS_NOT_APPLIED` (via `fidelityWarnings` / SYNC_STREAM fidelity headers) — they are **not** rejected with `400` solely for format≠PDF.
+- Such DOCX requests **succeed** with success-path warning `DOCX_PERMISSIONS_NOT_APPLIED` (`messageKey` `generation.warning.fidelity.docxPermissionsNotApplied`, via `fidelityWarnings` / SYNC_STREAM fidelity headers) — they are **not** rejected with `400` solely for format≠PDF.
 - Apache POI DOCX write-protect remains **out of scope** for CE-C06 (future slice).
 - Structural rules in Decision (ownerPassword required with permissions; enabled consistency; password baseline; unsupported enum values → 400) remain in force.
 

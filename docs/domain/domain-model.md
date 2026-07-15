@@ -1194,7 +1194,7 @@ Sensitive Data Classification -- constrains --> API Response / Audit Log / Manag
 - 加密策略摘要采用标准摘要，记录是否启用加密、输出格式、是否传入 openPassword、是否传入 ownerPassword、permissions 权限摘要。
 - `encryption.enabled=true` 时，`openPassword` 必填；`ownerPassword` 可选。
 - `permissions` 采用统一抽象权限枚举；**v1 仅对 PDF 映射并应用到输出访问权限**（CE-C06）；DOCX 口令加密不消费 `permissions`。v1 权限枚举确认为 `ALLOW_PRINT`、`ALLOW_COPY`、`ALLOW_EDIT`、`ALLOW_ANNOTATE`、`ALLOW_FORM_FILL`；传入 `permissions` 时必须同时传入 `ownerPassword`。
-- **DOCX + 非空 `permissions`：** 结构合法时成功生成并发出 `DOCX_PERMISSIONS_NOT_APPLIED` 警告（不 400）；POI DOCX write-protect 另立片。见 [ce-c06-docx-permissions-boundary.md](../behavior/ce-c06-docx-permissions-boundary.md)。
+- **DOCX + 非空 `permissions`：** 结构合法时成功生成并发出 `DOCX_PERMISSIONS_NOT_APPLIED` 警告（`messageKey=generation.warning.fidelity.docxPermissionsNotApplied`；不 400）；POI DOCX write-protect 另立片。见 [ce-c06-docx-permissions-boundary.md](../behavior/ce-c06-docx-permissions-boundary.md)。
 - 不支持的权限枚举值、缺少必需密码、`enabled=false` 或未传 `enabled` 时仍传入加密子字段，均返回 `400 ENCRYPTION_PARAMETER_INVALID`。
 - `openPassword` 和 `ownerPassword` 的密码强度基线为最少 12 字符、最长 128 字符；如果两者同时传入，二者必须不同。
 - 加密参数合法但实际加密处理失败时，返回 `500 ENCRYPTION_FAILED`，`retryable=true`；错误响应、日志和审计不得返回密码、内部加密细节或敏感配置值。

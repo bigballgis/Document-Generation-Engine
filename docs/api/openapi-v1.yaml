@@ -3758,7 +3758,9 @@ components:
         Caller-visible fidelity warning codes for runtime success paths (JSON `fidelityWarnings[].warningCode`
         and SYNC_STREAM `fidelityWarningCodes` header). Baseline ADR-0019 codes plus engine-emitted codes
         that may appear on the formal runtime success path (CE-C03 honest enum). Includes
-        DOCX_PERMISSIONS_NOT_APPLIED (CE-C06) when DOCX requests non-empty encryption.permissions.
+        DOCX_PERMISSIONS_NOT_APPLIED (CE-C06) when DOCX requests non-empty encryption.permissions;
+        JSON path `messageKey` for that code is
+        generation.warning.fidelity.docxPermissionsNotApplied.
       enum:
         - OPTIONAL_CONTENT_EMPTY
         - LOW_RISK_PAGINATION_DIFFERENCE
@@ -3832,9 +3834,10 @@ components:
         are present. permissions apply only when output.format is PDF (CE-C06);
         for DOCX (non-PDF), a non-empty permissions array that passes structural
         validation does not map to document protection — generation succeeds with
-        fidelity warning DOCX_PERMISSIONS_NOT_APPLIED. Apache POI DOCX
-        write-protect is out of scope for CE-C06. DOCX openPassword encryption
-        remains supported.
+        fidelity warning DOCX_PERMISSIONS_NOT_APPLIED
+        (messageKey generation.warning.fidelity.docxPermissionsNotApplied).
+        Apache POI DOCX write-protect is out of scope for CE-C06. DOCX
+        openPassword encryption remains supported.
       additionalProperties: false
       required: [enabled]
       allOf:
@@ -3879,7 +3882,8 @@ components:
             Abstract allow-list permissions. Applied only for PDF output.
             For DOCX, non-empty values are accepted structurally (ownerPassword
             still required) but ignored for file protection; callers receive
-            DOCX_PERMISSIONS_NOT_APPLIED on the success path.
+            DOCX_PERMISSIONS_NOT_APPLIED on the success path with messageKey
+            generation.warning.fidelity.docxPermissionsNotApplied.
           items:
             $ref: '#/components/schemas/Permission'
           uniqueItems: true
@@ -4330,6 +4334,9 @@ components:
           $ref: '#/components/schemas/FidelityWarningCode'
         messageKey:
           type: string
+          description: >-
+            Stable localization key. For CE-C06 DOCX_PERMISSIONS_NOT_APPLIED the
+            key is generation.warning.fidelity.docxPermissionsNotApplied.
         message:
           type: string
         locationSummary:
@@ -4356,6 +4363,10 @@ components:
           type: boolean
         permissions:
           type: array
+          description: >-
+            Request-side permissions summary echo (not proof of file-level apply).
+            For DOCX with non-empty requested permissions, callers must also read
+            DOCX_PERMISSIONS_NOT_APPLIED on the success path.
           items:
             $ref: '#/components/schemas/Permission'
     ContractResponse:
