@@ -224,6 +224,7 @@ describe('useDashboardDataLoader', () => {
     setupSession({ manageMasters: true })
     primaryClusterOneRole.value = 'MASTER_DESIGNER'
     isOverviewTab.value = true
+    capabilityRefs.manageMasters.value = true
 
     const sessionStore = useSessionStore()
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
@@ -233,11 +234,39 @@ describe('useDashboardDataLoader', () => {
     const mastersStore = useMastersStore()
     vi.spyOn(mastersStore, 'fetchAllMasters').mockResolvedValue(undefined)
     const enrichSpy = vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
+    const deepLinkSpy = vi
+      .spyOn(mastersStore, 'enrichCurrentRevisionLineIdsForWorkflow')
+      .mockResolvedValue(undefined)
 
     mountDataLoaderHarness()
     await flushPromises()
 
     expect(enrichSpy).toHaveBeenCalled()
+    expect(deepLinkSpy).toHaveBeenCalled()
+  })
+
+  it('enriches current revision deep links for master reviewers (CE-U09)', async () => {
+    setupSession({ reviewMasters: true })
+    primaryClusterOneRole.value = null
+    isOverviewTab.value = true
+    capabilityRefs.reviewMasters.value = true
+    capabilityRefs.manageMasters.value = false
+
+    const sessionStore = useSessionStore()
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.master-management',
+    )
+
+    const mastersStore = useMastersStore()
+    vi.spyOn(mastersStore, 'fetchAllMasters').mockResolvedValue(undefined)
+    const deepLinkSpy = vi
+      .spyOn(mastersStore, 'enrichCurrentRevisionLineIdsForWorkflow')
+      .mockResolvedValue(undefined)
+
+    mountDataLoaderHarness()
+    await flushPromises()
+
+    expect(deepLinkSpy).toHaveBeenCalled()
   })
 
   it('reports collaboration fetch failure from store', async () => {

@@ -14,6 +14,8 @@ vi.mock('@/api/masters', () => ({
   getMasterImpactAnalysis: vi.fn(),
   listMasterRevisionLines: vi.fn(),
   downloadMasterFile: vi.fn(),
+  submitMasterReview: vi.fn(),
+  decideMasterReview: vi.fn(),
 }))
 
 const routerPush = vi.fn()
@@ -148,7 +150,198 @@ describe('MasterPackageHubView', () => {
     expect(wrapper.find('[data-journey-timeline]').exists()).toBe(true)
     expect(wrapper.find('[data-journey-guidance]').exists()).toBe(false)
     expect(wrapper.find('.context-help-trigger').exists()).toBe(true)
-    expect(wrapper.find('[data-master-journey-cta]').exists()).toBe(false)
+    expect(wrapper.find('[data-master-journey-cta]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Upload letterhead')
+  })
+
+  it('shows Submit for review on Hub when manageMasters and DRAFT (MRR-001)', async () => {
+    vi.mocked(mastersApi.getMaster).mockResolvedValue({
+      id: 'master-1',
+      groupCode: 'RETAIL',
+      name: 'Retail letterhead',
+      description: null,
+      status: 'DRAFT',
+      originalFilename: 'letterhead.docx',
+      changeSummary: null,
+      anchors: [{ anchorId: 'HEADER', displayLabel: 'Header' }],
+      reviewHistory: [],
+      createdBy: '10000001',
+      updatedBy: '10000001',
+      createdAt: '2026-06-23T10:00:00Z',
+      updatedAt: '2026-06-23T10:00:00Z',
+    })
+    vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
+      masterId: 'master-1',
+      referencedTemplateIds: [],
+      retestRequired: false,
+    })
+    vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
+      content: [
+        {
+          id: 'revision-1',
+          lineLabel: 'CURRENT',
+          status: 'DRAFT',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 1,
+          updatedAt: '2026-06-23T10:00:00Z',
+          updatedBy: '10000001',
+          current: true,
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(MasterPackageHubView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Submit for review')
+    expect(wrapper.find('[data-master-journey-cta]').exists()).toBe(true)
+  })
+
+  it('hides Submit for review without manageMasters (MRR-003)', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      roles: ['TEMPLATE_APPROVER'],
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.master-management'],
+      capabilities: { manageMasters: false, reviewMasters: true },
+    } as never
+
+    vi.mocked(mastersApi.getMaster).mockResolvedValue({
+      id: 'master-1',
+      groupCode: 'RETAIL',
+      name: 'Pending letterhead',
+      description: null,
+      status: 'DRAFT',
+      originalFilename: 'letterhead.docx',
+      changeSummary: null,
+      anchors: [{ anchorId: 'HEADER', displayLabel: 'Header' }],
+      reviewHistory: [],
+      createdBy: '10000001',
+      updatedBy: '10000001',
+      createdAt: '2026-06-23T10:00:00Z',
+      updatedAt: '2026-06-23T10:00:00Z',
+    })
+    vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
+      masterId: 'master-1',
+      referencedTemplateIds: [],
+      retestRequired: false,
+    })
+    vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
+      content: [
+        {
+          id: 'revision-1',
+          lineLabel: 'CURRENT',
+          status: 'DRAFT',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 1,
+          updatedAt: '2026-06-23T10:00:00Z',
+          updatedBy: '10000001',
+          current: true,
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(MasterPackageHubView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('Submit for review')
+  })
+
+  it('shows Approve and Reject on Hub when reviewMasters and PENDING_REVIEW (MRR-002)', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      roles: ['TEMPLATE_APPROVER'],
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.master-management'],
+      capabilities: { manageMasters: false, reviewMasters: true },
+    } as never
+
+    vi.mocked(mastersApi.getMaster).mockResolvedValue({
+      id: 'master-1',
+      groupCode: 'RETAIL',
+      name: 'Pending letterhead',
+      description: null,
+      status: 'PENDING_REVIEW',
+      originalFilename: 'letterhead.docx',
+      changeSummary: 'Ready',
+      anchors: [{ anchorId: 'HEADER', displayLabel: 'Header' }],
+      reviewHistory: [],
+      createdBy: '10000001',
+      updatedBy: '10000001',
+      createdAt: '2026-06-23T10:00:00Z',
+      updatedAt: '2026-06-23T10:00:00Z',
+    })
+    vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
+      masterId: 'master-1',
+      referencedTemplateIds: [],
+      retestRequired: false,
+    })
+    vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
+      content: [
+        {
+          id: 'revision-1',
+          lineLabel: 'CURRENT',
+          status: 'PENDING_REVIEW',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 1,
+          updatedAt: '2026-06-23T10:00:00Z',
+          updatedBy: '10000001',
+          current: true,
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(MasterPackageHubView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Approve')
+    expect(wrapper.text()).toContain('Reject')
+    expect(wrapper.text()).not.toContain('Update letterhead DOCX')
   })
 
   it('renders multiple revision lines from paginated history API', async () => {

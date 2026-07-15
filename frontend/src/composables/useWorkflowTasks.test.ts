@@ -106,6 +106,53 @@ describe('useWorkflowTasks', () => {
     expect(tasks.value.some((task) => task.kind === 'master-review')).toBe(true)
   })
 
+  it('deep-links master-review tasks to current revision approval tab (MRR-004)', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      ...sessionStore.session,
+      roles: ['GLOBAL_ADMIN'],
+      capabilities: reviewerCapabilities,
+    } as never
+
+    const mastersStore = useMastersStore()
+    mastersStore.masters = [
+      {
+        id: 'm1',
+        name: 'Master A',
+        groupCode: 'RETAIL',
+        status: 'PENDING_REVIEW',
+      } as never,
+    ]
+    mastersStore.currentRevisionLineIdByMasterId = { m1: 'rev-current-1' }
+
+    const { tasks } = useWorkflowTasks()
+    const reviewTask = tasks.value.find((task) => task.kind === 'master-review')
+    expect(reviewTask?.path).toBe('/masters/m1/revisions/rev-current-1?workspaceTab=approval')
+  })
+
+  it('falls back master-review path to Hub when current revision is unknown (MRR-004)', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      ...sessionStore.session,
+      roles: ['GLOBAL_ADMIN'],
+      capabilities: reviewerCapabilities,
+    } as never
+
+    const mastersStore = useMastersStore()
+    mastersStore.masters = [
+      {
+        id: 'm1',
+        name: 'Master A',
+        groupCode: 'RETAIL',
+        status: 'PENDING_REVIEW',
+      } as never,
+    ]
+
+    const { tasks } = useWorkflowTasks()
+    const reviewTask = tasks.value.find((task) => task.kind === 'master-review')
+    expect(reviewTask?.path).toBe('/masters/m1')
+  })
+
   it('builds clause outdated bump tasks for template authors', () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {

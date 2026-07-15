@@ -14,6 +14,8 @@ const {
   metadataEditOpen,
   replaceFileOpen,
   submitReviewOpen,
+  reviewDialogOpen,
+  reviewMode,
   loadFailed,
   downloading,
   currentRevisionLineId,
@@ -22,6 +24,8 @@ const {
   master,
   canEditMetadata,
   canReplaceFile,
+  canSubmitForReview,
+  canDecideReview,
   showDesignerJourney,
   journeyContext,
   canWriteJourney,
@@ -32,6 +36,8 @@ const {
   handleReplaceFile,
   clearReplaceServerError,
   handleSubmitReview,
+  openReviewDialog,
+  handleReviewDecision,
 } = useMasterPackageHub()
 </script>
 
@@ -50,9 +56,13 @@ const {
           :downloading="downloading"
           :can-replace-file="canReplaceFile"
           :can-edit-metadata="canEditMetadata"
+          :can-submit-for-review="canSubmitForReview"
+          :can-decide-review="canDecideReview"
           @download="handleDownloadCurrent"
           @replace-file="replaceFileOpen = true"
           @edit-metadata="metadataEditOpen = true"
+          @open-submit-review="submitReviewOpen = true"
+          @open-review="openReviewDialog"
         />
       </template>
     </PageHeader>
@@ -83,6 +93,8 @@ const {
       :current-revision-line-id="currentRevisionLineId"
       :can-write-journey="canWriteJourney"
       :impact="mastersStore.impactAnalysis"
+      @upload="replaceFileOpen = true"
+      @submit-review="submitReviewOpen = true"
     />
 
     <MasterPackageHubDialogs
@@ -90,16 +102,19 @@ const {
       v-model:metadata-edit-open="metadataEditOpen"
       v-model:replace-file-open="replaceFileOpen"
       v-model:submit-review-open="submitReviewOpen"
+      v-model:review-dialog-open="reviewDialogOpen"
       :master-name="master.name"
       :master-description="master.description"
       :original-filename="master.originalFilename"
       :submitting="mastersStore.submitting"
       :upload-progress="mastersStore.uploadProgress"
       :replace-server-error-key="replaceFileOpen ? mastersStore.lastErrorMessageKey : null"
+      :review-mode="reviewMode"
       @metadata-submit="handleMetadataUpdate"
       @replace-submit="handleReplaceFile"
       @clear-server-error="clearReplaceServerError"
       @submit-review="handleSubmitReview"
+      @decide-review="handleReviewDecision"
     />
   </AppPageLayout>
 </template>

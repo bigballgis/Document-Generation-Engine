@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { canViewCollaborationWorkItems } from '@/auth/roles'
-import { pathForRouteKey, ROUTE_KEYS } from '@/routing/routeKeys'
+import { masterDetailPath, masterRevisionDetailPath, pathForRouteKey, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useContentModulesStore } from '@/stores/contentModules'
@@ -57,7 +57,9 @@ export function useWorkflowTasks() {
         if (master.status !== 'PENDING_REVIEW') {
           continue
         }
-        items.push(masterReviewTask(master))
+        items.push(
+          masterReviewTask(master, mastersStore.currentRevisionLineIdByMasterId[master.id]),
+        )
       }
     }
 
@@ -112,7 +114,8 @@ function masterReworkTask(master: MasterDocumentSummary): WorkflowTask {
     kind: 'master-rework',
     titleKey: 'dashboard.tasks.masterRework.itemTitle',
     descriptionKey: 'dashboard.tasks.masterRework.description',
-    path: `/masters/${master.id}`,
+    // Hub keeps Replace / resubmit reachable (U09-C4) — do not land on read-only approval.
+    path: masterDetailPath(master.id),
     groupCode: master.groupCode,
     entityName: master.name,
     source: 'master',
@@ -120,13 +123,26 @@ function masterReworkTask(master: MasterDocumentSummary): WorkflowTask {
   }
 }
 
-function masterReviewTask(master: MasterDocumentSummary): WorkflowTask {
+function masterReviewDeepLinkPath(
+  master: MasterDocumentSummary,
+  currentRevisionLineId: string | undefined,
+): string {
+  if (!currentRevisionLineId) {
+    return masterDetailPath(master.id)
+  }
+  return `${masterRevisionDetailPath(master.id, currentRevisionLineId)}?workspaceTab=approval`
+}
+
+function masterReviewTask(
+  master: MasterDocumentSummary,
+  currentRevisionLineId: string | undefined,
+): WorkflowTask {
   return {
     id: `master-review-${master.id}`,
     kind: 'master-review',
     titleKey: 'dashboard.tasks.masterReview.title',
     descriptionKey: 'dashboard.tasks.masterReview.description',
-    path: `/masters/${master.id}`,
+    path: masterReviewDeepLinkPath(master, currentRevisionLineId),
     groupCode: master.groupCode,
     entityName: master.name,
     source: 'master',

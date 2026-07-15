@@ -21,6 +21,11 @@ defineProps<{
   impact: MasterImpactAnalysis | null
 }>()
 
+const emit = defineEmits<{
+  upload: []
+  submitReview: []
+}>()
+
 const revisionLinesPanelRef = ref<ComponentPublicInstance<{ reload: () => Promise<void> }> | null>(
   null,
 )
@@ -37,8 +42,10 @@ defineExpose({
     :master-id="masterId"
     :current-revision-line-id="currentRevisionLineId"
     :can-write="canWriteJourney"
-    :show-primary-cta="false"
+    :show-primary-cta="canWriteJourney"
     :enable-workspace-link="false"
+    @upload="emit('upload')"
+    @submit-review="emit('submitReview')"
   />
 
   <MasterWorkflowBanner :master="master" />

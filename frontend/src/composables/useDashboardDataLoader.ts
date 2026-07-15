@@ -145,13 +145,19 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
 
     await Promise.all(jobs)
     if (
-      primaryClusterOneRole.value === 'MASTER_DESIGNER' &&
       sessionStore.canAccessRoute('route.master-management') &&
       !mastersLoadError.value
     ) {
-      await mastersStore.enrichDraftMasterReviewHistory().catch(() => {
-        /* degrade to summary-only journey mapping */
-      })
+      if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
+        await mastersStore.enrichDraftMasterReviewHistory().catch(() => {
+          /* degrade to summary-only journey mapping */
+        })
+      }
+      if (reviewMasters.value || manageMasters.value) {
+        await mastersStore.enrichCurrentRevisionLineIdsForWorkflow().catch(() => {
+          /* degrade to Hub fallback deep links */
+        })
+      }
     }
     loading.value = false
   }
