@@ -357,7 +357,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **Blocker（阻止发布）：** 未声明变量引用（`UNRESOLVED_VARIABLE`）、不支持节点类型（`UNSUPPORTED_NODE`）等。
 
-**「不支持节点」语义（LR-A4 / BDD-LRP-A4-FAIL-CLOSED-001，2026-07-10 确认；CE-K06b 收缩 2026-07-15；CE-K06c 目标 2026-07-15）：** 包括 (1) **未知** `type`（不在 `StructuredContentNodeType`）；(2) **writer-unsupported** — 矩阵已声明但当前无 DOCX 发射分支的类型。v1 writer-unsupported set：**历史** `{ qrBarcodeRef, attachmentListRef }`；**CE-K06b 落地后** = `{ attachmentListRef }` 仅；**CE-K06c writer 落地后** = **空集**。仍在 set 中的类型必须在绑定校验与发布门禁 **硬阻断**，预览/运行时生成 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。
+**「不支持节点」语义（LR-A4 / BDD-LRP-A4-FAIL-CLOSED-001，2026-07-10 确认；CE-K06b 收缩 2026-07-15；CE-K06c 落地 2026-07-15）：** 包括 (1) **未知** `type`（不在 `StructuredContentNodeType`）；(2) **writer-unsupported** — 矩阵已声明但当前无 DOCX 发射分支的类型。v1 writer-unsupported set：**历史** `{ qrBarcodeRef, attachmentListRef }`；**CE-K06b 落地后** = `{ attachmentListRef }` 仅；**CE-K06c writer 落地后** = **空集**。仍在 set 中的类型必须在绑定校验与发布门禁 **硬阻断**，预览/运行时生成 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。
 
 **Warning（摘要 + 确认）：** 低风险缩放差异（`IMAGE_SCALING_ADJUSTED`）等。Writer-unsupported **不得** 降级为可发布 warning。
 

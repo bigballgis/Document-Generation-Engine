@@ -148,7 +148,7 @@ Done 时平台应满足：
 - 前端 impact 面板用模板名（非 UUID）+ 可点击链接。
 **依赖：** K01（release→revision 关联）。
 
-### CE-K06 渲染保真补全 — P1 · L · `In Progress`
+### CE-K06 渲染保真补全 — P1 · L · `Done`
 
 **痛点：** `WriterUnsupportedStructuredNodeTypes` 明确不支持 `qrBarcodeRef`/`attachmentListRef`；表格 `repeatHeaderAcrossPages` 绑定配置存在但 writer 不写 `tblHeader`；`pdf-page-number-stamping-enabled` 默认 false。
 **目标行为（三个子片，可独立交付）：**
@@ -156,8 +156,7 @@ Done 时平台应满足：
 - K06b：`qrBarcodeRef` writer（ZXing 生成图片嵌入，尺寸/纠错级别可配）。
 - K06c：`attachmentListRef` writer（结构化附件清单 → 编号列表段落）；PDF 页码 stamp 策略进 render profile（按包配置而非全局布尔）。
 **依赖：** K02（样式来源）先行为佳；资产/图片依赖 CE-E02 的键名约定但不阻塞。
-**状态（2026-07-15）：** **In Progress** — Task Master **#62**; **K06a Done** (merge `485a7f3e`); **K06b Done** (merge `a689ca87`); **active sub-slice K06c** in flight — worktree `DGE-ce-k06c-attachment-pdf-stamp` / `feat/ce-k06c-attachment-pdf-stamp`. Formal phase remains **None**. Do **not** claim CE-K06 / #62 Done until K06c gates green + merge. Parallel closed: **#69** CE-C04 → **Done** (`c7be8305`); **#70** CE-C05 → **Done** (`405f7cea`); **#88** CE-U06 → **Done** (`7734366e`).
-**BDD（2026-07-15 Wave 3）：** K06a/K06b historical **`ready`/shipped**；**K06c `ready`** — [ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md) §18–§20（`BDD-CE-K06c-001…008`；K06c-Q1…Q3 **confirmed**：`string[]` / empty `[]` success / golden `10-attachment-list`；messageKeys `attachmentListPayloadMissing`|`Invalid`）。Stamp 优先级（C7–C11 / 004…007）不变。Plan/Task Master activated — Next: prefer **rendering-engineer**.
+**状态（2026-07-15）：** **Done** — Task Master **#62**. **K06a** `485a7f3e` (tblHeader); **K06b** `a689ca87` (qrBarcodeRef); **K06c** tip `76297d08` (feat `4418efe6` + fix `76297d08` — `attachmentListRef` numbered list + PDF stamp via `renderProfile`; writer-unsupported set empty). BDD **ready**/shipped ([ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md); **BDD-CE-K06a/b/c**). Formal phase remains **None**. Umbrella **#53** remains **in-progress**. Do **not** activate CD-3. Do **not** claim go-live.
 
 ### CE-K07 金标语料回归体系 — P1 · M · `Done`
 
@@ -401,6 +400,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior waves closed: **#59**/**#68**/**#83** → **Done**; **#60**/**#84**/**#85** → **Done**. **Wave 0 (K05+U11+U12) closed:** **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (merges `51a58f12` / `513d776c` / tip `34353b75`). **#69** CE-C04 → **Done** (`c7be8305`). **#70** CE-C05 → **Done** (`405f7cea`). **#88** CE-U06 → **Done** (`7734366e`). **#62** CE-K06 → **in-progress** (K06a `485a7f3e` + K06b `a689ca87` Done; **active sub-slice K06c** worktree `DGE-ce-k06c-attachment-pdf-stamp` / `feat/ce-k06c-attachment-pdf-stamp` — do **not** claim #62 Done). Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
+**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior waves closed: **#59**/**#68**/**#83** → **Done**; **#60**/**#84**/**#85** → **Done**. **Wave 0 (K05+U11+U12) closed:** **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (merges `51a58f12` / `513d776c` / tip `34353b75`). **#69** CE-C04 → **Done** (`c7be8305`). **#70** CE-C05 → **Done** (`405f7cea`). **#88** CE-U06 → **Done** (`7734366e`). **#62** CE-K06 → **Done** (K06a `485a7f3e` + K06b `a689ca87` + K06c tip `76297d08`). Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
 
-**Last reviewed:** 2026-07-15（MAIN catch-up at `7734366e`; #69/#70/#88 Done; #62 K06c in flight; Wave 0 Done; umbrella #53 in-progress）
+**Last reviewed:** 2026-07-15（MAIN CE-K06 Done at `76297d08`; #62 Done; #69/#70/#88 Done; Wave 0 Done; umbrella #53 in-progress）

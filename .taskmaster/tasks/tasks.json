@@ -730,15 +730,16 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 remains in-progress (K06a merged 485a7f3e; K06b merged a689ca87; K06c in flight — do NOT claim #62 Done).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #69/#70/#88 Done. Active leaf #62 CE-K06 (K06c worktree DGE-ce-k06c-attachment-pdf-stamp / feat/ce-k06c-attachment-pdf-stamp). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#69/#70/#88 Done. No sole-active CE leaf claimed — pick next from pending CE-* under #53. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T13:10:00.000Z"
+        "updatedAt": "2026-07-15T14:20:00.000Z"
       },
+
       {
         "id": "54",
         "title": "CE-K07: Golden corpus regression skeleton",
@@ -850,17 +851,17 @@
       {
         "id": "62",
         "title": "CE-K06: Rendering fidelity completion (a/b/c)",
-        "description": "IN PROGRESS 2026-07-15. K06a tblHeader Done (merge 485a7f3e). K06b qrBarcodeRef Done (merge a689ca87). Active sub-slice K06c: attachmentListRef writer + PDF page-number stamp profile — worktree DGE-ce-k06c-attachment-pdf-stamp / feat/ce-k06c-attachment-pdf-stamp. Do NOT claim #62 Done until K06c merges. P1·L. Formal phase None.",
-        "details": "Depends K02 (#58); lane after K05 (#61). K06a Done on main (485a7f3e). K06b Done on main (a689ca87) — ZXing PNG embed; sizePx/errorCorrection/format; golden 09-qr-barcode ACTIVE. Active delivery: K06c only — attachmentListRef string[] → numbered list paragraphs; empty [] OK; fail-closed null/missing/non-array; PDF stamp via renderProfile only (BDD-CE-K06c-004–07); golden 10-attachment-list ACTIVE. Do NOT redo K06a/b. BDD ready: docs/behavior/ce-k06-rendering-fidelity.md §18–20 (BDD-CE-K06c-001–08; K06c-Q1…Q3 confirmed). Prefer rendering-engineer. Gates before K06c merge: mvn verify; queued docker-deploy when acceptance surface changes; worktree ../DGE-ce-k06c-attachment-pdf-stamp. Keep #62 in-progress until K06c closed. Formal phase stays None. Plan §3 CE-K06. Parallel #69/#70/#88 Done.",
-        "testStrategy": "1. K06a/K06b already on main — do not redo. 2. K06c: attachmentListRef numbered list from string[]; empty [] success; fail-closed missing/null/non-array; exit writer-unsupported; stamp via renderProfile only; golden 10-attachment-list ACTIVE; BDD-CE-K06c-001–08. 3. mvn verify. 4. Do not claim #62 Done until K06c merge.",
+        "description": "DONE 2026-07-15. K06a tblHeader (485a7f3e). K06b qrBarcodeRef (a689ca87). K06c attachmentListRef + PDF stamp profile (feat 4418efe6 + fix 76297d08 tip). Writer-unsupported set empty. P1·L. Formal phase None.",
+        "details": "Completed 2026-07-15. Depends K02 (#58); lane after K05 (#61). K06a: tblHeader / golden 02-cross-page-table. K06b: ZXing PNG embed; sizePx/errorCorrection/format; golden 09-qr-barcode ACTIVE. K06c: attachmentListRef string[] → numbered list; empty [] OK; fail-closed null/missing/non-array; PDF stamp via renderProfile.pdfPageNumberStampingEnabled only; golden 10-attachment-list ACTIVE; writer-unsupported empty. BDD ready/shipped: docs/behavior/ce-k06-rendering-fidelity.md (BDD-CE-K06a/b/c). Formal phase remains None. Plan §3 CE-K06 Done.",
+        "testStrategy": "1. K06a tblHeader XPath. 2. K06b QR/barcode embed + fail-closed. 3. K06c attachment list + stamp profile + golden 10-attachment-list. 4. mvn verify GREEN on MAIN tip 76297d08.",
         "priority": "medium",
         "dependencies": [
           "58",
           "61"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T13:10:00.000Z"
+        "updatedAt": "2026-07-15T14:20:00.000Z"
       },
       {
         "id": "63",
