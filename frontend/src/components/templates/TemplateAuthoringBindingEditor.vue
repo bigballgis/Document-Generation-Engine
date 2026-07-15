@@ -20,8 +20,6 @@ const props = defineProps<{
   editingAnchorId: string | null
   draftDevVersionId: string
   contentTypes: readonly string[]
-  visibilityEnabled: boolean
-  visibilityExpression: string
   editingPasteResidueBlocked: boolean
   variables: VariableSchema[]
   contentModuleReferenceKeys: string[]
@@ -36,12 +34,12 @@ const props = defineProps<{
 
 const declaredContentType = defineModel<string>('declaredContentType', { required: true })
 const structuredContentJson = defineModel<string>('structuredContentJson', { required: true })
+const visibilityEnabled = defineModel<boolean>('visibilityEnabled', { required: true })
+const visibilityExpression = defineModel<string>('visibilityExpression', { required: true })
 
 const emit = defineEmits<{
   back: []
   save: []
-  'update:visibilityEnabled': [value: boolean]
-  'update:visibilityExpression': [value: string]
   'clear-paste-residue': []
   'dirty-change': [dirty: boolean]
   'structure-change': []
@@ -93,8 +91,8 @@ defineExpose({ markPristine })
             </p>
             <el-form-item>
               <el-checkbox
-                :model-value="visibilityEnabled"
-                @update:model-value="emit('update:visibilityEnabled', $event as boolean)"
+                v-model="visibilityEnabled"
+                data-testid="enable-visibility-checkbox"
               >
                 {{ t('templates.authoring.visibilityCondition.enable') }}
               </el-checkbox>
@@ -104,11 +102,10 @@ defineExpose({ markPristine })
               :label="t('templates.authoring.visibilityCondition.expression')"
             >
               <ConditionExpressionInput
-                :model-value="visibilityExpression"
+                v-model="visibilityExpression"
                 :variable-keys="visibilityVariableKeys"
                 test-id="visibility-expression-input"
                 :placeholder="t('templates.authoring.visibilityCondition.expressionPlaceholder')"
-                @update:model-value="emit('update:visibilityExpression', String($event))"
               />
             </el-form-item>
           </div>

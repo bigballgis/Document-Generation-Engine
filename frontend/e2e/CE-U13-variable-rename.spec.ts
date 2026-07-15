@@ -342,10 +342,10 @@ test.describe('CE-U13 variable rename + expression autocomplete (BDD-CE-U13-VRC)
     const local = await prepareCeU13CascadeFixture(request)
     await openDevBindingEditor(page, request, local.templateId)
 
-    const visibilitySection = page.locator('.visibility-section')
-    await expect(visibilitySection).toBeVisible({ timeout: 15_000 })
-    const visibilityToggle = visibilitySection.locator('.el-checkbox')
-    await visibilityToggle.click()
+    const visibilityToggle = page.getByTestId('enable-visibility-checkbox')
+    await expect(visibilityToggle).toBeVisible({ timeout: 15_000 })
+    // Element Plus keeps the native input visually hidden; force-check still fires v-model.
+    await visibilityToggle.locator('input[type="checkbox"]').check({ force: true })
     await expect(visibilityToggle).toHaveClass(/is-checked/)
 
     const field = page

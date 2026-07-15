@@ -80,14 +80,6 @@ const {
 
 const { variables, bindings } = toRefs(props)
 const lastPreview = computed(() => props.lastPreview ?? null)
-
-function onVisibilityEnabledUpdate(value: boolean) {
-  visibilityEnabled.value = value
-}
-
-function onVisibilityExpressionUpdate(value: string) {
-  visibilityExpression.value = value
-}
 </script>
 
 <template>
@@ -125,8 +117,8 @@ function onVisibilityExpressionUpdate(value: string) {
       :editing-anchor-id="editingAnchorId"
       :draft-dev-version-id="draftDevVersionId"
       :content-types="contentTypes"
-      :visibility-enabled="visibilityEnabled"
-      :visibility-expression="visibilityExpression"
+      v-model:visibility-enabled="visibilityEnabled"
+      v-model:visibility-expression="visibilityExpression"
       :editing-paste-residue-blocked="editingPasteResidueBlocked"
       :variables="variables"
       :content-module-reference-keys="contentModuleReferenceKeys"
@@ -139,8 +131,6 @@ function onVisibilityExpressionUpdate(value: string) {
       :paste-residue-item-label="pasteResidueItemLabel"
       @back="backToList"
       @save="handleSaveBinding"
-      @update:visibility-enabled="onVisibilityEnabledUpdate"
-      @update:visibility-expression="onVisibilityExpressionUpdate"
       @clear-paste-residue="clearPendingPasteResidue"
       @dirty-change="handleEditorDirtyChange"
       @structure-change="handleStructureChange"
