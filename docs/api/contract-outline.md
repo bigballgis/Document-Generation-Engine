@@ -84,7 +84,7 @@ Field names, capability breakdown, error-code names, and response structure are 
 - 批量请求中每笔记录的单独覆盖都必须受模板级 API 管理配置约束，不能绕过输出方式、批量上限或动态加密能力限制。
 - 批量请求中每笔记录必须传入 `items[].itemId`，且同一批次内必须唯一；重复 `items[].itemId` 返回 `400 ITEM_ID_DUPLICATED`，不创建批次或异步任务。
 - 同步批量中任一记录因参数校验或 API 管理策略失败时，整批失败且不生成任何文件；响应需要返回每笔失败明细，并按非重试幂等结果记录。
-- 异步批量部分成功后的失败项重试必须使用新批次和新的 `idempotencyKey`，通过 `originalBatchId` 或等效字段关联原批次，原批次结果不被扩展或改写。
+- 异步批量部分成功后的失败项重试必须使用新批次和新的 `idempotencyKey`，通过 `originalBatchId` 或等效字段关联原批次，原批次结果不被扩展或改写；`originalBatchId` 出现时须通过同凭证 `BATCH_ROOT` 校验，否则 `404 ORIGINAL_BATCH_NOT_FOUND`（CE-C05）。
 - API 支持 DOCX/PDF 动态加密参数，是否允许加密以及可用加密能力由 API 管理配置控制。
 - `encryption.enabled=true` 时，`openPassword` 必填，`ownerPassword` 可选；`permissions` 采用统一抽象权限枚举，按 DOCX/PDF 输出格式映射到对应加密能力，且传入 `permissions` 时必须同时传入 `ownerPassword`。
 - `encryption.enabled=false` 或未传 `enabled` 时，如果仍传入 `openPassword`、`ownerPassword` 或 `permissions`，返回 `400 ENCRYPTION_PARAMETER_INVALID`，不得静默忽略。
@@ -626,6 +626,7 @@ default 路径特殊规则：首次请求创建幂等记录时，应记录当时
 - 批量重复提交命中原批次时，应返回原 `batchId`、汇总结果、任务 ID 或当前任务状态。
 - 同步批量中任一记录因参数校验或 API 管理策略失败时，整批失败且不生成任何文件；响应需要返回每笔失败明细，并按非重试幂等结果记录，重复提交同一 `idempotencyKey` 时重放该失败结果。
 - 异步批量部分成功后的失败项重试使用新批次和新的 `idempotencyKey`；新批次只提交需要重试的失败项，并通过 `originalBatchId` 或等效关联字段关联原批次，原批次结果不被扩展或改写。
+- **`originalBatchId` 运行时校验（CE-C05，2026-07-15）：** 可选。出现时必须在当前 API 凭证下存在匹配的原 `BATCH_ROOT`；否则 `404 ORIGINAL_BATCH_NOT_FOUND`（`category=BATCH`，`messageKey=api.error.batch.originalBatchNotFound`，`retryable=false`）。格式不符 pattern → `400 REQUEST_BODY_INVALID`（`fieldErrors` → `originalBatchId`）。成功时 `result.batch.originalBatchId` 回显；新批次审计/调用记录必须持久化关联。详见 [ce-c05-original-batch-id.md](../behavior/ce-c05-original-batch-id.md)。
 
 ### 幂等响应与审计字段状态
 
@@ -636,7 +637,7 @@ default 路径特殊规则：首次请求创建幂等记录时，应记录当时
 | 原始请求时间 | `originalRequestAt` | 重复命中或幂等冲突安全摘要中表达原请求受理时间。 | 已确认：重复命中成功场景固定返回。 |
 | 原始任务标识 | `task.taskId` | 重复命中异步请求时返回原任务。 | 已确认：重复命中异步请求返回完整 `task` 对象。 |
 | 原始批次标识 | `batchId` | 重复命中批量请求时返回原批次。 | 已确认。 |
-| 失败项重试原批次标识 | `originalBatchId` | 异步批量失败项以新批次重试时关联原批次。 | 字段名和语义已确认。 |
+| 失败项重试原批次标识 | `originalBatchId` | 异步批量失败项以新批次重试时关联原批次；出现时须同凭证下存在原 `BATCH_ROOT`，否则 `404 ORIGINAL_BATCH_NOT_FOUND`；成功响应回显并写入审计。 | **CE-C05 确认**：字段名、校验、回显、审计关联已锁定（[BDD](../behavior/ce-c05-original-batch-id.md)）。 |
 
 审计建议记录 `requestId`、`idempotencyKey` 或其摘要、幂等处理状态、原始请求时间、是否重复命中、是否冲突、冲突原因、解析后的发布版本和请求参数摘要。批量调用还需要记录 `batchId`、`items[].itemId` 或其摘要、失败项重试关联的 `originalBatchId` 或等效关联字段。过期 `idempotencyKey` 复用时，审计记录需要包含 `reusedExpiredIdempotencyKey`、`previousIdempotencyExpiredAt`、`previousRequestAt`、`previousResolvedReleaseVersion`。幂等响应字段统一放入 `metadata`。审计摘要不得包含 API 传入的 DOCX/PDF 加密密码。
 
@@ -1138,6 +1139,7 @@ Async task query response structure
 | `BATCH` | `BATCH_ITEM_COUNT_INVALID` | `api.error.batch.batchItemCountInvalid` | `false` | Batch item count is invalid. |
 | `BATCH` | `ITEM_ID_REQUIRED` | `api.error.batch.itemIdRequired` | `false` | Batch item ID is required. |
 | `BATCH` | `ITEM_ID_DUPLICATED` | `api.error.batch.itemIdDuplicated` | `false` | Batch item ID is duplicated. |
+| `BATCH` | `ORIGINAL_BATCH_NOT_FOUND` | `api.error.batch.originalBatchNotFound` | `false` | Original batch was not found. |
 | `BATCH` | `BATCH_PARTIAL_FAILED` | `api.error.batch.batchPartialFailed` | `false` | One or more batch items failed. |
 | `BATCH` | `BATCH_PROCESSING_FAILED` | `api.error.batch.batchProcessingFailed` | `true` | Batch processing failed. |
 
@@ -1152,7 +1154,7 @@ Async task query response structure
 | 400 Bad Request | `ENVIRONMENT_MISMATCH`、`RELEASE_VERSION_REQUIRED`、`RELEASE_VERSION_FORMAT_INVALID`、`OUTPUT_FORMAT_NOT_ALLOWED`、`OUTPUT_MODE_NOT_ALLOWED`、`BATCH_LIMIT_EXCEEDED`、`ENCRYPTION_NOT_ALLOWED`、`REQUEST_BODY_INVALID`、`REQUEST_ID_REQUIRED`、`OUTPUT_FORMAT_REQUIRED`、`OUTPUT_MODE_REQUIRED`、`VARIABLES_REQUIRED`、`ENCRYPTION_PARAMETER_INVALID`、`BATCH_ITEMS_REQUIRED`、`BATCH_ITEM_COUNT_INVALID`、`ITEM_ID_REQUIRED`、`ITEM_ID_DUPLICATED`。 | 请求结构、必填字段、格式类错误或 API 管理策略拒绝。 |
 | 401 Unauthorized | `API_CREDENTIAL_REQUIRED`、`API_CREDENTIAL_INVALID`、`API_CREDENTIAL_EXPIRED`、`API_CREDENTIAL_REVOKED`、`ACCESS_ACCOUNT_REQUIRED`。 | API 凭证或访问账号认证失败。 |
 | 403 Forbidden | `AD_GROUP_NOT_AUTHORIZED`、`TEMPLATE_ACCESS_DENIED`、`SELF_APPROVAL_FORBIDDEN`、`EXCEPTION_INTERVENTION_NOT_ALLOWED`。 | 调用方已被识别，但未获得模板 API 访问授权，或管理端同人审批 / 例外干预被拒绝；消息不得泄露未授权资源细节。 |
-| 404 Not Found | `RELEASE_VERSION_NOT_FOUND`、`ASYNC_TASK_NOT_FOUND`、`DOCUMENT_NOT_FOUND`。 | 授权范围内请求的发布版本、任务或文档不存在。 |
+| 404 Not Found | `RELEASE_VERSION_NOT_FOUND`、`ASYNC_TASK_NOT_FOUND`、`DOCUMENT_NOT_FOUND`、`ORIGINAL_BATCH_NOT_FOUND`。 | 授权范围内请求的发布版本、任务、文档不存在，或批量重试血缘中的原批次在同凭证下不可见。 |
 | 409 Conflict | `RELEASE_VERSION_DISABLED`、`DEFAULT_ROUTE_NOT_CONFIGURED`、`DEFAULT_ROUTE_TARGET_UNAVAILABLE`、`TEMPLATE_DISABLED`、`TEMPLATE_DEPRECATED`、`IDEMPOTENCY_KEY_CONFLICT`、`IDEMPOTENCY_RETRY_NOT_ALLOWED`、`ASYNC_TASK_CANCELLATION_NOT_ALLOWED`。 | 请求与当前版本、模板、default 配置、幂等状态或异步任务当前状态冲突。 |
 | 410 Gone | `DOWNLOAD_URL_EXPIRED`、`RESULT_RETENTION_EXPIRED`、`ASYNC_TASK_EXPIRED`。 | 资源曾可用，但下载地址、任务或结果已过期。 |
 | 422 Unprocessable Entity | `VARIABLE_REQUIRED`、`VARIABLE_TYPE_INVALID`、`VARIABLE_FORMAT_INVALID`、`VARIABLE_RULE_FAILED`、`OOXML_VALIDATION_FAILED`、`EXCEPTION_REASON_REQUIRED`、`EXCEPTION_SECONDARY_CONFIRM_REQUIRED`。 | 请求结构可解析，但模板变量、业务规则校验未通过，装配后 DOCX 未通过 OOXML 输出校验（fail-closed，不落库/不预览），或 CE-G01 例外干预字段缺失。 |

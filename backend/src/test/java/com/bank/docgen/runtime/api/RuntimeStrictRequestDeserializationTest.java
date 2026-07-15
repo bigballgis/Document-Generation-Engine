@@ -198,7 +198,7 @@ class RuntimeStrictRequestDeserializationTest {
     }
 
     @Test
-    void batchAcceptsContextAndOriginalBatchIdWithoutLineage() throws Exception {
+    void batchAcceptsContextAndOriginalBatchIdBinding() throws Exception {
         String json = """
                 {
                   "output": {"format": "DOCX", "mode": "SYNC_STREAM"},

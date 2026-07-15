@@ -895,6 +895,7 @@ Template Collaboration Work Item 用于站内待办和状态提示，不是 Temp
 - 批量请求使用批次级 `idempotencyKey` 识别整批重复提交；`items[].itemId` 只用于单笔明细、审计和失败项定位，不替代批次级 `idempotencyKey`。
 - 同步批量中任一记录因参数校验或 API 管理策略失败时，整批失败且不生成任何文件；响应需要返回每笔失败明细，并按非重试幂等结果记录，重复提交同一 `idempotencyKey` 时重放该失败结果。
 - 异步批量部分成功后的失败项重试必须使用新批次和新的 `idempotencyKey`；新批次只提交需要重试的失败项，并通过 `originalBatchId` 或等效关联字段关联原批次，原批次结果不被扩展或改写。
+- **`originalBatchId` 血缘（CE-C05）：** 批量请求可选关联字段；出现时必须解析到调用方同一 API 凭证下的既有 `BATCH_ROOT`（`batchExternalId`/`batchId`），否则 `404 ORIGINAL_BATCH_NOT_FOUND`；新批次持久化该关联且不得改写原批次。详见 [ce-c05-original-batch-id.md](../behavior/ce-c05-original-batch-id.md)。
 - 同步文件流响应中，文件内容放在响应体，核心元数据通过响应头承载；核心元数据包括 `auditId`、`traceId`、`requestId`、`idempotencyKey`、`idempotencyStatus`、`documentId`、`templateId`、`routeType`、`resolvedReleaseVersion`、`output.format`、`output.mode`。
 - 同步下载地址和异步结果下载地址固定有效期为 15 分钟，不允许通过 API 管理配置调整有效期。
 - 下载时需要二次授权，校验 API 凭证、AD Group、模板级授权、下载地址有效期和结果有效性。

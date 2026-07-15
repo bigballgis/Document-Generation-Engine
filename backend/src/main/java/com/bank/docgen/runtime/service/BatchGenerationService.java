@@ -35,6 +35,7 @@ public class BatchGenerationService {
     private final BatchGenerationPolicySupport policySupport;
     private final BatchAsyncTaskPersistenceSupport tasks;
     private final BatchGenerationOutcomeSupport outcomes;
+    private final OriginalBatchLineageValidator originalBatchLineageValidator;
 
     public BatchGenerationService(
             ApiPolicyRepository apiPolicyRepository,
@@ -47,7 +48,8 @@ public class BatchGenerationService {
             BatchExecutionService batchExecutionService,
             RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder,
             TraceIdProvider traceIdProvider,
-            InvocationRecordService invocationRecordService
+            InvocationRecordService invocationRecordService,
+            OriginalBatchLineageValidator originalBatchLineageValidator
     ) {
         this.asyncTaskRepository = asyncTaskRepository;
         this.idempotencyService = idempotencyService;
@@ -68,6 +70,7 @@ public class BatchGenerationService {
                 traceIdProvider,
                 tasks
         );
+        this.originalBatchLineageValidator = originalBatchLineageValidator;
     }
 
     @Transactional
@@ -85,6 +88,10 @@ public class BatchGenerationService {
         policySupport.requireSyncMode(request, policy);
         String resolvedVersion = policySupport.resolveVersion(template, policy, releaseVersion);
         policySupport.validateBatchRequest(request, policy);
+        originalBatchLineageValidator.requireValidOriginalBatchIfPresent(
+                request.originalBatchId(),
+                session.credentialId()
+        );
 
         String requestHash = idempotencyService.hashRequest(json.writeRequest(request, resolvedVersion));
         Optional<BatchGenerateResultView> replay =
@@ -133,6 +140,10 @@ public class BatchGenerationService {
         policySupport.requireAsyncMode(request, policy);
         String resolvedVersion = policySupport.resolveVersion(template, policy, releaseVersion);
         policySupport.validateBatchRequest(request, policy);
+        originalBatchLineageValidator.requireValidOriginalBatchIfPresent(
+                request.originalBatchId(),
+                session.credentialId()
+        );
 
         String requestHash = idempotencyService.hashRequest(json.writeRequest(request, resolvedVersion));
         Optional<GenerationAsyncTaskEntity> existing = tasks.findReplayTask(request, template.getId(), requestHash);

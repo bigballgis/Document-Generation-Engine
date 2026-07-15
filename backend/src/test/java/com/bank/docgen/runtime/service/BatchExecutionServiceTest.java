@@ -86,6 +86,52 @@ class BatchExecutionServiceTest {
     }
 
     @Test
+    void bddCeC05_003_echoesOriginalBatchIdOnSuccessfulBatchResult() {
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
+                .thenReturn(generated("DOC-1"))
+                .thenReturn(generated("DOC-2"));
+
+        BatchGenerateRequestBody withLineage = new BatchGenerateRequestBody(
+                request.output(),
+                request.items(),
+                request.encryption(),
+                request.requestId(),
+                request.idempotencyKey(),
+                "BATCH-ORIG02",
+                request.context()
+        );
+
+        BatchExecutionService.BatchExecutionOutcome outcome = service.execute(
+                template,
+                "1.0.0",
+                withLineage,
+                "BATCH-NEW02",
+                false
+        );
+
+        assertThat(outcome.batchResult().batchId()).isEqualTo("BATCH-NEW02");
+        assertThat(outcome.batchResult().originalBatchId()).isEqualTo("BATCH-ORIG02");
+        assertThat(outcome.batchResult().batchId()).isNotEqualTo(outcome.batchResult().originalBatchId());
+    }
+
+    @Test
+    void bddCeC05_001_omitsOriginalBatchIdWhenRequestHasNone() {
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
+                .thenReturn(generated("DOC-1"))
+                .thenReturn(generated("DOC-2"));
+
+        BatchExecutionService.BatchExecutionOutcome outcome = service.execute(
+                template,
+                "1.0.0",
+                request,
+                "BATCH-PLAIN",
+                false
+        );
+
+        assertThat(outcome.batchResult().originalBatchId()).isNull();
+    }
+
+    @Test
     void executeAsyncMode_marksPartialSucceededWhenOneItemFails() {
         when(messageResolver.resolve(anyString())).thenReturn("Generation failed.");
         when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))

@@ -3817,6 +3817,11 @@ components:
         originalBatchId:
           type: string
           pattern: '^BATCH-[A-Za-z0-9]+$'
+          description: >
+            Optional retry lineage. When present, must identify an existing BATCH_ROOT
+            batch owned by the same API credential; otherwise 404 ORIGINAL_BATCH_NOT_FOUND.
+            On success, echoed on result.batch.originalBatchId. Does not mutate the original batch.
+            See CE-C05 / docs/behavior/ce-c05-original-batch-id.md.
         context:
           $ref: '#/components/schemas/Context'
     BatchGenerateItem:
@@ -4134,6 +4139,9 @@ components:
         originalBatchId:
           type: string
           pattern: '^BATCH-[A-Za-z0-9]+$'
+          description: >
+            Present when the request supplied originalBatchId and lineage validation succeeded.
+            Equals the request originalBatchId; never equal to this result's batchId.
         summary:
           type: object
           additionalProperties: false
@@ -8543,6 +8551,7 @@ components:
         - BATCH_ITEM_COUNT_INVALID
         - ITEM_ID_REQUIRED
         - ITEM_ID_DUPLICATED
+        - ORIGINAL_BATCH_NOT_FOUND
         - BATCH_PARTIAL_FAILED
         - BATCH_PROCESSING_FAILED
         - SELF_APPROVAL_FORBIDDEN

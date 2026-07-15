@@ -4,6 +4,8 @@ import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.rendering.EncryptionFailedException;
 import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.runtime.domain.InvocationErrorEnvelope;
+import com.bank.docgen.runtime.service.OriginalBatchIdFormatException;
+import com.bank.docgen.runtime.service.OriginalBatchNotFoundException;
 import com.bank.docgen.runtime.service.RuntimeBatchValidationException;
 import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
@@ -76,6 +78,24 @@ final class FailedSyncInvocationErrorMapper {
             return envelope(
                     ex.errorCode(),
                     ApiErrorCategories.RUNTIME,
+                    ex.messageKey(),
+                    false,
+                    messageResolver
+            );
+        }
+        if (throwable instanceof OriginalBatchNotFoundException ex) {
+            return envelope(
+                    ex.errorCode(),
+                    ApiErrorCategories.BATCH,
+                    ex.messageKey(),
+                    false,
+                    messageResolver
+            );
+        }
+        if (throwable instanceof OriginalBatchIdFormatException ex) {
+            return envelope(
+                    ApiErrorCodes.REQUEST_BODY_INVALID,
+                    ApiErrorCategories.VALIDATION,
                     ex.messageKey(),
                     false,
                     messageResolver

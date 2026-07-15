@@ -632,6 +632,7 @@ API 需要支持批量生成。
 - 同一批次出现重复 `items[].itemId` 时，整批请求校验失败，返回 `400 ITEM_ID_DUPLICATED`，不创建批次或异步任务。
 - 同步批量中任一记录因参数校验或 API 管理策略失败时，整批失败且不生成任何文件；响应需要返回每笔失败明细，并按非重试幂等结果记录，重复提交同一 `idempotencyKey` 时重放该失败结果。
 - 异步批量部分成功后的失败项重试必须使用新批次和新的 `idempotencyKey`；新批次只提交需要重试的失败项，并通过 `originalBatchId` 或等效关联字段关联原批次，原批次结果不被扩展或改写。
+- **`originalBatchId` 重试血缘（CE-C05）：** 可选字段；出现时须在同凭证下存在对应原 `BATCH_ROOT`，否则 `404 ORIGINAL_BATCH_NOT_FOUND`；成功时响应回显并写入调用/审计关联；原批次结果不被改写。行为规格：[ce-c05-original-batch-id.md](../behavior/ce-c05-original-batch-id.md)。
 
 批量 API 采用全局默认上限 + API 管理可覆盖：
 
@@ -820,7 +821,7 @@ API 幂等规则：
 - 过期 `idempotencyKey` 复用审计字段包括 `reusedExpiredIdempotencyKey`、`previousIdempotencyExpiredAt`、`previousRequestAt`、`previousResolvedReleaseVersion`。
 - 批量请求使用批次级 `idempotencyKey` 识别整批重复提交；`items[].itemId` 只用于单笔明细、审计和失败项定位，不替代批次级 `idempotencyKey`。
 - 同步批量中非重试的整批失败需要记录幂等结果；重复提交同一 `idempotencyKey` 时重放该失败结果。
-- 异步批量失败项重试需要使用新的 `idempotencyKey`，并通过 `originalBatchId` 或等效关联字段关联原批次。
+- 异步批量失败项重试需要使用新的 `idempotencyKey`，并通过 `originalBatchId` 或等效关联字段关联原批次；`originalBatchId` 运行时校验与审计关联见 CE-C05 / [ce-c05-original-batch-id.md](../behavior/ce-c05-original-batch-id.md)。
 
 API 响应交付规则：
 
