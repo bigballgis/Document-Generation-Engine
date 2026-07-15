@@ -35,7 +35,7 @@ final class StructuredContentDocxCursorSupport {
     static boolean isBlockLevelType(String type) {
         return switch (type) {
             case "paragraph", "sectionHeading", "conditionBlock", "loopBlock", "tableComponentRef",
-                    "tableComponent", "contentModuleRef", "list" -> true;
+                    "tableComponent", "contentModuleRef", "list", "attachmentListRef" -> true;
             default -> false;
         };
     }

@@ -210,7 +210,8 @@
 **And** 本片 **不** 要求断言 `<w:tblHeader/>` 或跨页表头行为  
 
 > **Enrichment ownership (2026-07-15):** CE-K06a BDD **ready** — [ce-k06-rendering-fidelity.md](./ce-k06-rendering-fidelity.md)（`BDD-CE-K06a-004`）负责将本包升为 ACTIVE 并断言 `w:tblHeader`。  
-> **Additional package (CE-K06b, 2026-07-15):** Wave 2 追加金标包 `09-qr-barcode`（同 `golden-corpus/` 根；非平行第二套体系）— 见 [ce-k06-rendering-fidelity.md](./ce-k06-rendering-fidelity.md) `BDD-CE-K06b-008`。
+> **Additional package (CE-K06b, 2026-07-15):** Wave 2 追加金标包 `09-qr-barcode`（同 `golden-corpus/` 根；非平行第二套体系）— 见 [ce-k06-rendering-fidelity.md](./ce-k06-rendering-fidelity.md) `BDD-CE-K06b-008`。  
+> **Additional package (CE-K06c, 2026-07-15):** Wave 3 追加金标包 `10-attachment-list`（同根；`maturity: ACTIVE`；`string[]` → 编号列表）— 见 [ce-k06-rendering-fidelity.md](./ce-k06-rendering-fidelity.md) `BDD-CE-K06c-008`。
 
 #### BDD-CE-K07-013 — compute-variables 占位（待 K03）
 

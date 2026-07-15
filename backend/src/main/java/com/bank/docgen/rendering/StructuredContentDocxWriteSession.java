@@ -68,6 +68,7 @@ class StructuredContentDocxWriteSession {
                 inlineSupport,
                 styles,
                 cursor,
+                variables,
                 pinnedModuleStructures,
                 numberingCounters,
                 (nodes, paragraph) -> writeBlockNodes(nodes, paragraph, true),
@@ -80,7 +81,8 @@ class StructuredContentDocxWriteSession {
                 this::writeLoopBlock,
                 expandSupport::expandContentModule,
                 expandSupport::writeSectionHeading,
-                expandSupport::writeInlineOrBlockChildren
+                expandSupport::writeInlineOrBlockChildren,
+                expandSupport::writeAttachmentListRef
         );
     }
 
@@ -122,6 +124,17 @@ class StructuredContentDocxWriteSession {
                 }
                 QrBarcodeRefDocxSupport.writeQrBarcodeRef(node, currentParagraph, variables, styles);
                 paragraphAvailable = false;
+                continue;
+            }
+            if ("attachmentListRef".equals(type)) {
+                expandSupport.writeAttachmentListRef(
+                        node,
+                        paragraphAvailable ? currentParagraph : null
+                );
+                paragraphAvailable = false;
+                if (!body.getParagraphs().isEmpty()) {
+                    currentParagraph = body.getParagraphs().get(body.getParagraphs().size() - 1);
+                }
                 continue;
             }
             // LR-A4 (CD-PIT-07): unsupported / writer-missing structured node types must fail-closed.

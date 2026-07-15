@@ -322,8 +322,8 @@ class PublishGateServiceTest {
     }
 
     @Test
-    void publishGate_blocksAttachmentListRef_unsupportedStructuredNodes() {
-        // A2 — LR-A4 dedicated publish-gate hard-block for writer-unsupported attachmentListRef
+    void publishGate_allowsAttachmentListRef_alone() {
+        // BDD-CE-K06c-003 — attachmentListRef no longer hard-blocks publish gate
         when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         String attachmentJson = "{\"nodes\":[{\"type\":\"attachmentListRef\",\"referenceKey\":\"ATTACHMENTS\"}]}";
@@ -337,18 +337,18 @@ class PublishGateServiceTest {
         );
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
                 .thenReturn(List.of(binding));
-        when(nodeMatrixValidationService.countUnsupportedNodeBlockers(attachmentJson)).thenReturn(1);
+        when(nodeMatrixValidationService.countUnsupportedNodeBlockers(attachmentJson)).thenReturn(0);
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin);
 
-        assertThat(checklist.ready()).isFalse();
         assertThat(checklist.items().stream()
-                .anyMatch(item -> item.checkCode() == PublishGateCheckCode.UNSUPPORTED_STRUCTURED_NODES
-                        && item.blocker()
-                        && "api.publishGate.unsupportedStructuredNodes.blocked".equals(item.messageKey())))
-                .isTrue();
-        assertThatThrownBy(() -> service.assertReady(templateId, admin))
-                .isInstanceOf(TemplateValidationException.class);
+                .filter(item -> item.checkCode() == PublishGateCheckCode.UNSUPPORTED_STRUCTURED_NODES)
+                .findFirst()
+                .orElseThrow())
+                .satisfies(item -> {
+                    assertThat(item.blocker()).isFalse();
+                    assertThat(item.ready()).isTrue();
+                });
     }
 
     @Test

@@ -32,15 +32,15 @@ class WriterUnsupportedStructuredNodeTypesConsistencyTest {
     }
 
     @Test
-    void authoritativeSet_isExactlyAttachmentList() {
-        assertThat(WriterUnsupportedStructuredNodeTypes.jsonTypes())
-                .containsExactly("attachmentListRef");
+    void authoritativeSet_isEmptyAfterK06c() {
+        // CE-K06c — attachmentListRef writer shipped; writer-unsupported set is empty
+        assertThat(WriterUnsupportedStructuredNodeTypes.jsonTypes()).isEmpty();
     }
 
     @Test
     void containsJsonType_matchesExactCamelCaseOnly() {
-        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("attachmentListRef")).isTrue();
-        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("  attachmentListRef  ")).isTrue();
+        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("attachmentListRef")).isFalse();
+        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("  attachmentListRef  ")).isFalse();
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("qrBarcodeRef")).isFalse();
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("attachmentlistref")).isFalse();
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("ATTACHMENTLISTREF")).isFalse();
@@ -72,6 +72,7 @@ class WriterUnsupportedStructuredNodeTypesConsistencyTest {
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("imageRef")).isFalse();
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("sealRef")).isFalse();
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("qrBarcodeRef")).isFalse();
+        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("attachmentListRef")).isFalse();
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("contentModuleRef")).isFalse();
     }
 
@@ -89,7 +90,10 @@ class WriterUnsupportedStructuredNodeTypesConsistencyTest {
                     .contains(nodeType.jsonType());
         }
 
-        assertThat(DocxWriterHandledStructuredNodeTypes.jsonTypes())
-                .doesNotContainAnyElementsOf(WriterUnsupportedStructuredNodeTypes.jsonTypes());
+        // Empty writer-unsupported set (post CE-K06c) is valid; AssertJ rejects empty expected sets.
+        assertThat(java.util.Collections.disjoint(
+                DocxWriterHandledStructuredNodeTypes.jsonTypes(),
+                WriterUnsupportedStructuredNodeTypes.jsonTypes()
+        )).isTrue();
     }
 }

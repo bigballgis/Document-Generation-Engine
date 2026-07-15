@@ -59,20 +59,73 @@ class PdfConversionPostProcessorTest {
     }
 
     @Test
-    void renderProfileEnablesStampingWhenPlatformDefaultDisabled() throws Exception {
+    void renderProfileTrue_enablesStampingRegardlessOfGlobal() throws Exception {
+        // BDD-CE-K06c-004
+        assertThat(isStampingEnabled(true, false)).isTrue();
+        assertThat(isStampingEnabled(true, true)).isTrue();
+    }
+
+    @Test
+    void renderProfileFalse_disablesStampingEvenWhenGlobalTrue() throws Exception {
+        // BDD-CE-K06c-005 — global must not OR/bypass locked profile false
+        assertThat(isStampingEnabled(false, true)).isFalse();
+    }
+
+    @Test
+    void renderProfileFalse_andGlobalFalse_disablesStamping() throws Exception {
+        // BDD-CE-K06c-006
+        assertThat(isStampingEnabled(false, false)).isFalse();
+    }
+
+    @Test
+    void nullRenderProfile_fallsBackToGlobal() throws Exception {
+        // BDD-CE-K06c-007
         DocgenRenderingProperties properties = new DocgenRenderingProperties();
-        properties.setPdfPageNumberStampingEnabled(false);
+        properties.setPdfPageNumberStampingEnabled(true);
         PdfConversionPostProcessor processor = new PdfConversionPostProcessor(
                 properties,
                 new DocxPdfConversionPreprocessor()
         );
-        assertThat(processor.isStampingEnabled(
-                com.bank.docgen.sharedkernel.document.RenderProfile.fromJsonNode(
-                        new com.fasterxml.jackson.databind.ObjectMapper().readTree("""
-                                {"pdfPageNumberStampingEnabled": true}
-                                """)
+        assertThat(processor.isStampingEnabled((com.bank.docgen.sharedkernel.document.RenderProfile) null))
+                .isTrue();
+
+        properties.setPdfPageNumberStampingEnabled(false);
+        assertThat(processor.isStampingEnabled((com.bank.docgen.sharedkernel.document.RenderProfile) null))
+                .isFalse();
+    }
+
+    @Test
+    void resolveOptions_respectsProfileFalseDespiteGlobalTrue() throws Exception {
+        DocgenRenderingProperties properties = new DocgenRenderingProperties();
+        properties.setPdfPageNumberStampingEnabled(true);
+        PdfConversionPostProcessor processor = new PdfConversionPostProcessor(
+                properties,
+                new DocxPdfConversionPreprocessor()
+        );
+        PdfConversionOptions options = processor.resolveOptions(
+                new byte[0],
+                profile(false)
+        );
+        assertThat(options.pageNumberStampingEnabled()).isFalse();
+    }
+
+    private static boolean isStampingEnabled(boolean profileEnabled, boolean globalEnabled) throws Exception {
+        DocgenRenderingProperties properties = new DocgenRenderingProperties();
+        properties.setPdfPageNumberStampingEnabled(globalEnabled);
+        PdfConversionPostProcessor processor = new PdfConversionPostProcessor(
+                properties,
+                new DocxPdfConversionPreprocessor()
+        );
+        return processor.isStampingEnabled(profile(profileEnabled));
+    }
+
+    private static com.bank.docgen.sharedkernel.document.RenderProfile profile(boolean enabled)
+            throws Exception {
+        return com.bank.docgen.sharedkernel.document.RenderProfile.fromJsonNode(
+                new com.fasterxml.jackson.databind.ObjectMapper().readTree(
+                        "{\"pdfPageNumberStampingEnabled\": " + enabled + "}"
                 )
-        )).isTrue();
+        );
     }
 
     private static byte[] samplePdf() throws Exception {

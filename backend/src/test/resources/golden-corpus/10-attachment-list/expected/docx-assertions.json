@@ -1,0 +1,10 @@
+{
+  "deferred": false,
+  "assertions": [
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "numPr"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "Attachments"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "Annex A"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "Annex B"},
+    {"type": "XPATH_EXISTS", "part": "word/document.xml", "xpath": "//*[local-name()='numPr']"}
+  ]
+}

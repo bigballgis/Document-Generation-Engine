@@ -145,8 +145,22 @@ class DocxAssemblerTest {
     }
 
     @Test
-    void failsClosedOnUnsupportedAttachmentListNode() {
-        // LR-A4 (CD-PIT-07): attachmentListRef is declared but unrendered in v1.
+    void embedsAttachmentListNode() {
+        // CE-K06c — attachmentListRef writes numbered list (no longer unsupportedNodeType)
+        String structured = """
+                {"nodes":[{"type":"attachmentListRef","referenceKey":"ATTACHMENTS"}]}
+                """;
+
+        String rendered = assembler.renderStructuredContent(
+                structured,
+                Map.of("ATTACHMENTS", java.util.List.of("Annex A", "Annex B"))
+        );
+
+        assertThat(rendered).contains("Annex A").contains("Annex B");
+    }
+
+    @Test
+    void failsClosedOnMissingAttachmentListPayload() {
         String structured = """
                 {"nodes":[{"type":"attachmentListRef","referenceKey":"ATTACHMENTS"}]}
                 """;
@@ -154,7 +168,7 @@ class DocxAssemblerTest {
         assertThatThrownBy(() -> assembler.renderStructuredContent(structured, Map.of()))
                 .isInstanceOf(DocxAssemblyException.class)
                 .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
-                .isEqualTo("api.error.rendering.unsupportedNodeType");
+                .isEqualTo("api.error.rendering.attachmentListPayloadMissing");
     }
 
     @Test

@@ -357,7 +357,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **Blocker（阻止发布）：** 未声明变量引用（`UNRESOLVED_VARIABLE`）、不支持节点类型（`UNSUPPORTED_NODE`）等。
 
-**「不支持节点」语义（LR-A4 / BDD-LRP-A4-FAIL-CLOSED-001，2026-07-10 确认；CE-K06b 收缩 2026-07-15）：** 包括 (1) **未知** `type`（不在 `StructuredContentNodeType`）；(2) **writer-unsupported** — 矩阵已声明但当前无 DOCX 发射分支的类型。v1 writer-unsupported set：**历史** `{ qrBarcodeRef, attachmentListRef }`；**CE-K06b 落地后** = `{ attachmentListRef }` 仅（`qrBarcodeRef` 退出）。仍在 set 中的类型必须在绑定校验与发布门禁 **硬阻断**，预览/运行时生成 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。`attachmentListRef` 完整 writer 仍属 **CE-K06c**。
+**「不支持节点」语义（LR-A4 / BDD-LRP-A4-FAIL-CLOSED-001，2026-07-10 确认；CE-K06b 收缩 2026-07-15；CE-K06c 目标 2026-07-15）：** 包括 (1) **未知** `type`（不在 `StructuredContentNodeType`）；(2) **writer-unsupported** — 矩阵已声明但当前无 DOCX 发射分支的类型。v1 writer-unsupported set：**历史** `{ qrBarcodeRef, attachmentListRef }`；**CE-K06b 落地后** = `{ attachmentListRef }` 仅；**CE-K06c writer 落地后** = **空集**。仍在 set 中的类型必须在绑定校验与发布门禁 **硬阻断**，预览/运行时生成 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。
 
 **Warning（摘要 + 确认）：** 低风险缩放差异（`IMAGE_SCALING_ADJUSTED`）等。Writer-unsupported **不得** 降级为可发布 warning。
 
@@ -383,14 +383,14 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **跨页表头发射（CE-K06a / BDD-CE-K06a，2026-07-15 确认）：** 当 `repeatHeaderAcrossPages == true` 时，DOCX writer（`StructuredContentDocxTableSupport` 或同源路径）必须对写出的表头行落 OOXML `<w:tblHeader/>`（行级 `w:trPr`），使 Word 在续页重复表头。`false` 或缺省时不得写入 `w:tblHeader`。循环行与页脚行不得带 `w:tblHeader`。金标包 `golden-corpus/02-cross-page-table` 由本能力充实为 ACTIVE，以 DOCX XML XPath 断言（禁像素比对）。规格：[ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md)。
 
-#### 2.6.5 引用节点 Reference nodes（P18-T05 + CE-K06b）
+#### 2.6.5 引用节点 Reference nodes（P18-T05 + CE-K06b + CE-K06c）
 
 `ReferenceNodeService` 校验签章/QR/图片/附件列表引用节点：
 
 - **签章 `sealRef`：** `placement.withinAuthorizedArea=false` → `SEAL_OUTSIDE_AUTHORIZED_AREA` blocker；`applyScaling` → `SEAL_SCALING_NOT_ALLOWED` blocker（签章/QR 不适用图片缩放 warning）
 - **图片 `imageRef`：** `applyScaling` → `IMAGE_SCALING_ADJUSTED` warning（自 T02 迁至本服务）
 - **二维码/条码 `qrBarcodeRef`（CE-K06b / BDD-CE-K06b，2026-07-15 确认）：** 校验非空 `referenceKey`。DOCX writer 用 **ZXing** 从运行时 **`variables[referenceKey]`** 文本 payload 生成 PNG 并嵌入（默认 `format=QR_CODE`；可选 `CODE_128`）。可选节点字段：`sizePx`（默认 128，范围 32–512）、`errorCorrection`（`L|M|Q|H`，默认 `M`，仅 QR）、`format`（`QR_CODE`\|`CODE_128`）。非法配置 / 缺失 payload / 编码失败 → 显式渲染失败（`api.error.rendering.qrBarcodeConfigInvalid` / `qrBarcodePayloadMissing` / `qrBarcodeEncodeFailed`）；**禁止** 静默省略。实现后 **退出** LR-A4 writer-unsupported set。金标包 `golden-corpus/09-qr-barcode` ACTIVE。规格：[ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md) §15–§16。不依赖 CE-E02 资产库。
-- **附件列表 `attachmentListRef`：** 可校验 `referenceKey` 形态并解析为 `AttachmentListReferenceModel`；**在 CE-K06c writer 落地前** 仍由 LR-A4 writer-unsupported 规则 **发布阻断**（不得因 key 合法而允许发布或静默渲染）
+- **附件列表 `attachmentListRef`（CE-K06c / BDD-CE-K06c，2026-07-15 确认）：** 校验非空 `referenceKey` 并解析为 `AttachmentListReferenceModel`。DOCX writer 须将运行时 **`variables[referenceKey]`** 的 **`string[]`**（每项 = 编号列表段落显示文本）按序写成 **有序编号列表段落**（对齐既有 ordered list / `numPr` 路径）；实现后 **退出** LR-A4 writer-unsupported set（集合可空）。空数组 `[]` → 成功、零段落；`null` / 缺失 key → `api.error.rendering.attachmentListPayloadMissing`；非数组或元素非 string → `api.error.rendering.attachmentListPayloadInvalid`；**禁止** 静默省略。金标包 `golden-corpus/10-attachment-list` ACTIVE。规格：[ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md) §18–§20 `BDD-CE-K06c-001…008`。
 
 #### 2.6.6 受控多级编号 Controlled numbering（P18-T06）
 
@@ -484,9 +484,9 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **`PageNumberingProfile`（演示包配置枚举，非 API 字段）：** `GLOBAL_ONLY` | `SECTION_AND_GLOBAL` | `SECTION_ONLY`。声明于 `deploy/demo-*/config/*-template-config.json`，驱动母版生成与导入幂等；单节短信函可不强制双页码。
 
-**`PdfPageNumberStamper`：** LibreOffice 转换若未求值 Word 页码字段，则按节边界在 PDF 上还原 DOCX 页码语义（含双页码）。是否启用由发布锁定 `RenderProfile` 的 `pdfPageNumberStampingEnabled`（及既有 PDF 转换策略）控制；加盖失败须记录 fidelity warning，不得在要求页码时静默返回无页码 PDF。
+**`PdfPageNumberStamper`：** LibreOffice 转换若未求值 Word 页码字段，则按节边界在 PDF 上还原 DOCX 页码语义（含双页码）。是否启用由发布锁定 `RenderProfile` 的 `pdfPageNumberStampingEnabled` 控制（**CE-K06c / BDD-CE-K06c-004…007，2026-07-15 确认优先级**）：当解析到非 null `RenderProfile` 时，**仅**该布尔为权威；全局 `docgen.rendering.pdf-page-number-stamping-enabled` **不得** OR/绕过已锁定 profile 的 true/false。仅 `renderProfile == null` 旁路才回落全局属性。调用方不可覆盖。加盖失败须记录 fidelity warning，不得在要求页码时静默返回无页码 PDF。规格：[ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md) §18。
 
-**Profile 维度扩展（P22）：** 在 §2.6.8 既有维度基础上，`RenderProfile` 可包含 `pdfPageNumberStampingEnabled`（布尔，发布锁定，调用方不可覆盖）。
+**Profile 维度扩展（P22 + CE-K06c）：** 在 §2.6.8 既有维度基础上，`RenderProfile` 可包含 `pdfPageNumberStampingEnabled`（布尔，发布锁定，调用方不可覆盖）。**CE-K06c：** 非 null profile 时该字段为 stamp 唯一权威（全局应用属性不得绕过）。
 
 ### 2.7 模板 Template
 

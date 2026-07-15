@@ -228,18 +228,6 @@ class QrBarcodeRefDocxWriterTest {
         }
     }
 
-    @Test
-    void attachmentListRef_remainsUnsupported() {
-        String structured = """
-                {"nodes":[{"type":"attachmentListRef","referenceKey":"ATTACHMENTS"}]}
-                """;
-
-        assertThatThrownBy(() -> render(structured, Map.of()))
-                .isInstanceOf(DocxAssemblyException.class)
-                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
-                .isEqualTo("api.error.rendering.unsupportedNodeType");
-    }
-
     private byte[] render(String structuredJson, Map<String, Object> variables) throws Exception {
         return StructuredContentDocxWriterTestSupport.renderAnchorParagraph(
                 writer, structuredJson, variables, Map.of());

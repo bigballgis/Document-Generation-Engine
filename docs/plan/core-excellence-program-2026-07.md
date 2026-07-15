@@ -157,7 +157,7 @@ Done 时平台应满足：
 - K06c：`attachmentListRef` writer（结构化附件清单 → 编号列表段落）；PDF 页码 stamp 策略进 render profile（按包配置而非全局布尔）。
 **依赖：** K02（样式来源）先行为佳；资产/图片依赖 CE-E02 的键名约定但不阻塞。
 **状态（2026-07-15）：** **In Progress** — Task Master **#62**; **K06a Done** (merge `485a7f3e`); **K06b Done** (merge `a689ca87`); **active sub-slice K06c** in flight — worktree `DGE-ce-k06c-attachment-pdf-stamp` / `feat/ce-k06c-attachment-pdf-stamp`. Formal phase remains **None**. Do **not** claim CE-K06 / #62 Done until K06c gates green + merge. Parallel closed: **#69** CE-C04 → **Done** (`c7be8305`); **#70** CE-C05 → **Done** (`405f7cea`); **#88** CE-U06 → **Done** (`7734366e`).
-**BDD（2026-07-15）：** **`ready`** for **K06a**（shipped）+ **`ready`** for **K06b**（shipped）— [ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md)（`BDD-CE-K06a-001…006`；`BDD-CE-K06b-001…009`）。本 Wave 确认 scope = **K06c**（`attachmentListRef` + PDF stamp profile；同文件 §12.2）。Do **not** claim go-live. Do **not** activate CD-3.
+**BDD（2026-07-15 Wave 3）：** K06a/K06b historical **`ready`/shipped**；**K06c `ready`** — [ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md) §18–§20（`BDD-CE-K06c-001…008`；K06c-Q1…Q3 **confirmed**：`string[]` / empty `[]` success / golden `10-attachment-list`；messageKeys `attachmentListPayloadMissing`|`Invalid`）。Stamp 优先级（C7–C11 / 004…007）不变。Plan/Task Master activated — Next: prefer **rendering-engineer**.
 
 ### CE-K07 金标语料回归体系 — P1 · M · `Done`
 

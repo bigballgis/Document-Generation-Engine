@@ -24,6 +24,7 @@ final class StructuredContentDocxExpandSupport {
     private final StructuredContentDocxInlineSupport inlineSupport;
     private final StructuredContentDocxStyleSupport styles;
     private final StructuredContentDocxCursorSupport cursor;
+    private final Map<String, Object> variables;
     private final Map<String, String> pinnedModuleStructures;
     private final int[] numberingCounters;
     private final BiConsumer<JsonNode, XWPFParagraph> writeBlockNodesReuseFirst;
@@ -37,6 +38,7 @@ final class StructuredContentDocxExpandSupport {
             StructuredContentDocxInlineSupport inlineSupport,
             StructuredContentDocxStyleSupport styles,
             StructuredContentDocxCursorSupport cursor,
+            Map<String, Object> variables,
             Map<String, String> pinnedModuleStructures,
             int[] numberingCounters,
             BiConsumer<JsonNode, XWPFParagraph> writeBlockNodesReuseFirst,
@@ -48,6 +50,7 @@ final class StructuredContentDocxExpandSupport {
         this.inlineSupport = inlineSupport;
         this.styles = styles;
         this.cursor = cursor;
+        this.variables = variables;
         this.pinnedModuleStructures = pinnedModuleStructures;
         this.numberingCounters = numberingCounters;
         this.writeBlockNodesReuseFirst = writeBlockNodesReuseFirst;
@@ -94,6 +97,18 @@ final class StructuredContentDocxExpandSupport {
             }
             current = null;
         }
+    }
+
+    void writeAttachmentListRef(JsonNode node, XWPFParagraph firstParagraph) {
+        AttachmentListRefDocxSupport.writeAttachmentListRef(
+                node,
+                firstParagraph,
+                variables,
+                listSupport,
+                styles,
+                cursor,
+                document
+        );
     }
 
     void writeSectionHeading(JsonNode node, XWPFParagraph paragraph) {

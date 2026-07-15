@@ -585,15 +585,23 @@ class StructuredContentDocxWriterTest {
     }
 
     @Test
-    void failsClosedOnUnsupportedAttachmentListNode() {
+    void writesAttachmentListNodeAsNumberedParagraphs() throws Exception {
+        // CE-K06c — success path replaces former unsupported fail-closed for attachmentListRef
         String structured = """
                 {"nodes":[{"type":"attachmentListRef","referenceKey":"ATTACHMENTS"}]}
                 """;
 
-        assertThatThrownBy(() -> render(structured, Map.of()))
-                .isInstanceOf(DocxAssemblyException.class)
-                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
-                .isEqualTo("api.error.rendering.unsupportedNodeType");
+        byte[] result = render(structured, Map.of(
+                "ATTACHMENTS", List.of("Annex A", "Annex B")
+        ));
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            long numbered = document.getParagraphs().stream()
+                    .filter(paragraph -> paragraph.getCTP().getPPr() != null
+                            && paragraph.getCTP().getPPr().getNumPr() != null)
+                    .count();
+            assertThat(numbered).isEqualTo(2);
+        }
     }
 
     @Test
@@ -618,8 +626,8 @@ class StructuredContentDocxWriterTest {
     }
 
     @Test
-    void failsClosedOnAttachmentListNestedInLoopBlock() {
-        // A5 — nested fail-closed under loopBlock
+    void writesAttachmentListNestedInLoopBlock() throws Exception {
+        // CE-K06c — nested success path under loopBlock
         String structured = """
                 {"nodes":[{
                   "type":"loopBlock",
@@ -628,10 +636,18 @@ class StructuredContentDocxWriterTest {
                 }]}
                 """;
 
-        assertThatThrownBy(() -> render(structured, Map.of("items", List.of(Map.of("n", "1")))))
-                .isInstanceOf(DocxAssemblyException.class)
-                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
-                .isEqualTo("api.error.rendering.unsupportedNodeType");
+        byte[] result = render(structured, Map.of(
+                "items", List.of(Map.of("n", "1")),
+                "ATTACHMENTS", List.of("Loop annex")
+        ));
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            long numbered = document.getParagraphs().stream()
+                    .filter(paragraph -> paragraph.getCTP().getPPr() != null
+                            && paragraph.getCTP().getPPr().getNumPr() != null)
+                    .count();
+            assertThat(numbered).isGreaterThanOrEqualTo(1);
+        }
     }
 
     @Test

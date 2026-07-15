@@ -66,22 +66,19 @@ class NodeMatrixValidationServiceTest {
     }
 
     @Test
-    void writerUnsupportedAttachmentListRef_isBlocker() {
-        // A3 — binding-time BLOCKER for writer-unsupported attachmentListRef
+    void attachmentListRef_isNotWriterUnsupportedBlocker() {
+        // CE-K06c — attachmentListRef exits writer-unsupported set (BDD-CE-K06c-003)
         String json = """
                 {"nodes":[{"type":"attachmentListRef","referenceKey":"ATTACHMENTS"}]}
                 """;
 
         StructuredContentValidationResult result = service.validate(json, Set.of());
 
-        assertThat(result.blockers()).hasSize(1);
-        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.UNSUPPORTED_NODE);
-        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0]");
+        assertThat(result.blockers()).isEmpty();
     }
 
     @Test
-    void writerUnsupportedNestedInCondition_isBlocker() {
-        // A3 + B2 — static tree detection even when nested under conditionBlock
+    void attachmentListRefNestedInCondition_isNotWriterUnsupportedBlocker() {
         String json = """
                 {
                   "nodes": [
@@ -98,19 +95,17 @@ class NodeMatrixValidationServiceTest {
 
         StructuredContentValidationResult result = service.validate(json, Set.of("show"));
 
-        assertThat(result.blockers()).hasSize(1);
-        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.UNSUPPORTED_NODE);
-        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0].children[0]");
+        assertThat(result.blockers()).isEmpty();
     }
 
     @Test
-    void countUnsupportedNodeBlockers_countsWriterUnsupportedAndUnknown() {
+    void countUnsupportedNodeBlockers_countsUnknownOnly_afterK06c() {
         assertThat(service.countUnsupportedNodeBlockers(
                 "{\"nodes\":[{\"type\":\"qrBarcodeRef\",\"referenceKey\":\"QR-1\"}]}"))
                 .isZero();
         assertThat(service.countUnsupportedNodeBlockers(
                 "{\"nodes\":[{\"type\":\"attachmentListRef\",\"referenceKey\":\"ATTACHMENTS\"}]}"))
-                .isEqualTo(1);
+                .isZero();
         assertThat(service.countUnsupportedNodeBlockers(
                 "{\"nodes\":[{\"type\":\"rawHtml\",\"value\":\"x\"}]}"))
                 .isEqualTo(1);

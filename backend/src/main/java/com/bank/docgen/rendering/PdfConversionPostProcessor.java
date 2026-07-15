@@ -45,9 +45,15 @@ public class PdfConversionPostProcessor {
         return renderingProperties.isPdfPageNumberStampingEnabled();
     }
 
+    /**
+     * CE-K06c: when a non-null {@link RenderProfile} is present, only
+     * {@code pdfPageNumberStampingEnabled} on that profile is authoritative.
+     * The global {@code docgen.rendering.pdf-page-number-stamping-enabled} property
+     * must not OR/bypass a locked profile true/false. Null profile falls back to global.
+     */
     public boolean isStampingEnabled(RenderProfile renderProfile) {
-        if (renderProfile != null && renderProfile.pdfPageNumberStampingEnabled()) {
-            return true;
+        if (renderProfile != null) {
+            return renderProfile.pdfPageNumberStampingEnabled();
         }
         return renderingProperties.isPdfPageNumberStampingEnabled();
     }

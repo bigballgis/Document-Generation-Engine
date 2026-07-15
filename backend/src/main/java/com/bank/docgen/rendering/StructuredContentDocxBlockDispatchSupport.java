@@ -21,6 +21,7 @@ final class StructuredContentDocxBlockDispatchSupport {
     private final java.util.function.BiConsumer<JsonNode, XWPFParagraph> expandContentModule;
     private final java.util.function.BiConsumer<JsonNode, XWPFParagraph> writeSectionHeading;
     private final java.util.function.BiConsumer<JsonNode, XWPFParagraph> writeInlineOrBlockChildren;
+    private final java.util.function.BiConsumer<JsonNode, XWPFParagraph> writeAttachmentListRef;
 
     StructuredContentDocxBlockDispatchSupport(
             StructuredContentDocxStyleSupport styles,
@@ -29,7 +30,8 @@ final class StructuredContentDocxBlockDispatchSupport {
             java.util.function.BiConsumer<JsonNode, XWPFParagraph> writeLoopBlock,
             java.util.function.BiConsumer<JsonNode, XWPFParagraph> expandContentModule,
             java.util.function.BiConsumer<JsonNode, XWPFParagraph> writeSectionHeading,
-            java.util.function.BiConsumer<JsonNode, XWPFParagraph> writeInlineOrBlockChildren
+            java.util.function.BiConsumer<JsonNode, XWPFParagraph> writeInlineOrBlockChildren,
+            java.util.function.BiConsumer<JsonNode, XWPFParagraph> writeAttachmentListRef
     ) {
         this.styles = styles;
         this.inlineSupport = inlineSupport;
@@ -38,6 +40,7 @@ final class StructuredContentDocxBlockDispatchSupport {
         this.expandContentModule = expandContentModule;
         this.writeSectionHeading = writeSectionHeading;
         this.writeInlineOrBlockChildren = writeInlineOrBlockChildren;
+        this.writeAttachmentListRef = writeAttachmentListRef;
     }
 
     void rejectIfUnrenderable(String type) {
@@ -65,6 +68,10 @@ final class StructuredContentDocxBlockDispatchSupport {
         }
         if ("contentModuleRef".equals(type)) {
             expandContentModule.accept(node, paragraph);
+            return;
+        }
+        if ("attachmentListRef".equals(type)) {
+            writeAttachmentListRef.accept(node, paragraph);
             return;
         }
         if ("sectionHeading".equals(type)) {
