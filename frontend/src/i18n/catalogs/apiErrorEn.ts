@@ -124,7 +124,13 @@ export const apiErrorEn = {
     sealAssetNotFound: "The referenced seal asset could not be found.",
     ooxmlValidationFailed:
       "The generated document failed OOXML validation and was not saved. Regenerate after correcting structured content.",
-    pinnedMasterUnavailable: "The pinned letterhead revision for this release is unavailable."
+    pinnedMasterUnavailable: "The pinned letterhead revision for this release is unavailable.",
+    qrBarcodePayloadMissing:
+      "The QR or barcode payload variable is missing or blank. Provide a non-empty value for the referenced key.",
+    qrBarcodeConfigInvalid:
+      "The QR or barcode node configuration is invalid. Check sizePx, errorCorrection, and format.",
+    qrBarcodeEncodeFailed:
+      "The QR or barcode payload could not be encoded. Check the payload characters and format."
   },
   lifecycle: {
     selfApprovalForbidden:

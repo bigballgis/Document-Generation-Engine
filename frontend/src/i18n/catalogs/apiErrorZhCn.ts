@@ -122,7 +122,10 @@ export const apiErrorZhCn = {
     sealAssetNotFound: "找不到引用的印章资源。",
     ooxmlValidationFailed:
       "生成的文档未通过 OOXML 校验，未予保存。请修正结构化内容后重新生成。",
-    pinnedMasterUnavailable: "此发布版本固定的母版修订版本不可用。"
+    pinnedMasterUnavailable: "此发布版本固定的母版修订版本不可用。",
+    qrBarcodePayloadMissing: "二维码或条码载荷变量缺失或为空。请为引用的键提供非空值。",
+    qrBarcodeConfigInvalid: "二维码或条码节点配置无效。请检查 sizePx、errorCorrection 和 format。",
+    qrBarcodeEncodeFailed: "无法编码二维码或条码载荷。请检查载荷字符与格式。"
   },
   lifecycle: {
     selfApprovalForbidden: "不允许自我审批；决策人必须与最近一次提交人不同。",
