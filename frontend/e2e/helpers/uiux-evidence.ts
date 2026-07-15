@@ -1114,3 +1114,33 @@ export async function captureCeU10LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** CE-U12 caller contract copyable examples — 1920×1080 dual-brand evidence. */
+export const CE_U12_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-U12')
+export const CE_U12_SCREENSHOT_DIR = path.join(CE_U12_EVIDENCE_ROOT, 'screenshots')
+export const CE_U12_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensureCeU12EvidenceDirs(): void {
+  fs.mkdirSync(CE_U12_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceU12ScreenshotPath(filename: string): string {
+  return path.join(CE_U12_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeU12Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeU12EvidenceDirs()
+  const target = ceU12ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeU12LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeU12EvidenceDirs()
+  const target = ceU12ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
