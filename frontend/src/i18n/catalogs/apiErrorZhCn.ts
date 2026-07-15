@@ -132,8 +132,7 @@ export const apiErrorZhCn = {
     qrBarcodeEncodeFailed: "无法编码二维码或条码载荷。请检查载荷字符与格式。",
     attachmentListPayloadMissing:
       "附件列表载荷变量缺失或为 null。请为引用的键提供字符串数组。",
-    attachmentListPayloadInvalid:
-      "附件列表载荷无效。请为引用的键提供字符串数组。"
+    attachmentListPayloadInvalid: "附件列表载荷无效。请为引用的键提供字符串数组。"
   },
   lifecycle: {
     selfApprovalForbidden: "不允许自我审批；决策人必须与最近一次提交人不同。",
