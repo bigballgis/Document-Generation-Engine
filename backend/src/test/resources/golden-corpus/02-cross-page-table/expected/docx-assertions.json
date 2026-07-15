@@ -1,4 +1,10 @@
 {
-  "deferred": true,
-  "assertions": []
+  "deferred": false,
+  "assertions": [
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "tblHeader"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "Period"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "Payment"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "Cross-page repayment schedule"},
+    {"type": "XPATH_EXISTS", "part": "word/document.xml", "xpath": "//*[local-name()='tblHeader']"}
+  ]
 }

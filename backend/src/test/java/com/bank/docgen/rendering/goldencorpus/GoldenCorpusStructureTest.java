@@ -58,7 +58,7 @@ class GoldenCorpusStructureTest {
 
     @Test
     void placeholderMissingSkeletonFileFails(@TempDir Path tempDir) throws Exception {
-        Path packageDir = copyPackageToTemp("cross-page-table", tempDir);
+        Path packageDir = copyPackageToTemp("long-clause-limits", tempDir);
         Files.delete(packageDir.resolve("input/template.json"));
 
         GoldenCorpusPackage loaded = scanner.loadPackage(packageDir);
@@ -86,13 +86,12 @@ class GoldenCorpusStructureTest {
                 "encrypted-pdf",
                 "specimen-watermark",
                 "compute-variables",
-                "chinese-uppercase-amount"
+                "chinese-uppercase-amount",
+                "cross-page-table"
         );
-        assertThat(placeholders).contains(
-                "cross-page-table",
-                "long-clause-limits"
-        );
+        assertThat(placeholders).contains("long-clause-limits");
         assertThat(placeholders).doesNotContain(
+                "cross-page-table",
                 "specimen-watermark",
                 "dual-font-master",
                 "compute-variables",

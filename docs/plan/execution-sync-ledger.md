@@ -1,6 +1,8 @@
 # Execution Sync Ledger
 
-**Completion note (2026-07-15, CE Wave 0 K05+U11+U12):** **Wave 0 → Done** — **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (wave fully closed). Formal phase remains **None**. Umbrella **#53** remains **in-progress**. **Batch 4 remains Done**. Prior wave (#60/#84/#85) remains **Done**. Overall checklist remains **NO-GO** (blocking: **#3b**). **no sole-active formal phase**. Do **not** claim production go-live. Do **not** activate CD-3. **PAUSED** — do **not** activate Wave 1 (**#62** CE-K06 / **#69** CE-C04 / **#88** CE-U06); user Cursor update pause.
+**Activation note (2026-07-15, CE Wave 1 lane 1 K06):** **#62** CE-K06 → Task Master **in-progress** (starting K06a tblHeader; worktree `DGE-ce-k06-rendering-fidelity` / `feat/ce-k06-rendering-fidelity`). Formal phase remains **None**. Umbrella **#53** remains **in-progress**. Parallel Wave 1 lanes **#69** CE-C04 / **#88** CE-U06 remain **pending** (not activated). Do **not** claim CE-K06 Done. Do **not** activate CD-3. Do **not** claim go-live.
+
+**Completion note (2026-07-15, CE Wave 0 K05+U11+U12):** **Wave 0 → Done** — **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (wave fully closed). Formal phase remains **None**. Umbrella **#53** remains **in-progress**. **Batch 4 remains Done**. Prior wave (#60/#84/#85) remains **Done**. Overall checklist remains **NO-GO** (blocking: **#3b**). **no sole-active formal phase**. Do **not** claim production go-live. Do **not** activate CD-3.
 
 - **CE-K05** (`ce-k05-master-impact-real`; Task Master **#61**): BDD **ready** ([ce-k05-master-impact-real.md](../behavior/ce-k05-master-impact-real.md); **BDD-CE-K05-MIR-001…009**). **Merge:** `51a58f12`. **Gates:** E2E + UIUX **PASS** dual-brand @1440. **Evidence:** real impactAnalysis (name links); revision anchor/hash diff; replace-confirm; [CE-K05-uiux-manifest.md](../../frontend/e2e/evidence/CE-K05-uiux-manifest.md).
 

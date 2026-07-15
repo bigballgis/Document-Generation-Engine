@@ -4,13 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -318,6 +324,170 @@ class StructuredContentDocxWriterTest {
     }
 
     @Test
+    void bddCeK06a001_repeatHeaderAcrossPagesWritesTblHeaderOnHeaderRow() throws Exception {
+        String structured = """
+                {"nodes":[{"type":"tableComponentRef","tableComponentRef":"TBL-1","tableComponent":{
+                  "columnSchema":[{"columnKey":"period"},{"columnKey":"payment"}],
+                  "repeatHeaderAcrossPages": true,
+                  "headerRows":[[
+                    {"columnKey":"period","value":"Period"},
+                    {"columnKey":"payment","value":"Payment"}
+                  ]],
+                  "loopRow":{"loopVariable":"scheduleRows","cells":[
+                    {"columnKey":"period","variableKey":"period"},
+                    {"columnKey":"payment","variableKey":"payment"}
+                  ]}
+                }}]}
+                """;
+        Map<String, Object> variables = Map.of(
+                "scheduleRows",
+                List.of(Map.of("period", "1", "payment", "600.00"))
+        );
+
+        byte[] result = render(structured, variables);
+
+        String documentXml = readZipPart(result, "word/document.xml");
+        assertThat(documentXml).contains("tblHeader");
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            XWPFTableRow headerRow = document.getTables().getFirst().getRow(0);
+            assertThat(headerRow.isRepeatHeader()).isTrue();
+        }
+    }
+
+    @Test
+    void bddCeK06a002_repeatHeaderFalseOrAbsentDoesNotWriteTblHeader() throws Exception {
+        String withoutFlag = """
+                {"nodes":[{"type":"tableComponentRef","tableComponentRef":"TBL-1","tableComponent":{
+                  "columnSchema":[{"columnKey":"period"},{"columnKey":"payment"}],
+                  "headerRows":[[
+                    {"columnKey":"period","value":"Period"},
+                    {"columnKey":"payment","value":"Payment"}
+                  ]],
+                  "loopRow":{"loopVariable":"scheduleRows","cells":[
+                    {"columnKey":"period","variableKey":"period"},
+                    {"columnKey":"payment","variableKey":"payment"}
+                  ]}
+                }}]}
+                """;
+        String explicitFalse = """
+                {"nodes":[{"type":"tableComponentRef","tableComponentRef":"TBL-1","tableComponent":{
+                  "columnSchema":[{"columnKey":"period"},{"columnKey":"payment"}],
+                  "repeatHeaderAcrossPages": false,
+                  "headerRows":[[
+                    {"columnKey":"period","value":"Period"},
+                    {"columnKey":"payment","value":"Payment"}
+                  ]],
+                  "loopRow":{"loopVariable":"scheduleRows","cells":[
+                    {"columnKey":"period","variableKey":"period"},
+                    {"columnKey":"payment","variableKey":"payment"}
+                  ]}
+                }}]}
+                """;
+        Map<String, Object> variables = Map.of(
+                "scheduleRows",
+                List.of(Map.of("period", "1", "payment", "600.00"))
+        );
+
+        byte[] absentResult = render(withoutFlag, variables);
+        byte[] falseResult = render(explicitFalse, variables);
+
+        assertThat(readZipPart(absentResult, "word/document.xml")).doesNotContain("tblHeader");
+        assertThat(readZipPart(falseResult, "word/document.xml")).doesNotContain("tblHeader");
+        try (XWPFDocument absentDoc = StructuredContentDocxWriterTestSupport.openDocument(absentResult);
+                XWPFDocument falseDoc = StructuredContentDocxWriterTestSupport.openDocument(falseResult)) {
+            assertThat(absentDoc.getTables().getFirst().getRow(0).isRepeatHeader()).isFalse();
+            assertThat(falseDoc.getTables().getFirst().getRow(0).isRepeatHeader()).isFalse();
+        }
+    }
+
+    @Test
+    void bddCeK06a003_onlyHeaderRowsCarryTblHeader() throws Exception {
+        String structured = """
+                {"nodes":[{"type":"tableComponentRef","tableComponentRef":"TBL-1","tableComponent":{
+                  "columnSchema":[{"columnKey":"period"},{"columnKey":"payment"}],
+                  "repeatHeaderAcrossPages": true,
+                  "headerRows":[[
+                    {"columnKey":"period","value":"Period"},
+                    {"columnKey":"payment","value":"Payment"}
+                  ]],
+                  "loopRow":{"loopVariable":"scheduleRows","cells":[
+                    {"columnKey":"period","variableKey":"period"},
+                    {"columnKey":"payment","variableKey":"payment"}
+                  ]},
+                  "footerRows":[[
+                    {"columnKey":"period","value":"Total"},
+                    {"columnKey":"payment","variableKey":"totalPayment"}
+                  ]]
+                }}]}
+                """;
+        Map<String, Object> variables = Map.of(
+                "totalPayment", "1,200.00",
+                "scheduleRows",
+                List.of(
+                        Map.of("period", "1", "payment", "600.00"),
+                        Map.of("period", "2", "payment", "600.00")
+                )
+        );
+
+        byte[] result = render(structured, variables);
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            XWPFTable table = document.getTables().getFirst();
+            assertThat(table.getRows()).hasSize(4);
+            assertThat(table.getRow(0).isRepeatHeader()).isTrue();
+            assertThat(table.getRow(1).isRepeatHeader()).isFalse();
+            assertThat(table.getRow(2).isRepeatHeader()).isFalse();
+            assertThat(table.getRow(3).isRepeatHeader()).isFalse();
+        }
+        String documentXml = readZipPart(result, "word/document.xml");
+        assertThat(countOccurrences(documentXml, "tblHeader")).isEqualTo(1);
+    }
+
+    @Test
+    void bddCeK06a006_writtenHeaderRowsEachGetTblHeaderWhenRepeatEnabled() throws Exception {
+        // v1 writer emits only the first headerRows entry; assert that written header carries tblHeader.
+        String structured = """
+                {"nodes":[{"type":"tableComponentRef","tableComponentRef":"TBL-1","tableComponent":{
+                  "columnSchema":[{"columnKey":"period"},{"columnKey":"payment"}],
+                  "repeatHeaderAcrossPages": true,
+                  "headerRows":[
+                    [
+                      {"columnKey":"period","value":"Period"},
+                      {"columnKey":"payment","value":"Payment"}
+                    ],
+                    [
+                      {"columnKey":"period","value":"Period2"},
+                      {"columnKey":"payment","value":"Payment2"}
+                    ]
+                  ],
+                  "loopRow":{"loopVariable":"scheduleRows","cells":[
+                    {"columnKey":"period","variableKey":"period"},
+                    {"columnKey":"payment","variableKey":"payment"}
+                  ]}
+                }}]}
+                """;
+        Map<String, Object> variables = Map.of(
+                "scheduleRows",
+                List.of(Map.of("period", "1", "payment", "600.00"))
+        );
+
+        byte[] result = render(structured, variables);
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            XWPFTable table = document.getTables().getFirst();
+            List<XWPFTableRow> writtenHeaders = new ArrayList<>();
+            for (XWPFTableRow row : table.getRows()) {
+                if (row.isRepeatHeader()) {
+                    writtenHeaders.add(row);
+                }
+            }
+            assertThat(writtenHeaders).isNotEmpty();
+            assertThat(table.getRow(0).isRepeatHeader()).isTrue();
+            assertThat(table.getText()).contains("Period");
+        }
+    }
+
+    @Test
     void expandsContentModuleRefFromPinnedStructure() throws Exception {
         String structured = """
                 {"nodes":[{"type":"contentModuleRef","referenceKey":"CLAUSE-1"}]}
@@ -515,5 +685,27 @@ class StructuredContentDocxWriterTest {
                 variables,
                 pinnedModuleStructures
         );
+    }
+
+    private static String readZipPart(byte[] docxBytes, String partName) throws Exception {
+        try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(docxBytes))) {
+            ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+                if (partName.equals(entry.getName())) {
+                    return new String(zip.readAllBytes(), StandardCharsets.UTF_8);
+                }
+            }
+        }
+        throw new IllegalStateException("DOCX part not found: " + partName);
+    }
+
+    private static int countOccurrences(String haystack, String needle) {
+        int count = 0;
+        int index = 0;
+        while ((index = haystack.indexOf(needle, index)) >= 0) {
+            count++;
+            index += needle.length();
+        }
+        return count;
     }
 }

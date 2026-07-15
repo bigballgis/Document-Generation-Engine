@@ -29,11 +29,13 @@ final class StructuredContentDocxTableSupport {
         if (columnKeys.isEmpty()) {
             return;
         }
+        boolean repeatHeaderAcrossPages = tableDefinition.path("repeatHeaderAcrossPages").asBoolean(false);
         int rowIndex = 0;
         JsonNode headerRows = tableDefinition.path("headerRows");
         if (headerRows.isArray() && !headerRows.isEmpty()) {
+            // v1 writer emits the first header row only (unchanged semantics).
             JsonNode headerRow = headerRows.get(0);
-            writeTableRow(table, rowIndex, headerRow, columnKeys, variables, true);
+            writeTableRow(table, rowIndex, headerRow, columnKeys, variables, true, repeatHeaderAcrossPages);
             rowIndex++;
         }
         JsonNode loopRow = tableDefinition.path("loopRow");
@@ -47,6 +49,7 @@ final class StructuredContentDocxTableSupport {
                         loopRow.path("cells"),
                         columnKeys,
                         scopedVariables(variables, item),
+                        false,
                         false
                 );
                 rowIndex++;
@@ -55,7 +58,7 @@ final class StructuredContentDocxTableSupport {
         JsonNode footerRows = tableDefinition.path("footerRows");
         if (footerRows.isArray()) {
             for (JsonNode footerRow : footerRows) {
-                writeTableRow(table, rowIndex, footerRow, columnKeys, variables, false);
+                writeTableRow(table, rowIndex, footerRow, columnKeys, variables, false, false);
                 rowIndex++;
             }
         }
@@ -67,11 +70,16 @@ final class StructuredContentDocxTableSupport {
             JsonNode cellsNode,
             List<String> columnKeys,
             Map<String, Object> scopedVariables,
-            boolean header
+            boolean header,
+            boolean repeatHeaderAcrossPages
     ) {
         XWPFTableRow row = rowIndex < table.getNumberOfRows() ? table.getRow(rowIndex) : table.createRow();
         while (row.getTableCells().size() < columnKeys.size()) {
             row.addNewTableCell();
+        }
+        if (header && repeatHeaderAcrossPages) {
+            // OOXML <w:tblHeader/> — Word repeats this row on each page of the table.
+            row.setRepeatHeader(true);
         }
         Map<String, String> valuesByColumn = new LinkedHashMap<>();
         if (cellsNode.isArray()) {

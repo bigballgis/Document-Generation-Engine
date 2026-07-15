@@ -373,13 +373,15 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **有限直接格式白名单：** `fontFamily`、`fontSize`、`textColor`、`lineSpacing`、`spacingBefore`、`spacingAfter`、`firstLineIndent`、`leftIndent`、`rightIndent`。白名单外字段 → `DIRECT_FORMAT_OUT_OF_WHITELIST`；页边距/页眉页脚/纸张/分栏等全局版式字段 → `DIRECT_FORMAT_GLOBAL_LAYOUT`。
 
-#### 2.6.4 结构化表格组件 Structured table component（P18-T04）
+#### 2.6.4 结构化表格组件 Structured table component（P18-T04 + CE-K06a）
 
 `TableComponentService` 校验 v1 表格组件定义（`columnSchema`、表头行、`repeatHeaderAcrossPages`、循环行、合计/页脚行、列宽），并构建 `TableComponentRenderModel` 供渲染路径使用。
 
 **Blocker：** 嵌套表格（`layout.nestedTable`）→ `NESTED_TABLE`；浮动/绝对定位 → `UNRELIABLE_TABLE_LAYOUT`；列 schema/单元格引用无效 → `INVALID_TABLE_COMPONENT`。
 
 内容树中 `tableComponentRef` 节点可内联 `tableComponent` 定义；校验 blockers 经 `TemplateService.computeBindingStatus` 合并进发布门禁。
+
+**跨页表头发射（CE-K06a / BDD-CE-K06a，2026-07-15 确认）：** 当 `repeatHeaderAcrossPages == true` 时，DOCX writer（`StructuredContentDocxTableSupport` 或同源路径）必须对写出的表头行落 OOXML `<w:tblHeader/>`（行级 `w:trPr`），使 Word 在续页重复表头。`false` 或缺省时不得写入 `w:tblHeader`。循环行与页脚行不得带 `w:tblHeader`。金标包 `golden-corpus/02-cross-page-table` 由本能力充实为 ACTIVE，以 DOCX XML XPath 断言（禁像素比对）。规格：[ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md)。`qrBarcodeRef` / `attachmentListRef` 完整 writer（K06b/K06c）不在本确认范围内，仍受 LR-A4 writer-unsupported 硬阻断。
 
 #### 2.6.5 引用节点 Reference nodes（P18-T05）
 

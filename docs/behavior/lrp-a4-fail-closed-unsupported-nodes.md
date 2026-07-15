@@ -29,7 +29,7 @@
 
 | 非目标 | 处理 |
 | --- | --- |
-| 实现 `qrBarcodeRef` / `attachmentListRef` 完整 DOCX writer | **Deferred** — 另任务；本切片硬阻断 |
+| 实现 `qrBarcodeRef` / `attachmentListRef` 完整 DOCX writer | **Deferred** — 另任务；本切片硬阻断。后续归属 **CE-K06b / CE-K06c**（Wave 1a 仅 K06a；见 [ce-k06-rendering-fidelity.md](./ce-k06-rendering-fidelity.md) §12 residual stubs） |
 | 病毒扫描、CD-E2E T02–T12、LR-A7 测量、DGE-audit-governance | Out of scope |
 | 发明新节点类型或削弱既有 `UNSUPPORTED_NODE`（未知 type）校验 | Forbidden |
 | 重开 P18/P22 / F1 阶段状态 | Forbidden |

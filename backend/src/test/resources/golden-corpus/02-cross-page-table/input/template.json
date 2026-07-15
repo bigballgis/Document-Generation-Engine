@@ -1,5 +1,5 @@
 {
   "bindings": {
-    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"placeholder\"}]}]}"
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"Cross-page repayment schedule\"}]},{\"type\":\"tableComponentRef\",\"tableComponentRef\":\"TBL-CROSS-PAGE\",\"tableComponent\":{\"columnSchema\":[{\"columnKey\":\"period\"},{\"columnKey\":\"payment\"},{\"columnKey\":\"balance\"}],\"repeatHeaderAcrossPages\":true,\"headerRows\":[[{\"columnKey\":\"period\",\"value\":\"Period\"},{\"columnKey\":\"payment\",\"value\":\"Payment\"},{\"columnKey\":\"balance\",\"value\":\"Balance\"}]],\"loopRow\":{\"loopVariable\":\"scheduleRows\",\"cells\":[{\"columnKey\":\"period\",\"variableKey\":\"period\"},{\"columnKey\":\"payment\",\"variableKey\":\"payment\"},{\"columnKey\":\"balance\",\"variableKey\":\"balance\"}]},\"footerRows\":[[{\"columnKey\":\"period\",\"value\":\"Total\"},{\"columnKey\":\"payment\",\"variableKey\":\"totalPayment\"},{\"columnKey\":\"balance\",\"value\":\"\"}]]}}]}"
   }
 }

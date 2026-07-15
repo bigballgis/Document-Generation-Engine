@@ -1,8 +1,8 @@
-# 02-cross-page-table (PLACEHOLDER)
+# 02-cross-page-table (ACTIVE)
 
-Placeholder skeleton for CE-K06a (cross-page table header repetition).
+CE-K06a golden sample: cross-page table header repetition via OOXML `<w:tblHeader/>`.
 
-- **Maturity:** `PLACEHOLDER` — skeleton validated by harness; business assertions
-  deferred until CE-K06a enriches this package.
-- **Enrichment scope (CE-K06a, NOT this slice):** assert `<w:tblHeader/>` presence
-  and that table header rows repeat across page breaks.
+- **Maturity:** `ACTIVE` — DOCX half executed by golden-corpus harness in `mvn verify`.
+- **Behavior:** `repeatHeaderAcrossPages: true` on `tableComponent` → header row carries `w:tblHeader`.
+- **Assertions:** `expected/docx-assertions.json` requires `tblHeader` (XML + XPath) and header labels.
+- **PDF:** deferred (`expected/pdf-assertions.json`); no soffice required for this package.

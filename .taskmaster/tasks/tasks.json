@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. PAUSED — do NOT activate Wave 1 (#62/#69/#88).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1–4 Done. Prior waves closed: #59/#68/#83 Done; #60/#84/#85 Done. Wave 0 closed: #61/#86/#87 Done. PAUSED — do not activate Wave 1 (#62 CE-K06 / #69 CE-C04 / #88 CE-U06). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. Wave 1 lane 1 active: #62 CE-K06 → in-progress (starting K06a tblHeader); parallel lanes #69 CE-C04 / #88 CE-U06 remain pending.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1–4 Done. Prior waves closed: #59/#68/#83 Done; #60/#84/#85 Done. Wave 0 closed: #61/#86/#87 Done. Wave 1 lane 1: #62 CE-K06 in-progress (worktree DGE-ce-k06-rendering-fidelity); #69/#88 still pending. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T07:35:00.000Z"
+        "updatedAt": "2026-07-15T09:14:00.000Z"
       },
       {
         "id": "54",
@@ -850,17 +850,17 @@
       {
         "id": "62",
         "title": "CE-K06: Rendering fidelity completion (a/b/c)",
-        "description": "PENDING. Slice ce-k06-rendering-fidelity (sub: K06a tblHeader, K06b qrBarcodeRef, K06c attachmentListRef + PDF stamp profile). P1·L.",
-        "details": "Depends K02 (#58); lane after K05 (#61). Deliverable as one or sequential a/b/c PRs under this task. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §3 CE-K06.",
+        "description": "IN PROGRESS 2026-07-15. Wave 1 lane 1. Slice ce-k06-rendering-fidelity (sub: K06a tblHeader first, then K06b qrBarcodeRef, K06c attachmentListRef + PDF stamp profile). Worktree DGE-ce-k06-rendering-fidelity / feat/ce-k06-rendering-fidelity. P1·L. Formal phase None.",
+        "details": "Depends K02 (#58); lane after K05 (#61). Started 2026-07-15 with K06a tblHeader. Deliverable as one or sequential a/b/c PRs under this task. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-ce-k06-rendering-fidelity; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §3 CE-K06. Wave 1 parallel lanes #69/#88 remain pending (not activated here).",
         "testStrategy": "1. tblHeader written. 2. qrBarcode embedded. 3. attachmentList paragraphs. 4. Golden samples. 5. mvn verify.",
         "priority": "medium",
         "dependencies": [
           "58",
           "61"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T09:14:00.000Z"
       },
       {
         "id": "63",
