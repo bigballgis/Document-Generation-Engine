@@ -21,6 +21,8 @@ public record ManagementInvocationDetailView(
         String errorCategory,
         String errorMessageKey,
         Boolean errorRetryable,
-        String errorMessage
+        String errorMessage,
+        UUID releaseBundleSnapshotId,
+        String releaseBundleHash
 ) {
 }

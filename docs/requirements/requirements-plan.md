@@ -279,6 +279,7 @@
 - 调用方 GET 自己的记录详情含 **完整** `variables`/`context`/batch items；**禁止** 持久化 encryption 明文密码；管理端/审计仍仅摘要。
 - 单表存储；`invocationKind`：`SINGLE` | `BATCH_ROOT` | `BATCH_ITEM` | `ASYNC_TASK`；查询 `view=logical`（真实调用，batch 仅 ROOT）与 `view=flat`（平铺，**不含** ROOT，仅 SINGLE+ITEM 同结构）。
 - 管理端包 Hub **只读** 最近调用摘要（无 variables 明文）。
+- **CE-G06（2026-07-16 确认 / BDD `ready`）：** 成功解析到 PUBLISHED release 的生成行在 `api_invocation_record` 持久化 `release_bundle_snapshot_id`（=`template_version.id`）与 `release_bundle_hash`（=`master_file_hash` 拷贝；落库不重算对象字节）。管理端 `POST …/templates/{templateId}/api/invocations/{invocationId}/regenerate` 供 `GLOBAL_ADMIN` / 同组 `GROUP_ADMIN` / 模板可见范围内 `AUDIT_ADMIN` 受控再生：内部重放 parameters、钉扎母版、CE-G02 SPECIMEN 水印、写 `INVOCATION_REGENERATED` 审计；响应/审计禁止 variables 或加密密码；不新建调用方 runtime SUCCESS 记录；不回填历史指纹；FE 再生 CTA out of scope。Drift / 水印失败 fail-closed。**敏感数据：** `parameters_storage` 留存已消毒 variables 由 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md) 授权（修订 ADR-0020；TTL=调用记录留存；管理端仍禁暴露；encryption-at-rest 暂缓）。完整 Given/When/Then：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md) `BDD-CE-G06-001…021`。
 
 ### 留存策略（包级可配，约定默认）
 
@@ -301,8 +302,8 @@
 ## 已确认：审计
 
 - 模板侧需要审计：创建/编辑模板、提交测试、测试通过、测试不通过、提交审批、审批通过、审批不通过、发布、停用、恢复、废弃、版本停用、版本恢复、导出/导入、母版提交审核、母版审核通过、母版审核不通过、母版变更和母版影响分析。
-- API 管理侧需要审计：API 凭证创建、轮换、吊销、过期、到期提醒、凭证摘要查看、AD Group 授权配置变更、输出方式配置变更、批量上限配置变更、DOCX/PDF 动态加密配置变更、default 路径目标发布版本配置变更。
-- API 调用审计至少记录：调用时间、环境、访问账号、访问账号 AD Group、API 凭证/调用方、模板与发布版本、路由类型、default 路径解析后的目标发布版本、输出格式、成功/失败与错误原因、耗时、请求参数摘要、生成文件标识、`requestId`、`idempotencyKey` 或其摘要、幂等处理状态；批量调用还需记录 `batchId`、`items[].itemId` 或其摘要、失败项重试关联的 `originalBatchId` 或等效关联字段（CE-C05：字段出现且校验通过时**必须**持久化该关联）；如复用已过期 `idempotencyKey`，还需记录过期 key 复用审计字段。
+- API 管理侧需要审计：API 凭证创建、轮换、吊销、过期、到期提醒、凭证摘要查看、AD Group 授权配置变更、输出方式配置变更、批量上限配置变更、DOCX/PDF 动态加密配置变更、default 路径目标发布版本配置变更；**CE-G06：** 受控再生终态事件 `INVOCATION_REGENERATED`（成功/失败均写；含 sourceInvocationId / regenerationId / fingerprint / outcome / actor；禁止 variables 明文）。
+- API 调用审计至少记录：调用时间、环境、访问账号、访问账号 AD Group、API 凭证/调用方、模板与发布版本、路由类型、default 路径解析后的目标发布版本、输出格式、成功/失败与错误原因、耗时、请求参数摘要、生成文件标识、`requestId`、`idempotencyKey` 或其摘要、幂等处理状态；批量调用还需记录 `batchId`、`items[].itemId` 或其摘要、失败项重试关联的 `originalBatchId` 或等效关联字段（CE-C05：字段出现且校验通过时**必须**持久化该关联）；如复用已过期 `idempotencyKey`，还需记录过期 key 复用审计字段；**CE-G06：** 成功解析 release 的生成行还须持久化 `release_bundle_snapshot_id` + `release_bundle_hash`（管理查询可返回；仍禁止 parameters 明文）。
 - API 调用和 API 管理配置变更审计采用标准摘要对象，字段基线包括 `auditId`、`eventType`、`eventAt`、操作者或系统主体摘要、API 凭证或指纹摘要、访问账号、环境、模板、发布版本、解析后发布版本、路由类型、`requestId`、`idempotencyKey` 摘要、幂等状态、`taskId`、`batchId`、`itemId`（或其安全摘要）、`contextSummary`、输出摘要、加密摘要、批量摘要、资源 ID、结果摘要、错误摘要、耗时和配置差异摘要。
 - API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 `changedAreas` 表达变更配置域；`changedAreas` 取值基线为 `AD_GROUP_AUTHORIZATION`、`OUTPUT_POLICY`、`BATCH_LIMIT`、`ENCRYPTION_CAPABILITY`、`DEFAULT_ROUTE_TARGET`、`INVOCATION_RETENTION`（2026-07-03 新增，包级调用记录与文档留存策略）。
 - API 管理配置变更审计需要记录 `policyVersion`、上一配置版本、变更配置域、配置差异摘要、影响预览摘要、硬阻断和警告摘要、确认结果、是否回滚以及回滚来源版本；不得记录敏感配置明文。

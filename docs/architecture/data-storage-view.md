@@ -74,6 +74,25 @@ Template Test Data Set variable values **may** be persisted in the relational Te
 
 There is **no** approved third path of “mask then silently store” without attestation. Behavior SoT: [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md) **G03-C14**. ADR-0020 plaintext bans continue to apply to logs, audit summaries, contract examples, exports, and unauthorized display.
 
+## Confirmed — invocation parameters retention (CE-G06 / ADR-0057)
+
+**Closed (2026-07-16):** architecture Critical conflict between ADR-0020’s ban on plaintext template-variable persistence and CE-G06 regenerate-by-invocation (and ADR-0040 caller reconciliation).
+
+`api_invocation_record.parameters_storage` **may** retain **sanitized** template variable values for:
+
+1. Caller-facing invocation reconciliation (ADR-0040), and
+2. Server-internal CE-G06 regenerate replay.
+
+Constraints (confirmed):
+
+- Encryption passwords are never stored.
+- Retention TTL equals the invocation-record retention clock; purge destroys the column with the row.
+- Management list/detail/CSV, management audit, logs, exports, and contract examples must **not** expose variables (HIST C6).
+- Column / application encryption-at-rest for this column is **deferred** (pending KMS; align ADR-0045) — **not** a CE-G06 Done gate.
+
+Authority: [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md). Behavior: [ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md) **G06-C21**.
+
 ## Pending Questions
 
 - Final rollout evidence and owner sequence for replacing remaining in-memory persistence adapters across runtime and governance paths.
+- Bank KMS / column-encryption ownership for `parameters_storage` (deferred from ADR-0057; not blocking CE-G06).

@@ -28,6 +28,10 @@ public class InvocationParameterSanitizer {
     public String sanitizeSingleRequest(GenerateRequestBody request, String resolvedReleaseVersion) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("releaseVersion", resolvedReleaseVersion);
+        // CE-G06 / ADR-0057: retention-scoped exception — sanitized variables may persist for
+        // caller reconciliation and server-internal regenerate replay. Passwords remain stripped;
+        // management APIs / audit / logs never return this payload (HIST C6 / ADR-0020 display ban).
+        payload.put("variables", request.variables() == null ? Map.of() : request.variables());
         payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, request.variables()));
         payload.put("output", request.output());
         payload.put("encryption", sanitizeEncryption(request.encryption(), request.output().format()));
@@ -42,7 +46,13 @@ public class InvocationParameterSanitizer {
         payload.put("encryption", sanitizeEncryption(request.encryption(), request.output().format()));
         payload.put("itemsCount", request.items().size());
         payload.put("itemsHash", hashBatchItems(request));
-        payload.put("items", request.items().stream().map(this::sanitizeBatchItem).toList());
+        payload.put("items", request.items().stream().map(this::sanitizeBatchItemSummary).toList());
+        // CE-G06 / ADR-0057: single-item async ASYNC_TASK rows can regenerate from top-level variables.
+        if (request.items().size() == 1) {
+            Map<String, Object> variables = request.items().get(0).variables();
+            payload.put("variables", variables == null ? Map.of() : variables);
+            payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, variables));
+        }
         putContextSummary(payload, request.context());
         if (request.originalBatchId() != null && !request.originalBatchId().isBlank()) {
             payload.put("originalBatchId", request.originalBatchId());
@@ -58,6 +68,8 @@ public class InvocationParameterSanitizer {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("releaseVersion", resolvedReleaseVersion);
         payload.put("itemId", item.itemId());
+        Map<String, Object> variables = item.variables() == null ? Map.of() : item.variables();
+        payload.put("variables", variables);
         payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, item.variables()));
         var output = item.output() != null ? item.output() : request.output();
         payload.put("output", output);
@@ -79,7 +91,7 @@ public class InvocationParameterSanitizer {
         }
     }
 
-    private Map<String, Object> sanitizeBatchItem(BatchGenerateRequestBody.BatchGenerateItemBody item) {
+    private Map<String, Object> sanitizeBatchItemSummary(BatchGenerateRequestBody.BatchGenerateItemBody item) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("itemId", item.itemId());
         payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, item.variables()));

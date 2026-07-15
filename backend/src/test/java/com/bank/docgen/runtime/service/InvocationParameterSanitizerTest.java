@@ -44,7 +44,7 @@ class InvocationParameterSanitizerTest {
         assertThat(root.get("encryption").get("enabled").asBoolean()).isTrue();
         assertThat(root.get("encryption").get("openPasswordProvided").asBoolean()).isTrue();
         assertThat(root.get("encryption").get("ownerPasswordProvided").asBoolean()).isTrue();
-        assertThat(root.has("variables")).isFalse();
+        assertThat(root.get("variables").get("name").asText()).isEqualTo("Alice");
         assertThat(root.get("variablesHash").asText()).hasSize(64);
         assertThat(root.has("contextSummary")).isFalse();
     }
@@ -66,7 +66,7 @@ class InvocationParameterSanitizerTest {
         assertThat(root.get("contextSummary").get("sourceSystem").asText()).isEqualTo("LOS");
         assertThat(root.get("contextSummary").get("channel").asText()).isEqualTo("API");
         assertThat(root.get("contextSummary").get("locale").asText()).isEqualTo("en-US");
-        assertThat(root.toString()).doesNotContain("should-not-appear");
+        assertThat(root.get("variables").get("ssn").asText()).isEqualTo("should-not-appear");
         assertThat(root.toString()).doesNotContain("secret");
     }
 
@@ -110,10 +110,11 @@ class InvocationParameterSanitizerTest {
         assertThat(root.get("encryption").has("openPassword")).isFalse();
         assertThat(root.get("items").get(0).get("encryption").has("ownerPassword")).isFalse();
         assertThat(root.get("items").get(0).get("encryption").get("ownerPasswordProvided").asBoolean()).isTrue();
-        assertThat(root.toString()).doesNotContain("100");
-        assertThat(root.get("itemsHash").asText()).hasSize(64);
+        // BATCH_ROOT item summaries stay hash-only; top-level variables present for single-item batches.
         assertThat(root.get("items").get(0).has("variables")).isFalse();
         assertThat(root.get("items").get(0).get("variablesHash").asText()).hasSize(64);
+        assertThat(root.get("variables").get("amount").asInt()).isEqualTo(100);
+        assertThat(root.get("itemsHash").asText()).hasSize(64);
         assertThat(root.get("contextSummary").get("channel").asText()).isEqualTo("BATCH");
         assertThat(root.has("originalBatchId")).isFalse();
     }
@@ -138,8 +139,8 @@ class InvocationParameterSanitizerTest {
         JsonNode root = objectMapper.readTree(sanitizer.sanitizeBatchRequest(request, "1.0.0"));
 
         assertThat(root.get("originalBatchId").asText()).isEqualTo("BATCH-ORIG01");
-        assertThat(root.toString()).doesNotContain("must-not-appear");
-        assertThat(root.toString()).doesNotContain("secretVar");
+        assertThat(root.get("variables").get("secretVar").asText()).isEqualTo("must-not-appear");
+        assertThat(root.get("items").get(0).has("variables")).isFalse();
     }
 
     @Test

@@ -33,6 +33,8 @@ public final class ManagementAuditEventTypes {
     public static final String TEMPLATE_EXPORTED = "TEMPLATE_EXPORTED";
     public static final String TEMPLATE_IMPORTED = "TEMPLATE_IMPORTED";
     public static final String TEMPLATE_TEST_DATA_PII_EXPLICIT_CONFIRM = "TEMPLATE_TEST_DATA_PII_EXPLICIT_CONFIRM";
+    /** CE-G06: controlled regenerate terminal event (success or failure). */
+    public static final String INVOCATION_REGENERATED = "INVOCATION_REGENERATED";
 
     private ManagementAuditEventTypes() {
     }

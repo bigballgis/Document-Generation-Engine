@@ -61,7 +61,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0003-api-routing-and-batch-overrides.md](./api/0003-api-routing-and-batch-overrides.md) | Accepted (display-boundary amend 2026-07-15) | API route versioning, default route, and batch item overrides; CE-C04 callable-version optional display metadata |
 | [0004-api-idempotency-strategy.md](./api/0004-api-idempotency-strategy.md) | Accepted | API idempotency strategy |
 | [0005-api-response-delivery-and-download-security.md](./api/0005-api-response-delivery-and-download-security.md) | Accepted | API response delivery and download security |
-| [0006-api-error-model.md](./api/0006-api-error-model.md) | Accepted | API error model |
+| [0006-api-error-model.md](./api/0006-api-error-model.md) | Accepted (amended 2026-07-16 — includes `RENDERING`) | API error model |
 | [0007-api-management-change-governance.md](./api-management/0007-api-management-change-governance.md) | Accepted | API management configuration change governance |
 | [0008-api-async-task-lifecycle.md](./async-processing/0008-api-async-task-lifecycle.md) | Accepted | API async task lifecycle |
 | [0009-api-credential-lifecycle.md](./api-management/0009-api-credential-lifecycle.md) | Accepted | API credential lifecycle |
@@ -75,7 +75,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0017-template-lifecycle-recovery-deprecation-import.md](./template-lifecycle/0017-template-lifecycle-recovery-deprecation-import.md) | Accepted (display-boundary amend 2026-07-15) | Template lifecycle recovery, deprecation, and import conflict rules; CE-C04 display-only `deprecated`/`sunsetAt` on callable versions |
 | [0018-master-review-state-and-impact-analysis.md](./template-lifecycle/0018-master-review-state-and-impact-analysis.md) | Accepted | Master review state and impact analysis |
 | [0019-structured-authoring-and-rendering-boundary.md](./rendering-authoring/0019-structured-authoring-and-rendering-boundary.md) | Accepted | Structured authoring, controlled rich text, and DOCX rendering boundary |
-| [0020-unified-authorization-and-sensitive-data-handling.md](./authorization-security/0020-unified-authorization-and-sensitive-data-handling.md) | Accepted | Unified authorization and sensitive data handling |
+| [0020-unified-authorization-and-sensitive-data-handling.md](./authorization-security/0020-unified-authorization-and-sensitive-data-handling.md) | Accepted (amended 2026-07-16 by ADR-0057) | Unified authorization and sensitive data handling |
 | [0021-template-testing-approval-release-governance.md](./template-lifecycle/0021-template-testing-approval-release-governance.md) | Accepted | Template testing, approval, and release governance |
 | [0022-basic-technology-stack-baseline.md](./technology-stack/0022-basic-technology-stack-baseline.md) | Accepted | Basic technology stack baseline |
 | [0023-document-as-software-operating-model.md](./documentation-governance/0023-document-as-software-operating-model.md) | Accepted | Document as software operating model |
@@ -106,6 +106,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0054-ad-group-resolver-production-boundary.md](./authorization-security/0054-ad-group-resolver-production-boundary.md) | Accepted | AD Group resolver production boundary — `ConfigAdGroupResolver` / `type=config` = local/dev/test only; acceptance/production requires directory adapter SPI **or** startup fail-closed; company LDAP/AD coords UNKNOWN; does not supersede ADR-0010 cache/`503` (ops-ad-group-stub-close / Task Master #46, 2026-07-12) |
 | [0055-cursor-sole-parent-agent.md](./documentation-governance/0055-cursor-sole-parent-agent.md) | Accepted | Cursor sole parent agent; MCP canonical `.cursor/mcp.json`; Claude dual-stack removed; amends ADR-0053 tooling (2026-07-14) |
 | [0056-whitelist-variable-compute-dsl-bounds.md](./rendering-authoring/0056-whitelist-variable-compute-dsl-bounds.md) | Accepted | Whitelist compute DSL bounds; forbid Groovy/JS/SpEL; FILTER form; locale default zh-CN; SPELL_AMOUNT CNY-only (CE-K03) |
+| [0057-invocation-parameters-retention-for-regenerate.md](./authorization-security/0057-invocation-parameters-retention-for-regenerate.md) | Accepted | Retention-scoped `parameters_storage` exception for caller reconciliation + CE-G06 regenerate; amends ADR-0020; aligns ADR-0040; encryption-at-rest deferred (2026-07-16) |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
 ### LR-A5 triad (0041 Accepted; 0042/0043 remain Proposed)

@@ -3,6 +3,7 @@ package com.bank.docgen.runtime.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +50,8 @@ class InvocationRecordServiceTest {
     private ApiInvocationRecordRepository repository;
     @Mock
     private IdempotencyService idempotencyService;
+    @Mock
+    private ReleaseBundleFingerprintSupport fingerprintSupport;
 
     @Captor
     private ArgumentCaptor<ApiInvocationRecordEntity> savedRecords;
@@ -63,8 +66,10 @@ class InvocationRecordServiceTest {
         service = new InvocationRecordService(
                 repository,
                 new InvocationParameterSanitizer(new ObjectMapper()),
-                idempotencyService
+                idempotencyService,
+                fingerprintSupport
         );
+        lenient().when(fingerprintSupport.resolve(any(), any())).thenReturn(Optional.empty());
         template = new TemplateEntity(
                 TEMPLATE_ID,
                 "TPL-001",
@@ -151,6 +156,47 @@ class InvocationRecordServiceTest {
                 ApiPolicyPlatformDefaults.INVOCATION_RECORD_RETENTION_DAYS - 1L,
                 java.time.temporal.ChronoUnit.DAYS
         ));
+    }
+
+    @Test
+    void recordSingleSync_persistsReleaseBundleFingerprintWhenResolved() {
+        UUID snapshotId = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        String hash = "d".repeat(64);
+        when(idempotencyService.findLiveRecord("idem-fp", TEMPLATE_ID)).thenReturn(Optional.empty());
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(fingerprintSupport.resolve(TEMPLATE_ID, "1.0.0"))
+                .thenReturn(Optional.of(new ReleaseBundleFingerprint(snapshotId, hash)));
+
+        GenerateRequestBody request = new GenerateRequestBody(
+                new OutputOptionsView("PDF", "SYNC_STREAM"),
+                Map.of("name", "Bob"),
+                null,
+                "req-fp",
+                "idem-fp",
+                null
+        );
+
+        service.recordSingleSync(
+                template,
+                policy,
+                session,
+                "dev",
+                "EXPLICIT_VERSION",
+                "1.0.0",
+                "1.0.0",
+                request,
+                "DOC-FP",
+                "storage/doc-fp.pdf",
+                RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
+                "audit-fp"
+        );
+
+        verify(repository).save(savedRecords.capture());
+        ApiInvocationRecordEntity saved = savedRecords.getValue();
+        assertThat(saved.getReleaseBundleSnapshotId()).isEqualTo(snapshotId);
+        assertThat(saved.getReleaseBundleHash()).isEqualTo(hash);
+        assertThat(saved.getParametersStorage()).contains("\"name\"");
+        assertThat(saved.getParametersStorage()).contains("Bob");
     }
 
     @Test

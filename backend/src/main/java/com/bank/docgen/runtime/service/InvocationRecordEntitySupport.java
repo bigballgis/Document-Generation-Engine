@@ -21,15 +21,18 @@ final class InvocationRecordEntitySupport {
     private final InvocationParameterSanitizer parameterSanitizer;
     private final IdempotencyService idempotencyService;
     private final InvocationRecordMetadataSupport metadata;
+    private final ReleaseBundleFingerprintSupport fingerprintSupport;
 
     InvocationRecordEntitySupport(
             InvocationParameterSanitizer parameterSanitizer,
             IdempotencyService idempotencyService,
-            InvocationRecordMetadataSupport metadata
+            InvocationRecordMetadataSupport metadata,
+            ReleaseBundleFingerprintSupport fingerprintSupport
     ) {
         this.parameterSanitizer = parameterSanitizer;
         this.idempotencyService = idempotencyService;
         this.metadata = metadata;
+        this.fingerprintSupport = fingerprintSupport;
     }
 
     ApiInvocationRecordEntity buildSingleSync(
@@ -56,7 +59,7 @@ final class InvocationRecordEntitySupport {
                     .orElse(null);
         }
         boolean artifactSaved = policy.isSaveGeneratedDocuments() && hasArtifact;
-        return new ApiInvocationRecordEntity(
+        ApiInvocationRecordEntity entity = new ApiInvocationRecordEntity(
                 UUID.randomUUID(),
                 metadata.newInvocationExternalId(),
                 InvocationKind.SINGLE,
@@ -91,6 +94,8 @@ final class InvocationRecordEntitySupport {
                 now,
                 now
         );
+        applyFingerprint(entity, template.getId(), resolvedReleaseVersion);
+        return entity;
     }
 
     ApiInvocationRecordEntity buildBatchRoot(
@@ -110,6 +115,7 @@ final class InvocationRecordEntitySupport {
             Instant now
     ) {
         InvocationStatus rootStatus = InvocationStatusMappingSupport.mapBatchRootStatus(batchResult);
+        // G06-C4: BATCH_ROOT does not require fingerprint (no single assembly unit).
         return new ApiInvocationRecordEntity(
                 UUID.randomUUID(),
                 rootInvocationId,
@@ -162,7 +168,7 @@ final class InvocationRecordEntitySupport {
             UUID idempotencyRecordId,
             Instant now
     ) {
-        return new ApiInvocationRecordEntity(
+        ApiInvocationRecordEntity entity = new ApiInvocationRecordEntity(
                 UUID.randomUUID(),
                 metadata.newInvocationExternalId(),
                 InvocationKind.ASYNC_TASK,
@@ -196,6 +202,18 @@ final class InvocationRecordEntitySupport {
                 true,
                 now,
                 now
+        );
+        applyFingerprint(entity, template.getId(), resolvedReleaseVersion);
+        return entity;
+    }
+
+    private void applyFingerprint(
+            ApiInvocationRecordEntity entity,
+            UUID templateId,
+            String resolvedReleaseVersion
+    ) {
+        fingerprintSupport.resolve(templateId, resolvedReleaseVersion).ifPresent(fingerprint ->
+                entity.applyReleaseBundleFingerprint(fingerprint.snapshotId(), fingerprint.bundleHash())
         );
     }
 }

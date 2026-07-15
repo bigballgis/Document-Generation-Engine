@@ -147,6 +147,8 @@ API 契约查看和可调用版本列表必须按当前授权视角返回结果�
 
 **CE-G03 澄清（2026-07-15）：** 「模板测试数据敏感值」禁明文面 = 日志、审计摘要、契约示例、导出、发布证据与未授权展示。授权维护者经 `SYNTHETIC` / `EXPLICIT_SENSITIVE` 闸门后写入 Template Test Data Set 存储的变量值是测试资产本体（见 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md) G03-C14/C22；[data-storage-view.md](../architecture/data-storage-view.md)）。不修订 ADR-0020 正文。运行时调用方 generate API **不**新增入参 PII 扫描。
 
+**CE-G06 / ADR-0057（2026-07-16）：** `api_invocation_record.parameters_storage` 允许在调用记录留存窗口内持久化已消毒模板变量（加密密码仍禁），供调用方 reconciliation 与受控再生内部重放；管理端/审计/日志/导出仍禁明文；列级 encryption-at-rest 暂缓。权威：[ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)。
+
 允许以摘要或指纹表达的内容包括 API 凭证标识或指纹摘要、`idempotencyKey` 摘要、请求语义 hash、`variablesHash`、`itemsHash`、加密策略摘要、AD Group 授权摘要、下载地址脱敏值、`contextSummary`、`fidelityWarnings` 非敏感摘要、`policyVersion`、`changedAreas` 和配置差异摘要。
 
 授权响应例外仅限已确认安全场景：API 凭证创建或轮换时 secret 明文只展示一次；授权 API 响应可返回可用 `download.url`；同步文件流和下载取文件可在授权通过后返回生成文档内容；`task.queryPath` 只是相对查询路径，不授予额外访问能力。
@@ -941,10 +943,56 @@ Asynchronous accepted response draft
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
 | GET | `/api/management/v1/templates/{templateId}/api/routes-summary` | 包 externalId、默认 generate 路径、explicit 路径列表 |
-| GET | `/api/management/v1/templates/{templateId}/api/invocations` | 分页列表；筛选 `status`、`invocationKind`、`requestId`、`createdAfter`/`createdBefore`、`credentialId` |
-| GET | `/api/management/v1/templates/{templateId}/api/invocations/{invocationId}` | 单条摘要详情（无 parameters） |
+| GET | `/api/management/v1/templates/{templateId}/api/invocations` | 分页列表；筛选 `status`、`invocationKind`、`requestId`、`createdAfter`/`createdBefore`、`credentialId`；摘要可含 `releaseBundleSnapshotId`/`releaseBundleHash`（CE-G06，可空） |
+| GET | `/api/management/v1/templates/{templateId}/api/invocations/{invocationId}` | 单条摘要详情（无 parameters；CE-G06 可含指纹字段） |
+| POST | `/api/management/v1/templates/{templateId}/api/invocations/{invocationId}/regenerate` | CE-G06 受控再生 SPECIMEN；见下方专节 |
 | GET | `/api/management/v1/api-access/alerts` | 跨包待关注项（缺 AD 组含 PENDING_RELEASE；凭证类仍仅 PUBLISHED） |
 | GET | `/api/management/v1/api-access/summary` | Overview 轻量就绪计数（published / attention / pending-setup；非 catalog） |
+
+### 审计可复现受控再生（CE-G06）
+
+管理面契约（**不**扩展 caller-facing runtime generate 路径语义；正式 runtime **不**施加 SPECIMEN）。权威行为：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。上游钉扎：[ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)；水印复用：[ce-g02-specimen-watermark.md](../behavior/ce-g02-specimen-watermark.md)。
+
+#### 指纹落库（runtime write path）
+
+| 字段 | 语义 |
+| --- | --- |
+| `release_bundle_snapshot_id` / `releaseBundleSnapshotId` | 生成时解析到的 PUBLISHED `template_version.id` |
+| `release_bundle_hash` / `releaseBundleHash` | 该行 `master_file_hash` 拷贝（64 字符小写 hex SHA-256）；落库时**不**重算对象字节 |
+
+写入对象：`SINGLE` / `BATCH_ITEM` / `ASYNC_TASK`（有解析 release 时非空）。`BATCH_ROOT` **不要求**指纹。解析失败行两字段 **NULL**。**不**回填历史行。
+
+#### Regenerate API
+
+| 项 | 已确认 |
+| --- | --- |
+| 路径 | `POST /api/management/v1/templates/{templateId}/api/invocations/{invocationId}/regenerate` |
+| Body | 可选 `{ "outputFormat": "DOCX" \| "PDF" }`；缺省 = 原 invocation `output_format`，若空则 `PDF` |
+| 授权 | `GLOBAL_ADMIN`；同组 `GROUP_ADMIN`；模板可见范围内 `AUDIT_ADMIN`（`readAudit` + 组范围）。其他角色 403。跨组探测对齐既有 403/404 惯例 |
+| 可再生 kind | 仅 `SINGLE` / `BATCH_ITEM` / `ASYNC_TASK` |
+| Drift | 再生前重算钉扎 `master_revision_id` 对象 SHA-256，与 invocation.`releaseBundleHash` 比对；不一致 fail-closed |
+| 水印 | 复用 CE-G02 DOCX 眉脚 + PDF 对角 `SPECIMEN`；失败 fail-closed，不落无水印成功件 |
+| 加密 | 再生件一律不加密；`encryptionReapplied=false` |
+| 审计 | 终态必写 `INVOCATION_REGENERATED`（成功/失败）；**禁止** variables / 密码明文 |
+| 参数留存 | 内部重放读 `parameters_storage`；授权依据 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)；管理端响应仍禁 variables |
+| 边界 | **不**新建调用方 runtime SUCCESS 记录；**不**消耗调用方幂等键；**不**要求 regenerate `idempotencyKey` |
+| FE | 再生 CTA / E2E/UIUX **out of scope** |
+| 过期 | `record_expires_at` 已过 → **410**（契约钉死；与 BDD Q2 默认一致） |
+
+成功 `result` 至少含：`regenerationId`、`sourceInvocationId`、`releaseBundleSnapshotId`、`releaseBundleHash`、`outputFormat`、`specimen=true`、`encryptionReapplied=false`、artifact 引用（`downloadUrl` 和/或 `artifactPath`）。
+
+#### Fail-closed messageKeys（English-first；management regenerate surface）
+
+| Condition | HTTP | category | `error.code` | messageKey（稳定） | English default |
+| --- | --- | --- | --- | --- | --- |
+| 指纹缺失 / 历史未记录 | 409 | `GENERATION` | `RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE` | `api.error.audit.releaseBundleSnapshotUnavailable` | Release-bundle snapshot is not available for this invocation. |
+| Bundle hash drift | 409 | `GENERATION` | `RELEASE_BUNDLE_HASH_MISMATCH` | `api.error.audit.releaseBundleHashMismatch` | Release-bundle hash does not match the pinned master object. |
+| 钉扎母版不可用 | 422/500 对齐 K01 运行时语义 | `RENDERING` | `PINNED_MASTER_UNAVAILABLE` | `api.error.rendering.pinnedMasterUnavailable` | Pinned master revision is unavailable. |
+| `BATCH_ROOT` 等不可再生 kind | 422 | `VALIDATION` | `INVOCATION_KIND_NOT_REGENERABLE` | `api.error.audit.invocationKindNotRegenerable` | This invocation kind cannot be regenerated; use a SINGLE, BATCH_ITEM, or ASYNC_TASK record. |
+| 记录过期 / 已清理 | 410 | `API_POLICY` | `INVOCATION_RECORD_EXPIRED` | `api.error.audit.invocationRecordExpired` | Invocation record has expired. |
+| SPECIMEN 水印失败 | 500 | `GENERATION` | `SPECIMEN_WATERMARK_FAILED` | `api.error.audit.specimenWatermarkFailed` | SPECIMEN watermark could not be applied. |
+
+说明：`api.error.audit.*` 为 **management** messageKey 命名空间（对齐 `api.error.template.*` / `api.error.master.*`）；envelope `error.category` 仍取固定 11 类之一，**不**新增 `AUDIT` 类别。钉扎母版键 **复用 K01**（G06-C12 契约钉死，不用并行 `api.error.audit.pinnedMasterUnavailable`）。
 
 ## 异步任务查询与取消接口确认
 
@@ -1168,6 +1216,7 @@ Async task query response structure
 | `TEMPLATE_CONTRACT` | `TEMPLATE_CONTRACT_INVALID` | `api.error.templateContract.templateContractInvalid` | `false` | Template contract is invalid. |
 | `TEMPLATE_CONTRACT` | `TEMPLATE_ANCHOR_MISSING` | `api.error.templateContract.templateAnchorMissing` | `false` | Template anchor is missing. |
 | `RENDERING` | `OOXML_VALIDATION_FAILED` | `api.error.rendering.ooxmlValidationFailed` | `false` | Generated document failed OOXML validation. |
+| `RENDERING` | `PINNED_MASTER_UNAVAILABLE` | `api.error.rendering.pinnedMasterUnavailable` | `false` | Pinned master revision is unavailable. |
 | `GENERATION` | `DOCX_GENERATION_FAILED` | `api.error.generation.docxGenerationFailed` | `true` | DOCX generation failed. |
 | `GENERATION` | `PDF_CONVERSION_FAILED` | `api.error.generation.pdfConversionFailed` | `true` | PDF conversion failed. |
 | `GENERATION` | `GENERATION_TIMEOUT` | `api.error.generation.generationTimeout` | `true` | Document generation timed out. |

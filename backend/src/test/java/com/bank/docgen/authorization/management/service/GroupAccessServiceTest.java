@@ -77,6 +77,9 @@ class GroupAccessServiceTest {
         ManagementSessionClaims groupAdmin = session(List.of("GROUP_ADMIN"), List.of());
         assertThat(service.canPublishTemplates(groupAdmin)).isTrue();
         assertThat(service.canManageApiPolicy(groupAdmin)).isTrue();
+        assertThat(service.canRegenerateInvocation(groupAdmin)).isTrue();
+        assertThat(service.canRegenerateInvocation(session(List.of("AUDIT_ADMIN"), List.of()))).isTrue();
+        assertThat(service.canRegenerateInvocation(author)).isFalse();
     }
 
     @Test

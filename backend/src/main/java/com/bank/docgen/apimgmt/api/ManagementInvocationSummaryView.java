@@ -1,6 +1,7 @@
 package com.bank.docgen.apimgmt.api;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public record ManagementInvocationSummaryView(
         String invocationId,
@@ -10,6 +11,8 @@ public record ManagementInvocationSummaryView(
         String resolvedReleaseVersion,
         String routeType,
         Instant createdAt,
-        String accessAccountSummary
+        String accessAccountSummary,
+        UUID releaseBundleSnapshotId,
+        String releaseBundleHash
 ) {
 }

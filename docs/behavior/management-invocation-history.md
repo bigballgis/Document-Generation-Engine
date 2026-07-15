@@ -22,6 +22,8 @@ Administrators review **paginated invocation history** on the package hub Extern
 
 Management APIs and UI **must not** expose `parametersStorage`, `variables`, or encryption password fields. Caller-facing runtime APIs remain unchanged.
 
+**CE-G06 note:** Controlled regenerate may **internally** read `parametersStorage` to rebuild a SPECIMEN artifact. Responses and audit summaries still must not expose variables or passwords. See [ce-g06-audit-reproducible.md](./ce-g06-audit-reproducible.md).
+
 ---
 
 ## Acceptance scenarios

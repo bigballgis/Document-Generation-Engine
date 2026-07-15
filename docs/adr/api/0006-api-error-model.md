@@ -16,7 +16,7 @@ related:
 
 ## Status
 
-Accepted
+Accepted (amended 2026-07-16 — `error.category` set includes `RENDERING`; aligns contract-outline 11-category baseline and OpenAPI `ErrorCategory`)
 
 ## Context
 
@@ -28,9 +28,9 @@ The idempotency strategy also depends on every error clearly expressing whether 
 
 API errors use detailed stable `error.code` values plus `error.category` for grouping.
 
-The v1 baseline uses these fixed `error.category` values: `AUTHENTICATION`, `AUTHORIZATION`, `VERSION_ROUTING`, `API_POLICY`, `IDEMPOTENCY`, `VALIDATION`, `TEMPLATE_CONTRACT`, `GENERATION`, `ENCRYPTION`, and `BATCH`.
+The v1 baseline uses these fixed `error.category` values: `AUTHENTICATION`, `AUTHORIZATION`, `VERSION_ROUTING`, `API_POLICY`, `IDEMPOTENCY`, `VALIDATION`, `TEMPLATE_CONTRACT`, `RENDERING`, `GENERATION`, `ENCRYPTION`, and `BATCH`.
 
-The v1 baseline error code list covers authentication, authorization, version routing, API management policy, idempotency, validation, template contract, generation, encryption, batch, asynchronous task, and generated-document download scenarios. The complete per-code list, default `retryable` values, `messageKey` values, and English messages are maintained in the API contract draft.
+The v1 baseline error code list covers authentication, authorization, version routing, API management policy, idempotency, validation, template contract, rendering/OOXML, generation, encryption, batch, asynchronous task, and generated-document download scenarios. The complete per-code list, default `retryable` values, `messageKey` values, and English messages are maintained in the API contract draft.
 
 Every API error response must include `error.retryable` with an explicit `true` or `false` value.
 

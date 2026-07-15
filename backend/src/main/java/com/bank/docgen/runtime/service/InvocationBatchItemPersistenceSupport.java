@@ -19,15 +19,18 @@ final class InvocationBatchItemPersistenceSupport {
     private final ApiInvocationRecordRepository repository;
     private final InvocationParameterSanitizer parameterSanitizer;
     private final InvocationRecordMetadataSupport metadata;
+    private final ReleaseBundleFingerprintSupport fingerprintSupport;
 
     InvocationBatchItemPersistenceSupport(
             ApiInvocationRecordRepository repository,
             InvocationParameterSanitizer parameterSanitizer,
-            InvocationRecordMetadataSupport metadata
+            InvocationRecordMetadataSupport metadata,
+            ReleaseBundleFingerprintSupport fingerprintSupport
     ) {
         this.repository = repository;
         this.parameterSanitizer = parameterSanitizer;
         this.metadata = metadata;
+        this.fingerprintSupport = fingerprintSupport;
     }
 
     void persistBatchItemsFromRecord(
@@ -125,6 +128,9 @@ final class InvocationBatchItemPersistenceSupport {
                     true,
                     now,
                     now
+            );
+            fingerprintSupport.resolve(template.getId(), resolvedReleaseVersion).ifPresent(fingerprint ->
+                    itemRecord.applyReleaseBundleFingerprint(fingerprint.snapshotId(), fingerprint.bundleHash())
             );
             repository.save(itemRecord);
         }

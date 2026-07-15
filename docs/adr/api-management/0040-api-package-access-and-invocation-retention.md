@@ -50,6 +50,7 @@ Callers also need durable **invocation records** (parameters + optional artifact
 - Each runtime generate / batch / async acceptance writes an **`api_invocation_record`** row scoped to the calling **API credential**.
 - **`IDEMPOTENCY_REPLAYED`** does **not** create a duplicate invocation row; callers resolve the original record via `idempotencyKey` or `requestId`.
 - Stored parameters **must not** include encryption password plaintext (`openPassword`, `ownerPassword`); only sanitized encryption metadata is persisted.
+- **Sensitive-data basis (ADR-0057, 2026-07-16):** sanitized template variable persistence in `parameters_storage` is an **authorized retention-scoped exception** to ADR-0020’s general plaintext-persistence ban, for caller reconciliation and CE-G06 regenerate replay. Management APIs must still never expose variables. Column encryption-at-rest is deferred.
 - Caller-facing query:
   - `GET /api/{environment}/v1/templates/{templateId}/invocations` with `view=logical|flat` (default `logical`) and optional `requestId` filter.
   - `GET …/invocations/{invocationId}` for detail including full sanitized parameters.
@@ -93,3 +94,4 @@ Callers also need durable **invocation records** (parameters + optional artifact
 
 - BDD: [api-package-access-and-invocation-records.md](../../behavior/api-package-access-and-invocation-records.md)
 - Plan: [P12-api-package-access-invocation-records.md](../../plan/detail/P12-api-package-access-invocation-records.md)
+- [ADR-0057 Retention-Scoped Invocation Parameters for Audit Regenerate](../authorization-security/0057-invocation-parameters-retention-for-regenerate.md)

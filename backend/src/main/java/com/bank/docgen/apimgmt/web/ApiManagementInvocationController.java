@@ -1,7 +1,10 @@
 package com.bank.docgen.apimgmt.web;
 
 import com.bank.docgen.apimgmt.api.ManagementInvocationDetailView;
+import com.bank.docgen.apimgmt.api.ManagementInvocationRegenerateRequest;
+import com.bank.docgen.apimgmt.api.ManagementInvocationRegenerateView;
 import com.bank.docgen.apimgmt.api.ManagementInvocationSummaryView;
+import com.bank.docgen.apimgmt.service.InvocationRegenerationService;
 import com.bank.docgen.apimgmt.service.ManagementInvocationCsvExport;
 import com.bank.docgen.apimgmt.service.ManagementInvocationFilters;
 import com.bank.docgen.apimgmt.service.ManagementInvocationQueryService;
@@ -19,6 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,13 +33,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApiManagementInvocationController {
 
     private final ManagementInvocationQueryService managementInvocationQueryService;
+    private final InvocationRegenerationService invocationRegenerationService;
     private final ApiManagementWebEnvelopeSupport envelopes;
 
     public ApiManagementInvocationController(
             ManagementInvocationQueryService managementInvocationQueryService,
+            InvocationRegenerationService invocationRegenerationService,
             TraceIdProvider traceIdProvider
     ) {
         this.managementInvocationQueryService = managementInvocationQueryService;
+        this.invocationRegenerationService = invocationRegenerationService;
         this.envelopes = new ApiManagementWebEnvelopeSupport(traceIdProvider);
     }
 
@@ -128,6 +136,22 @@ public class ApiManagementInvocationController {
         return envelopes.envelope(request, managementInvocationQueryService.getInvocationDetail(
                 templateId,
                 invocationId,
+                session
+        ));
+    }
+
+    @PostMapping("/invocations/{invocationId}/regenerate")
+    public SuccessEnvelope<ManagementInvocationRegenerateView> regenerateInvocation(
+            @PathVariable UUID templateId,
+            @PathVariable String invocationId,
+            @RequestBody(required = false) ManagementInvocationRegenerateRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelopes.envelope(request, invocationRegenerationService.regenerate(
+                templateId,
+                invocationId,
+                body,
                 session
         ));
     }

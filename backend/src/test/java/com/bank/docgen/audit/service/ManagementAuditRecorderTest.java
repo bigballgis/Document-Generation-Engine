@@ -40,7 +40,8 @@ class ManagementAuditRecorderTest {
                 new CollaborationAuditRecorder(eventWriter),
                 new ContentModuleAuditRecorder(eventWriter),
                 new TemplateTransferAuditRecorder(eventWriter),
-                new TestDataSetAuditRecorder(eventWriter)
+                new TestDataSetAuditRecorder(eventWriter),
+                new InvocationRegenerationAuditRecorder(eventWriter)
         );
     }
 
@@ -293,5 +294,39 @@ class ManagementAuditRecorderTest {
         assertThat(payload.get("piiConfirmReason").asText()).isEqualTo("Approved fixture for QA");
         assertThat(payload.has("variables")).isFalse();
         assertThat(payload.has("customerName")).isFalse();
+    }
+
+    @Test
+    void invocationRegenerated_scopesTemplateAndGroupWithoutVariables() throws Exception {
+        UUID templateId = UUID.randomUUID();
+        recorder.recordInvocationRegenerated(new com.bank.docgen.apimgmt.api.InvocationRegeneratedAuditDetail(
+                "INV-1",
+                "regen-1",
+                templateId.toString(),
+                "b".repeat(64),
+                "PDF",
+                "SUCCESS",
+                null,
+                "10000002",
+                false,
+                templateId,
+                "GRP-A"
+        ));
+
+        ArgumentCaptor<ManagementAuditEventEntity> captor = ArgumentCaptor.forClass(ManagementAuditEventEntity.class);
+        verify(repository).save(captor.capture());
+        ManagementAuditEventEntity saved = captor.getValue();
+
+        assertThat(saved.getEventType()).isEqualTo(ManagementAuditEventTypes.INVOCATION_REGENERATED);
+        assertThat(saved.getTemplateId()).isEqualTo(templateId);
+        assertThat(saved.getGroupCode()).isEqualTo("GRP-A");
+        assertThat(saved.getActorUsername()).isEqualTo("10000002");
+        assertThat(saved.getWarningCodesJson()).doesNotContain("Alice");
+        JsonNode payload = objectMapper.readTree(saved.getWarningCodesJson());
+        assertThat(payload.get("sourceInvocationId").asText()).isEqualTo("INV-1");
+        assertThat(payload.get("regenerationId").asText()).isEqualTo("regen-1");
+        assertThat(payload.get("outcome").asText()).isEqualTo("SUCCESS");
+        assertThat(payload.get("encryptionReapplied").asBoolean()).isFalse();
+        assertThat(payload.has("variables")).isFalse();
     }
 }

@@ -256,6 +256,24 @@ class ManagementInvocationQueryServiceTest {
         assertThat(detail.auditLinkHint().requestId()).isEqualTo("req-detail");
         assertThat(detail.auditLinkHint().auditId()).isEqualTo("audit-123");
         assertThat(detail.errorCode()).isNull();
+        assertThat(detail.releaseBundleSnapshotId()).isNull();
+        assertThat(detail.releaseBundleHash()).isNull();
+    }
+
+    @Test
+    void getInvocationDetail_returnsReleaseBundleFingerprintWhenPresent() {
+        stubManageableTemplate();
+        UUID snapshotId = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        String hash = "e".repeat(64);
+        ApiInvocationRecordEntity entity = sampleEntity("INV-FP", "req-fp", "SUCCESS", "1.0.0");
+        entity.applyReleaseBundleFingerprint(snapshotId, hash);
+        when(invocationRecordRepository.findByInvocationExternalId("INV-FP"))
+                .thenReturn(Optional.of(entity));
+
+        ManagementInvocationDetailView detail = service.getInvocationDetail(templateId, "INV-FP", session);
+
+        assertThat(detail.releaseBundleSnapshotId()).isEqualTo(snapshotId);
+        assertThat(detail.releaseBundleHash()).isEqualTo(hash);
     }
 
     @Test

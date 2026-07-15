@@ -2,6 +2,7 @@ package com.bank.docgen.apimgmt.web;
 
 import com.bank.docgen.apimgmt.service.ApiManagementAccessDeniedException;
 import com.bank.docgen.apimgmt.service.ApiManagementNotFoundException;
+import com.bank.docgen.apimgmt.service.InvocationRegenerationException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
@@ -42,6 +43,20 @@ public class ApiManagementExceptionAdvice {
                 ApiErrorCodes.ACCESS_DENIED,
                 ApiErrorCategories.APIMGMT,
                 "api.error.apimgmt.accessDenied"
+        );
+    }
+
+    @ExceptionHandler(InvocationRegenerationException.class)
+    public ResponseEntity<ErrorEnvelope> handleInvocationRegeneration(
+            InvocationRegenerationException ex,
+            HttpServletRequest request
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                ex.httpStatus(),
+                ex.errorCode(),
+                ex.category(),
+                ex.messageKey()
         );
     }
 }

@@ -76,6 +76,16 @@ public class GroupAccessService {
                 || session.roles().contains("GROUP_ADMIN");
     }
 
+    /**
+     * CE-G06: controlled regenerate — GLOBAL_ADMIN, GROUP_ADMIN, or AUDIT_ADMIN
+     * (still constrained by template group visibility via requireReadableTemplate).
+     */
+    public boolean canRegenerateInvocation(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("AUDIT_ADMIN");
+    }
+
     public boolean canDeleteTemplate(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN");
     }

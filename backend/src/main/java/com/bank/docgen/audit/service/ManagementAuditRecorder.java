@@ -23,6 +23,7 @@ public class ManagementAuditRecorder {
     private final ContentModuleAuditRecorder contentModuleAuditRecorder;
     private final TemplateTransferAuditRecorder templateTransferAuditRecorder;
     private final TestDataSetAuditRecorder testDataSetAuditRecorder;
+    private final InvocationRegenerationAuditRecorder invocationRegenerationAuditRecorder;
 
     public ManagementAuditRecorder(
             ApiPolicyAuditRecorder apiPolicyAuditRecorder,
@@ -30,7 +31,8 @@ public class ManagementAuditRecorder {
             CollaborationAuditRecorder collaborationAuditRecorder,
             ContentModuleAuditRecorder contentModuleAuditRecorder,
             TemplateTransferAuditRecorder templateTransferAuditRecorder,
-            TestDataSetAuditRecorder testDataSetAuditRecorder
+            TestDataSetAuditRecorder testDataSetAuditRecorder,
+            InvocationRegenerationAuditRecorder invocationRegenerationAuditRecorder
     ) {
         this.apiPolicyAuditRecorder = apiPolicyAuditRecorder;
         this.identityAuditRecorder = identityAuditRecorder;
@@ -38,6 +40,7 @@ public class ManagementAuditRecorder {
         this.contentModuleAuditRecorder = contentModuleAuditRecorder;
         this.templateTransferAuditRecorder = templateTransferAuditRecorder;
         this.testDataSetAuditRecorder = testDataSetAuditRecorder;
+        this.invocationRegenerationAuditRecorder = invocationRegenerationAuditRecorder;
     }
 
     @Transactional
@@ -395,5 +398,12 @@ public class ManagementAuditRecorder {
                 actorUsername,
                 actorSummary
         );
+    }
+
+    @Transactional
+    public void recordInvocationRegenerated(
+            com.bank.docgen.apimgmt.api.InvocationRegeneratedAuditDetail detail
+    ) {
+        invocationRegenerationAuditRecorder.record(detail);
     }
 }
