@@ -279,12 +279,15 @@ describe('executeVariableRenameCascade', () => {
     expect(upsertVariable.mock.calls.some((call) => call[1] === 'label')).toBe(true)
     expect(upsertBinding).toHaveBeenCalled()
     expect(saveRules).toHaveBeenCalled()
+    expect(deleteVariable).toHaveBeenCalledWith('tpl-1', 'customer')
     expect(updateTestDataSet).toHaveBeenCalledWith(
       'tpl-1',
       'u1',
       expect.objectContaining({ variables: { party: 'x' } }),
     )
-    expect(deleteVariable).toHaveBeenCalledWith('tpl-1', 'customer')
+    const deleteOrder = deleteVariable.mock.invocationCallOrder[0] ?? 0
+    const updateOrder = updateTestDataSet.mock.invocationCallOrder[0] ?? 0
+    expect(deleteOrder).toBeLessThan(updateOrder)
     expect(refreshTemplate).toHaveBeenCalledWith('tpl-1')
     expect(result.lockedSkippedCount).toBe(1)
   })

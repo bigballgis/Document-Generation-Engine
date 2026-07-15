@@ -402,11 +402,15 @@ export async function executeVariableRenameCascade(
     await deps.saveRules(deps.templateId, transforms.rules)
   }
 
+  // Drop oldKey from the schema before rewriting unlocked test-set JSON. Updating
+  // sets while oldKey is still REQUIRED fails schema validation (missing required
+  // field) even though the payload already uses newKey.
+  await deps.deleteVariable(deps.templateId, deps.oldKey)
+
   for (const update of transforms.unlockedTestSetUpdates) {
     await deps.updateTestDataSet(deps.templateId, update.testDataSetId, update.payload)
   }
 
-  await deps.deleteVariable(deps.templateId, deps.oldKey)
   await deps.refreshTemplate(deps.templateId)
 
   return { lockedSkippedCount: transforms.lockedSkippedCount }
