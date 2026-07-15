@@ -7,10 +7,10 @@
 | **编写日期** | 2026-07-16 |
 | **程序** | [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §6 Wave CE-G · CE-G06 |
 | **Slice** | `ce-g06-audit-reproducible` |
-| **Worktree** | `D:/working/DGE-ce-g06-audit-reproducible` · `feat/ce-g06-audit-reproducible` |
-| **Task Master** | **#76** → **in-progress**（sole-active CE delivery leaf） |
+| **Worktree** | removed after merge (`DGE-ce-g06-audit-reproducible`) |
+| **Task Master** | **#76** → **Done**（merge `d8636232`） |
 | **Formal phase** | **None**（CE 程序切片；不发明 sole-active 正式 P-phase） |
-| **Placement** | ISOLATED |
+| **Placement** | MAIN（merged） |
 | **上游** | CE-K01 (#57) **Done**（发布包钉扎）；CE-G02 (#73) **Done**（SPECIMEN 水印可复用） |
 | **Owning docs** | 本文件（行为 SoT）；计划映射 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md)；权限 [permission-matrix.md](../security/permission-matrix.md) §11；敏感数据例外 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)（修订 ADR-0020）；领域 [domain-model.md](../domain/domain-model.md) §2.12.2 / §2.17；钉扎上游 [ce-k01-release-bundle-pinning.md](./ce-k01-release-bundle-pinning.md)；水印上游 [ce-g02-specimen-watermark.md](./ce-g02-specimen-watermark.md)；管理端调用历史约束 [management-invocation-history.md](./management-invocation-history.md) |
 
@@ -365,9 +365,12 @@ acceptance_scenario_count: 21
 open_questions: [Q1, Q3, Q4, Q5, Q6]  # Q2 pinned 410; Q6 encryption-at-rest deferred per ADR-0057 (non-blocking)
 owning_doc: docs/behavior/ce-g06-audit-reproducible.md
 task_ids: [CE-G06, ce-g06-audit-reproducible, "#76"]
+task_status: Done
+merge_sha: d86362329e4a2ee496e82eedb7d4c83068574e43
 fe_regenerate_ui_in_scope: no
-docs_aligned: requirements / PRD / domain / permission-matrix §11 / ADR-0057 / OpenAPI / contract-outline (2026-07-16 doc-keeper arch Critical close)
-next: backend-engineer (verify password strip + retention purge of parameters_storage; no new column crypto; then re-arch review)
+docs_aligned: requirements / PRD / domain / permission-matrix §11 / ADR-0057 / OpenAPI / contract-outline (2026-07-16)
+gates: mvn verify GREEN 1748; architecture PASS (ADR-0057); Stage 10 DEPLOY_OK Flyway V64; FE/E2E/UIUX N/A (G06-C17)
+next: CE-E01 #78 pending/parked (do not activate until deliver)
 ```
 
-**Handoff：** ADR-0057 + matrix §11 已关闭「明文 variables vs ADR-0020」Critical；可进入后端 remediation（确认 strip/purge/非暴露）后重跑 architecture-reviewer。实现方必须以失败测试先行覆盖 BDD-CE-G06-001…021，再写最小代码使指纹落库、受控再生、SPECIMEN、审计、runtime 无水印护栏绿灯。门禁：`mvn verify` 全绿；FE/E2E/UIUX 按 G06-C17 not-applicable（除非机械类型同步）。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。
+**Handoff（Done）：** Task Master **#76** → **Done**（merge `d8636232`）。指纹落库、受控再生、SPECIMEN、审计、runtime 无水印护栏与 ADR-0057 已交付。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。下一 sole-active 建议：**#78** CE-E01（pending，勿提前激活）。
