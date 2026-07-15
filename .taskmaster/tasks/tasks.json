@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior next wave closed (#59/#68/#83). Next wave closed: #60 CE-K04 + #84 CE-U09 + #85 CE-U10 → Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1–4 Done. Prior next wave closed: #59/#68/#83 Done. Next wave closed: #60/#84/#85 Done. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. PAUSED — do NOT activate Wave 1 (#62/#69/#88).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1–4 Done. Prior waves closed: #59/#68/#83 Done; #60/#84/#85 Done. Wave 0 closed: #61/#86/#87 Done. PAUSED — do not activate Wave 1 (#62 CE-K06 / #69 CE-C04 / #88 CE-U06). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T00:26:00.000Z"
+        "updatedAt": "2026-07-15T07:35:00.000Z"
       },
       {
         "id": "54",
@@ -835,17 +835,17 @@
       {
         "id": "61",
         "title": "CE-K05: Master impact analysis + revision diff",
-        "description": "PENDING. Slice ce-k05-master-impact-real. Real impactAnalysis + revision anchor diff; FE links by name. P1·M.",
-        "details": "Depends K01 (#57); lane after K04 (#60). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §3 CE-K05.",
+        "description": "DONE 2026-07-15. Slice ce-k05-master-impact-real. Merge 51a58f12. Real impactAnalysis + revision anchor/hash diff + replace confirm; FE name links. E2E+UIUX PASS. Formal phase None.",
+        "details": "Completed 2026-07-15. Slice ce-k05-master-impact-real. Merge 51a58f12. BDD ready (ce-k05-master-impact-real.md; BDD-CE-K05-MIR-001…009). Real impactAnalysis; retestRequired from anchor delta; revision diff; replace confirm; FE name links. Gates: E2E+UIUX PASS dual-brand @1440 (CE-K05-uiux-manifest.md). Formal phase remains None. Plan §3 CE-K05 Done.",
         "testStrategy": "1. impactAnalysis returns real templates. 2. retestRequired from anchor delta. 3. FE no false empty. 4. mvn verify + FE gates.",
         "priority": "medium",
         "dependencies": [
           "57",
           "60"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T07:35:00.000Z"
       },
       {
         "id": "62",
@@ -1191,30 +1191,30 @@
       {
         "id": "86",
         "title": "CE-U11: Invocation troubleshoot + recall filter",
-        "description": "PENDING. Slice ce-u11-invocation-recall. releaseVersion filter; error envelope in drawer; CSV export. P1·M.",
-        "details": "Lane3 after C03 (#68). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U11.",
+        "description": "DONE 2026-07-15. Slice ce-u11-invocation-troubleshoot. Merge 513d776c (HEAD). releaseVersion filter; error envelope; CSV export. E2E 7/7 + UIUX PASS. Formal phase None.",
+        "details": "Completed 2026-07-15. Slice ce-u11-invocation-troubleshoot (plan alt ce-u11-invocation-recall). Merge 513d776c. BDD ready (ce-u11-invocation-troubleshoot.md; BDD-CE-U11-IRC-001…008). releaseVersion filter; error envelope in drawer; CSV export. Gates: E2E 7/7 + UIUX PASS dual-brand @1440 (CE-U11-uiux-manifest.md). Formal phase remains None. Plan §4 CE-U11 Done.",
         "testStrategy": "1. Filter by resolvedReleaseVersion. 2. Drawer shows envelope. 3. CSV export. 4. Gates + E2E.",
         "priority": "medium",
         "dependencies": [
           "68"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T07:35:00.000Z"
       },
       {
         "id": "87",
         "title": "CE-U12: Contract page copyable examples",
-        "description": "PENDING. Slice ce-u12-contract-copyable-examples. Full curl + payload from test dataset + copy. P1·S.",
-        "details": "Soft after U10 (#85). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U12.",
+        "description": "DONE 2026-07-15. Slice ce-u12-contract-copyable-examples. Tip 34353b75 (E2E/UIUX on MAIN). Full curl + dataset payload + copy. E2E 7/7 + UIUX PASS. Formal phase None.",
+        "details": "Completed 2026-07-15. Slice ce-u12-contract-copyable-examples. Tip 34353b75 (ahead of 38c71177; on MAIN under HEAD 513d776c). BDD ready (ce-u12-contract-copyable-examples.md; BDD-CE-U12-CCE-001…007). Full curl (Auth + Idempotency-Key) + dataset payload + copy. Gates: E2E 7/7 + UIUX PASS dual-brand @1920 (CE-U12-uiux-manifest.md). Formal phase remains None. Plan §4 CE-U12 Done.",
         "testStrategy": "1. curl with Auth + Idempotency-Key. 2. Payload from dataset. 3. Copy works. 4. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "85"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T07:35:00.000Z"
       },
       {
         "id": "88",

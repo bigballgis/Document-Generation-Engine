@@ -137,7 +137,9 @@ Done 时平台应满足：
 **依赖：** K01（对比对象必须是钉扎快照才有意义）。
 **测试：** diff 引擎单测（增/删/改/移动/嵌套）；E2E：改一句条款文字 → 审批页可见该句 diff。
 
-### CE-K05 母版影响分析真实化 + revision diff — P1 · M · `Not Started`
+### CE-K05 母版影响分析真实化 + revision diff — P1 · M · `Done`
+
+**Status (2026-07-15):** **Done** — Task Master **#61**; slice `ce-k05-master-impact-real`. BDD **ready** ([ce-k05-master-impact-real.md](../behavior/ce-k05-master-impact-real.md); **BDD-CE-K05-MIR-001…009**). **Merge:** `51a58f12`. **Gates:** E2E + UIUX **PASS** dual-brand @1440 ([CE-K05-uiux-manifest.md](../../frontend/e2e/evidence/CE-K05-uiux-manifest.md)). Real impactAnalysis + revision anchor/hash diff + replace confirm; FE name links. Formal phase **None**; **not** go-live.
 
 **痛点：** `impactAnalysis` 固定返回 `List.of(), false`；前端 `MasterImpactPanel` 呈现"无引用模板"的假象；无 revision 间差异对比。
 **目标行为：**
@@ -221,11 +223,13 @@ condition/loop 块 `children` 数组已在 schema 中但 `StructuredContentBlock
 后端/API 全通，前端零入口。目标：条款创建与设置对话框加多选"共享到组"，详情摘要展示共享范围。
 **Status (2026-07-15):** **Done** — Task Master **#85**; slice `ce-u10-shared-group-codes-ui`. BDD **ready** ([ce-u10-shared-group-codes-ui.md](../behavior/ce-u10-shared-group-codes-ui.md); **BDD-CE-U10-SGC-001…007**). **Merge:** `10aa5c70` (feature tip `1e4df8a8`). **Gates:** E2E **6/6** + UIUX **2/2 PASS** dual-brand @1920 ([CE-U10-manifest.md](../../frontend/e2e/evidence/CE-U10-manifest.md); [CE-U10-uiux-manifest.md](../../frontend/e2e/evidence/CE-U10-uiux-manifest.md)); PUT shared-group-codes API. Create/settings Share to groups + detail summary. Next wave (#60/#84/#85) **closed**. Formal phase **None**; **not** go-live.
 
-**CE-U11 调用排障 + 召回检索 — P1 · M**（合并 R3 GAP-07）
+**CE-U11 调用排障 + 召回检索 — P1 · M · `Done`**（合并 R3 GAP-07）
 Drawer 无 errorCode/messageKey；管理查询无 `resolvedReleaseVersion` 过滤（实体有字段、predicates 没接）。目标：`ManagementInvocationFilters` + repository + controller + 前端筛选器加 releaseVersion；detail view 与 Drawer 暴露统一 error envelope；列表可导出 CSV（召回圈定的最小闭环）。
+**Status (2026-07-15):** **Done** — Task Master **#86**; slice `ce-u11-invocation-troubleshoot` (plan alt `ce-u11-invocation-recall`). BDD **ready** ([ce-u11-invocation-troubleshoot.md](../behavior/ce-u11-invocation-troubleshoot.md); **BDD-CE-U11-IRC-001…008**). **Merge:** `513d776c` (HEAD). **Gates:** E2E **7/7** + UIUX **PASS** dual-brand @1440 ([CE-U11-uiux-manifest.md](../../frontend/e2e/evidence/CE-U11-uiux-manifest.md)). releaseVersion filter; error envelope; CSV export. Formal phase **None**; **not** go-live.
 
-**CE-U12 契约页可复制示例 — P1 · S**
+**CE-U12 契约页可复制示例 — P1 · S · `Done`**
 examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth 头 + Idempotency-Key）+ 按选定测试数据集生成请求 payload JSON + 复制按钮。
+**Status (2026-07-15):** **Done** — Task Master **#87**; slice `ce-u12-contract-copyable-examples`. BDD **ready** ([ce-u12-contract-copyable-examples.md](../behavior/ce-u12-contract-copyable-examples.md); **BDD-CE-U12-CCE-001…007**). **Tip:** `34353b75` (E2E/UIUX; on MAIN ahead of `38c71177`). **Gates:** E2E **7/7** + UIUX **PASS** dual-brand @1920 ([CE-U12-uiux-manifest.md](../../frontend/e2e/evidence/CE-U12-uiux-manifest.md)). Full curl + dataset payload + copy. Formal phase **None**; **not** go-live.
 
 ### P2/P3 组（简卡）
 
@@ -395,6 +399,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior next wave closed: **#59**/**#68**/**#83** → **Done**. **Next wave closed:** **#60** CE-K04 + **#84** CE-U09 + **#85** CE-U10 → **Done**. Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
+**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior waves closed: **#59**/**#68**/**#83** → **Done**; **#60**/**#84**/**#85** → **Done**. **Wave 0 (K05+U11+U12) closed:** **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (merges `51a58f12` / `513d776c` / tip `34353b75`). **PAUSED** — do **not** activate Wave 1 (**#62** CE-K06 / **#69** CE-C04 / **#88** CE-U06). Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
 
-**Last reviewed:** 2026-07-15（#60/#84/#85 Done; prior #59/#68/#83 Done; Batch 4 remains Done）
+**Last reviewed:** 2026-07-15（Wave 0 #61/#86/#87 Done; PAUSED no Wave 1; prior #60/#84/#85 Done; #59/#68/#83 Done; Batch 4 remains Done）
