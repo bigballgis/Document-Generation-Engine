@@ -730,8 +730,8 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). Wave 1+ lane 3: #70 CE-C05 in-progress (worktree DGE-ce-c05-original-batch-id). #62 CE-K06 remains in-progress (K06a merged 485a7f3e). #88 CE-U06 pending.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. Active delivery: #70 CE-C05 (worktree DGE-ce-c05-original-batch-id · feat/ce-c05-original-batch-id) + #62 CE-K06 (K06a at 485a7f3e). #69 CE-C04 Done. #88 remains pending. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). Wave 1+ lane 3: #70 CE-C05 in-progress (worktree DGE-ce-c05-original-batch-id). #62 CE-K06 remains in-progress (K06a merged 485a7f3e; active sub-slice K06b qrBarcodeRef; K06c residual — do NOT claim #62 Done). #88 CE-U06 pending.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. Active delivery: #70 CE-C05 (worktree DGE-ce-c05-original-batch-id · feat/ce-c05-original-batch-id) + #62 CE-K06 (K06a at 485a7f3e; active focus K06b worktree DGE-ce-k06b-qr-barcode / feat/ce-k06b-qr-barcode; K06c residual). #69 CE-C04 Done. #88 remains pending. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
@@ -850,9 +850,9 @@
       {
         "id": "62",
         "title": "CE-K06: Rendering fidelity completion (a/b/c)",
-        "description": "IN PROGRESS 2026-07-15. Wave 1 lane 1. Slice ce-k06-rendering-fidelity (sub: K06a tblHeader first, then K06b qrBarcodeRef, K06c attachmentListRef + PDF stamp profile). Worktree DGE-ce-k06-rendering-fidelity / feat/ce-k06-rendering-fidelity. P1·L. Formal phase None.",
-        "details": "Depends K02 (#58); lane after K05 (#61). Started 2026-07-15 with K06a tblHeader. Deliverable as one or sequential a/b/c PRs under this task. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-ce-k06-rendering-fidelity; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §3 CE-K06. Wave 1 parallel lanes #69/#88 remain pending (not activated here).",
-        "testStrategy": "1. tblHeader written. 2. qrBarcode embedded. 3. attachmentList paragraphs. 4. Golden samples. 5. mvn verify.",
+        "description": "IN PROGRESS 2026-07-15. Wave 2 continuation — active sub-slice K06b only (qrBarcodeRef DOCX writer). K06a tblHeader shipped (merge 485a7f3e). K06c attachmentListRef + PDF stamp = residual (do NOT claim #62 Done). Worktree DGE-ce-k06b-qr-barcode / feat/ce-k06b-qr-barcode. P1·L. Formal phase None.",
+        "details": "Depends K02 (#58); lane after K05 (#61). K06a Done on main (485a7f3e). Active delivery: K06b qrBarcodeRef — ZXing PNG embed; sizePx/errorCorrection/format configurable; exit writer-unsupported for qrBarcodeRef only; golden 09-qr-barcode ACTIVE. BDD ready: docs/behavior/ce-k06-rendering-fidelity.md (BDD-CE-K06b-001…009). Prefer rendering-engineer. Do not touch C05/U06. Gates before K06b merge: mvn verify; queued docker-deploy when acceptance surface changes; worktree ../DGE-ce-k06b-qr-barcode; merge + MAIN doc-sync + commit-review. Keep #62 in-progress until K06c closed. Formal phase stays None. Plan §3 CE-K06. Parallel #69 CE-C04 Done; #70 CE-C05 in-progress; #88 pending.",
+        "testStrategy": "1. K06a tblHeader already on main. 2. K06b: qrBarcode PNG embedded; sizePx/errorCorrection/format; writer-unsupported exit for qrBarcodeRef only; golden 09-qr-barcode ACTIVE; BDD-CE-K06b-001…009. 3. K06c residual later. 4. mvn verify.",
         "priority": "medium",
         "dependencies": [
           "58",
@@ -860,7 +860,7 @@
         ],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T09:14:00.000Z"
+        "updatedAt": "2026-07-15T11:00:00.000Z"
       },
       {
         "id": "63",

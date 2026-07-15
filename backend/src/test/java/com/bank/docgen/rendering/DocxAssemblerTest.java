@@ -130,17 +130,18 @@ class DocxAssemblerTest {
     }
 
     @Test
-    void failsClosedOnUnsupportedQrBarcodeNode() {
-        // LR-A4 (CD-PIT-07): qrBarcodeRef is in the v1 node matrix but has no writer branch.
-        // It must fail closed with the unsupportedNodeType message key, never silently drop.
+    void embedsQrBarcodeNode() {
+        // CE-K06b — qrBarcodeRef embeds via ZXing (no longer unsupportedNodeType)
         String structured = """
                 {"nodes":[{"type":"qrBarcodeRef","referenceKey":"PAYMENT-QR"}]}
                 """;
 
-        assertThatThrownBy(() -> assembler.renderStructuredContent(structured, Map.of()))
-                .isInstanceOf(DocxAssemblyException.class)
-                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
-                .isEqualTo("api.error.rendering.unsupportedNodeType");
+        String rendered = assembler.renderStructuredContent(
+                structured,
+                Map.of("PAYMENT-QR", "https://pay.example/k06b")
+        );
+
+        assertThat(rendered).isBlank();
     }
 
     @Test

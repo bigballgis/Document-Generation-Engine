@@ -71,6 +71,10 @@ final class StructuredContentDocxInlineSupport {
             writeReferenceNode(node, paragraph);
             return;
         }
+        if ("qrBarcodeRef".equals(type)) {
+            QrBarcodeRefDocxSupport.writeQrBarcodeRef(node, paragraph, variables, styles);
+            return;
+        }
         rejectIfUnrenderable.accept(type);
     }
 

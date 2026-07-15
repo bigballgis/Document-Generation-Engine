@@ -53,14 +53,16 @@ class GoldenCorpusHarnessTest {
                 "encrypted-pdf",
                 "specimen-watermark",
                 "dual-font-master",
-                "cross-page-table"
+                "cross-page-table",
+                "qr-barcode"
         );
         assertThat(placeholders).doesNotContain(
                 "nested-clauses",
                 "encrypted-pdf",
                 "specimen-watermark",
                 "dual-font-master",
-                "cross-page-table"
+                "cross-page-table",
+                "qr-barcode"
         );
         assertThat(active.size()).isGreaterThanOrEqualTo(3);
     }

@@ -29,7 +29,7 @@
 
 | 非目标 | 处理 |
 | --- | --- |
-| 实现 `qrBarcodeRef` / `attachmentListRef` 完整 DOCX writer | **Deferred** — 另任务；本切片硬阻断。后续归属 **CE-K06b / CE-K06c**（Wave 1a 仅 K06a；见 [ce-k06-rendering-fidelity.md](./ce-k06-rendering-fidelity.md) §12 residual stubs） |
+| 实现 `qrBarcodeRef` / `attachmentListRef` 完整 DOCX writer | **Deferred at LR-A4** — 硬阻断。**CE-K06b**（2026-07-15 BDD **ready**）拥有 `qrBarcodeRef` writer 并从 unsupported set 移除该类型；**CE-K06c** 拥有 `attachmentListRef` + PDF stamp profile。见 [ce-k06-rendering-fidelity.md](./ce-k06-rendering-fidelity.md) §15–§16 / §12.2 |
 | 病毒扫描、CD-E2E T02–T12、LR-A7 测量、DGE-audit-governance | Out of scope |
 | 发明新节点类型或削弱既有 `UNSUPPORTED_NODE`（未知 type）校验 | Forbidden |
 | 重开 P18/P22 / F1 阶段状态 | Forbidden |
@@ -295,7 +295,10 @@ task_ids: [LR-A4, lrp-a4-fail-closed-nodes]
 owning_doc: docs/behavior/lrp-a4-fail-closed-unsupported-nodes.md
 open_questions: []
 locked_decision: publish-gate hard-block for writer-unsupported nodes; no silent omit; writers deferred
-writer_unsupported_set: [qrBarcodeRef, attachmentListRef]
+writer_unsupported_set: [qrBarcodeRef, attachmentListRef]   # at LR-A4 Done
+# After CE-K06b implementation: [attachmentListRef] only — see ce-k06-rendering-fidelity.md K06b-C6
 ```
 
 **交给下一阶段**：`plan-orchestrator` 按 §2 缺口拆 TDD 任务；推荐实现者见 handoff（**backend-engineer** 主责门禁+校验；writer 嵌套 fail-closed 同切片内完成）。
+
+**Follow-up (not LR-A4 scope):** CE-K06b BDD **ready** — remove `qrBarcodeRef` from the live unsupported set when the ZXing writer ships；keep `attachmentListRef` until K06c.

@@ -54,20 +54,15 @@ class NodeMatrixValidationServiceTest {
     }
 
     @Test
-    void writerUnsupportedQrBarcodeRef_isBlocker() {
-        // A3 — binding-time BLOCKER for writer-unsupported qrBarcodeRef
+    void qrBarcodeRef_isNotWriterUnsupportedBlocker() {
+        // CE-K06b — qrBarcodeRef exits writer-unsupported set (BDD-CE-K06b-006)
         String json = """
                 {"nodes":[{"type":"qrBarcodeRef","referenceKey":"PAYMENT-QR"}]}
                 """;
 
         StructuredContentValidationResult result = service.validate(json, Set.of());
 
-        assertThat(result.blockers()).hasSize(1);
-        assertThat(result.blockers().getFirst().severity()).isEqualTo(StructuredContentFidelitySeverity.BLOCKER);
-        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.UNSUPPORTED_NODE);
-        assertThat(result.blockers().getFirst().messageKey())
-                .isEqualTo(NodeMatrixValidationService.MESSAGE_KEY_UNSUPPORTED_NODE);
-        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0]");
+        assertThat(result.blockers()).isEmpty();
     }
 
     @Test
@@ -94,7 +89,7 @@ class NodeMatrixValidationServiceTest {
                       "type": "conditionBlock",
                       "conditionExpression": "${show} == true",
                       "children": [
-                        { "type": "qrBarcodeRef", "referenceKey": "PAYMENT-QR" }
+                        { "type": "attachmentListRef", "referenceKey": "ATTACHMENTS" }
                       ]
                     }
                   ]
@@ -112,6 +107,9 @@ class NodeMatrixValidationServiceTest {
     void countUnsupportedNodeBlockers_countsWriterUnsupportedAndUnknown() {
         assertThat(service.countUnsupportedNodeBlockers(
                 "{\"nodes\":[{\"type\":\"qrBarcodeRef\",\"referenceKey\":\"QR-1\"}]}"))
+                .isZero();
+        assertThat(service.countUnsupportedNodeBlockers(
+                "{\"nodes\":[{\"type\":\"attachmentListRef\",\"referenceKey\":\"ATTACHMENTS\"}]}"))
                 .isEqualTo(1);
         assertThat(service.countUnsupportedNodeBlockers(
                 "{\"nodes\":[{\"type\":\"rawHtml\",\"value\":\"x\"}]}"))

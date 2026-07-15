@@ -567,15 +567,21 @@ class StructuredContentDocxWriterTest {
     }
 
     @Test
-    void failsClosedOnUnsupportedQrBarcodeNode() {
+    void embedsQrBarcodeNode() throws Exception {
+        // CE-K06b — success path replaces former unsupported fail-closed for qrBarcodeRef
         String structured = """
                 {"nodes":[{"type":"qrBarcodeRef","referenceKey":"PAYMENT-QR"}]}
                 """;
 
-        assertThatThrownBy(() -> render(structured, Map.of()))
-                .isInstanceOf(DocxAssemblyException.class)
-                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
-                .isEqualTo("api.error.rendering.unsupportedNodeType");
+        byte[] result = render(structured, Map.of("PAYMENT-QR", "https://pay.example/k06b"));
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            long pictureCount = document.getParagraphs().stream()
+                    .flatMap(paragraph -> paragraph.getRuns().stream())
+                    .filter(run -> !run.getEmbeddedPictures().isEmpty())
+                    .count();
+            assertThat(pictureCount).isGreaterThanOrEqualTo(1);
+        }
     }
 
     @Test
@@ -591,8 +597,7 @@ class StructuredContentDocxWriterTest {
     }
 
     @Test
-    void failsClosedOnQrBarcodeNestedInConditionBlock() {
-        // A5 — nested fail-closed under conditionBlock (true branch)
+    void embedsQrBarcodeNestedInConditionBlock() throws Exception {
         String structured = """
                 {"nodes":[{
                   "type":"conditionBlock",
@@ -601,10 +606,15 @@ class StructuredContentDocxWriterTest {
                 }]}
                 """;
 
-        assertThatThrownBy(() -> render(structured, Map.of("show", true)))
-                .isInstanceOf(DocxAssemblyException.class)
-                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
-                .isEqualTo("api.error.rendering.unsupportedNodeType");
+        byte[] result = render(structured, Map.of("show", true, "PAYMENT-QR", "https://pay.example/k06b"));
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            long pictureCount = document.getParagraphs().stream()
+                    .flatMap(paragraph -> paragraph.getRuns().stream())
+                    .filter(run -> !run.getEmbeddedPictures().isEmpty())
+                    .count();
+            assertThat(pictureCount).isGreaterThanOrEqualTo(1);
+        }
     }
 
     @Test
@@ -625,8 +635,7 @@ class StructuredContentDocxWriterTest {
     }
 
     @Test
-    void failsClosedOnQrBarcodeInsidePinnedContentModule() {
-        // A5 — fail-closed after contentModuleRef expansion
+    void embedsQrBarcodeInsidePinnedContentModule() throws Exception {
         String structured = """
                 {"nodes":[{"type":"contentModuleRef","referenceKey":"CLAUSE-1"}]}
                 """;
@@ -635,15 +644,19 @@ class StructuredContentDocxWriterTest {
                 "{\"nodes\":[{\"type\":\"qrBarcodeRef\",\"referenceKey\":\"PAYMENT-QR\"}]}"
         );
 
-        assertThatThrownBy(() -> render(structured, Map.of(), pinned))
-                .isInstanceOf(DocxAssemblyException.class)
-                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
-                .isEqualTo("api.error.rendering.unsupportedNodeType");
+        byte[] result = render(structured, Map.of("PAYMENT-QR", "https://pay.example/k06b"), pinned);
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            long pictureCount = document.getParagraphs().stream()
+                    .flatMap(paragraph -> paragraph.getRuns().stream())
+                    .filter(run -> !run.getEmbeddedPictures().isEmpty())
+                    .count();
+            assertThat(pictureCount).isGreaterThanOrEqualTo(1);
+        }
     }
 
     @Test
-    void failsClosedOnQrBarcodeAsParagraphInlineChild() {
-        // A5 — writeInlineNode path must not silently skip
+    void embedsQrBarcodeAsParagraphInlineChild() throws Exception {
         String structured = """
                 {"nodes":[{"type":"paragraph","children":[
                   {"type":"textRun","value":"Pay: "},
@@ -651,10 +664,15 @@ class StructuredContentDocxWriterTest {
                 ]}]}
                 """;
 
-        assertThatThrownBy(() -> render(structured, Map.of()))
-                .isInstanceOf(DocxAssemblyException.class)
-                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
-                .isEqualTo("api.error.rendering.unsupportedNodeType");
+        byte[] result = render(structured, Map.of("PAYMENT-QR", "https://pay.example/k06b"));
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            long pictureCount = document.getParagraphs().stream()
+                    .flatMap(paragraph -> paragraph.getRuns().stream())
+                    .filter(run -> !run.getEmbeddedPictures().isEmpty())
+                    .count();
+            assertThat(pictureCount).isGreaterThanOrEqualTo(1);
+        }
     }
 
     @Test

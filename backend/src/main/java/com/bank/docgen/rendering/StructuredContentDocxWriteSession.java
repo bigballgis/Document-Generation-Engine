@@ -116,6 +116,14 @@ class StructuredContentDocxWriteSession {
                 paragraphAvailable = false;
                 continue;
             }
+            if ("qrBarcodeRef".equals(type)) {
+                if (!paragraphAvailable) {
+                    currentParagraph = cursor.insertParagraphAfter(currentParagraph);
+                }
+                QrBarcodeRefDocxSupport.writeQrBarcodeRef(node, currentParagraph, variables, styles);
+                paragraphAvailable = false;
+                continue;
+            }
             // LR-A4 (CD-PIT-07): unsupported / writer-missing structured node types must fail-closed.
             // Never silently drop content from published letters.
             rejectIfUnrenderable(type);

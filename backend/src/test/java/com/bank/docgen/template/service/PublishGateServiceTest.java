@@ -292,8 +292,8 @@ class PublishGateServiceTest {
     }
 
     @Test
-    void publishGate_blocksQrBarcodeRef_unsupportedStructuredNodes() {
-        // A1 — LR-A4 dedicated publish-gate hard-block for writer-unsupported qrBarcodeRef
+    void publishGate_allowsQrBarcodeRef_alone() {
+        // BDD-CE-K06b-006 — qrBarcodeRef no longer hard-blocks publish gate
         when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         String qrJson = "{\"nodes\":[{\"type\":\"qrBarcodeRef\",\"referenceKey\":\"PAYMENT-QR\"}]}";
@@ -307,23 +307,18 @@ class PublishGateServiceTest {
         );
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
                 .thenReturn(List.of(binding));
-        when(nodeMatrixValidationService.countUnsupportedNodeBlockers(qrJson)).thenReturn(1);
+        when(nodeMatrixValidationService.countUnsupportedNodeBlockers(qrJson)).thenReturn(0);
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin);
 
-        assertThat(checklist.ready()).isFalse();
         assertThat(checklist.items().stream()
                 .filter(item -> item.checkCode() == PublishGateCheckCode.UNSUPPORTED_STRUCTURED_NODES)
                 .findFirst()
                 .orElseThrow())
                 .satisfies(item -> {
-                    assertThat(item.blocker()).isTrue();
-                    assertThat(item.ready()).isFalse();
-                    assertThat(item.messageKey()).isEqualTo("api.publishGate.unsupportedStructuredNodes.blocked");
-                    assertThat(item.summary()).contains("unsupportedNodeCount=1");
+                    assertThat(item.blocker()).isFalse();
+                    assertThat(item.ready()).isTrue();
                 });
-        assertThatThrownBy(() -> service.assertReady(templateId, admin))
-                .isInstanceOf(TemplateValidationException.class);
     }
 
     @Test

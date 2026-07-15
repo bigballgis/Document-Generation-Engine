@@ -156,8 +156,8 @@ Done 时平台应满足：
 - K06b：`qrBarcodeRef` writer（ZXing 生成图片嵌入，尺寸/纠错级别可配）。
 - K06c：`attachmentListRef` writer（结构化附件清单 → 编号列表段落）；PDF 页码 stamp 策略进 render profile（按包配置而非全局布尔）。
 **依赖：** K02（样式来源）先行为佳；资产/图片依赖 CE-E02 的键名约定但不阻塞。
-**状态（2026-07-15）：** **In Progress** — Task Master **#62**; Wave 1 lane 1; worktree `DGE-ce-k06-rendering-fidelity` / `feat/ce-k06-rendering-fidelity`; starting with **K06a tblHeader**. Formal phase remains **None**. Do **not** claim Done until a/b/c gates green + merge. Parallel lane **#70** CE-C05 → **in-progress** (separate worktree); **#69** CE-C04 → **Done** (`c7be8305`); **#88** CE-U06 remains **pending**.
-**BDD（2026-07-15）：** **`ready`** for **K06a** — [ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md)（`BDD-CE-K06a-001…006`）。本片确认 scope = **K06a only**；K06b/K06c = deferred residual stubs（同文件 §12）。Do **not** claim go-live. Do **not** activate CD-3.
+**状态（2026-07-15）：** **In Progress** — Task Master **#62**; **K06a shipped** (merge `485a7f3e`); Wave 2 continuation **K06b** worktree `DGE-ce-k06b-qr-barcode` / `feat/ce-k06b-qr-barcode`. Formal phase remains **None**. Do **not** claim CE-K06 Done until a/b/c gates green + merge. Parallel lane **#70** CE-C05 → **in-progress** (separate worktree); **#69** CE-C04 → **Done** (`c7be8305`); **#88** CE-U06 remains **pending**.
+**BDD（2026-07-15）：** **`ready`** for **K06a**（shipped）+ **`ready`** for **K06b** — [ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md)（`BDD-CE-K06a-001…006`；`BDD-CE-K06b-001…009`）。本 Wave 确认 scope = **K06b only**；K06c = deferred residual（同文件 §12.2）。Do **not** claim go-live. Do **not** activate CD-3.
 
 ### CE-K07 金标语料回归体系 — P1 · M · `Done`
 
@@ -401,6 +401,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior waves closed: **#59**/**#68**/**#83** → **Done**; **#60**/**#84**/**#85** → **Done**. **Wave 0 (K05+U11+U12) closed:** **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (merges `51a58f12` / `513d776c` / tip `34353b75`). **Wave 1 parallel:** **#62** CE-K06 → **in-progress** (K06a merged `485a7f3e`) + **#69** CE-C04 → **in-progress** (worktree `DGE-ce-c04-credential-expires`). **#88** CE-U06 remains **pending**. Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
+**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior waves closed: **#59**/**#68**/**#83** → **Done**; **#60**/**#84**/**#85** → **Done**. **Wave 0 (K05+U11+U12) closed:** **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (merges `51a58f12` / `513d776c` / tip `34353b75`). **Wave 2 continuation:** **#62** CE-K06 → **in-progress** (K06a merged `485a7f3e`; **active sub-slice K06b** worktree `DGE-ce-k06b-qr-barcode` / `feat/ce-k06b-qr-barcode`; K06c residual — do **not** claim #62 Done). **#69** CE-C04 → **Done** (merge `c7be8305`). **#70** CE-C05 → **in-progress** (worktree `DGE-ce-c05-original-batch-id`). **#88** CE-U06 remains **pending**. Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
 
-**Last reviewed:** 2026-07-15（#70 CE-C05 In Progress; #69 CE-C04 Done `c7be8305`; #62 K06 In Progress; Wave 0 Done; #88 pending）
+**Last reviewed:** 2026-07-15（#70 CE-C05 In Progress; #69 CE-C04 Done `c7be8305`; #62 K06b active / K06a at 485a7f3e; Wave 0 Done; #88 pending）

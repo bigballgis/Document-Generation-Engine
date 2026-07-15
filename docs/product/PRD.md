@@ -335,7 +335,7 @@ v1 已确认警告项包括：
 
 v1 复杂编号只支持平台或已审核母版样式目录确认的受控多级编号方案；条件块和循环块渲染后必须确定性重排编号，重复编号、跳号、条款编号语义变化或交叉引用失效均阻断发布。
 
-v1 表格组件采用结构化表格组件模型，支持列 schema、表头、跨页重复表头、循环行、简单合计/页脚和受控列宽；嵌套表、浮动表、绝对定位表、无法稳定跨页的合并单元格或无法保持关键金额/条款可读性的表格均阻断发布。**跨页重复表头（CE-K06a，2026-07-15 确认）：** 当表格组件 `repeatHeaderAcrossPages` 为 true 时，渲染写入路径必须在 DOCX 表头行落 `<w:tblHeader/>`，而不仅是校验/建模该字段；金标语料以 XML 断言覆盖。见 [ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md)。`qrBarcodeRef` / `attachmentListRef` 完整 writer 仍为后续子片（K06b/K06c）。
+v1 表格组件采用结构化表格组件模型，支持列 schema、表头、跨页重复表头、循环行、简单合计/页脚和受控列宽；嵌套表、浮动表、绝对定位表、无法稳定跨页的合并单元格或无法保持关键金额/条款可读性的表格均阻断发布。**跨页重复表头（CE-K06a，2026-07-15 确认）：** 当表格组件 `repeatHeaderAcrossPages` 为 true 时，渲染写入路径必须在 DOCX 表头行落 `<w:tblHeader/>`，而不仅是校验/建模该字段；金标语料以 XML 断言覆盖。**二维码/条码引用发射（CE-K06b，2026-07-15 确认）：** `qrBarcodeRef` 必须由 DOCX writer 用 ZXing 将运行时变量 payload 生成为嵌入图片（尺寸与纠错级别可配）；不得因矩阵已声明却无 writer 而静默省略；落地后不再作为 writer-unsupported 发布阻断。见 [ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md)。`attachmentListRef` 完整 writer 与 PDF stamp profile 收敛仍为后续子片（K06c）。
 
 v1 签章/盖章仅确认受控占位和印章/签名图片资产，不包含密码学电子签名、电子印章或验签能力；签章/盖章必须位于授权区域内，不得重叠、裁切、越界或在 DOCX/PDF 中不可见，否则阻断发布。
 
@@ -546,7 +546,7 @@ v1 支持对模板发布候选选择多组测试样例执行批量测试生成�
 - 模板引用的母版锚点缺失。
 - 变量 Schema 与发布候选契约不一致或校验失败。
 - 计算表达式、聚合函数、条件显示、循环渲染或跨字段校验越过已确认边界，调用外部数据/API，或无法完成规则校验。
-- 结构化富文本包含不支持节点（含未知节点类型，以及 v1 矩阵已声明但尚无 DOCX writer 的类型，当前包括 `qrBarcodeRef` / `attachmentListRef`——发布硬阻断、禁止静默省略；完整 writer 另任务。见 [BDD-LRP-A4-FAIL-CLOSED-001](../behavior/lrp-a4-fail-closed-unsupported-nodes.md)）。
+- 结构化富文本包含不支持节点（含未知节点类型，以及 v1 矩阵已声明但尚无 DOCX writer 的类型——**CE-K06b 后** writer-unsupported 当前为 `attachmentListRef`；`qrBarcodeRef` 须成功嵌入或显式业务失败，不得静默省略。见 [BDD-LRP-A4-FAIL-CLOSED-001](../behavior/lrp-a4-fail-closed-unsupported-nodes.md) 与 [CE-K06 BDD](../behavior/ce-k06-rendering-fidelity.md)）。
 - 变量、样式、条款或内容模块、表格组件或母版锚点引用缺失。
 - 样式未通过母版审核、不在可访问母版样式目录内、不适用于节点类型，或有限直接格式取值不在白名单内。
 - 粘贴清洗存在未解决阻断项，或不可识别内容仍以原始 Word、HTML、CSS 或二进制片段形式存在于发布契约中。

@@ -32,17 +32,18 @@ class WriterUnsupportedStructuredNodeTypesConsistencyTest {
     }
 
     @Test
-    void authoritativeSet_isExactlyQrAndAttachment() {
+    void authoritativeSet_isExactlyAttachmentList() {
         assertThat(WriterUnsupportedStructuredNodeTypes.jsonTypes())
-                .containsExactlyInAnyOrder("qrBarcodeRef", "attachmentListRef");
+                .containsExactly("attachmentListRef");
     }
 
     @Test
     void containsJsonType_matchesExactCamelCaseOnly() {
-        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("qrBarcodeRef")).isTrue();
+        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("attachmentListRef")).isTrue();
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("  attachmentListRef  ")).isTrue();
-        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("qrbarcoderef")).isFalse();
-        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("QRBARCODEREF")).isFalse();
+        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("qrBarcodeRef")).isFalse();
+        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("attachmentlistref")).isFalse();
+        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("ATTACHMENTLISTREF")).isFalse();
     }
 
     @Test
@@ -70,6 +71,7 @@ class WriterUnsupportedStructuredNodeTypesConsistencyTest {
     void supportedReferenceTypes_areNotInWriterUnsupportedSet() {
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("imageRef")).isFalse();
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("sealRef")).isFalse();
+        assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("qrBarcodeRef")).isFalse();
         assertThat(WriterUnsupportedStructuredNodeTypes.containsJsonType("contentModuleRef")).isFalse();
     }
 

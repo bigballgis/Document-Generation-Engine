@@ -7,8 +7,9 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
  * Raised when DOCX assembly from structured content fails.
  *
  * <p>LR-A4: also raised when an unsupported structured-content node type (e.g.
- * {@code qrBarcodeRef}, {@code attachmentListRef}) is encountered — fail-closed instead of
- * silently dropping content (CD-PIT-07).
+ * {@code attachmentListRef}) is encountered — fail-closed instead of
+ * silently dropping content (CD-PIT-07). CE-K06b added dedicated keys for
+ * {@code qrBarcodeRef} payload/config/encode failures.
  */
 public class DocxAssemblyException extends RuntimeException {
 
