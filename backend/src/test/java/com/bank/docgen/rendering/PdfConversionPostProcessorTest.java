@@ -109,6 +109,50 @@ class PdfConversionPostProcessorTest {
         assertThat(options.pageNumberStampingEnabled()).isFalse();
     }
 
+    @Test
+    void finishPdf_respectsResolvedOptionsDisabledDespiteGlobalTrue() throws Exception {
+        // BDD-CE-K06c-005 / K06c-C7 — production path: resolveOptions → finishPdf
+        // must not re-enable stamping via global OR when profile locked false
+        DocgenRenderingProperties properties = new DocgenRenderingProperties();
+        properties.setPdfPageNumberStampingEnabled(true);
+        PdfConversionPostProcessor processor = new PdfConversionPostProcessor(
+                properties,
+                new DocxPdfConversionPreprocessor()
+        );
+        PdfConversionOptions options = processor.resolveOptions(new byte[0], profile(false));
+
+        assertThat(options.pageNumberStampingEnabled()).isFalse();
+        assertThat(processor.isStampingEnabled(options)).isFalse();
+
+        byte[] sourcePdf = samplePdf();
+        PdfPageStampResult finished = processor.finishPdf(sourcePdf, options);
+
+        try (PDDocument document = Loader.loadPDF(finished.pdfBytes())) {
+            String text = new PDFTextStripper().getText(document);
+            assertThat(text).contains("Body page 1");
+            assertThat(text).doesNotContain("Page 1 of 1");
+        }
+        assertThat(finished.warning()).isEmpty();
+    }
+
+    @Test
+    void prepareDocxForConversion_skipsWhenResolvedOptionsDisabledDespiteGlobalTrue() throws Exception {
+        // BDD-CE-K06c-005 — prepareDocxForConversion must trust resolveOptions, not global
+        DocgenRenderingProperties properties = new DocgenRenderingProperties();
+        properties.setPdfPageNumberStampingEnabled(true);
+        PdfConversionPostProcessor processor = new PdfConversionPostProcessor(
+                properties,
+                new DocxPdfConversionPreprocessor()
+        );
+        PdfConversionOptions options = processor.resolveOptions(new byte[0], profile(false));
+        byte[] sourceDocx = new byte[]{0x50, 0x4B, 0x03, 0x04};
+
+        byte[] prepared = processor.prepareDocxForConversion(sourceDocx, options);
+
+        assertThat(processor.isStampingEnabled(options)).isFalse();
+        assertThat(prepared).isSameAs(sourceDocx);
+    }
+
     private static boolean isStampingEnabled(boolean profileEnabled, boolean globalEnabled) throws Exception {
         DocgenRenderingProperties properties = new DocgenRenderingProperties();
         properties.setPdfPageNumberStampingEnabled(globalEnabled);

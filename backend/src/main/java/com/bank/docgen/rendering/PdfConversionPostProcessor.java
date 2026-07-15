@@ -38,9 +38,14 @@ public class PdfConversionPostProcessor {
         return PdfPageNumberStamper.stampPageNumbers(pdfBytes, plan);
     }
 
+    /**
+     * When {@code options} is non-null (production path after {@link #resolveOptions}),
+     * trust {@code pageNumberStampingEnabled} only — do not OR with the global property.
+     * Global applies only when {@code options == null}.
+     */
     public boolean isStampingEnabled(PdfConversionOptions options) {
-        if (options != null && options.pageNumberStampingEnabled()) {
-            return true;
+        if (options != null) {
+            return options.pageNumberStampingEnabled();
         }
         return renderingProperties.isPdfPageNumberStampingEnabled();
     }

@@ -59,7 +59,14 @@ final class AttachmentListRefDocxSupport {
 
     private static List<String> toStringList(Object value) {
         if (value instanceof String[] array) {
-            return List.of(array);
+            List<String> items = new ArrayList<>(array.length);
+            for (String element : array) {
+                if (element == null) {
+                    throw payloadInvalid();
+                }
+                items.add(element);
+            }
+            return items;
         }
         if (value instanceof JsonNode jsonNode) {
             if (!jsonNode.isArray()) {

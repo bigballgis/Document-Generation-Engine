@@ -128,6 +128,20 @@ class AttachmentListRefDocxWriterTest {
     }
 
     @Test
+    void failsClosedOnStringArrayWithNullElements() {
+        String structured = """
+                {"nodes":[{"type":"attachmentListRef","referenceKey":"ATTACHMENTS"}]}
+                """;
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("ATTACHMENTS", new String[]{"Annex A", null});
+
+        assertThatThrownBy(() -> render(structured, variables))
+                .isInstanceOf(DocxAssemblyException.class)
+                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
+                .isEqualTo("api.error.rendering.attachmentListPayloadInvalid");
+    }
+
+    @Test
     void acceptsBlankAndWhitespaceStringElements() throws Exception {
         String structured = """
                 {"nodes":[{"type":"attachmentListRef","referenceKey":"ATTACHMENTS"}]}
