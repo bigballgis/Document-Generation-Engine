@@ -11,10 +11,13 @@ import java.util.Set;
  * without violating module boundaries.
  *
  * <p>Matching is exact after trim (same camelCase as {@code StructuredContentNodeType#jsonType()}).
+ *
+ * <p>CE-K06b: {@code qrBarcodeRef} removed after ZXing writer shipped; {@code attachmentListRef}
+ * remains until K06c.
  */
 public final class WriterUnsupportedStructuredNodeTypes {
 
-    private static final Set<String> JSON_TYPES = Set.of("qrBarcodeRef", "attachmentListRef");
+    private static final Set<String> JSON_TYPES = Set.of("attachmentListRef");
 
     private WriterUnsupportedStructuredNodeTypes() {
     }

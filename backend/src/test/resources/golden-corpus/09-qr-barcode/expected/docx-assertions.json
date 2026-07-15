@@ -1,0 +1,10 @@
+{
+  "deferred": false,
+  "assertions": [
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "drawing"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "blip"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "Payment QR"},
+    {"type": "XPATH_EXISTS", "part": "word/document.xml", "xpath": "//*[local-name()='drawing']"},
+    {"type": "XPATH_EXISTS", "part": "word/document.xml", "xpath": "//*[local-name()='blip']"}
+  ]
+}

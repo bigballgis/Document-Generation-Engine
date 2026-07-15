@@ -87,7 +87,8 @@ class GoldenCorpusStructureTest {
                 "specimen-watermark",
                 "compute-variables",
                 "chinese-uppercase-amount",
-                "cross-page-table"
+                "cross-page-table",
+                "qr-barcode"
         );
         assertThat(placeholders).contains("long-clause-limits");
         assertThat(placeholders).doesNotContain(

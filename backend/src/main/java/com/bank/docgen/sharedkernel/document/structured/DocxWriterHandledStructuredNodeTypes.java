@@ -15,6 +15,7 @@ public final class DocxWriterHandledStructuredNodeTypes {
             "list",
             "imageRef",
             "sealRef",
+            "qrBarcodeRef",
             "conditionBlock",
             "loopBlock",
             "contentModuleRef",

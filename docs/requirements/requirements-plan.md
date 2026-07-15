@@ -390,7 +390,7 @@
 - v1 明确不支持任意 HTML/CSS、脚本、绝对定位、浮动、复杂分栏、在线任意修改页眉页脚/页边距/全局版式，以及未被平台模型识别的 Word 脏样式进入发布版本。
 - Word 或 HTML 粘贴内容必须清洗并转换为受控结构化节点后才能进入模板；不可识别内容不得作为原始格式直接进入发布契约，应按风险进入阻断项或警告项。
 - 已确认发布阻断项包括不支持节点、变量引用缺失、样式引用缺失、条款或内容模块引用缺失、表格组件引用缺失、母版锚点引用缺失、编号断裂且影响条款语义、表格无法可靠渲染、签章/盖章位置异常和 PDF 转换失败。
-- **LR-A4（2026-07-10 确认）：**「不支持节点」= 未知 `type` ∪ **writer-unsupported**（矩阵已声明但当前无 DOCX 发射：`qrBarcodeRef`、`attachmentListRef`）。对此类节点 **发布门禁硬阻断**；预览/运行时 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。本切片不实现完整 QR/附件 writer。规格：[BDD-LRP-A4-FAIL-CLOSED-001](../behavior/lrp-a4-fail-closed-unsupported-nodes.md)。
+- **LR-A4（2026-07-10 确认）：**「不支持节点」= 未知 `type` ∪ **writer-unsupported**（矩阵已声明但当前无 DOCX 发射）。LR-A4 交付时 set = `{ qrBarcodeRef, attachmentListRef }`；对此类节点 **发布门禁硬阻断**；预览/运行时 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。完整 writer 另任务（**CE-K06b** 移除 `qrBarcodeRef`；**CE-K06c** 移除 `attachmentListRef`）。规格：[BDD-LRP-A4-FAIL-CLOSED-001](../behavior/lrp-a4-fail-closed-unsupported-nodes.md)。
 - 警告项用于提示不直接破坏文档语义或合规结果的较低风险保真问题；v1 不设置静默忽略阈值，任一已确认低风险保真问题都必须形成警告。
 - 警告项不会仅因数量自动阻断发布；如果问题影响文档语义、合规结果、签章/盖章、二维码/条码、附件完整性、变量或引用合法性、关键表格可读性或条款编号语义，则应归为阻断项。
 - v1 已确认警告项包括：可选章节、段落或表格因条件/循环为空但已完整隐藏或配置空状态且不影响编号和语义；预览、DOCX 和 PDF 之间存在不影响语义、签章、附件和表格可读性的低风险分页或换行差异；表格跨页但表头、行内容和阅读顺序保持完整且不影响关键金额或条款；使用已批准替代字体/样式或受控格式归一化且不影响语义、页眉页脚或签章区；普通图片为适配容器发生轻微等比缩放且不适用于二维码、条码、签章或盖章。
@@ -404,7 +404,8 @@
 - 后台 API 契约页提供调用方视图，展示授权模板的契约版本对比、错误码说明、调用示例、可调用版本列表、API 策略摘要、调用方自身 API 凭证非敏感状态、保真警告码目录、字段含义、JSON 示例、文件流响应头说明，以及授权范围内的非敏感调用结果警告摘要和 `traceId` 或 `auditId` 定位标识；契约版本对比由页面基于已授权契约数据计算，不新增 `ContractResponse` 专门字段；v1 不建设独立开发者门户，该视图不授予完整审计查看权限，也不提供 API 凭证自助管理。
 - v1 复杂编号只支持平台或已审核母版样式目录确认的受控多级编号方案；条件块和循环块渲染后必须确定性重排编号，重复编号、跳号、条款编号语义变化或交叉引用失效均阻断发布。
 - v1 表格组件采用结构化表格组件模型，支持列 schema、表头、跨页重复表头、循环行、简单合计/页脚和受控列宽；嵌套表、浮动表、绝对定位表、无法稳定跨页的合并单元格或无法保持关键金额/条款可读性的表格均阻断发布。
-- **CE-K06a（2026-07-15 确认）：** `repeatHeaderAcrossPages=true` 时 DOCX writer 必须写出表头行 `<w:tblHeader/>`（可观察：DOCX XML / 金标 `02-cross-page-table`）；`false`/缺省不写。行为规格：[BDD CE-K06](../behavior/ce-k06-rendering-fidelity.md)。K06b（`qrBarcodeRef` writer）与 K06c（`attachmentListRef` + PDF stamp via render profile）为 residual，不在本确认交付范围。
+- **CE-K06a（2026-07-15 确认）：** `repeatHeaderAcrossPages=true` 时 DOCX writer 必须写出表头行 `<w:tblHeader/>`（可观察：DOCX XML / 金标 `02-cross-page-table`）；`false`/缺省不写。行为规格：[BDD CE-K06](../behavior/ce-k06-rendering-fidelity.md)。已合并 `485a7f3e`。
+- **CE-K06b（2026-07-15 确认）：** `qrBarcodeRef` DOCX writer — ZXing 从 `variables[referenceKey]` 生成 PNG 嵌入；`sizePx`（默认 128，32–512）与 `errorCorrection`（`L|M|Q|H`，默认 `M`）及 `format`（`QR_CODE` 默认 / `CODE_128`）可配；退出 writer-unsupported set（`attachmentListRef` 仍阻断）；金标 `09-qr-barcode` ACTIVE；缺失 payload / 非法配置 / 编码失败显式失败、禁止静默省略。规格：[ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md) `BDD-CE-K06b-001…009`。K06c（`attachmentListRef` + PDF stamp via render profile）仍为 residual。
 - v1 签章/盖章仅确认受控占位和印章/签名图片资产，不包含密码学电子签名、电子印章或验签能力；签章/盖章必须位于授权区域内，不得重叠、裁切、越界或在 DOCX/PDF 中不可见，否则阻断发布。
 - PDF 转换验收采用语义保真优先基线；不得出现缺页、异常空白页、内容裁切、关键内容丢失、签章/盖章不可见、二维码/条码不可读、关键表格不可读或附件引用丢失。低风险视觉差异按已确认警告项处理。
 - 编号、表格、签章/盖章和 PDF 转换验收结果必须进入测试生成记录、审批材料、发布前检查清单、发布摘要和审计摘要；发布前检查存在阻断项时不得发布。

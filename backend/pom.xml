@@ -37,6 +37,7 @@
         <resilience4j.version>2.4.0</resilience4j.version>
         <pdfbox.version>3.0.8</pdfbox.version>
         <bouncycastle.version>1.85</bouncycastle.version>
+        <zxing.version>3.5.3</zxing.version>
         <archunit.version>1.4.2</archunit.version>
         <!-- Quality gates (OPT-B). gate.fail toggles ratchet measure vs enforce. -->
         <gate.fail>true</gate.fail>
@@ -183,6 +184,17 @@
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
             <version>${pdfbox.version}</version>
+        </dependency>
+        <!-- CE-K06b: QR / barcode PNG generation for qrBarcodeRef writer -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>${zxing.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>${zxing.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

@@ -357,7 +357,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **Blocker（阻止发布）：** 未声明变量引用（`UNRESOLVED_VARIABLE`）、不支持节点类型（`UNSUPPORTED_NODE`）等。
 
-**「不支持节点」语义（LR-A4 / BDD-LRP-A4-FAIL-CLOSED-001，2026-07-10 确认）：** 包括 (1) **未知** `type`（不在 `StructuredContentNodeType`）；(2) **writer-unsupported** — 矩阵已声明但当前无 DOCX 发射分支的类型。v1 当前 writer-unsupported set = `{ qrBarcodeRef, attachmentListRef }`。此类节点必须在绑定校验与发布门禁 **硬阻断**，预览/运行时生成 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。完整 QR/附件列表 writer **不在** LR-A4 范围（另任务从 set 移除后方可发布含该节点的版本）。
+**「不支持节点」语义（LR-A4 / BDD-LRP-A4-FAIL-CLOSED-001，2026-07-10 确认；CE-K06b 收缩 2026-07-15）：** 包括 (1) **未知** `type`（不在 `StructuredContentNodeType`）；(2) **writer-unsupported** — 矩阵已声明但当前无 DOCX 发射分支的类型。v1 writer-unsupported set：**历史** `{ qrBarcodeRef, attachmentListRef }`；**CE-K06b 落地后** = `{ attachmentListRef }` 仅（`qrBarcodeRef` 退出）。仍在 set 中的类型必须在绑定校验与发布门禁 **硬阻断**，预览/运行时生成 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。`attachmentListRef` 完整 writer 仍属 **CE-K06c**。
 
 **Warning（摘要 + 确认）：** 低风险缩放差异（`IMAGE_SCALING_ADJUSTED`）等。Writer-unsupported **不得** 降级为可发布 warning。
 
@@ -381,15 +381,16 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 内容树中 `tableComponentRef` 节点可内联 `tableComponent` 定义；校验 blockers 经 `TemplateService.computeBindingStatus` 合并进发布门禁。
 
-**跨页表头发射（CE-K06a / BDD-CE-K06a，2026-07-15 确认）：** 当 `repeatHeaderAcrossPages == true` 时，DOCX writer（`StructuredContentDocxTableSupport` 或同源路径）必须对写出的表头行落 OOXML `<w:tblHeader/>`（行级 `w:trPr`），使 Word 在续页重复表头。`false` 或缺省时不得写入 `w:tblHeader`。循环行与页脚行不得带 `w:tblHeader`。金标包 `golden-corpus/02-cross-page-table` 由本能力充实为 ACTIVE，以 DOCX XML XPath 断言（禁像素比对）。规格：[ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md)。`qrBarcodeRef` / `attachmentListRef` 完整 writer（K06b/K06c）不在本确认范围内，仍受 LR-A4 writer-unsupported 硬阻断。
+**跨页表头发射（CE-K06a / BDD-CE-K06a，2026-07-15 确认）：** 当 `repeatHeaderAcrossPages == true` 时，DOCX writer（`StructuredContentDocxTableSupport` 或同源路径）必须对写出的表头行落 OOXML `<w:tblHeader/>`（行级 `w:trPr`），使 Word 在续页重复表头。`false` 或缺省时不得写入 `w:tblHeader`。循环行与页脚行不得带 `w:tblHeader`。金标包 `golden-corpus/02-cross-page-table` 由本能力充实为 ACTIVE，以 DOCX XML XPath 断言（禁像素比对）。规格：[ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md)。
 
-#### 2.6.5 引用节点 Reference nodes（P18-T05）
+#### 2.6.5 引用节点 Reference nodes（P18-T05 + CE-K06b）
 
 `ReferenceNodeService` 校验签章/QR/图片/附件列表引用节点：
 
 - **签章 `sealRef`：** `placement.withinAuthorizedArea=false` → `SEAL_OUTSIDE_AUTHORIZED_AREA` blocker；`applyScaling` → `SEAL_SCALING_NOT_ALLOWED` blocker（签章/QR 不适用图片缩放 warning）
 - **图片 `imageRef`：** `applyScaling` → `IMAGE_SCALING_ADJUSTED` warning（自 T02 迁至本服务）
-- **二维码/条码 `qrBarcodeRef` / 附件列表 `attachmentListRef`：** 可校验 `referenceKey` 形态；**在 writer 落地前** 另由 LR-A4 writer-unsupported 规则作为 **发布阻断**（不得因 key 合法而允许发布或静默渲染）。有效 `attachmentListRef.referenceKey` 仍可解析为 `AttachmentListReferenceModel` 供校验/清单使用，但不代表可 DOCX 发射
+- **二维码/条码 `qrBarcodeRef`（CE-K06b / BDD-CE-K06b，2026-07-15 确认）：** 校验非空 `referenceKey`。DOCX writer 用 **ZXing** 从运行时 **`variables[referenceKey]`** 文本 payload 生成 PNG 并嵌入（默认 `format=QR_CODE`；可选 `CODE_128`）。可选节点字段：`sizePx`（默认 128，范围 32–512）、`errorCorrection`（`L|M|Q|H`，默认 `M`，仅 QR）、`format`（`QR_CODE`\|`CODE_128`）。非法配置 / 缺失 payload / 编码失败 → 显式渲染失败（`api.error.rendering.qrBarcodeConfigInvalid` / `qrBarcodePayloadMissing` / `qrBarcodeEncodeFailed`）；**禁止** 静默省略。实现后 **退出** LR-A4 writer-unsupported set。金标包 `golden-corpus/09-qr-barcode` ACTIVE。规格：[ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md) §15–§16。不依赖 CE-E02 资产库。
+- **附件列表 `attachmentListRef`：** 可校验 `referenceKey` 形态并解析为 `AttachmentListReferenceModel`；**在 CE-K06c writer 落地前** 仍由 LR-A4 writer-unsupported 规则 **发布阻断**（不得因 key 合法而允许发布或静默渲染）
 
 #### 2.6.6 受控多级编号 Controlled numbering（P18-T06）
 

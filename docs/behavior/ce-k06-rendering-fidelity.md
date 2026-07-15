@@ -1,213 +1,123 @@
-# CE-K06 渲染保真补全 — BDD（Wave 1a = K06a）
+# CE-K06 渲染保真补全 — BDD（K06a shipped · Wave 2 = K06b）
 
 | Field | Value |
 | --- | --- |
-| **Slice** | `ce-k06-rendering-fidelity` |
+| **Slice (Wave 2)** | `ce-k06b-qr-barcode` |
 | **Plan task** | **CE-K06**（[core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §3 CE-K06） |
-| **Task Master** | **#62** |
-| **bdd_readiness** | **`ready`**（本片确认范围 = **K06a**；K06b/K06c 为 residual 验收桩，不阻塞本片 TDD） |
-| **Recorded** | 2026-07-15 |
+| **Task Master** | **#62**（sub-slice **K06b**） |
+| **bdd_readiness** | **`ready`** for **K06b**（本片确认范围 = **K06b only**；K06a 已合并 `485a7f3e`；K06c 仍为 residual） |
+| **Recorded** | 2026-07-15（K06a）；**2026-07-15 Wave 2 K06b** |
 | **Formal phase** | **None**（CE 程序切片；不发明 sole-active 正式 P-phase） |
-| **Placement** | ISOLATED `D:/working/DGE-ce-k06-rendering-fidelity` · `feat/ce-k06-rendering-fidelity` |
-| **Scope of this slice** | **K06a only** — `repeatHeaderAcrossPages` → DOCX writer 落 `<w:tblHeader/>`；金标 `02-cross-page-table` PLACEHOLDER → **ACTIVE**；fail-first 回归。**不**实现 K06b（`qrBarcodeRef` writer）/ K06c（`attachmentListRef` writer + PDF stamp profile 收敛）；**不** go-live；**不**激活 CD-3；**不**改 CE-C04 / CE-U06 |
-| **Owning docs** | 本文件（行为 SoT）；计划映射 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md)；产品 [PRD.md](../product/PRD.md) §6.5 表格跨页；需求 [requirements-plan.md](../requirements/requirements-plan.md) 表格组件；领域 [domain-model.md](../domain/domain-model.md) §2.6.4；金标约定 [ce-k07-golden-corpus-skeleton.md](./ce-k07-golden-corpus-skeleton.md)；writer-unsupported 正交 [lrp-a4-fail-closed-unsupported-nodes.md](./lrp-a4-fail-closed-unsupported-nodes.md) |
+| **Placement** | ISOLATED `D:/working/DGE-ce-k06b-qr-barcode` · `feat/ce-k06b-qr-barcode` |
+| **Scope of this slice** | **K06b only** — `qrBarcodeRef` DOCX writer：ZXing 生成 PNG 嵌入；`sizePx` / `errorCorrection`（及 `format`）可配；退出 LR-A4 writer-unsupported set（仅 `qrBarcodeRef`）；金标 `09-qr-barcode` ACTIVE。**不**重做 K06a；**不**实现 K06c（`attachmentListRef` + PDF stamp profile）；**不**改 CE-C04 / CE-U06；**不** go-live；**不**激活 CD-3 |
+| **Owning docs** | 本文件（行为 SoT）；计划映射 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md)；产品 [PRD.md](../product/PRD.md)；需求 [requirements-plan.md](../requirements/requirements-plan.md)；领域 [domain-model.md](../domain/domain-model.md) §2.6.5；金标 [ce-k07-golden-corpus-skeleton.md](./ce-k07-golden-corpus-skeleton.md)；writer-unsupported 正交 [lrp-a4-fail-closed-unsupported-nodes.md](./lrp-a4-fail-closed-unsupported-nodes.md) |
 
 ---
 
 ## 1. 概述
 
-CE-K06 关闭渲染保真三类缺口。本 Wave 1a 切片 **只交付 K06a**（跨页表头），其余子片记录为 residual。
+CE-K06 关闭渲染保真三类缺口，可独立子片交付。
 
-| 子片 | 本片状态 | 痛点摘要 |
+| 子片 | 状态 | 痛点摘要 |
 | --- | --- | --- |
-| **K06a** | **In scope / ready** | `TableComponentService` / 绑定已接受 `repeatHeaderAcrossPages`，但 `StructuredContentDocxTableSupport` 写表头行时 **不** 写 OOXML `<w:tblHeader/>`，Word 跨页时表头不重复 |
-| **K06b** | **Deferred residual** | `qrBarcodeRef` 在节点矩阵与 LR-A4 writer-unsupported set；无 ZXing 图片嵌入 writer |
-| **K06c** | **Deferred residual** | `attachmentListRef` 无编号列表段落 writer；PDF 页码 stamp 与全局 `pdf-page-number-stamping-enabled` / `renderProfile.pdfPageNumberStampingEnabled` 收敛未完结 |
+| **K06a** | **Shipped**（merge `485a7f3e`） | `repeatHeaderAcrossPages` → DOCX `<w:tblHeader/>`；金标 `02-cross-page-table` ACTIVE — 见 §2–§11 / `BDD-CE-K06a-*`（**本 Wave 不重做**） |
+| **K06b** | **In scope / ready**（本 Wave 2） | `qrBarcodeRef` 在节点矩阵与 LR-A4 writer-unsupported set；无 ZXing 图片嵌入 writer |
+| **K06c** | **Deferred residual** | `attachmentListRef` 无编号列表段落 writer；PDF 页码 stamp 与全局 / `renderProfile` 收敛未完结 — 见 §12.2 |
 
-**现状证据（K06a）：**
+**现状证据（K06b）：**
 
-- `TableComponentRenderModel.repeatHeaderAcrossPages` 已从 JSON 解析并有单测覆盖。
-- `StructuredContentDocxTableSupport.populateTable` 写 header 行时仅套 `TableHeader` 段落样式，**不**设置行级 `w:tblHeader`。
-- 金标包 `02-cross-page-table` 成熟度仍为 **PLACEHOLDER**（K07 骨架；`docx-assertions.json` 为 `deferred: true`）。
+- `StructuredContentNodeType.QR_BARCODE_REF` / schema 已声明；`ReferenceNodeService` 校验非空 `referenceKey`。
+- `WriterUnsupportedStructuredNodeTypes` = `{ qrBarcodeRef, attachmentListRef }`；发布硬阻断 + 渲染 `api.error.rendering.unsupportedNodeType`（LR-A4）。
+- `StructuredContentDocxWriter` / inline / nested 路径 **无** QR 发射分支；`pom.xml` **无** ZXing 依赖。
+- 金标目录尚无 QR 主题包（K07 八包骨架；K06a 已充实 `02-cross-page-table`）。
 
 ---
 
-## 2. Actor / Role
+## 2–11. K06a（shipped — do not redo）
+
+> **Historical SoT for K06a.** Acceptance `BDD-CE-K06a-001…006` remains authoritative for tblHeader behavior. Wave 2 implementers **must not** reopen K06a writer/golden work unless a regression is found.
+
+### Actor / Role（K06a）
 
 | Actor | 说明 | 关注点 |
 | --- | --- | --- |
 | **系统（Rendering pipeline / DocxAssembler）** | 结构化表格 → DOCX 发射 | `repeatHeaderAcrossPages=true` 时表头行带 `w:tblHeader` |
 | **Runtime / Preview 生成路径** | 消费已发布绑定与变量 | 产物 DOCX 跨页表头可被 Word 重复；XML 可断言 |
 | **平台 / CI** | 金标 harness + `mvn verify` | `cross-page-table` ACTIVE；XPath 失败即红 |
-| **（间接）函件读者 / 法务** | 多页表格可读性 | 续页仍见列标题；不丢关键列语义 |
 
-本片 **无** 新管理 UI 旅程、**无** 新公开 API 契约变更（作者侧 `repeatHeaderAcrossPages` 字段已存在）。
+### Goal（K06a）
 
----
+1. `repeatHeaderAcrossPages == true` → 表头行写 `<w:tblHeader/>`。
+2. `false` / 缺省 → 不写 `w:tblHeader`。
+3. 金标 `02-cross-page-table` ACTIVE（DOCX XML 断言；禁像素）。
 
-## 3. Goal（K06a）
+### 已确认决策（K06a，2026-07-15）
 
-1. 当表格组件定义（或等价绑定）`repeatHeaderAcrossPages == true` 时，DOCX writer 对 **每一个** 标记为表头的行写入 OOXML **`<w:tblHeader/>`**（位于该行 `w:trPr` 下）。
-2. 当 `repeatHeaderAcrossPages == false` 或缺失（默认 false）时，**不得** 在表头行写入 `w:tblHeader`（保持非跨页重复语义）。
-3. 金标 `backend/src/test/resources/golden-corpus/02-cross-page-table/` 由 PLACEHOLDER → **ACTIVE**：输入含足以跨页的循环行数据；`expected/docx-assertions.json` 用稳定 XPath/关键路径断言至少一个 `w:tblHeader` 存在；禁像素比对。
-4. 回归：单元/装配测试 **fail-first** 再绿；`mvn verify` 执行金标 DOCX 半段（PDF 半段对齐 K07：无 soffice 可 skip）。
-
----
-
-## 4. 已确认决策（2026-07-15）
-
-| ID | 决策 | 来源 |
-| --- | --- | --- |
-| **K06-C1** | **本片交付范围 = K06a only。** K06b / K06c 不进入本片实现；验收桩见 §12；不阻塞 `bdd_readiness=ready`。 | 编排 handoff；CE-K06 可独立子片 |
-| **K06-C2** | **触发字段：** 表格组件 JSON 布尔 `repeatHeaderAcrossPages`（已由 `TableComponentService` / `TableComponentRenderModel` 校验与建模）。等价绑定若经 `tableComponent` / `tableComponentRef` 内联同一字段，行为相同。 | 计划卡；domain §2.6.4 |
-| **K06-C3** | **发射目标：** 对 `headerRows` 中写出的表头行（当前实现至少第一表头行；若多表头行均作为 header 写出，则 **每一** 表头行均带 `w:tblHeader`）写入 `<w:tblHeader/>`。循环行与 footer 行 **不得** 带 `w:tblHeader`。 | OOXML `CT_TrPr` / Word「标题行重复」；计划卡 |
-| **K06-C4** | **实现落点：** `StructuredContentDocxTableSupport`（或同源 table writer）在 `repeatHeaderAcrossPages==true` 时设置行属性；优先经 POI 稳定 API（如 `XWPFTableRow` / `CTTrPr`）写出，保证解压后 `word/document.xml` XPath 可匹配 `//w:tblHeader`（或行级等价路径）。 | 代码现状 |
-| **K06-C5** | **`false` / 缺省：** 不写 `w:tblHeader`；不得因「看起来像表头样式」而隐式加 tblHeader。 | fail-closed 语义清晰 |
-| **K06-C6** | **金标：** 复用 K07 包 `cross-page-table`（目录 `02-cross-page-table`）；充实 input（母版 + 含 `repeatHeaderAcrossPages: true` 的 table 绑定 + 足够行数的变量，使表格在典型 A4 下可跨 ≥2 页）；`maturity: ACTIVE`；DOCX 断言至少：存在 `w:tblHeader`；可选断言表头单元格文本。**禁止** 像素/截图 golden。PDF 文本断言可选（有 soffice 时）；无 soffice → skip PDF 半段（K07-C9）。 | CE-K06；CE-K07 |
-| **K06-C7** | **可观察证据：** (1) 单元/装配测试对写出的 DOCX 字节解压后 XPath 命中 `w:tblHeader`；(2) 金标 ACTIVE 包在 `mvn verify` 绿灯；(3) 负例：`repeatHeaderAcrossPages=false` 时 XPath **不** 命中。 | TDD |
-| **K06-C8** | **与 LR-A4 正交：** 本片 **不** 从 `WriterUnsupportedStructuredNodeTypes` 移除 `qrBarcodeRef` / `attachmentListRef`；发布硬阻断与显式渲染失败保持至 K06b/K06c 落地。 | LR-A4；K06-C1 |
-| **K06-C9** | **非目标：** 嵌套表；浮动/绝对定位表；合并单元格跨页修复；新 UI 开关；调用方覆盖 `renderProfile`；K06b ZXing；K06c 附件列表 writer；全局 vs profile PDF stamp 重构；CE-C04 / CE-U06；CD-3；go-live。 | handoff |
-
----
-
-## 5. Preconditions
-
-- CE-K07 金标骨架存在；`02-cross-page-table` PLACEHOLDER 可被本片充实。
-- CE-K02（样式来源）已 Done — 表头可用既有 `TableHeader` 样式；本片不改 style catalog 权威。
-- `TableComponentService` 已接受并建模 `repeatHeaderAcrossPages`。
-- CORE-FORTRESS F1 结构化 writer 路径可用（`tableComponent` / `tableComponentRef` → `populateTable`）。
-- 隔离 worktree 交付；不在 MAIN 实现。
-
----
-
-## 6. Trigger
-
-- Runtime / preview / test-generate 装配含 `tableComponent`（或 `tableComponentRef`）且定义 `repeatHeaderAcrossPages: true` 的结构化内容。
-- CI / 工程师执行 `mvn -B -ntp -f backend/pom.xml verify`（含 golden-corpus harness）。
-
----
-
-## 7. Primary journey（K06a）
-
-1. 作者（或演示/金标夹具）在表格组件定义中设置 `repeatHeaderAcrossPages: true`，并提供 `headerRows` + 足够多的 `loopRow` 数据。
-2. 发布门禁通过既有表格校验（无 NESTED_TABLE 等 blocker）。
-3. 渲染管线打开母版、写入锚点结构化内容，调用 table support 填充 `XWPFTable`。
-4. Writer 对表头行写入 `w:tblHeader`。
-5. 产物 DOCX 可被解压；`document.xml` XPath 断言通过；Word 打开时续页重复表头（人工/集成可选；自动化以 XML 断言为准）。
-6. 金标 `cross-page-table` ACTIVE 在 verify 中执行并通过。
-
----
-
-## 8. System responses
-
-| 情况 | 系统响应 |
+| ID | 决策 |
 | --- | --- |
-| `repeatHeaderAcrossPages=true` + 合法表头行 | 成功写出 DOCX；表头行含 `<w:tblHeader/>` |
-| `repeatHeaderAcrossPages=false` 或缺失 | 成功写出 DOCX；表头行 **无** `w:tblHeader` |
-| 表格其它既有 blocker（嵌套表等） | 保持既有发布/校验阻断；本片不放宽 |
-| 金标 ACTIVE DOCX 断言失败 | `mvn verify` **FAIL** |
-| 金标 PDF 半段且无 soffice | **SKIP** PDF；DOCX 仍必须 PASS |
+| **K06-C1…C9** | 见原 Wave 1a 锁定（范围 = K06a only；发射落点 `StructuredContentDocxTableSupport`；与当时 LR-A4 正交保留 `qrBarcodeRef`/`attachmentListRef` unsupported）。**K06-C1 / C8 / C9 中「本片不实现 K06b」已被本 Wave 2  supersede：K06b 现为本片范围。** |
 
----
+### Acceptance scenarios — K06a
 
-## 9. Acceptance scenarios — K06a（Given / When / Then）
-
-### BDD-CE-K06a-001 — 跨页表头写入 `w:tblHeader`
+#### BDD-CE-K06a-001 — 跨页表头写入 `w:tblHeader`
 
 **Given** 结构化表格定义含非空 `headerRows`、合法 `columnSchema`，且 `"repeatHeaderAcrossPages": true`  
 **And** 绑定变量使循环行足够填充表格  
 **When** 渲染管线将 `tableComponent` / `tableComponentRef` 写入 DOCX  
-**Then** 解压产物 `word/document.xml` 中至少存在一处 `w:tblHeader`（稳定 XPath 或关键字路径断言）  
+**Then** 解压产物 `word/document.xml` 中至少存在一处 `w:tblHeader`  
 **And** 该元素位于表头行的 `w:trPr`（或 POI 写出的等价结构）下
 
-### BDD-CE-K06a-002 — 关闭跨页重复时不写 `tblHeader`
+#### BDD-CE-K06a-002 — 关闭跨页重复时不写 `tblHeader`
 
 **Given** 同结构表格但 `"repeatHeaderAcrossPages": false`（或字段缺省）  
 **When** 渲染写出 DOCX  
 **Then** 该表的表头行 **不** 含 `w:tblHeader`  
 **And** 文档仍成功生成（非错误路径）
 
-### BDD-CE-K06a-003 — 仅表头行带 `tblHeader`
+#### BDD-CE-K06a-003 — 仅表头行带 `tblHeader`
 
 **Given** `repeatHeaderAcrossPages: true`，且存在 loop 数据行与（可选）footer 行  
 **When** 渲染写出 DOCX  
 **Then** `w:tblHeader` 仅出现在 header 行对应 `w:tr`  
 **And** loop / footer 行的 `w:trPr` **不含** `w:tblHeader`
 
-### BDD-CE-K06a-004 — 金标 `cross-page-table` → ACTIVE
+#### BDD-CE-K06a-004 — 金标 `cross-page-table` → ACTIVE
 
-**Given** 本片交付完成  
+**Given** K06a 交付完成  
 **When** 检查 `golden-corpus/02-cross-page-table/manifest.json`  
 **Then** `maturity` 为 `ACTIVE`  
-**And** `input/` 含可渲染母版 + 带 `repeatHeaderAcrossPages: true` 的模板/绑定 + 变量（行数足以体现跨页意图）  
 **And** `expected/docx-assertions.json` 非 `deferred`，且断言 `w:tblHeader` 存在  
 **And** harness 在 `mvn verify` 中执行该包 DOCX 半段并通过
 
-### BDD-CE-K06a-005 — Fail-first 回归
+#### BDD-CE-K06a-005 — Fail-first 回归
 
 **Given** 实现前（或故意破坏 tblHeader 写出）  
 **When** 运行针对 `repeatHeaderAcrossPages=true` 的 writer / 装配测试或金标断言  
 **Then** 测试失败（Red）  
 **And** 最小实现写出 `w:tblHeader` 后同测试通过（Green）
 
-### BDD-CE-K06a-006 — 多表头行（若写出）
+#### BDD-CE-K06a-006 — 多表头行（若写出）
 
 **Given** 定义含多个 `headerRows` 且 writer 将每一行作为表头写出，且 `repeatHeaderAcrossPages: true`  
 **When** 渲染写出 DOCX  
 **Then** 每一个写出的表头行均带 `w:tblHeader`  
-**Note** 若 v1 writer 仍只写第一表头行，则本场景退化为对第一行的断言；不得静默丢弃后续表头行而不记录（行为与现网一致即可，本片不强制扩展多表头写出能力）。
+**Note** 若 v1 writer 仍只写第一表头行，则本场景退化为对第一行的断言。
 
 ---
 
-## 10. Boundary / exception（K06a）
+## 12. Residual — K06c only（K06b stubs superseded）
 
-| 边界 | 行为 |
-| --- | --- |
-| 空 `headerRows` 但 `repeatHeaderAcrossPages=true` | 无表头行可标 → 不强制人造空行；既有校验若已 blocker 则保持；否则不写 `w:tblHeader` |
-| `columnKeys` 为空 | 保持现网 early-return；不新增成功路径 |
-| 未知/非法表格 | 既有 `INVALID_TABLE_COMPONENT` / 发布阻断不变 |
-| 像素断言 | **禁止** |
-| Authorization | 无新权限码；沿用既有生成/预览授权 fail-closed |
+> **K06b：** 原 §12.1 stub 已提升为完整规格 → **§15–§22**（`BDD-CE-K06b-001…008`）。  
+> **K06c：** 仍 deferred；**不**作为 K06b Done 门槛；保持 `attachmentListRef` 在 LR-A4 writer-unsupported set，直至 K06c 落地。
 
----
-
-## 11. Observable evidence
-
-| 证据 | 说明 |
-| --- | --- |
-| DOCX XML | XPath / 关键字：`w:tblHeader` 存在性与行归属 |
-| 金标 | `02-cross-page-table` ACTIVE + verify |
-| 单测 | `StructuredContentDocxWriterTest` / table support / assembler 回归 |
-| 审计 | 无新审计事件要求（渲染保真内部行为） |
-
----
-
-## 12. Residual acceptance stubs（K06b / K06c — deferred）
-
-> **Status:** 规格意图已记录，**不**作为本片 Done 门槛；后续切片充实为完整 BDD 并实现。保持 LR-A4 fail-closed 直至 writer 落地并从 unsupported set 移除。
-
-### 12.1 K06b — `qrBarcodeRef` writer（deferred）
-
-| Field | Stub |
-| --- | --- |
-| **Actor** | Rendering pipeline |
-| **Goal** | 对合法 `qrBarcodeRef` 用 ZXing（或平台批准等价库）生成二维码/条码图片并嵌入 DOCX；尺寸与纠错级别可配置 |
-| **Then (stub)** | 节点不再属于 writer-unsupported；发布门禁放行；DOCX 含嵌入图片；缺失 reference / 非法配置 fail-closed（显式错误，禁止静默省略） |
-| **Out of this slice** | 依赖引入、图片缓存、CE-E02 资产键名深化 |
-
-**Stub scenarios:**
-
-- **BDD-CE-K06b-001 (deferred):** Given 绑定含合法 `qrBarcodeRef`，When 渲染，Then DOCX 含 QR/barcode 图片 part，且 `WriterUnsupportedStructuredNodeTypes` 不再包含 `qrBarcodeRef`。
-- **BDD-CE-K06b-002 (deferred):** Given 可配置 size / error-correction，When 渲染，Then 嵌入图反映配置；非法配置 → 显式失败。
-
-### 12.2 K06c — `attachmentListRef` + PDF stamp via render profile（deferred）
+### 12.2 K06c — `attachmentListRef` + PDF stamp via render profile（deferred residual）
 
 | Field | Stub |
 | --- | --- |
 | **Actor** | Rendering pipeline + PDF post-process |
 | **Goal** | `attachmentListRef` → 结构化附件清单的编号列表段落；PDF 页码 stamp **按发布锁定 `renderProfile`（包级）** 控制，而非仅依赖全局应用布尔 |
 | **Then (stub)** | 附件列表可见编号段落；`pdfPageNumberStampingEnabled`（或等价 profile 字段）驱动 stamp；全局默认不得绕过已锁定 profile |
-| **Out of this slice** | 完整 stamp 策略重构、附件元数据 UI |
+| **Out of K06b** | 完整 stamp 策略重构、附件元数据 UI、从 unsupported set 移除 `attachmentListRef` |
 
 **Stub scenarios:**
 
@@ -216,30 +126,218 @@ CE-K06 关闭渲染保真三类缺口。本 Wave 1a 切片 **只交付 K06a**（
 
 ---
 
-## 13. Traceability
+## 13. Traceability（CE-K06 family）
 
 | Source | Link |
 | --- | --- |
 | Plan card | [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) § CE-K06 |
-| Task Master | `#62` CE-K06 |
-| PRD | [PRD.md](../product/PRD.md) — 表格跨页表头完整；v1 表格组件「跨页重复表头」 |
-| Requirements | [requirements-plan.md](../requirements/requirements-plan.md) — 同左 |
-| Domain | [domain-model.md](../domain/domain-model.md) §2.6.4 |
-| Golden corpus | [ce-k07-golden-corpus-skeleton.md](./ce-k07-golden-corpus-skeleton.md) BDD-CE-K07-012 → 本片充实 |
-| Writer-unsupported | [lrp-a4-fail-closed-unsupported-nodes.md](./lrp-a4-fail-closed-unsupported-nodes.md) — K06b/c 前保持 |
-| P18 table | [P18-structured-authoring-fidelity-engine.md](../plan/detail/P18-structured-authoring-fidelity-engine.md) P18-T04 `repeatHeader_acrossPages_preserved` |
+| Task Master | `#62` CE-K06 · sub-slice K06b |
+| PRD | [PRD.md](../product/PRD.md) — 二维码/条码引用；K06a 跨页表头；K06b writer |
+| Requirements | [requirements-plan.md](../requirements/requirements-plan.md) |
+| Domain | [domain-model.md](../domain/domain-model.md) §2.6.4（K06a）、§2.6.5（K06b） |
+| Golden corpus | [ce-k07-golden-corpus-skeleton.md](./ce-k07-golden-corpus-skeleton.md) — K06b 追加 `09-qr-barcode` |
+| Writer-unsupported | [lrp-a4-fail-closed-unsupported-nodes.md](./lrp-a4-fail-closed-unsupported-nodes.md) — K06b 后 set 收缩为 `{ attachmentListRef }` |
+| K06a merge | `485a7f3e` |
 
 ---
 
-## 14. BDD readiness
+## 14. BDD readiness — K06a (historical)
 
 ```
 bdd_readiness: ready
-k06_scope_this_slice: a
-residual: K06b (qrBarcodeRef/ZXing), K06c (attachmentListRef + PDF stamp via render profile)
-open_questions: []
+k06_scope_slice: a
+status: shipped (merge 485a7f3e)
 owning_doc: docs/behavior/ce-k06-rendering-fidelity.md
 task_ids: [#62, CE-K06, K06a]
 ```
 
-**Next:** `plan-orchestrator` → TDD tasks for K06a only（failing tests → `w:tblHeader` writer → golden ACTIVE → `mvn verify`）。
+---
+
+## 15. Wave 2 — K06b `qrBarcodeRef` writer
+
+### 15.1 Actor / Role（K06b）
+
+| Actor | 说明 | 关注点 |
+| --- | --- | --- |
+| **系统（Rendering pipeline / DocxAssembler）** | 结构化引用节点 → DOCX 发射 | ZXing 生成 PNG；嵌入 drawing/blip；配置生效 |
+| **Runtime / Preview 生成路径** | 变量 payload + 已发布绑定 | 成功嵌入可扫描码；失败显式错误 |
+| **发布门禁 / 绑定校验** | LR-A4 writer-unsupported 集合 | `qrBarcodeRef` 退出 unsupported；`attachmentListRef` 仍阻断 |
+| **平台 / CI** | 金标 + `mvn verify` | `09-qr-barcode` ACTIVE；DOCX 断言 + 可选 decode 回归 |
+| **（间接）函件读者** | 扫码可达性 | 码可读；尺寸/纠错符合模板配置 |
+
+本片 **无** 新管理 UI 旅程、**无** 新公开 REST 契约（节点字段为既有 structured JSON `additionalProperties` 扩展；错误走既有渲染失败信封）。
+
+### 15.2 Goal（K06b）
+
+1. 合法 `qrBarcodeRef` 在顶层与嵌套路径均可写出 DOCX **嵌入图片**（PNG part + 文档中的 drawing），**禁止** 静默省略。
+2. 用 **ZXing**（`com.google.zxing`）从运行时变量 payload 生成码图（默认 QR）。
+3. **尺寸**（`sizePx`）与 **纠错级别**（`errorCorrection`，QR）可配置；非法配置 → 显式失败。
+4. 从 `WriterUnsupportedStructuredNodeTypes` **仅移除** `qrBarcodeRef`；发布门禁与绑定校验对合法 QR 节点 **放行**（不再 `UNSUPPORTED_NODE` / LR-A4 checklist 阻断）。
+5. 金标包 `golden-corpus/09-qr-barcode/` → **ACTIVE**（DOCX 关键路径/关系断言；禁像素比对）。
+6. Fail-first 单测/装配测试驱动 writer。
+
+### 15.3 已确认决策（K06b，2026-07-15）
+
+| ID | 决策 | 来源 |
+| --- | --- | --- |
+| **K06b-C1** | **本片交付范围 = K06b only。** 不重做 K06a；不实现 K06c；不改 CE-C04 / CE-U06；不 go-live；不激活 CD-3。 | 编排 handoff |
+| **K06b-C2** | **库：** **ZXing**（`com.google.zxing:core` + 写出 PNG 所需的 `javase` 或等价 Matrix→PNG 路径）。引入前在公司批准仓库核验版本可用性；不得静默换成未确认库。 | CE-K06 计划卡 |
+| **K06b-C3** | **Payload：** 从渲染/预览 **`variables` map** 按节点 `referenceKey`（trim 后）取值；值必须为非空字符串（或可稳定 `String.valueOf` 的标量）。**不**依赖 CE-E02 资产库 / MinIO 对象（E02 键名约定不阻塞本片）。缺失、空白、或无法编码为文本 → fail-closed。 | stub + E02 不阻塞 |
+| **K06b-C4** | **节点配置字段（structured JSON，可选）：** (1) `sizePx` — 正整数，**默认 128**，合法范围 **[32, 512]**（含端点）；同时作为生成位图边长（QR 方形）与 Word 显示尺寸（`Units.pixelToEMU(sizePx)`）。(2) `errorCorrection` — `L` \| `M` \| `Q` \| `H`（大小写不敏感），**默认 `M`**；仅 `format=QR_CODE` 使用。(3) `format` — `QR_CODE`（默认）\| `CODE_128`。未知/越界 → 显式配置错误。 | stub「尺寸/纠错可配」+ PRD 二维码/条码 |
+| **K06b-C5** | **发射：** Writer（`StructuredContentDocxInlineSupport` / block dispatch 同源路径）对 `qrBarcodeRef` 生成 PNG 字节并 `XWPFRun.addPicture`（`PICTURE_TYPE_PNG`）；顶层块节点与段落 inline 子节点均须覆盖。 | 代码现状（seal/image 路径） |
+| **K06b-C6** | **LR-A4 收缩：** 实现后权威 set = `{ attachmentListRef }` 仅。`WriterUnsupportedStructuredNodeTypes`、绑定 `UNSUPPORTED_NODE`、发布门禁专用项、一致性单测必须同源更新。既有「unsupported」渲染测试对 `qrBarcodeRef` **改为成功路径或删除并替换为 encode 回归**。 | LR-A4-C4 |
+| **K06b-C7** | **Fail-closed messageKey（English-first）：** payload 缺失/空白 → `api.error.rendering.qrBarcodePayloadMissing`；非法 size/EC/format → `api.error.rendering.qrBarcodeConfigInvalid`；ZXing 编码失败 → `api.error.rendering.qrBarcodeEncodeFailed`。均 **非** `unsupportedNodeType`。禁止静默 skip。 | LR-A4 精神；本片细化 |
+| **K06b-C8** | **嵌套：** `conditionBlock` / `loopBlock` children、pinned `contentModuleRef` 展开、inline paragraph children — 与顶层相同发射/失败语义（延续 LR-A4 嵌套可达性，改为成功或显式业务错误）。 | LR-A4 A4 |
+| **K06b-C9** | **金标：** 新增 `backend/src/test/resources/golden-corpus/09-qr-barcode/`（复用 K07 根目录与 harness 约定；`maturity: ACTIVE`）。input：母版 + 含 `qrBarcodeRef` 的绑定 + variables 提供 payload；`expected/docx-assertions.json` 断言存在嵌入图片（如 `a:blip` / `w:drawing` / relationship image 目标之一，稳定即可）。**禁止** 像素/截图 golden。PDF 半段可选；无 soffice → skip（K07-C9）。单元测试可额外 ZXing **decode** 嵌入 PNG 校验 payload 往返（推荐，非像素比对）。 | CE-K07「K01–K06 加样本」；handoff |
+| **K06b-C10** | **缩放：** `applyScaling` **不**对 QR/条码产生 `IMAGE_SCALING_ADJUSTED` warning（保持现网）；writer **不得**对码图做「适配容器」缩放逻辑。本片不强制把 `applyScaling=true` 升为 seal 级 blocker（现网对 QR 忽略该字段）。 | PRD；ReferenceNodeServiceTest |
+| **K06b-C11** | **非目标：** K06c；CE-E02 资产目录 UI；QR 管理面配置实体；缓存/异步预生成；像素级视觉回归；新权限码；调用方覆盖 renderProfile；CE-C04 / CE-U06。 | handoff |
+
+### 15.4 Preconditions
+
+- K06a 已在 main（`485a7f3e`）；本 worktree 基于可含 K06a 的 integration base。
+- LR-A4 fail-closed 基础设施存在（单一权威 unsupported set）。
+- CORE-FORTRESS F1 结构化 writer / `DocxAssembler` 路径可用。
+- CE-K07 golden harness 可发现新包目录。
+- 隔离 worktree 交付；不在 MAIN 实现。
+
+### 15.5 Trigger
+
+- Runtime / preview / test-generate 装配含 `qrBarcodeRef` 的结构化内容，且 variables 提供对应 payload。
+- 发布门禁评估含 `qrBarcodeRef`（且无 `attachmentListRef`）的草稿版本。
+- CI / 工程师执行 `mvn -B -ntp -f backend/pom.xml verify`（含 golden-corpus）。
+
+### 15.6 Primary journey（K06b）
+
+1. 作者在锚点结构化 JSON 插入 `"type":"qrBarcodeRef","referenceKey":"PAYMENT-QR"`，可选 `sizePx` / `errorCorrection` / `format`。
+2. 绑定校验：`referenceKey` 非空；**不再**因 writer-unsupported 阻断 `qrBarcodeRef`（`attachmentListRef` 仍阻断）。
+3. 发布门禁对仅含合法 QR 引用的版本放行（就 writer-unsupported 项而言）。
+4. 生成/预览时 variables 含 `"PAYMENT-QR":"https://pay.example/abc"`（或测试夹具字符串）。
+5. Writer 调 ZXing 生成 PNG → 嵌入 DOCX。
+6. 产物可解压；drawing/image part 可断言；可选 decode 得原 payload。
+7. 金标 `09-qr-barcode` ACTIVE 在 verify 中通过。
+
+### 15.7 System responses
+
+| 情况 | 系统响应 |
+| --- | --- |
+| 合法 QR + 非空 payload + 合法/缺省配置 | 成功 DOCX；含嵌入 PNG；非 `unsupportedNodeType` |
+| `sizePx` / `errorCorrection` / `format` 缺省 | 使用默认 128 / `M` / `QR_CODE` |
+| 非法配置（越界 size、未知 EC、未知 format） | 显式失败 `qrBarcodeConfigInvalid`；不写残缺图 |
+| variables 缺 key 或空白 payload | 显式失败 `qrBarcodePayloadMissing` |
+| ZXing 无法编码（极端 payload / CODE_128 非法字符等） | 显式失败 `qrBarcodeEncodeFailed` |
+| 仍含 `attachmentListRef` | 保持 LR-A4：发布阻断 + 渲染 `unsupportedNodeType` |
+| 金标 ACTIVE DOCX 断言失败 | `mvn verify` **FAIL** |
+| 金标 PDF 半段且无 soffice | **SKIP** PDF；DOCX 仍必须 PASS |
+
+### 15.8 Boundary / exception（K06b）
+
+| 边界 | 行为 |
+| --- | --- |
+| `referenceKey` 空白 | 既有 `MISSING_REFERENCE_KEY` 绑定 blocker（发布前）；若绕过直达 writer → 与 payload missing 同类显式失败 |
+| 超长 payload | ZXing 能编码则成功；不能则 `qrBarcodeEncodeFailed`（不截断静默） |
+| `format=CODE_128` + 提供 `errorCorrection` | **忽略** EC（不报错），仅用 format+payload+size |
+| 非字符串变量值（number/boolean） | 允许稳定字符串化后编码；`null` → payload missing |
+| Authorization | 无新权限码；沿用既有生成/预览授权 fail-closed |
+| 像素断言 | **禁止** |
+
+### 15.9 Observable evidence
+
+| 证据 | 说明 |
+| --- | --- |
+| DOCX package | `word/media/*` PNG + `document.xml` drawing/`a:blip` |
+| 单测 decode（推荐） | ZXing 读回嵌入 PNG，payload 匹配 |
+| 金标 | `09-qr-barcode` ACTIVE + verify |
+| Unsupported set | 一致性测试：仅 `attachmentListRef` |
+| 发布门禁 | 含 `qrBarcodeRef` 的版本不再因该类型硬阻断 |
+| 错误信封 | 稳定 `messageKey` + `retryable=false`（业务失败） |
+
+---
+
+## 16. Acceptance scenarios — K06b（Given / When / Then）
+
+### BDD-CE-K06b-001 — 合法 `qrBarcodeRef` 嵌入 QR 图片并退出 unsupported
+
+**Given** 锚点结构化 JSON 含 `"type":"qrBarcodeRef","referenceKey":"PAYMENT-QR"`（合法非空 key）  
+**And** 生成变量含 `"PAYMENT-QR":"https://pay.example/k06b"`  
+**And** 本片实现已完成  
+**When** 渲染管线写出 DOCX  
+**Then** 产物含至少一处嵌入图片（`w:drawing` / `a:blip` 或等价 media relationship）  
+**And** `WriterUnsupportedStructuredNodeTypes` **不再**包含 `qrBarcodeRef`  
+**And** 渲染 **不** 抛 `api.error.rendering.unsupportedNodeType`（因该节点）
+
+### BDD-CE-K06b-002 — 默认尺寸与纠错级别
+
+**Given** `qrBarcodeRef` **未**指定 `sizePx` / `errorCorrection` / `format`  
+**And** variables 提供非空 payload  
+**When** 渲染写出 DOCX  
+**Then** 成功嵌入图片  
+**And** 生成使用默认 **`sizePx=128`**、**`errorCorrection=M`**、**`format=QR_CODE`**（可由单测对生成器入参或 decode/尺寸断言验证）
+
+### BDD-CE-K06b-003 — 可配置 `sizePx` 与 `errorCorrection`
+
+**Given** 节点为 `"sizePx":256,"errorCorrection":"H","format":"QR_CODE"`（或省略 format）  
+**And** 非空 payload  
+**When** 渲染写出 DOCX  
+**Then** 嵌入图显示尺寸对应 256px（EMU）且生成器使用 EC level **H**  
+**And**（推荐）decode 得原 payload
+
+### BDD-CE-K06b-004 — 非法配置显式失败
+
+**Given** `sizePx` 为 `16` 或 `999`，**或** `errorCorrection` 为 `"X"`，**或** `format` 为 `"AZTEC"`（未支持）  
+**When** 渲染  
+**Then** 失败且 `messageKey=api.error.rendering.qrBarcodeConfigInvalid`  
+**And** **不** 静默省略该节点；**不** 产出假装成功的无码文档
+
+### BDD-CE-K06b-005 — Payload 缺失 fail-closed
+
+**Given** 合法 `qrBarcodeRef` 但 variables **无**对应 key 或值为空白  
+**When** 渲染  
+**Then** 失败且 `messageKey=api.error.rendering.qrBarcodePayloadMissing`  
+**And** 禁止静默省略
+
+### BDD-CE-K06b-006 — 发布门禁放行 `qrBarcodeRef`（仍阻断 attachmentList）
+
+**Given** 草稿版本绑定仅含合法 `qrBarcodeRef`（无 `attachmentListRef`、无其它既有 blocker）  
+**When** 评估发布门禁 / 绑定校验中的 writer-unsupported 规则  
+**Then** **不** 因 `qrBarcodeRef` 硬阻断  
+**And** Given 另含 `attachmentListRef`，When 评估，Then **仍** 硬阻断 `attachmentListRef`
+
+### BDD-CE-K06b-007 — 嵌套路径发射
+
+**Given** `qrBarcodeRef` 位于 `conditionBlock`/`loopBlock` children、或 pinned `contentModuleRef` 结构、或 paragraph inline children，且条件/循环使节点可达，variables 有 payload  
+**When** 渲染  
+**Then** DOCX 含嵌入码图（与顶层同等成功语义）  
+**And** 不得再走「嵌套静默 omit」或 `unsupportedNodeType`
+
+### BDD-CE-K06b-008 — 金标 `09-qr-barcode` ACTIVE + fail-first
+
+**Given** 本片交付完成  
+**When** 检查 `golden-corpus/09-qr-barcode/manifest.json` 并运行 `mvn verify`  
+**Then** `maturity` 为 `ACTIVE`  
+**And** `expected/docx-assertions.json` 非 `deferred`，断言嵌入图片存在  
+**And** 实现前故意缺少 writer 时对应测试/金标为 Red；最小 ZXing 嵌入实现后为 Green  
+**And** **无** 像素/截图比对
+
+### BDD-CE-K06b-009 — `CODE_128` 条码（同片可选但确认）
+
+**Given** `"format":"CODE_128"`、合法 payload（ZXing CODE_128 可编码字符集）、合法 `sizePx`  
+**When** 渲染  
+**Then** DOCX 含嵌入条码 PNG  
+**And** `errorCorrection` 若存在则被忽略且不报错  
+**Note** 金标最小样本以 **QR_CODE** 为主；CODE_128 至少由单元测试覆盖。
+
+---
+
+## 17. BDD readiness — K06b（this slice）
+
+```
+bdd_readiness: ready
+k06_scope_this_slice: b
+residual: K06c (attachmentListRef writer + PDF stamp via render profile)
+open_questions: []
+owning_doc: docs/behavior/ce-k06-rendering-fidelity.md
+task_ids: [#62, CE-K06, K06b]
+next: plan-orchestrator → rendering-engineer (TDD Red: unsupported removal + ZXing embed + golden 09-qr-barcode)
+```
+
+**Next:** `plan-orchestrator` → TDD tasks for **K06b only** → prefer **`rendering-engineer`**.
