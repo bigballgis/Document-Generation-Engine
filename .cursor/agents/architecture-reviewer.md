@@ -1,7 +1,7 @@
 ---
 name: architecture-reviewer
 description: Read-only architecture and governance reviewer. Use to review changes against module boundaries, accepted ADRs, non-functional requirements, the security/permission model, and the document-as-code constitution before merge.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 readonly: true
 ---
 

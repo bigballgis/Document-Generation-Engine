@@ -1,7 +1,7 @@
 ---
 name: code-quality-reviewer
 description: Read-only code cleanliness and structural consistency reviewer. Use for full-repo audits, refactor readiness, or pre-merge hygiene 鈥?dead code, DRY, naming, minimalism, file size, test smells, and stack-local style. Complements architecture-reviewer (governance) and bugbot (defects). Safe to run in parallel/background after architecture review.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 readonly: true
 is_background: true
 ---

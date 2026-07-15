@@ -144,7 +144,7 @@ text
 
 
 
-**All project specialists pin grok-4.5-fast-xhigh.** Role tiers (Governance / Delivery / Execution) describe pipeline responsibility only — not different models. See [.cursor/agents/MODEL-STRATEGY.md](.cursor/agents/MODEL-STRATEGY.md).
+**All project specialists pin cursor-grok-4.5-high-fast.** Role tiers (Governance / Delivery / Execution) describe pipeline responsibility only — not different models. See [.cursor/agents/MODEL-STRATEGY.md](.cursor/agents/MODEL-STRATEGY.md).
 
 
 

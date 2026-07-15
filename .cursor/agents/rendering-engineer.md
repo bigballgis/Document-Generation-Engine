@@ -1,7 +1,7 @@
 ---
 name: rendering-engineer
 description: Rendering and document-assembly specialist for DOCX/OOXML fidelity, LibreOffice PDF conversion, structured content writers, and preview pipelines. Use for changes under com.bank.docgen.rendering.*, authoring structured assembly, or PDF conversion capacity/metrics — TDD first; keeps rendering isolated from lifecycle/authorization/API governance.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 ---
 
 # Rendering Engineer

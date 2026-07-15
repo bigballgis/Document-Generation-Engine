@@ -1,7 +1,7 @@
 ---
 name: backend-engineer
 description: Backend TDD implementer for the document generation platform. Use to implement Java 25 + Spring Boot 4 backend slices (master, template, lifecycle, API management, runtime generation API, authorization, audit) strictly following accepted ADRs and the test-first delivery loop. For DOCX/PDF/LibreOffice rendering-primary slices, prefer rendering-engineer.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 ---
 
 # Backend TDD Engineer

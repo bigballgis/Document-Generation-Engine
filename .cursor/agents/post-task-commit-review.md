@@ -1,7 +1,7 @@
 ---
 name: post-task-commit-review
 description: Mandatory end-of-task commit gate. Use after post-task-doc-sync and green quality gates 鈥?review the full change set (code + docs), block on critical findings, then stage, commit, and push with a repository-style message. Skips push only when the user explicitly opts out in the same session.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 ---
 
 # Post-Task Commit Review

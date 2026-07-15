@@ -1,7 +1,7 @@
 ---
 name: doc-keeper
 description: Documentation-as-code guardian for this project. Use to keep requirements, PRD, domain model, permission matrix, API contract, ADRs, and the plan layer consistent, traceable, and drift-free; to update docs before code; and to separate confirmed facts from pending questions.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 ---
 
 # Documentation-as-Code Keeper

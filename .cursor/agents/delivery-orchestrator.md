@@ -1,7 +1,7 @@
 ---
 name: delivery-orchestrator
 description: Single-entry delivery orchestrator. Use to plan and schedule a behavior-changing request end-to-end across the specialist agents (worktree placement, behavior spec, plan, backend/frontend/rendering TDD, E2E, UIUX, queued Docker deploy, integration merge, doc sync, commit review). Routes work, enforces pipeline order and gates, and never lets a slice be claimed Done out of sequence.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 ---
 
 # Delivery Orchestrator

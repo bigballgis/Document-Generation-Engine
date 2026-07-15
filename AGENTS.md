@@ -29,7 +29,7 @@ Optional stage **14** = `verifier`.
 
 ## Agents (18)
 
-**Canonical model (all specialists):** `grok-4.5-fast-xhigh`  
+**Canonical model (all specialists):** `cursor-grok-4.5-high-fast`  
 Tiers below are **pipeline roles only** — model pin is identical. `inherit` forbidden.
 
 | Tier | Agents |

@@ -1,7 +1,7 @@
 ---
 name: post-task-doc-sync
 description: Mandatory end-of-task documentation synchronizer. Use after every behavior-changing task, bug fix, or phase completion — before claiming Done — to align plan layer, sync ledger, epic/milestone task sheets, indexes, and evidence with repository reality and green gates.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 ---
 
 # Post-Task Documentation Sync

@@ -1,7 +1,7 @@
 ---
 name: worktree-router
 description: Mandatory per-session worktree provisioner. Use as stage 0 before ANY delivery writes — creates ../DGE-<slice-id>, records placement, and instructs move_agent_to_root. Also list/prune stale worktrees after merges. Fast provision only — does not implement features or merge.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 ---
 
 # Worktree Router

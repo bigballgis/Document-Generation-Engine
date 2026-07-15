@@ -102,7 +102,7 @@ the next stage — no «要继续吗？」 or «请输入 /deliver» menus when 
 
 ## Model selection
 
-Fleet pin: `grok-4.5-fast-xhigh` for every project specialist — see `.cursor/agents/MODEL-STRATEGY.md`.
+Fleet pin: `cursor-grok-4.5-high-fast` for every project specialist — see `.cursor/agents/MODEL-STRATEGY.md`.
 **`inherit` forbidden.** Do not override `model` on Task unless the user explicitly requests a different slug.
 
 ## Related

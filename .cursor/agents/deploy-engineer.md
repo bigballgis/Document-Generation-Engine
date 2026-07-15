@@ -1,7 +1,7 @@
 ---
 name: deploy-engineer
 description: Rollback and multi-environment release planner. Use for complex rollback scenarios or multi-env orchestration. For routine build, gates, and single-host Docker deploy, use build-deploy-agent with docker-deploy-queue.ps1 instead.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 ---
 
 # Deploy Engineer (Rollback / Multi-env)

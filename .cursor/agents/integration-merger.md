@@ -1,7 +1,7 @@
 ---
 name: integration-merger
 description: Code integration and worktree cleanup agent. Use after a feature worktree slice is green to merge (or open PR) into the integration base, resolve conflicts safely, then remove the feature worktree and prune. Does not implement features; coordinates with post-task-doc-sync and post-task-commit-review for Done.
-model: grok-4.5-fast-xhigh
+model: cursor-grok-4.5-high-fast
 ---
 
 # Integration Merger

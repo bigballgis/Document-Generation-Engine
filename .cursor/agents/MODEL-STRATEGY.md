@@ -3,7 +3,7 @@
 Each specialist under `.cursor/agents/` **must** pin an explicit `model` slug in YAML
 frontmatter. **`inherit` is forbidden.**
 
-> **Active policy (2026-07-10):** **All project specialists pin `grok-4.5-fast-xhigh`.**
+> **Active policy (2026-07-15):** **All project specialists pin `cursor-grok-4.5-high-fast`.**
 > Single-model fleet for production consistency — no Composer / GLM tier split.
 > Do **not** pin `glm-5.2-*` (Cursor API pool). Do **not** use `inherit`.
 
@@ -11,7 +11,7 @@ frontmatter. **`inherit` is forbidden.**
 
 | Slug | Role |
 | --- | --- |
-| **`grok-4.5-fast-xhigh`** | **Every** `.cursor/agents/*.md` specialist |
+| **`cursor-grok-4.5-high-fast`** | **Every** `.cursor/agents/*.md` specialist |
 | **`inherit`** | **Forbidden** |
 | **`composer-2.5` / `composer-2.5-fast`** | **Retired** for project agents (do not reintroduce without explicit user request) |
 | **`glm-5.2-*`** | **Avoid** (API pool) |
@@ -30,31 +30,31 @@ Tiers describe **pipeline responsibility** only. Model slug is identical for all
 
 | Agent | Tier | Model |
 | --- | --- | --- |
-| `delivery-orchestrator` | Governance | `grok-4.5-fast-xhigh` |
-| `plan-orchestrator` | Governance | `grok-4.5-fast-xhigh` |
-| `architecture-reviewer` | Governance | `grok-4.5-fast-xhigh` |
-| `code-quality-reviewer` | Governance | `grok-4.5-fast-xhigh` |
-| `post-task-commit-review` | Governance | `grok-4.5-fast-xhigh` |
-| `integration-merger` | Governance | `grok-4.5-fast-xhigh` |
-| `behavior-spec-author` | Delivery | `grok-4.5-fast-xhigh` |
-| `doc-keeper` | Delivery | `grok-4.5-fast-xhigh` |
-| `backend-engineer` | Delivery | `grok-4.5-fast-xhigh` |
-| `frontend-engineer` | Delivery | `grok-4.5-fast-xhigh` |
-| `rendering-engineer` | Delivery | `grok-4.5-fast-xhigh` |
-| `e2e-test-engineer` | Delivery | `grok-4.5-fast-xhigh` |
-| `e2e-uiux-reviewer` | Delivery | `grok-4.5-fast-xhigh` |
-| `post-task-doc-sync` | Delivery | `grok-4.5-fast-xhigh` |
-| `verifier` | Execution | `grok-4.5-fast-xhigh` |
-| `worktree-router` | Execution | `grok-4.5-fast-xhigh` |
-| `build-deploy-agent` | Execution | `grok-4.5-fast-xhigh` |
-| `deploy-engineer` | Execution | `grok-4.5-fast-xhigh` |
+| `delivery-orchestrator` | Governance | `cursor-grok-4.5-high-fast` |
+| `plan-orchestrator` | Governance | `cursor-grok-4.5-high-fast` |
+| `architecture-reviewer` | Governance | `cursor-grok-4.5-high-fast` |
+| `code-quality-reviewer` | Governance | `cursor-grok-4.5-high-fast` |
+| `post-task-commit-review` | Governance | `cursor-grok-4.5-high-fast` |
+| `integration-merger` | Governance | `cursor-grok-4.5-high-fast` |
+| `behavior-spec-author` | Delivery | `cursor-grok-4.5-high-fast` |
+| `doc-keeper` | Delivery | `cursor-grok-4.5-high-fast` |
+| `backend-engineer` | Delivery | `cursor-grok-4.5-high-fast` |
+| `frontend-engineer` | Delivery | `cursor-grok-4.5-high-fast` |
+| `rendering-engineer` | Delivery | `cursor-grok-4.5-high-fast` |
+| `e2e-test-engineer` | Delivery | `cursor-grok-4.5-high-fast` |
+| `e2e-uiux-reviewer` | Delivery | `cursor-grok-4.5-high-fast` |
+| `post-task-doc-sync` | Delivery | `cursor-grok-4.5-high-fast` |
+| `verifier` | Execution | `cursor-grok-4.5-high-fast` |
+| `worktree-router` | Execution | `cursor-grok-4.5-high-fast` |
+| `build-deploy-agent` | Execution | `cursor-grok-4.5-high-fast` |
+| `deploy-engineer` | Execution | `cursor-grok-4.5-high-fast` |
 
 ## Production rules
 
-1. **Pin in frontmatter** — every agent file has `model: grok-4.5-fast-xhigh`.
+1. **Pin in frontmatter** — every agent file has `model: cursor-grok-4.5-high-fast`.
 2. **Parent `Task` calls** — do **not** pass `model` unless the user explicitly requests a different slug in the same session.
 3. **Built-in Cursor types** (`explore`, `bugbot`) — no project frontmatter; Cursor-owned.
-4. **Region / availability failure** — if `grok-4.5-fast-xhigh` is rejected, surface the error to the user; do **not** silently fall back to Composer/GLM without confirmation.
+4. **Region / availability failure** — if `cursor-grok-4.5-high-fast` is rejected, surface the error to the user; do **not** silently fall back to Composer/GLM without confirmation.
 5. **No `inherit`** — ever.
 
 ## Fallback (only with user confirmation)
