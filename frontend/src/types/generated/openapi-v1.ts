@@ -33,7 +33,7 @@ export interface paths {
         };
         /**
          * List callable release versions
-         * @description Returns release versions currently callable from the caller's authorization view. This is not a back-office version management list.
+         * @description Returns release versions currently callable from the caller's authorization view. This is not a back-office version management list. Optional per-item `deprecated` and `sunsetAt` fields are display/discovery metadata only and must not change the callable candidate set (see ADR-0003 / ADR-0017 display boundary).
          */
         get: operations["listCallableVersions"];
         put?: never;
@@ -1832,6 +1832,13 @@ export interface components {
         CallableVersion: {
             releaseVersion: string;
             explicitVersionUrl: string;
+            /** @description Optional display-only deprecation flag for discovery UIs. Does not admit stopped or permanently deprecated release versions into the callable set; omit or false for currently callable PUBLISHED items. */
+            deprecated?: boolean;
+            /**
+             * Format: date-time
+             * @description Optional display-only sunset timestamp (ISO 8601 with timezone offset). Discovery metadata only; does not change callable candidate rules. Omit for currently callable PUBLISHED items when no sunset is published.
+             */
+            sunsetAt?: string;
         };
         DefaultRouteSummary: {
             url: string;
@@ -2037,21 +2044,29 @@ export interface components {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["ApiAccessReadinessSummaryView"];
         };
+        /** @description Non-sensitive API credential summary for contract and management views. `status` is the effective lifecycle status (including EXPIRING_SOON). `expiresAt` is the persisted credential expiry (ISO 8601 with timezone offset); it must not be synthesized solely from createdAt + 180 days. */
         CredentialSummary: {
             credentialId?: string;
             status?: components["schemas"]["CredentialStatus"];
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Persisted credential expiry instant (ISO 8601 with timezone offset). EXPIRING_SOON applies when expiry is within the 30-day reminder window and the credential is not yet expired or revoked.
+             */
             expiresAt?: string;
             fingerprintSummary?: string;
             authorizedTemplateSummary?: string;
             /** Format: date-time */
             rotationGracePeriodEndsAt?: string;
         };
-        /** @enum {string} */
+        /**
+         * @description Effective credential lifecycle status. ACTIVE and EXPIRING_SOON remain callable when the secret matches; EXPIRED and REVOKED fail closed.
+         * @enum {string}
+         */
         CredentialStatus: "ACTIVE" | "EXPIRING_SOON" | "EXPIRED" | "REVOKED";
         CredentialCreateRequest: {
             operator: string;
             callerId: string;
+            /** @description Optional credential lifetime in days. Default is 180 when omitted. Must be between 1 and 365 inclusive (ADR-0009). */
             expiryDays?: number;
             reason?: string;
         };

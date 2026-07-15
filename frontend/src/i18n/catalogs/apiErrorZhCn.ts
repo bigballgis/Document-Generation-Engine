@@ -149,6 +149,8 @@ export const apiErrorZhCn = {
     adGroupDenied: "调用方未通过 AD 组策略授权。",
     policyNotConfigured: "此模板未配置 API 策略。",
     templateCredentialMismatch: "凭据对此模板无效。",
+    apiCredentialExpired: "API 凭据已过期。",
+    apiCredentialRevoked: "API 凭据已被撤销。",
     releaseVersionRequired: "生成需要发布版本。",
     versionNotCallable: "请求的发布版本不可调用。",
     idempotencyConflict: "幂等键已用于不同的请求。",

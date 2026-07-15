@@ -153,6 +153,8 @@ export const apiErrorEn = {
     adGroupDenied: "The caller is not authorized by AD Group policy.",
     policyNotConfigured: "API policy is not configured for this template.",
     templateCredentialMismatch: "The credential is not valid for this template.",
+    apiCredentialExpired: "The API credential has expired.",
+    apiCredentialRevoked: "The API credential has been revoked.",
     releaseVersionRequired: "A release version is required for generation.",
     versionNotCallable: "The requested release version is not callable.",
     idempotencyConflict: "The idempotency key was already used with a different request.",
