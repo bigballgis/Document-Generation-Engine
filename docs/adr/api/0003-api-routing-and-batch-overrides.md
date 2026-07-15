@@ -17,7 +17,7 @@ related:
 
 ## Status
 
-Accepted
+Accepted (display-boundary amend 2026-07-15 — CE-C04)
 
 ## Context
 
@@ -63,6 +63,14 @@ Asynchronous task query uses `/api/{environment}/v1/templates/{templateId}/tasks
 
 Generated document downloads use `/api/{environment}/v1/documents/{documentId}/download`. Download authorization still resolves the generated document back to its template and applies API credential, AD Group, and template-level authorization checks.
 
+## Amendment — 2026-07-15 (display boundary only; CE-C04)
+
+**Scope:** Callable-version discovery schema display metadata. Does **not** change routing paths, default-route governance, batch override rules, or which release versions are callable.
+
+**Clarification:** Contract discovery (`GET …/contract` `callableVersions[]` and `GET …/versions`) may expose optional per-item display fields `deprecated` (boolean) and `sunsetAt` (date-time) on `CallableVersion`. These fields are discovery/UI metadata only. They must not be used to admit stopped or permanently deprecated release versions into the callable candidate set, and they do not alter default-route target selection or generation routing.
+
+**Unchanged:** Explicit release-version routes, default-route explicit targeting, batch item override validation, and download authorization remain as decided above.
+
 ## Consequences
 
 - Upstream systems can call a stable default route without changing integration paths on every release-version change.
@@ -73,6 +81,7 @@ Generated document downloads use `/api/{environment}/v1/documents/{documentId}/d
 - Caller-facing notifications are not required for default target changes; contract visibility and audit records are the confirmed traceability mechanisms.
 - Batch response and audit models need to identify batch-level configuration, item-level overrides, and per-item validation/generation results.
 - API contract documentation now publishes stable generation, batch, task-query, download, contract-discovery, and callable-version paths, with formal OpenAPI output and examples maintained under the API documentation folder.
+- Optional callable-version `deprecated` / `sunsetAt` fields may appear in OpenAPI and examples for discovery; callable-set membership remains governed by template/release status and API management configuration (ADR-0017).
 
 ## Alternatives Considered
 
@@ -91,3 +100,6 @@ Generated document downloads use `/api/{environment}/v1/documents/{documentId}/d
 - [Domain Model](../../domain/domain-model.md)
 - [Permission Matrix](../../security/permission-matrix.md)
 - [API Contract Draft](../../api/contract-outline.md)
+- [OpenAPI v1](../../api/openapi-v1.yaml)
+- [CE-C04 behavior](../../behavior/ce-c04-credential-expires.md)
+- [ADR-0017](../template-lifecycle/0017-template-lifecycle-recovery-deprecation-import.md)

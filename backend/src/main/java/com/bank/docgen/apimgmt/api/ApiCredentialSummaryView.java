@@ -7,6 +7,7 @@ public record ApiCredentialSummaryView(
         String externalId,
         String status,
         Instant createdAt,
-        Instant revokedAt
+        Instant revokedAt,
+        Instant expiresAt
 ) {
 }

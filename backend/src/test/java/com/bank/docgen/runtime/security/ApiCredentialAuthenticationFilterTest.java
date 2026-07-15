@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.apimgmt.domain.ApiCredentialStatus;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
@@ -23,6 +24,8 @@ import com.bank.docgen.template.persistence.TemplateRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -165,6 +168,87 @@ class ApiCredentialAuthenticationFilterTest {
         verify(chain).doFilter(request, response);
     }
 
+    @Test
+    void expiringSoonCredentialIsAllowedThrough() throws Exception {
+        ApiCredentialEntity credential = credentialExpiringIn(10);
+        TemplateEntity template = templateEntity();
+        ApiPolicyEntity policy = new ApiPolicyEntity(
+                UUID.randomUUID(), TEMPLATE_ID, "[\"grp-a\"]", "admin");
+        when(apiCredentialRepository.findByExternalId("CRED-1")).thenReturn(Optional.of(credential));
+        when(passwordHashService.matches("secret", credential.getSecretHash())).thenReturn(true);
+        when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(template));
+        when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
+        when(adGroupResolver.isAuthorized("svc-caller", List.of("grp-a"))).thenReturn(true);
+        when(adGroupResolver.resolveGroups("svc-caller")).thenReturn(List.of("grp-a"));
+
+        MockHttpServletRequest request = runtimeRequest("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = mock(FilterChain.class);
+
+        filter.doFilterInternal(request, response, chain);
+
+        verify(chain).doFilter(request, response);
+    }
+
+    @Test
+    void expiredCredentialReturnsApiCredentialExpired() throws Exception {
+        when(messageResolver.resolve("api.error.runtime.apiCredentialExpired"))
+                .thenReturn("The API credential has expired.");
+
+        ApiCredentialEntity credential = credentialExpiringIn(-1);
+        when(apiCredentialRepository.findByExternalId("CRED-1")).thenReturn(Optional.of(credential));
+        when(passwordHashService.matches("secret", credential.getSecretHash())).thenReturn(true);
+
+        MockHttpServletRequest request = runtimeRequest("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilterInternal(request, response, mock(FilterChain.class));
+
+        assertThat(response.getStatus()).isEqualTo(401);
+        JsonNode body = objectMapper.readTree(response.getContentAsString());
+        assertThat(body.get("error").get("code").asText()).isEqualTo(ApiErrorCodes.API_CREDENTIAL_EXPIRED);
+        assertThat(body.get("error").get("messageKey").asText())
+                .isEqualTo("api.error.runtime.apiCredentialExpired");
+        assertThat(body.get("error").get("category").asText()).isEqualTo("AUTHENTICATION");
+    }
+
+    @Test
+    void revokedCredentialReturnsApiCredentialRevoked() throws Exception {
+        when(messageResolver.resolve("api.error.runtime.apiCredentialRevoked"))
+                .thenReturn("The API credential has been revoked.");
+
+        ApiCredentialEntity credential = activeCredential();
+        credential.revoke();
+        when(apiCredentialRepository.findByExternalId("CRED-1")).thenReturn(Optional.of(credential));
+        when(passwordHashService.matches("secret", credential.getSecretHash())).thenReturn(true);
+
+        MockHttpServletRequest request = runtimeRequest("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilterInternal(request, response, mock(FilterChain.class));
+
+        assertThat(response.getStatus()).isEqualTo(401);
+        JsonNode body = objectMapper.readTree(response.getContentAsString());
+        assertThat(body.get("error").get("code").asText()).isEqualTo(ApiErrorCodes.API_CREDENTIAL_REVOKED);
+        assertThat(body.get("error").get("messageKey").asText())
+                .isEqualTo("api.error.runtime.apiCredentialRevoked");
+        assertThat(body.get("error").get("category").asText()).isEqualTo("AUTHENTICATION");
+    }
+
+    @Test
+    void wrongSecretStillReturnsInvalidCredentialsEvenWhenExpired() {
+        ApiCredentialEntity credential = credentialExpiringIn(-1);
+        when(apiCredentialRepository.findByExternalId("CRED-1")).thenReturn(Optional.of(credential));
+        when(passwordHashService.matches("secret", credential.getSecretHash())).thenReturn(false);
+
+        MockHttpServletRequest request = runtimeRequest("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract");
+
+        assertThatThrownBy(() -> filter.authenticate(request))
+                .isInstanceOf(RuntimeAuthenticationException.class)
+                .satisfies(ex -> assertThat(((RuntimeAuthenticationException) ex).code())
+                        .isEqualTo(ApiErrorCodes.INVALID_CREDENTIALS));
+    }
+
     private MockHttpServletRequest runtimeRequest(String path) {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", path);
         request.addHeader(ApiCredentialAuthenticationFilter.HEADER_CREDENTIAL_ID, "CRED-1");
@@ -174,7 +258,27 @@ class ApiCredentialAuthenticationFilterTest {
     }
 
     private ApiCredentialEntity activeCredential() {
-        return new ApiCredentialEntity(UUID.randomUUID(), "CRED-1", TEMPLATE_ID, "hash", "admin");
+        return credentialExpiringIn(120);
+    }
+
+    private ApiCredentialEntity credentialExpiringIn(int daysFromNow) {
+        ApiCredentialEntity credential = new ApiCredentialEntity(
+                UUID.randomUUID(), "CRED-1", TEMPLATE_ID, "hash", "admin");
+        Instant expiresAt = Instant.now().plus(daysFromNow, ChronoUnit.DAYS);
+        try {
+            var field = ApiCredentialEntity.class.getDeclaredField("expiresAt");
+            field.setAccessible(true);
+            field.set(credential, expiresAt);
+            if (daysFromNow < 0) {
+                var statusField = ApiCredentialEntity.class.getDeclaredField("status");
+                statusField.setAccessible(true);
+                // keep persisted ACTIVE so effective status is derived from expiresAt
+                statusField.set(credential, ApiCredentialStatus.ACTIVE);
+            }
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException(ex);
+        }
+        return credential;
     }
 
     private TemplateEntity templateEntity() {

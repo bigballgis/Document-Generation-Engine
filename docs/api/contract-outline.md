@@ -61,14 +61,15 @@ Field names, capability breakdown, error-code names, and response structure are 
 - API 管理中的 AD Group 授权配置变更立即生效，并清理相关授权缓存；目录中的 AD Group 成员变更在目录同步完成且平台缓存过期后生效。
 - API 凭证对象是调用方级身份，可授权到多个模板 API；模板调用仍必须同时满足 API 凭证授权、AD Group 授权和模板级授权。
 - API 凭证创建和轮换时，secret 明文只展示一次；平台只保存不可逆摘要或指纹，不允许管理员后续重新查看 secret 明文。
-- API 凭证必须设置有效期；默认有效期为 180 天，最长 365 天，管理员可设置更短有效期。
+- API 凭证必须设置有效期；默认有效期为 180 天，最长 365 天，管理员可设置更短有效期；到期时间以持久化 `expiresAt` 为准（CE-C04）。
 - API 凭证状态集合确认为 `ACTIVE`、`EXPIRING_SOON`、`EXPIRED`、`REVOKED`。
-- API 凭证轮换时，新 secret 立即可用，旧 secret 保留 7 天宽限期；宽限期结束后旧 secret 失效。
+- API 凭证轮换时，新 secret 立即可用，旧 secret 保留 7 天宽限期；宽限期结束后旧 secret 失效；轮换不重置到期时间。
 - API 凭证吊销立即生效，阻断该凭证的所有后续 API 操作，包括新生成、异步任务查询、异步任务取消和下载取文件。
 - API 管理由全局管理员和分组管理员承担，不设置独立 API 管理员角色。
 - API 管理配置当前按模板级绑定；一个模板对应一组 API 管理配置，适用于该模板下所有未停用的发布版本。
 - 发布版本继续锁定模板内容、变量、规则和发布版本契约；API 管理配置作为调用侧策略独立维护，不要求重新发布模板。
 - 可调用版本列表从模板下发布版本生成；模板停用或废弃时所有发布版本不可调用，单个发布版本停用时仅该版本不可调用；模板或发布版本恢复后，恢复对象重新进入可调用候选范围，但仍受模板状态、发布版本状态和模板级 API 管理配置约束。
+- 可调用版本列表项（`CallableVersion`）可包含可选展示字段 `deprecated`（boolean）与 `sunsetAt`（date-time）；对当前可调用的发布版本通常为 `deprecated=false`（或省略）且省略 `sunsetAt`。这些字段仅用于契约/发现展示，不得借此把已停用或已永久废弃版本纳入可调用集（ADR-0003 / ADR-0017 展示边界；CE-C04）。
 - 模板发布后需要生成接口地址、请求参数 Schema、响应 Schema、字段校验规则、示例请求/响应、错误码说明、契约版本对比和可调用版本列表。
 - API 支持 DOCX/PDF 输出、同步文件流、同步下载地址、异步任务返回任务 ID、批量生成。
 - 同步文件流响应中，文件内容放在响应体，核心元数据通过响应头承载。
@@ -1748,9 +1749,11 @@ API 调用和 API 管理配置变更审计采用标准摘要对象。
 - API 凭证由全局管理员和分组管理员管理；全局管理员可管理全部 API 凭证，分组管理员只能管理被授权组范围内的 API 凭证。
 - API 凭证创建和轮换时，secret 明文只展示一次；平台只保存不可逆摘要或指纹，不允许管理员后续重新查看 secret 明文。
 - API 凭证必须设置有效期；默认有效期为 180 天，最长 365 天，管理员可设置更短有效期。
+- API 凭证到期时间以持久化 `expires_at` / 契约字段 `credentialSummary.expiresAt` 为真相；不得仅用 `createdAt + 180` 冒充持久化到期（CE-C04）。
 - API 凭证状态集合确认为 `ACTIVE`、`EXPIRING_SOON`、`EXPIRED`、`REVOKED`。
-- `EXPIRING_SOON` 用于到期前提醒窗口，轮换状态由当前 secret 与旧 secret 宽限期表达，不新增凭证级 `ROTATING` 状态。
-- API 凭证轮换时，新 secret 立即可用，旧 secret 保留 7 天宽限期；宽限期结束后旧 secret 失效。
+- `EXPIRING_SOON` 用于到期前提醒窗口（到期前 30 天且未过期），轮换状态由当前 secret 与旧 secret 宽限期表达，不新增凭证级 `ROTATING` 状态。
+- 有效状态为 `ACTIVE` 或 `EXPIRING_SOON` 的凭证在 secret 匹配时可调用；`EXPIRED` → `401 API_CREDENTIAL_EXPIRED`；`REVOKED` → `401 API_CREDENTIAL_REVOKED`。
+- API 凭证轮换时，新 secret 立即可用，旧 secret 保留 7 天宽限期；宽限期结束后旧 secret 失效；轮换不重置 `expires_at`。
 - 旧 secret 在轮换宽限期结束后不再可用；使用已失效旧 secret 的请求按认证失败处理，不通过错误消息泄露轮换细节。
 - API 凭证吊销立即生效，阻断该凭证的所有后续 API 操作，包括新生成、异步任务查询、异步任务取消和下载取文件。
 - 已受理的后台生成任务可继续完成，但调用方不能再使用被吊销凭证获取结果。
@@ -1766,7 +1769,7 @@ API 调用和 API 管理配置变更审计采用标准摘要对象。
 | --- | --- | --- |
 | API 凭证标识 | 标识调用方级凭证，不展示 secret。 | 纳入 `apiPolicy.credentialSummary` 表达。 |
 | API 凭证状态 | `ACTIVE`、`EXPIRING_SOON`、`EXPIRED`、`REVOKED`。 | 已确认。 |
-| 到期时间 | 当前凭证到期时间。 | 默认 180 天、最长 365 天已确认；纳入 `apiPolicy.credentialSummary` 表达。 |
+| 到期时间 | 当前凭证到期时间（持久化 `expiresAt`，ISO 8601 带时区）。 | 默认 180 天、最长 365 天已确认；纳入 `apiPolicy.credentialSummary.expiresAt`；CE-C04 结束 `createdAt+180` 过渡推导。 |
 | 授权模板摘要 | 当前凭证可调用的模板范围摘要。 | 纳入 `apiPolicy.credentialSummary` 表达。 |
 | 轮换宽限期 | 当前是否存在旧 secret 宽限期及其结束时间。 | 7 天宽限期已确认；纳入 `apiPolicy.credentialSummary` 表达。 |
 | 指纹摘要 | 用于管理员识别当前 secret 版本的非敏感摘要。 | 已确认，不展示 secret 明文。 |
@@ -1816,7 +1819,7 @@ API 契约按角色展示 API 管理配置：
 | --- | --- | --- |
 | 接口地址 | 环境、模板标识、显式发布版本路径、default 路径、单笔/批量生成、异步任务查询、异步任务取消和下载路径。 | 路由语义、路径命名、异步取消路径和 default 路径契约展示字段已确认。 |
 | 认证与授权 | API 凭证、访问账号、AD Group、模板级授权、统一授权判定、失败场景。 | 授权模型、统一授权判定、fail-closed 策略、API 凭证生命周期、AD Group 解析失败、缓存、同步延迟、权限变更生效策略和审计已确认。 |
-| 发布版本与可调用列表 | 显式发布版本号、未停用发布版本列表、模板停用/废弃和版本停用后的可调用判断。 | 模板级 API 管理配置基线、契约查看接口和可调用版本列表响应格式已确认。 |
+| 发布版本与可调用列表 | 显式发布版本号、未停用发布版本列表、模板停用/废弃和版本停用后的可调用判断；可选展示字段 `deprecated` / `sunsetAt`。 | 模板级 API 管理配置基线、契约查看接口和可调用版本列表响应格式已确认；可选字段为展示/发现元数据，不改变可调用候选集（ADR-0003 / ADR-0017 展示边界；CE-C04）。 |
 | 请求 Schema | 模板变量、规则校验、输出格式、输出模式、批量输入、加密参数。 | 字段命名、路径/请求体边界、OpenAPI 3.1 YAML 载体和严格未知字段策略已确认；正式 OpenAPI v1 已输出，后续随契约变更维护。 |
 | 幂等策略 | `requestId`、`idempotencyKey`、`itemId`、重复提交处理、default 路径幂等、幂等保留期限。 | 生成类 API 必填范围、唯一性范围、7 天保留、过期后按新请求处理、default 变更后冲突、失败后按 `retryable` 决定、幂等状态枚举、冲突安全摘要、过期 key 复用审计标记、批量 `itemId` 必填唯一、重复 `itemId` 处理、同步批量失败幂等记录和异步失败项重试策略已确认。 |
 | 响应 Schema | 文件流、下载地址、异步任务 ID、批量成功/失败明细、通用响应元数据。 | JSON envelope、`metadata`/`result`/`error` 承载方式、字段命名和批量全量明细返回已确认；正式 OpenAPI v1 已输出，后续随契约变更维护。 |

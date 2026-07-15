@@ -64,7 +64,12 @@ class ContractAssemblyServicePolicyViewTest {
                 "10000002"
         );
 
-        credentialSummary = new RuntimeCredentialSummaryView("cred-ext-001", "ACTIVE", "fp-cred-ext-001");
+        credentialSummary = new RuntimeCredentialSummaryView(
+                "cred-ext-001",
+                "ACTIVE",
+                "fp-cred-ext-001",
+                Instant.parse("2026-12-01T00:00:00Z")
+        );
 
         lenient().when(messageResolver.resolve(any())).thenAnswer(invocation -> invocation.getArgument(0).toString());
         lenient().when(messageResolver.resolve(any(), anyInt())).thenReturn("2 authorized AD groups configured.");
@@ -95,6 +100,8 @@ class ContractAssemblyServicePolicyViewTest {
         assertThat(contract.apiPolicy().adGroupAuthorizationSummary().effectivePolicyDescription()).isNotBlank();
         assertThat(contract.apiPolicy().credentialSummary().credentialExternalId()).isEqualTo("cred-ext-001");
         assertThat(contract.apiPolicy().credentialSummary().fingerprintSummary()).isEqualTo("fp-cred-ext-001");
+        assertThat(contract.apiPolicy().credentialSummary().expiresAt())
+                .isEqualTo(Instant.parse("2026-12-01T00:00:00Z"));
         assertThat(contract.defaultRoute().updatedAt()).isNotNull();
         assertThat(contract.defaultRoute().updatedBy()).isEqualTo("10000002");
     }
@@ -118,6 +125,8 @@ class ContractAssemblyServicePolicyViewTest {
         assertThat(contract.apiPolicy().credentialSummary().credentialExternalId()).isNull();
         assertThat(contract.apiPolicy().credentialSummary().fingerprintSummary()).isNull();
         assertThat(contract.apiPolicy().credentialSummary().status()).isEqualTo("ACTIVE");
+        assertThat(contract.apiPolicy().credentialSummary().expiresAt())
+                .isEqualTo(Instant.parse("2026-12-01T00:00:00Z"));
         assertThat(contract.defaultRoute().updatedAt()).isNull();
         assertThat(contract.defaultRoute().updatedBy()).isNull();
     }

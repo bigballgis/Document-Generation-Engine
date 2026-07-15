@@ -1,5 +1,6 @@
 package com.bank.docgen.runtime.security;
 
+import com.bank.docgen.apimgmt.domain.ApiCredentialLifecycleSupport;
 import com.bank.docgen.apimgmt.domain.ApiCredentialStatus;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
@@ -24,6 +25,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -118,7 +120,9 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private static String categoryFor(String code) {
-        if (ApiErrorCodes.INVALID_CREDENTIALS.equals(code)) {
+        if (ApiErrorCodes.INVALID_CREDENTIALS.equals(code)
+                || ApiErrorCodes.API_CREDENTIAL_EXPIRED.equals(code)
+                || ApiErrorCodes.API_CREDENTIAL_REVOKED.equals(code)) {
             return ApiErrorCategories.AUTHENTICATION;
         }
         if (ApiErrorCodes.REQUEST_BODY_INVALID.equals(code)) {
@@ -151,8 +155,29 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
                         ApiErrorCodes.INVALID_CREDENTIALS,
                         "api.error.runtime.invalidCredentials"
                 ));
-        if (credential.getStatus() != ApiCredentialStatus.ACTIVE
-                || !passwordHashService.matches(secret, credential.getSecretHash())) {
+        if (!passwordHashService.matches(secret, credential.getSecretHash())) {
+            throw new RuntimeAuthenticationException(
+                    ApiErrorCodes.INVALID_CREDENTIALS,
+                    "api.error.runtime.invalidCredentials"
+            );
+        }
+        ApiCredentialStatus effectiveStatus = ApiCredentialLifecycleSupport.resolveEffectiveStatus(
+                credential,
+                Instant.now()
+        );
+        if (effectiveStatus == ApiCredentialStatus.REVOKED) {
+            throw new RuntimeAuthenticationException(
+                    ApiErrorCodes.API_CREDENTIAL_REVOKED,
+                    "api.error.runtime.apiCredentialRevoked"
+            );
+        }
+        if (effectiveStatus == ApiCredentialStatus.EXPIRED) {
+            throw new RuntimeAuthenticationException(
+                    ApiErrorCodes.API_CREDENTIAL_EXPIRED,
+                    "api.error.runtime.apiCredentialExpired"
+            );
+        }
+        if (!ApiCredentialLifecycleSupport.isActiveCredential(credential, Instant.now())) {
             throw new RuntimeAuthenticationException(
                     ApiErrorCodes.INVALID_CREDENTIALS,
                     "api.error.runtime.invalidCredentials"

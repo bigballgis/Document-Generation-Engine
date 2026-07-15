@@ -58,7 +58,7 @@ Create an ADR when a decision affects future design or implementation, including
 | --- | --- | --- |
 | [0001-output-encryption.md](./authorization-security/0001-output-encryption.md) | Accepted | DOCX/PDF dynamic output encryption |
 | [0002-api-management-template-scope.md](./api-management/0002-api-management-template-scope.md) | Accepted | Template-level API management configuration scope |
-| [0003-api-routing-and-batch-overrides.md](./api/0003-api-routing-and-batch-overrides.md) | Accepted | API route versioning, default route, and batch item overrides |
+| [0003-api-routing-and-batch-overrides.md](./api/0003-api-routing-and-batch-overrides.md) | Accepted (display-boundary amend 2026-07-15) | API route versioning, default route, and batch item overrides; CE-C04 callable-version optional display metadata |
 | [0004-api-idempotency-strategy.md](./api/0004-api-idempotency-strategy.md) | Accepted | API idempotency strategy |
 | [0005-api-response-delivery-and-download-security.md](./api/0005-api-response-delivery-and-download-security.md) | Accepted | API response delivery and download security |
 | [0006-api-error-model.md](./api/0006-api-error-model.md) | Accepted | API error model |
@@ -72,7 +72,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0014-api-openapi-v1-contract-scope.md](./api/0014-api-openapi-v1-contract-scope.md) | Accepted | OpenAPI v1 contract scope, discovery paths, auth headers, and trace ID handling |
 | [0015-template-release-verifiability.md](./template-lifecycle/0015-template-release-verifiability.md) | Accepted | Template verifiability and release gate |
 | [0016-api-management-ui-and-audit-format.md](./api-management/0016-api-management-ui-and-audit-format.md) | Accepted | API management UI structure, policy versioning, preview blocking, and audit format |
-| [0017-template-lifecycle-recovery-deprecation-import.md](./template-lifecycle/0017-template-lifecycle-recovery-deprecation-import.md) | Accepted | Template lifecycle recovery, deprecation, and import conflict rules |
+| [0017-template-lifecycle-recovery-deprecation-import.md](./template-lifecycle/0017-template-lifecycle-recovery-deprecation-import.md) | Accepted (display-boundary amend 2026-07-15) | Template lifecycle recovery, deprecation, and import conflict rules; CE-C04 display-only `deprecated`/`sunsetAt` on callable versions |
 | [0018-master-review-state-and-impact-analysis.md](./template-lifecycle/0018-master-review-state-and-impact-analysis.md) | Accepted | Master review state and impact analysis |
 | [0019-structured-authoring-and-rendering-boundary.md](./rendering-authoring/0019-structured-authoring-and-rendering-boundary.md) | Accepted | Structured authoring, controlled rich text, and DOCX rendering boundary |
 | [0020-unified-authorization-and-sensitive-data-handling.md](./authorization-security/0020-unified-authorization-and-sensitive-data-handling.md) | Accepted | Unified authorization and sensitive data handling |

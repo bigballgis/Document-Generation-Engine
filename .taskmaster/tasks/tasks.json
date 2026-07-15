@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. Wave 1 lane 1 active: #62 CE-K06 → in-progress (starting K06a tblHeader); parallel lanes #69 CE-C04 / #88 CE-U06 remain pending.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1–4 Done. Prior waves closed: #59/#68/#83 Done; #60/#84/#85 Done. Wave 0 closed: #61/#86/#87 Done. Wave 1 lane 1: #62 CE-K06 in-progress (worktree DGE-ce-k06-rendering-fidelity); #69/#88 still pending. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. Wave 1 parallel: #62 CE-K06 in-progress (K06a merged 485a7f3e) + #69 CE-C04 in-progress; #88 CE-U06 pending.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. Wave 1 parallel lanes: #62 CE-K06 (worktree DGE-ce-k06-rendering-fidelity; K06a at 485a7f3e) + #69 CE-C04 (worktree DGE-ce-c04-credential-expires). #88 remains pending. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T09:14:00.000Z"
+        "updatedAt": "2026-07-15T10:00:00.000Z"
       },
       {
         "id": "54",
@@ -950,16 +950,16 @@
       {
         "id": "69",
         "title": "CE-C04: Credential expires_at persist + expose",
-        "description": "PENDING. Slice ce-c04-credential-expires-at. Flyway + issue/rotate write; RuntimeCredentialSummaryView expiresAt/EXPIRING_SOON; optional sunset docs. P1·M.",
-        "details": "Lane after U11 (#86). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §5 CE-C04.",
+        "description": "IN PROGRESS 2026-07-15. Slice ce-c04-credential-expires. Wave 1 lane 3. BDD ready (ce-c04-credential-expires.md; BDD-CE-C04-001…012). Worktree D:/working/DGE-ce-c04-credential-expires · feat/ce-c04-credential-expires. Flyway expires_at + issue/rotate write; end LifecycleSupport transitional; RuntimeCredentialSummaryView expiresAt/EXPIRING_SOON; optional CallableVersion deprecated/sunsetAt. Formal phase None. Not go-live. Do NOT mark Done until gates green + merge.",
+        "details": "Lane after U11 (#86 Done). Placement ISOLATED. BDD readiness ready. Gates before Done: mvn verify (+ frontend gates if applicable); E2E N/A (FE display optional); queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review (parent wave). Formal phase stays None. Plan §5 CE-C04 In Progress. Rebased onto K06a MAIN tip 485a7f3e.",
         "testStrategy": "1. expires_at persisted. 2. Summary exposes fields. 3. mvn verify + contract docs.",
         "priority": "medium",
         "dependencies": [
           "86"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T10:00:00.000Z"
       },
       {
         "id": "70",
