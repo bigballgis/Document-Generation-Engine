@@ -22,6 +22,7 @@ const {
   editingVariableKey,
   treeRef,
   variableTypes,
+  piiCategories,
   variableForm,
   filteredTree,
   treeRenderKey,
@@ -99,6 +100,15 @@ const {
             <el-tag v-if="data.variable.required" size="small" type="warning">
               {{ t('templates.authoring.required') }}
             </el-tag>
+            <el-tag
+              v-if="data.variable.piiCategory && data.variable.piiCategory !== 'NONE'"
+              size="small"
+              type="danger"
+              effect="plain"
+              :data-testid="`variable-pii-badge-${data.variable.variableKey}`"
+            >
+              {{ t('templates.authoring.piiBadge') }}
+            </el-tag>
             <span v-if="data.technicalKey" class="tree-node__technical-key">{{ data.technicalKey }}</span>
             <span class="tree-node__actions">
               <el-button link type="primary" @click.stop="openEditVariable(data.variable)">
@@ -136,6 +146,20 @@ const {
         </el-form-item>
         <el-form-item :label="t('templates.authoring.description')">
           <el-input v-model="variableForm.description" type="textarea" :rows="2" />
+        </el-form-item>
+        <el-form-item :label="t('templates.authoring.piiCategory')">
+          <AppSearchSelect
+            v-model="variableForm.piiCategory"
+            style="width: 100%"
+            data-testid="variable-pii-category"
+          >
+            <el-option
+              v-for="category in piiCategories"
+              :key="category"
+              :label="t(`templates.authoring.piiCategories.${category}`)"
+              :value="category"
+            />
+          </AppSearchSelect>
         </el-form-item>
         <el-form-item
           v-if="variableForm.variableType === 'COMPUTED'"

@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#69/#70/#88 Done. No sole-active CE leaf claimed — pick next from pending CE-* under #53. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). Sole-active CE leaf: #74 CE-G03. Parked: #89 CE-U13, #71 CE-C06.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#88 Done. Sole-active CE delivery leaf: #74 CE-G03 (single-lane serial). #89 U13 + #71 C06 remain parked (pending). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T14:20:00.000Z"
+        "updatedAt": "2026-07-16T01:23:00.000Z"
       },
 
       {
@@ -866,16 +866,16 @@
       {
         "id": "63",
         "title": "CE-K08: Content-module legal metadata",
-        "description": "IN PROGRESS. Slice ce-k08-clause-legal-metadata. BDD ready 2026-07-15. jurisdiction/effectiveFrom/To/legalReviewRef + catalog filters + publish gate CONTENT_MODULE_EFFECTIVE_EXPIRED. P2·M.",
-        "details": "Lane after K06 (#62 Done). BDD ready: docs/behavior/ce-k08-clause-legal-metadata.md (BDD-CE-K08-LM-001…015; locks K08-C1…C12). Worktree DGE-ce-k08-clause-legal-metadata / feat/ce-k08-clause-legal-metadata. Next: backend-engineer TDD (Flyway V62+, entity/DTO/OpenAPI, list filters, PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED) then FE fields/filters + gates. Formal phase stays None. Plan §3 CE-K08 In Progress (BDD ready).",
+        "description": "DONE 2026-07-16. Slice ce-k08-clause-legal-metadata. jurisdiction/effectiveFrom/To/legalReviewRef + catalog filters + publish gate CONTENT_MODULE_EFFECTIVE_EXPIRED. P2·M. On main at 35f57503.",
+        "details": "Done on MAIN (ancestor 35f57503 feat(CE-K08): add clause legal metadata and publish expiry gate). BDD ready/shipped: docs/behavior/ce-k08-clause-legal-metadata.md (BDD-CE-K08-LM-001…015; locks K08-C1…C12). Flyway V62 legal metadata; PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED. Formal phase stays None. Plan §3 CE-K08 Done. Do not re-implement.",
         "testStrategy": "1. Version legal fields create/update/read + validation. 2. Catalog filters (jurisdiction/legalReviewRef/effective range). 3. Publish gate blocks expired effectiveTo; null/equal now pass; future effectiveFrom does not block. 4. mvn verify + FE gates/E2E as applicable.",
         "priority": "medium",
         "dependencies": [
           "62"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T14:35:00.000Z"
+        "updatedAt": "2026-07-16T01:23:00.000Z"
       },
       {
         "id": "64",
@@ -1022,17 +1022,17 @@
       {
         "id": "74",
         "title": "CE-G03: Test-data PII governance",
-        "description": "PENDING. Slice ce-g03-testdata-pii. piiCategory on schema; force synthetic or confirm+audit on save. P1·M.",
-        "details": "Depends U03 (#55); lane after C05 (#70). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G03.",
-        "testStrategy": "1. piiCategory schema. 2. Save rules + audit. 3. Gates green.",
+        "description": "IN PROGRESS 2026-07-16 (sole-active CE leaf). Slice ce-g03-testdata-pii. piiCategory on schema; force SYNTHETIC or EXPLICIT_SENSITIVE+audit on save; closes data-storage-view hanging Q. P1·M. BDD ready.",
+        "details": "BDD ready: docs/behavior/ce-g03-testdata-pii.md (BDD-CE-G03-001…017). Depends U03 (#55); lane after C05 (#70). Worktree D:/working/DGE-ce-g03-testdata-pii / feat/ce-g03-testdata-pii / placement ISOLATED. Single-lane serial: sole-active delivery leaf under umbrella #53. #89 U13 + #71 C06 remain parked. Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G03 In Progress. Do NOT activate CD-3 / claim go-live.",
+        "testStrategy": "1. piiCategory schema upsert/default/reject unknown. 2. Save: SYNTHETIC ok; EXPLICIT needs reason+confirm+audit without plaintext; missing handling 422. 3. UI PII badge + handling. 4. Gates green.",
         "priority": "medium",
         "dependencies": [
           "55",
           "70"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-16T01:23:00.000Z"
       },
       {
         "id": "75",

@@ -2492,7 +2492,7 @@ export interface components {
             result: components["schemas"]["ChangeDiffView"];
         };
         /** @enum {string} */
-        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "UNSUPPORTED_STRUCTURED_NODES" | "PASTE_CLEANING_BLOCKERS" | "BLOCKER_STATUS";
+        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "CONTENT_MODULE_EFFECTIVE_EXPIRED" | "UNSUPPORTED_STRUCTURED_NODES" | "PASTE_CLEANING_BLOCKERS" | "BLOCKER_STATUS" | "FIDELITY_WARNINGS_VIEWED";
         PublishGateItemView: {
             checkCode: components["schemas"]["PublishGateCheckCode"];
             ready: boolean;
@@ -2939,10 +2939,38 @@ export interface components {
             semanticVersion: string;
             contentStructureJson: string;
             changeDescription?: string;
+            /** @description CE-K08 optional legal jurisdiction (trim; blank → null). */
+            jurisdiction?: string;
+            /**
+             * Format: date-time
+             * @description CE-K08 optional effective-from Instant (UTC).
+             */
+            effectiveFrom?: string;
+            /**
+             * Format: date-time
+             * @description CE-K08 optional effective-to Instant (UTC). Null = no expiry.
+             */
+            effectiveTo?: string;
+            /** @description CE-K08 optional legal review reference (trim; blank → null). */
+            legalReviewRef?: string;
         };
         UpdateContentModuleVersionRequest: {
             contentStructureJson: string;
             changeDescription?: string;
+            /** @description CE-K08 optional legal jurisdiction (trim; blank → null). */
+            jurisdiction?: string;
+            /**
+             * Format: date-time
+             * @description CE-K08 optional effective-from Instant (UTC).
+             */
+            effectiveFrom?: string;
+            /**
+             * Format: date-time
+             * @description CE-K08 optional effective-to Instant (UTC). Null = no expiry.
+             */
+            effectiveTo?: string;
+            /** @description CE-K08 optional legal review reference (trim; blank → null). */
+            legalReviewRef?: string;
         };
         UpdateContentModuleSharedGroupCodesRequest: {
             /** @description Target groups that may read this module outside the owning group. Normalized to upper-case, distinct, sorted; owning groupCode is ignored.
@@ -2963,6 +2991,20 @@ export interface components {
             /** @description Present when the version is DRAFT after REJECT_REVIEW. Cleared on SUBMIT_FOR_REVIEW and APPROVE_REVIEW (CE-U08).
              *      */
             rejectionReason?: string;
+            /** @description CE-K08 optional legal jurisdiction. */
+            jurisdiction?: string;
+            /**
+             * Format: date-time
+             * @description CE-K08 optional effective-from Instant (UTC).
+             */
+            effectiveFrom?: string;
+            /**
+             * Format: date-time
+             * @description CE-K08 optional effective-to Instant (UTC). Null = no expiry.
+             */
+            effectiveTo?: string;
+            /** @description CE-K08 optional legal review reference. */
+            legalReviewRef?: string;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -3132,6 +3174,12 @@ export interface components {
         /** @enum {string} */
         TemplateVariableType: "TEXT" | "NUMBER" | "AMOUNT" | "DATE" | "ENUM" | "BOOLEAN" | "LIST" | "OBJECT" | "COMPUTED";
         /**
+         * @description Optional PII classification on a template variable schema field (CE-G03). `NONE` / omitted = not PII-governed for test-data-set save gates. Unknown values must be rejected (fail-closed). Management upsert/view and export/import bundle carry this field; runtime caller generate APIs are unchanged.
+         *
+         * @enum {string}
+         */
+        VariablePiiCategory: "NONE" | "PERSONAL_NAME" | "GOVERNMENT_ID" | "FINANCIAL_ACCOUNT" | "CONTACT" | "ADDRESS" | "OTHER_SENSITIVE";
+        /**
          * @description Conflict resolution when bundle metadata `templateId` (internal UUID) already exists. Defaults to `REJECT_IMPORT` when omitted. Conflicting `externalId` always rejects import regardless of policy.
          * @enum {string}
          */
@@ -3165,6 +3213,9 @@ export interface components {
             /** @description Serialized enum values for ENUM variables. */
             enumValues?: string | null;
             description?: string | null;
+            /** @description CE-G03 — optional PII category. Omitted or null on import means `NONE`. Does not embed test-data-set variable values in the export bundle.
+             *      */
+            piiCategory?: components["schemas"]["VariablePiiCategory"] | null;
         };
         TemplateExportAnchorBindingView: {
             id?: string;
@@ -4851,6 +4902,14 @@ export interface operations {
                 groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
                 /** @description Whitelist sort key. Default `groupCodeAsc`. Unknown values fall back to `groupCodeAsc` (no 400). Content-modules also support `moduleCodeAsc`. */
                 sort?: "groupCodeAsc" | "updatedAtDesc" | "updatedAtAsc" | "nameAsc" | "moduleCodeAsc";
+                /** @description CE-K08 — case-insensitive exact match on the catalog filter version jurisdiction (trim). Catalog filter version = latest APPROVED+ACTIVE, else latest version. */
+                jurisdiction?: string;
+                /** @description CE-K08 — case-insensitive exact match on the catalog filter version legalReviewRef (trim). */
+                legalReviewRef?: string;
+                /** @description CE-K08 — keep modules whose catalog filter version effectiveFrom is >= this Instant. Versions with null effectiveFrom do not match. */
+                effectiveFrom?: string;
+                /** @description CE-K08 — keep modules whose catalog filter version effectiveTo is <= this Instant. Versions with null effectiveTo do not match. */
+                effectiveTo?: string;
             };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */

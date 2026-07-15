@@ -1337,6 +1337,17 @@ export default {
       editBinding: 'Edit binding',
       defaultValue: 'Default value',
       description: 'Description',
+      piiCategory: 'PII category',
+      piiBadge: 'PII',
+      piiCategories: {
+        NONE: 'None (not PII-governed)',
+        PERSONAL_NAME: 'Personal name',
+        GOVERNMENT_ID: 'Government ID',
+        FINANCIAL_ACCOUNT: 'Financial account',
+        CONTACT: 'Contact (email / phone)',
+        ADDRESS: 'Address',
+        OTHER_SENSITIVE: 'Other sensitive',
+      },
       structuredContent: 'Structured content',
       structuredContentEditor: 'Controlled structured content',
       saveVariableSuccess: 'Variable saved.',
@@ -1666,6 +1677,24 @@ export default {
         enumNotAllowed: 'Value is not in the allowed enumeration.',
         unknownField: 'Unknown field is not defined in the variable schema.',
         invalidJson: 'Variables JSON is invalid.',
+      },
+      pii: {
+        badge: 'PII',
+        handlingTitle: 'PII handling for this save',
+        handlingHint:
+          'One or more PII-tagged fields have values. Declare synthetic/desensitized test values, or confirm explicit sensitive storage with a reason and secondary confirmation.',
+        synthetic: 'Synthetic / desensitized values (recommended)',
+        explicitSensitive: 'Explicit sensitive values (requires confirmation + audit)',
+        handlingRequired: 'Select a PII handling option before saving.',
+        explicitConfirmTitle: 'Confirm sensitive test data',
+        explicitConfirmIntro:
+          'You are confirming that this test data set intentionally stores sensitive values. This action is audited. Do not paste production secrets. Variable values are never written to the audit record.',
+        confirmReason: 'Reason for storing sensitive test values',
+        reasonRequired: 'A reason is required for explicit sensitive confirmation.',
+        secondaryConfirm:
+          'I confirm these values are intentionally sensitive test data and that this confirmation will be audited.',
+        secondaryConfirmRequired: 'Secondary confirmation is required before saving.',
+        confirmSave: 'Confirm and save',
       },
       error: {
         load: 'Unable to load test data sets.',

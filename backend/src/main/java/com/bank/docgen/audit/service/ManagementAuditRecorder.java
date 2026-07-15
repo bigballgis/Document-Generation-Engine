@@ -5,6 +5,7 @@ import com.bank.docgen.audit.api.PolicyUpdateAuditDetail;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemTriggerType;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,19 +22,22 @@ public class ManagementAuditRecorder {
     private final CollaborationAuditRecorder collaborationAuditRecorder;
     private final ContentModuleAuditRecorder contentModuleAuditRecorder;
     private final TemplateTransferAuditRecorder templateTransferAuditRecorder;
+    private final TestDataSetAuditRecorder testDataSetAuditRecorder;
 
     public ManagementAuditRecorder(
             ApiPolicyAuditRecorder apiPolicyAuditRecorder,
             IdentityAuditRecorder identityAuditRecorder,
             CollaborationAuditRecorder collaborationAuditRecorder,
             ContentModuleAuditRecorder contentModuleAuditRecorder,
-            TemplateTransferAuditRecorder templateTransferAuditRecorder
+            TemplateTransferAuditRecorder templateTransferAuditRecorder,
+            TestDataSetAuditRecorder testDataSetAuditRecorder
     ) {
         this.apiPolicyAuditRecorder = apiPolicyAuditRecorder;
         this.identityAuditRecorder = identityAuditRecorder;
         this.collaborationAuditRecorder = collaborationAuditRecorder;
         this.contentModuleAuditRecorder = contentModuleAuditRecorder;
         this.templateTransferAuditRecorder = templateTransferAuditRecorder;
+        this.testDataSetAuditRecorder = testDataSetAuditRecorder;
     }
 
     @Transactional
@@ -364,5 +368,32 @@ public class ManagementAuditRecorder {
             String statusSummary
     ) {
         identityAuditRecorder.recordEscalationDenied(reasonCode, actorUsername, actorSummary, statusSummary);
+    }
+
+    @Transactional
+    public void recordTestDataPiiExplicitConfirm(
+            UUID templateId,
+            String groupCode,
+            String testDataSetId,
+            int datasetVersion,
+            String variablesHash,
+            List<String> piiFieldKeys,
+            Map<String, String> piiCategories,
+            String piiConfirmReason,
+            String actorUsername,
+            String actorSummary
+    ) {
+        testDataSetAuditRecorder.recordTestDataPiiExplicitConfirm(
+                templateId,
+                groupCode,
+                testDataSetId,
+                datasetVersion,
+                variablesHash,
+                piiFieldKeys,
+                piiCategories,
+                piiConfirmReason,
+                actorUsername,
+                actorSummary
+        );
     }
 }

@@ -200,6 +200,9 @@ export interface TestDataSet {
   updatedAt: string
 }
 
+/** CE-G03 — required when payload touches PII-marked fields. */
+export type TestDataSetPiiHandling = 'SYNTHETIC' | 'EXPLICIT_SENSITIVE'
+
 /** Not yet modeled in `openapi-v1.yaml` (management test data set upsert). */
 export interface UpsertTestDataSetPayload {
   name: string
@@ -208,6 +211,10 @@ export interface UpsertTestDataSetPayload {
   required?: boolean
   scenarioName?: string
   coverageTags?: string[]
+  /** CE-G03 — SYNTHETIC or EXPLICIT_SENSITIVE when PII fields have values. */
+  piiHandling?: TestDataSetPiiHandling | null
+  piiConfirmReason?: string | null
+  secondaryConfirmed?: boolean | null
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management async preview stream). */

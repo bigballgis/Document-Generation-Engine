@@ -67,8 +67,20 @@ export type TemplateDevVersionCreated = Schema<'TemplateDevVersionCreatedView'> 
   lifecycleStatus?: TemplateLifecycleStatus
 }
 
+/** CE-G03 — optional PII classification on variable schema (UPPER_SNAKE_CASE). */
+export type VariablePiiCategory =
+  | 'NONE'
+  | 'PERSONAL_NAME'
+  | 'GOVERNMENT_ID'
+  | 'FINANCIAL_ACCOUNT'
+  | 'CONTACT'
+  | 'ADDRESS'
+  | 'OTHER_SENSITIVE'
+
 export type VariableSchema = Schema<'TemplateExportVariableSchemaView'> & {
   computeExpression?: string | null
+  /** CE-G03 — omitted / null / NONE = not PII-governed. */
+  piiCategory?: VariablePiiCategory | null
 }
 
 export type AnchorBinding = Schema<'TemplateExportAnchorBindingView'>
@@ -84,6 +96,8 @@ export interface UpsertVariablePayload {
   enumValues?: string | null
   description?: string | null
   computeExpression?: string | null
+  /** CE-G03 — optional; omit or NONE = not PII-governed. */
+  piiCategory?: VariablePiiCategory | null
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management binding upsert). */

@@ -81,28 +81,40 @@ export function createTemplateTestDataSetPanelActions(options: {
     serverFieldErrors.value = undefined
   }
 
-  async function handleSave(variablesPayload: Record<string, unknown>) {
+  async function handleSave(payload: {
+  variables: Record<string, unknown>
+  piiHandling?: string
+  piiConfirmReason?: string
+  secondaryConfirmed?: boolean
+}) {
     if (!form.name.trim()) {
       ElMessage.error(t('templates.testDataSets.error.invalidForm'))
       return
     }
-    const payload = {
+    const upsertPayload = {
       name: form.name.trim(),
       description: form.description.trim() || undefined,
-      variables: variablesPayload,
+      variables: payload.variables,
       required: form.required,
       scenarioName: form.scenarioName.trim() || undefined,
       coverageTags: parseCoverageTags(),
+      ...(payload.piiHandling
+        ? {
+            piiHandling: payload.piiHandling as 'SYNTHETIC' | 'EXPLICIT_SENSITIVE',
+            piiConfirmReason: payload.piiConfirmReason,
+            secondaryConfirmed: payload.secondaryConfirmed,
+          }
+        : {}),
     }
     saving.value = true
     serverFieldErrors.value = undefined
     try {
       const id = templateId()
       if (editingId.value) {
-        await panelDataStore.updateTestDataSet(id, editingId.value, payload)
+        await panelDataStore.updateTestDataSet(id, editingId.value, upsertPayload)
         ElMessage.success(t('templates.testDataSets.updateSuccess'))
       } else {
-        const created = await panelDataStore.createTestDataSet(id, payload)
+        const created = await panelDataStore.createTestDataSet(id, upsertPayload)
         selectedId.value = created.testDataSetId
         emitSelected(created.testDataSetId)
         ElMessage.success(t('templates.testDataSets.createSuccess'))
@@ -114,7 +126,9 @@ export function createTemplateTestDataSetPanelActions(options: {
         serverFieldErrors.value = resolved.error.fieldErrors
         ElMessage.error(t(resolved.error.messageKey || 'templates.testDataSets.error.save'))
       } else {
-        ElMessage.error(t('templates.testDataSets.error.save'))
+        ElMessage.error(
+          t(resolved?.error.messageKey || 'templates.testDataSets.error.save'),
+        )
       }
     } finally {
       saving.value = false

@@ -11,6 +11,18 @@ public record UpsertVariableSchemaRequest(
         String defaultValue,
         String enumValues,
         String description,
-        String computeExpression
+        String computeExpression,
+        String piiCategory
 ) {
+    public UpsertVariableSchemaRequest(
+            String variableKey,
+            VariableType variableType,
+            boolean required,
+            String defaultValue,
+            String enumValues,
+            String description,
+            String computeExpression
+    ) {
+        this(variableKey, variableType, required, defaultValue, enumValues, description, computeExpression, null);
+    }
 }

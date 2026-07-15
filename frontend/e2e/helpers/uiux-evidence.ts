@@ -1234,3 +1234,34 @@ export async function captureCeU06LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** CE-G03 test-data PII badges / handling / explicit confirm — 1440×900 dual-brand. */
+export const CE_G03_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-G03-testdata-pii')
+export const CE_G03_SCREENSHOT_DIR = path.join(CE_G03_EVIDENCE_ROOT, 'screenshots')
+export const CE_G03_VIEWPORT = { width: 1440, height: 900 } as const
+export const CE_G03_NARROW_VIEWPORT = { width: 1280, height: 800 } as const
+
+export function ensureCeG03EvidenceDirs(): void {
+  fs.mkdirSync(CE_G03_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceG03ScreenshotPath(filename: string): string {
+  return path.join(CE_G03_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeG03Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeG03EvidenceDirs()
+  const target = ceG03ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeG03LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeG03EvidenceDirs()
+  const target = ceG03ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

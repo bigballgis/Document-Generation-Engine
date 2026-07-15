@@ -62,6 +62,10 @@ export const apiErrorZhCn = {
     testDataSetNotFound: "未找到测试数据集。",
     testDataSetLocked: "测试数据集已被测试证据锁定，无法修改。",
     testDataSetSchemaInvalid: "测试数据集变量与模板变量 schema 不匹配。",
+    testDataSetPiiHandlingRequired: "已标记 PII 的测试数据值要求 piiHandling 为 SYNTHETIC 或 EXPLICIT_SENSITIVE。",
+    piiConfirmReasonRequired: "显式敏感测试数据确认必须填写非空白原因。",
+    piiSecondaryConfirmRequired: "显式敏感测试数据确认要求 secondaryConfirmed=true。",
+    piiCategoryInvalid: "不支持该变量 piiCategory 值。",
     accessDenied: "您无权访问此模板。",
     changeDiffReleaseVersionsRequired: "发布版本对比需要同时提供 releaseVersionA 与 releaseVersionB。",
     confirmationRequired: "此操作需要二次确认。",
@@ -125,7 +129,11 @@ export const apiErrorZhCn = {
     pinnedMasterUnavailable: "此发布版本固定的母版修订版本不可用。",
     qrBarcodePayloadMissing: "二维码或条码载荷变量缺失或为空。请为引用的键提供非空值。",
     qrBarcodeConfigInvalid: "二维码或条码节点配置无效。请检查 sizePx、errorCorrection 和 format。",
-    qrBarcodeEncodeFailed: "无法编码二维码或条码载荷。请检查载荷字符与格式。"
+    qrBarcodeEncodeFailed: "无法编码二维码或条码载荷。请检查载荷字符与格式。",
+    attachmentListPayloadMissing:
+      "附件列表载荷变量缺失或为 null。请为引用的键提供字符串数组。",
+    attachmentListPayloadInvalid:
+      "附件列表载荷无效。请为引用的键提供字符串数组。"
   },
   lifecycle: {
     selfApprovalForbidden: "不允许自我审批；决策人必须与最近一次提交人不同。",
@@ -216,7 +224,8 @@ export const apiErrorZhCn = {
     lifecycleRoleDenied: "您无权执行此标准条款生命周期操作。",
     lifecycleStateTransitionDenied: "当前标准条款版本状态不允许此生命周期操作。",
     lifecycleRequestInvalid: "标准条款生命周期请求无效。",
-    impactConfirmationRequired: "执行此生命周期操作前，必须审阅影响摘要并进行二次确认。"
+    impactConfirmationRequired: "执行此生命周期操作前，必须审阅影响摘要并进行二次确认。",
+    invalidEffectiveRange: "effectiveFrom 必须小于或等于 effectiveTo。"
   },
   collaboration: {
     accessDenied: "您无权查看协作待办事项。",

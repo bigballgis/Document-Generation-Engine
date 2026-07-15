@@ -9,6 +9,7 @@ import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
 import com.bank.docgen.template.domain.BindingValidationStatus;
+import com.bank.docgen.template.domain.VariablePiiCategory;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
@@ -71,6 +72,7 @@ final class TemplateBindingMutationSupport {
                 version.getId(),
                 request.variableKey()
         );
+        VariablePiiCategory piiCategory = TemplateBindingStatusSupport.resolvePiiCategory(request.piiCategory());
         VariableSchemaEntity entity;
         if (existing.isPresent()) {
             entity = existing.get();
@@ -80,7 +82,8 @@ final class TemplateBindingMutationSupport {
                     request.defaultValue(),
                     request.enumValues(),
                     request.description(),
-                    request.computeExpression()
+                    request.computeExpression(),
+                    piiCategory
             );
         } else {
             entity = new VariableSchemaEntity(
@@ -92,7 +95,8 @@ final class TemplateBindingMutationSupport {
                     request.defaultValue(),
                     request.enumValues(),
                     request.description(),
-                    request.computeExpression()
+                    request.computeExpression(),
+                    piiCategory
             );
         }
         variableSchemaRepository.save(entity);

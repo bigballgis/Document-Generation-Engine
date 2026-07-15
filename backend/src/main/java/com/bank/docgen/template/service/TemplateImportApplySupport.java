@@ -54,7 +54,8 @@ final class TemplateImportApplySupport {
                             variable.defaultValue(),
                             variable.enumValues(),
                             variable.description(),
-                            variable.computeExpression()
+                            variable.computeExpression(),
+                            variable.piiCategory() == null ? null : variable.piiCategory().name()
                     ),
                     session
             );

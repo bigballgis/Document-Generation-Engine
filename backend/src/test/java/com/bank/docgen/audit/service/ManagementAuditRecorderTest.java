@@ -13,6 +13,7 @@ import com.bank.docgen.collaboration.domain.CollaborationWorkItemTriggerType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,8 @@ class ManagementAuditRecorderTest {
                 new IdentityAuditRecorder(eventWriter),
                 new CollaborationAuditRecorder(eventWriter),
                 new ContentModuleAuditRecorder(eventWriter),
-                new TemplateTransferAuditRecorder(eventWriter)
+                new TemplateTransferAuditRecorder(eventWriter),
+                new TestDataSetAuditRecorder(eventWriter)
         );
     }
 
@@ -248,5 +250,48 @@ class ManagementAuditRecorderTest {
         assertThat(saved.getGroupCode()).isEqualTo("RETAIL");
         assertThat(saved.getStatusSummary()).contains("TEST");
         assertThat(saved.getChangedAreasJson()).contains(workItemId.toString());
+    }
+
+    @Test
+    void testDataPiiExplicitConfirm_recordsKeysCategoriesReasonWithoutVariablePlaintext() throws Exception {
+        UUID templateId = UUID.randomUUID();
+        String secretValue = "RealCustomer-SECRET-VALUE";
+        String variablesHash = "a".repeat(64);
+
+        recorder.recordTestDataPiiExplicitConfirm(
+                templateId,
+                "RETAIL",
+                "TDS-1",
+                2,
+                variablesHash,
+                List.of("customerName"),
+                Map.of("customerName", "PERSONAL_NAME"),
+                "Approved fixture for QA",
+                "10000003",
+                "Author (10000003)"
+        );
+
+        ArgumentCaptor<ManagementAuditEventEntity> captor = ArgumentCaptor.forClass(ManagementAuditEventEntity.class);
+        verify(repository).save(captor.capture());
+        ManagementAuditEventEntity saved = captor.getValue();
+
+        assertThat(saved.getEventType()).isEqualTo(ManagementAuditEventTypes.TEMPLATE_TEST_DATA_PII_EXPLICIT_CONFIRM);
+        assertThat(saved.getTemplateId()).isEqualTo(templateId);
+        assertThat(saved.getGroupCode()).isEqualTo("RETAIL");
+        assertThat(saved.getActorUsername()).isEqualTo("10000003");
+        assertThat(saved.getStatusSummary()).contains("TDS-1");
+        assertThat(saved.getWarningCodesJson()).doesNotContain(secretValue);
+        assertThat(saved.getStatusSummary()).doesNotContain(secretValue);
+
+        JsonNode payload = objectMapper.readTree(saved.getWarningCodesJson());
+        assertThat(payload.get("testDataSetId").asText()).isEqualTo("TDS-1");
+        assertThat(payload.get("datasetVersion").asInt()).isEqualTo(2);
+        assertThat(payload.get("variablesHash").asText()).isEqualTo(variablesHash);
+        assertThat(payload.get("piiFieldKeys").get(0).asText()).isEqualTo("customerName");
+        assertThat(payload.get("piiCategories").get("customerName").asText()).isEqualTo("PERSONAL_NAME");
+        assertThat(payload.get("piiHandling").asText()).isEqualTo("EXPLICIT_SENSITIVE");
+        assertThat(payload.get("piiConfirmReason").asText()).isEqualTo("Approved fixture for QA");
+        assertThat(payload.has("variables")).isFalse();
+        assertThat(payload.has("customerName")).isFalse();
     }
 }

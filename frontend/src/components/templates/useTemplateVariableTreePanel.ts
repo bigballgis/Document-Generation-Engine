@@ -46,7 +46,18 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     defaultValue: '',
     description: '',
     computeExpression: '',
+    piiCategory: 'NONE',
   })
+
+  const piiCategories = [
+    'NONE',
+    'PERSONAL_NAME',
+    'GOVERNMENT_ID',
+    'FINANCIAL_ACCOUNT',
+    'CONTACT',
+    'ADDRESS',
+    'OTHER_SENSITIVE',
+  ] as const
 
   const sourceTree = computed(() => buildVariableSchemaTree(options.variables.value))
   const filteredTree = computed(() => filterVariableTree(sourceTree.value, searchQuery.value))
@@ -92,6 +103,7 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     variableForm.defaultValue = ''
     variableForm.description = ''
     variableForm.computeExpression = ''
+    variableForm.piiCategory = 'NONE'
     editingVariableKey.value = null
     computeValidationError.value = null
     sampleResult.value = null
@@ -111,6 +123,7 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     variableForm.defaultValue = variable.defaultValue ?? ''
     variableForm.description = variable.description ?? ''
     variableForm.computeExpression = variable.computeExpression ?? ''
+    variableForm.piiCategory = variable.piiCategory ?? 'NONE'
     sampleResult.value = null
     sampleError.value = null
     variableDialogOpen.value = true
@@ -157,6 +170,7 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
           variableForm.variableType === 'COMPUTED'
             ? variableForm.computeExpression?.trim() || null
             : null,
+        piiCategory: variableForm.piiCategory || 'NONE',
       })
       variableDialogOpen.value = false
       ElMessage.success(t('templates.authoring.saveVariableSuccess'))
@@ -242,6 +256,7 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     editingVariableKey,
     treeRef,
     variableTypes,
+    piiCategories,
     variableForm,
     filteredTree,
     treeRenderKey,

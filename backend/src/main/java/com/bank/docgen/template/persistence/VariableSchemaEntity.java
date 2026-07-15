@@ -1,5 +1,6 @@
 package com.bank.docgen.template.persistence;
 
+import com.bank.docgen.template.domain.VariablePiiCategory;
 import com.bank.docgen.template.domain.VariableType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,6 +43,10 @@ public class VariableSchemaEntity {
     @Column(name = "compute_expression")
     private String computeExpression;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pii_category", nullable = false, length = 32)
+    private VariablePiiCategory piiCategory;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -62,6 +67,32 @@ public class VariableSchemaEntity {
             String description,
             String computeExpression
     ) {
+        this(
+                id,
+                templateVersionId,
+                variableKey,
+                variableType,
+                required,
+                defaultValue,
+                enumValues,
+                description,
+                computeExpression,
+                VariablePiiCategory.NONE
+        );
+    }
+
+    public VariableSchemaEntity(
+            UUID id,
+            UUID templateVersionId,
+            String variableKey,
+            VariableType variableType,
+            boolean required,
+            String defaultValue,
+            String enumValues,
+            String description,
+            String computeExpression,
+            VariablePiiCategory piiCategory
+    ) {
         this.id = id;
         this.templateVersionId = templateVersionId;
         this.variableKey = variableKey;
@@ -71,6 +102,7 @@ public class VariableSchemaEntity {
         this.enumValues = enumValues;
         this.description = description;
         this.computeExpression = computeExpression;
+        this.piiCategory = piiCategory == null ? VariablePiiCategory.NONE : piiCategory;
         Instant now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
@@ -112,6 +144,10 @@ public class VariableSchemaEntity {
         return computeExpression;
     }
 
+    public VariablePiiCategory getPiiCategory() {
+        return piiCategory == null ? VariablePiiCategory.NONE : piiCategory;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -126,7 +162,8 @@ public class VariableSchemaEntity {
             String defaultValue,
             String enumValues,
             String description,
-            String computeExpression
+            String computeExpression,
+            VariablePiiCategory piiCategory
     ) {
         this.variableType = variableType;
         this.required = required;
@@ -134,6 +171,7 @@ public class VariableSchemaEntity {
         this.enumValues = enumValues;
         this.description = description;
         this.computeExpression = computeExpression;
+        this.piiCategory = piiCategory == null ? VariablePiiCategory.NONE : piiCategory;
         this.updatedAt = Instant.now();
     }
 }

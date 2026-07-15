@@ -76,7 +76,8 @@ public class TemplateAuthoringController {
                 body.defaultValue(),
                 body.enumValues(),
                 body.description(),
-                body.computeExpression()
+                body.computeExpression(),
+                body.piiCategory()
         );
         return envelope(request, templateService.upsertVariable(templateId, normalized, session));
     }

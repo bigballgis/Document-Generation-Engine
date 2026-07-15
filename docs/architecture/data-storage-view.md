@@ -62,7 +62,18 @@ at the Ingress.
 | ConfigMap / Secret wiring | [k8s-config-secrets.md](../../deploy/k8s-config-secrets.md) |
 | Service DNS and external endpoints | [k8s-ingress-tls.md](../../deploy/k8s-ingress-tls.md) |
 
+## Confirmed — template test data PII storage (CE-G03)
+
+**Closed (2026-07-15):** former pending question *“Whether any template test data may be stored after masking or must always be synthetic.”*
+
+Template Test Data Set variable values **may** be persisted in the relational Test Data Set store when:
+
+1. The field is not PII-tagged (`piiCategory = NONE` / unset), or
+2. PII-tagged fields use author **`SYNTHETIC`** attestation (synthetic or desensitized test values — the default path), or
+3. PII-tagged fields use **`EXPLICIT_SENSITIVE`** with reason + secondary confirm + durable management audit (audit must **not** store variable plaintext — only keys, categories, `variablesHash`, reason).
+
+There is **no** approved third path of “mask then silently store” without attestation. Behavior SoT: [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md) **G03-C14**. ADR-0020 plaintext bans continue to apply to logs, audit summaries, contract examples, exports, and unauthorized display.
+
 ## Pending Questions
 
-- Whether any template test data may be stored after masking or must always be synthetic.
 - Final rollout evidence and owner sequence for replacing remaining in-memory persistence adapters across runtime and governance paths.

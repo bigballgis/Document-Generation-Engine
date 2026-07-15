@@ -13,11 +13,24 @@ public record UpsertTestDataSetRequest(
         @NotNull Map<String, Object> variables,
         Boolean required,
         String scenarioName,
-        List<String> coverageTags
+        List<String> coverageTags,
+        String piiHandling,
+        String piiConfirmReason,
+        Boolean secondaryConfirmed
 ) {
     public UpsertTestDataSetRequest {
         variables = DefensiveCopies.copyMap(variables);
         coverageTags = DefensiveCopies.copyStringList(coverageTags);
     }
 
+    public UpsertTestDataSetRequest(
+            String name,
+            String description,
+            Map<String, Object> variables,
+            Boolean required,
+            String scenarioName,
+            List<String> coverageTags
+    ) {
+        this(name, description, variables, required, scenarioName, coverageTags, null, null, null);
+    }
 }

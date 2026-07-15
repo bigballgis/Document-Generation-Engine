@@ -7641,6 +7641,21 @@ components:
     TemplateVariableType:
       type: string
       enum: [TEXT, NUMBER, AMOUNT, DATE, ENUM, BOOLEAN, LIST, OBJECT, COMPUTED]
+    VariablePiiCategory:
+      type: string
+      description: >
+        Optional PII classification on a template variable schema field (CE-G03).
+        `NONE` / omitted = not PII-governed for test-data-set save gates.
+        Unknown values must be rejected (fail-closed). Management upsert/view and
+        export/import bundle carry this field; runtime caller generate APIs are unchanged.
+      enum:
+        - NONE
+        - PERSONAL_NAME
+        - GOVERNMENT_ID
+        - FINANCIAL_ACCOUNT
+        - CONTACT
+        - ADDRESS
+        - OTHER_SENSITIVE
     TemplateImportConflictPolicy:
       type: string
       enum: [KEEP_TEMPLATE_ID, REJECT_IMPORT]
@@ -7718,6 +7733,13 @@ components:
         description:
           type: string
           nullable: true
+        piiCategory:
+          allOf:
+            - $ref: '#/components/schemas/VariablePiiCategory'
+          nullable: true
+          description: >
+            CE-G03 — optional PII category. Omitted or null on import means `NONE`.
+            Does not embed test-data-set variable values in the export bundle.
     TemplateExportAnchorBindingView:
       type: object
       additionalProperties: false

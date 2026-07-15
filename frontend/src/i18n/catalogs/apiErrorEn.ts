@@ -63,6 +63,12 @@ export const apiErrorEn = {
     testDataSetNotFound: "The test data set was not found.",
     testDataSetLocked: "The test data set is locked by test evidence and cannot be modified.",
     testDataSetSchemaInvalid: "The test data set variables do not match the template variable schema.",
+    testDataSetPiiHandlingRequired:
+      "PII-tagged test data values require piiHandling of SYNTHETIC or EXPLICIT_SENSITIVE.",
+    piiConfirmReasonRequired: "An explicit sensitive test-data confirmation requires a non-blank reason.",
+    piiSecondaryConfirmRequired:
+      "An explicit sensitive test-data confirmation requires secondaryConfirmed=true.",
+    piiCategoryInvalid: "The variable piiCategory value is not supported.",
     accessDenied: "You do not have permission to access this template.",
     changeDiffReleaseVersionsRequired:
       "Both releaseVersionA and releaseVersionB are required for release change-diff comparison.",
@@ -130,7 +136,11 @@ export const apiErrorEn = {
     qrBarcodeConfigInvalid:
       "The QR or barcode node configuration is invalid. Check sizePx, errorCorrection, and format.",
     qrBarcodeEncodeFailed:
-      "The QR or barcode payload could not be encoded. Check the payload characters and format."
+      "The QR or barcode payload could not be encoded. Check the payload characters and format.",
+    attachmentListPayloadMissing:
+      "The attachment list payload variable is missing or null. Provide a string array for the referenced key.",
+    attachmentListPayloadInvalid:
+      "The attachment list payload is invalid. Provide a string array for the referenced key."
   },
   lifecycle: {
     selfApprovalForbidden:
@@ -223,7 +233,8 @@ export const apiErrorEn = {
     lifecycleRoleDenied: "You do not have permission to perform this content module lifecycle operation.",
     lifecycleStateTransitionDenied: "The content module version is not in a valid state for this lifecycle operation.",
     lifecycleRequestInvalid: "The content module lifecycle request is invalid.",
-    impactConfirmationRequired: "Impact summary review and secondary confirmation are required for this lifecycle operation."
+    impactConfirmationRequired: "Impact summary review and secondary confirmation are required for this lifecycle operation.",
+    invalidEffectiveRange: "effectiveFrom must be less than or equal to effectiveTo."
   },
   collaboration: {
     accessDenied: "You do not have permission to view collaboration work items.",

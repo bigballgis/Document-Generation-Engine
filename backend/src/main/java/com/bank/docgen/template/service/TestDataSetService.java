@@ -1,11 +1,15 @@
 package com.bank.docgen.template.service;
 
+import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.sharedkernel.security.VariableHashSupport;
 import com.bank.docgen.template.api.TestDataSetView;
 import com.bank.docgen.template.api.UpsertTestDataSetRequest;
+import com.bank.docgen.template.domain.TestDataSetPiiHandling;
 import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
+import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
@@ -28,6 +32,7 @@ public class TestDataSetService {
     private final ObjectMapper objectMapper;
     private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
     private final VariableSchemaRepository variableSchemaRepository;
+    private final ManagementAuditRecorder managementAuditRecorder;
 
     public TestDataSetService(
             TemplateService templateService,
@@ -35,7 +40,8 @@ public class TestDataSetService {
             GroupAccessService groupAccessService,
             ObjectMapper objectMapper,
             TemplateCurrentVersionResolver templateCurrentVersionResolver,
-            VariableSchemaRepository variableSchemaRepository
+            VariableSchemaRepository variableSchemaRepository,
+            ManagementAuditRecorder managementAuditRecorder
     ) {
         this.templateService = templateService;
         this.testDataSetRepository = testDataSetRepository;
@@ -43,6 +49,7 @@ public class TestDataSetService {
         this.objectMapper = objectMapper;
         this.templateCurrentVersionResolver = templateCurrentVersionResolver;
         this.variableSchemaRepository = variableSchemaRepository;
+        this.managementAuditRecorder = managementAuditRecorder;
     }
 
     @Transactional(readOnly = true)
@@ -68,8 +75,12 @@ public class TestDataSetService {
 
     @Transactional
     public TestDataSetView create(UUID templateId, UpsertTestDataSetRequest request, ManagementSessionClaims session) {
-        assertCanMaintain(templateId, session);
+        TemplateEntity template = assertCanMaintain(templateId, session);
         Map<String, Object> variables = validateAndSanitizeVariables(templateId, request.variables());
+        List<VariableSchemaEntity> schema = loadCurrentVariableSchema(templateId);
+        List<VariableSchemaEntity> triggered = TestDataSetPiiGateSupport.triggeredPiiFields(schema, variables);
+        TestDataSetPiiHandling handling = TestDataSetPiiGateSupport.requireHandling(request, triggered);
+
         String externalId = "TDS-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         TestDataSetEntity entity = new TestDataSetEntity(
                 UUID.randomUUID(),
@@ -85,7 +96,11 @@ public class TestDataSetService {
                 false,
                 null
         );
-        return toView(testDataSetRepository.save(entity));
+        TestDataSetEntity saved = testDataSetRepository.save(entity);
+        if (handling == TestDataSetPiiHandling.EXPLICIT_SENSITIVE) {
+            recordExplicitPiiAudit(template, saved, variables, triggered, request.piiConfirmReason(), session);
+        }
+        return toView(saved);
     }
 
     @Transactional
@@ -95,9 +110,13 @@ public class TestDataSetService {
             UpsertTestDataSetRequest request,
             ManagementSessionClaims session
     ) {
-        assertCanMaintain(templateId, session);
+        TemplateEntity template = assertCanMaintain(templateId, session);
         TestDataSetEntity entity = requireMutableDataSet(templateId, externalId);
         Map<String, Object> variables = validateAndSanitizeVariables(templateId, request.variables());
+        List<VariableSchemaEntity> schema = loadCurrentVariableSchema(templateId);
+        List<VariableSchemaEntity> triggered = TestDataSetPiiGateSupport.triggeredPiiFields(schema, variables);
+        TestDataSetPiiHandling handling = TestDataSetPiiGateSupport.requireHandling(request, triggered);
+
         entity.update(
                 request.name(),
                 request.description(),
@@ -106,7 +125,11 @@ public class TestDataSetService {
                 request.scenarioName(),
                 writeCoverageTags(request.coverageTags())
         );
-        return toView(testDataSetRepository.save(entity));
+        TestDataSetEntity saved = testDataSetRepository.save(entity);
+        if (handling == TestDataSetPiiHandling.EXPLICIT_SENSITIVE) {
+            recordExplicitPiiAudit(template, saved, variables, triggered, request.piiConfirmReason(), session);
+        }
+        return toView(saved);
     }
 
     @Transactional
@@ -148,6 +171,28 @@ public class TestDataSetService {
         });
     }
 
+    private void recordExplicitPiiAudit(
+            TemplateEntity template,
+            TestDataSetEntity entity,
+            Map<String, Object> variables,
+            List<VariableSchemaEntity> triggered,
+            String piiConfirmReason,
+            ManagementSessionClaims session
+    ) {
+        managementAuditRecorder.recordTestDataPiiExplicitConfirm(
+                template.getId(),
+                template.getGroupCode(),
+                entity.getExternalId(),
+                entity.getDatasetVersion(),
+                VariableHashSupport.hashVariables(objectMapper, variables),
+                TestDataSetPiiGateSupport.keys(triggered),
+                TestDataSetPiiGateSupport.categoryByKey(triggered),
+                piiConfirmReason.trim(),
+                session.username(),
+                session.displayName()
+        );
+    }
+
     private Map<String, Object> validateAndSanitizeVariables(UUID templateId, Map<String, Object> requestVariables) {
         List<VariableSchemaEntity> schema = loadCurrentVariableSchema(templateId);
         Map<String, Object> stripped = TestDataSetVariablesSchemaValidator.stripComputeKeys(schema, requestVariables);
@@ -165,11 +210,12 @@ public class TestDataSetService {
         return variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(version.getId());
     }
 
-    private void assertCanMaintain(UUID templateId, ManagementSessionClaims session) {
-        templateService.requireReadableTemplate(templateId, session);
+    private TemplateEntity assertCanMaintain(UUID templateId, ManagementSessionClaims session) {
+        TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
         if (!groupAccessService.canAuthorTemplates(session)) {
             throw new TemplateAccessDeniedException();
         }
+        return template;
     }
 
     private TestDataSetEntity requireDataSet(UUID templateId, String externalId) {

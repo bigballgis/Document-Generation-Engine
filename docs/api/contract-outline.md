@@ -145,6 +145,8 @@ API 契约查看和可调用版本列表必须按当前授权视角返回结果�
 
 禁止明文持久化或展示的内容包括 API 凭证 secret、DOCX/PDF 加密密码、模板变量原值、模板测试数据敏感值、完整请求体、完整下载地址、完整 AD Group 成员、未授权组详情、历史密文、敏感配置明文和未授权生成文档内容；保真警告不得包含模板变量原值、粘贴原文、客户数据、完整请求体或生成文档敏感内容。
 
+**CE-G03 澄清（2026-07-15）：** 「模板测试数据敏感值」禁明文面 = 日志、审计摘要、契约示例、导出、发布证据与未授权展示。授权维护者经 `SYNTHETIC` / `EXPLICIT_SENSITIVE` 闸门后写入 Template Test Data Set 存储的变量值是测试资产本体（见 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md) G03-C14/C22；[data-storage-view.md](../architecture/data-storage-view.md)）。不修订 ADR-0020 正文。运行时调用方 generate API **不**新增入参 PII 扫描。
+
 允许以摘要或指纹表达的内容包括 API 凭证标识或指纹摘要、`idempotencyKey` 摘要、请求语义 hash、`variablesHash`、`itemsHash`、加密策略摘要、AD Group 授权摘要、下载地址脱敏值、`contextSummary`、`fidelityWarnings` 非敏感摘要、`policyVersion`、`changedAreas` 和配置差异摘要。
 
 授权响应例外仅限已确认安全场景：API 凭证创建或轮换时 secret 明文只展示一次；授权 API 响应可返回可用 `download.url`；同步文件流和下载取文件可在授权通过后返回生成文档内容；`task.queryPath` 只是相对查询路径，不授予额外访问能力。
@@ -332,6 +334,45 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 模板 release 详情 | 获取已发布 release 只读快照。 | 按语义版本 `releaseVersion` 定位；未知版本 `404`。 | `GET /api/management/v1/templates/{templateId}/releases/{releaseVersion}` |
 | 克隆已发布 release | 从已发布 release 复制快照到新的 DRAFT dev 行（`max(dev_version_number)+1`）。 | 存在进行中 dev 行时 `409 TEMPLATE_DEV_LINE_IN_FLIGHT`；成功后模板包状态为 `DRAFT`；记录 lifecycle 审计。 | `POST /api/management/v1/templates/{templateId}/release-versions/{releaseVersion}/clone` |
 | 粘贴清洗（P18-T10 / ops-paste-binding-seam） | 编辑期将 Word/HTML 清洗为受控结构化 JSON + 非敏感摘要。 | SoT **ADR-0019**：script / iframe / **object** / **absolute** → `BLOCKED`（整次 `blocked=true`，无 cleaned JSON）。Accept 后绑定持久化非敏感 `pasteCleaningEvidence`；未解除阻断在 validate / `computeBindingStatus` / PublishGate **fail-closed**。**不**新增权限面（复用配置锚点内容）。行为：[ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md)；领域 §2.6.7。 | `POST /api/management/v1/templates/{templateId}/paste-clean`（管理面；OpenAPI 绑定/validate/export 已声明 `pasteCleaningEvidence`） |
+| 变量 Schema PII 标签（CE-G03） | 变量 upsert/view 可选 `piiCategory`。 | 见下方「测试数据集 PII 治理（CE-G03）」；导出 bundle `variables[]` 携带该字段（OpenAPI `TemplateExportVariableSchemaView.piiCategory`）。 | 既有变量 Schema 管理路由（与配置模板变量同权） |
+| 测试数据集 PII 闸门（CE-G03） | create/update 触及 PII 标记字段非空值时强制 `piiHandling`。 | fail-closed；`SYNTHETIC` 或 `EXPLICIT_SENSITIVE`+审计；无新权限。行为：[ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。 | `POST/PUT /api/management/v1/templates/{templateId}/test-data-sets[/{testDataSetId}]` |
+
+### 测试数据集 PII 治理（CE-G03）
+
+管理面契约（**不**在 caller-facing OpenAPI 运行时 generate 路径上扩展；导出变量 Schema 字段见 [openapi-v1.yaml](openapi-v1.yaml) `VariablePiiCategory` / `TemplateExportVariableSchemaView.piiCategory`）。权威行为：[ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。
+
+#### Variable Schema — `piiCategory`
+
+| 项 | 已确认 |
+| --- | --- |
+| 字段 | 可选 `piiCategory`（API / DB / UI / export-import bundle） |
+| 枚举（`UPPER_SNAKE_CASE`） | `NONE`、`PERSONAL_NAME`、`GOVERNMENT_ID`、`FINANCIAL_ACCOUNT`、`CONTACT`、`ADDRESS`、`OTHER_SENSITIVE` |
+| 缺省 | 省略或 `null` → 持久化为 `NONE`；导入旧 bundle 无字段 → `NONE` |
+| 非法值 | `422` `VALIDATION`；不持久化 |
+| PII 标记字段 | `piiCategory ≠ NONE` |
+
+#### Test Data Set create/update — `piiHandling`
+
+触发：当前模板 Schema 存在 ≥1 个 PII 标记字段，且请求 `variables` 对该字段提供非空值（optional 缺省/null/空串不触发；required 空值先走 CE-U03 `REQUIRED`）。
+
+| 请求字段 | 何时必需 | 语义 |
+| --- | --- | --- |
+| `piiHandling` | 触发后必需 | `SYNTHETIC` \| `EXPLICIT_SENSITIVE` |
+| `piiConfirmReason` | 仅 `EXPLICIT_SENSITIVE` | 非空白，≤2048；可进审计（**不是**变量值） |
+| `secondaryConfirmed` | 仅 `EXPLICIT_SENSITIVE` | 必须 `true` |
+
+未触发时可不传 `piiHandling`（行为 = CE-U03 only）。校验顺序：授权 → 锁定不可变 → U03 schema → **PII 闸门** → 持久化（→ `EXPLICIT_SENSITIVE` 审计）。`derive` / `delete` / `lock` / list / get / preview **不**新增 PII 闸门。
+
+#### Fail-closed messageKeys（English-first）
+
+| Condition | HTTP | category | messageKey（稳定） | English default (implement in `messages_en.properties`) |
+| --- | --- | --- | --- | --- |
+| PII 触发且缺/非法 `piiHandling` | 422 | `VALIDATION` | `api.error.template.testDataSetPiiHandlingRequired` | PII-tagged test data values require `piiHandling` of `SYNTHETIC` or `EXPLICIT_SENSITIVE`. |
+| `EXPLICIT_SENSITIVE` 缺 reason | 422 | `VALIDATION` | `api.error.template.piiConfirmReasonRequired` | An explicit sensitive test-data confirmation requires a non-blank reason. |
+| `EXPLICIT_SENSITIVE` 未二次确认 | 422 | `VALIDATION` | `api.error.template.piiSecondaryConfirmRequired` | An explicit sensitive test-data confirmation requires secondary confirmation. |
+| 非法 `piiCategory` | 422 | `VALIDATION` | `api.error.template.piiCategoryInvalid` | The variable `piiCategory` value is not supported. |
+
+可选 `fieldErrors` 可指向 `piiHandling` / `piiConfirmReason` / `secondaryConfirmed` / 变量路径。`EXPLICIT_SENSITIVE` 成功须写耐久管理审计（建议 `eventType=TEMPLATE_TEST_DATA_PII_EXPLICIT_CONFIRM`）：含 keys、categories、reason、`variablesHash`；**禁止**变量明文。审计写失败 → 整笔回滚（不得出现「已存敏感值但无审计」）。
 
 ### 目录列表分页契约（LR-C5）
 
@@ -366,7 +407,7 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | --- | --- | --- |
 | `format` | 是 | 固定 `template-export-bundle-v1-json`。 |
 | `metadata` | 是 | 源环境快照：`templateId`（内部 UUID）、`externalId`、`groupCode`、`name`、`description`、`masterId`、`lifecycleStatus`、`releaseVersion`、`devVersionId`、`devVersionNumber`、`exportedAt`。 |
-| `variables` | 是 | 变量 Schema 列表（`variableKey`、`variableType`、`required` 等）。 |
+| `variables` | 是 | 变量 Schema 列表（`variableKey`、`variableType`、`required`、可选 `piiCategory` 等；CE-G03）。 |
 | `bindings` | 是 | 锚点绑定列表。每项可含可选非敏感 `pasteCleaningEvidence`（粘贴清洗 residue；**禁止**源 HTML）。未解除粘贴阻断在 validate / publish 路径 fail-closed — 见 [ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md) / domain-model §2.6.7。 |
 | `rules` | 是 | 组合规则列表。 |
 | `contentModuleReferences` | 是 | 内容模块引用列表；`locked=true` 的发布锁定引用在导入时不重新写入。 |
