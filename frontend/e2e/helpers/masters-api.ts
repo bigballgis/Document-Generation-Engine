@@ -7,6 +7,7 @@ import {
   DEMO_MASTER_NAME,
   E2E_ADMIN,
   E2E_GROUP_ADMIN,
+  E2E_MASTER_DESIGNER,
 } from './auth'
 import {
   E2E_CATALOG_PAGE_SIZE,
@@ -380,4 +381,125 @@ export async function restoreDemoMasterToApproved(
       { decision: 'APPROVED', commentSummary: 'E2E restore approval' },
     )
   }
+}
+
+/** CE-U09 Hub / dashboard deep-link fixtures (isolated masters; unique names). */
+export interface E2eMasterReviewFixture {
+  masterId: string
+  name: string
+  status: string
+  hubPath: string
+  currentRevisionLineId: string
+  currentRevisionPath: string
+  approvalDeepLinkPath: string
+}
+
+async function resolveCurrentRevisionLine(
+  request: APIRequestContext,
+  token: string,
+  masterId: string,
+): Promise<MasterRevisionLineSummary> {
+  const page = await authorizedGet<PagedRevisionLines>(
+    request,
+    token,
+    `/masters/${masterId}/revision-lines?page=0&size=5`,
+  )
+  const current = page.content.find((line) => line.current) ?? page.content[0]
+  if (!current) {
+    throw new Error(`Master ${masterId} has no revision lines`)
+  }
+  return current
+}
+
+async function createMasterPackageViaApi(
+  request: APIRequestContext,
+  token: string,
+  name: string,
+): Promise<MasterDetail> {
+  if (!fs.existsSync(DEMO_SEED_DOCX_PATH)) {
+    throw new Error(
+      `Missing seed fixture ${DEMO_SEED_DOCX_PATH}. Run: mvn -f backend/pom.xml -Dtest=E2eDocxFixtureGeneratorTest test`,
+    )
+  }
+  const response = await request.post(`${E2E_API_BASE_URL}/masters`, {
+    headers: { Authorization: `Bearer ${token}` },
+    multipart: {
+      file: {
+        name: DEMO_SEED_DOCX_FILENAME,
+        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        buffer: fs.readFileSync(DEMO_SEED_DOCX_PATH),
+      },
+      groupCode: DEMO_GROUP_CODE,
+      name,
+      description: 'CE-U09 E2E master review reachability fixture',
+    },
+  })
+  if (!response.ok()) {
+    throw new Error(
+      `POST /masters failed (${response.status()}): ${await response.text()}`,
+    )
+  }
+  return ((await response.json()) as ApiEnvelope<MasterDetail>).result
+}
+
+function toMasterReviewFixture(
+  detail: MasterDetail,
+  current: MasterRevisionLineSummary,
+): E2eMasterReviewFixture {
+  const hubPath = `/masters/${detail.id}`
+  const currentRevisionPath = `/masters/${detail.id}/revisions/${current.id}`
+  return {
+    masterId: detail.id,
+    name: detail.name,
+    status: detail.status,
+    hubPath,
+    currentRevisionLineId: current.id,
+    currentRevisionPath,
+    approvalDeepLinkPath: `${currentRevisionPath}?workspaceTab=approval`,
+  }
+}
+
+/** DRAFT master for Hub Submit-for-review (MRR-001 / MRR-005). */
+export async function createDraftMasterForHubSubmit(
+  request: APIRequestContext,
+  options?: { name?: string },
+): Promise<E2eMasterReviewFixture> {
+  const token = await apiLogin(request, E2E_MASTER_DESIGNER)
+  const name = options?.name ?? `E2E-MRR-Draft ${Date.now()}`
+  const created = await createMasterPackageViaApi(request, token, name)
+  if (created.status !== 'DRAFT') {
+    throw new Error(`Expected DRAFT master after upload, got ${created.status}`)
+  }
+  const current = await resolveCurrentRevisionLine(request, token, created.id)
+  return toMasterReviewFixture(created, current)
+}
+
+/** PENDING_REVIEW master for Hub Approve/Reject + dashboard deep link (MRR-002 / MRR-004).
+ * Submitted by MASTER_DESIGNER so GROUP_ADMIN/GLOBAL_ADMIN can decide (same-person block). */
+export async function createPendingReviewMasterForDecide(
+  request: APIRequestContext,
+  options?: { name?: string; changeSummary?: string },
+): Promise<E2eMasterReviewFixture> {
+  const designerToken = await apiLogin(request, E2E_MASTER_DESIGNER)
+  const name = options?.name ?? `E2E-MRR-Pending ${Date.now()}`
+  const created = await createMasterPackageViaApi(request, designerToken, name)
+  const submitted = await authorizedPost<MasterDetail>(
+    request,
+    designerToken,
+    `/masters/${created.id}/submit-review`,
+    { changeSummary: options?.changeSummary ?? 'CE-U09 E2E submit for review fixture' },
+  )
+  if (submitted.status !== 'PENDING_REVIEW') {
+    throw new Error(`Expected PENDING_REVIEW after submit, got ${submitted.status}`)
+  }
+  const current = await resolveCurrentRevisionLine(request, designerToken, submitted.id)
+  return toMasterReviewFixture(submitted, current)
+}
+
+export async function getMasterDetailViaApi(
+  request: APIRequestContext,
+  masterId: string,
+): Promise<MasterDetail> {
+  const token = await apiLogin(request, E2E_GROUP_ADMIN)
+  return authorizedGet<MasterDetail>(request, token, `/masters/${masterId}`)
 }
