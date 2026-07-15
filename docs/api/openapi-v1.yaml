@@ -2933,6 +2933,65 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/masters/{masterId}/revision-lines/{revisionLineId}/anchors/{anchorId}:
+    patch:
+      tags: [Admin]
+      operationId: updateMasterRevisionLineAnchorDisplayLabel
+      summary: Update displayLabel for a master revision-line anchor
+      description: >-
+        CE-U06: updates `displayLabel` on the **current** writable revision-line
+        anchor snapshot and keeps the live `master_document` catalog in sync.
+        Requires `manageMasters` and package status not `PENDING_REVIEW`.
+        Historical (`current=false`) lines are rejected with
+        `api.error.master.invalidState`. `anchorId` and `documentSequence` are
+        immutable via this endpoint; displayLabel-only changes do not affect
+        CE-K05 anchor-set delta / `retestRequired`. Blank or whitespace-only
+        labels are rejected (trim; English-first validation messageKey).
+        Traceability: BDD-CE-U06-MAC-003…009.
+      parameters:
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: revisionLineId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: anchorId
+          in: path
+          required: true
+          description: Stable anchor key (immutable).
+          schema:
+            type: string
+            maxLength: 128
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMasterAnchorDisplayLabelRequest'
+      responses:
+        '200':
+          description: Updated anchor summary (trimmed displayLabel; sequence unchanged).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterAnchorSummaryResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/audit/generation:
     get:
       tags: [Admin]
@@ -5455,12 +5514,39 @@ components:
     MasterAnchorSummaryView:
       type: object
       additionalProperties: false
-      required: [anchorId, displayLabel]
+      required: [anchorId, displayLabel, documentSequence]
       properties:
         anchorId:
           type: string
         displayLabel:
           type: string
+        documentSequence:
+          type: integer
+          minimum: 0
+          description: >-
+            Zero-based document order from DOCX extraction (CE-U06 / CE-K05).
+            Immutable via displayLabel PATCH; list surfaces sort by this order.
+    UpdateMasterAnchorDisplayLabelRequest:
+      type: object
+      additionalProperties: false
+      required: [displayLabel]
+      properties:
+        displayLabel:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: >-
+            Human-readable anchor label. Trimmed on save; blank/whitespace-only
+            rejected. Does not change anchorId or documentSequence.
+    MasterAnchorSummaryResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/MasterAnchorSummaryView'
     MasterReviewRecordView:
       type: object
       additionalProperties: false

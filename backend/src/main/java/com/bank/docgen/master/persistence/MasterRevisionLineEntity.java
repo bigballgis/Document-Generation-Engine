@@ -170,6 +170,27 @@ public class MasterRevisionLineEntity {
         return List.copyOf(anchors);
     }
 
+    /**
+     * CE-U06: mutate managed snapshot anchor displayLabel (documentSequence / anchorId unchanged).
+     *
+     * @return true when the anchor existed on this line
+     */
+    public boolean updateAnchorDisplayLabel(String anchorId, String displayLabel) {
+        for (MasterRevisionLineAnchorEntity anchor : anchors) {
+            if (anchor.getAnchorId().equals(anchorId)) {
+                anchor.setDisplayLabel(displayLabel);
+                this.updatedAt = Instant.now();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+        this.updatedAt = Instant.now();
+    }
+
     public void markSuperseded() {
         this.current = false;
     }

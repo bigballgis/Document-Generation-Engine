@@ -9,10 +9,13 @@ import com.bank.docgen.master.api.MasterRevisionLineDetailView;
 import com.bank.docgen.master.api.MasterRevisionLineSummaryView;
 import com.bank.docgen.master.api.MasterReviewRecordView;
 import com.bank.docgen.master.api.PinnedReleaseReference;
+import com.bank.docgen.master.api.UpdateMasterAnchorDisplayLabelRequest;
+import com.bank.docgen.master.domain.MasterDocumentStatus;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterReviewRecordEntity;
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
+import com.bank.docgen.master.persistence.MasterRevisionLineAnchorEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -150,6 +153,49 @@ public class MasterRevisionLineService {
         }
     }
 
+    /**
+     * CE-U06: update displayLabel on the current writable revision-line snapshot and keep the
+     * live master_document catalog in sync. Does not change anchorId or documentSequence
+     * (displayLabel-only is ignored by CE-K05 anchor-set delta).
+     */
+    @Transactional
+    public MasterAnchorView updateAnchorDisplayLabel(
+            UUID masterId,
+            UUID revisionLineId,
+            String anchorId,
+            UpdateMasterAnchorDisplayLabelRequest request,
+            ManagementSessionClaims session
+    ) {
+        MasterDocumentEntity master = requireWritableMasterWithAnchors(masterId, session);
+        MasterRevisionLineEntity line = requireRevisionLine(masterId, revisionLineId);
+        if (!line.isCurrent() || master.getStatus() == MasterDocumentStatus.PENDING_REVIEW) {
+            throw new MasterValidationException("api.error.master.invalidState");
+        }
+        String trimmedLabel = request.displayLabel() == null ? "" : request.displayLabel().trim();
+        if (trimmedLabel.isEmpty() || trimmedLabel.length() > 256) {
+            throw new MasterValidationException("api.error.validation.requestBodyInvalid");
+        }
+        if (!line.updateAnchorDisplayLabel(anchorId, trimmedLabel)) {
+            throw new MasterNotFoundException();
+        }
+        line.setUpdatedBy(session.username());
+        if (!master.updateAnchorDisplayLabel(anchorId, trimmedLabel)) {
+            throw new MasterNotFoundException();
+        }
+        master.setUpdatedBy(session.username());
+        masterRevisionLineRepository.save(line);
+        masterDocumentRepository.save(master);
+        MasterRevisionLineAnchorEntity updated = line.getAnchors().stream()
+                .filter(anchor -> anchor.getAnchorId().equals(anchorId))
+                .findFirst()
+                .orElseThrow(MasterNotFoundException::new);
+        return new MasterAnchorView(
+                updated.getAnchorId(),
+                updated.getDisplayLabel(),
+                updated.getDocumentSequence()
+        );
+    }
+
     private List<PinnedReleaseReference> buildReferences(List<TemplateVersionEntity> versions) {
         return versions.stream()
                 .map(version -> {
@@ -165,6 +211,19 @@ public class MasterRevisionLineService {
         MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)
                 .orElseThrow(MasterNotFoundException::new);
         if (!groupAccessService.canAccessGroup(session, master.getGroupCode())) {
+            throw new MasterAccessDeniedException();
+        }
+        return master;
+    }
+
+    private MasterDocumentEntity requireWritableMasterWithAnchors(
+            UUID masterId,
+            ManagementSessionClaims session
+    ) {
+        MasterDocumentEntity master = masterDocumentRepository.findWithAnchorsByIdAndDeletedAtIsNull(masterId)
+                .orElseThrow(MasterNotFoundException::new);
+        if (!groupAccessService.canAccessGroup(session, master.getGroupCode())
+                || !groupAccessService.canManageMasters(session)) {
             throw new MasterAccessDeniedException();
         }
         return master;
@@ -243,7 +302,10 @@ public class MasterRevisionLineService {
                 line.isCurrent(),
                 line.getRevisionSequence(),
                 line.getAnchors().stream()
-                        .map(anchor -> new MasterAnchorView(anchor.getAnchorId(), anchor.getDisplayLabel()))
+                        .map(anchor -> new MasterAnchorView(
+                                anchor.getAnchorId(),
+                                anchor.getDisplayLabel(),
+                                anchor.getDocumentSequence()))
                         .toList(),
                 scopedHistory,
                 line.getCreatedBy(),
