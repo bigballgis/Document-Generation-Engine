@@ -1114,3 +1114,33 @@ export async function captureCeU10LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** CE-K05 master impact real — impact panel / replace confirm / revision diff @1440×900. */
+export const CE_K05_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-K05')
+export const CE_K05_SCREENSHOT_DIR = path.join(CE_K05_EVIDENCE_ROOT, 'screenshots')
+export const CE_K05_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureCeK05EvidenceDirs(): void {
+  fs.mkdirSync(CE_K05_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceK05ScreenshotPath(filename: string): string {
+  return path.join(CE_K05_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeK05Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeK05EvidenceDirs()
+  const target = ceK05ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeK05LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeK05EvidenceDirs()
+  const target = ceK05ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
