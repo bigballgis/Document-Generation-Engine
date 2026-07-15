@@ -2,6 +2,7 @@ import { computed } from 'vue'
 import {
   canAuthorContentModules,
   canAuthorTemplates,
+  canConfigureContentModuleSharedGroups,
   canDecideApprovals,
   canDecideContentModuleReviews,
   canDecideTests,
@@ -41,6 +42,9 @@ export function useCapabilities() {
   const authorContentModules = computed(() => canAuthorContentModules(context.value))
   const decideContentModuleReviews = computed(() => canDecideContentModuleReviews(context.value))
   const manageContentModuleLifecycle = computed(() => canManageContentModuleLifecycle(context.value))
+  const configureContentModuleSharedGroups = computed(() =>
+    canConfigureContentModuleSharedGroups(context.value),
+  )
 
   return {
     context,
@@ -60,5 +64,6 @@ export function useCapabilities() {
     authorContentModules,
     decideContentModuleReviews,
     manageContentModuleLifecycle,
+    configureContentModuleSharedGroups,
   }
 }

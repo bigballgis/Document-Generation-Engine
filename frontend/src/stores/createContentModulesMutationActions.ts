@@ -13,6 +13,7 @@ import type {
   ContentModuleSummary,
   CreateContentModulePayload,
   CreateContentModuleVersionPayload,
+  UpdateContentModuleSharedGroupCodesPayload,
   UpdateContentModuleVersionPayload,
 } from '@/types/contentModule'
 
@@ -52,6 +53,27 @@ export function createContentModulesMutationActions(deps: {
       return created
     } catch (error) {
       lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'contentModules.error.create')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function updateSharedGroupCodes(
+    moduleId: string,
+    payload: UpdateContentModuleSharedGroupCodesPayload,
+  ): Promise<ContentModuleDetail> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      const updated = await contentModulesApi.updateContentModuleSharedGroupCodes(moduleId, payload)
+      applyUpdatedContentModule(selectedModule, modules, updated)
+      return updated
+    } catch (error) {
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(
+        error,
+        'contentModules.error.updateSharedGroups',
+      )
       throw error
     } finally {
       submitting.value = false
@@ -155,6 +177,7 @@ export function createContentModulesMutationActions(deps: {
 
   return {
     createModule,
+    updateSharedGroupCodes,
     createVersion,
     updateDraftVersion,
     transitionReview,

@@ -17,6 +17,7 @@ import type {
   ContentModuleWorkflowTask,
   CreateContentModulePayload,
   CreateContentModuleVersionPayload,
+  UpdateContentModuleSharedGroupCodesPayload,
   UpdateContentModuleVersionPayload,
 } from '@/types/contentModule'
 
@@ -78,6 +79,17 @@ export async function createContentModule(
   payload: CreateContentModulePayload,
 ): Promise<ContentModuleDetail> {
   const response = await http.post<ApiEnvelope<ContentModuleDetail>>('/content-modules', payload)
+  return unwrapEnvelope(response.data)
+}
+
+export async function updateContentModuleSharedGroupCodes(
+  moduleId: string,
+  payload: UpdateContentModuleSharedGroupCodesPayload,
+): Promise<ContentModuleDetail> {
+  const response = await http.put<ApiEnvelope<ContentModuleDetail>>(
+    `/content-modules/${moduleId}/shared-group-codes`,
+    payload,
+  )
   return unwrapEnvelope(response.data)
 }
 

@@ -21,6 +21,11 @@ export type ContentModuleDetail = Schema<'ContentModuleDetailView'>
 
 export type CreateContentModulePayload = Schema<'CreateContentModuleRequest'>
 
+/** Minimal update body for PUT …/content-modules/{id}/shared-group-codes (CE-U10 / U10-C4). */
+export type UpdateContentModuleSharedGroupCodesPayload = {
+  sharedGroupCodes: string[]
+}
+
 export type CreateContentModuleVersionPayload = Schema<'CreateContentModuleVersionRequest'>
 
 export type UpdateContentModuleVersionPayload = Schema<'UpdateContentModuleVersionRequest'>

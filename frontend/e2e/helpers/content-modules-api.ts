@@ -619,7 +619,9 @@ export async function createRejectedContentModuleForRework(
 export interface ContentModuleDetailFixture {
   moduleId: string
   moduleCode: string
+  groupCode: string
   name: string
+  sharedGroupCodes?: string[]
   versions: Array<{
     semanticVersion: string
     reviewState: string
@@ -640,6 +642,64 @@ export async function getContentModuleDetailViaApi(
 ): Promise<ContentModuleDetailFixture> {
   const token = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
   return authorizedGet<ContentModuleDetailFixture>(request, token, `/content-modules/${moduleId}`)
+}
+
+/** CE-U10: draft module owned by RETAIL with optional sharedGroupCodes (GROUP_ADMIN). */
+export async function createDraftContentModuleWithSharedGroups(
+  request: APIRequestContext,
+  options?: {
+    moduleCode?: string
+    name?: string
+    semanticVersion?: string
+    sharedGroupCodes?: string[]
+    groupCode?: string
+  },
+): Promise<ApprovedContentModuleFixture & { groupCode: string; sharedGroupCodes: string[] }> {
+  const adminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  const moduleCode = options?.moduleCode ?? uniqueModuleCode('E2E-SGC')
+  const name = options?.name ?? `E2E SGC Module ${moduleCode}`
+  const semanticVersion = options?.semanticVersion ?? '1.0.0'
+  const groupCode = options?.groupCode ?? DEMO_GROUP_CODE
+  const sharedGroupCodes = options?.sharedGroupCodes ?? []
+
+  const created = await authorizedPost<ContentModuleDetail & { sharedGroupCodes?: string[] }>(
+    request,
+    adminToken,
+    '/content-modules',
+    {
+      moduleCode,
+      groupCode,
+      name,
+      description: 'CE-U10 Playwright sharedGroupCodes fixture',
+      sharedGroupCodes,
+      semanticVersion,
+      contentStructureJson: '{"blocks":[{"type":"paragraph","text":"E2E SGC clause"}]}',
+      changeDescription: 'Initial E2E SGC draft',
+    },
+  )
+
+  return {
+    moduleId: created.moduleId,
+    moduleCode,
+    name,
+    semanticVersion,
+    groupCode,
+    sharedGroupCodes: created.sharedGroupCodes ?? sharedGroupCodes,
+  }
+}
+
+export async function updateContentModuleSharedGroupCodesViaApi(
+  request: APIRequestContext,
+  moduleId: string,
+  sharedGroupCodes: string[],
+): Promise<ContentModuleDetailFixture> {
+  const token = await apiLogin(request, E2E_GROUP_ADMIN)
+  return authorizedPut<ContentModuleDetailFixture>(
+    request,
+    token,
+    `/content-modules/${moduleId}/shared-group-codes`,
+    { sharedGroupCodes },
+  )
 }
 
 export async function upsertTemplateContentModuleReference(

@@ -258,6 +258,45 @@ class ContentModuleControllerTest {
                 .andExpect(jsonPath("$.error.code").value("MODULE_CHANGE_DESCRIPTION_REQUIRED"));
     }
 
+    @Test
+    void updateSharedGroupCodes_allowsGroupAdminAndReturnsDetail() throws Exception {
+        seedDraftModule();
+
+        mockMvc.perform(put("/api/management/v1/content-modules/" + MODULE_CODE + "/shared-group-codes")
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sharedGroupCodes":["WEALTH","CORP"]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.moduleCode").value(MODULE_CODE))
+                .andExpect(jsonPath("$.result.sharedGroupCodes.length()").value(2))
+                .andExpect(jsonPath("$.result.sharedGroupCodes[0]").value("CORP"))
+                .andExpect(jsonPath("$.result.sharedGroupCodes[1]").value("WEALTH"));
+
+        mockMvc.perform(get("/api/management/v1/content-modules/" + MODULE_CODE)
+                        .with(authentication(new ManagementAuthentication(groupAdmin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.sharedGroupCodes.length()").value(2));
+    }
+
+    @Test
+    void updateSharedGroupCodes_rejectsTemplateAuthor() throws Exception {
+        seedDraftModule();
+
+        mockMvc.perform(put("/api/management/v1/content-modules/" + MODULE_CODE + "/shared-group-codes")
+                        .with(authentication(new ManagementAuthentication(author)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sharedGroupCodes":["WEALTH"]
+                                }
+                                """))
+                .andExpect(status().isForbidden());
+    }
+
     private void seedDraftModule() {
         UUID moduleId = UUID.randomUUID();
         moduleRepository.save(new ContentModuleEntity(

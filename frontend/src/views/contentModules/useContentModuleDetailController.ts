@@ -19,6 +19,7 @@ import {
   resolveContentModuleWorkspaceTabFromQuery,
   type ContentModuleWorkspaceTab,
 } from '@/views/contentModules/contentModuleWorkspaceTabs'
+import { buildContentModuleDetailSummaryDescription } from '@/views/contentModules/contentModuleDetailSummary'
 import { createContentModuleDetailDerived } from '@/views/contentModules/createContentModuleDetailDerived'
 import { useContentModuleDetailActions } from '@/views/contentModules/useContentModuleDetailActions'
 
@@ -28,14 +29,19 @@ export function useContentModuleDetailController() {
   const router = useRouter()
   const contentModulesStore = useContentModulesStore()
   const sessionStore = useSessionStore()
-  const { authorContentModules, decideContentModuleReviews, manageContentModuleLifecycle } =
-    useCapabilities()
+  const {
+    authorContentModules,
+    decideContentModuleReviews,
+    manageContentModuleLifecycle,
+    configureContentModuleSharedGroups,
+  } = useCapabilities()
 
   const loadFailed = ref(false)
   const versionDialogOpen = ref(false)
   const versionDialogMode = ref<'create' | 'edit'>('create')
   const selectedVersion = ref<ContentModuleVersion | null>(null)
   const impactDialogOpen = ref(false)
+  const settingsDialogOpen = ref(false)
   const pendingLifecycleOperation = ref<ContentModuleLifecycleOperation | null>(null)
   const activeWorkspaceTab = ref<ContentModuleWorkspaceTab>(
     resolveContentModuleWorkspaceTabFromQuery(route.query),
@@ -68,6 +74,12 @@ export function useContentModuleDetailController() {
   const detail = computed(() => contentModulesStore.selectedModule)
   const versions = computed(() => detail.value?.versions ?? [])
   const reviewHistory = computed(() => detail.value?.reviewHistory ?? [])
+  const canConfigureSharedGroups = computed(() => configureContentModuleSharedGroups.value)
+  const detailSummaryDescription = computed(() =>
+    detail.value ? buildContentModuleDetailSummaryDescription(detail.value, t) : undefined,
+  )
+  const sharedGroupCodes = computed(() => detail.value?.sharedGroupCodes ?? [])
+  const ownerGroupCode = computed(() => detail.value?.groupCode ?? '')
 
   function formatReviewAction(action: string): string {
     const key = `contentModules.reviewHistory.action.${action}`
@@ -128,6 +140,10 @@ export function useContentModuleDetailController() {
     router.push('/content-modules')
   }
 
+  function openSettingsDialog() {
+    settingsDialogOpen.value = true
+  }
+
   const actions = useContentModuleDetailActions({
     moduleId,
     versions,
@@ -151,6 +167,7 @@ export function useContentModuleDetailController() {
     versionDialogMode,
     selectedVersion,
     impactDialogOpen,
+    settingsDialogOpen,
     activeWorkspaceTab,
     workspaceTabs,
     moduleId,
@@ -158,6 +175,10 @@ export function useContentModuleDetailController() {
     versions,
     reviewHistory,
     formatReviewAction,
+    canConfigureSharedGroups,
+    detailSummaryDescription,
+    sharedGroupCodes,
+    ownerGroupCode,
     canSubmitReview: derived.canSubmitReview,
     canApproveReview: derived.canApproveReview,
     canCreateVersion: derived.canCreateVersion,
@@ -171,6 +192,7 @@ export function useContentModuleDetailController() {
     lifecycleOperationLabelKey,
     reloadPage,
     goBackToList,
+    openSettingsDialog,
     ...actions,
   }
 }

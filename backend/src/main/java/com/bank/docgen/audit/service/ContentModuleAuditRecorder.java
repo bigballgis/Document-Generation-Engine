@@ -3,6 +3,7 @@ package com.bank.docgen.audit.service;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_CREATED;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_LIFECYCLE_OPERATION;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_REVIEW_TRANSITION;
+import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_SHARED_GROUP_CODES_UPDATED;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_VERSION_CREATED;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_VERSION_UPDATED;
 
@@ -74,6 +75,24 @@ class ContentModuleAuditRecorder {
                 moduleId,
                 groupCode,
                 "Draft updated: " + moduleCode + "@" + semanticVersion,
+                actorUsername,
+                actorSummary
+        );
+    }
+
+    @Transactional
+    void recordContentModuleSharedGroupCodesUpdated(
+            UUID moduleId,
+            String groupCode,
+            String moduleCode,
+            String actorUsername,
+            String actorSummary
+    ) {
+        recordContentModuleEvent(
+                CONTENT_MODULE_SHARED_GROUP_CODES_UPDATED,
+                moduleId,
+                groupCode,
+                "Shared group codes updated: " + moduleCode,
                 actorUsername,
                 actorSummary
         );

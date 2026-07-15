@@ -111,6 +111,34 @@ describe('contentModules API', () => {
     expect(created.versions[0]?.reviewState).toBe('DRAFT')
   })
 
+  it('updates shared group codes via PUT shared-group-codes', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          moduleId: 'MOD-LOAN-DISCLOSURE',
+          moduleCode: 'MOD-LOAN-DISCLOSURE',
+          groupCode: 'HQ',
+          name: 'Loan disclosure',
+          sharedGroupCodes: ['RETAIL', 'WEALTH'],
+          versions: [],
+          reviewHistory: [],
+        },
+      },
+    })
+
+    const updated = await contentModulesApi.updateContentModuleSharedGroupCodes(
+      'MOD-LOAN-DISCLOSURE',
+      { sharedGroupCodes: ['RETAIL', 'WEALTH'] },
+    )
+
+    expect(http.put).toHaveBeenCalledWith(
+      '/content-modules/MOD-LOAN-DISCLOSURE/shared-group-codes',
+      { sharedGroupCodes: ['RETAIL', 'WEALTH'] },
+    )
+    expect(updated.sharedGroupCodes).toEqual(['RETAIL', 'WEALTH'])
+  })
+
   it('fetches lifecycle impact preview', async () => {
     vi.mocked(http.get).mockResolvedValue({
       data: {

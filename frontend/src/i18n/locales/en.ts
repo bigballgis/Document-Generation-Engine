@@ -2388,6 +2388,11 @@ export default {
       backToList: 'Back to standard clauses',
       loadingTitle: 'Loading content module…',
       groupLabel: 'Group: {groupCode}',
+      summary: {
+        owner: 'Owner: {groupCode}',
+        sharedWith: 'Shared with: {codes}',
+        notShared: 'Not shared outside owner group',
+      },
       versionsTitle: 'Versions',
       noVersions: 'No versions yet',
       noVersionsDescription: 'Create a draft version to begin authoring module content.',
@@ -2405,6 +2410,17 @@ export default {
       changeSummary: 'Change summary',
       commentSummary: 'Review comment',
       actorLabel: 'By {username}',
+    },
+    settings: {
+      open: 'Settings',
+      title: 'Module settings',
+      sharedGroupCodes: 'Share to groups',
+      sharedGroupCodesPlaceholder: 'Select groups that may read this clause',
+      save: 'Save',
+      saveSuccess: 'Shared groups updated.',
+      confirmTitle: 'Confirm shared group changes',
+      confirmMessage:
+        'Changing shared groups updates which groups can read this clause. Continue?',
     },
     workspace: {
       tabs: {
@@ -2459,6 +2475,8 @@ export default {
       open: 'New content module',
       title: 'Create content module',
       groupCode: 'Group',
+      sharedGroupCodes: 'Share to groups',
+      sharedGroupCodesPlaceholder: 'Select groups that may read this clause',
       moduleCode: 'Module code',
       moduleCodePlaceholder: 'MOD-LOAN-DISCLOSURE',
       name: 'Name',
@@ -2514,6 +2532,7 @@ export default {
       create: 'Unable to create content module.',
       createVersion: 'Unable to create module version.',
       updateVersion: 'Unable to update draft version.',
+      updateSharedGroups: 'Unable to update shared groups.',
       reviewTransition: 'Unable to apply review transition.',
       loadImpactPreview: 'Unable to load impact preview.',
       lifecycle: 'Unable to apply status change.',

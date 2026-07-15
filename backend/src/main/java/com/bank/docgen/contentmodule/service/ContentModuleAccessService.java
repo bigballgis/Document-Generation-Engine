@@ -88,12 +88,25 @@ public class ContentModuleAccessService {
                 .filter(code -> code != null && !code.isBlank())
                 .map(code -> code.trim().toUpperCase(Locale.ROOT))
                 .distinct()
+                .sorted()
                 .toList();
         try {
             return objectMapper.writeValueAsString(normalized);
         } catch (JsonProcessingException ex) {
             return "[]";
         }
+    }
+
+    /**
+     * Normalize shared codes and drop the owning group (owner access is implicit).
+     */
+    public String writeSharedGroupCodesExcludingOwner(List<String> sharedGroupCodes, String ownerGroupCode) {
+        String owner = ownerGroupCode == null ? "" : ownerGroupCode.trim().toUpperCase(Locale.ROOT);
+        List<String> withoutOwner = sharedGroupCodes == null ? List.of() : sharedGroupCodes.stream()
+                .filter(code -> code != null && !code.isBlank())
+                .filter(code -> !owner.equals(code.trim().toUpperCase(Locale.ROOT)))
+                .toList();
+        return writeSharedGroupCodes(withoutOwner);
     }
 
     public void assertActorSession(ManagementSessionClaims session, ContentModuleGovernanceActorRole actorRole) {

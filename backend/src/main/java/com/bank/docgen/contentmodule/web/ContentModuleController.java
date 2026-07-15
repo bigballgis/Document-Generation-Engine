@@ -10,6 +10,7 @@ import com.bank.docgen.contentmodule.api.ContentModuleSummaryView;
 import com.bank.docgen.contentmodule.api.ContentModuleWorkflowTaskView;
 import com.bank.docgen.contentmodule.api.CreateContentModuleRequest;
 import com.bank.docgen.contentmodule.api.CreateContentModuleVersionRequest;
+import com.bank.docgen.contentmodule.api.UpdateContentModuleSharedGroupCodesRequest;
 import com.bank.docgen.contentmodule.api.UpdateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.api.ContentModuleLifecycleImpactSummaryView;
 import com.bank.docgen.contentmodule.service.ContentModuleLifecycleImpactService;
@@ -108,6 +109,16 @@ public class ContentModuleController {
             HttpServletRequest request
     ) {
         return envelope(request, contentModuleService.createVersion(moduleId, body, session));
+    }
+
+    @PutMapping("/{moduleId}/shared-group-codes")
+    public SuccessEnvelope<ContentModuleDetailView> updateSharedGroupCodes(
+            @PathVariable String moduleId,
+            @Valid @RequestBody UpdateContentModuleSharedGroupCodesRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, contentModuleService.updateSharedGroupCodes(moduleId, body, session));
     }
 
     @PutMapping("/{moduleId}/versions/{semanticVersion}")

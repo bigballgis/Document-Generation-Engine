@@ -13,6 +13,7 @@ vi.mock('@/api/contentModules', () => ({
   listContentModuleWorkflowTasks: vi.fn(),
   getContentModule: vi.fn(),
   createContentModule: vi.fn(),
+  updateContentModuleSharedGroupCodes: vi.fn(),
   createContentModuleVersion: vi.fn(),
   updateContentModuleDraftVersion: vi.fn(),
   transitionContentModuleReview: vi.fn(),
@@ -212,5 +213,91 @@ describe('ContentModuleDetailView', () => {
     await flushPromises()
     expect(wrapper.find('.el-timeline').exists()).toBe(false)
     expect(wrapper.text()).toContain('No review activity yet.')
+  })
+
+  it('SGC-003: detail summary shows owner and shared groups', async () => {
+    vi.mocked(contentModulesApi.getContentModule).mockResolvedValue({
+      moduleId: 'MOD-LOAN-DISCLOSURE',
+      moduleCode: 'MOD-LOAN',
+      groupCode: 'HQ',
+      name: 'Loan disclosure',
+      sharedGroupCodes: ['WEALTH', 'RETAIL'],
+      versions: [],
+      reviewHistory: [],
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleDetailView, {
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+    patchSession(['TEMPLATE_AUTHOR'])
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Owner: HQ')
+    expect(wrapper.text()).toContain('Shared with: RETAIL, WEALTH')
+  })
+
+  it('SGC-003: empty shared groups show not-shared copy', async () => {
+    vi.mocked(contentModulesApi.getContentModule).mockResolvedValue({
+      moduleId: 'MOD-LOAN-DISCLOSURE',
+      moduleCode: 'MOD-LOAN',
+      groupCode: 'HQ',
+      name: 'Loan disclosure',
+      sharedGroupCodes: [],
+      versions: [],
+      reviewHistory: [],
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleDetailView, {
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+    patchSession(['TEMPLATE_AUTHOR'])
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Not shared outside owner group')
+  })
+
+  it('SGC-006: settings entry hidden without configure capability', async () => {
+    vi.mocked(contentModulesApi.getContentModule).mockResolvedValue({
+      moduleId: 'MOD-LOAN-DISCLOSURE',
+      moduleCode: 'MOD-LOAN',
+      groupCode: 'HQ',
+      name: 'Loan disclosure',
+      sharedGroupCodes: ['RETAIL'],
+      versions: [],
+      reviewHistory: [],
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleDetailView, {
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+    patchSession(['TEMPLATE_AUTHOR'])
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="content-module-settings-open"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Shared with: RETAIL')
+  })
+
+  it('SGC-006: GROUP_ADMIN sees settings entry', async () => {
+    vi.mocked(contentModulesApi.getContentModule).mockResolvedValue({
+      moduleId: 'MOD-LOAN-DISCLOSURE',
+      moduleCode: 'MOD-LOAN',
+      groupCode: 'HQ',
+      name: 'Loan disclosure',
+      sharedGroupCodes: ['RETAIL'],
+      versions: [],
+      reviewHistory: [],
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleDetailView, {
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+    patchSession(['GROUP_ADMIN'])
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="content-module-settings-open"]').exists()).toBe(true)
   })
 })

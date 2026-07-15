@@ -8,6 +8,7 @@ import com.bank.docgen.contentmodule.api.ContentModuleDetailView;
 import com.bank.docgen.contentmodule.api.ContentModuleSummaryView;
 import com.bank.docgen.contentmodule.api.CreateContentModuleRequest;
 import com.bank.docgen.contentmodule.api.CreateContentModuleVersionRequest;
+import com.bank.docgen.contentmodule.api.UpdateContentModuleSharedGroupCodesRequest;
 import com.bank.docgen.contentmodule.api.UpdateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
@@ -193,6 +194,42 @@ public class ContentModuleService {
                 module.getGroupCode(),
                 module.getModuleCode(),
                 semanticVersion.trim(),
+                session.username(),
+                accessSupport.actorSummary(session)
+        );
+        return catalog.toDetail(module, session);
+    }
+
+    /**
+     * CE-U10 / U10-C4: module-level sharedGroupCodes update for GLOBAL_ADMIN / GROUP_ADMIN
+     * within the owning group (fail-closed; shared-into access alone is insufficient).
+     */
+    @Transactional
+    public ContentModuleDetailView updateSharedGroupCodes(
+            String moduleId,
+            UpdateContentModuleSharedGroupCodesRequest request,
+            ManagementSessionClaims session
+    ) {
+        if (!groupAccessService.canManageContentModuleLifecycle(session)) {
+            throw new ContentModuleAccessDeniedException();
+        }
+        ContentModuleEntity module = accessSupport.requireExistingModule(moduleId);
+        if (!groupAccessService.canAccessGroup(session, module.getGroupCode())) {
+            throw new ContentModuleAccessDeniedException();
+        }
+        module.setSharedGroupCodesJson(
+                accessSupport.writeSharedGroupCodesExcludingOwner(
+                        request.sharedGroupCodes(),
+                        module.getGroupCode()
+                )
+        );
+        module.setUpdatedBy(session.username());
+        moduleRepository.save(module);
+
+        auditRecorder.recordContentModuleSharedGroupCodesUpdated(
+                module.getId(),
+                module.getGroupCode(),
+                module.getModuleCode(),
                 session.username(),
                 accessSupport.actorSummary(session)
         );

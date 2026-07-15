@@ -14,6 +14,7 @@ const {
   versionDialogMode,
   selectedVersion,
   impactDialogOpen,
+  settingsDialogOpen,
   activeWorkspaceTab,
   workspaceTabs,
   moduleId,
@@ -21,6 +22,10 @@ const {
   versions,
   reviewHistory,
   formatReviewAction,
+  canConfigureSharedGroups,
+  detailSummaryDescription,
+  sharedGroupCodes,
+  ownerGroupCode,
   canSubmitReview,
   canApproveReview,
   canCreateVersion,
@@ -34,6 +39,7 @@ const {
   lifecycleOperationLabelKey,
   reloadPage,
   goBackToList,
+  openSettingsDialog,
   openCreateVersionDialog,
   openEditDraftDialog,
   handleSubmitReview,
@@ -51,9 +57,15 @@ const {
       show-back
       :back-label="t('contentModules.detail.backToList')"
       :title="detail?.name ?? t('contentModules.detail.loadingTitle')"
-      :description="detail ? `${detail.moduleCode} · ${t('contentModules.detail.groupLabel', { groupCode: detail.groupCode })}` : undefined"
+      :description="detailSummaryDescription"
       @back="goBackToList"
-    />
+    >
+      <template v-if="detail && canConfigureSharedGroups" #actions>
+        <el-button data-testid="content-module-settings-open" @click="openSettingsDialog">
+          {{ t('contentModules.settings.open') }}
+        </el-button>
+      </template>
+    </PageHeader>
 
     <p v-if="detail?.description" class="header-extra">{{ detail.description }}</p>
 
@@ -94,14 +106,19 @@ const {
     <ContentModuleDetailDialogs
       v-model:version-dialog-open="versionDialogOpen"
       v-model:impact-dialog-open="impactDialogOpen"
+      v-model:settings-dialog-open="settingsDialogOpen"
       :module-id="moduleId"
       :version-dialog-mode="versionDialogMode"
       :version="selectedVersion"
       :loading-impact="contentModulesStore.loadingImpactPreview"
       :impact="contentModulesStore.lifecycleImpactPreview"
       :operation-label-key="lifecycleOperationLabelKey"
+      :owner-group-code="ownerGroupCode"
+      :shared-group-codes="sharedGroupCodes"
+      :can-configure-shared-groups="canConfigureSharedGroups"
       @saved="handleVersionSaved"
       @confirm="confirmLifecycleOperation"
+      @settings-saved="reloadPage"
     />
   </AppPageLayout>
 </template>

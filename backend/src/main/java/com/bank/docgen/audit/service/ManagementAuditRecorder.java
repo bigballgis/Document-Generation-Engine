@@ -273,6 +273,19 @@ public class ManagementAuditRecorder {
     }
 
     @Transactional
+    public void recordContentModuleSharedGroupCodesUpdated(
+            UUID moduleId,
+            String groupCode,
+            String moduleCode,
+            String actorUsername,
+            String actorSummary
+    ) {
+        contentModuleAuditRecorder.recordContentModuleSharedGroupCodesUpdated(
+                moduleId, groupCode, moduleCode, actorUsername, actorSummary
+        );
+    }
+
+    @Transactional
     public void recordContentModuleReviewTransition(
             UUID moduleId,
             String groupCode,
