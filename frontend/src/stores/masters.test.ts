@@ -17,6 +17,7 @@ vi.mock('@/api/masters', () => ({
   listMasterRevisionLines: vi.fn(),
   getMasterRevisionLine: vi.fn(),
   downloadMasterRevisionLineFile: vi.fn(),
+  updateMasterRevisionLineAnchorDisplayLabel: vi.fn(),
 }))
 
 const sampleDetail = {
@@ -27,7 +28,7 @@ const sampleDetail = {
   status: 'DRAFT' as const,
   originalFilename: 'letterhead.docx',
   changeSummary: null,
-  anchors: [{ anchorId: 'HEADER', displayLabel: 'Header block' }],
+  anchors: [{ anchorId: 'HEADER', displayLabel: 'Header block', documentSequence: 0 }],
   reviewHistory: [],
   createdBy: '10000001',
   updatedBy: '10000001',
@@ -282,5 +283,44 @@ describe('masters store', () => {
 
     expect(detail.id).toBe('revision-1')
     expect(store.selectedRevisionLine?.current).toBe(true)
+  })
+
+  it('CE-U06 — updates displayLabel on selected revision line and live master', async () => {
+    vi.mocked(mastersApi.updateMasterRevisionLineAnchorDisplayLabel).mockResolvedValue({
+      anchorId: 'HEADER',
+      displayLabel: 'Readable header',
+      documentSequence: 0,
+    })
+
+    const store = useMastersStore()
+    store.selectedMaster = { ...sampleDetail }
+    store.selectedRevisionLine = {
+      id: 'revision-1',
+      masterId: 'master-1',
+      lineLabel: 'CURRENT',
+      status: 'DRAFT',
+      originalFilename: 'letterhead.docx',
+      changeSummary: null,
+      current: true,
+      anchors: [{ anchorId: 'HEADER', displayLabel: 'Header block', documentSequence: 0 }],
+      reviewHistory: [],
+      createdBy: '10000001',
+      updatedBy: '10000001',
+      createdAt: '2026-06-23T10:00:00Z',
+      updatedAt: '2026-06-23T10:00:00Z',
+    }
+
+    await store.updateRevisionLineAnchorDisplayLabel('master-1', 'revision-1', 'HEADER', {
+      displayLabel: 'Readable header',
+    })
+
+    expect(mastersApi.updateMasterRevisionLineAnchorDisplayLabel).toHaveBeenCalledWith(
+      'master-1',
+      'revision-1',
+      'HEADER',
+      { displayLabel: 'Readable header' },
+    )
+    expect(store.selectedRevisionLine?.anchors[0]?.displayLabel).toBe('Readable header')
+    expect(store.selectedMaster?.anchors[0]?.displayLabel).toBe('Readable header')
   })
 })

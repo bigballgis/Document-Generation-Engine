@@ -5,9 +5,9 @@ import type { MasterAnchor } from '@/types/master'
 
 describe('buildMasterAnchorBindingRows', () => {
   const masterAnchors: MasterAnchor[] = [
-    { anchorId: 'FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION', displayLabel: '1. Definitions and Interpretation' },
-    { anchorId: 'FOL_CLAUSE_02_THE_FACILITY', displayLabel: '2. The Facility' },
-    { anchorId: 'FOL_CLAUSE_03_PURPOSE', displayLabel: '3. Purpose' },
+    { anchorId: 'FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION', displayLabel: '1. Definitions and Interpretation', documentSequence: 0 },
+    { anchorId: 'FOL_CLAUSE_02_THE_FACILITY', displayLabel: '2. The Facility', documentSequence: 1 },
+    { anchorId: 'FOL_CLAUSE_03_PURPOSE', displayLabel: '3. Purpose', documentSequence: 2 },
   ]
 
   it('preserves master anchor order and marks unconfigured anchors', () => {

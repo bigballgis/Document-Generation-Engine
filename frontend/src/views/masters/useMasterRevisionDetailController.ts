@@ -1,19 +1,21 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import { canReviewMasters, sessionContext } from '@/auth/roles'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { shouldShowMasterDesignerJourney } from '@/utils/masterDesignerJourney'
+import { sortMasterAnchorsByDocumentSequence } from '@/utils/masterAnchorDocumentOrder'
 import {
   MASTER_REVISION_WORKSPACE_TAB_LABEL_KEYS,
   buildMasterRevisionWorkspaceQuery,
   resolveMasterRevisionWorkspaceTabFromQuery,
   type MasterRevisionWorkspaceTab,
 } from '@/views/masters/masterRevisionWorkspaceTabs'
-import type { MasterDocumentDetail } from '@/types/master'
+import type { MasterAnchor, MasterDocumentDetail } from '@/types/master'
 import { formatMasterRevisionLineLabel } from '@/utils/masterRevisionLineLabel'
 import { createMasterRevisionDetailActions } from '@/views/masters/createMasterRevisionDetailActions'
 
@@ -29,6 +31,9 @@ export function useMasterRevisionDetailController() {
   const reviewDialogOpen = ref(false)
   const loadFailed = ref(false)
   const downloading = ref(false)
+  const editLabelOpen = ref(false)
+  const editingAnchor = ref<MasterAnchor | null>(null)
+  const savingAnchorLabel = ref(false)
   const activeWorkspaceTab = ref<MasterRevisionWorkspaceTab>(
     resolveMasterRevisionWorkspaceTabFromQuery(route.query),
   )
@@ -77,7 +82,9 @@ export function useMasterRevisionDetailController() {
     }
   })
 
-  const anchorsSource = computed(() => revisionLine.value?.anchors ?? [])
+  const anchorsSource = computed(() =>
+    sortMasterAnchorsByDocumentSequence(revisionLine.value?.anchors ?? []),
+  )
   const { filters: anchorColumnFilters, filteredRows: filteredAnchors } = useDataTableFilters(
     anchorsSource,
     [
@@ -94,7 +101,10 @@ export function useMasterRevisionDetailController() {
       (revisionLine.value?.status === 'DRAFT' || revisionLine.value?.status === 'REJECTED'),
   )
   const canDecideReview = computed(
-    () => canReview.value && isCurrentRevision.value && revisionLine.value?.status === 'PENDING_REVIEW',
+    () =>
+      canReview.value &&
+      isCurrentRevision.value &&
+      revisionLine.value?.status === 'PENDING_REVIEW',
   )
 
   const showDesignerJourney = computed(() => {
@@ -131,6 +141,9 @@ export function useMasterRevisionDetailController() {
       ),
   )
 
+  /** CE-U06 — same write gate as Hub journey (manageMasters + current + not PENDING_REVIEW). */
+  const canEditAnchorDisplayLabel = computed(() => canWriteJourney.value)
+
   const errorMessage = computed(() => {
     const key = mastersStore.lastErrorMessageKey
     if (!key) {
@@ -161,6 +174,36 @@ export function useMasterRevisionDetailController() {
     errorMessage,
   })
 
+  function openEditAnchorLabel(anchor: MasterAnchor) {
+    if (!canEditAnchorDisplayLabel.value) {
+      return
+    }
+    editingAnchor.value = anchor
+    editLabelOpen.value = true
+  }
+
+  async function handleSaveAnchorDisplayLabel(payload: { displayLabel: string }) {
+    if (!editingAnchor.value || !canEditAnchorDisplayLabel.value) {
+      return
+    }
+    savingAnchorLabel.value = true
+    try {
+      await mastersStore.updateRevisionLineAnchorDisplayLabel(
+        masterId.value,
+        revisionLineId.value,
+        editingAnchor.value.anchorId,
+        payload,
+      )
+      ElMessage.success(t('masters.revision.anchorLabelSaveSuccess'))
+      editLabelOpen.value = false
+      editingAnchor.value = null
+    } catch {
+      ElMessage.error(errorMessage.value || t('masters.error.updateAnchorLabel'))
+    } finally {
+      savingAnchorLabel.value = false
+    }
+  }
+
   onMounted(async () => {
     await actions.reloadPage()
   })
@@ -177,6 +220,9 @@ export function useMasterRevisionDetailController() {
     reviewMode: actions.reviewMode,
     loadFailed,
     downloading,
+    editLabelOpen,
+    editingAnchor,
+    savingAnchorLabel,
     activeWorkspaceTab,
     workspaceTabs,
     masterId,
@@ -192,6 +238,7 @@ export function useMasterRevisionDetailController() {
     showDesignerJourney,
     journeyContext,
     canWriteJourney,
+    canEditAnchorDisplayLabel,
     revisionLineTitle,
     reloadPage: actions.reloadPage,
     goBackToPackage: actions.goBackToPackage,
@@ -200,5 +247,7 @@ export function useMasterRevisionDetailController() {
     handleReviewDecision: actions.handleReviewDecision,
     handleDownload: actions.handleDownload,
     formatReviewAction: actions.formatReviewAction,
+    openEditAnchorLabel,
+    handleSaveAnchorDisplayLabel,
   }
 }

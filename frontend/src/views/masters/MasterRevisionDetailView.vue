@@ -10,6 +10,7 @@ import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import MasterRevisionDetailWorkspace from '@/views/masters/detail/MasterRevisionDetailWorkspace.vue'
+import MasterAnchorDisplayLabelDialog from '@/components/masters/MasterAnchorDisplayLabelDialog.vue'
 import { useMasterRevisionDetailController } from '@/views/masters/useMasterRevisionDetailController'
 import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 
@@ -36,6 +37,7 @@ const {
   showDesignerJourney,
   journeyContext,
   canWriteJourney,
+  canEditAnchorDisplayLabel,
   revisionLineTitle,
   reloadPage,
   goBackToPackage,
@@ -44,6 +46,11 @@ const {
   handleReviewDecision,
   handleDownload,
   formatReviewAction,
+  editLabelOpen,
+  editingAnchor,
+  savingAnchorLabel,
+  openEditAnchorLabel,
+  handleSaveAnchorDisplayLabel,
 } = useMasterRevisionDetailController()
 
 const { formatDateTime } = useLocaleFormatters()
@@ -112,6 +119,7 @@ const { formatDateTime } = useLocaleFormatters()
         :downloading="downloading"
         :can-submit-for-review="canSubmitForReview"
         :can-decide-review="canDecideReview"
+        :can-edit-anchor-display-label="canEditAnchorDisplayLabel"
         :change-summary="revisionLine.changeSummary"
         :filtered-anchors="filteredAnchors"
         :review-history="revisionLine.reviewHistory"
@@ -119,6 +127,7 @@ const { formatDateTime } = useLocaleFormatters()
         @download="handleDownload"
         @open-submit-review="submitReviewOpen = true"
         @open-review="openReviewDialog"
+        @edit-display-label="openEditAnchorLabel"
       />
     </template>
 
@@ -127,6 +136,14 @@ const { formatDateTime } = useLocaleFormatters()
       v-model="reviewDialogOpen"
       :mode="reviewMode"
       @submit="handleReviewDecision"
+    />
+    <MasterAnchorDisplayLabelDialog
+      v-if="editingAnchor"
+      v-model="editLabelOpen"
+      :anchor-id="editingAnchor.anchorId"
+      :initial-display-label="editingAnchor.displayLabel"
+      :loading="savingAnchorLabel"
+      @submit="handleSaveAnchorDisplayLabel"
     />
   </AppPageLayout>
 </template>

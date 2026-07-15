@@ -1327,6 +1327,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/masters/{masterId}/revision-lines/{revisionLineId}/anchors/{anchorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update displayLabel for a master revision-line anchor
+         * @description CE-U06: updates `displayLabel` on the **current** writable revision-line anchor snapshot and keeps the live `master_document` catalog in sync. Requires `manageMasters` and package status not `PENDING_REVIEW`. Historical (`current=false`) lines are rejected with `api.error.master.invalidState`. `anchorId` and `documentSequence` are immutable via this endpoint; displayLabel-only changes do not affect CE-K05 anchor-set delta / `retestRequired`. Blank or whitespace-only labels are rejected (trim; English-first validation messageKey). Traceability: BDD-CE-U06-MAC-003…009.
+         */
+        patch: operations["updateMasterRevisionLineAnchorDisplayLabel"];
+        trace?: never;
+    };
     "/api/management/v1/audit/generation": {
         parameters: {
             query?: never;
@@ -2311,6 +2331,16 @@ export interface components {
         MasterAnchorSummaryView: {
             anchorId: string;
             displayLabel: string;
+            /** @description Zero-based document order from DOCX extraction (CE-U06 / CE-K05). Immutable via displayLabel PATCH; list surfaces sort by this order. */
+            documentSequence: number;
+        };
+        UpdateMasterAnchorDisplayLabelRequest: {
+            /** @description Human-readable anchor label. Trimmed on save; blank/whitespace-only rejected. Does not change anchorId or documentSequence. */
+            displayLabel: string;
+        };
+        MasterAnchorSummaryResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["MasterAnchorSummaryView"];
         };
         MasterReviewRecordView: {
             action: string;
@@ -6102,6 +6132,43 @@ export interface operations {
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": string;
                 };
             };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    updateMasterRevisionLineAnchorDisplayLabel: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                masterId: string;
+                revisionLineId: string;
+                /** @description Stable anchor key (immutable). */
+                anchorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMasterAnchorDisplayLabelRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated anchor summary (trimmed displayLabel; sequence unchanged). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MasterAnchorSummaryResponse"];
+                };
+            };
+            400: components["responses"]["ErrorResponse"];
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
             404: components["responses"]["ErrorResponse"];
