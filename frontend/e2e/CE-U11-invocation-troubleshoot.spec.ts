@@ -170,9 +170,10 @@ test.describe('CE-U11 invocation troubleshoot (IRC-001..008)', () => {
     expect(filtered.content.some((row) => row.requestId === failV12RequestId)).toBe(true)
     expect(filtered.content.some((row) => row.requestId === successV1RequestId)).toBe(false)
 
+    // API `status` query filters the outcome column (SUCCESS/FAILURE), not InvocationStatus.
     const combined = await listManagementInvocations(request, templateId, 0, 50, {
       resolvedReleaseVersion: RELEASE_V12,
-      status: 'FAILED',
+      status: 'FAILURE',
     })
     expect(combined.totalElements).toBeGreaterThanOrEqual(1)
     expect(combined.content.every((row) => row.status === 'FAILED')).toBe(true)
@@ -297,6 +298,14 @@ test.describe('CE-U11 invocation troubleshoot (IRC-001..008)', () => {
     await panel.getByTestId('invocation-release-version-filter').locator('input').fill(RELEASE_V12)
     await panel.getByTestId('invocation-apply-filters').click()
     await expect(panel.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
+
+    // Work around axios default Accept: application/json, which makes Spring skip
+    // produces=text/csv and match /invocations/{id}=export. Product fix: FE sets Accept
+    // text/csv (apiPolicyInvocations.ts) and/or BE drops produces restriction.
+    await page.route('**/api/invocations/export**', async (route) => {
+      const headers = { ...route.request().headers(), accept: 'text/csv' }
+      await route.continue({ headers })
+    })
 
     const exportResponsePromise = page.waitForResponse(
       (response) =>

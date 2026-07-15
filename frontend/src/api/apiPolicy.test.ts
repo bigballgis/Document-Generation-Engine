@@ -358,6 +358,7 @@ describe('apiPolicy API', () => {
         status: 'FAILED',
       },
       responseType: 'blob',
+      headers: { Accept: 'text/csv' },
     })
     expect(result.filename).toBe('invocations-tpl-1.csv')
     expect(result.truncated).toBe(false)

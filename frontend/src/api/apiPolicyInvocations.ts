@@ -96,6 +96,9 @@ export async function exportInvocationsCsv(
   const response = await http.get<Blob>(`/templates/${templateId}/api/invocations/export`, {
     params: buildInvocationFilterParams(filters),
     responseType: 'blob',
+    // Must not send Accept: application/json or Spring skips produces=text/csv and
+    // matches /invocations/{invocationId} with id "export" (API_POLICY_NOT_FOUND).
+    headers: { Accept: 'text/csv' },
   })
   const disposition = response.headers['content-disposition'] ?? ''
   const filenameMatch = /filename="([^"]+)"/i.exec(disposition)

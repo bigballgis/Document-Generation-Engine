@@ -84,7 +84,7 @@ public class ApiManagementInvocationController {
         ));
     }
 
-    @GetMapping(value = "/invocations/export", produces = "text/csv")
+    @GetMapping("/invocations/export")
     public ResponseEntity<byte[]> exportInvocationsCsv(
             @PathVariable UUID templateId,
             @RequestParam(required = false) String status,
