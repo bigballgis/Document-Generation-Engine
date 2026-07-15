@@ -1,0 +1,32 @@
+{
+  "slice": "CE-U13 #89",
+  "stage": 5,
+  "result": "DEPLOY_OK",
+  "timestamp": "2026-07-15T21:51:12+08:00",
+  "worktree": "D:/working/DGE-ce-u13-variable-rename",
+  "branch": "feat/ce-u13-variable-rename",
+  "commit": "9052d670c9f6e85dd8e5a60b152a7967d2b444b5",
+  "commit_short": "9052d670",
+  "compose_project": "documentgenerationengine",
+  "frontend_port": 4173,
+  "backend_port": 8080,
+  "healthz_status": 200,
+  "healthz_body": "{\"status\":\"UP\"}",
+  "frontend_status": 200,
+  "frontend_image_asset": "/usr/share/nginx/html/assets/ControlledStructuredContentEditor-Bhc-Pd4b.js",
+  "backend_inspect": "project=documentgenerationengine working_dir=D:\\working\\DGE-ce-u13-variable-rename image=sha256:c371b80338dd5dcd082d8173fc1be258b855cc62bdcb59b71ed08c4322e36ed7 status=running health=healthy",
+  "frontend_inspect": "project=documentgenerationengine working_dir=D:\\working\\DGE-ce-u13-variable-rename image=sha256:7004e12ce6b1fe645114cb86d92bb3af92640e6150609e1515c5d88ece0671f9 status=running health=healthy ports={\"8080/tcp\":[{\"HostIp\":\"0.0.0.0\",\"HostPort\":\"4173\"},{\"HostIp\":\"::\",\"HostPort\":\"4173\"}]}",
+  "images": [
+    "documentgenerationengine-docgen-backend:latest sha256:c371b80338dd5dcd082d8173fc1be258b855cc62bdcb59b71ed08c4322e36ed7 c371b80338dd About a minute ago",
+    "documentgenerationengine-docgen-frontend:latest sha256:7004e12ce6b1fe645114cb86d92bb3af92640e6150609e1515c5d88ece0671f9 7004e12ce6b1 About a minute ago"
+  ],
+  "notes": [
+    "Full queued deploy from CE-U13 worktree with COMPOSE_PROJECT_NAME=documentgenerationengine (single host; avoided second project).",
+    "JWT_SECRET set to non-default local secret in worktree .env (gitignored) to satisfy BDD-OPS-JWT-SECRET-001.",
+    "FRONTEND_PORT set to 4173 for Playwright docker E2E.",
+    "Did not touch K06c source; reused shared compose project only.",
+    "Stage 10 may SkipBuild if no further FE/BE rebuild needed and this stack remains current."
+  ],
+  "stage10_skip_build": true,
+  "queue_status": ""
+}

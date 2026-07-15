@@ -90,8 +90,10 @@ test.describe('CE-G03 testdata PII governance (BDD-CE-G03-012…014)', () => {
         return
       }
       const original = route.request().postDataJSON() as Record<string, unknown>
-      const { piiHandling: _removed, piiConfirmReason: _r, secondaryConfirmed: _s, ...rest } =
-        original
+      const rest = { ...original }
+      delete rest.piiHandling
+      delete rest.piiConfirmReason
+      delete rest.secondaryConfirmed
       await route.continue({
         postData: JSON.stringify(rest),
         headers: {
