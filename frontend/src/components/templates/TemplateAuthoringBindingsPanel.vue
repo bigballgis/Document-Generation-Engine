@@ -80,6 +80,14 @@ const {
 
 const { variables, bindings } = toRefs(props)
 const lastPreview = computed(() => props.lastPreview ?? null)
+
+function onVisibilityEnabledUpdate(value: boolean) {
+  visibilityEnabled.value = value
+}
+
+function onVisibilityExpressionUpdate(value: string) {
+  visibilityExpression.value = value
+}
 </script>
 
 <template>
@@ -131,8 +139,8 @@ const lastPreview = computed(() => props.lastPreview ?? null)
       :paste-residue-item-label="pasteResidueItemLabel"
       @back="backToList"
       @save="handleSaveBinding"
-      @update:visibility-enabled="visibilityEnabled = $event"
-      @update:visibility-expression="visibilityExpression = $event"
+      @update:visibility-enabled="onVisibilityEnabledUpdate"
+      @update:visibility-expression="onVisibilityExpressionUpdate"
       @clear-paste-residue="clearPendingPasteResidue"
       @dirty-change="handleEditorDirtyChange"
       @structure-change="handleStructureChange"

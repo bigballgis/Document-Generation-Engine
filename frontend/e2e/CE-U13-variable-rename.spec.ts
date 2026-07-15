@@ -342,11 +342,16 @@ test.describe('CE-U13 variable rename + expression autocomplete (BDD-CE-U13-VRC)
     const local = await prepareCeU13CascadeFixture(request)
     await openDevBindingEditor(page, request, local.templateId)
 
-    await page.getByText(/enable conditional visibility/i).click()
+    const visibilitySection = page.locator('.visibility-section')
+    await expect(visibilitySection).toBeVisible({ timeout: 15_000 })
+    const visibilityToggle = visibilitySection.locator('.el-checkbox')
+    await visibilityToggle.click()
+    await expect(visibilityToggle).toHaveClass(/is-checked/)
+
     const field = page
       .locator('[data-testid="condition-expression-field"]')
       .filter({ has: page.getByTestId('visibility-expression-input') })
-    await expect(field.getByTestId('visibility-expression-input')).toBeVisible({ timeout: 10_000 })
+    await expect(field.getByTestId('visibility-expression-input')).toBeVisible({ timeout: 15_000 })
 
     await field.getByTestId('insert-variable-button').click()
     await expect(field.getByTestId('variable-autocomplete-list')).toBeVisible()
