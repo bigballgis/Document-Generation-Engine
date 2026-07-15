@@ -1,9 +1,11 @@
 package com.bank.docgen.master.web;
 
 import com.bank.docgen.authorization.management.api.PageView;
+import com.bank.docgen.master.api.MasterAnchorView;
 import com.bank.docgen.master.api.MasterRevisionDiffView;
 import com.bank.docgen.master.api.MasterRevisionLineDetailView;
 import com.bank.docgen.master.api.MasterRevisionLineSummaryView;
+import com.bank.docgen.master.api.UpdateMasterAnchorDisplayLabelRequest;
 import com.bank.docgen.master.service.MasterDocumentService;
 import com.bank.docgen.master.service.MasterImpactAnalysisService;
 import com.bank.docgen.master.service.MasterRevisionLineService;
@@ -13,12 +15,15 @@ import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -111,6 +116,22 @@ public class MasterRevisionLineController {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();
         return new SuccessEnvelope<>(Metadata.minimal(auditId, traceId), null);
+    }
+
+    @PatchMapping("/{revisionLineId}/anchors/{anchorId}")
+    public SuccessEnvelope<MasterAnchorView> updateAnchorDisplayLabel(
+            @PathVariable UUID masterId,
+            @PathVariable UUID revisionLineId,
+            @PathVariable String anchorId,
+            @Valid @RequestBody UpdateMasterAnchorDisplayLabelRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(
+                request,
+                masterRevisionLineService.updateAnchorDisplayLabel(
+                        masterId, revisionLineId, anchorId, body, session)
+        );
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

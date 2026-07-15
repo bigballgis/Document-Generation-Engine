@@ -122,7 +122,10 @@ export const apiErrorZhCn = {
     sealAssetNotFound: "找不到引用的印章资源。",
     ooxmlValidationFailed:
       "生成的文档未通过 OOXML 校验，未予保存。请修正结构化内容后重新生成。",
-    pinnedMasterUnavailable: "此发布版本固定的母版修订版本不可用。"
+    pinnedMasterUnavailable: "此发布版本固定的母版修订版本不可用。",
+    qrBarcodePayloadMissing: "二维码或条码载荷变量缺失或为空。请为引用的键提供非空值。",
+    qrBarcodeConfigInvalid: "二维码或条码节点配置无效。请检查 sizePx、errorCorrection 和 format。",
+    qrBarcodeEncodeFailed: "无法编码二维码或条码载荷。请检查载荷字符与格式。"
   },
   lifecycle: {
     selfApprovalForbidden: "不允许自我审批；决策人必须与最近一次提交人不同。",
@@ -149,6 +152,8 @@ export const apiErrorZhCn = {
     adGroupDenied: "调用方未通过 AD 组策略授权。",
     policyNotConfigured: "此模板未配置 API 策略。",
     templateCredentialMismatch: "凭据对此模板无效。",
+    apiCredentialExpired: "API 凭据已过期。",
+    apiCredentialRevoked: "API 凭据已被撤销。",
     releaseVersionRequired: "生成需要发布版本。",
     versionNotCallable: "请求的发布版本不可调用。",
     idempotencyConflict: "幂等键已用于不同的请求。",
@@ -182,6 +187,9 @@ export const apiErrorZhCn = {
   audit: {
     invalidTimeWindow: "审计时间窗口无效。",
     scopeRequired: "组范围审计查询需要组范围和模板标识符。"
+  },
+  batch: {
+    originalBatchNotFound: "未找到原始批次。"
   },
   notFound: {
     userNotFound: "请求的用户不存在。",

@@ -17,7 +17,9 @@ import type {
   MasterRevisionLineDetail,
   MasterRevisionLinePage,
   SubmitMasterReviewPayload,
+  UpdateMasterAnchorDisplayLabelPayload,
   UpdateMasterMetadataPayload,
+  MasterAnchor,
 } from '@/types/master'
 
 /** Optional UX callbacks for multipart master DOCX transfers (endpoints/payloads unchanged). */
@@ -229,6 +231,20 @@ export async function replaceMasterFile(
       headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: attachUploadProgress(options),
     },
+  )
+  return unwrapEnvelope(response.data)
+}
+
+/** CE-U06 — PATCH displayLabel on a revision-line anchor (current writable line). */
+export async function updateMasterRevisionLineAnchorDisplayLabel(
+  masterId: string,
+  revisionLineId: string,
+  anchorId: string,
+  payload: UpdateMasterAnchorDisplayLabelPayload,
+): Promise<MasterAnchor> {
+  const response = await http.patch<ApiEnvelope<MasterAnchor>>(
+    `/masters/${masterId}/revision-lines/${revisionLineId}/anchors/${encodeURIComponent(anchorId)}`,
+    payload,
   )
   return unwrapEnvelope(response.data)
 }

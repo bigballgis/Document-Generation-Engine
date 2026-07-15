@@ -1204,3 +1204,33 @@ export async function captureCeK05LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** CE-U06 master anchor position overview — 1440×900 dual-brand evidence. */
+export const CE_U06_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-U06')
+export const CE_U06_SCREENSHOT_DIR = path.join(CE_U06_EVIDENCE_ROOT, 'screenshots')
+export const CE_U06_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureCeU06EvidenceDirs(): void {
+  fs.mkdirSync(CE_U06_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceU06ScreenshotPath(filename: string): string {
+  return path.join(CE_U06_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeU06Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeU06EvidenceDirs()
+  const target = ceU06ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeU06LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeU06EvidenceDirs()
+  const target = ceU06ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

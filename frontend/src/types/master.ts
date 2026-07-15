@@ -107,6 +107,8 @@ export interface UpdateMasterMetadataPayload {
   description?: string | null
 }
 
+export type UpdateMasterAnchorDisplayLabelPayload = Schema<'UpdateMasterAnchorDisplayLabelRequest'>
+
 export type MasterRevisionLineSummary = Schema<'MasterRevisionLineSummaryView'> & {
   updatedByDisplayName?: string | null
 }

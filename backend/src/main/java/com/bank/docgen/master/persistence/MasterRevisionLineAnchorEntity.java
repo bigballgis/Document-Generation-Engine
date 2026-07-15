@@ -61,6 +61,10 @@ public class MasterRevisionLineAnchorEntity {
         return displayLabel;
     }
 
+    public void setDisplayLabel(String displayLabel) {
+        this.displayLabel = displayLabel;
+    }
+
     public int getDocumentSequence() {
         return documentSequence;
     }

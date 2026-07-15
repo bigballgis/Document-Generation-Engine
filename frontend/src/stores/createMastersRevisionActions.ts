@@ -2,11 +2,13 @@ import type { Ref } from 'vue'
 import * as mastersApi from '@/api/masters'
 import { resolveApiErrorMessageKey, resolveStoreErrorMessageKey } from '@/api/http'
 import type {
+  MasterAnchor,
   MasterDocumentDetail,
   MasterDocumentSummary,
   MasterImpactAnalysis,
   MasterRevisionLineDetail,
   MasterRevisionLinePage,
+  UpdateMasterAnchorDisplayLabelPayload,
 } from '@/types/master'
 import { applyUpdatedMaster } from '@/stores/mastersStoreHelpers'
 
@@ -129,6 +131,61 @@ export function createMastersRevisionActions(deps: {
     }
   }
 
+  function applyAnchorLabelToList(
+    anchors: MasterAnchor[],
+    updated: MasterAnchor,
+  ): MasterAnchor[] {
+    return anchors.map((anchor) =>
+      anchor.anchorId === updated.anchorId
+        ? {
+            ...anchor,
+            displayLabel: updated.displayLabel,
+            documentSequence: updated.documentSequence,
+          }
+        : anchor,
+    )
+  }
+
+  /** CE-U06 — persist displayLabel; refresh local revision + live master catalogs. */
+  async function updateRevisionLineAnchorDisplayLabel(
+    masterId: string,
+    revisionLineId: string,
+    anchorId: string,
+    payload: UpdateMasterAnchorDisplayLabelPayload,
+  ): Promise<MasterAnchor> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      const updated = await mastersApi.updateMasterRevisionLineAnchorDisplayLabel(
+        masterId,
+        revisionLineId,
+        anchorId,
+        payload,
+      )
+      if (selectedRevisionLine.value?.id === revisionLineId) {
+        selectedRevisionLine.value = {
+          ...selectedRevisionLine.value,
+          anchors: applyAnchorLabelToList(selectedRevisionLine.value.anchors, updated),
+        }
+      }
+      if (selectedMaster.value?.id === masterId) {
+        selectedMaster.value = {
+          ...selectedMaster.value,
+          anchors: applyAnchorLabelToList(selectedMaster.value.anchors, updated),
+        }
+      }
+      return updated
+    } catch (error) {
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(
+        error,
+        'masters.error.updateAnchorLabel',
+      )
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
   return {
     fetchImpactAnalysis,
     fetchRevisionLines,
@@ -136,5 +193,6 @@ export function createMastersRevisionActions(deps: {
     downloadMasterFile,
     downloadRevisionLineFile,
     replaceMasterFile,
+    updateRevisionLineAnchorDisplayLabel,
   }
 }

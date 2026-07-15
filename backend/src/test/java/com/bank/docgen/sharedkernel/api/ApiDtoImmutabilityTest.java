@@ -89,7 +89,7 @@ class ApiDtoImmutabilityTest {
 
     @Test
     void masterDocumentDetailViewDefensivelyCopiesAnchorsAndReviewHistory() {
-        List<MasterAnchorView> anchors = new ArrayList<>(List.of(new MasterAnchorView("a1", "Anchor 1")));
+        List<MasterAnchorView> anchors = new ArrayList<>(List.of(new MasterAnchorView("a1", "Anchor 1", 0)));
         List<String> reviewActorIds = new ArrayList<>(List.of("10000001"));
 
         MasterDocumentDetailView view = new MasterDocumentDetailView(
@@ -108,7 +108,7 @@ class ApiDtoImmutabilityTest {
                 Instant.parse("2026-01-02T00:00:00Z")
         );
 
-        anchors.add(new MasterAnchorView("a2", "Anchor 2"));
+        anchors.add(new MasterAnchorView("a2", "Anchor 2", 1));
         reviewActorIds.add("10000002");
 
         assertThat(view.anchors()).hasSize(1);

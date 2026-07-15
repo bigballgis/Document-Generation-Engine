@@ -6,6 +6,8 @@ vi.mock('@/api/http', () => ({
   http: {
     get: vi.fn(),
     post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
   },
 }))
 
@@ -13,6 +15,8 @@ describe('masters API', () => {
   beforeEach(() => {
     vi.mocked(http.get).mockReset()
     vi.mocked(http.post).mockReset()
+    vi.mocked(http.put).mockReset()
+    vi.mocked(http.patch).mockReset()
   })
 
   it('lists masters as PageView with page/size defaults', async () => {
@@ -253,5 +257,32 @@ describe('masters API', () => {
     })
     expect(page.content).toHaveLength(1)
     expect(page.content[0]?.current).toBe(true)
+  })
+
+  it('CE-U06 — PATCHes revision-line anchor displayLabel', async () => {
+    vi.mocked(http.patch).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          anchorId: 'HEADER',
+          displayLabel: 'Header block',
+          documentSequence: 0,
+        },
+      },
+    })
+
+    const updated = await mastersApi.updateMasterRevisionLineAnchorDisplayLabel(
+      'master-1',
+      'revision-1',
+      'HEADER',
+      { displayLabel: 'Header block' },
+    )
+
+    expect(http.patch).toHaveBeenCalledWith(
+      '/masters/master-1/revision-lines/revision-1/anchors/HEADER',
+      { displayLabel: 'Header block' },
+    )
+    expect(updated.displayLabel).toBe('Header block')
+    expect(updated.documentSequence).toBe(0)
   })
 })

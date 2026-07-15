@@ -158,6 +158,21 @@ public class MasterDocumentEntity {
         return List.copyOf(anchors);
     }
 
+    /**
+     * CE-U06: mutate managed live catalog displayLabel (documentSequence / anchorId unchanged).
+     *
+     * @return true when the anchor existed on this master
+     */
+    public boolean updateAnchorDisplayLabel(String anchorId, String displayLabel) {
+        for (MasterAnchorEntity anchor : anchors) {
+            if (anchor.getAnchorId().equals(anchorId)) {
+                anchor.setDisplayLabel(displayLabel);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void setName(String name) {
         this.name = name;
     }

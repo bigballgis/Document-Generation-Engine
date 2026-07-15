@@ -33,7 +33,7 @@ export interface paths {
         };
         /**
          * List callable release versions
-         * @description Returns release versions currently callable from the caller's authorization view. This is not a back-office version management list.
+         * @description Returns release versions currently callable from the caller's authorization view. This is not a back-office version management list. Optional per-item `deprecated` and `sunsetAt` fields are display/discovery metadata only and must not change the callable candidate set (see ADR-0003 / ADR-0017 display boundary).
          */
         get: operations["listCallableVersions"];
         put?: never;
@@ -1327,6 +1327,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/masters/{masterId}/revision-lines/{revisionLineId}/anchors/{anchorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update displayLabel for a master revision-line anchor
+         * @description CE-U06: updates `displayLabel` on the **current** writable revision-line anchor snapshot and keeps the live `master_document` catalog in sync. Requires `manageMasters` and package status not `PENDING_REVIEW`. Historical (`current=false`) lines are rejected with `api.error.master.invalidState`. `anchorId` and `documentSequence` are immutable via this endpoint; displayLabel-only changes do not affect CE-K05 anchor-set delta / `retestRequired`. Blank or whitespace-only labels are rejected (trim; English-first validation messageKey). Traceability: BDD-CE-U06-MAC-003…009.
+         */
+        patch: operations["updateMasterRevisionLineAnchorDisplayLabel"];
+        trace?: never;
+    };
     "/api/management/v1/audit/generation": {
         parameters: {
             query?: never;
@@ -1593,6 +1613,8 @@ export interface components {
             items: components["schemas"]["BatchGenerateItem"][];
             requestId: string;
             idempotencyKey: string;
+            /** @description Optional retry lineage. When present, must identify an existing BATCH_ROOT batch owned by the same API credential; otherwise 404 ORIGINAL_BATCH_NOT_FOUND. On success, echoed on result.batch.originalBatchId. Does not mutate the original batch. See CE-C05 / docs/behavior/ce-c05-original-batch-id.md.
+             *      */
             originalBatchId?: string;
             context?: components["schemas"]["Context"];
         };
@@ -1744,6 +1766,8 @@ export interface components {
         };
         BatchResult: {
             batchId: string;
+            /** @description Present when the request supplied originalBatchId and lineage validation succeeded. Equals the request originalBatchId; never equal to this result's batchId.
+             *      */
             originalBatchId?: string;
             summary: {
                 totalCount: number;
@@ -1812,6 +1836,13 @@ export interface components {
         CallableVersion: {
             releaseVersion: string;
             explicitVersionUrl: string;
+            /** @description Optional display-only deprecation flag for discovery UIs. Does not admit stopped or permanently deprecated release versions into the callable set; omit or false for currently callable PUBLISHED items. */
+            deprecated?: boolean;
+            /**
+             * Format: date-time
+             * @description Optional display-only sunset timestamp (ISO 8601 with timezone offset). Discovery metadata only; does not change callable candidate rules. Omit for currently callable PUBLISHED items when no sunset is published.
+             */
+            sunsetAt?: string;
         };
         DefaultRouteSummary: {
             url: string;
@@ -2017,21 +2048,29 @@ export interface components {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["ApiAccessReadinessSummaryView"];
         };
+        /** @description Non-sensitive API credential summary for contract and management views. `status` is the effective lifecycle status (including EXPIRING_SOON). `expiresAt` is the persisted credential expiry (ISO 8601 with timezone offset); it must not be synthesized solely from createdAt + 180 days. */
         CredentialSummary: {
             credentialId?: string;
             status?: components["schemas"]["CredentialStatus"];
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Persisted credential expiry instant (ISO 8601 with timezone offset). EXPIRING_SOON applies when expiry is within the 30-day reminder window and the credential is not yet expired or revoked.
+             */
             expiresAt?: string;
             fingerprintSummary?: string;
             authorizedTemplateSummary?: string;
             /** Format: date-time */
             rotationGracePeriodEndsAt?: string;
         };
-        /** @enum {string} */
+        /**
+         * @description Effective credential lifecycle status. ACTIVE and EXPIRING_SOON remain callable when the secret matches; EXPIRED and REVOKED fail closed.
+         * @enum {string}
+         */
         CredentialStatus: "ACTIVE" | "EXPIRING_SOON" | "EXPIRED" | "REVOKED";
         CredentialCreateRequest: {
             operator: string;
             callerId: string;
+            /** @description Optional credential lifetime in days. Default is 180 when omitted. Must be between 1 and 365 inclusive (ADR-0009). */
             expiryDays?: number;
             reason?: string;
         };
@@ -2311,6 +2350,16 @@ export interface components {
         MasterAnchorSummaryView: {
             anchorId: string;
             displayLabel: string;
+            /** @description Zero-based document order from DOCX extraction (CE-U06 / CE-K05). Immutable via displayLabel PATCH; list surfaces sort by this order. */
+            documentSequence: number;
+        };
+        UpdateMasterAnchorDisplayLabelRequest: {
+            /** @description Human-readable anchor label. Trimmed on save; blank/whitespace-only rejected. Does not change anchorId or documentSequence. */
+            displayLabel: string;
+        };
+        MasterAnchorSummaryResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["MasterAnchorSummaryView"];
         };
         MasterReviewRecordView: {
             action: string;
@@ -3525,7 +3574,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED";
     };
     responses: {
         /** @description Async task accepted. */
@@ -6102,6 +6151,43 @@ export interface operations {
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": string;
                 };
             };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    updateMasterRevisionLineAnchorDisplayLabel: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                masterId: string;
+                revisionLineId: string;
+                /** @description Stable anchor key (immutable). */
+                anchorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMasterAnchorDisplayLabelRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated anchor summary (trimmed displayLabel; sequence unchanged). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MasterAnchorSummaryResponse"];
+                };
+            };
+            400: components["responses"]["ErrorResponse"];
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
             404: components["responses"]["ErrorResponse"];

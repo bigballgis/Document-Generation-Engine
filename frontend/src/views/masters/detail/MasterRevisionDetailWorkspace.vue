@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import AppDataTable from '@/components/common/AppDataTable.vue'
-import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
+import MasterAnchorPositionOverview from '@/components/masters/MasterAnchorPositionOverview.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import type { MasterRevisionWorkspaceTab } from '@/views/masters/masterRevisionWorkspaceTabs'
-import type { MasterReviewDecision } from '@/types/master'
+import type { MasterAnchor, MasterReviewDecision } from '@/types/master'
 
 defineProps<{
   workspaceTabs: Array<{ name: MasterRevisionWorkspaceTab; labelKey: string }>
   downloading: boolean
   canSubmitForReview: boolean
   canDecideReview: boolean
+  canEditAnchorDisplayLabel: boolean
   changeSummary: string | null | undefined
-  filteredAnchors: Array<{ anchorId: string; displayLabel: string }>
+  filteredAnchors: MasterAnchor[]
   reviewHistory: Array<{
     createdAt: string
     action: string
@@ -33,6 +33,7 @@ const emit = defineEmits<{
   download: []
   openSubmitReview: []
   openReview: [mode: MasterReviewDecision]
+  editDisplayLabel: [anchor: MasterAnchor]
 }>()
 
 const { t } = useI18n()
@@ -76,29 +77,17 @@ const { formatDateTime } = useLocaleFormatters()
           </dl>
         </el-card>
 
-        <el-card shadow="never">
+        <el-card shadow="never" class="anchors-card">
           <template #header>
             <span>{{ t('masters.revision.anchorsTitle') }}</span>
           </template>
-          <AppDataTable v-if="filteredAnchors.length > 0" :data="filteredAnchors">
-            <el-table-column prop="anchorId" min-width="160">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('masters.revision.anchorId')"
-                  v-model="anchorColumnFilters.anchorId"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column prop="displayLabel" min-width="220">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('masters.revision.anchorLabel')"
-                  v-model="anchorColumnFilters.displayLabel"
-                />
-              </template>
-            </el-table-column>
-          </AppDataTable>
-          <el-empty v-else :description="t('masters.revision.noAnchors')" />
+          <MasterAnchorPositionOverview
+            :anchors="filteredAnchors"
+            :can-edit-display-label="canEditAnchorDisplayLabel"
+            :column-filters="anchorColumnFilters"
+            @update:column-filters="anchorColumnFilters = $event"
+            @edit-display-label="emit('editDisplayLabel', $event)"
+          />
         </el-card>
       </section>
     </template>
@@ -142,9 +131,13 @@ const { formatDateTime } = useLocaleFormatters()
 
 .detail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
   margin-bottom: 1rem;
+}
+
+.anchors-card {
+  min-width: 0;
 }
 
 .summary-list {

@@ -93,7 +93,10 @@ final class MasterDocumentViewSupport {
                 master.getOriginalFilename(),
                 master.getChangeSummary(),
                 master.getAnchors().stream()
-                        .map(anchor -> new MasterAnchorView(anchor.getAnchorId(), anchor.getDisplayLabel()))
+                        .map(anchor -> new MasterAnchorView(
+                                anchor.getAnchorId(),
+                                anchor.getDisplayLabel(),
+                                anchor.getDocumentSequence()))
                         .toList(),
                 reviewRecords.stream()
                         .map(record -> new MasterReviewRecordView(

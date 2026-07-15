@@ -124,7 +124,13 @@ export const apiErrorEn = {
     sealAssetNotFound: "The referenced seal asset could not be found.",
     ooxmlValidationFailed:
       "The generated document failed OOXML validation and was not saved. Regenerate after correcting structured content.",
-    pinnedMasterUnavailable: "The pinned letterhead revision for this release is unavailable."
+    pinnedMasterUnavailable: "The pinned letterhead revision for this release is unavailable.",
+    qrBarcodePayloadMissing:
+      "The QR or barcode payload variable is missing or blank. Provide a non-empty value for the referenced key.",
+    qrBarcodeConfigInvalid:
+      "The QR or barcode node configuration is invalid. Check sizePx, errorCorrection, and format.",
+    qrBarcodeEncodeFailed:
+      "The QR or barcode payload could not be encoded. Check the payload characters and format."
   },
   lifecycle: {
     selfApprovalForbidden:
@@ -153,6 +159,8 @@ export const apiErrorEn = {
     adGroupDenied: "The caller is not authorized by AD Group policy.",
     policyNotConfigured: "API policy is not configured for this template.",
     templateCredentialMismatch: "The credential is not valid for this template.",
+    apiCredentialExpired: "The API credential has expired.",
+    apiCredentialRevoked: "The API credential has been revoked.",
     releaseVersionRequired: "A release version is required for generation.",
     versionNotCallable: "The requested release version is not callable.",
     idempotencyConflict: "The idempotency key was already used with a different request.",
@@ -186,6 +194,9 @@ export const apiErrorEn = {
   audit: {
     invalidTimeWindow: "The audit time window is invalid.",
     scopeRequired: "Group scope and template identifier are required for group-scoped audit queries."
+  },
+  batch: {
+    originalBatchNotFound: "Original batch was not found."
   },
   notFound: {
     userNotFound: "The requested user does not exist.",
