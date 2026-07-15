@@ -31,12 +31,14 @@ test.describe('CE-K05 master impact real (MIR-008/009)', () => {
   test('MIR-009 — impact panel empty vs name links stay honest', async ({ page }) => {
     await loginAs(page, E2E_MASTER_DESIGNER)
     await page.goto(hubPath)
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /demo retail letterhead/i })).toBeVisible()
 
     const panel = page.getByTestId('master-impact-panel')
     await expect(panel).toBeVisible()
+    // Wait for impact fetch to settle (skeleton / unavailable → empty or name links).
     const empty = panel.getByTestId('master-impact-empty')
     const list = panel.getByTestId('master-impact-template-list')
+    await expect(empty.or(list)).toBeVisible()
     if ((await list.count()) > 0) {
       await expect(empty).toHaveCount(0)
       await expect(panel.getByTestId('master-impact-template-link').first()).toBeVisible()
@@ -53,7 +55,7 @@ test.describe('CE-K05 master impact real (MIR-008/009)', () => {
 
     await loginAs(page, E2E_MASTER_DESIGNER)
     await page.goto(hubPath)
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    await expect(page.getByRole('button', { name: /update letterhead docx/i })).toBeVisible()
     const beforeUrl = page.url()
 
     await page.getByRole('button', { name: /update letterhead docx/i }).click()
