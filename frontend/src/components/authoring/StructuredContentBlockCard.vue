@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Rank } from '@element-plus/icons-vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import ConditionExpressionInput from '@/components/authoring/ConditionExpressionInput.vue'
 import StructuredContentBlockCard from '@/components/authoring/StructuredContentBlockCard.vue'
 import {
   STRUCTURED_BLOCK_NODE_TYPES,
@@ -52,6 +53,7 @@ const nestedChildren = computed(() => props.node.children ?? [])
 const nestedPathKey = computed(() => pathTestId(props.path))
 const canReorder = computed(() => !props.readonly && props.siblingCount > 1)
 const dragOver = ref(false)
+const conditionVariableKeys = computed(() => props.variableSelectOptions.map((option) => option.value))
 
 function conditionExpression(node: StructuredContentNode): string {
   return node.conditionExpression ?? node.key ?? ''
@@ -219,10 +221,11 @@ function onDragEnd() {
     </template>
 
     <template v-else-if="node.type === 'conditionBlock'">
-      <el-input
+      <ConditionExpressionInput
         :model-value="conditionExpression(node)"
+        :variable-keys="conditionVariableKeys"
         :readonly="readonly"
-        data-testid="condition-expression-input"
+        test-id="condition-expression-input"
         :placeholder="t('templates.structuredEditor.conditionPlaceholder')"
         @update:model-value="(value: string) => emit('update-block-field', path, 'conditionExpression', value)"
         @blur="emit('end-field-coalesce')"

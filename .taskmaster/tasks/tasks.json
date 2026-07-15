@@ -739,7 +739,6 @@
         "subtasks": [],
         "updatedAt": "2026-07-16T03:45:00.000Z"
       },
-
       {
         "id": "54",
         "title": "CE-K07: Golden corpus regression skeleton",
@@ -1235,8 +1234,8 @@
       {
         "id": "89",
         "title": "CE-U13: Variable rename cascade + expression autocomplete",
-        "description": "IN PROGRESS 2026-07-16 (sole-active CE leaf after G03). Slice ce-u13-variable-rename-autocomplete. Rename propagates; conditionExpression autocomplete. P2·M. Worktree may stay parked until writer /deliver.",
-        "details": "After U06 (#88) and G03 (#74 Done). Sole-active under umbrella #53 (single-lane serial). Worktree ../DGE-ce-u13-variable-rename may exist parked — activate writer only via next deliver session; do not fan-out with #71. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U13 In Progress. Do NOT activate CD-3 / claim go-live.",
+        "description": "IN PROGRESS 2026-07-16 (sole-active CE leaf after G03). Slice ce-u13-variable-rename. Worktree DGE-ce-u13-variable-rename; branch feat/ce-u13-variable-rename. Rename cascade + conditionExpression autocomplete. FE-primary. Formal phase None. Not go-live. Do NOT mark Done until merge + MAIN doc-sync.",
+        "details": "After U06 (#88) and G03 (#74 Done). Sole-active under umbrella #53 (single-lane serial). Worktree ../DGE-ce-u13-variable-rename active writer; do not fan-out with #71. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U13 In Progress. Do NOT activate CD-3 / claim go-live.",
         "testStrategy": "1. Rename cascade. 2. Autocomplete. 3. Gates + E2E.",
         "priority": "medium",
         "dependencies": [

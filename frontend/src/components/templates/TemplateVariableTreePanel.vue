@@ -17,6 +17,7 @@ const emit = defineEmits<{
 const {
   t,
   templatesStore,
+  canWriteVariables,
   searchQuery,
   variableDialogOpen,
   editingVariableKey,
@@ -47,14 +48,20 @@ const {
 </script>
 
 <template>
-  <div class="variable-tree-panel">
+  <div class="variable-tree-panel" data-testid="variable-tree-panel">
     <SectionPanelHeader
       :title="t('templates.authoring.variablesTitle')"
       :help-title="t('templates.authoring.variablesHelpTitle')"
       :help-content="t('templates.authoring.variablesHelpContent')"
     >
       <template #actions>
-        <el-button type="primary" plain @click="openAddVariable">
+        <el-button
+          v-if="canWriteVariables"
+          type="primary"
+          plain
+          data-testid="add-variable-button"
+          @click="openAddVariable"
+        >
           {{ t('templates.authoring.addVariable') }}
         </el-button>
       </template>
@@ -110,8 +117,13 @@ const {
               {{ t('templates.authoring.piiBadge') }}
             </el-tag>
             <span v-if="data.technicalKey" class="tree-node__technical-key">{{ data.technicalKey }}</span>
-            <span class="tree-node__actions">
-              <el-button link type="primary" @click.stop="openEditVariable(data.variable)">
+            <span v-if="canWriteVariables" class="tree-node__actions">
+              <el-button
+                link
+                type="primary"
+                data-testid="edit-variable-button"
+                @click.stop="openEditVariable(data.variable)"
+              >
                 {{ t('common.edit') }}
               </el-button>
               <el-button link type="danger" @click.stop="handleDeleteVariable(data.variable.variableKey)">
@@ -131,21 +143,34 @@ const {
     >
       <el-form label-position="top">
         <el-form-item :label="t('templates.authoring.variableKey')">
-          <el-input v-model="variableForm.variableKey" :disabled="Boolean(editingVariableKey)" />
+          <el-input
+            v-model="variableForm.variableKey"
+            data-testid="variable-key-input"
+            :disabled="!canWriteVariables"
+          />
         </el-form-item>
         <el-form-item :label="t('templates.authoring.variableType')">
-          <AppSearchSelect v-model="variableForm.variableType" style="width: 100%">
+          <AppSearchSelect
+            v-model="variableForm.variableType"
+            style="width: 100%"
+            :disabled="!canWriteVariables"
+          >
             <el-option v-for="type in variableTypes" :key="type" :label="type" :value="type" />
           </AppSearchSelect>
         </el-form-item>
         <el-form-item :label="t('templates.authoring.required')">
-          <el-switch v-model="variableForm.required" />
+          <el-switch v-model="variableForm.required" :disabled="!canWriteVariables" />
         </el-form-item>
         <el-form-item :label="t('templates.authoring.defaultValue')">
-          <el-input v-model="variableForm.defaultValue" />
+          <el-input v-model="variableForm.defaultValue" :disabled="!canWriteVariables" />
         </el-form-item>
         <el-form-item :label="t('templates.authoring.description')">
-          <el-input v-model="variableForm.description" type="textarea" :rows="2" />
+          <el-input
+            v-model="variableForm.description"
+            type="textarea"
+            :rows="2"
+            :disabled="!canWriteVariables"
+          />
         </el-form-item>
         <el-form-item :label="t('templates.authoring.piiCategory')">
           <AppSearchSelect
@@ -170,15 +195,16 @@ const {
             v-model="variableForm.computeExpression"
             type="textarea"
             :rows="3"
+            :disabled="!canWriteVariables"
             :placeholder="t('templates.authoring.computeExpressionPlaceholder')"
           />
         </el-form-item>
         <template v-if="variableForm.variableType === 'COMPUTED'">
           <el-form-item :label="t('templates.authoring.computeSampleJson')">
-            <el-input v-model="sampleJson" type="textarea" :rows="4" />
+            <el-input v-model="sampleJson" type="textarea" :rows="4" :disabled="!canWriteVariables" />
           </el-form-item>
           <div class="compute-sample-actions">
-            <el-button :loading="sampleEvaluating" @click="handleSampleEvaluate">
+            <el-button :loading="sampleEvaluating" :disabled="!canWriteVariables" @click="handleSampleEvaluate">
               {{ t('templates.authoring.computeSampleEvaluate') }}
             </el-button>
           </div>
@@ -190,7 +216,13 @@ const {
       </el-form>
       <template #footer>
         <el-button @click="variableDialogOpen = false">{{ t('common.cancel') }}</el-button>
-        <el-button type="primary" :loading="templatesStore.submitting" @click="handleSaveVariable">
+        <el-button
+          v-if="canWriteVariables"
+          type="primary"
+          data-testid="save-variable-button"
+          :loading="templatesStore.submitting"
+          @click="handleSaveVariable"
+        >
           {{ t('common.save') }}
         </el-button>
       </template>

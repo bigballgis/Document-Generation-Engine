@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import AuthoringSideBySideLayout from '@/components/templates/AuthoringSideBySideLayout.vue'
 import AuthoringPreviewPane from '@/components/templates/AuthoringPreviewPane.vue'
 import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
+import ConditionExpressionInput from '@/components/authoring/ConditionExpressionInput.vue'
 import type { MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
 import type {
   AnchorBinding,
@@ -13,7 +14,7 @@ import type {
   VariableSchema,
 } from '@/types/template'
 
-defineProps<{
+const props = defineProps<{
   templateId: string
   editingRow: MasterAnchorBindingRow | null
   editingAnchorId: string | null
@@ -50,6 +51,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const structuredEditorRef = ref<InstanceType<typeof ControlledStructuredContentEditor> | null>(null)
+const visibilityVariableKeys = computed(() => props.variables.map((item) => item.variableKey))
 
 function markPristine() {
   structuredEditorRef.value?.markPristine()
@@ -101,8 +103,10 @@ defineExpose({ markPristine })
               v-if="visibilityEnabled"
               :label="t('templates.authoring.visibilityCondition.expression')"
             >
-              <el-input
+              <ConditionExpressionInput
                 :model-value="visibilityExpression"
+                :variable-keys="visibilityVariableKeys"
+                test-id="visibility-expression-input"
                 :placeholder="t('templates.authoring.visibilityCondition.expressionPlaceholder')"
                 @update:model-value="emit('update:visibilityExpression', String($event))"
               />

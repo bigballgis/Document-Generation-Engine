@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 export interface ConfirmActionOptions {
   titleKey: string
   messageKey: string
+  messageParams?: Record<string, unknown>
   confirmButtonKey?: string
   cancelButtonKey?: string
   type?: 'warning' | 'info' | 'success' | 'error'
@@ -14,11 +15,15 @@ export function useConfirmAction() {
 
   async function confirmAction(options: ConfirmActionOptions): Promise<boolean> {
     try {
-      await ElMessageBox.confirm(t(options.messageKey), t(options.titleKey), {
-        confirmButtonText: t(options.confirmButtonKey ?? 'common.confirm'),
-        cancelButtonText: t(options.cancelButtonKey ?? 'common.cancel'),
-        type: options.type ?? 'warning',
-      })
+      await ElMessageBox.confirm(
+        t(options.messageKey, options.messageParams ?? {}),
+        t(options.titleKey),
+        {
+          confirmButtonText: t(options.confirmButtonKey ?? 'common.confirm'),
+          cancelButtonText: t(options.cancelButtonKey ?? 'common.cancel'),
+          type: options.type ?? 'warning',
+        },
+      )
       return true
     } catch {
       return false

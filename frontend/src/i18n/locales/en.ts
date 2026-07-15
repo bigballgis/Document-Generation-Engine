@@ -1351,10 +1351,26 @@ export default {
       structuredContent: 'Structured content',
       structuredContentEditor: 'Controlled structured content',
       saveVariableSuccess: 'Variable saved.',
+      renameVariableSuccess: 'Variable renamed and references updated.',
+      renameVariableLockedWarning:
+        '{count} locked test data set(s) still use the previous key and were left unchanged.',
       saveBindingSuccess: 'Binding saved.',
       deleteVariableSuccess: 'Variable deleted.',
       confirmDeleteVariableTitle: 'Delete variable',
       confirmDeleteVariableMessage: 'Remove this variable from the template draft?',
+      rename: {
+        confirmTitle: 'Rename variable',
+        confirmMessage:
+          'Rename "{oldKey}" to "{newKey}" and update references?\n\nBindings: {bindingCount}\nRules: {ruleCount}\nUnlocked test sets: {unlockedCount}\nLocked test sets skipped: {lockedCount}\nCompute references: {computeCount}',
+        variableKeyRequired: 'Variable key is required.',
+        variableKeyInvalid:
+          'Variable key must start with a letter or underscore and contain only letters, digits, underscores, dots, or hyphens.',
+        variableKeyConflict: 'Another variable already uses this key.',
+      },
+      conditionExpression: {
+        insertVariable: 'Insert variable',
+        noSuggestions: 'No matching variables.',
+      },
       variableTreeSearchPlaceholder: 'Search variables by key or description',
       variableTreeCount: '{count} variables',
       computeExpression: 'Compute expression',

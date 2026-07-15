@@ -240,7 +240,7 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 | ID | 标题 | 级 | 要点 |
 | --- | --- | --- | --- |
 | CE-U06 | 母版锚点可视上下文 | P2·M · `Done` | **Done (2026-07-15)** — Task Master **#88**; slice `ce-u06-master-anchor-context`. BDD **ready** ([ce-u06-master-anchor-context.md](../behavior/ce-u06-master-anchor-context.md); **BDD-CE-U06-MAC-001…009**). **Merge:** `7734366e`. MasterAnchorPositionOverview + editable displayLabel; first-open seed fix `6ae23981`; E2E + UIUX evidence. Formal phase **None**; **not** go-live. |
-| CE-U13 | 变量重命名联动 + 表达式补全 | P2·M · `In Progress` | rename 传播到 bindings/规则/测试集 JSON；conditionExpression 变量补全。**Sole-active (2026-07-16)** — Task Master **#89** next after CE-G03 Done; worktree `../DGE-ce-u13-variable-rename` may exist **parked** until next `/deliver` writer session; **#71** CE-C06 remains parked. Formal phase **None**; **not** go-live. |
+| CE-U13 | 变量重命名联动 + 表达式补全 | P2·M · `In Progress` | **In Progress (2026-07-16)** — Task Master **#89** sole-active after CE-G03 Done; slice `ce-u13-variable-rename`; worktree `../DGE-ce-u13-variable-rename` · `feat/ce-u13-variable-rename`. rename 传播到 bindings/规则/未锁定测试集 JSON（+ compute 引用）；conditionExpression / visibility 变量补全. BDD **ready** ([ce-u13-variable-rename.md](../behavior/ce-u13-variable-rename.md); **BDD-CE-U13-VRC-001…012**). **FE-primary**; **#71** CE-C06 remains parked. Formal phase **None**; **not** Done; **not** go-live. |
 | CE-U14 | Dashboard 模板生命周期待办 | P2·S | 测试裁定/审批/待发布队列进 Tasks Tab |
 | CE-U15 | 生命周期 Stepper + checklist 深链 | P2·M | 顶栏状态机 Stepper；发布 gate 每条 pending 项"前往修复"链接 |
 | CE-U16 | 创作路径压缩 | P2·M | design 默认落点 bindings；新建后微向导（母版→绑定→变量→预览步骤条） |

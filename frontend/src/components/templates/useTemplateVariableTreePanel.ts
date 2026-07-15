@@ -1,6 +1,7 @@
 import { computed, reactive, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConfirmAction } from '@/composables/useConfirmAction'
+import { useCapabilities } from '@/composables/useCapabilities'
 import { useTemplatesStore } from '@/stores/templates'
 import type { UpsertVariablePayload, VariableSchema } from '@/types/template'
 import {
@@ -11,9 +12,20 @@ import {
 } from '@/utils/variableSchemaTree'
 import { validateComputeExpressionClient } from '@/utils/computeExpressionValidate'
 import {
+  analyzeVariableRenameImpact,
+  executeVariableRenameCascade,
+  validateRenameVariableKey,
+} from '@/utils/variableRenameCascade'
+import {
   evaluateComputeExpression,
   validateComputeExpression,
-} from '@/api/templatesBindings'
+  listTestDataSets,
+  updateTestDataSet,
+  upsertVariable as upsertVariableApi,
+  deleteVariable as deleteVariableApi,
+  upsertBinding as upsertBindingApi,
+  saveRules as saveRulesApi,
+} from '@/api/templates'
 import { ElMessage } from 'element-plus'
 
 export interface UseTemplateVariableTreePanelOptions {
@@ -26,6 +38,7 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
   const { t } = useI18n()
   const templatesStore = useTemplatesStore()
   const { confirmAction } = useConfirmAction()
+  const { authorTemplates } = useCapabilities()
 
   const searchQuery = ref('')
   const variableDialogOpen = ref(false)
@@ -36,6 +49,7 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
   const sampleResult = ref<string | null>(null)
   const sampleError = ref<string | null>(null)
   const sampleEvaluating = ref(false)
+  const renaming = ref(false)
 
   const variableTypes = ['TEXT', 'NUMBER', 'AMOUNT', 'DATE', 'ENUM', 'BOOLEAN', 'LIST', 'OBJECT', 'COMPUTED']
 
@@ -59,6 +73,7 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     'OTHER_SENSITIVE',
   ] as const
 
+  const canWriteVariables = computed(() => authorTemplates.value)
   const sourceTree = computed(() => buildVariableSchemaTree(options.variables.value))
   const filteredTree = computed(() => filterVariableTree(sourceTree.value, searchQuery.value))
   const treeRenderKey = computed(() => searchQuery.value.trim())
@@ -111,6 +126,9 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
   }
 
   function openAddVariable() {
+    if (!canWriteVariables.value) {
+      return
+    }
     resetVariableForm()
     variableDialogOpen.value = true
   }
@@ -129,49 +147,160 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     variableDialogOpen.value = true
   }
 
-  async function handleSaveVariable() {
-    if (variableForm.variableType === 'COMPUTED') {
-      const client = validateComputeExpressionClient(
-        variableForm.computeExpression ?? '',
-        knownVariableKeys.value,
+  function buildPayload(): UpsertVariablePayload {
+    return {
+      variableKey: variableForm.variableKey.trim(),
+      variableType: variableForm.variableType,
+      required: variableForm.required,
+      defaultValue: variableForm.defaultValue || null,
+      description: variableForm.description || null,
+      computeExpression:
+        variableForm.variableType === 'COMPUTED'
+          ? variableForm.computeExpression?.trim() || null
+          : null,
+      piiCategory: variableForm.piiCategory || 'NONE',
+    }
+  }
+
+  async function validateComputedIfNeeded(payload: UpsertVariablePayload): Promise<boolean> {
+    if (payload.variableType !== 'COMPUTED') {
+      return true
+    }
+    const client = validateComputeExpressionClient(
+      payload.computeExpression ?? '',
+      knownVariableKeys.value,
+    )
+    if (!client.valid) {
+      computeValidationError.value = t(
+        client.messageKey ?? 'templates.authoring.computeExpressionInvalid',
       )
-      if (!client.valid) {
-        computeValidationError.value = t(
-          client.messageKey ?? 'templates.authoring.computeExpressionInvalid',
-        )
-        ElMessage.error(computeValidationError.value)
-        return
-      }
-      try {
-        const server = await validateComputeExpression(options.templateId.value, {
-          variableKey: variableForm.variableKey,
-          expression: variableForm.computeExpression ?? '',
-          knownVariableKeys: knownVariableKeys.value,
-        })
-        if (!server.valid) {
-          computeValidationError.value =
-            server.message || t('templates.authoring.computeExpressionInvalid')
-          ElMessage.error(computeValidationError.value)
-          return
-        }
-      } catch {
-        ElMessage.error(t('templates.error.saveVariable'))
-        return
-      }
+      ElMessage.error(computeValidationError.value)
+      return false
     }
     try {
-      await templatesStore.upsertVariable(options.templateId.value, variableForm.variableKey, {
-        variableKey: variableForm.variableKey,
-        variableType: variableForm.variableType,
-        required: variableForm.required,
-        defaultValue: variableForm.defaultValue || null,
-        description: variableForm.description || null,
-        computeExpression:
-          variableForm.variableType === 'COMPUTED'
-            ? variableForm.computeExpression?.trim() || null
-            : null,
-        piiCategory: variableForm.piiCategory || 'NONE',
+      const server = await validateComputeExpression(options.templateId.value, {
+        variableKey: payload.variableKey,
+        expression: payload.computeExpression ?? '',
+        knownVariableKeys: knownVariableKeys.value,
       })
+      if (!server.valid) {
+        computeValidationError.value =
+          server.message || t('templates.authoring.computeExpressionInvalid')
+        ElMessage.error(computeValidationError.value)
+        return false
+      }
+    } catch {
+      ElMessage.error(t('templates.error.saveVariable'))
+      return false
+    }
+    return true
+  }
+
+  async function handleRenameVariable(oldKey: string, payload: UpsertVariablePayload): Promise<boolean> {
+    const selected = templatesStore.selectedTemplate
+    const bindings = selected?.bindings ?? []
+    const rules = selected?.rules ?? []
+    const variables = options.variables.value
+    let testDataSets
+    try {
+      testDataSets = await listTestDataSets(options.templateId.value)
+    } catch {
+      ElMessage.error(t('templates.error.saveVariable'))
+      return false
+    }
+
+    const impact = analyzeVariableRenameImpact(oldKey, bindings, rules, variables, testDataSets)
+    const confirmed = await confirmAction({
+      titleKey: 'templates.authoring.rename.confirmTitle',
+      messageKey: 'templates.authoring.rename.confirmMessage',
+      messageParams: {
+        oldKey,
+        newKey: payload.variableKey,
+        bindingCount: impact.bindingAnchorCount,
+        ruleCount: impact.ruleCount,
+        unlockedCount: impact.unlockedTestSetCount,
+        lockedCount: impact.lockedTestSetSkippedCount,
+        computeCount: impact.computeReferenceCount,
+      },
+      type: 'warning',
+    })
+    if (!confirmed) {
+      return false
+    }
+
+    renaming.value = true
+    templatesStore.submitting = true
+    try {
+      const result = await executeVariableRenameCascade({
+        templateId: options.templateId.value,
+        oldKey,
+        newKey: payload.variableKey,
+        variablePayload: payload,
+        bindings,
+        rules,
+        variables,
+        testDataSets,
+        upsertVariable: upsertVariableApi,
+        deleteVariable: deleteVariableApi,
+        upsertBinding: upsertBindingApi,
+        saveRules: saveRulesApi,
+        updateTestDataSet,
+        refreshTemplate: (templateId) => templatesStore.fetchTemplate(templateId),
+      })
+      variableDialogOpen.value = false
+      ElMessage.success(t('templates.authoring.renameVariableSuccess'))
+      if (result.lockedSkippedCount > 0) {
+        ElMessage.warning(
+          t('templates.authoring.renameVariableLockedWarning', {
+            count: result.lockedSkippedCount,
+          }),
+        )
+      }
+      options.onUpdated()
+      return true
+    } catch {
+      ElMessage.error(t('templates.error.saveVariable'))
+      return false
+    } finally {
+      renaming.value = false
+      templatesStore.submitting = false
+    }
+  }
+
+  async function handleSaveVariable() {
+    if (!canWriteVariables.value) {
+      return
+    }
+    const payload = buildPayload()
+    const oldKey = editingVariableKey.value
+    const isRename = Boolean(oldKey && payload.variableKey !== oldKey)
+
+    if (isRename && oldKey) {
+      const validation = validateRenameVariableKey(
+        payload.variableKey,
+        oldKey,
+        options.variables.value.map((item) => item.variableKey),
+      )
+      if (!validation.valid) {
+        ElMessage.error(t(validation.messageKey ?? 'templates.error.saveVariable'))
+        return
+      }
+    } else if (!payload.variableKey.trim()) {
+      ElMessage.error(t('templates.authoring.rename.variableKeyRequired'))
+      return
+    }
+
+    if (!(await validateComputedIfNeeded(payload))) {
+      return
+    }
+
+    if (isRename && oldKey) {
+      await handleRenameVariable(oldKey, payload)
+      return
+    }
+
+    try {
+      await templatesStore.upsertVariable(options.templateId.value, payload.variableKey, payload)
       variableDialogOpen.value = false
       ElMessage.success(t('templates.authoring.saveVariableSuccess'))
       options.onUpdated()
@@ -217,6 +346,9 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
   }
 
   async function handleDeleteVariable(variableKey: string) {
+    if (!canWriteVariables.value) {
+      return
+    }
     const confirmed = await confirmAction({
       titleKey: 'templates.authoring.confirmDeleteVariableTitle',
       messageKey: 'templates.authoring.confirmDeleteVariableMessage',
@@ -251,6 +383,7 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
   return {
     t,
     templatesStore,
+    canWriteVariables,
     searchQuery,
     variableDialogOpen,
     editingVariableKey,
@@ -267,6 +400,7 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     sampleResult,
     sampleError,
     sampleEvaluating,
+    renaming,
     openAddVariable,
     openEditVariable,
     handleSaveVariable,
