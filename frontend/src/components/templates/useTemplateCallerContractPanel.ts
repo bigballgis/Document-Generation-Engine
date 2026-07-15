@@ -1,10 +1,12 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { ElMessage } from 'element-plus'
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useYesNoFilterOptions } from '@/composables/useTableFilterOptions'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { getCallerContract } from '@/api/contract'
+import { listTestDataSets } from '@/api/templates'
 import {
   ALLOWED_ENVIRONMENTS,
   ENVIRONMENT_LABEL_KEY,
@@ -12,6 +14,11 @@ import {
   type RuntimeEnvironment,
 } from '@/config/environments'
 import type { CallerContract } from '@/types/contract'
+import type { TestDataSet } from '@/types/templatePreview'
+import {
+  buildContractCopyableExample,
+  pickDefaultTestDataSet,
+} from '@/utils/contractCopyableExample'
 
 export interface UseTemplateCallerContractPanelOptions {
   templateId: Ref<string>
@@ -24,6 +31,9 @@ export function useTemplateCallerContractPanel(options: UseTemplateCallerContrac
   const loading = ref(false)
   const errorMessageKey = ref<string | null>(null)
   const contract = ref<CallerContract | null>(null)
+  const testDataSets = ref<TestDataSet[]>([])
+  const selectedTestDataSetId = ref<string | null>(null)
+  const loadingTestDataSets = ref(false)
 
   const selectedEnvironment = ref<RuntimeEnvironment>(
     resolveRuntimeEnvironment(options.environment.value),
@@ -92,6 +102,44 @@ export function useTemplateCallerContractPanel(options: UseTemplateCallerContrac
     CLIENT_TABLE_PAGE_SIZE,
   )
 
+  const selectedTestDataSet = computed(() => {
+    if (!selectedTestDataSetId.value) {
+      return null
+    }
+    return testDataSets.value.find((row) => row.testDataSetId === selectedTestDataSetId.value) ?? null
+  })
+
+  const copyableExample = computed(() => {
+    if (!contract.value) {
+      return null
+    }
+    return buildContractCopyableExample(contract.value, selectedTestDataSet.value)
+  })
+
+  const testDataSetOptions = computed(() =>
+    testDataSets.value.map((row) => ({
+      value: row.testDataSetId,
+      label: row.name,
+    })),
+  )
+
+  async function loadTestDataSets(templateId: string) {
+    loadingTestDataSets.value = true
+    try {
+      const rows = await listTestDataSets(templateId)
+      testDataSets.value = rows
+      const currentStillValid = rows.some((row) => row.testDataSetId === selectedTestDataSetId.value)
+      if (!currentStillValid) {
+        selectedTestDataSetId.value = pickDefaultTestDataSet(rows)?.testDataSetId ?? null
+      }
+    } catch {
+      testDataSets.value = []
+      selectedTestDataSetId.value = null
+    } finally {
+      loadingTestDataSets.value = false
+    }
+  }
+
   async function loadContract() {
     loading.value = true
     errorMessageKey.value = null
@@ -102,6 +150,29 @@ export function useTemplateCallerContractPanel(options: UseTemplateCallerContrac
     } finally {
       loading.value = false
     }
+  }
+
+  async function copyText(value: string) {
+    try {
+      await navigator.clipboard.writeText(value)
+      ElMessage.success(t('common.copyToClipboardSuccess'))
+    } catch {
+      ElMessage.error(t('common.copyToClipboardError'))
+    }
+  }
+
+  async function copyCurl() {
+    if (!copyableExample.value) {
+      return
+    }
+    await copyText(copyableExample.value.curl)
+  }
+
+  async function copyPayload() {
+    if (!copyableExample.value) {
+      return
+    }
+    await copyText(copyableExample.value.payloadJson.trimEnd())
   }
 
   watch(
@@ -123,6 +194,14 @@ export function useTemplateCallerContractPanel(options: UseTemplateCallerContrac
     [() => options.templateId.value, currentEnvironment],
     () => {
       void loadContract()
+    },
+    { immediate: true },
+  )
+
+  watch(
+    () => options.templateId.value,
+    (templateId) => {
+      void loadTestDataSets(templateId)
     },
     { immediate: true },
   )
@@ -152,5 +231,12 @@ export function useTemplateCallerContractPanel(options: UseTemplateCallerContrac
     errorCodesCurrentPage,
     totalErrorCodeRows,
     errorMessage,
+    testDataSets,
+    testDataSetOptions,
+    selectedTestDataSetId,
+    loadingTestDataSets,
+    copyableExample,
+    copyCurl,
+    copyPayload,
   }
 }

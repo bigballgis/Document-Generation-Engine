@@ -2133,6 +2133,17 @@ export default {
       },
       defaultRouteTargetYes: 'Default target',
       defaultRouteTargetNo: '—',
+      examples: {
+        syncGenerateTitle: 'Sync single generate',
+        testDataSet: 'Test data set',
+        testDataSetPlaceholder: 'Select a test data set',
+        noTestDataSetHint:
+          'No test data set selected. Payload uses an empty variables skeleton; curl remains copyable.',
+        curlHeading: 'curl',
+        payloadHeading: 'Request payload',
+        copyCurl: 'Copy curl',
+        copyPayload: 'Copy payload',
+      },
       error: {
         load: 'Unable to load caller contract.',
       },

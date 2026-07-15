@@ -33,6 +33,12 @@ const {
   errorCodesCurrentPage,
   totalErrorCodeRows,
   errorMessage,
+  testDataSetOptions,
+  selectedTestDataSetId,
+  loadingTestDataSets,
+  copyableExample,
+  copyCurl,
+  copyPayload,
 } = useTemplateCallerContractPanel({
   templateId: toRef(props, 'templateId'),
   environment: toRef(props, 'environment'),
@@ -186,7 +192,74 @@ const {
       />
 
       <h3>{{ t('templates.contract.sections.examples') }}</h3>
-      <ul class="example-list">
+      <section
+        v-if="copyableExample"
+        class="copyable-example"
+        data-testid="contract-copyable-example"
+      >
+        <div class="copyable-example__meta">
+          <el-tag size="small" type="info" effect="plain">
+            {{ copyableExample.exampleToken }}
+          </el-tag>
+          <span class="copyable-example__title">
+            {{ t('templates.contract.examples.syncGenerateTitle') }}
+          </span>
+        </div>
+
+        <div class="copyable-example__toolbar">
+          <el-form-item
+            :label="t('templates.contract.examples.testDataSet')"
+            class="copyable-example__dataset"
+          >
+            <AppSearchSelect
+              v-model="selectedTestDataSetId"
+              class="dataset-select"
+              clearable
+              :placeholder="t('templates.contract.examples.testDataSetPlaceholder')"
+              :loading="loadingTestDataSets"
+              data-testid="contract-example-dataset"
+            >
+              <el-option
+                v-for="option in testDataSetOptions"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+              />
+            </AppSearchSelect>
+          </el-form-item>
+          <div class="copyable-example__actions">
+            <el-button
+              type="primary"
+              data-testid="contract-copy-curl"
+              @click="copyCurl"
+            >
+              {{ t('templates.contract.examples.copyCurl') }}
+            </el-button>
+            <el-button data-testid="contract-copy-payload" @click="copyPayload">
+              {{ t('templates.contract.examples.copyPayload') }}
+            </el-button>
+          </div>
+        </div>
+
+        <p
+          v-if="!copyableExample.hasTestDataSet"
+          class="copyable-example__empty-hint"
+          data-testid="contract-example-empty-dataset"
+        >
+          {{ t('templates.contract.examples.noTestDataSetHint') }}
+        </p>
+
+        <h4>{{ t('templates.contract.examples.curlHeading') }}</h4>
+        <pre class="copyable-example__pre" data-testid="contract-example-curl">{{
+          copyableExample.curl
+        }}</pre>
+
+        <h4>{{ t('templates.contract.examples.payloadHeading') }}</h4>
+        <pre class="copyable-example__pre" data-testid="contract-example-payload">{{
+          copyableExample.payloadJson
+        }}</pre>
+      </section>
+      <ul v-else class="example-list">
         <li v-for="example in contract.examples" :key="example">
           <code>{{ example }}</code>
         </li>

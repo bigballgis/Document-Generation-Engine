@@ -1901,6 +1901,16 @@ export default {
       },
       defaultRouteTargetYes: '默认目标',
       defaultRouteTargetNo: '—',
+      examples: {
+        syncGenerateTitle: '同步单笔生成',
+        testDataSet: '测试数据集',
+        testDataSetPlaceholder: '选择测试数据集',
+        noTestDataSetHint: '未选择测试数据集。请求体使用空 variables 骨架；curl 仍可复制。',
+        curlHeading: 'curl',
+        payloadHeading: '请求载荷',
+        copyCurl: '复制 curl',
+        copyPayload: '复制载荷',
+      },
       error: {
         load: '无法加载调用方合约。',
       },

@@ -626,6 +626,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/content-modules/{moduleId}/shared-group-codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update content module shared group codes
+         * @description CE-U10 / U10-C4: replaces module-level sharedGroupCodes for GLOBAL_ADMIN / GROUP_ADMIN within the owning group (fail-closed). Owning groupCode is dropped from the persisted list (owner access is implicit). Empty list clears external sharing.
+         */
+        put: operations["updateContentModuleSharedGroupCodes"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/content-modules/{moduleId}/versions/{semanticVersion}": {
         parameters: {
             query?: never;
@@ -2848,6 +2868,11 @@ export interface components {
             contentStructureJson: string;
             changeDescription?: string;
         };
+        UpdateContentModuleSharedGroupCodesRequest: {
+            /** @description Target groups that may read this module outside the owning group. Normalized to upper-case, distinct, sorted; owning groupCode is ignored.
+             *      */
+            sharedGroupCodes: string[];
+        };
         ContentModuleVersionView: {
             versionId: string;
             semanticVersion: string;
@@ -4882,6 +4907,40 @@ export interface operations {
         };
         responses: {
             /** @description Version created. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContentModuleDetailResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    updateContentModuleSharedGroupCodes: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                moduleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateContentModuleSharedGroupCodesRequest"];
+            };
+        };
+        responses: {
+            /** @description Shared group codes updated; returns module detail. */
             200: {
                 headers: {
                     [name: string]: unknown;
