@@ -172,6 +172,7 @@
 - 同一批次出现重复 `items[].itemId` 时，整批请求校验失败，返回 `400 ITEM_ID_DUPLICATED`，不创建批次或异步任务。
 - 同步批量中任一记录因参数校验或 API 管理策略失败时，整批失败且不生成任何文件；响应需要返回每笔失败明细，并按非重试幂等结果记录，重复提交同一 `idempotencyKey` 时重放该失败结果。
 - 异步批量部分成功后的失败项重试必须使用新批次和新的 `idempotencyKey`；新批次只提交需要重试的失败项，并通过 `originalBatchId` 或等效关联字段关联原批次，原批次结果不被扩展或改写。
+- **`originalBatchId` 重试血缘（CE-C05 / BDD-CE-C05，2026-07-15 确认）：** 批量请求可选 `originalBatchId`（模式与 `batchId` 一致）。字段出现时，平台必须在调用方**同一 API 凭证**下解析到既有 `BATCH_ROOT`；否则返回 `404 ORIGINAL_BATCH_NOT_FOUND`（`api.error.batch.originalBatchNotFound`，`retryable=false`），不创建批次或异步任务；不区分「不存在」与「他凭证」以免探测。格式非法返回 `400 REQUEST_BODY_INVALID`。校验通过后，成功响应 `result.batch.originalBatchId` 回显请求值，且新 `batchId` 与原批次不同；新批次调用记录/审计必须持久化该关联。省略该字段时按普通新批次处理。完整 Given/When/Then：[ce-c05-original-batch-id.md](../behavior/ce-c05-original-batch-id.md)。
 - 批量 API 采用全局默认上限 + API 管理可覆盖：默认同步批量最多 100 条，默认异步批量最多 10,000 条；具体 API 管理配置可以配置更低上限。
 - API 调用需要审计记录。
 
@@ -300,7 +301,7 @@
 
 - 模板侧需要审计：创建/编辑模板、提交测试、测试通过、测试不通过、提交审批、审批通过、审批不通过、发布、停用、恢复、废弃、版本停用、版本恢复、导出/导入、母版提交审核、母版审核通过、母版审核不通过、母版变更和母版影响分析。
 - API 管理侧需要审计：API 凭证创建、轮换、吊销、过期、到期提醒、凭证摘要查看、AD Group 授权配置变更、输出方式配置变更、批量上限配置变更、DOCX/PDF 动态加密配置变更、default 路径目标发布版本配置变更。
-- API 调用审计至少记录：调用时间、环境、访问账号、访问账号 AD Group、API 凭证/调用方、模板与发布版本、路由类型、default 路径解析后的目标发布版本、输出格式、成功/失败与错误原因、耗时、请求参数摘要、生成文件标识、`requestId`、`idempotencyKey` 或其摘要、幂等处理状态；批量调用还需记录 `batchId`、`items[].itemId` 或其摘要、失败项重试关联的 `originalBatchId` 或等效关联字段；如复用已过期 `idempotencyKey`，还需记录过期 key 复用审计字段。
+- API 调用审计至少记录：调用时间、环境、访问账号、访问账号 AD Group、API 凭证/调用方、模板与发布版本、路由类型、default 路径解析后的目标发布版本、输出格式、成功/失败与错误原因、耗时、请求参数摘要、生成文件标识、`requestId`、`idempotencyKey` 或其摘要、幂等处理状态；批量调用还需记录 `batchId`、`items[].itemId` 或其摘要、失败项重试关联的 `originalBatchId` 或等效关联字段（CE-C05：字段出现且校验通过时**必须**持久化该关联）；如复用已过期 `idempotencyKey`，还需记录过期 key 复用审计字段。
 - API 调用和 API 管理配置变更审计采用标准摘要对象，字段基线包括 `auditId`、`eventType`、`eventAt`、操作者或系统主体摘要、API 凭证或指纹摘要、访问账号、环境、模板、发布版本、解析后发布版本、路由类型、`requestId`、`idempotencyKey` 摘要、幂等状态、`taskId`、`batchId`、`itemId`（或其安全摘要）、`contextSummary`、输出摘要、加密摘要、批量摘要、资源 ID、结果摘要、错误摘要、耗时和配置差异摘要。
 - API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 `changedAreas` 表达变更配置域；`changedAreas` 取值基线为 `AD_GROUP_AUTHORIZATION`、`OUTPUT_POLICY`、`BATCH_LIMIT`、`ENCRYPTION_CAPABILITY`、`DEFAULT_ROUTE_TARGET`、`INVOCATION_RETENTION`（2026-07-03 新增，包级调用记录与文档留存策略）。
 - API 管理配置变更审计需要记录 `policyVersion`、上一配置版本、变更配置域、配置差异摘要、影响预览摘要、硬阻断和警告摘要、确认结果、是否回滚以及回滚来源版本；不得记录敏感配置明文。

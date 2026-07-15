@@ -6,6 +6,8 @@ import com.bank.docgen.runtime.service.AsyncTaskExpiredException;
 import com.bank.docgen.runtime.service.AsyncTaskNotFoundException;
 import com.bank.docgen.runtime.service.IdempotencyConflictException;
 import com.bank.docgen.runtime.service.IdempotencyDigestException;
+import com.bank.docgen.runtime.service.OriginalBatchIdFormatException;
+import com.bank.docgen.runtime.service.OriginalBatchNotFoundException;
 import com.bank.docgen.runtime.service.RuntimeAccessDeniedException;
 import com.bank.docgen.runtime.service.RuntimeBatchValidationException;
 import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
@@ -77,6 +79,32 @@ public class RuntimeExceptionAdvice {
                 ex.errorCode(),
                 ApiErrorCategories.RUNTIME,
                 ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(OriginalBatchNotFoundException.class)
+    public ResponseEntity<ErrorEnvelope> handleOriginalBatchNotFound(
+            HttpServletRequest request,
+            OriginalBatchNotFoundException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.NOT_FOUND,
+                ex.errorCode(),
+                ApiErrorCategories.BATCH,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(OriginalBatchIdFormatException.class)
+    public ResponseEntity<ErrorEnvelope> handleOriginalBatchIdFormat(
+            HttpServletRequest request,
+            OriginalBatchIdFormatException ex
+    ) {
+        return errorEnvelopeFactory.validationError(
+                request,
+                ex.messageKey(),
+                ex.fieldErrors()
         );
     }
 

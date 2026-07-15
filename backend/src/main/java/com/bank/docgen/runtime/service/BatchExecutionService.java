@@ -49,7 +49,8 @@ public class BatchExecutionService {
             batchResult = new BatchResultView(
                     batchResult.batchId(),
                     batchResult.summary(),
-                    batchResult.items()
+                    batchResult.items(),
+                    batchResult.originalBatchId()
             );
         }
     }
@@ -130,7 +131,12 @@ public class BatchExecutionService {
                 failureCount,
                 0
         );
-        BatchResultView batchResult = new BatchResultView(batchId, summary, items);
+        BatchResultView batchResult = new BatchResultView(
+                batchId,
+                summary,
+                items,
+                request.originalBatchId()
+        );
 
         if (!continueOnItemFailure && failureCount > 0) {
             throw new SyncBatchFailureException(batchResult);

@@ -44,6 +44,9 @@ public class InvocationParameterSanitizer {
         payload.put("itemsHash", hashBatchItems(request));
         payload.put("items", request.items().stream().map(this::sanitizeBatchItem).toList());
         putContextSummary(payload, request.context());
+        if (request.originalBatchId() != null && !request.originalBatchId().isBlank()) {
+            payload.put("originalBatchId", request.originalBatchId());
+        }
         return writeJson(payload);
     }
 

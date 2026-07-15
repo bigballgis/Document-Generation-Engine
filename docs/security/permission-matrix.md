@@ -225,6 +225,7 @@ API 管理配置按配置域独立保存；每个配置域操作动线为编辑�
 - 批量请求中每笔记录必须传入 `items[].itemId`，且同一批次内必须唯一；重复 `items[].itemId` 导致整批请求校验失败，不创建批次或异步任务。
 - 同步批量中任一记录因参数校验或 API 管理策略失败时，整批失败且不生成任何文件；响应需要返回每笔失败明细，并按非重试幂等结果记录。
 - 异步批量部分成功后的失败项重试必须使用新批次和新的 `idempotencyKey`，并通过 `originalBatchId` 或等效关联字段关联原批次。
+- **`originalBatchId` 校验（CE-C05）：** 字段出现时仅允许关联**当前 API 凭证**下已存在的原 `BATCH_ROOT`；他凭证或不存在统一 `404 ORIGINAL_BATCH_NOT_FOUND`（不泄露资源是否存在）；审计必须记录该关联。行为规格：[ce-c05-original-batch-id.md](../behavior/ce-c05-original-batch-id.md)。
 - API 凭证代表调用系统/应用；请求中同时识别实际访问账号，并读取该访问账号的 AD Group。
 - API v1 请求头字段确认为 `X-Api-Credential-Id`、`X-Api-Credential-Secret`、`X-Access-Account`；可选追踪请求头为 `X-Trace-Id`。
 - `X-Api-Credential-Secret` 不得进入日志、审计、响应、契约展示或管理界面；`X-Trace-Id` 传入时平台沿用该值作为响应和审计中的 `traceId`，未传入时由平台生成。

@@ -226,7 +226,7 @@ class RuntimeContractStrictnessWebTest {
 
     @Test
     void bddCeC02_008_batchOriginalBatchIdAcceptedWithoutLineageCheck() throws Exception {
-        // OpenAPI-declared optional field must be bindable; CE-C05 lineage check is out of scope.
+        // OpenAPI-declared optional field must be bindable; lineage validation runs in BatchGenerationService (CE-C05).
         mockMvc.perform(post("/runtime/batch-generate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

@@ -14,6 +14,8 @@ public final class ApiErrorCategories {
     public static final String IDEMPOTENCY = "IDEMPOTENCY";
     public static final String AUDIT = "AUDIT";
     public static final String ENCRYPTION = "ENCRYPTION";
+    /** CE-C05 / OpenAPI ErrorCategory — batch lineage and batch-domain errors. */
+    public static final String BATCH = "BATCH";
     public static final String NOT_FOUND = "NOT_FOUND";
     public static final String CONFLICT = "CONFLICT";
     public static final String CONTENT_MODULE = "CONTENT_MODULE";

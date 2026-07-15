@@ -32,6 +32,8 @@ public final class ApiErrorCodes {
     public static final String DOWNLOAD_URL_EXPIRED = "DOWNLOAD_URL_EXPIRED";
     public static final String BATCH_LIMIT_EXCEEDED = "BATCH_LIMIT_EXCEEDED";
     public static final String ITEM_ID_DUPLICATED = "ITEM_ID_DUPLICATED";
+    /** CE-C05: originalBatchId not visible as same-credential BATCH_ROOT (opaque 404). */
+    public static final String ORIGINAL_BATCH_NOT_FOUND = "ORIGINAL_BATCH_NOT_FOUND";
     public static final String OUTPUT_MODE_NOT_ALLOWED = "OUTPUT_MODE_NOT_ALLOWED";
     public static final String IDEMPOTENCY_KEY_CONFLICT = "IDEMPOTENCY_KEY_CONFLICT";
     public static final String IDEMPOTENCY_DIGEST_FAILED = "IDEMPOTENCY_DIGEST_FAILED";

@@ -115,6 +115,31 @@ class InvocationParameterSanitizerTest {
         assertThat(root.get("items").get(0).has("variables")).isFalse();
         assertThat(root.get("items").get(0).get("variablesHash").asText()).hasSize(64);
         assertThat(root.get("contextSummary").get("channel").asText()).isEqualTo("BATCH");
+        assertThat(root.has("originalBatchId")).isFalse();
+    }
+
+    @Test
+    void bddCeC05_004_sanitizeBatchRequestPersistsOriginalBatchIdAssociation() throws Exception {
+        BatchGenerateRequestBody request = new BatchGenerateRequestBody(
+                new OutputOptionsView("DOCX", "ASYNC_TASK"),
+                List.of(new BatchGenerateRequestBody.BatchGenerateItemBody(
+                        "item-retry",
+                        Map.of("secretVar", "must-not-appear"),
+                        null,
+                        null
+                )),
+                null,
+                "req-retry",
+                "idem-retry",
+                "BATCH-ORIG01",
+                null
+        );
+
+        JsonNode root = objectMapper.readTree(sanitizer.sanitizeBatchRequest(request, "1.0.0"));
+
+        assertThat(root.get("originalBatchId").asText()).isEqualTo("BATCH-ORIG01");
+        assertThat(root.toString()).doesNotContain("must-not-appear");
+        assertThat(root.toString()).doesNotContain("secretVar");
     }
 
     @Test

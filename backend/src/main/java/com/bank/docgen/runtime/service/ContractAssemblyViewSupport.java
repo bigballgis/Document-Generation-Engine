@@ -141,6 +141,8 @@ final class ContractAssemblyViewSupport {
                         "api.error.runtime.batchLimitExceeded", false),
                 errorCode(ApiErrorCategories.RUNTIME, ApiErrorCodes.ITEM_ID_DUPLICATED,
                         "api.error.runtime.itemIdDuplicated", false),
+                errorCode(ApiErrorCategories.BATCH, ApiErrorCodes.ORIGINAL_BATCH_NOT_FOUND,
+                        "api.error.batch.originalBatchNotFound", false),
                 errorCode(ApiErrorCategories.RUNTIME, ApiErrorCodes.ASYNC_TASK_NOT_FOUND,
                         "api.error.runtime.asyncTaskNotFound", false),
                 errorCode(ApiErrorCategories.ENCRYPTION, ApiErrorCodes.ENCRYPTION_PARAMETER_INVALID,
