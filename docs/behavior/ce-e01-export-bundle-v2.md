@@ -7,10 +7,10 @@
 | **编写日期** | 2026-07-16 |
 | **程序** | [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §7 Wave CE-E · CE-E01 |
 | **Slice** | `ce-e01-export-bundle-v2` |
-| **Worktree** | `D:/working/DGE-ce-e01-export-bundle-v2` · `feat/ce-e01-export-bundle-v2` |
-| **Task Master** | **#78**（**In Progress** sole-active；**本片不标 Done** 直至实现 + 门禁 + MAIN doc-sync） |
+| **Worktree** | `D:/working/DGE-ce-e01-export-bundle-v2` · `feat/ce-e01-export-bundle-v2`（已 merge 并移除） |
+| **Task Master** | **#78**（**Done** — merge `6ae57974`；MAIN doc-sync 本片） |
 | **Formal phase** | **None**（CE 程序切片；不发明 sole-active 正式 P-phase） |
-| **Placement** | ISOLATED |
+| **Placement** | MAIN（merge 后） |
 | **上游** | CE-K01 (#57) **Done**（`master_revision_id` + `master_file_hash` + render profile 快照可消费） |
 | **Owning docs** | 本文件（行为 SoT）；计划 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §7；需求 [requirements-plan.md](../requirements/requirements-plan.md)「环境迁移」；产品 [PRD.md](../product/PRD.md) §10；领域 [domain-model.md](../domain/domain-model.md) §6；API [contract-outline.md](../api/contract-outline.md) + [openapi-v1.yaml](../api/openapi-v1.yaml)；权限沿用矩阵 §5 导出/导入（无新权限码） |
 | **Frontend UI** | **Out of scope（API-first）** — 无新导出/导入旅程、无 dry-run 报告页、无 Playwright E2E/UIUX 义务；既有 P14-T03 UI 继续走 v1 JSON 路径直至后续切片 |
@@ -348,10 +348,14 @@
 bdd_readiness: ready
 task_ids: ["78"]
 slice: ce-e01-export-bundle-v2
+status: Done
+merge_sha: 6ae5797454064d83915178b5eaf16b7269b311a8
 behavior_doc: docs/behavior/ce-e01-export-bundle-v2.md
 frontend_ui_in_scope: false
-next: plan-orchestrator → backend-engineer (API/TDD); FE/E2E stages N/A
+next: #79 CE-E02 pending/parked (do not activate until deliver)
 formal_phase: None
 ```
+
+**Handoff（Done）：** Task Master **#78** → **Done**（merge `6ae57974`）。自包含导出包 v2 + 导入 dry-run 已交付。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。下一 sole-active 建议：**#79** CE-E02（pending，勿提前激活）。
 
 **Open questions:** 无（已由 CE §7 + K01 Done + P14 基线裁定；E01-C1…C22）。

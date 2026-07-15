@@ -814,7 +814,7 @@ Template Collaboration Work Item 用于站内待办和状态提示，不是 Temp
 - 发布版本号采用语义化版本，例如 1.0.0、1.1.0、2.0.0。
 - 发布时由模板编排人员或管理员选择版本变更级别。
 - **CE-K01（Done）发布钉扎：** 发布为 release 时在 `template_version` 持久化 `master_revision_id`、`master_file_hash`（SHA-256）、`pin_metadata_json`（含 `pinOrigin`/`pinnedAt`/`pinnedBy`），并保留既有 render profile 锁。Runtime 装配读钉扎 revision，禁止回退 live master。权威行为：[ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)。
-- **CE-E01 消费钉扎（In Progress）：** 自包含导出包 v2 的 `masterPin` 读取上述 K01 字段（或 `EXPORT_TIME` 计算 hash 且不改 DB）；ZIP 内嵌对应 DOCX 字节且 hash 自洽。见 §6 与 [ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)。
+- **CE-E01 消费钉扎（Done）：** 自包含导出包 v2 的 `masterPin` 读取上述 K01 字段（或 `EXPORT_TIME` 计算 hash 且不改 DB）；ZIP 内嵌对应 DOCX 字节且 hash 自洽。见 §6 与 [ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)。
 
 ### 2.12 动态 API Dynamic API
 

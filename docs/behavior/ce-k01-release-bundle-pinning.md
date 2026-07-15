@@ -312,7 +312,7 @@
 **When** 检查导出包功能  
 **Then** 本片**不**新增导出包内嵌母版/revision DOCX 的能力  
 **And** 仅保证 DB 层钉扎字段可被 CE-E01 后续消费  
-**And** CE-E01 行为规格见 [ce-e01-export-bundle-v2.md](./ce-e01-export-bundle-v2.md)（BDD ready 2026-07-16；Task **#78** In Progress 消费本片钉扎）
+**And** CE-E01 行为规格见 [ce-e01-export-bundle-v2.md](./ce-e01-export-bundle-v2.md)（BDD ready 2026-07-16；Task **#78** **Done** merge `6ae57974` 已消费本片钉扎）
 
 ---
 

@@ -278,7 +278,7 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 
 | ID | 标题 | 级/量 | 要点 | 依赖 |
 | --- | --- | --- | --- | --- |
-| CE-E01 | 自包含导出包 v2 + dry-run | P2·L · `In Progress` | bundle 追加母版 revision 指纹与 DOCX（ZIP 内嵌）、条款正文快照、render profile、资产键清单；导入 dry-run 依赖预检报告。**BDD `ready`（2026-07-16）** — [ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md) `BDD-CE-E01-001…018`；FE/E2E **out of scope**（API-first）。**In Progress (2026-07-16)** — Task Master **#78** sole-active; slice `ce-e01-export-bundle-v2`; worktree `D:/working/DGE-ce-e01-export-bundle-v2` · `feat/ce-e01-export-bundle-v2` (base `d7588258`). Formal phase **None**; **not** Done; gate evidence []. Next after Done: **#79** CE-E02. | K01 |
+| CE-E01 | 自包含导出包 v2 + dry-run | P2·L · `Done` | bundle 追加母版 revision 指纹与 DOCX（ZIP 内嵌）、条款正文快照、render profile、资产键清单；导入 dry-run 依赖预检报告。**Done (2026-07-16)** — Task Master **#78**; slice `ce-e01-export-bundle-v2`; BDD **ready** ([ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md) `BDD-CE-E01-001…017` shipped; **018** FE non-goal)；FE/E2E **out of scope**（API-first）。**Merge:** `6ae57974`；worktree removed。**Gates:** `mvn verify` **GREEN** (**1759+** tests); architecture **PASS_WITH_NOTES** (Critical #1/#2 fixed); Stage 10 **DEPLOY_OK** (`docker-deploy-queue`; `:8080` healthz UP; actuator/health UP); FE/E2E/UIUX N/A。Formal phase **None**；**not** go-live。Next queue head: **#79** CE-E02 pending/parked。 | K01 |
 | CE-E02 | 资产库管理面 | P2·M | MinIO 资产目录 API（上传/列表/停用）+ 键名约定固化 + 管理页；印章类上传需审批角色；`StructuredContentImageResolver` 协议不变 | 无 |
 | CE-E03 | 全库导出 | P3·M | 基于 per-template bundle + 母版/条款批量导出 + manifest | E01 |
 
@@ -310,10 +310,10 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 
 | 序 | CE-ID | Task # | 级 | 说明 |
 | --- | --- | --- | --- | --- |
-| **1** | **CE-E01** | **#78** | P2 | 自包含导出包 v2 + dry-run — **sole-active In Progress**（worktree `DGE-ce-e01-export-bundle-v2`） |
-| 2+ | 收敛期 | #79… / #90… | P2–P3 | E02 → O01；再 U14–U21 链 — **parked** until #78 merge + MAIN doc-sync |
+| **1** | **CE-E02** | **#79** | P2 | 资产库管理面 — **next queue head**（**pending**/parked；do **not** activate until deliver） |
+| 2+ | 收敛期 | #80… / #90… | P2–P3 | E03 → O01；再 U14–U21 链 — **parked** |
 
-**已并入 main、勿再并行复开：** CE-G06 (#76) — merge `d8636232` on `main`（2026-07-16）；CE-C06 (#71) — merge `35f6f47d` on `main`（2026-07-16）；CE-U13 (#89) — merge `ccdfacda` on `main`（2026-07-16）；CE-G03 (#74) — merge `50c1a524` on `main`（2026-07-16）；CE-K08 (#63) — `35f57503` on `main`。Task Master / 本文件状态应对齐 **Done**。 **Sole-active CE delivery leaf:** **#78** CE-E01（umbrella **#53** is program registry, not a delivery leaf）。
+**已并入 main、勿再并行复开：** CE-E01 (#78) — merge `6ae57974` on `main`（2026-07-16）；CE-G06 (#76) — merge `d8636232` on `main`（2026-07-16）；CE-C06 (#71) — merge `35f6f47d` on `main`（2026-07-16）；CE-U13 (#89) — merge `ccdfacda` on `main`（2026-07-16）；CE-G03 (#74) — merge `50c1a524` on `main`（2026-07-16）；CE-K08 (#63) — `35f57503` on `main`。Task Master / 本文件状态应对齐 **Done**。 **No sole-active CE delivery leaf**（umbrella **#53** is program registry, not a delivery leaf）。
 
 **可选加速（仍单 writer）：** 下一切片可在**上一切片 merge 前**仅做 BDD / Red 测试（只读 + 轻量 TDD），但**不得**并行跑 verify / deploy / E2E。
 
@@ -424,6 +424,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-16):** umbrella **#53** in-progress (program registry only); **Execution model:** **single-lane serial** (§9.2) — **sole-active CE delivery leaf:** **#78** CE-E01 → **In Progress** (worktree `DGE-ce-e01-export-bundle-v2` · `feat/ce-e01-export-bundle-v2`; BDD ready; not Done). Next after Done: **#79** CE-E02 → **pending**/parked. **#76** CE-G06 → **Done** (merge `d8636232`) — do **not** reopen. **#71** CE-C06 → **Done** (merge `35f6f47d`) — do **not** reopen. Leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior waves closed: **#59**/**#68**/**#83** → **Done**; **#60**/**#84**/**#85** → **Done**. **Wave 0 (K05+U11+U12) closed:** **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (merges `51a58f12` / `513d776c` / tip `34353b75`). **#69** CE-C04 → **Done** (`c7be8305`). **#70** CE-C05 → **Done** (`405f7cea`). **#88** CE-U06 → **Done** (`7734366e`). **#62** CE-K06 → **Done** (K06a `485a7f3e` + K06b `a689ca87` + K06c tip `76297d08`). **#63** CE-K08 → **Done** (`35f57503` on main). **#74** CE-G03 → **Done** (`50c1a524`). **#89** CE-U13 → **Done** (`ccdfacda`). Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
+**Task Master registry (2026-07-16):** umbrella **#53** in-progress (program registry only); **Execution model:** **single-lane serial** (§9.2) — **no sole-active CE delivery leaf**; next queue head **#79** CE-E02 → **pending**/parked (do **not** activate until deliver). **#78** CE-E01 → **Done** (merge `6ae57974`) — do **not** reopen. **#76** CE-G06 → **Done** (merge `d8636232`) — do **not** reopen. **#71** CE-C06 → **Done** (merge `35f6f47d`) — do **not** reopen. Leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior waves closed: **#59**/**#68**/**#83** → **Done**; **#60**/**#84**/**#85** → **Done**. **Wave 0 (K05+U11+U12) closed:** **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (merges `51a58f12` / `513d776c` / tip `34353b75`). **#69** CE-C04 → **Done** (`c7be8305`). **#70** CE-C05 → **Done** (`405f7cea`). **#88** CE-U06 → **Done** (`7734366e`). **#62** CE-K06 → **Done** (K06a `485a7f3e` + K06b `a689ca87` + K06c tip `76297d08`). **#63** CE-K08 → **Done** (`35f57503` on main). **#74** CE-G03 → **Done** (`50c1a524`). **#89** CE-U13 → **Done** (`ccdfacda`). Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
 
-**Last reviewed:** 2026-07-16（#78 CE-E01 sole-active In Progress；#76 CE-G06 Done merge `d8636232`；next #79 CE-E02 parked；umbrella #53 in-progress；formal phase None；not go-live）
+**Last reviewed:** 2026-07-16（#78 CE-E01 Done merge `6ae57974`；no sole-active CE leaf；next #79 CE-E02 parked；#76 CE-G06 Done；umbrella #53 in-progress；formal phase None；not go-live）

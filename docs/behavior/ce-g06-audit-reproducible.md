@@ -370,7 +370,7 @@ merge_sha: d86362329e4a2ee496e82eedb7d4c83068574e43
 fe_regenerate_ui_in_scope: no
 docs_aligned: requirements / PRD / domain / permission-matrix §11 / ADR-0057 / OpenAPI / contract-outline (2026-07-16)
 gates: mvn verify GREEN 1748; architecture PASS (ADR-0057); Stage 10 DEPLOY_OK Flyway V64; FE/E2E/UIUX N/A (G06-C17)
-next: CE-E01 #78 pending/parked (do not activate until deliver)
+next: CE-E02 #79 pending/parked (do not activate until deliver)
 ```
 
-**Handoff（Done）：** Task Master **#76** → **Done**（merge `d8636232`）。指纹落库、受控再生、SPECIMEN、审计、runtime 无水印护栏与 ADR-0057 已交付。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。下一 sole-active 建议：**#78** CE-E01（pending，勿提前激活）。
+**Handoff（Done）：** Task Master **#76** → **Done**（merge `d8636232`）。指纹落库、受控再生、SPECIMEN、审计、runtime 无水印护栏与 ADR-0057 已交付。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。后继：**#78** CE-E01 → **Done**（merge `6ae57974`）；下一 queue head：**#79** CE-E02（pending，勿提前激活）。
