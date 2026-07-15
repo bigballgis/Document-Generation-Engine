@@ -18,7 +18,7 @@ export interface ApiPolicy {
   updatedAt: string
 }
 
-/** Not yet modeled in `openapi-v1.yaml` (management invocation history). */
+/** Management invocation list row (`ManagementInvocationSummaryView`). */
 export interface ManagementInvocationSummary {
   invocationId: string
   invocationKind: string
@@ -38,15 +38,16 @@ export interface ManagementInvocationFilters {
   createdAfter?: string
   createdBefore?: string
   credentialId?: string
+  resolvedReleaseVersion?: string
 }
 
-/** Not yet modeled in `openapi-v1.yaml` (management invocation detail). */
+/** Audit deep-link hint on invocation detail. */
 export interface ManagementInvocationAuditLinkHint {
   requestId: string
   auditId: string | null
 }
 
-/** Not yet modeled in `openapi-v1.yaml` (management invocation detail). */
+/** Management invocation detail (`ManagementInvocationDetailView`), including optional error envelope. */
 export interface ManagementInvocationDetail {
   invocationId: string
   requestId: string
@@ -61,6 +62,11 @@ export interface ManagementInvocationDetail {
   createdAt: string
   documentPresent: boolean
   auditLinkHint: ManagementInvocationAuditLinkHint
+  errorCode?: string | null
+  errorCategory?: string | null
+  errorMessageKey?: string | null
+  errorRetryable?: boolean | null
+  errorMessage?: string | null
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management API policy upsert). */

@@ -2,8 +2,10 @@ package com.bank.docgen.runtime.web;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.api.SyncGenerateResult;
+import com.bank.docgen.runtime.domain.InvocationErrorEnvelope;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.runtime.service.IdempotencyConstants;
 import com.bank.docgen.runtime.service.InvocationRecordService;
@@ -13,27 +15,34 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Package-private sync-generation audit, invocation recording, and HTTP response writing.
  */
 final class RuntimeTemplateSyncSupport {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RuntimeTemplateSyncSupport.class);
+
     private final InvocationRecordService invocationRecordService;
     private final ApiPolicyRepository apiPolicyRepository;
     private final TraceIdProvider traceIdProvider;
     private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
+    private final MessageResolver messageResolver;
 
     RuntimeTemplateSyncSupport(
             InvocationRecordService invocationRecordService,
             ApiPolicyRepository apiPolicyRepository,
             TraceIdProvider traceIdProvider,
-            RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder
+            RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder,
+            MessageResolver messageResolver
     ) {
         this.invocationRecordService = invocationRecordService;
         this.apiPolicyRepository = apiPolicyRepository;
         this.traceIdProvider = traceIdProvider;
         this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
+        this.messageResolver = messageResolver;
     }
 
     void auditRecordAndWrite(
@@ -115,6 +124,55 @@ final class RuntimeTemplateSyncSupport {
                 RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
                 auditId
         );
+    }
+
+    /**
+     * Persists a failed single-sync invocation with the platform error envelope (CE-U11 IRC-006).
+     * Best-effort: recording failures must not mask the original generate exception.
+     */
+    String recordFailedSingleInvocation(
+            TemplateEntity template,
+            RuntimeSessionClaims session,
+            String environment,
+            String routeType,
+            String requestedReleaseVersion,
+            GenerateRequestBody body,
+            Throwable failure
+    ) {
+        InvocationErrorEnvelope errorEnvelope = FailedSyncInvocationErrorMapper.from(failure, messageResolver);
+        if (errorEnvelope == null) {
+            return null;
+        }
+        try {
+            ApiPolicyEntity policy = apiPolicyRepository.findByTemplateId(template.getId()).orElse(null);
+            if (policy == null) {
+                return null;
+            }
+            String auditId = traceIdProvider.newAuditId();
+            String resolvedReleaseVersion = requestedReleaseVersion;
+            return invocationRecordService.recordSingleSync(
+                    template,
+                    policy,
+                    session,
+                    environment,
+                    routeType,
+                    requestedReleaseVersion,
+                    resolvedReleaseVersion,
+                    body,
+                    null,
+                    null,
+                    RuntimeGenerationAuditRecorder.OUTCOME_FAILURE,
+                    auditId,
+                    errorEnvelope
+            );
+        } catch (RuntimeException recordingFailure) {
+            LOG.warn(
+                    "Failed to persist failed invocation record for template {}: {}",
+                    template.getExternalId(),
+                    recordingFailure.getMessage()
+            );
+            return null;
+        }
     }
 
     void writeSyncResponse(

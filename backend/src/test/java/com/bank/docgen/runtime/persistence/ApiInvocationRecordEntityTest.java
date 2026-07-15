@@ -53,4 +53,58 @@ class ApiInvocationRecordEntityTest {
         assertThat(entity.getParentInvocationExternalId()).isEqualTo("INV-ROOT01");
         assertThat(entity.isBatch()).isTrue();
     }
+
+    @Test
+    void applyErrorEnvelope_persistsUnifiedFields() {
+        Instant now = Instant.now();
+        ApiInvocationRecordEntity entity = new ApiInvocationRecordEntity(
+                UUID.randomUUID(),
+                "INV-FAIL01",
+                InvocationKind.SINGLE,
+                InvocationStatus.FAILED,
+                "dev",
+                UUID.randomUUID(),
+                "TPL-001",
+                UUID.randomUUID(),
+                "svc-account",
+                "req-1",
+                "idem-1",
+                "DEFAULT_ROUTE",
+                null,
+                "1.2.0",
+                "DOCX",
+                "SYNC_STREAM",
+                "FAILURE",
+                null,
+                "{}",
+                null,
+                null,
+                false,
+                now.plusSeconds(3600),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                false,
+                now,
+                now
+        );
+
+        entity.applyErrorEnvelope(
+                "REQUEST_BODY_INVALID",
+                "RUNTIME",
+                "api.error.validation.requestBodyInvalid",
+                false,
+                "Invalid body."
+        );
+
+        assertThat(entity.getErrorCode()).isEqualTo("REQUEST_BODY_INVALID");
+        assertThat(entity.getErrorCategory()).isEqualTo("RUNTIME");
+        assertThat(entity.getErrorMessageKey()).isEqualTo("api.error.validation.requestBodyInvalid");
+        assertThat(entity.getErrorRetryable()).isFalse();
+        assertThat(entity.getErrorMessage()).isEqualTo("Invalid body.");
+    }
 }

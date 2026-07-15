@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.runtime.api.InvocationDetailResultView;
 import com.bank.docgen.runtime.api.InvocationDetailView;
 import com.bank.docgen.runtime.api.InvocationListResultView;
@@ -49,6 +50,8 @@ class RuntimeInvocationControllerTest {
     private InvocationQueryService invocationQueryService;
     @Mock
     private ApiPolicyRepository apiPolicyRepository;
+    @Mock
+    private MessageResolver messageResolver;
 
     private RuntimeTemplateController controller;
     private TemplateEntity template;
@@ -65,7 +68,8 @@ class RuntimeInvocationControllerTest {
                 runtimeGenerationAuditRecorder,
                 invocationRecordService,
                 invocationQueryService,
-                apiPolicyRepository
+                apiPolicyRepository,
+                messageResolver
         );
         template = new TemplateEntity(TEMPLATE_ID, "TPL-001", "GRP", "Demo", null, null, "U0000001");
         session = new RuntimeSessionClaims(

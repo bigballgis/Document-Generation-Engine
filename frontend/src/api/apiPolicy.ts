@@ -23,4 +23,4 @@ export {
   fetchApiPolicyImpactPreview,
 } from '@/api/apiPolicyDomains'
 
-export { listInvocations, getInvocationDetail } from '@/api/apiPolicyInvocations'
+export { listInvocations, getInvocationDetail, exportInvocationsCsv } from '@/api/apiPolicyInvocations'

@@ -14,6 +14,7 @@ import com.bank.docgen.runtime.service.InvocationRecordService;
 import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.runtime.service.RuntimeGenerationService;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.RouteType;
@@ -53,14 +54,20 @@ public class RuntimeTemplateController {
             RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder,
             InvocationRecordService invocationRecordService,
             InvocationQueryService invocationQueryService,
-            ApiPolicyRepository apiPolicyRepository
+            ApiPolicyRepository apiPolicyRepository,
+            MessageResolver messageResolver
     ) {
         this.templateService = templateService;
         this.runtimeGenerationService = runtimeGenerationService;
         this.traceIdProvider = traceIdProvider;
         this.invocationQueryService = invocationQueryService;
         this.syncSupport = new RuntimeTemplateSyncSupport(
-                invocationRecordService, apiPolicyRepository, traceIdProvider, runtimeGenerationAuditRecorder);
+                invocationRecordService,
+                apiPolicyRepository,
+                traceIdProvider,
+                runtimeGenerationAuditRecorder,
+                messageResolver
+        );
         this.batchSupport = new RuntimeTemplateBatchSupport(batchGenerationService, traceIdProvider);
     }
 
@@ -140,24 +147,37 @@ public class RuntimeTemplateController {
             HttpServletResponse response
     ) throws java.io.IOException {
         TemplateEntity template = templateService.requireTemplateByExternalId(templateExternalId);
-        SyncGenerateResult result = runtimeGenerationService.generateSync(
-                template,
-                session,
-                releaseVersion,
-                body
-        );
-        syncSupport.auditRecordAndWrite(
-                template,
-                session,
-                environment,
-                RouteType.EXPLICIT_VERSION,
-                releaseVersion,
-                templateExternalId,
-                body,
-                result,
-                request,
-                response
-        );
+        try {
+            SyncGenerateResult result = runtimeGenerationService.generateSync(
+                    template,
+                    session,
+                    releaseVersion,
+                    body
+            );
+            syncSupport.auditRecordAndWrite(
+                    template,
+                    session,
+                    environment,
+                    RouteType.EXPLICIT_VERSION,
+                    releaseVersion,
+                    templateExternalId,
+                    body,
+                    result,
+                    request,
+                    response
+            );
+        } catch (RuntimeException ex) {
+            syncSupport.recordFailedSingleInvocation(
+                    template,
+                    session,
+                    environment,
+                    RouteType.EXPLICIT_VERSION,
+                    releaseVersion,
+                    body,
+                    ex
+            );
+            throw ex;
+        }
     }
 
     @PostMapping("/versions/{releaseVersion}/batch-generate")
@@ -197,19 +217,32 @@ public class RuntimeTemplateController {
             HttpServletResponse response
     ) throws java.io.IOException {
         TemplateEntity template = templateService.requireTemplateByExternalId(templateExternalId);
-        SyncGenerateResult result = runtimeGenerationService.generateSync(template, session, null, body);
-        syncSupport.auditRecordAndWrite(
-                template,
-                session,
-                environment,
-                RouteType.DEFAULT_ROUTE,
-                null,
-                templateExternalId,
-                body,
-                result,
-                request,
-                response
-        );
+        try {
+            SyncGenerateResult result = runtimeGenerationService.generateSync(template, session, null, body);
+            syncSupport.auditRecordAndWrite(
+                    template,
+                    session,
+                    environment,
+                    RouteType.DEFAULT_ROUTE,
+                    null,
+                    templateExternalId,
+                    body,
+                    result,
+                    request,
+                    response
+            );
+        } catch (RuntimeException ex) {
+            syncSupport.recordFailedSingleInvocation(
+                    template,
+                    session,
+                    environment,
+                    RouteType.DEFAULT_ROUTE,
+                    null,
+                    body,
+                    ex
+            );
+            throw ex;
+        }
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

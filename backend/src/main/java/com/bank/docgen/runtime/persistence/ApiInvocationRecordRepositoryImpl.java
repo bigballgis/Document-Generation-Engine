@@ -32,6 +32,7 @@ public class ApiInvocationRecordRepositoryImpl implements ApiInvocationRecordRep
             Instant createdAfter,
             Instant createdBefore,
             UUID credentialId,
+            String resolvedReleaseVersion,
             int page,
             int size
     ) {
@@ -51,7 +52,8 @@ public class ApiInvocationRecordRepositoryImpl implements ApiInvocationRecordRep
                 requestId,
                 createdAfter,
                 createdBefore,
-                credentialId
+                credentialId,
+                resolvedReleaseVersion
         ));
         long totalElements = entityManager.createQuery(countQuery).getSingleResult();
 
@@ -69,7 +71,8 @@ public class ApiInvocationRecordRepositoryImpl implements ApiInvocationRecordRep
                 requestId,
                 createdAfter,
                 createdBefore,
-                credentialId
+                credentialId,
+                resolvedReleaseVersion
         ));
         criteriaQuery.orderBy(criteriaBuilder.desc(root.get("createdAt")));
 
@@ -92,7 +95,8 @@ public class ApiInvocationRecordRepositoryImpl implements ApiInvocationRecordRep
             String requestId,
             Instant createdAfter,
             Instant createdBefore,
-            UUID credentialId
+            UUID credentialId,
+            String resolvedReleaseVersion
     ) {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(root.get("templateId"), templateId));
@@ -122,6 +126,12 @@ public class ApiInvocationRecordRepositoryImpl implements ApiInvocationRecordRep
         }
         if (credentialId != null) {
             predicates.add(criteriaBuilder.equal(root.get("credentialId"), credentialId));
+        }
+        if (resolvedReleaseVersion != null && !resolvedReleaseVersion.isBlank()) {
+            predicates.add(criteriaBuilder.equal(
+                    root.get("resolvedReleaseVersion"),
+                    resolvedReleaseVersion.trim()
+            ));
         }
         return predicates.toArray(Predicate[]::new);
     }

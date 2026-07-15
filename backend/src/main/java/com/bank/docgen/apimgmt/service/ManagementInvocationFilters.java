@@ -9,10 +9,11 @@ public record ManagementInvocationFilters(
         String requestId,
         Instant createdAfter,
         Instant createdBefore,
-        UUID credentialId
+        UUID credentialId,
+        String resolvedReleaseVersion
 ) {
 
     public static ManagementInvocationFilters empty() {
-        return new ManagementInvocationFilters(null, null, null, null, null, null);
+        return new ManagementInvocationFilters(null, null, null, null, null, null, null);
     }
 }

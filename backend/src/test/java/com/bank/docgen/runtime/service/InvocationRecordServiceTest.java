@@ -16,6 +16,7 @@ import com.bank.docgen.runtime.api.BatchSummaryView;
 import com.bank.docgen.runtime.api.EncryptionSummaryView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.api.OutputOptionsView;
+import com.bank.docgen.runtime.domain.InvocationErrorEnvelope;
 import com.bank.docgen.runtime.domain.InvocationKind;
 import com.bank.docgen.runtime.domain.InvocationStatus;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordEntity;
@@ -150,6 +151,53 @@ class InvocationRecordServiceTest {
                 ApiPolicyPlatformDefaults.INVOCATION_RECORD_RETENTION_DAYS - 1L,
                 java.time.temporal.ChronoUnit.DAYS
         ));
+    }
+
+    @Test
+    void recordSingleSync_persistsErrorEnvelopeOnFailure() {
+        when(idempotencyService.findLiveRecord("idem-fail", TEMPLATE_ID)).thenReturn(Optional.empty());
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        GenerateRequestBody request = new GenerateRequestBody(
+                new OutputOptionsView("DOCX", "SYNC_STREAM"),
+                Map.of("name", "Bob"),
+                null,
+                "req-fail",
+                "idem-fail",
+                null
+        );
+
+        String invocationId = service.recordSingleSync(
+                template,
+                policy,
+                session,
+                "dev",
+                "EXPLICIT_VERSION",
+                "1.2.0",
+                "1.2.0",
+                request,
+                null,
+                null,
+                RuntimeGenerationAuditRecorder.OUTCOME_FAILURE,
+                "audit-fail",
+                new InvocationErrorEnvelope(
+                        "REQUEST_BODY_INVALID",
+                        "RUNTIME",
+                        "api.error.validation.requestBodyInvalid",
+                        false,
+                        "Request body is invalid."
+                )
+        );
+
+        verify(repository).save(savedRecords.capture());
+        ApiInvocationRecordEntity saved = savedRecords.getValue();
+        assertThat(invocationId).startsWith("INV-");
+        assertThat(saved.getStatus()).isEqualTo(InvocationStatus.FAILED);
+        assertThat(saved.getErrorCode()).isEqualTo("REQUEST_BODY_INVALID");
+        assertThat(saved.getErrorCategory()).isEqualTo("RUNTIME");
+        assertThat(saved.getErrorMessageKey()).isEqualTo("api.error.validation.requestBodyInvalid");
+        assertThat(saved.getErrorRetryable()).isFalse();
+        assertThat(saved.getErrorMessage()).isEqualTo("Request body is invalid.");
     }
 
     @Test

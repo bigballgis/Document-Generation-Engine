@@ -16,6 +16,11 @@ public record ManagementInvocationDetailView(
         String parentInvocationId,
         Instant createdAt,
         boolean documentPresent,
-        ManagementInvocationAuditLinkHintView auditLinkHint
+        ManagementInvocationAuditLinkHintView auditLinkHint,
+        String errorCode,
+        String errorCategory,
+        String errorMessageKey,
+        Boolean errorRetryable,
+        String errorMessage
 ) {
 }

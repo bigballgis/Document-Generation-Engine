@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.api.OutputOptionsView;
 import com.bank.docgen.runtime.api.SyncGenerateResult;
@@ -34,6 +35,8 @@ class SyncStreamFidelityWarningHeadersTest {
     private ApiPolicyRepository apiPolicyRepository;
     @Mock
     private RuntimeGenerationAuditRecorder auditRecorder;
+    @Mock
+    private MessageResolver messageResolver;
 
     private RuntimeTemplateSyncSupport support;
 
@@ -43,7 +46,8 @@ class SyncStreamFidelityWarningHeadersTest {
                 invocationRecordService,
                 apiPolicyRepository,
                 new TraceIdProvider(),
-                auditRecorder
+                auditRecorder,
+                messageResolver
         );
     }
 
