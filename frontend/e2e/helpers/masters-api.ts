@@ -8,6 +8,7 @@ import {
   E2E_ADMIN,
   E2E_GROUP_ADMIN,
   E2E_MASTER_DESIGNER,
+  FOL_MASTER_NAME,
 } from './auth'
 import {
   E2E_CATALOG_PAGE_SIZE,
@@ -32,8 +33,14 @@ interface MasterSummary {
   originalFilename: string
 }
 
+interface MasterAnchorSummary {
+  anchorId: string
+  displayLabel: string
+  documentSequence?: number
+}
+
 interface MasterDetail extends MasterSummary {
-  anchors: Array<{ anchorId: string; displayLabel: string }>
+  anchors: MasterAnchorSummary[]
 }
 
 interface MasterRevisionLineSummary {
@@ -502,4 +509,61 @@ export async function getMasterDetailViaApi(
 ): Promise<MasterDetail> {
   const token = await apiLogin(request, E2E_GROUP_ADMIN)
   return authorizedGet<MasterDetail>(request, token, `/masters/${masterId}`)
+}
+
+/** CE-U06 — multi-anchor approved FOL master current revision (ordered list journeys). */
+export async function resolveFolMasterCurrentRevisionPath(
+  request: APIRequestContext,
+): Promise<{
+  masterId: string
+  name: string
+  currentRevisionPath: string
+  anchors: MasterAnchorSummary[]
+}> {
+  const token = await apiLogin(request, E2E_GROUP_ADMIN)
+  const master = await findMasterByName(request, token, FOL_MASTER_NAME)
+  if (!master) {
+    throw new Error(
+      `FOL master "${FOL_MASTER_NAME}" was not found. Deploy with DOCGEN_IMPORT_FOL_DEMO=true.`,
+    )
+  }
+  const detail = await authorizedGet<MasterDetail>(request, token, `/masters/${master.id}`)
+  if (detail.anchors.length < 2) {
+    throw new Error(
+      `FOL master "${FOL_MASTER_NAME}" expected at least 2 anchors, got ${detail.anchors.length}`,
+    )
+  }
+  const current = await resolveCurrentRevisionLine(request, token, master.id)
+  return {
+    masterId: master.id,
+    name: detail.name,
+    currentRevisionPath: `/masters/${master.id}/revisions/${current.id}`,
+    anchors: detail.anchors,
+  }
+}
+
+/** CE-U06 — PATCH displayLabel (returns raw response for status/403 assertions). */
+export async function patchMasterAnchorDisplayLabelViaApi(
+  request: APIRequestContext,
+  credentials: { username: string; password: string },
+  masterId: string,
+  revisionLineId: string,
+  anchorId: string,
+  displayLabel: string,
+): Promise<{ status: number; body: unknown }> {
+  const token = await apiLogin(request, credentials)
+  const response = await request.patch(
+    `${E2E_API_BASE_URL}/masters/${masterId}/revision-lines/${revisionLineId}/anchors/${encodeURIComponent(anchorId)}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { displayLabel },
+    },
+  )
+  let body: unknown = null
+  try {
+    body = await response.json()
+  } catch {
+    body = await response.text()
+  }
+  return { status: response.status(), body }
 }
