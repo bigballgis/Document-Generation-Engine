@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). Wave 1+ lane 3: #70 CE-C05 in-progress (worktree DGE-ce-c05-original-batch-id). #62 CE-K06 remains in-progress (K06a merged 485a7f3e; active sub-slice K06b qrBarcodeRef; K06c residual — do NOT claim #62 Done). #88 CE-U06 pending.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. Active delivery: #70 CE-C05 (worktree DGE-ce-c05-original-batch-id · feat/ce-c05-original-batch-id) + #62 CE-K06 (K06a at 485a7f3e; active focus K06b worktree DGE-ce-k06b-qr-barcode / feat/ce-k06b-qr-barcode; K06c residual). #69 CE-C04 Done. #88 remains pending. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #62 CE-K06 remains in-progress (K06a merged 485a7f3e; K06b merged a689ca87; K06c residual — do NOT claim #62 Done). #88 CE-U06 in-progress (master anchor context).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #69/#70 Done; K06b on MAIN a689ca87. Active leaf #88 CE-U06 (worktree DGE-ce-u06-master-anchor-context) + #62 CE-K06 (K06c residual). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T11:05:00.000Z"
+        "updatedAt": "2026-07-15T12:10:00.000Z"
       },
       {
         "id": "54",
@@ -1219,17 +1219,17 @@
       {
         "id": "88",
         "title": "CE-U06: Master anchor visual context",
-        "description": "PENDING. Slice ce-u06-anchor-visual-context. Revision workspace anchor highlight list + editable displayLabel. P2·M.",
-        "details": "P2 after U09/U10 (#84,#85). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U06.",
+        "description": "IN PROGRESS 2026-07-15. Wave 1 lane 2 only. Slice ce-u06-master-anchor-context (alt ce-u06-anchor-visual-context). Worktree ../DGE-ce-u06-master-anchor-context; branch feat/ce-u06-master-anchor-context. Master revision workspace DOCX overview with anchor highlight list + editable displayLabel. P2·M. Formal phase None. Do NOT activate #62 CE-K06 or #69 CE-C04. BDD pending (authoring in parallel).",
+        "details": "Activated 2026-07-15 for Wave 1 lane 2 delivery (user explicit). Depends U09/U10 (#84,#85) Done. Placement ISOLATED. Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Not go-live. Do not mark Wave 1 complete. Plan §4 CE-U06. Umbrella #53 remains in-progress.",
         "testStrategy": "1. Anchor list context. 2. displayLabel edit. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "84",
           "85"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T09:13:00.000Z"
       },
       {
         "id": "89",
@@ -1360,7 +1360,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-14T18:04:52.779Z",
+      "lastModified": "2026-07-15T09:13:00.000Z",
       "taskCount": 97,
       "completedCount": 61,
       "tags": [

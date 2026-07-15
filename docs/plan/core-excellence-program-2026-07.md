@@ -237,7 +237,7 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 
 | ID | 标题 | 级 | 要点 |
 | --- | --- | --- | --- |
-| CE-U06 | 母版锚点可视上下文 | P2·M | 修订工作区 DOCX 概览（锚点位置高亮列表即可，不做完整渲染）+ displayLabel 可编辑 |
+| CE-U06 | 母版锚点可视上下文 | P2·M · `In Progress` | **Activated 2026-07-15** — Wave 1 **lane 2 only** (Task Master **#88**). Slice `ce-u06-master-anchor-context`; worktree `../DGE-ce-u06-master-anchor-context`. 修订工作区 DOCX 概览（锚点位置高亮列表即可，不做完整渲染）+ displayLabel 可编辑. BDD **ready** ([ce-u06-master-anchor-context.md](../behavior/ce-u06-master-anchor-context.md); **BDD-CE-U06-MAC-001…009**). Formal phase **None**. Do **not** activate CE-K06 (#62) / CE-C04 (#69). |
 | CE-U13 | 变量重命名联动 + 表达式补全 | P2·M | rename 传播到 bindings/规则/测试集 JSON；conditionExpression 变量补全 |
 | CE-U14 | Dashboard 模板生命周期待办 | P2·S | 测试裁定/审批/待发布队列进 Tasks Tab |
 | CE-U15 | 生命周期 Stepper + checklist 深链 | P2·M | 顶栏状态机 Stepper；发布 gate 每条 pending 项"前往修复"链接 |
