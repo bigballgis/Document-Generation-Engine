@@ -81,7 +81,7 @@ async function openReplaceDialog(
   await page.getByRole('button', { name: /^update letterhead docx$/i }).click()
   const dialog = replaceDialog(page)
   await expect(dialog).toBeVisible()
-  await expect(dialog.getByRole('button', { name: /^replace file$/i })).toBeVisible()
+  await expect(dialog.getByRole('button', { name: /^continue$/i })).toBeVisible()
   return dialog
 }
 
@@ -118,7 +118,7 @@ test.describe('LR-A3 master DOCX upload validation (A4 / A7)', () => {
     await expect(dialog.locator('.upload-error')).toBeVisible()
     await expect(dialog.locator('.upload-error')).toHaveText(READABLE_TOO_LARGE)
     await expect(dialog.locator('.upload-error')).not.toHaveText(RAW_NGINX_HTML)
-    await expect(dialog.getByRole('button', { name: /^replace file$/i })).toBeDisabled()
+    await expect(dialog.getByRole('button', { name: /^continue$/i })).toBeDisabled()
 
     await captureEvidence(page, 'A7-oversized-precheck')
   })
@@ -136,7 +136,7 @@ test.describe('LR-A3 master DOCX upload validation (A4 / A7)', () => {
 
     await expect(dialog.locator('.upload-error')).toBeVisible()
     await expect(dialog.locator('.upload-error')).toHaveText(READABLE_DOCX_ONLY)
-    await expect(dialog.getByRole('button', { name: /^replace file$/i })).toBeDisabled()
+    await expect(dialog.getByRole('button', { name: /^continue$/i })).toBeDisabled()
 
     await captureEvidence(page, 'A7-non-docx-precheck')
   })
@@ -166,8 +166,9 @@ test.describe('LR-A3 master DOCX upload validation (A4 / A7)', () => {
     const dialog = await openReplaceDialog(page, hubPath)
 
     await dialog.locator('input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
-    await expect(dialog.getByRole('button', { name: /^replace file$/i })).toBeEnabled()
-    await dialog.getByRole('button', { name: /^replace file$/i }).click()
+    await expect(dialog.getByRole('button', { name: /^continue$/i })).toBeEnabled()
+    await dialog.getByRole('button', { name: /^continue$/i }).click()
+    await dialog.getByRole('button', { name: /confirm replace|确认替换/i }).click()
 
     const inlineError = dialog.locator('.upload-error')
     await expect(inlineError).toBeVisible()
@@ -214,7 +215,8 @@ test.describe('LR-A3 master DOCX upload validation (A4 / A7)', () => {
     const dialog = await openReplaceDialog(page, hubPath)
 
     await dialog.locator('input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
-    await dialog.getByRole('button', { name: /^replace file$/i }).click()
+    await dialog.getByRole('button', { name: /^continue$/i }).click()
+    await dialog.getByRole('button', { name: /confirm replace|确认替换/i }).click()
 
     const inlineError = dialog.locator('.upload-error')
     await expect(inlineError).toBeVisible()
@@ -239,7 +241,7 @@ test.describe('LR-A3 master DOCX upload validation (A4 / A7)', () => {
     await dialog.locator('input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
 
     await expect(dialog.locator('.upload-error')).toHaveCount(0)
-    await expect(dialog.getByRole('button', { name: /^replace file$/i })).toBeEnabled()
+    await expect(dialog.getByRole('button', { name: /^continue$/i })).toBeEnabled()
     await expect(
       dialog.locator('.el-upload-list__item-file-name').filter({
         hasText: /retail-letterhead-replacement\.docx/i,

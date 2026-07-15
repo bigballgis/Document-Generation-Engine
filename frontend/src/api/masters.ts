@@ -13,6 +13,7 @@ import type {
   MasterDocumentDetail,
   MasterDocumentSummary,
   MasterImpactAnalysis,
+  MasterRevisionDiff,
   MasterRevisionLineDetail,
   MasterRevisionLinePage,
   SubmitMasterReviewPayload,
@@ -138,6 +139,20 @@ export async function decideMasterReview(
 export async function getMasterImpactAnalysis(masterId: string): Promise<MasterImpactAnalysis> {
   const response = await http.get<ApiEnvelope<MasterImpactAnalysis>>(
     `/masters/${masterId}/impact-analysis`,
+  )
+  return unwrapEnvelope(response.data)
+}
+
+export async function getMasterRevisionDiff(
+  masterId: string,
+  params?: {
+    baselineRevisionLineId?: string
+    candidateRevisionLineId?: string
+  },
+): Promise<MasterRevisionDiff> {
+  const response = await http.get<ApiEnvelope<MasterRevisionDiff>>(
+    `/masters/${masterId}/revision-lines/diff`,
+    { params },
   )
   return unwrapEnvelope(response.data)
 }

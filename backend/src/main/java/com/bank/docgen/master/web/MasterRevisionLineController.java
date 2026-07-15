@@ -1,9 +1,11 @@
 package com.bank.docgen.master.web;
 
 import com.bank.docgen.authorization.management.api.PageView;
+import com.bank.docgen.master.api.MasterRevisionDiffView;
 import com.bank.docgen.master.api.MasterRevisionLineDetailView;
 import com.bank.docgen.master.api.MasterRevisionLineSummaryView;
 import com.bank.docgen.master.service.MasterDocumentService;
+import com.bank.docgen.master.service.MasterImpactAnalysisService;
 import com.bank.docgen.master.service.MasterRevisionLineService;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
@@ -26,13 +28,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class MasterRevisionLineController {
 
     private final MasterRevisionLineService masterRevisionLineService;
+    private final MasterImpactAnalysisService masterImpactAnalysisService;
     private final TraceIdProvider traceIdProvider;
 
     public MasterRevisionLineController(
             MasterRevisionLineService masterRevisionLineService,
+            MasterImpactAnalysisService masterImpactAnalysisService,
             TraceIdProvider traceIdProvider
     ) {
         this.masterRevisionLineService = masterRevisionLineService;
+        this.masterImpactAnalysisService = masterImpactAnalysisService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -45,6 +50,25 @@ public class MasterRevisionLineController {
             HttpServletRequest request
     ) {
         return envelope(request, masterRevisionLineService.list(masterId, page, size, session));
+    }
+
+    @GetMapping("/diff")
+    public SuccessEnvelope<MasterRevisionDiffView> revisionDiff(
+            @PathVariable UUID masterId,
+            @RequestParam(required = false) UUID baselineRevisionLineId,
+            @RequestParam(required = false) UUID candidateRevisionLineId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(
+                request,
+                masterImpactAnalysisService.revisionDiff(
+                        masterId,
+                        baselineRevisionLineId,
+                        candidateRevisionLineId,
+                        session
+                )
+        );
     }
 
     @GetMapping("/{revisionLineId}")

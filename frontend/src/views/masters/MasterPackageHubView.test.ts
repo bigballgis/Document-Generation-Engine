@@ -63,6 +63,7 @@ describe('MasterPackageHubView', () => {
     vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
       masterId: 'master-1',
       referencedTemplateIds: [],
+      referencedTemplates: [],
       retestRequired: false,
     })
     vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
@@ -123,6 +124,7 @@ describe('MasterPackageHubView', () => {
     vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
       masterId: 'master-1',
       referencedTemplateIds: [],
+      referencedTemplates: [],
       retestRequired: false,
     })
     vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
@@ -173,6 +175,7 @@ describe('MasterPackageHubView', () => {
     vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
       masterId: 'master-1',
       referencedTemplateIds: [],
+      referencedTemplates: [],
       retestRequired: false,
     })
     vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
@@ -239,6 +242,7 @@ describe('MasterPackageHubView', () => {
     vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
       masterId: 'master-1',
       referencedTemplateIds: [],
+      referencedTemplates: [],
       retestRequired: false,
     })
     vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
@@ -304,6 +308,7 @@ describe('MasterPackageHubView', () => {
     vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
       masterId: 'master-1',
       referencedTemplateIds: [],
+      referencedTemplates: [],
       retestRequired: false,
     })
     vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
@@ -363,6 +368,7 @@ describe('MasterPackageHubView', () => {
     vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
       masterId: 'master-1',
       referencedTemplateIds: [],
+      referencedTemplates: [],
       retestRequired: false,
     })
     vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({

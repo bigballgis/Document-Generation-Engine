@@ -79,7 +79,9 @@ test.describe('CDP-E2E-T06 Master designer upload-to-approve (BDD-CDP-MASTER-001
     await expect(replaceDialog).toBeVisible()
 
     await replaceDialog.locator('input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
-    await replaceDialog.getByRole('button', { name: /^replace file$/i }).click()
+    await replaceDialog.getByRole('button', { name: /^continue$/i }).click()
+    await expect(replaceDialog.getByTestId('master-replace-impact-confirm')).toBeVisible()
+    await replaceDialog.getByRole('button', { name: /confirm replace|确认替换/i }).click()
 
     await expect(
       page.locator('.el-message').getByText(/letterhead file replaced|master file replaced/i),

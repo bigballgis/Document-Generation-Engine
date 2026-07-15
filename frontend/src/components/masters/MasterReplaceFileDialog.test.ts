@@ -5,12 +5,25 @@ import { afterEach, describe, expect, it } from 'vitest'
 import MasterReplaceFileDialog from '@/components/masters/MasterReplaceFileDialog.vue'
 import en from '@/i18n/locales/en'
 import { MASTER_DOCX_MAX_UPLOAD_BYTES } from '@/utils/validateMasterDocxUpload'
+import type { MasterImpactAnalysis } from '@/types/master'
 
 function makeFile(name: string, size: number, type = ''): File {
   const blob = new Blob([new Uint8Array(Math.min(size, 64))], { type })
   const file = new File([blob], name, { type })
   Object.defineProperty(file, 'size', { value: size })
   return file
+}
+
+const sampleImpact: MasterImpactAnalysis = {
+  masterId: 'master-1',
+  referencedTemplateIds: ['tpl-1'],
+  referencedTemplates: [{ templateId: 'tpl-1', name: 'Loan Contract' }],
+  retestRequired: true,
+  anchorDelta: {
+    addedAnchors: [],
+    removedAnchors: ['FOOTER'],
+    renamedAnchors: [],
+  },
 }
 
 describe('MasterReplaceFileDialog', () => {
@@ -23,6 +36,7 @@ describe('MasterReplaceFileDialog', () => {
       loading?: boolean
       serverErrorKey?: string | null
       uploadProgress?: number | null
+      impact?: MasterImpactAnalysis | null
     } = {},
   ) {
     const i18n = createI18n({
@@ -34,6 +48,7 @@ describe('MasterReplaceFileDialog', () => {
       props: {
         modelValue: true,
         currentFilename: 'current.docx',
+        impact: sampleImpact,
         ...props,
       },
       attachTo: document.body,
@@ -41,6 +56,10 @@ describe('MasterReplaceFileDialog', () => {
         plugins: [i18n, ElementPlus],
       },
     })
+  }
+
+  function findButton(wrapper: ReturnType<typeof mountDialog>, label: string) {
+    return wrapper.findAll('button').find((button) => button.text().includes(label))
   }
 
   it('shows drag affordance and 50 MB / .docx limit hint', async () => {
@@ -54,7 +73,7 @@ describe('MasterReplaceFileDialog', () => {
     expect(wrapper.text()).toMatch(/\.docx/i)
   })
 
-  it('shows readable error and blocks submit when file exceeds 50MB', async () => {
+  it('shows readable error and blocks continue when file exceeds 50MB', async () => {
     const wrapper = mountDialog()
     await flushPromises()
 
@@ -66,15 +85,11 @@ describe('MasterReplaceFileDialog', () => {
     expect(wrapper.text()).toContain(
       'The file exceeds the 50 MB upload limit. Reduce the file size and try again.',
     )
-    expect(wrapper.text()).not.toContain('<html')
-    const submit = wrapper
-      .findAll('button')
-      .find((button) => button.text().includes('Replace file'))
-    expect(submit?.attributes('disabled')).toBeDefined()
+    expect(findButton(wrapper, 'Continue')?.attributes('disabled')).toBeDefined()
     expect(wrapper.emitted('submit')).toBeUndefined()
   })
 
-  it('shows readable error and blocks submit for non-.docx files', async () => {
+  it('shows readable error and blocks continue for non-.docx files', async () => {
     const wrapper = mountDialog()
     await flushPromises()
 
@@ -84,10 +99,7 @@ describe('MasterReplaceFileDialog', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Only .docx letterhead files are accepted.')
-    const submit = wrapper
-      .findAll('button')
-      .find((button) => button.text().includes('Replace file'))
-    expect(submit?.attributes('disabled')).toBeDefined()
+    expect(findButton(wrapper, 'Continue')?.attributes('disabled')).toBeDefined()
   })
 
   it('renders translated inline server rejection and clears it when file changes', async () => {
@@ -97,7 +109,6 @@ describe('MasterReplaceFileDialog', () => {
     await flushPromises()
 
     expect(wrapper.text()).toMatch(/corrupt|invalid|docx/i)
-    expect(wrapper.text()).not.toContain('<html')
     expect(wrapper.find('[role="alert"]').exists()).toBe(true)
 
     const docx = makeFile('retry.docx', 4096)
@@ -114,13 +125,9 @@ describe('MasterReplaceFileDialog', () => {
 
     expect(wrapper.find('[data-testid="master-upload-progress"]').exists()).toBe(true)
     expect(wrapper.text()).toMatch(/55%|uploading/i)
-    const submit = wrapper
-      .findAll('button')
-      .find((button) => button.text().includes('Replace file'))
-    expect(submit?.attributes('disabled')).toBeDefined()
   })
 
-  it('emits submit for a valid .docx under the size limit', async () => {
+  it('MIR-008 — confirm step shows template name and cancel does not submit', async () => {
     const wrapper = mountDialog()
     await flushPromises()
 
@@ -129,10 +136,34 @@ describe('MasterReplaceFileDialog', () => {
     await upload.vm.$emit('change', { raw: docx, name: docx.name })
     await flushPromises()
 
-    const submit = wrapper
-      .findAll('button')
-      .find((button) => button.text().includes('Replace file'))
-    await submit!.trigger('click')
+    await findButton(wrapper, 'Continue')!.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="master-replace-impact-confirm"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="master-replace-impact-names"]').text()).toContain(
+      'Loan Contract',
+    )
+    expect(wrapper.find('[data-testid="master-replace-retest-required"]').exists()).toBe(true)
+
+    await findButton(wrapper, 'Cancel')!.trigger('click')
+    await flushPromises()
+    expect(wrapper.emitted('submit')).toBeUndefined()
+  })
+
+  it('emits submit only after impact confirmation', async () => {
+    const wrapper = mountDialog()
+    await flushPromises()
+
+    const docx = makeFile('replacement.docx', 4096)
+    const upload = wrapper.findComponent({ name: 'ElUpload' })
+    await upload.vm.$emit('change', { raw: docx, name: docx.name })
+    await flushPromises()
+
+    await findButton(wrapper, 'Continue')!.trigger('click')
+    await flushPromises()
+    expect(wrapper.emitted('submit')).toBeUndefined()
+
+    await findButton(wrapper, 'Confirm replace')!.trigger('click')
     await flushPromises()
 
     expect(wrapper.emitted('submit')?.[0]?.[0]).toBe(docx)

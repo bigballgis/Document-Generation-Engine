@@ -52,7 +52,8 @@ test.describe('master DOCX replacement (demo retail letterhead)', () => {
     await expect(page.locator('.el-dialog').getByText(/update master docx/i)).toBeVisible()
 
     await page.locator('.el-dialog input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
-    await page.getByRole('button', { name: /^replace file$/i }).click()
+    await page.getByRole('button', { name: /^continue$/i }).click()
+    await page.getByRole('button', { name: /confirm replace|确认替换/i }).click()
 
     await expect(page.locator('.el-message').getByText(/master file replaced/i)).toBeVisible()
     await expect(page).toHaveURL(/\/masters\/[^/]+\/revisions\/[^/?]+$/)

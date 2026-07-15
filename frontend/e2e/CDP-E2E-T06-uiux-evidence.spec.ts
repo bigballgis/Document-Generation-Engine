@@ -74,7 +74,8 @@ test.describe('CDP-E2E-T06 UIUX evidence — master designer lifecycle @1920 (BD
     await page.getByRole('button', { name: /update letterhead docx/i }).click()
     const replaceDialog = page.locator('.el-dialog').filter({ hasText: /update letterhead docx/i })
     await replaceDialog.locator('input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
-    await replaceDialog.getByRole('button', { name: /^replace file$/i }).click()
+    await replaceDialog.getByRole('button', { name: /^continue$/i }).click()
+    await replaceDialog.getByRole('button', { name: /confirm replace|确认替换/i }).click()
     await expect(page).toHaveURL(/\/masters\/[^/]+\/revisions\/[^/?]+/, { timeout: 60_000 })
     revisionDetailPath = new URL(page.url()).pathname
 

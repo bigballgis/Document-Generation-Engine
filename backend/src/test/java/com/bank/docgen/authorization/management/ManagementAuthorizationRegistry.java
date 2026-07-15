@@ -118,7 +118,10 @@ final class ManagementAuthorizationRegistry {
             ),
             Map.entry(
                     "com.bank.docgen.master.web.MasterRevisionLineController",
-                    Set.of("com.bank.docgen.master.service.MasterRevisionLineService")
+                    Set.of(
+                            "com.bank.docgen.master.service.MasterRevisionLineService",
+                            "com.bank.docgen.master.service.MasterImpactAnalysisService"
+                    )
             ),
             Map.entry(
                     "com.bank.docgen.rendering.web.BatchTestController",
@@ -301,6 +304,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.contentmodule.service.ContentModuleReviewService",
             "com.bank.docgen.contentmodule.service.ContentModuleService",
             "com.bank.docgen.master.service.MasterDocumentService",
+            "com.bank.docgen.master.service.MasterImpactAnalysisService",
             "com.bank.docgen.master.service.MasterRevisionLineService",
             "com.bank.docgen.template.service.TemplateDeleteService",
             "com.bank.docgen.template.service.TemplateExportAccessService",
