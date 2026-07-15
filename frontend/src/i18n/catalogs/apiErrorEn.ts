@@ -189,6 +189,9 @@ export const apiErrorEn = {
     invalidTimeWindow: "The audit time window is invalid.",
     scopeRequired: "Group scope and template identifier are required for group-scoped audit queries."
   },
+  batch: {
+    originalBatchNotFound: "Original batch was not found."
+  },
   notFound: {
     userNotFound: "The requested user does not exist.",
     groupNotFound: "The requested business group does not exist."

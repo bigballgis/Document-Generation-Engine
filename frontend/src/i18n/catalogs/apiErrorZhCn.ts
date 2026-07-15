@@ -185,6 +185,9 @@ export const apiErrorZhCn = {
     invalidTimeWindow: "审计时间窗口无效。",
     scopeRequired: "组范围审计查询需要组范围和模板标识符。"
   },
+  batch: {
+    originalBatchNotFound: "未找到原始批次。"
+  },
   notFound: {
     userNotFound: "请求的用户不存在。",
     groupNotFound: "请求的业务组不存在。"
