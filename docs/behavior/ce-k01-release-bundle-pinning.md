@@ -68,7 +68,7 @@
 | **K01-C10** | **D7 release-locked：** 停用（status 置为非 ACTIVE）一个被已发布 release 钉扎的 master revision **不取消**在途异步任务；在途任务继续按其发布时已解析的钉扎 revision 跑完。停用仅阻止其被**新发布**的 release 钉扎。 | 用户确认 D7 |
 | **K01-C11** | 停用（STOPPED）/弃用（DEPRECATED）一个 release **不解除**对其 `master_revision_id` 的引用，亦**不释放**该 revision 供物理删除（K01-C6 仍生效）。 | 计划卡 + 审计可复现要求 |
 | **K01-C12** | **本片禁止：** 改锚点提取逻辑、改预览路径语义（预览继续跟随 dev 母版）、改 master revision 的 revision_sequence 编号策略、做 K04 语义级 diff、做 K05 真实影响分析。这些属后续切片。 | 计划卡"禁止"栏 |
-| **K01-C13** | 本片**不**实现 CE-E01 自包含导出包 v2（其依赖 K01 数据），仅保证 DB 层钉扎字段可被 E01 后续消费。 | 计划卡依赖图 |
+| **K01-C13** | 本片**不**实现 CE-E01 自包含导出包 v2（其依赖 K01 数据），仅保证 DB 层钉扎字段可被 E01 后续消费。**下游：** [ce-e01-export-bundle-v2.md](./ce-e01-export-bundle-v2.md) E01-C4/C12 消费 `master_revision_id` / `master_file_hash`。 | 计划卡依赖图 |
 | **K01-C14** | `pin_metadata_json` 至少包含 `pinOrigin` ∈ {`PUBLISHED`, `PINNED_RETROACTIVELY`}；`PUBLISHED` 由发布流程写入、`PINNED_RETROACTIVELY` 由 Flyway 回填写入。 | K01-C8 + 发布流程 |
 
 ---
@@ -311,7 +311,8 @@
 **Given** 本切片交付完成  
 **When** 检查导出包功能  
 **Then** 本片**不**新增导出包内嵌母版/revision DOCX 的能力  
-**And** 仅保证 DB 层钉扎字段可被 CE-E01 后续消费
+**And** 仅保证 DB 层钉扎字段可被 CE-E01 后续消费  
+**And** CE-E01 行为规格见 [ce-e01-export-bundle-v2.md](./ce-e01-export-bundle-v2.md)（BDD ready 2026-07-16；Task **#78** In Progress 消费本片钉扎）
 
 ---
 
@@ -358,7 +359,7 @@
 | 用户拍板 D1–D7（2026-07-14） | D7 release-locked 直接驱动 BDD-CE-K01-014/015 |
 | Task Master **#57** | 本切片任务登记 |
 | CE-K07 金标骨架 | 本片交付时按 K07 约定充实 `nested-clauses` 等样本的母版 revision 钉扎断言（若可行） |
-| CE-K04 / CE-K05 / CE-E01 | 依赖本片钉扎数据；本片不实现它们的能力 |
+| CE-K04 / CE-K05 / CE-E01 | 依赖本片钉扎数据；本片不实现它们的能力。**CE-E01 消费面（2026-07-16）：** Task Master **#78** · [ce-e01-export-bundle-v2.md](./ce-e01-export-bundle-v2.md) — 导出自包含 v2 读取 `master_revision_id` / `master_file_hash` / render profile；导入 dry-run 比对 `masterPin.masterFileHash` |
 | `permission-matrix.md` | 发布与母版删除权限角色不变（本片不改权限模型） |
 
 ---

@@ -12,7 +12,8 @@ public record ErrorDetail(
         boolean retryable,
         List<FieldError> fieldErrors,
         java.util.Map<String, Object> idempotencyConflict,
-        List<BatchErrorItemView> items
+        List<BatchErrorItemView> items,
+        Object dependencyReport
 ) {
     public ErrorDetail {
         fieldErrors = DefensiveCopies.copyList(fieldErrors);
@@ -28,7 +29,7 @@ public record ErrorDetail(
             boolean retryable,
             List<FieldError> fieldErrors
     ) {
-        this(code, category, message, messageKey, retryable, fieldErrors, null, null);
+        this(code, category, message, messageKey, retryable, fieldErrors, null, null, null);
     }
 
     public ErrorDetail(
@@ -40,6 +41,19 @@ public record ErrorDetail(
             List<FieldError> fieldErrors,
             java.util.Map<String, Object> idempotencyConflict
     ) {
-        this(code, category, message, messageKey, retryable, fieldErrors, idempotencyConflict, null);
+        this(code, category, message, messageKey, retryable, fieldErrors, idempotencyConflict, null, null);
+    }
+
+    public ErrorDetail(
+            String code,
+            String category,
+            String message,
+            String messageKey,
+            boolean retryable,
+            List<FieldError> fieldErrors,
+            java.util.Map<String, Object> idempotencyConflict,
+            List<BatchErrorItemView> items
+    ) {
+        this(code, category, message, messageKey, retryable, fieldErrors, idempotencyConflict, items, null);
     }
 }

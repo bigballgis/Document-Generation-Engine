@@ -5,10 +5,16 @@ import com.bank.docgen.template.api.TemplateExportMetadataView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TemplateImportBundleValidator {
+
+    private static final Set<String> SUPPORTED_FORMATS = Set.of(
+            TemplateExportService.EXPORT_FORMAT,
+            TemplateExportV2Support.EXPORT_FORMAT_V2
+    );
 
     private static final List<String> FORBIDDEN_SECRET_MARKERS = List.of(
             "credentialid",
@@ -28,7 +34,7 @@ public class TemplateImportBundleValidator {
         if (bundle == null) {
             throw new TemplateValidationException("api.error.template.importBundleInvalid");
         }
-        if (!TemplateExportService.EXPORT_FORMAT.equals(bundle.format())) {
+        if (bundle.format() == null || !SUPPORTED_FORMATS.contains(bundle.format())) {
             throw new TemplateValidationException("api.error.template.importBundleUnsupportedFormat");
         }
         TemplateExportMetadataView metadata = bundle.metadata();
@@ -44,6 +50,11 @@ public class TemplateImportBundleValidator {
                 || bundle.rules() == null
                 || bundle.contentModuleReferences() == null) {
             throw new TemplateValidationException("api.error.template.importBundleInvalid");
+        }
+        if (TemplateExportV2Support.EXPORT_FORMAT_V2.equals(bundle.format())) {
+            if (bundle.clauseSnapshots() == null || bundle.assetKeyManifest() == null) {
+                throw new TemplateValidationException("api.error.template.importBundleInvalid");
+            }
         }
         assertNoSecrets(bundle);
     }

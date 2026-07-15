@@ -32,6 +32,7 @@ public final class ManagementAuditEventTypes {
     public static final String CONTENT_MODULE_LIFECYCLE_OPERATION = "CONTENT_MODULE_LIFECYCLE_OPERATION";
     public static final String TEMPLATE_EXPORTED = "TEMPLATE_EXPORTED";
     public static final String TEMPLATE_IMPORTED = "TEMPLATE_IMPORTED";
+    public static final String TEMPLATE_IMPORT_DRY_RUN = "TEMPLATE_IMPORT_DRY_RUN";
     public static final String TEMPLATE_TEST_DATA_PII_EXPLICIT_CONFIRM = "TEMPLATE_TEST_DATA_PII_EXPLICIT_CONFIRM";
     /** CE-G06: controlled regenerate terminal event (success or failure). */
     public static final String INVOCATION_REGENERATED = "INVOCATION_REGENERATED";

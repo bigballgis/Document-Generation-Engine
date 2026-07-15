@@ -696,6 +696,7 @@
 - 导入生产环境时，不能直接导出为最终发布版本。
 - 导入生产遇到已有相同模板 ID 时，保留模板 ID，并在目标环境创建新的开发版本；模板发布版本号在后续发布时再由模板编排人员或管理员选择。
 - 导入生产不重新生成模板 ID 或 API 地址；导入后的模板仍需从草稿重新经过测试、审批、待发布和发布流程后才可形成新的发布版本。
+- **CE-E01（2026-07-16 确认 / BDD `ready`）：** 支持自包含导出包 **v2**（`template-export-bundle-v2-json`）：ZIP 内嵌钉扎母版 DOCX（`artifacts/master.docx`）+ JSON 清单（CE-K01 母版 revision 指纹 `master_revision_id`/`master_file_hash`、条款正文快照、render profile 快照、资产键清单；**不**嵌资产二进制、**不**含 secret/凭证/测试数据明文）。默认导出仍为 v1 以兼容既有客户端；`bundleVersion=2` 显式选择 v2。导入支持 **dry-run**（`dryRun=true`）：仅返回依赖预检报告（母版指纹、条款将物化/缺失、资产键缺失等），**零**业务表写入；`readyToCommit=false` 时提交导入 **422**（`IMPORT_DEPENDENCIES_UNSATISFIED`）且禁止半残状态；通过则单事务落地 `DRAFT`（可物化缺失条款快照为草稿模块；母版仍绑定目标 `masterId`，本片不从 DOCX 自动建母版）。权限与矩阵 §5 导出/导入一致；**管理端 UI / E2E 本片 out of scope**（API-first）。非目标：CE-E02 资产库、CE-E03 全库导出、CE-O01 PDF/A。完整 Given/When/Then：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md) `BDD-CE-E01-001…018`；钉扎上游：[ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)。
 
 ## 已确认：登录起点角色旅程重构（T01 首波）
 

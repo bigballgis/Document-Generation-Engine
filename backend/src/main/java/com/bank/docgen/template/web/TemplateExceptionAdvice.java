@@ -7,6 +7,7 @@ import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelopeFactory;
 import com.bank.docgen.template.service.TemplateAccessDeniedException;
 import com.bank.docgen.template.service.TemplateGovernanceException;
+import com.bank.docgen.template.service.TemplateImportDependenciesException;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.bank.docgen.template.service.TestDataSetImmutableException;
@@ -118,6 +119,14 @@ public class TemplateExceptionAdvice {
                 ApiErrorCategories.TEMPLATE,
                 ex.messageKey()
         );
+    }
+
+    @ExceptionHandler(TemplateImportDependenciesException.class)
+    public ResponseEntity<ErrorEnvelope> handleImportDependencies(
+            HttpServletRequest request,
+            TemplateImportDependenciesException ex
+    ) {
+        return errorEnvelopeFactory.importDependenciesUnsatisfied(request, ex.dependencyReport());
     }
 
     @ExceptionHandler(com.bank.docgen.sharedkernel.document.compute.VariableComputeException.class)

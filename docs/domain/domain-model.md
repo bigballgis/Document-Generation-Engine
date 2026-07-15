@@ -813,6 +813,8 @@ Template Collaboration Work Item 用于站内待办和状态提示，不是 Temp
 - API 授权只到模板级别；调用方获得模板权限后，可以调用该模板下所有未停用的发布版本。
 - 发布版本号采用语义化版本，例如 1.0.0、1.1.0、2.0.0。
 - 发布时由模板编排人员或管理员选择版本变更级别。
+- **CE-K01（Done）发布钉扎：** 发布为 release 时在 `template_version` 持久化 `master_revision_id`、`master_file_hash`（SHA-256）、`pin_metadata_json`（含 `pinOrigin`/`pinnedAt`/`pinnedBy`），并保留既有 render profile 锁。Runtime 装配读钉扎 revision，禁止回退 live master。权威行为：[ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)。
+- **CE-E01 消费钉扎（In Progress）：** 自包含导出包 v2 的 `masterPin` 读取上述 K01 字段（或 `EXPORT_TIME` 计算 hash 且不改 DB）；ZIP 内嵌对应 DOCX 字节且 hash 自洽。见 §6 与 [ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)。
 
 ### 2.12 动态 API Dynamic API
 
@@ -1312,6 +1314,7 @@ P19 范围（见 [P5 薄切片边界](../plan/detail/P5-lifecycle-governance.md)
 - 导入生产环境时，不能直接导出为最终发布版本。
 - 导入生产遇到已有相同模板 ID 时，保留模板 ID，并在目标环境创建新的开发版本；模板发布版本号在后续发布时再由模板编排人员或管理员选择。
 - 导入生产不重新生成模板 ID 或 API 地址；导入后的模板仍需从草稿重新经过测试、审批、待发布和发布流程后才可形成新的发布版本。
+- **CE-E01（2026-07-16）：** 导出包格式族：`template-export-bundle-v1-json`（默认兼容）与 `template-export-bundle-v2-json`（自包含）。v2 ZIP 载体固定条目 `template-export-bundle.json` + `artifacts/master.docx`；JSON 清单含 `masterPin`（消费 CE-K01 `master_revision_id`/`master_file_hash`，见 §2.11）、`clauseSnapshots`（条款正文/结构快照）、`renderProfile`、`assetKeyManifest`（仅键，无资产字节）。导入 `dryRun=true` 产出依赖预检报告且不写业务表；提交导入在 blocking 依赖未清时拒绝并保持零半残；通过时单事务物化缺失条款快照为草稿内容模块并落地模板 `DRAFT`，母版仍绑定目标环境已批准 `masterId`。权威行为：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)；契约：[contract-outline.md](../api/contract-outline.md) / [openapi-v1.yaml](../api/openapi-v1.yaml)。
 
 ### 2.18 演示包（部署制品）Demo Package
 

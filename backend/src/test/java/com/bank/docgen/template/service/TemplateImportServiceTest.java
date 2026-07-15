@@ -62,6 +62,14 @@ class TemplateImportServiceTest {
     private ManagementAuditRecorder managementAuditRecorder;
     @Mock
     private TemplateCurrentVersionResolver templateCurrentVersionResolver;
+    @Mock
+    private TemplateImportDependencyPrecheck dependencyPrecheck;
+    @Mock
+    private com.bank.docgen.contentmodule.service.ContentModuleService contentModuleService;
+    @Mock
+    private com.bank.docgen.contentmodule.persistence.ContentModuleRepository contentModuleRepository;
+    @Mock
+    private com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository contentModuleVersionRepository;
 
     private TemplateImportService service;
     private UUID templateId;
@@ -82,7 +90,11 @@ class TemplateImportServiceTest {
                 new TemplateExportAccessService(new GroupAccessService()),
                 new TemplateImportBundleValidator(new ObjectMapper().findAndRegisterModules()),
                 new ObjectMapper().findAndRegisterModules(),
-                templateCurrentVersionResolver
+                templateCurrentVersionResolver,
+                dependencyPrecheck,
+                contentModuleService,
+                contentModuleRepository,
+                contentModuleVersionRepository
         );
         templateId = UUID.randomUUID();
         masterId = UUID.randomUUID();
@@ -112,7 +124,9 @@ class TemplateImportServiceTest {
                 any(),
                 eq(1),
                 eq("10000002"),
-                any()
+                any(),
+                eq("template-export-bundle-v1-json"),
+                eq(0)
         );
     }
 

@@ -38,16 +38,18 @@ public class TemplateExportController {
     @GetMapping(value = "/{templateId}/export", produces = MediaType.APPLICATION_JSON_VALUE)
     public SuccessEnvelope<TemplateExportResult> exportJson(
             @PathVariable UUID templateId,
+            @RequestParam(value = "bundleVersion", required = false, defaultValue = "1") int bundleVersion,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        return envelope(request, templateExportService.exportJson(templateId, session));
+        return envelope(request, templateExportService.exportJson(templateId, session, bundleVersion));
     }
 
     @GetMapping(value = "/{templateId}/export", params = "format=zip")
     public void exportZip(
             @PathVariable UUID templateId,
             @RequestParam("format") String format,
+            @RequestParam(value = "bundleVersion", required = false, defaultValue = "1") int bundleVersion,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletResponse response
     ) throws IOException {
@@ -55,7 +57,7 @@ public class TemplateExportController {
             throw new TemplateValidationException("api.error.template.exportFormatUnsupported");
         }
         TemplateExportService.TemplateExportZipArtifact artifact =
-                templateExportService.exportZip(templateId, session);
+                templateExportService.exportZip(templateId, session, bundleVersion);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/zip");
         response.setHeader(

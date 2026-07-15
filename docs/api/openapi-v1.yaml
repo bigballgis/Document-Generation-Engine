@@ -1968,15 +1968,21 @@ paths:
       summary: Export a template as JSON or ZIP bundle
       description: >-
         Exports an eligible template (`PENDING_RELEASE`, `PUBLISHED`, `STOPPED`,
-        or `DEPRECATED`) as `template-export-bundle-v1-json`. JSON responses use
-        the management success envelope; ZIP responses (`format=zip`) return a
-        single `application/zip` attachment containing
-        `template-export-bundle.json`. Bundle includes metadata, variables,
-        bindings, composition rules, content-module references, and API policy
-        snapshot. Export omits secrets, API credential material, and runtime
-        credentials. Permission boundary per permission-matrix section 5:
+        or `DEPRECATED`) as `template-export-bundle-v1-json` by default, or
+        `template-export-bundle-v2-json` when `bundleVersion=2` (CE-E01).
+        JSON responses use the management success envelope; ZIP responses
+        (`format=zip`) return an `application/zip` attachment. v1 ZIP contains
+        only `template-export-bundle.json`. v2 ZIP additionally embeds
+        `artifacts/master.docx` (pinned master revision bytes) and the JSON
+        carries `masterPin`, `clauseSnapshots`, `renderProfile`, and
+        `assetKeyManifest`. Bundle omits secrets, API credential material, and
+        runtime credentials. Permission boundary per permission-matrix section 5:
         `GLOBAL_ADMIN` (all templates), `GROUP_ADMIN` (authorized groups),
         `TEMPLATE_AUTHOR` (own templates only). Export actions are audited.
+        Traceability: BDD-CE-E01-001…006; docs/behavior/ce-e01-export-bundle-v2.md.
+        When the pinned master DOCX object is unavailable at export time, fail-closed
+        with `PINNED_MASTER_UNAVAILABLE` /
+        `api.error.rendering.pinnedMasterUnavailable` (reuse CE-K01 / CE-G06 key).
       parameters:
         - name: templateId
           in: path
@@ -1992,6 +1998,17 @@ paths:
           schema:
             type: string
             enum: [zip]
+        - name: bundleVersion
+          in: query
+          required: false
+          description: >-
+            Export bundle schema generation. `1` (default) =
+            `template-export-bundle-v1-json`. `2` (CE-E01) =
+            `template-export-bundle-v2-json` with self-contained ZIP artifacts.
+          schema:
+            type: integer
+            enum: [1, 2]
+            default: 1
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
         '200':
@@ -2005,8 +2022,9 @@ paths:
                 type: string
                 format: binary
               description: >-
-                ZIP archive with entry `template-export-bundle.json` containing
-                the same bundle structure as JSON export.
+                ZIP archive. v1: entry `template-export-bundle.json` only.
+                v2 (CE-E01): `template-export-bundle.json` plus
+                `artifacts/master.docx`.
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
@@ -2109,17 +2127,25 @@ paths:
     post:
       tags: [Admin]
       operationId: importTemplateBundle
-      summary: Import a template export bundle into DRAFT
+      summary: Import a template export bundle into DRAFT (or dry-run dependency pre-check)
       description: >-
-        Imports a validated `template-export-bundle-v1-json` bundle. Imported
-        templates land in `DRAFT` and must re-run test, approval, and publish
-        in the target environment. `masterId` must reference an `APPROVED`
-        master in the same `groupCode` as bundle metadata.
-        `importConflictPolicy` defaults to `REJECT_IMPORT` when omitted.
-        `KEEP_TEMPLATE_ID` applies only when the internal template UUID in
-        bundle metadata already exists; conflicting `externalId` always rejects
-        import. Permission boundary per permission-matrix section 5 matches
-        export. Import actions are audited and return `importBatchId`.
+        Imports a validated `template-export-bundle-v1-json` or
+        `template-export-bundle-v2-json` (CE-E01) bundle. Imported templates land
+        in `DRAFT` and must re-run test, approval, and publish in the target
+        environment. `masterId` must reference an `APPROVED` master in the same
+        `groupCode` as bundle metadata. `importConflictPolicy` defaults to
+        `REJECT_IMPORT` when omitted. `KEEP_TEMPLATE_ID` applies only when the
+        internal template UUID in bundle metadata already exists; conflicting
+        `externalId` always rejects import. When `dryRun=true`, the API returns
+        a dependency pre-check report (`dependencyReport`) with HTTP 200 and
+        performs no business-table writes (CE-E01). Commit import with blocking
+        unmet dependencies returns 422 `api.error.template.importDependenciesUnsatisfied`
+        with the same report shape — never a half-imported state. v2 may
+        materialize missing clause snapshots as DRAFT content-module versions
+        inside a single transaction. Permission boundary per permission-matrix
+        section 5 matches export. Import and dry-run actions are audited;
+        successful commit returns `importBatchId`. Traceability:
+        BDD-CE-E01-007…017; docs/behavior/ce-e01-export-bundle-v2.md.
       parameters:
         - $ref: '#/components/parameters/TraceIdHeader'
       requestBody:
@@ -2128,7 +2154,22 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ImportTemplateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImportTemplateMultipartRequest'
+            encoding:
+              file:
+                contentType: application/zip
       responses:
+        '200':
+          description: >-
+            CE-E01 dry-run (`dryRun=true`): dependency pre-check report only;
+            `imported=false`; no business-table writes. Audit
+            `TEMPLATE_IMPORT_DRY_RUN` still recorded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateImportDryRunResponse'
         '201':
           description: Template imported; lands in DRAFT.
           content:
@@ -2142,7 +2183,15 @@ paths:
         '404':
           $ref: '#/components/responses/ErrorResponse'
         '422':
-          $ref: '#/components/responses/ErrorResponse'
+          description: >-
+            Validation / dependency gate failure. For unmet blocking import
+            dependencies, `error.code=IMPORT_DEPENDENCIES_UNSATISFIED` and
+            `error.messageKey=api.error.template.importDependenciesUnsatisfied`
+            with `error.dependencyReport` (same shape as dry-run).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/templates/{templateId}/version-lines:
@@ -8055,9 +8104,123 @@ components:
         updatedAt:
           type: string
           format: date-time
+    TemplateExportMasterPinOrigin:
+      type: string
+      description: >-
+        Origin of the master fingerprint written into a v2 export bundle
+        (CE-E01 / CE-K01). `EXPORT_TIME` is computed at export without mutating DB.
+      enum: [PUBLISHED, PINNED_RETROACTIVELY, EXPORT_TIME]
+    TemplateExportMasterPinView:
+      type: object
+      additionalProperties: false
+      description: >-
+        CE-E01 v2 master revision fingerprint. Consumes CE-K01 fields
+        `master_revision_id` / `master_file_hash` (or EXPORT_TIME hash).
+        See docs/behavior/ce-k01-release-bundle-pinning.md and
+        docs/behavior/ce-e01-export-bundle-v2.md (E01-C4).
+      required: [masterRevisionId, masterFileHash]
+      properties:
+        masterRevisionId:
+          type: string
+          format: uuid
+          description: Pinned `master_revision_line.id` (or current line at EXPORT_TIME).
+        masterFileHash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          description: SHA-256 of pinned master DOCX bytes (lowercase hex).
+        revisionSequence:
+          type: integer
+          minimum: 1
+          nullable: true
+          description: Optional `master_revision_line.revision_sequence` snapshot.
+        pinOrigin:
+          $ref: '#/components/schemas/TemplateExportMasterPinOrigin'
+          nullable: true
+    TemplateExportClauseSnapshotView:
+      type: object
+      additionalProperties: false
+      description: CE-E01 clause body/structure snapshot embedded in v2 bundle (no test data).
+      required: [moduleCode, moduleVersionId, versionNumber, contentStructureJson]
+      properties:
+        moduleCode:
+          type: string
+        moduleVersionId:
+          type: string
+          format: uuid
+        versionNumber:
+          type: integer
+          minimum: 1
+          description: Major component of the pinned semantic version (compat / display).
+        contentStructureJson:
+          type: string
+          description: Structured content / body snapshot as JSON text (non-secret).
+        locked:
+          type: boolean
+          description: Whether the template content-module reference was locked at export.
+          nullable: true
+        jurisdiction:
+          type: string
+          nullable: true
+          description: Optional CE-K08 legal metadata snapshot when present on the module version.
+        effectiveFrom:
+          type: string
+          format: date
+          nullable: true
+        effectiveTo:
+          type: string
+          format: date
+          nullable: true
+        legalReviewRef:
+          type: string
+          nullable: true
+        semanticVersion:
+          type: string
+          nullable: true
+          description: >-
+            Full semantic version string at export (e.g. 1.2.3). Prefer this over
+            collapsing to major-only N.0.0 when materializing on import.
+        sourceModuleId:
+          type: string
+          format: uuid
+          nullable: true
+          description: >-
+            Export-time content module UUID. Used to correlate contentModuleReferences
+            on a fresh target (do not treat as target identity).
+    TemplateExportRenderProfileView:
+      type: object
+      additionalProperties: false
+      description: CE-E01 publish-locked (or version-row) render profile snapshot for v2.
+      required: [version, json]
+      properties:
+        version:
+          type: string
+          description: Render profile version id (e.g. rp-v1).
+        json:
+          type: string
+          description: Render profile JSON text snapshot (non-secret).
+    TemplateExportAssetKeyUsage:
+      type: string
+      enum: [IMAGE, OTHER]
+    TemplateExportAssetKeyManifestItemView:
+      type: object
+      additionalProperties: false
+      description: CE-E01 asset key inventory item (key only; no binary payload).
+      required: [referenceKey, usage]
+      properties:
+        referenceKey:
+          type: string
+          description: Object-storage or structured-content reference key.
+        usage:
+          $ref: '#/components/schemas/TemplateExportAssetKeyUsage'
     TemplateExportBundleView:
       type: object
       additionalProperties: false
+      description: >-
+        Template export bundle. v1 uses format `template-export-bundle-v1-json`.
+        v2 (CE-E01) uses `template-export-bundle-v2-json` and includes
+        `masterPin`, `clauseSnapshots`, optional `renderProfile`, and
+        `assetKeyManifest`. Behavior SoT:
+        docs/behavior/ce-e01-export-bundle-v2.md.
       required:
         - format
         - metadata
@@ -8068,7 +8231,10 @@ components:
       properties:
         format:
           type: string
-          const: template-export-bundle-v1-json
+          description: Bundle format constant (v1 or v2).
+          enum:
+            - template-export-bundle-v1-json
+            - template-export-bundle-v2-json
         metadata:
           $ref: '#/components/schemas/TemplateExportMetadataView'
         variables:
@@ -8090,6 +8256,24 @@ components:
         policySnapshot:
           $ref: '#/components/schemas/TemplateExportApiPolicySnapshot'
           nullable: true
+        masterPin:
+          $ref: '#/components/schemas/TemplateExportMasterPinView'
+          nullable: true
+          description: Required for v2 format; omit on v1.
+        clauseSnapshots:
+          type: array
+          description: Required for v2 (may be empty); omit on v1.
+          items:
+            $ref: '#/components/schemas/TemplateExportClauseSnapshotView'
+        renderProfile:
+          $ref: '#/components/schemas/TemplateExportRenderProfileView'
+          nullable: true
+          description: Optional on v2; absent → dry-run INFO `RENDER_PROFILE_ABSENT`.
+        assetKeyManifest:
+          type: array
+          description: Required for v2 (may be empty); omit on v1; no binaries.
+          items:
+            $ref: '#/components/schemas/TemplateExportAssetKeyManifestItemView'
     TemplateExportResult:
       type: object
       additionalProperties: false
@@ -8097,7 +8281,9 @@ components:
       properties:
         format:
           type: string
-          const: template-export-bundle-v1-json
+          enum:
+            - template-export-bundle-v1-json
+            - template-export-bundle-v2-json
         bundle:
           $ref: '#/components/schemas/TemplateExportBundleView'
     TemplateExportResponse:
@@ -8122,6 +8308,98 @@ components:
           $ref: '#/components/schemas/TemplateExportBundleView'
         importConflictPolicy:
           $ref: '#/components/schemas/TemplateImportConflictPolicy'
+        dryRun:
+          type: boolean
+          default: false
+          description: >-
+            CE-E01: when true, return dependency pre-check report only (HTTP 200);
+            no business-table writes. When false/omitted, commit import (or 422
+            if blocking dependencies remain). v2 JSON-only bundles may dry-run;
+            self-contained commit requires multipart ZIP with `artifacts/master.docx`.
+    ImportTemplateMultipartRequest:
+      type: object
+      additionalProperties: false
+      description: >-
+        CE-E01 normative ZIP import carrier (multipart). Prefer this for v2
+        self-contained commit. Optional raw `Content-Type: application/zip`
+        whole-body POST is a non-normative equivalent implementation.
+      required: [masterId, file]
+      properties:
+        masterId:
+          type: string
+          format: uuid
+        file:
+          type: string
+          format: binary
+          description: ZIP archive (`template-export-bundle.json` [+ `artifacts/master.docx` for v2]).
+        importConflictPolicy:
+          $ref: '#/components/schemas/TemplateImportConflictPolicy'
+        dryRun:
+          type: boolean
+          default: false
+    TemplateImportDependencyType:
+      type: string
+      enum: [MASTER_PIN, CLAUSE, ASSET_KEY, RENDER_PROFILE, BUNDLE_FORMAT]
+    TemplateImportDependencySeverity:
+      type: string
+      description: >-
+        Item severity. `MISSING` / `MISMATCH` are blocking unless noted otherwise
+        in behavior SoT; `WILL_MATERIALIZE` and `INFO` are non-blocking;
+        `OK` is success.
+      enum: [OK, MISSING, MISMATCH, WILL_MATERIALIZE, INFO]
+    TemplateImportDependencyItemView:
+      type: object
+      additionalProperties: false
+      required: [dependencyType, severity, code, messageKey]
+      properties:
+        dependencyType:
+          $ref: '#/components/schemas/TemplateImportDependencyType'
+        severity:
+          $ref: '#/components/schemas/TemplateImportDependencySeverity'
+        code:
+          type: string
+          description: Stable UPPER_SNAKE code (e.g. MASTER_FINGERPRINT_MISMATCH, MASTER_DOCX_ABSENT).
+          pattern: '^[A-Z][A-Z0-9_]*$'
+        messageKey:
+          type: string
+          description: English-first i18n key (e.g. api.error.template.dep.masterFingerprintMismatch).
+        detail:
+          type: string
+          nullable: true
+          description: Non-sensitive detail (no clause body, secrets, or DOCX bytes).
+    TemplateImportDependencyReportView:
+      type: object
+      additionalProperties: false
+      description: CE-E01 import dependency pre-check report (dry-run 200 or commit 422).
+      required:
+        - items
+        - blockingCount
+        - warningCount
+        - infoCount
+        - readyToCommit
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateImportDependencyItemView'
+        blockingCount:
+          type: integer
+          minimum: 0
+        warningCount:
+          type: integer
+          minimum: 0
+        infoCount:
+          type: integer
+          minimum: 0
+        readyToCommit:
+          type: boolean
+          description: True iff `blockingCount == 0`.
+        bundleFormat:
+          type: string
+          enum:
+            - template-export-bundle-v1-json
+            - template-export-bundle-v2-json
+          nullable: true
     TemplateImportSummaryView:
       type: object
       additionalProperties: false
@@ -8136,6 +8414,18 @@ components:
         importBatchId:
           type: string
           format: uuid
+        bundleFormat:
+          type: string
+          enum:
+            - template-export-bundle-v1-json
+            - template-export-bundle-v2-json
+          nullable: true
+          description: "CE-E01: format of the committed bundle."
+        materializedClauseCount:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: "CE-E01: count of clause snapshots materialized as DRAFT module versions."
     TemplateSummaryView:
       type: object
       additionalProperties: false
@@ -8417,6 +8707,26 @@ components:
           $ref: '#/components/schemas/Metadata'
         result:
           $ref: '#/components/schemas/TemplateImportResult'
+    TemplateImportDryRunResult:
+      type: object
+      additionalProperties: false
+      description: CE-E01 dry-run success payload (`imported` always false).
+      required: [imported, dependencyReport]
+      properties:
+        imported:
+          type: boolean
+          enum: [false]
+        dependencyReport:
+          $ref: '#/components/schemas/TemplateImportDependencyReportView'
+    TemplateImportDryRunResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/TemplateImportDryRunResult'
     ContentModuleReviewSnapshot:
       type: object
       additionalProperties: false
@@ -8849,6 +9159,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BatchResultItem'
+        dependencyReport:
+          $ref: '#/components/schemas/TemplateImportDependencyReportView'
+          nullable: true
+          description: >-
+            CE-E01: present on 422 `IMPORT_DEPENDENCIES_UNSATISFIED` (commit gate);
+            same shape as dry-run `result.dependencyReport`.
     FieldError:
       type: object
       additionalProperties: false
@@ -8933,6 +9249,7 @@ components:
         - RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE
         - RELEASE_BUNDLE_HASH_MISMATCH
         - PINNED_MASTER_UNAVAILABLE
+        - IMPORT_DEPENDENCIES_UNSATISFIED
         - INVOCATION_KIND_NOT_REGENERABLE
         - SPECIMEN_WATERMARK_FAILED
         - INVOCATION_RECORD_EXPIRED

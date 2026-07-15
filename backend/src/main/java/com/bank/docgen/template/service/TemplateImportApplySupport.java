@@ -44,6 +44,19 @@ final class TemplateImportApplySupport {
             TemplateExportBundleView bundle,
             ManagementSessionClaims session
     ) {
+        applyBundleArtifacts(templateId, bundle, session, false);
+    }
+
+    /**
+     * @param importTimeDraftClauseSeam when true, wire all content-module refs (including
+     *     locked-at-export) via the CE-E01 import-time DRAFT-referencable seam.
+     */
+    void applyBundleArtifacts(
+            UUID templateId,
+            TemplateExportBundleView bundle,
+            ManagementSessionClaims session,
+            boolean importTimeDraftClauseSeam
+    ) {
         for (VariableSchemaView variable : bundle.variables()) {
             templateService.upsertVariable(
                     templateId,
@@ -75,18 +88,19 @@ final class TemplateImportApplySupport {
         }
         templateService.saveRules(templateId, bundle.rules(), session);
         for (ContentModuleReferenceView reference : bundle.contentModuleReferences()) {
-            if (reference.locked()) {
+            if (!importTimeDraftClauseSeam && reference.locked()) {
                 continue;
             }
-            contentModuleReferenceService.upsertReference(
-                    templateId,
-                    new UpsertContentModuleReferenceRequest(
-                            reference.referenceKey(),
-                            reference.moduleId(),
-                            reference.semanticVersion()
-                    ),
-                    session
+            UpsertContentModuleReferenceRequest request = new UpsertContentModuleReferenceRequest(
+                    reference.referenceKey(),
+                    reference.moduleId(),
+                    reference.semanticVersion()
             );
+            if (importTimeDraftClauseSeam) {
+                contentModuleReferenceService.upsertReferenceForImport(templateId, request, session);
+            } else {
+                contentModuleReferenceService.upsertReference(templateId, request, session);
+            }
         }
     }
 

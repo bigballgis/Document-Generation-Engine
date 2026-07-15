@@ -320,15 +320,29 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 
 ## 模板导出/导入契约
 
-已确认模板跨环境导出/导入接口与 [P14-T03](../plan/detail/P14-confirmed-large-domains.md) 行为一致。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准；本文档提供路由索引、bundle 语义、冲突策略与权限说明。
+已确认模板跨环境导出/导入接口与 [P14-T03](../plan/detail/P14-confirmed-large-domains.md) 行为一致，并经 **CE-E01** 扩展自包含 v2 + dry-run。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准；本文档提供路由索引、bundle 语义、冲突策略与权限说明。权威行为：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)。
 
 **P14-T03 范围说明：** OpenAPI 定义管理路径导出（JSON + `format=zip`）与导入（`POST`）；bundle schema、`TemplateImportConflictPolicy` 枚举与权限边界对齐 [权限矩阵 §5](../security/permission-matrix.md#5-模板权限矩阵)。
 
+**CE-E01 扩展（2026-07-16 确认）：**
+
+| 项 | 已确认规则 |
+| --- | --- |
+| 导出 `bundleVersion` | 查询参数；缺省 `1` → `template-export-bundle-v1-json`；`2` → `template-export-bundle-v2-json` |
+| v2 ZIP 条目 | 固定 `template-export-bundle.json` + `artifacts/master.docx`（钉扎母版 DOCX）；禁止可执行/未知必需外条目 |
+| v2 JSON 字段（追加） | `masterPin`（revisionId/fileHash 等）、`clauseSnapshots[]`、`renderProfile`、`assetKeyManifest[]`；仍禁 secret/凭证/测试数据明文 |
+| 导入 dry-run | 请求 `dryRun=true`（JSON 或 multipart）→ `200` + `dependencyReport`（`readyToCommit`/`blockingCount`/项级 `dependencyType`+`severity`）；**零**业务写入；审计 `TEMPLATE_IMPORT_DRY_RUN` |
+| 依赖门禁 | 提交时 `blockingCount>0` → `422` `api.error.template.importDependenciesUnsatisfied` + 完整 report；禁止半导入 |
+| 条款物化 | 目标缺模块但 snapshot 存在 → dry-run `WILL_MATERIALIZE`；提交事务内创建草稿内容模块版本 |
+| 母版 | 仍要求目标已批准同组 `masterId`；用 `masterPin.masterFileHash` 与目标 revision 比对；本片不从 DOCX 自动建母版 |
+| 导入载体 | 既有 JSON body；另支持 multipart（`file`=v2 ZIP + `masterId` + 可选 policy/dryRun） |
+| UI | 管理端导出/导入/dry-run UI **本片 out of scope**（API-first） |
+
 | 路由语义 | 用途 | 已确认规则 | 已确认路径 |
 | --- | --- | --- | --- |
-| 模板导出（JSON） | 导出已通过审批或已发布模板 bundle（元数据、变量、绑定、规则、内容模块引用、API 策略快照）。 | 仅 `PENDING_RELEASE`、`PUBLISHED`、`STOPPED`、`DEPRECATED` 可导出；bundle 格式固定为 `template-export-bundle-v1-json`；不得包含 secret、API 凭证或运行时凭证；导出动作记录审计。 | `GET /api/management/v1/templates/{templateId}/export` |
-| 模板导出（ZIP） | 与 JSON 相同 bundle，封装为单文件 ZIP 附件。 | ZIP 内仅含条目 `template-export-bundle.json`；响应 `Content-Type: application/zip`；`Content-Disposition` 为 attachment。 | `GET /api/management/v1/templates/{templateId}/export?format=zip` |
-| 模板导入 | 将 bundle 导入目标环境并从草稿重新走流程。 | 导入后模板状态为 `DRAFT`；须重新执行测试→审批→发布；`masterId` 须为同 `groupCode` 下已批准母版；导入动作记录审计并返回 `importBatchId`。 | `POST /api/management/v1/templates/import` |
+| 模板导出（JSON） | 导出已通过审批或已发布模板 bundle（元数据、变量、绑定、规则、内容模块引用、API 策略快照；v2 另含指纹/快照/清单）。 | 仅 `PENDING_RELEASE`、`PUBLISHED`、`STOPPED`、`DEPRECATED` 可导出；默认 `template-export-bundle-v1-json`；`bundleVersion=2` 为 v2；不得包含 secret、API 凭证或运行时凭证；导出动作记录审计。 | `GET /api/management/v1/templates/{templateId}/export` |
+| 模板导出（ZIP） | 与 JSON 相同 bundle，封装为单文件 ZIP 附件；v2 另嵌母版 DOCX。 | v1：ZIP 内仅含 `template-export-bundle.json`；v2：另含 `artifacts/master.docx`；响应 `Content-Type: application/zip`；`Content-Disposition` 为 attachment。 | `GET /api/management/v1/templates/{templateId}/export?format=zip`（可选 `bundleVersion=2`） |
+| 模板导入 / dry-run | 将 bundle 导入目标环境并从草稿重新走流程；或仅预检依赖。 | 提交后模板状态为 `DRAFT`；须重新执行测试→审批→发布；`masterId` 须为同 `groupCode` 下已批准母版；`dryRun=true` 不落库；导入动作记录审计并返回 `importBatchId`（dry-run 无 batch 业务写入）。 | `POST /api/management/v1/templates/import` |
 | 目录列表分页（LR-C5） | 管理端 Templates / Masters / Content-modules **包列表**服务端分页与筛选。 | 见下方「目录列表分页契约（LR-C5）」；完整行为 [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md)；正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。 | `GET /api/management/v1/templates` · `GET /api/management/v1/masters` · `GET /api/management/v1/content-modules` |
 | 模板版本线列表 | 分页列出模板包下进行中 dev 行与已发布 release 行，供包 hub 导航。 | 含 `release_version IS NULL` 的当前 dev 行与全部已发布行；跨组 `403 ACCESS_DENIED`；排序为 dev 行优先、再按 dev 版本降序。 | `GET /api/management/v1/templates/{templateId}/version-lines?page=&size=` |
 | 模板版本线详情 | 只读查看指定版本线的变量、绑定与规则快照。 | 版本线须属于该模板；跨组 `403`。 | `GET /api/management/v1/templates/{templateId}/version-lines/{versionLineId}` |
@@ -407,15 +421,31 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 
 | 字段 | 必需 | 说明 |
 | --- | --- | --- |
-| `format` | 是 | 固定 `template-export-bundle-v1-json`。 |
+| `format` | 是 | v1：`template-export-bundle-v1-json`；v2：`template-export-bundle-v2-json`。 |
 | `metadata` | 是 | 源环境快照：`templateId`（内部 UUID）、`externalId`、`groupCode`、`name`、`description`、`masterId`、`lifecycleStatus`、`releaseVersion`、`devVersionId`、`devVersionNumber`、`exportedAt`。 |
 | `variables` | 是 | 变量 Schema 列表（`variableKey`、`variableType`、`required`、可选 `piiCategory` 等；CE-G03）。 |
 | `bindings` | 是 | 锚点绑定列表。每项可含可选非敏感 `pasteCleaningEvidence`（粘贴清洗 residue；**禁止**源 HTML）。未解除粘贴阻断在 validate / publish 路径 fail-closed — 见 [ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md) / domain-model §2.6.7。 |
 | `rules` | 是 | 组合规则列表。 |
 | `contentModuleReferences` | 是 | 内容模块引用列表；`locked=true` 的发布锁定引用在导入时不重新写入。 |
 | `policySnapshot` | 否 | 模板级 API 管理策略快照（AD Group、输出/批量/加密/default 路由等）；不含 API 凭证 secret。 |
+| `masterPin` | v2 是 | CE-E01：`masterRevisionId`（UUID）、`masterFileHash`（SHA-256 小写 hex）、可选 `revisionSequence` / `pinOrigin`（`PUBLISHED` \| `PINNED_RETROACTIVELY` \| `EXPORT_TIME`）。消费 CE-K01 钉扎字段，见 [ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)。 |
+| `clauseSnapshots` | v2 是 | CE-E01：条款正文/结构快照数组（可空）。项含 `moduleCode`、`moduleVersionId`、`versionNumber`、`contentStructureJson`；可选 `locked` 与 CE-K08 法务元数据。 |
+| `renderProfile` | v2 否 | CE-E01：`version` + `json`（JSON 文本快照）。皆空可省略；dry-run 记 `RENDER_PROFILE_ABSENT`（INFO）。 |
+| `assetKeyManifest` | v2 是 | CE-E01：`referenceKey` + `usage`（`IMAGE` \| `OTHER`）；可空数组；无二进制。 |
 
-JSON 导出成功响应 envelope：`metadata` + `result`，其中 `result.format` 与 `result.bundle` 承载上述结构。ZIP 导出不含 envelope，文件内容为 bundle JSON。
+JSON 导出成功响应 envelope：`metadata` + `result`，其中 `result.format` 与 `result.bundle` 承载上述结构。ZIP 导出不含 envelope；v1 文件内容为 bundle JSON；v2 另含 `artifacts/master.docx`（字节 SHA-256 须等于 `masterPin.masterFileHash`）。
+
+### 导入 dry-run 与依赖报告（CE-E01）
+
+| 项 | 已确认 |
+| --- | --- |
+| 请求 | `dryRun: true`（JSON）或 multipart 同名字段 |
+| 成功 | `200`；`result.imported=false`；`result.dependencyReport` 含 `items[]`、`readyToCommit`、`blockingCount`、`warningCount`、`infoCount`、可选 `bundleFormat` |
+| 项字段 | `dependencyType`（`MASTER_PIN` \| `CLAUSE` \| `ASSET_KEY` \| `RENDER_PROFILE` \| `BUNDLE_FORMAT`）、`severity`（`OK` \| `MISSING` \| `MISMATCH` \| `WILL_MATERIALIZE` \| `INFO`）、`code`（UPPER_SNAKE）、`messageKey`、可选非敏感 `detail` |
+| 提交拒绝 | `422`；`error.code=IMPORT_DEPENDENCIES_UNSATISFIED`；`error.messageKey=api.error.template.importDependenciesUnsatisfied`；`error.dependencyReport` 同形 |
+| 载体 | JSON body（v1/v2 清单）或 **multipart**（规范面：`file`=ZIP + `masterId` + 可选 policy/`dryRun`）。v2 自包含提交须 ZIP（含 `artifacts/master.docx`）；纯 JSON v2 可 dry-run，**不可**作为自包含提交载体 |
+| 审计 | dry-run → `TEMPLATE_IMPORT_DRY_RUN`（含 `readyToCommit`/blockingCount/bundleFormat/actor；无条款全文、无 DOCX 字节） |
+| 权限 | 与导入相同（矩阵 §5）；无新权限码 |
 
 ### 导入冲突策略（`TemplateImportConflictPolicy`）
 
@@ -426,18 +456,22 @@ JSON 导出成功响应 envelope：`metadata` + `result`，其中 `result.format
 
 ### 导入请求与成功响应
 
-- 请求体：`masterId`（目标环境母版 UUID）、`bundle`（完整 bundle）、可选 `importConflictPolicy`。
-- 成功响应（`201`）：`result.importSummary` 含 `resolvedTemplateId`、`newDevelopmentVersion`、`importBatchId`；`result.template` 为导入后 `DRAFT` 模板详情。
+- JSON 请求体：`masterId`（目标环境母版 UUID）、`bundle`（完整 bundle）、可选 `importConflictPolicy`、可选 `dryRun`。
+- Multipart 请求：`masterId`、`file`（ZIP）、可选 `importConflictPolicy`、可选 `dryRun`。
+- Dry-run 成功（`200`）：`result.imported=false` + `result.dependencyReport`（无 `importBatchId` 业务写入）。
+- 提交成功（`201`）：`result.importSummary` 含 `resolvedTemplateId`、`newDevelopmentVersion`、`importBatchId`，以及 CE-E01 可选扩展 `bundleFormat`、`materializedClauseCount`；`result.template` 为导入后 `DRAFT` 模板详情。
 
 ### 校验与错误语义确认
 
 - 模板不在可导出生命周期状态时返回 `422`，`messageKey` 为 `api.error.template.exportNotEligible`。
 - 不支持的导出 `format` 查询参数返回 `422`，`messageKey` 为 `api.error.template.exportFormatUnsupported`。
-- bundle 格式非 `template-export-bundle-v1-json` 返回 `422`，`messageKey` 为 `api.error.template.importBundleUnsupportedFormat`。
+- 导出时钉扎母版 DOCX 对象不可用：`422`/`404` 等价 fail-closed；`error.code=PINNED_MASTER_UNAVAILABLE`，`messageKey=api.error.rendering.pinnedMasterUnavailable`（与 CE-K01/CE-G06 复用，不另造导出专用 key）。
+- bundle 格式非 `template-export-bundle-v1-json` 且非 `template-export-bundle-v2-json` 返回 `422`，`messageKey` 为 `api.error.template.importBundleUnsupportedFormat`。
 - bundle 结构无效或必需字段缺失返回 `422`，`messageKey` 为 `api.error.template.importBundleInvalid`。
 - bundle 含 secret/凭证标记返回 `422`，`messageKey` 为 `api.error.template.importBundleContainsSecrets`。
 - 导入冲突（默认策略或 `externalId` 冲突）返回 `422`，`messageKey` 为 `api.error.template.importConflict`。
 - 目标母版未批准或组不匹配分别返回 `422`，`messageKey` 为 `api.error.template.masterNotApproved` / `api.error.template.masterGroupMismatch`。
+- **CE-E01：** 提交导入时存在 blocking 依赖返回 `422`，`error.code=IMPORT_DEPENDENCIES_UNSATISFIED`，`messageKey=api.error.template.importDependenciesUnsatisfied`（附 `error.dependencyReport`）。
 - 角色或对象范围越权返回 `403`，`messageKey` 为 `api.error.template.accessDenied`。
 - 模板或母版不存在返回 `404`（`api.error.template.notFound` 或母版 not-found 等价错误）。
 

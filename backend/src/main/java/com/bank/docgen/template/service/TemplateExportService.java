@@ -4,6 +4,7 @@ import com.bank.docgen.apimgmt.mapping.ApiPolicyViewMapper;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.api.TemplateExportBundleView;
 import com.bank.docgen.template.api.TemplateExportMetadataView;
 import com.bank.docgen.template.api.TemplateExportResult;
@@ -11,12 +12,12 @@ import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
-import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TemplateExportService {
 
     public static final String EXPORT_FORMAT = "template-export-bundle-v1-json";
+    public static final String EXPORT_FORMAT_V2 = TemplateExportV2Support.EXPORT_FORMAT_V2;
     private static final String ZIP_ENTRY_NAME = "template-export-bundle.json";
     private static final Set<TemplateLifecycleStatus> EXPORT_ELIGIBLE = EnumSet.of(
             TemplateLifecycleStatus.PENDING_RELEASE,
@@ -37,7 +39,6 @@ public class TemplateExportService {
     );
 
     private final TemplateRepository templateRepository;
-    private final TemplateVersionRepository templateVersionRepository;
     private final ApiPolicyRepository apiPolicyRepository;
     private final ApiPolicyViewMapper apiPolicyViewMapper;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
@@ -46,10 +47,10 @@ public class TemplateExportService {
     private final TemplateExportAccessService exportAccessSupport;
     private final ObjectMapper objectMapper;
     private final TemplateCurrentVersionResolver templateVersionSupport;
+    private final TemplateExportV2Support exportV2Support;
 
     public TemplateExportService(
             TemplateRepository templateRepository,
-            TemplateVersionRepository templateVersionRepository,
             ApiPolicyRepository apiPolicyRepository,
             ApiPolicyViewMapper apiPolicyViewMapper,
             TemplateContentModuleReferenceService contentModuleReferenceService,
@@ -57,10 +58,10 @@ public class TemplateExportService {
             TemplateService templateService,
             TemplateExportAccessService exportAccessSupport,
             ObjectMapper objectMapper,
-            TemplateCurrentVersionResolver templateVersionSupport
+            TemplateCurrentVersionResolver templateVersionSupport,
+            TemplateExportV2Support exportV2Support
     ) {
         this.templateRepository = templateRepository;
-        this.templateVersionRepository = templateVersionRepository;
         this.apiPolicyRepository = apiPolicyRepository;
         this.apiPolicyViewMapper = apiPolicyViewMapper;
         this.contentModuleReferenceService = contentModuleReferenceService;
@@ -69,52 +70,98 @@ public class TemplateExportService {
         this.exportAccessSupport = exportAccessSupport;
         this.objectMapper = objectMapper;
         this.templateVersionSupport = templateVersionSupport;
+        this.exportV2Support = exportV2Support;
     }
 
     @Transactional(readOnly = true)
     public TemplateExportResult exportJson(UUID templateId, ManagementSessionClaims session) {
-        TemplateExportBundleView bundle = buildBundle(templateId, session);
-        recordAudit(bundle, session);
-        return new TemplateExportResult(EXPORT_FORMAT, bundle);
+        return exportJson(templateId, session, 1);
+    }
+
+    @Transactional(readOnly = true)
+    public TemplateExportResult exportJson(UUID templateId, ManagementSessionClaims session, int bundleVersion) {
+        BuiltExport built = buildExport(templateId, session, bundleVersion);
+        recordAudit(built.bundle(), session);
+        return new TemplateExportResult(built.format(), built.bundle());
     }
 
     @Transactional(readOnly = true)
     public TemplateExportZipArtifact exportZip(UUID templateId, ManagementSessionClaims session) {
-        TemplateExportBundleView bundle = buildBundle(templateId, session);
-        recordAudit(bundle, session);
-        return new TemplateExportZipArtifact(buildZipFilename(bundle), zipBundle(bundle));
+        return exportZip(templateId, session, 1);
     }
 
-    private TemplateExportBundleView buildBundle(UUID templateId, ManagementSessionClaims session) {
+    @Transactional(readOnly = true)
+    public TemplateExportZipArtifact exportZip(UUID templateId, ManagementSessionClaims session, int bundleVersion) {
+        BuiltExport built = buildExport(templateId, session, bundleVersion);
+        recordAudit(built.bundle(), session);
+        byte[] zipBytes = bundleVersion == 2
+                ? zipBundleV2(built.bundle(), built.masterDocxBytes())
+                : zipBundle(built.bundle());
+        return new TemplateExportZipArtifact(buildZipFilename(built.bundle()), zipBytes);
+    }
+
+    private BuiltExport buildExport(UUID templateId, ManagementSessionClaims session, int bundleVersion) {
+        if (bundleVersion != 1 && bundleVersion != 2) {
+            throw new TemplateValidationException("api.error.template.exportFormatUnsupported");
+        }
         TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNull(templateId)
                 .orElseThrow(TemplateNotFoundException::new);
         exportAccessSupport.assertCanExport(template, session);
         assertExportEligible(template);
         var detail = templateService.toDetail(template);
         TemplateVersionEntity version = templateVersionSupport.requireExportableVersion(templateId);
-        return new TemplateExportBundleView(
+        List<ContentModuleReferenceView> references =
+                contentModuleReferenceService.listReferences(templateId, session);
+        TemplateExportMetadataView metadata = new TemplateExportMetadataView(
+                template.getId().toString(),
+                template.getExternalId(),
+                template.getGroupCode(),
+                template.getName(),
+                template.getDescription(),
+                template.getMasterId().toString(),
+                template.getLifecycleStatus(),
+                template.getReleaseVersion(),
+                version.getId().toString(),
+                version.getDevVersionNumber(),
+                Instant.now()
+        );
+        var policy = apiPolicyRepository.findByTemplateId(templateId)
+                .map(apiPolicyViewMapper::toPolicyView)
+                .orElse(null);
+
+        if (bundleVersion == 2) {
+            TemplateExportV2Support.V2Artifacts v2 = exportV2Support.assemble(
+                    template,
+                    version,
+                    references,
+                    detail.bindings()
+            );
+            TemplateExportBundleView bundle = new TemplateExportBundleView(
+                    EXPORT_FORMAT_V2,
+                    metadata,
+                    detail.variables(),
+                    detail.bindings(),
+                    templateService.loadRules(version),
+                    references,
+                    policy,
+                    v2.masterPin(),
+                    v2.clauseSnapshots(),
+                    v2.renderProfile(),
+                    v2.assetKeyManifest()
+            );
+            return new BuiltExport(EXPORT_FORMAT_V2, bundle, v2.masterDocxBytes());
+        }
+
+        TemplateExportBundleView bundle = new TemplateExportBundleView(
                 EXPORT_FORMAT,
-                new TemplateExportMetadataView(
-                        template.getId().toString(),
-                        template.getExternalId(),
-                        template.getGroupCode(),
-                        template.getName(),
-                        template.getDescription(),
-                        template.getMasterId().toString(),
-                        template.getLifecycleStatus(),
-                        template.getReleaseVersion(),
-                        version.getId().toString(),
-                        version.getDevVersionNumber(),
-                        Instant.now()
-                ),
+                metadata,
                 detail.variables(),
                 detail.bindings(),
                 templateService.loadRules(version),
-                contentModuleReferenceService.listReferences(templateId, session),
-                apiPolicyRepository.findByTemplateId(templateId)
-                        .map(apiPolicyViewMapper::toPolicyView)
-                        .orElse(null)
+                references,
+                policy
         );
+        return new BuiltExport(EXPORT_FORMAT, bundle, new byte[0]);
     }
 
     private void assertExportEligible(TemplateEntity template) {
@@ -147,6 +194,23 @@ public class TemplateExportService {
         }
     }
 
+    private byte[] zipBundleV2(TemplateExportBundleView bundle, byte[] masterDocxBytes) {
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
+                zipOutputStream.putNextEntry(new ZipEntry(ZIP_ENTRY_NAME));
+                zipOutputStream.write(objectMapper.writeValueAsBytes(bundle));
+                zipOutputStream.closeEntry();
+                zipOutputStream.putNextEntry(new ZipEntry(TemplateExportV2Support.ZIP_MASTER_ENTRY));
+                zipOutputStream.write(masterDocxBytes == null ? new byte[0] : masterDocxBytes);
+                zipOutputStream.closeEntry();
+            }
+            return outputStream.toByteArray();
+        } catch (IOException exception) {
+            throw new TemplateValidationException("api.error.template.exportFailed");
+        }
+    }
+
     private String buildZipFilename(TemplateExportBundleView bundle) {
         return sanitizeFilename(bundle.metadata().externalId()) + "-export.zip";
     }
@@ -161,6 +225,14 @@ public class TemplateExportService {
     public record TemplateExportZipArtifact(String filename, byte[] content) {
         public TemplateExportZipArtifact {
             content = com.bank.docgen.sharedkernel.api.DefensiveCopies.copyBytes(content);
+        }
+    }
+
+    private record BuiltExport(String format, TemplateExportBundleView bundle, byte[] masterDocxBytes) {
+        private BuiltExport {
+            masterDocxBytes = masterDocxBytes == null
+                    ? new byte[0]
+                    : com.bank.docgen.sharedkernel.api.DefensiveCopies.copyBytes(masterDocxBytes);
         }
     }
 }

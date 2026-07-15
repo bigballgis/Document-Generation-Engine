@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). #89 CE-U13 → Done (merge ccdfacda). #71 CE-C06 → Done (merge 35f6f47d). #76 CE-G06 → Done (merge d8636232). No sole-active CE delivery leaf; next queue head #78 CE-E01 pending/parked.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#76/#88/#89 Done. No sole-active CE delivery leaf; next #78 CE-E01 pending. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). #89 CE-U13 → Done (merge ccdfacda). #71 CE-C06 → Done (merge 35f6f47d). #76 CE-G06 → Done (merge d8636232). Sole-active CE delivery leaf: #78 CE-E01 In Progress; next after Done #79 CE-E02 pending/parked.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#76/#88/#89 Done. Sole-active CE delivery leaf: #78 CE-E01 (In Progress). Next after Done: #79 CE-E02. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T06:16:00.000Z"
+        "updatedAt": "2026-07-16T06:27:00Z"
       },
       {
         "id": "54",
@@ -1078,16 +1078,16 @@
       {
         "id": "78",
         "title": "CE-E01: Self-contained export bundle v2 + dry-run",
-        "description": "PENDING. Slice ce-e01-export-bundle-v2. Bundle embeds master revision DOCX + clause snapshots + render profile + asset keys; import dry-run. P2·L.",
-        "details": "Depends K01 (#57). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §7 CE-E01.",
+        "description": "IN PROGRESS (sole-active). Slice ce-e01-export-bundle-v2. Self-contained template export bundle v2 + import dry-run dependency report (API-first; FE out of scope). P2·L.",
+        "details": "Activated 2026-07-16 as sole-active CE delivery leaf (single-lane serial). Placement: ISOLATED D:/working/DGE-ce-e01-export-bundle-v2 · feat/ce-e01-export-bundle-v2 · base d7588258. BDD ready: docs/behavior/ce-e01-export-bundle-v2.md (BDD-CE-E01-001…018); frontend_ui_in_scope=false. Depends K01 (#57). Formal phase remains None. Do not activate #79 CE-E02 until #78 Done + MAIN doc-sync. Prior #76 CE-G06 Done (merge d8636232) — do not reopen. #77 is CE-G05 (pending), not G06. Gates before Done: mvn verify; FE/E2E/UIUX N/A (API-first); queued docker-deploy when acceptance surface changes; worktree merge + MAIN doc-sync + commit-review. Plan §7 CE-E01.",
         "testStrategy": "1. Export self-contained. 2. Dry-run dependency report. 3. mvn verify.",
         "priority": "medium",
         "dependencies": [
           "57"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-16T06:27:00Z"
       },
       {
         "id": "79",

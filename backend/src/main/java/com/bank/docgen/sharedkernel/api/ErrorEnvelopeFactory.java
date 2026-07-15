@@ -238,6 +238,28 @@ public class ErrorEnvelopeFactory {
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 
+    public ResponseEntity<ErrorEnvelope> importDependenciesUnsatisfied(
+            HttpServletRequest request,
+            Object dependencyReport
+    ) {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        String messageKey = "api.error.template.importDependenciesUnsatisfied";
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.IMPORT_DEPENDENCIES_UNSATISFIED,
+                ApiErrorCategories.TEMPLATE,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                false,
+                null,
+                null,
+                null,
+                dependencyReport
+        );
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
+    }
+
     public ResponseEntity<ErrorEnvelope> unexpectedError(HttpServletRequest request) {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();

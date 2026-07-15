@@ -59,6 +59,28 @@ final class TemplateContentModuleReferenceSupport {
         return version;
     }
 
+    /**
+     * CE-E01 import-time seam: allow wiring template refs to DRAFT module versions
+     * materialized during the same import transaction. Publish gate still requires
+     * {@link ContentModuleVersionEntity#isReferencable()}.
+     */
+    ContentModuleVersionEntity resolveVersionForImport(
+            TemplateEntity template,
+            String moduleId,
+            String semanticVersion,
+            ManagementSessionClaims session
+    ) {
+        ContentModuleEntity module = contentModuleAccessService.requireReadableModule(moduleId, session);
+        assertTemplateCanReferenceModule(template, module);
+        ContentModuleVersionEntity version = contentModuleVersionRepository
+                .findByModuleIdAndSemanticVersion(module.getId(), semanticVersion.trim())
+                .orElseThrow(() -> new TemplateValidationException("api.error.template.contentModuleReferenceMissing"));
+        if (isPinnedStructureMissing(version)) {
+            throw new TemplateValidationException("api.error.template.contentModuleReferenceInvalid");
+        }
+        return version;
+    }
+
     ContentModuleReferenceView toView(TemplateContentModuleReferenceEntity reference) {
         ContentModuleVersionEntity version = contentModuleVersionRepository
                 .findById(reference.getContentModuleVersionId())

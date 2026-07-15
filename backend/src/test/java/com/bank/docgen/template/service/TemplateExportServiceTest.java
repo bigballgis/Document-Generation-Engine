@@ -68,7 +68,6 @@ class TemplateExportServiceTest {
     void setUp() {
         service = new TemplateExportService(
                 templateRepository,
-                templateVersionRepository,
                 apiPolicyRepository,
                 apiPolicyViewMapper,
                 contentModuleReferenceService,
@@ -76,7 +75,15 @@ class TemplateExportServiceTest {
                 templateService,
                 new TemplateExportAccessService(new GroupAccessService()),
                 new ObjectMapper().findAndRegisterModules(),
-                templateCurrentVersionResolver
+                templateCurrentVersionResolver,
+                new TemplateExportV2Support(
+                        org.mockito.Mockito.mock(com.bank.docgen.master.persistence.MasterDocumentRepository.class),
+                        org.mockito.Mockito.mock(com.bank.docgen.master.persistence.MasterRevisionLineRepository.class),
+                        org.mockito.Mockito.mock(com.bank.docgen.infrastructure.storage.ObjectStoragePort.class),
+                        org.mockito.Mockito.mock(com.bank.docgen.contentmodule.persistence.ContentModuleRepository.class),
+                        org.mockito.Mockito.mock(com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository.class),
+                        new ObjectMapper().findAndRegisterModules()
+                )
         );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(

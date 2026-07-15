@@ -128,6 +128,28 @@ public class TemplateContentModuleReferenceService {
             UpsertContentModuleReferenceRequest request,
             ManagementSessionClaims session
     ) {
+        return upsertReferenceInternal(templateId, request, session, false);
+    }
+
+    /**
+     * CE-E01: wire content-module references during template import, including DRAFT
+     * versions materialized in the same transaction (import-time referencable seam).
+     */
+    @Transactional
+    public ContentModuleReferenceView upsertReferenceForImport(
+            UUID templateId,
+            UpsertContentModuleReferenceRequest request,
+            ManagementSessionClaims session
+    ) {
+        return upsertReferenceInternal(templateId, request, session, true);
+    }
+
+    private ContentModuleReferenceView upsertReferenceInternal(
+            UUID templateId,
+            UpsertContentModuleReferenceRequest request,
+            ManagementSessionClaims session,
+            boolean importTimeDraftSeam
+    ) {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
@@ -136,12 +158,11 @@ public class TemplateContentModuleReferenceService {
         if (existing.isPresent() && existing.get().isLockedFlag()) {
             throw new TemplateValidationException("api.error.template.contentModuleReferenceLocked");
         }
-        ContentModuleVersionEntity moduleVersion = referenceSupport.resolveReferencableVersion(
-                template,
-                request.moduleId(),
-                request.semanticVersion(),
-                session
-        );
+        ContentModuleVersionEntity moduleVersion = importTimeDraftSeam
+                ? referenceSupport.resolveVersionForImport(
+                        template, request.moduleId(), request.semanticVersion(), session)
+                : referenceSupport.resolveReferencableVersion(
+                        template, request.moduleId(), request.semanticVersion(), session);
         TemplateContentModuleReferenceEntity entity;
         if (existing.isPresent()) {
             entity = existing.get();

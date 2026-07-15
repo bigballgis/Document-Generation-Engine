@@ -100,6 +100,8 @@ public final class ApiErrorCodes {
     public static final String RELEASE_BUNDLE_HASH_MISMATCH = "RELEASE_BUNDLE_HASH_MISMATCH";
     /** CE-G06 / CE-K01: pinned master revision unavailable. */
     public static final String PINNED_MASTER_UNAVAILABLE = "PINNED_MASTER_UNAVAILABLE";
+    /** CE-E01: import commit blocked by unmet dependency pre-check. */
+    public static final String IMPORT_DEPENDENCIES_UNSATISFIED = "IMPORT_DEPENDENCIES_UNSATISFIED";
     /** CE-G06: BATCH_ROOT (and similar) cannot be regenerated. */
     public static final String INVOCATION_KIND_NOT_REGENERABLE = "INVOCATION_KIND_NOT_REGENERABLE";
     /** CE-G06: SPECIMEN watermark application failed. */

@@ -234,7 +234,61 @@ public class ManagementAuditRecorder {
             String actorSummary
     ) {
         templateTransferAuditRecorder.recordTemplateImported(
-                templateId, groupCode, externalId, importBatchId, developmentVersion, actorUsername, actorSummary
+                templateId,
+                groupCode,
+                externalId,
+                importBatchId,
+                developmentVersion,
+                actorUsername,
+                actorSummary,
+                null,
+                null
+        );
+    }
+
+    @Transactional
+    public void recordTemplateImported(
+            UUID templateId,
+            String groupCode,
+            String externalId,
+            String importBatchId,
+            int developmentVersion,
+            String actorUsername,
+            String actorSummary,
+            String bundleFormat,
+            Integer materializedClauseCount
+    ) {
+        templateTransferAuditRecorder.recordTemplateImported(
+                templateId,
+                groupCode,
+                externalId,
+                importBatchId,
+                developmentVersion,
+                actorUsername,
+                actorSummary,
+                bundleFormat,
+                materializedClauseCount
+        );
+    }
+
+    @Transactional
+    public void recordTemplateImportDryRun(
+            String groupCode,
+            String externalId,
+            boolean readyToCommit,
+            int blockingCount,
+            String bundleFormat,
+            String actorUsername,
+            String actorSummary
+    ) {
+        templateTransferAuditRecorder.recordTemplateImportDryRun(
+                groupCode,
+                externalId,
+                readyToCommit,
+                blockingCount,
+                bundleFormat,
+                actorUsername,
+                actorSummary
         );
     }
 
