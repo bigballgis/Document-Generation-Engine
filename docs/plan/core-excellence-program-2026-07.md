@@ -240,7 +240,7 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 | ID | 标题 | 级 | 要点 |
 | --- | --- | --- | --- |
 | CE-U06 | 母版锚点可视上下文 | P2·M · `Done` | **Done (2026-07-15)** — Task Master **#88**; slice `ce-u06-master-anchor-context`. BDD **ready** ([ce-u06-master-anchor-context.md](../behavior/ce-u06-master-anchor-context.md); **BDD-CE-U06-MAC-001…009**). **Merge:** `7734366e`. MasterAnchorPositionOverview + editable displayLabel; first-open seed fix `6ae23981`; E2E + UIUX evidence. Formal phase **None**; **not** go-live. |
-| CE-U13 | 变量重命名联动 + 表达式补全 | P2·M · `In Progress` | **In Progress (2026-07-16)** — Task Master **#89** sole-active after CE-G03 Done; slice `ce-u13-variable-rename`; worktree `../DGE-ce-u13-variable-rename` · `feat/ce-u13-variable-rename`. rename 传播到 bindings/规则/未锁定测试集 JSON（+ compute 引用）；conditionExpression / visibility 变量补全. BDD **ready** ([ce-u13-variable-rename.md](../behavior/ce-u13-variable-rename.md); **BDD-CE-U13-VRC-001…012**). **FE-primary**; **#71** CE-C06 remains parked. Formal phase **None**; **not** Done; **not** go-live. |
+| CE-U13 | 变量重命名联动 + 表达式补全 | P2·M · `Done` | **Done (2026-07-16)** — Task Master **#89**; slice `ce-u13-variable-rename`. BDD **ready** ([ce-u13-variable-rename.md](../behavior/ce-u13-variable-rename.md); **BDD-CE-U13-VRC-001…012**). **Merge:** `ccdfacda` (FF on `main`). rename 传播到 bindings/规则/未锁定测试集 JSON（+ compute 引用）；conditionExpression / visibility 变量补全. **Gates:** FE lint/type-check/test/build **PASS**; arch **PASS_WITH_NOTES**; **DEPLOY_OK** ([ce-u13-stage5-deploy](./evidence/ce-u13-stage5-deploy/)); E2E **9/9** ([ce-u13-stage6-e2e](./evidence/ce-u13-stage6-e2e/)); UIUX **PASS_WITH_NOTES**. Formal phase **None**; **not** go-live. |
 | CE-U14 | Dashboard 模板生命周期待办 | P2·S | 测试裁定/审批/待发布队列进 Tasks Tab |
 | CE-U15 | 生命周期 Stepper + checklist 深链 | P2·M | 顶栏状态机 Stepper；发布 gate 每条 pending 项"前往修复"链接 |
 | CE-U16 | 创作路径压缩 | P2·M | design 默认落点 bindings；新建后微向导（母版→绑定→变量→预览步骤条） |
@@ -261,7 +261,7 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 | CE-C03 | fidelityWarnings 契约对齐 | P1·S · `Done` | **Done (2026-07-15)** — Task Master **#68**; slice `ce-c03-fidelity-warnings-contract`; BDD **ready** ([ce-c03-fidelity-warnings-contract.md](../behavior/ce-c03-fidelity-warnings-contract.md); **BDD-CE-C03-001…010**). **Merge:** `49fa0a70`. **Gates:** `mvn verify` **GREEN** (**1515**/0/8); architecture **PASS_WITH_NOTES**; deploy stack healthy / SkipBuild notes. Batch/task → full `FidelityWarning[]`; sync stream header summary documented. Formal phase **None** | 无 |
 | CE-C04 | 凭证 `expires_at` 持久化 + 暴露 | P1·M · `Done` | **Done (2026-07-15)** — Task Master **#69**; slice `ce-c04-credential-expires`. BDD **ready** ([ce-c04-credential-expires.md](../behavior/ce-c04-credential-expires.md); **BDD-CE-C04-001…012**). **Merge:** `c7be8305`. Flyway `expires_at` + issue/rotate write; `RuntimeCredentialSummaryView` `expiresAt`/`EXPIRING_SOON`. Formal phase **None**; **not** go-live. | 无 |
 | CE-C05 | `originalBatchId` 重试血缘 | P1·M · `Done` | **Done (2026-07-15)** — Task Master **#70**; slice `ce-c05-original-batch-id`. BDD **ready** ([ce-c05-original-batch-id.md](../behavior/ce-c05-original-batch-id.md); **BDD-CE-C05-001…012**). **Merge:** `405f7cea`. `OriginalBatchLineageValidator` + same-credential `BATCH_ROOT`; `ORIGINAL_BATCH_NOT_FOUND`; response echo; sanitizer/audit; OpenAPI/contract. Formal phase **None**; **not** go-live. | C04（泳道） |
-| CE-C06 | DOCX permissions 边界声明 | P2·S · parked | 短期：契约明确"permissions 仅 PDF 生效"，校验对 DOCX+permissions 返回警告；长期 POI 写保护另立片。**Parked (2026-07-16)** — Task Master **#71** remains **pending**; do **not** set in-progress while **#89** CE-U13 is sole-active. | 无 |
+| CE-C06 | DOCX permissions 边界声明 | P2·S · parked | 短期：契约明确"permissions 仅 PDF 生效"，校验对 DOCX+permissions 返回警告；长期 POI 写保护另立片。**Parked (2026-07-16)** — Task Master **#71** remains **pending**; next sole-active recommendation after **#89** CE-U13 → **Done** (`ccdfacda`); do **not** set in-progress until deliver activates this leaf. | 无 |
 
 ## 6. Wave CE-G — 银行内控合规
 
@@ -310,11 +310,10 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 
 | 序 | CE-ID | Task # | 级 | 说明 |
 | --- | --- | --- | --- | --- |
-| **1** | **CE-U13** | **#89** | P2 | 变量重命名级联 — **sole-active**（worktree `../DGE-ce-u13-variable-rename` may be parked until writer session; after G03 Done） |
-| 2 | CE-C06 | #71 | P2 | DOCX 权限边界 — **parked**（`../DGE-ce-c06-docx-permissions-boundary`） |
-| 3+ | 收敛期 | #76/#78… | P2–P3 | G06 → E01 → E02 → O01；再 U14–U21 链 |
+| **1** | **CE-C06** | **#71** | P2 | DOCX 权限边界 — **next sole-active recommendation**；remain **pending**/parked（do **not** activate until deliver） |
+| 2+ | 收敛期 | #76/#78… / #90… | P2–P3 | G06 → E01 → E02 → O01；再 U14–U21 链 |
 
-**已并入 main、勿再并行复开：** CE-G03 (#74) — merge `50c1a524` on `main`（2026-07-16）；CE-K08 (#63) — `35f57503` on `main`。Task Master / 本文件状态应对齐 **Done**。
+**已并入 main、勿再并行复开：** CE-U13 (#89) — merge `ccdfacda` on `main`（2026-07-16）；CE-G03 (#74) — merge `50c1a524` on `main`（2026-07-16）；CE-K08 (#63) — `35f57503` on `main`。Task Master / 本文件状态应对齐 **Done**。 **No sole-active CE leaf** after U13 doc-sync.
 
 **可选加速（仍单 writer）：** 下一切片可在**上一切片 merge 前**仅做 BDD / Red 测试（只读 + 轻量 TDD），但**不得**并行跑 verify / deploy / E2E。
 
@@ -425,6 +424,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-16):** umbrella **#53** in-progress; **Execution model:** **single-lane serial** (§9.2) — sole-active CE leaf **#89** CE-U13 (after **#74** CE-G03 → **Done**, merge `50c1a524`). Leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior waves closed: **#59**/**#68**/**#83** → **Done**; **#60**/**#84**/**#85** → **Done**. **Wave 0 (K05+U11+U12) closed:** **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (merges `51a58f12` / `513d776c` / tip `34353b75`). **#69** CE-C04 → **Done** (`c7be8305`). **#70** CE-C05 → **Done** (`405f7cea`). **#88** CE-U06 → **Done** (`7734366e`). **#62** CE-K06 → **Done** (K06a `485a7f3e` + K06b `a689ca87` + K06c tip `76297d08`). **#63** CE-K08 → **Done** (`35f57503` on main). **#74** CE-G03 → **Done** (`50c1a524`). Parked queue: **#71** CE-C06. Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
+**Task Master registry (2026-07-16):** umbrella **#53** in-progress; **Execution model:** **single-lane serial** (§9.2) — **no sole-active CE leaf** after **#89** CE-U13 → **Done** (merge `ccdfacda`). Next queue head **#71** CE-C06 remains **pending**/parked. Leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1–4 Done.** Prior waves closed: **#59**/**#68**/**#83** → **Done**; **#60**/**#84**/**#85** → **Done**. **Wave 0 (K05+U11+U12) closed:** **#61** CE-K05 + **#86** CE-U11 + **#87** CE-U12 → **Done** (merges `51a58f12` / `513d776c` / tip `34353b75`). **#69** CE-C04 → **Done** (`c7be8305`). **#70** CE-C05 → **Done** (`405f7cea`). **#88** CE-U06 → **Done** (`7734366e`). **#62** CE-K06 → **Done** (K06a `485a7f3e` + K06b `a689ca87` + K06c tip `76297d08`). **#63** CE-K08 → **Done** (`35f57503` on main). **#74** CE-G03 → **Done** (`50c1a524`). **#89** CE-U13 → **Done** (`ccdfacda`). Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
 
-**Last reviewed:** 2026-07-16（#74 CE-G03 Done merge `50c1a524`；sole-active → #89 CE-U13；#71 C06 parked；umbrella #53 in-progress；formal phase None；not go-live）
+**Last reviewed:** 2026-07-16（#89 CE-U13 Done merge `ccdfacda`；no sole-active CE leaf；next recommend #71 CE-C06 parked；umbrella #53 in-progress；formal phase None；not go-live）
