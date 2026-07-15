@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #62 CE-K06 remains in-progress (K06a merged 485a7f3e; K06b merged a689ca87; K06c residual — do NOT claim #62 Done). #88 CE-U06 in-progress (master anchor context).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #69/#70 Done; K06b on MAIN a689ca87. Active leaf #88 CE-U06 (worktree DGE-ce-u06-master-anchor-context) + #62 CE-K06 (K06c residual). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 remains in-progress (K06a merged 485a7f3e; K06b merged a689ca87; K06c in flight — do NOT claim #62 Done).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #69/#70/#88 Done. Active leaf #62 CE-K06 (K06c worktree DGE-ce-k06c-attachment-pdf-stamp / feat/ce-k06c-attachment-pdf-stamp). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T12:10:00.000Z"
+        "updatedAt": "2026-07-15T13:10:00.000Z"
       },
       {
         "id": "54",
@@ -850,9 +850,9 @@
       {
         "id": "62",
         "title": "CE-K06: Rendering fidelity completion (a/b/c)",
-        "description": "IN PROGRESS 2026-07-15. Wave 2 continuation — active sub-slice K06b only (qrBarcodeRef DOCX writer). K06a tblHeader shipped (merge 485a7f3e). K06c attachmentListRef + PDF stamp = residual (do NOT claim #62 Done). Worktree DGE-ce-k06b-qr-barcode / feat/ce-k06b-qr-barcode. P1·L. Formal phase None.",
-        "details": "Depends K02 (#58); lane after K05 (#61). K06a Done on main (485a7f3e). Active delivery: K06b qrBarcodeRef — ZXing PNG embed; sizePx/errorCorrection/format configurable; exit writer-unsupported for qrBarcodeRef only; golden 09-qr-barcode ACTIVE. BDD ready: docs/behavior/ce-k06-rendering-fidelity.md (BDD-CE-K06b-001…009). Prefer rendering-engineer. Do not touch C05/U06. Gates before K06b merge: mvn verify; queued docker-deploy when acceptance surface changes; worktree ../DGE-ce-k06b-qr-barcode; merge + MAIN doc-sync + commit-review. Keep #62 in-progress until K06c closed. Formal phase stays None. Plan §3 CE-K06. Parallel #69 CE-C04 Done; #70 CE-C05 in-progress; #88 pending.",
-        "testStrategy": "1. K06a tblHeader already on main. 2. K06b: qrBarcode PNG embedded; sizePx/errorCorrection/format; writer-unsupported exit for qrBarcodeRef only; golden 09-qr-barcode ACTIVE; BDD-CE-K06b-001…009. 3. K06c residual later. 4. mvn verify.",
+        "description": "IN PROGRESS 2026-07-15. K06a tblHeader Done (merge 485a7f3e). K06b qrBarcodeRef Done (merge a689ca87). Active sub-slice K06c: attachmentListRef writer + PDF page-number stamp profile — worktree DGE-ce-k06c-attachment-pdf-stamp / feat/ce-k06c-attachment-pdf-stamp. Do NOT claim #62 Done until K06c merges. P1·L. Formal phase None.",
+        "details": "Depends K02 (#58); lane after K05 (#61). K06a Done on main (485a7f3e). K06b Done on main (a689ca87) — ZXing PNG embed; sizePx/errorCorrection/format; golden 09-qr-barcode ACTIVE. Active delivery: K06c attachmentListRef + PDF stamp. BDD ready: docs/behavior/ce-k06-rendering-fidelity.md (K06a/b shipped; K06c §12.2). Prefer rendering-engineer. Keep #62 in-progress until K06c closed. Formal phase stays None. Plan §3 CE-K06. Parallel #69/#70/#88 Done.",
+        "testStrategy": "1. K06a tblHeader already on main. 2. K06b qrBarcode already on main. 3. K06c: attachmentListRef numbered list + PDF stamp profile; mvn verify. 4. Do not mark #62 done until K06c merge.",
         "priority": "medium",
         "dependencies": [
           "58",
@@ -860,7 +860,7 @@
         ],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T11:00:00.000Z"
+        "updatedAt": "2026-07-15T13:10:00.000Z"
       },
       {
         "id": "63",
@@ -964,16 +964,16 @@
       {
         "id": "70",
         "title": "CE-C05: originalBatchId retry lineage",
-        "description": "IN PROGRESS 2026-07-15. Slice ce-c05-original-batch-id. Worktree D:/working/DGE-ce-c05-original-batch-id · feat/ce-c05-original-batch-id. BDD ready (docs/behavior/ce-c05-original-batch-id.md; BDD-CE-C05-001…012). Request field + same-credential BATCH_ROOT validation + ORIGINAL_BATCH_NOT_FOUND + response echo + audit + contract. P1·M. Formal phase None. Not go-live. Do NOT mark Done until gates green + merge.",
-        "details": "Lane after C04 (#69 Done; merge c7be8305). BDD readiness ready. Placement ISOLATED. Gates before Done: mvn verify (+ frontend if applicable); E2E N/A (no UI); queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §5 CE-C05 In Progress. Spec owns ORIGINAL_BATCH_NOT_FOUND + response echo + sanitizer/audit originalBatchId. Implementation next: backend-engineer TDD Red on BDD-CE-C05-001…012.",
+        "description": "DONE 2026-07-15. Slice ce-c05-original-batch-id. Merge 405f7cea (feat/ce-c05-original-batch-id → main). BDD ready (ce-c05-original-batch-id.md; BDD-CE-C05-001…012). OriginalBatchLineageValidator + same-credential BATCH_ROOT; ORIGINAL_BATCH_NOT_FOUND; response echo; sanitizer/audit; OpenAPI/contract. Formal phase None. Not go-live.",
+        "details": "Completed 2026-07-15. Slice id: ce-c05-original-batch-id. Merge: 405f7cea on main. Formal phase remains None. Plan §5 CE-C05 Done. Lane after C04 (#69 Done; c7be8305).",
         "testStrategy": "1. BDD-CE-C05-001…012 Red then Green. 2. Field accepted with same-credential validation. 3. 404 ORIGINAL_BATCH_NOT_FOUND opaque across credentials. 4. Audit link + OpenAPI ErrorCode. 5. mvn verify.",
         "priority": "medium",
         "dependencies": [
           "69"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T11:05:00.000Z"
+        "updatedAt": "2026-07-15T13:10:00.000Z"
       },
       {
         "id": "71",
@@ -1219,17 +1219,17 @@
       {
         "id": "88",
         "title": "CE-U06: Master anchor visual context",
-        "description": "IN PROGRESS 2026-07-15. Wave 1 lane 2 only. Slice ce-u06-master-anchor-context (alt ce-u06-anchor-visual-context). Worktree ../DGE-ce-u06-master-anchor-context; branch feat/ce-u06-master-anchor-context. Master revision workspace DOCX overview with anchor highlight list + editable displayLabel. P2·M. Formal phase None. Do NOT activate #62 CE-K06 or #69 CE-C04. BDD pending (authoring in parallel).",
-        "details": "Activated 2026-07-15 for Wave 1 lane 2 delivery (user explicit). Depends U09/U10 (#84,#85) Done. Placement ISOLATED. Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Not go-live. Do not mark Wave 1 complete. Plan §4 CE-U06. Umbrella #53 remains in-progress.",
+        "description": "DONE 2026-07-15. Slice ce-u06-master-anchor-context. Merge 7734366e (feat/ce-u06-master-anchor-context → main). BDD ready (ce-u06-master-anchor-context.md; BDD-CE-U06-MAC-001…009). MasterAnchorPositionOverview + editable displayLabel; first-open seed fix 6ae23981; E2E + UIUX evidence. Formal phase None. Not go-live.",
+        "details": "Completed 2026-07-15. Slice id: ce-u06-master-anchor-context. Merge: 7734366e on main. Depends U09/U10 (#84,#85) Done. Formal phase remains None. Plan §4 CE-U06 Done. Umbrella #53 remains in-progress.",
         "testStrategy": "1. Anchor list context. 2. displayLabel edit. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "84",
           "85"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T09:13:00.000Z"
+        "updatedAt": "2026-07-15T13:10:00.000Z"
       },
       {
         "id": "89",

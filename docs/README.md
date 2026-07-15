@@ -3,7 +3,7 @@
 **Project baseline:** Restart from zero (2026-06-23); **P0–P11, P13–P21 Done**; **P12 Not Started**
 (catch-all idle; slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03).
 
-**Delivery focus:** **CORE-EXCELLENCE (CE) Wave 1 lane 3** — **#69 CE-C04** → **in-progress** (slice `ce-c04-credential-expires`); **#62**/**#88** remain **pending**; Wave 0 #61/#86/#87 **Done**; umbrella **#53** remains **in-progress**; plan [core-excellence-program-2026-07.md](./plan/core-excellence-program-2026-07.md). Prior waves (#60/#84/#85; #59/#68/#83) **Done**. **Batch 4 remains Done**. Batch 1–3 Done. Formal phase remains **None**; **not** go-live. Overall checklist remains **NO-GO** (blocking: **#3b**; #5a/#10 **CONDITIONAL**). Do **not** activate CD-3. Do **not** invent a formal P-phase.
+**Delivery focus:** **CORE-EXCELLENCE (CE)** — **#62 CE-K06** → **in-progress** (K06a/`485a7f3e` + K06b/`a689ca87` Done; **K06c in flight**); **#69 CE-C04** / **#70 CE-C05** / **#88 CE-U06** → **Done** (`c7be8305` / `405f7cea` / `7734366e`); Wave 0 #61/#86/#87 **Done**; umbrella **#53** remains **in-progress**; plan [core-excellence-program-2026-07.md](./plan/core-excellence-program-2026-07.md). Prior waves (#60/#84/#85; #59/#68/#83) **Done**. **Batch 4 remains Done**. Batch 1–3 Done. Formal phase remains **None**; **not** go-live. Overall checklist remains **NO-GO** (blocking: **#3b**; #5a/#10 **CONDITIONAL**). Do **not** activate CD-3. Do **not** invent a formal P-phase.
 
 **Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08. **CORE-FORTRESS Done** — F1–F8. **CDP Wave CD-2 Done** (T01–T13; merge tip `b2b0899`; **no CDP wave In Progress**; CD-3 Not Started). **LRP waves A–E → Done**. See [CORE-EXCELLENCE](./plan/core-excellence-program-2026-07.md) · [CODE-QUALITY](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md) · [CDP](./plan/competitiveness-deepening-program.md) · [execution-sync-ledger](./plan/execution-sync-ledger.md).
 
@@ -19,7 +19,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | --- | --- | --- |
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
 | 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P23) |
-| 2a | **[CORE-EXCELLENCE (CE)](./plan/core-excellence-program-2026-07.md)** | **Delivery focus** — Wave 1 lane 3 **#69** CE-C04 **In Progress**; Wave 0 #61/#86/#87 **Done**; #62/#88 pending; prior #60/#84/#85 **Done**; Batch 4 remains Done; umbrella **#53**; not a formal P-phase |
+| 2a | **[CORE-EXCELLENCE (CE)](./plan/core-excellence-program-2026-07.md)** | **Delivery focus** — **#62** CE-K06 **In Progress** (K06c; K06a/b Done); **#69/#70/#88 Done**; Wave 0 #61/#86/#87 **Done**; umbrella **#53**; not a formal P-phase |
 | 2a′ | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **CD-2 Done** (T01–T13); **no wave In Progress**; CD-3 Not Started; E2E matrix + pitfall registry (`CD-*`) |
 | 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
 | 2c | **[Deployment guide](../deploy/README.md)** | **Canonical** install/upgrade/cutover/rollback — Docker Compose + Kubernetes (ADR-0030) |
