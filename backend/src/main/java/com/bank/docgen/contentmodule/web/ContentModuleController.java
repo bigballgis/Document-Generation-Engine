@@ -24,6 +24,7 @@ import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,10 +70,17 @@ public class ContentModuleController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String groupCode,
             @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String jurisdiction,
+            @RequestParam(required = false) String legalReviewRef,
+            @RequestParam(required = false) Instant effectiveFrom,
+            @RequestParam(required = false) Instant effectiveTo,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        return envelope(request, contentModuleService.list(session, page, size, search, groupCode, sort));
+        return envelope(request, contentModuleService.list(
+                session, page, size, search, groupCode, sort,
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo
+        ));
     }
 
     @GetMapping("/workflow-tasks")

@@ -51,6 +51,23 @@ final class PublishGateCheckItemContentSupport {
         );
     }
 
+    PublishGateItemView contentModuleEffectiveExpiredItem(UUID versionId) {
+        var expiry = contentModuleReferenceService.evaluateEffectiveExpiry(versionId);
+        boolean blocking = expiry.blocking();
+        String detail = blocking
+                ? String.join(";", expiry.expiredDetails())
+                : "expiredReferences=0";
+        return new PublishGateItemView(
+                PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED,
+                !blocking,
+                blocking,
+                blocking
+                        ? "api.publishGate.contentModuleEffectiveExpired.blocked"
+                        : "api.publishGate.contentModuleEffectiveExpired.ready",
+                detail
+        );
+    }
+
     PublishGateItemView unsupportedStructuredNodesItem(UUID versionId) {
         int unsupportedNodeCount = 0;
         for (AnchorBindingEntity binding : anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)) {

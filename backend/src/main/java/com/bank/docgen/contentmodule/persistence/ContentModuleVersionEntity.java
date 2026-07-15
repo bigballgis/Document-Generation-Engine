@@ -45,6 +45,18 @@ public class ContentModuleVersionEntity {
     @Column(name = "rejection_reason", length = 2048)
     private String rejectionReason;
 
+    @Column(name = "jurisdiction", length = 128)
+    private String jurisdiction;
+
+    @Column(name = "effective_from")
+    private Instant effectiveFrom;
+
+    @Column(name = "effective_to")
+    private Instant effectiveTo;
+
+    @Column(name = "legal_review_ref", length = 128)
+    private String legalReviewRef;
+
     @Column(name = "submitted_by", length = 8)
     private String submittedBy;
 
@@ -116,6 +128,22 @@ public class ContentModuleVersionEntity {
         return rejectionReason;
     }
 
+    public String getJurisdiction() {
+        return jurisdiction;
+    }
+
+    public Instant getEffectiveFrom() {
+        return effectiveFrom;
+    }
+
+    public Instant getEffectiveTo() {
+        return effectiveTo;
+    }
+
+    public String getLegalReviewRef() {
+        return legalReviewRef;
+    }
+
     public String getCreatedBy() {
         return createdBy;
     }
@@ -171,8 +199,48 @@ public class ContentModuleVersionEntity {
         this.updatedAt = Instant.now();
     }
 
+    public void setJurisdiction(String jurisdiction) {
+        this.jurisdiction = jurisdiction;
+        this.updatedAt = Instant.now();
+    }
+
+    public void setEffectiveFrom(Instant effectiveFrom) {
+        this.effectiveFrom = effectiveFrom;
+        this.updatedAt = Instant.now();
+    }
+
+    public void setEffectiveTo(Instant effectiveTo) {
+        this.effectiveTo = effectiveTo;
+        this.updatedAt = Instant.now();
+    }
+
+    public void setLegalReviewRef(String legalReviewRef) {
+        this.legalReviewRef = legalReviewRef;
+        this.updatedAt = Instant.now();
+    }
+
+    public void setLegalMetadata(
+            String jurisdiction,
+            Instant effectiveFrom,
+            Instant effectiveTo,
+            String legalReviewRef
+    ) {
+        this.jurisdiction = jurisdiction;
+        this.effectiveFrom = effectiveFrom;
+        this.effectiveTo = effectiveTo;
+        this.legalReviewRef = legalReviewRef;
+        this.updatedAt = Instant.now();
+    }
+
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
         this.updatedAt = Instant.now();
+    }
+
+    /**
+     * K08-C5: expired when effectiveTo is set and utcNow is strictly after it.
+     */
+    public boolean isEffectiveExpired(Instant utcNow) {
+        return effectiveTo != null && utcNow.isAfter(effectiveTo);
     }
 }

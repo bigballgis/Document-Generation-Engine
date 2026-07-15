@@ -280,6 +280,8 @@ default 路径目标版本回滚按一次新的受控变更处理：管理员重
 [P14-T01c](../plan/detail/P14-confirmed-large-domains.md) **Done** (2026-06-26) — 模板 content-module-references
 GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REFERENCES` 发布阻断项。
 
+**CE-K08（BDD `ready`，2026-07-15）：** `ContentModuleVersionView` / create-update 请求增加可选法务字段 `jurisdiction`、`effectiveFrom`、`effectiveTo`、`legalReviewRef`；`GET /content-modules` 增加对应筛选 query；发布门禁新增硬项 `PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED`（与 `CONTENT_MODULE_REFERENCES` 正交）。行为 SoT：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)。OpenAPI 字段以同片实现同步为准。
+
 | 路由语义 | 用途 | 已确认规则 | 已确认路径 |
 | --- | --- | --- | --- |
 | 内容模块审批流转 | 对条款或内容模块版本执行提交、审批通过或审批不通过。 | 使用独立版本审批生命周期；审批前置条件和角色边界遵循权限矩阵与领域模型。 | `/api/{environment}/v1/admin/content-modules/{moduleId}/review/transition` |

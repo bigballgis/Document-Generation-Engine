@@ -17,6 +17,7 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordReposi
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,7 +52,11 @@ final class ContentModuleCatalogSupport {
             Integer size,
             String search,
             String groupCode,
-            String sort
+            String sort,
+            String jurisdiction,
+            String legalReviewRef,
+            Instant effectiveFrom,
+            Instant effectiveTo
     ) {
         assertCatalogBrowseAllowed(session);
         int safePage = CatalogPageSupport.normalizePage(page);
@@ -79,7 +84,11 @@ final class ContentModuleCatalogSupport {
                 allGroups,
                 groupFilter,
                 CatalogPageSupport.blankToNull(search),
-                sortKey
+                sortKey,
+                ContentModuleLegalMetadataSupport.normalizeText(jurisdiction),
+                ContentModuleLegalMetadataSupport.normalizeText(legalReviewRef),
+                effectiveFrom,
+                effectiveTo
         );
         CatalogQueryPage<ContentModuleEntity> modulePage =
                 moduleRepository.searchCatalog(filter, safePage, safeSize);
@@ -101,7 +110,8 @@ final class ContentModuleCatalogSupport {
         if (!groupAccessService.canAccessGroup(session, groupCode)) {
             throw new ContentModuleAccessDeniedException();
         }
-        return list(session, 0, CatalogPageSupport.MAX_SIZE, null, groupCode, null).content();
+        return list(session, 0, CatalogPageSupport.MAX_SIZE, null, groupCode, null, null, null, null, null)
+                .content();
     }
 
     ContentModuleDetailView toDetail(ContentModuleEntity module, ManagementSessionClaims session) {
@@ -160,7 +170,11 @@ final class ContentModuleCatalogSupport {
                 contentStructureJson,
                 version.getRejectionReason(),
                 version.getCreatedAt(),
-                version.getUpdatedAt()
+                version.getUpdatedAt(),
+                version.getJurisdiction(),
+                version.getEffectiveFrom(),
+                version.getEffectiveTo(),
+                version.getLegalReviewRef()
         );
     }
 

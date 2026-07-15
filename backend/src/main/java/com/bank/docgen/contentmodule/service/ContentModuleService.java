@@ -17,6 +17,7 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordReposi
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -62,9 +63,28 @@ public class ContentModuleService {
             Integer size,
             String search,
             String groupCode,
+            String sort,
+            String jurisdiction,
+            String legalReviewRef,
+            Instant effectiveFrom,
+            Instant effectiveTo
+    ) {
+        return catalog.list(
+                session, page, size, search, groupCode, sort,
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PageView<ContentModuleSummaryView> list(
+            ManagementSessionClaims session,
+            Integer page,
+            Integer size,
+            String search,
+            String groupCode,
             String sort
     ) {
-        return catalog.list(session, page, size, search, groupCode, sort);
+        return list(session, page, size, search, groupCode, sort, null, null, null, null);
     }
 
     @Transactional(readOnly = true)
@@ -142,15 +162,22 @@ public class ContentModuleService {
             throw new ContentModuleValidationException("api.error.contentModule.versionExists");
         }
         validateContentStructureJson(request.contentStructureJson());
+        String jurisdiction = ContentModuleLegalMetadataSupport.normalizeText(request.jurisdiction());
+        Instant effectiveFrom = request.effectiveFrom();
+        Instant effectiveTo = request.effectiveTo();
+        String legalReviewRef = ContentModuleLegalMetadataSupport.normalizeText(request.legalReviewRef());
+        ContentModuleLegalMetadataSupport.validateEffectiveRange(effectiveFrom, effectiveTo);
 
-        versionRepository.save(new ContentModuleVersionEntity(
+        ContentModuleVersionEntity version = new ContentModuleVersionEntity(
                 UUID.randomUUID(),
                 module.getId(),
                 request.semanticVersion().trim(),
                 request.contentStructureJson(),
                 request.changeDescription(),
                 session.username()
-        ));
+        );
+        version.setLegalMetadata(jurisdiction, effectiveFrom, effectiveTo, legalReviewRef);
+        versionRepository.save(version);
         module.setUpdatedBy(session.username());
         moduleRepository.save(module);
 
@@ -180,10 +207,16 @@ public class ContentModuleService {
             throw new ContentModuleValidationException("api.error.contentModule.draftOnlyEditable");
         }
         validateContentStructureJson(request.contentStructureJson());
+        String jurisdiction = ContentModuleLegalMetadataSupport.normalizeText(request.jurisdiction());
+        Instant effectiveFrom = request.effectiveFrom();
+        Instant effectiveTo = request.effectiveTo();
+        String legalReviewRef = ContentModuleLegalMetadataSupport.normalizeText(request.legalReviewRef());
+        ContentModuleLegalMetadataSupport.validateEffectiveRange(effectiveFrom, effectiveTo);
         version.setContentStructureJson(request.contentStructureJson());
         if (request.changeDescription() != null) {
             version.setChangeDescription(request.changeDescription());
         }
+        version.setLegalMetadata(jurisdiction, effectiveFrom, effectiveTo, legalReviewRef);
         version.setUpdatedBy(session.username());
         versionRepository.save(version);
         module.setUpdatedBy(session.username());

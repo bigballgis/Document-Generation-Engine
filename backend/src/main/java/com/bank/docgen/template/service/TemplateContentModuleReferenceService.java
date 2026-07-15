@@ -6,6 +6,7 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.contentmodule.service.ContentModuleAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView;
 import com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.api.OutdatedClauseReferenceAuthorTaskView;
@@ -17,6 +18,7 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -170,6 +172,42 @@ public class TemplateContentModuleReferenceService {
                 invalid > 0,
                 references.size(),
                 invalid
+        );
+    }
+
+    /**
+     * CE-K08: evaluate referenced content-module versions whose effectiveTo is strictly past utcNow.
+     * Only resolved version entities are considered (orthogonal to CONTENT_MODULE_REFERENCES validity).
+     */
+    @Transactional(readOnly = true)
+    public ContentModuleEffectiveExpirySummaryView evaluateEffectiveExpiry(UUID templateVersionId) {
+        return evaluateEffectiveExpiry(templateVersionId, Instant.now());
+    }
+
+    @Transactional(readOnly = true)
+    public ContentModuleEffectiveExpirySummaryView evaluateEffectiveExpiry(UUID templateVersionId, Instant utcNow) {
+        List<TemplateContentModuleReferenceEntity> references =
+                referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(templateVersionId);
+        List<String> expiredDetails = new ArrayList<>();
+        int resolved = 0;
+        for (TemplateContentModuleReferenceEntity reference : references) {
+            ContentModuleVersionEntity version = contentModuleVersionRepository
+                    .findById(reference.getContentModuleVersionId())
+                    .orElse(null);
+            if (version == null) {
+                continue;
+            }
+            resolved++;
+            if (!version.isEffectiveExpired(utcNow)) {
+                continue;
+            }
+            expiredDetails.add(referenceSupport.formatExpiredEffectiveDetail(version));
+        }
+        return new ContentModuleEffectiveExpirySummaryView(
+                !expiredDetails.isEmpty(),
+                expiredDetails.size(),
+                resolved,
+                expiredDetails
         );
     }
 

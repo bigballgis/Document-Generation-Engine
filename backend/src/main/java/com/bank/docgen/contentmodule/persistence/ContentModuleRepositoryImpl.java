@@ -3,6 +3,8 @@ package com.bank.docgen.contentmodule.persistence;
 import com.bank.docgen.authorization.management.api.CatalogPageSupport;
 import com.bank.docgen.authorization.management.api.CatalogQueryPage;
 import com.bank.docgen.authorization.management.api.CatalogSortKey;
+import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
+import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -11,6 +13,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -31,12 +34,12 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<ContentModuleEntity> countRoot = countQuery.from(ContentModuleEntity.class);
         countQuery.select(cb.count(countRoot));
-        countQuery.where(buildPredicates(cb, countRoot, filter));
+        countQuery.where(buildPredicates(cb, countQuery, countRoot, filter));
         long totalElements = entityManager.createQuery(countQuery).getSingleResult();
 
         CriteriaQuery<ContentModuleEntity> dataQuery = cb.createQuery(ContentModuleEntity.class);
         Root<ContentModuleEntity> root = dataQuery.from(ContentModuleEntity.class);
-        dataQuery.where(buildPredicates(cb, root, filter));
+        dataQuery.where(buildPredicates(cb, dataQuery, root, filter));
         dataQuery.orderBy(buildOrders(cb, root, filter.sort()));
 
         TypedQuery<ContentModuleEntity> typedQuery = entityManager.createQuery(dataQuery);
@@ -48,6 +51,7 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
 
     private Predicate[] buildPredicates(
             CriteriaBuilder cb,
+            CriteriaQuery<?> query,
             Root<ContentModuleEntity> root,
             ContentModuleCatalogFilter filter
     ) {
@@ -78,7 +82,96 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
                     cb.like(cb.lower(root.get("groupCode")), pattern)
             ));
         }
+
+        if (filter.hasLegalFilters()) {
+            predicates.add(buildCatalogFilterVersionLegalPredicate(cb, query, root, filter));
+        }
         return predicates.toArray(Predicate[]::new);
+    }
+
+    /**
+     * Matches legal filters against the module's catalog filter version (K08-C7):
+     * latest APPROVED+ACTIVE by semanticVersion, else latest version overall.
+     */
+    private Predicate buildCatalogFilterVersionLegalPredicate(
+            CriteriaBuilder cb,
+            CriteriaQuery<?> query,
+            Root<ContentModuleEntity> moduleRoot,
+            ContentModuleCatalogFilter filter
+    ) {
+        Subquery<Integer> exists = query.subquery(Integer.class);
+        Root<ContentModuleVersionEntity> version = exists.from(ContentModuleVersionEntity.class);
+        exists.select(cb.literal(1));
+
+        List<Predicate> versionPredicates = new ArrayList<>();
+        versionPredicates.add(cb.equal(version.get("moduleId"), moduleRoot.get("id")));
+        versionPredicates.add(isCatalogFilterVersion(cb, exists, moduleRoot, version));
+
+        if (filter.jurisdiction() != null) {
+            versionPredicates.add(cb.equal(
+                    cb.lower(version.get("jurisdiction")),
+                    filter.jurisdiction().toLowerCase(Locale.ROOT)
+            ));
+        }
+        if (filter.legalReviewRef() != null) {
+            versionPredicates.add(cb.equal(
+                    cb.lower(version.get("legalReviewRef")),
+                    filter.legalReviewRef().toLowerCase(Locale.ROOT)
+            ));
+        }
+        if (filter.effectiveFrom() != null) {
+            versionPredicates.add(cb.isNotNull(version.get("effectiveFrom")));
+            versionPredicates.add(cb.greaterThanOrEqualTo(version.get("effectiveFrom"), filter.effectiveFrom()));
+        }
+        if (filter.effectiveTo() != null) {
+            versionPredicates.add(cb.isNotNull(version.get("effectiveTo")));
+            versionPredicates.add(cb.lessThanOrEqualTo(version.get("effectiveTo"), filter.effectiveTo()));
+        }
+
+        exists.where(versionPredicates.toArray(Predicate[]::new));
+        return cb.exists(exists);
+    }
+
+    private Predicate isCatalogFilterVersion(
+            CriteriaBuilder cb,
+            Subquery<?> outer,
+            Root<ContentModuleEntity> moduleRoot,
+            Root<ContentModuleVersionEntity> version
+    ) {
+        Subquery<Long> approvedActiveCount = outer.subquery(Long.class);
+        Root<ContentModuleVersionEntity> approvedCountRoot = approvedActiveCount.from(ContentModuleVersionEntity.class);
+        approvedActiveCount.select(cb.count(approvedCountRoot));
+        approvedActiveCount.where(
+                cb.equal(approvedCountRoot.get("moduleId"), moduleRoot.get("id")),
+                cb.equal(approvedCountRoot.get("reviewState"), ContentModuleReviewState.APPROVED),
+                cb.equal(approvedCountRoot.get("lifecycleState"), ContentModuleLifecycleState.ACTIVE)
+        );
+
+        Subquery<String> maxApprovedSemver = outer.subquery(String.class);
+        Root<ContentModuleVersionEntity> maxApprovedRoot = maxApprovedSemver.from(ContentModuleVersionEntity.class);
+        maxApprovedSemver.select(cb.greatest(maxApprovedRoot.<String>get("semanticVersion")));
+        maxApprovedSemver.where(
+                cb.equal(maxApprovedRoot.get("moduleId"), moduleRoot.get("id")),
+                cb.equal(maxApprovedRoot.get("reviewState"), ContentModuleReviewState.APPROVED),
+                cb.equal(maxApprovedRoot.get("lifecycleState"), ContentModuleLifecycleState.ACTIVE)
+        );
+
+        Subquery<String> maxAnySemver = outer.subquery(String.class);
+        Root<ContentModuleVersionEntity> maxAnyRoot = maxAnySemver.from(ContentModuleVersionEntity.class);
+        maxAnySemver.select(cb.greatest(maxAnyRoot.<String>get("semanticVersion")));
+        maxAnySemver.where(cb.equal(maxAnyRoot.get("moduleId"), moduleRoot.get("id")));
+
+        Predicate useApprovedActive = cb.and(
+                cb.greaterThan(approvedActiveCount, 0L),
+                cb.equal(version.get("reviewState"), ContentModuleReviewState.APPROVED),
+                cb.equal(version.get("lifecycleState"), ContentModuleLifecycleState.ACTIVE),
+                cb.equal(version.get("semanticVersion"), maxApprovedSemver)
+        );
+        Predicate useLatestAny = cb.and(
+                cb.equal(approvedActiveCount, 0L),
+                cb.equal(version.get("semanticVersion"), maxAnySemver)
+        );
+        return cb.or(useApprovedActive, useLatestAny);
     }
 
     private List<Order> buildOrders(CriteriaBuilder cb, Root<ContentModuleEntity> root, CatalogSortKey sort) {

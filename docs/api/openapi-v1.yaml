@@ -1274,6 +1274,43 @@ paths:
             type: string
             enum: [groupCodeAsc, updatedAtDesc, updatedAtAsc, nameAsc, moduleCodeAsc]
             default: groupCodeAsc
+        - name: jurisdiction
+          in: query
+          required: false
+          description: >-
+            CE-K08 — case-insensitive exact match on the catalog filter version
+            jurisdiction (trim). Catalog filter version = latest APPROVED+ACTIVE,
+            else latest version.
+          schema:
+            type: string
+            maxLength: 128
+        - name: legalReviewRef
+          in: query
+          required: false
+          description: >-
+            CE-K08 — case-insensitive exact match on the catalog filter version
+            legalReviewRef (trim).
+          schema:
+            type: string
+            maxLength: 128
+        - name: effectiveFrom
+          in: query
+          required: false
+          description: >-
+            CE-K08 — keep modules whose catalog filter version effectiveFrom is
+            >= this Instant. Versions with null effectiveFrom do not match.
+          schema:
+            type: string
+            format: date-time
+        - name: effectiveTo
+          in: query
+          required: false
+          description: >-
+            CE-K08 — keep modules whose catalog filter version effectiveTo is
+            <= this Instant. Versions with null effectiveTo do not match.
+          schema:
+            type: string
+            format: date-time
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
         '200':
@@ -5891,9 +5928,11 @@ components:
         - COVERAGE_THRESHOLDS
         - API_POLICY
         - CONTENT_MODULE_REFERENCES
+        - CONTENT_MODULE_EFFECTIVE_EXPIRED
         - UNSUPPORTED_STRUCTURED_NODES
         - PASTE_CLEANING_BLOCKERS
         - BLOCKER_STATUS
+        - FIDELITY_WARNINGS_VIEWED
     PublishGateItemView:
       type: object
       additionalProperties: false
@@ -7095,6 +7134,22 @@ components:
         changeDescription:
           type: string
           maxLength: 2048
+        jurisdiction:
+          type: string
+          maxLength: 128
+          description: CE-K08 optional legal jurisdiction (trim; blank → null).
+        effectiveFrom:
+          type: string
+          format: date-time
+          description: CE-K08 optional effective-from Instant (UTC).
+        effectiveTo:
+          type: string
+          format: date-time
+          description: CE-K08 optional effective-to Instant (UTC). Null = no expiry.
+        legalReviewRef:
+          type: string
+          maxLength: 128
+          description: CE-K08 optional legal review reference (trim; blank → null).
     UpdateContentModuleVersionRequest:
       type: object
       additionalProperties: false
@@ -7106,6 +7161,22 @@ components:
         changeDescription:
           type: string
           maxLength: 2048
+        jurisdiction:
+          type: string
+          maxLength: 128
+          description: CE-K08 optional legal jurisdiction (trim; blank → null).
+        effectiveFrom:
+          type: string
+          format: date-time
+          description: CE-K08 optional effective-from Instant (UTC).
+        effectiveTo:
+          type: string
+          format: date-time
+          description: CE-K08 optional effective-to Instant (UTC). Null = no expiry.
+        legalReviewRef:
+          type: string
+          maxLength: 128
+          description: CE-K08 optional legal review reference (trim; blank → null).
     UpdateContentModuleSharedGroupCodesRequest:
       type: object
       additionalProperties: false
@@ -7152,6 +7223,22 @@ components:
             Present when the version is DRAFT after REJECT_REVIEW. Cleared on SUBMIT_FOR_REVIEW
             and APPROVE_REVIEW (CE-U08).
           maxLength: 2048
+        jurisdiction:
+          type: string
+          maxLength: 128
+          description: CE-K08 optional legal jurisdiction.
+        effectiveFrom:
+          type: string
+          format: date-time
+          description: CE-K08 optional effective-from Instant (UTC).
+        effectiveTo:
+          type: string
+          format: date-time
+          description: CE-K08 optional effective-to Instant (UTC). Null = no expiry.
+        legalReviewRef:
+          type: string
+          maxLength: 128
+          description: CE-K08 optional legal review reference.
         createdAt:
           type: string
           format: date-time

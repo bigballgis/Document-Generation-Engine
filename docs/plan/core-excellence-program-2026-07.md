@@ -164,10 +164,12 @@ Done 时平台应满足：
 **依赖：** 骨架先行，可与 K01 并行启动。
 **状态（2026-07-14）：** **Done** — 骨架先行切片 `ce-k07-golden-corpus-skeleton`（Task Master **#54**）。**Merge:** `e8f996a0` (`e8f996a000fcf3845fa4c1dc66295e2b0c0f5282`); feature tip `91455ca3`。8 主题包骨架就位（`nested-clauses`/`encrypted-pdf` = ACTIVE，其余 6 = PLACEHOLDER）；harness `GoldenCorpusScanner`/`GoldenCorpusActiveRunner`/`GoldenCorpusStructureTest`/`GoldenCorpusHarnessTest` 接入 `mvn verify`。**Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (**1379** / 0 fail / 0 error / 7 skipped；golden-corpus 套件绿；Checkstyle/PMD/SpotBugs/JaCoCo 通过）。Architecture **PASS_WITH_NOTES** (Critical=0; review `7bc4b23f`)。BDD **ready** ([ce-k07-golden-corpus-skeleton.md](../behavior/ce-k07-golden-corpus-skeleton.md); **BDD-CE-K07-001…019**)。PLACEHOLDER 充实由后续 K01–K06 / CE-G02 拥有。正式 phase 仍为 **None**；**not** go-live；不激活 CD-3。
 
-### CE-K08 条款治理元数据 — P2 · M · `Not Started`
+### CE-K08 条款治理元数据 — P2 · M · `In Progress`（BDD `ready`）
 
 **目标：** `content_module_version` 增加 `jurisdiction`、`effectiveFrom/To`、`legalReviewRef`（法务评审单号）可选字段 + 目录筛选；模板发布 gate 增加"引用条款已过 effectiveTo"阻断项。
-**依赖：** 无硬依赖；与 CE-U07 升版提醒同泳道排前后。
+**依赖：** 无硬依赖；与 CE-U07 升版提醒同泳道排前后。Lane after K06（#62 Done）。
+**Slice:** `ce-k08-clause-legal-metadata` · branch `feat/ce-k08-clause-legal-metadata` · worktree `DGE-ce-k08-clause-legal-metadata` · Task Master **#63**.
+**BDD（2026-07-15）：** **`ready`** — [ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)（`BDD-CE-K08-LM-001…015`；locks K08-C1…C12）。实现未开始；正式 phase 仍为 **None**；**not** go-live。
 
 ---
 

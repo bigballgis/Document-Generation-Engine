@@ -866,16 +866,16 @@
       {
         "id": "63",
         "title": "CE-K08: Content-module legal metadata",
-        "description": "PENDING. Slice ce-k08-clause-governance-metadata. jurisdiction/effectiveFrom/To/legalReviewRef + publish gate expired clause. P2·M.",
-        "details": "Lane after K06 (#62). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §3 CE-K08.",
-        "testStrategy": "1. Fields + catalog filters. 2. Publish blocks expired refs. 3. mvn verify.",
+        "description": "IN PROGRESS. Slice ce-k08-clause-legal-metadata. BDD ready 2026-07-15. jurisdiction/effectiveFrom/To/legalReviewRef + catalog filters + publish gate CONTENT_MODULE_EFFECTIVE_EXPIRED. P2·M.",
+        "details": "Lane after K06 (#62 Done). BDD ready: docs/behavior/ce-k08-clause-legal-metadata.md (BDD-CE-K08-LM-001…015; locks K08-C1…C12). Worktree DGE-ce-k08-clause-legal-metadata / feat/ce-k08-clause-legal-metadata. Next: backend-engineer TDD (Flyway V62+, entity/DTO/OpenAPI, list filters, PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED) then FE fields/filters + gates. Formal phase stays None. Plan §3 CE-K08 In Progress (BDD ready).",
+        "testStrategy": "1. Version legal fields create/update/read + validation. 2. Catalog filters (jurisdiction/legalReviewRef/effective range). 3. Publish gate blocks expired effectiveTo; null/equal now pass; future effectiveFrom does not block. 4. mvn verify + FE gates/E2E as applicable.",
         "priority": "medium",
         "dependencies": [
           "62"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T14:35:00.000Z"
       },
       {
         "id": "64",

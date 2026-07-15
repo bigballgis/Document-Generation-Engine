@@ -13,6 +13,37 @@ public record ContentModuleVersionView(
         String contentStructureJson,
         String rejectionReason,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        String jurisdiction,
+        Instant effectiveFrom,
+        Instant effectiveTo,
+        String legalReviewRef
 ) {
+    public ContentModuleVersionView(
+            String versionId,
+            String semanticVersion,
+            ContentModuleReviewState reviewState,
+            ContentModuleLifecycleState lifecycleState,
+            String changeDescription,
+            String contentStructureJson,
+            String rejectionReason,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this(
+                versionId,
+                semanticVersion,
+                reviewState,
+                lifecycleState,
+                changeDescription,
+                contentStructureJson,
+                rejectionReason,
+                createdAt,
+                updatedAt,
+                null,
+                null,
+                null,
+                null
+        );
+    }
 }

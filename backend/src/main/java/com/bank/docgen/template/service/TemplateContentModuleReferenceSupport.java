@@ -153,4 +153,15 @@ final class TemplateContentModuleReferenceSupport {
             throw new TemplateValidationException("api.error.template.contentModuleReferenceInvalid");
         }
     }
+
+    String formatExpiredEffectiveDetail(ContentModuleVersionEntity version) {
+        ContentModuleEntity module = contentModuleRepository.findByIdAndDeletedAtIsNull(version.getModuleId())
+                .orElse(null);
+        String moduleCode = module == null ? version.getModuleId().toString() : module.getModuleCode();
+        return moduleCode
+                + "@"
+                + version.getSemanticVersion()
+                + " effectiveTo="
+                + version.getEffectiveTo();
+    }
 }

@@ -192,6 +192,10 @@ final class PublishGateCheckItemSupport {
         return contentItems.contentModuleReferencesItem(versionId);
     }
 
+    PublishGateItemView contentModuleEffectiveExpiredItem(UUID versionId) {
+        return contentItems.contentModuleEffectiveExpiredItem(versionId);
+    }
+
     PublishGateItemView unsupportedStructuredNodesItem(UUID versionId) {
         return contentItems.unsupportedStructuredNodesItem(versionId);
     }

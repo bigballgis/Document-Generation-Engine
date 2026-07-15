@@ -3,6 +3,7 @@ package com.bank.docgen.contentmodule.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.bank.docgen.authorization.management.api.CatalogQueryPage;
 import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.infrastructure.config.QuerydslConfig;
@@ -106,6 +107,67 @@ class ContentModuleRepositoryTest {
         assertThat(loaded.getChangeDescription()).isEqualTo("Initial version");
         assertThat(loaded.getRejectionReason()).isNull();
         assertThat(version.getCreatedAt()).isNotNull();
+    }
+
+    @Test
+    void persistsLegalMetadataOnVersion_ceK08() {
+        ContentModuleVersionEntity version = new ContentModuleVersionEntity(
+                VERSION_V1,
+                MODULE_RETAIL,
+                "1.0.0",
+                "{\"blocks\":[]}",
+                "Initial version",
+                "10000001"
+        );
+        Instant from = Instant.parse("2026-01-01T00:00:00Z");
+        Instant to = Instant.parse("2026-12-31T23:59:59Z");
+        version.setLegalMetadata("England and Wales", from, to, "LR-2026-001");
+        versionRepository.save(version);
+        entityManager.flush();
+        entityManager.clear();
+
+        ContentModuleVersionEntity loaded = versionRepository.findById(VERSION_V1).orElseThrow();
+        assertThat(loaded.getJurisdiction()).isEqualTo("England and Wales");
+        assertThat(loaded.getEffectiveFrom()).isEqualTo(from);
+        assertThat(loaded.getEffectiveTo()).isEqualTo(to);
+        assertThat(loaded.getLegalReviewRef()).isEqualTo("LR-2026-001");
+    }
+
+    @Test
+    void searchCatalog_filtersByJurisdictionOnCatalogFilterVersion_ceK08() {
+        ContentModuleVersionEntity england = approvedActiveVersion(VERSION_V1, "1.0.0");
+        england.setJurisdiction("England and Wales");
+        versionRepository.save(england);
+
+        ContentModuleVersionEntity corpVersion = new ContentModuleVersionEntity(
+                VERSION_V2,
+                MODULE_CORP,
+                "1.0.0",
+                "{}",
+                "corp",
+                "10000002"
+        );
+        corpVersion.setReviewState(ContentModuleReviewState.APPROVED);
+        corpVersion.setLifecycleState(ContentModuleLifecycleState.ACTIVE);
+        corpVersion.setJurisdiction("Hong Kong");
+        versionRepository.save(corpVersion);
+        entityManager.flush();
+
+        var filter = new ContentModuleRepositoryCustom.ContentModuleCatalogFilter(
+                List.of("RETAIL", "CORP"),
+                false,
+                null,
+                null,
+                null,
+                "England and Wales",
+                null,
+                null,
+                null
+        );
+        CatalogQueryPage<ContentModuleEntity> page = moduleRepository.searchCatalog(filter, 0, 20);
+
+        assertThat(page.content()).extracting(ContentModuleEntity::getModuleCode)
+                .containsExactly("MOD-RETAIL-DISCLOSURE");
     }
 
     @Test

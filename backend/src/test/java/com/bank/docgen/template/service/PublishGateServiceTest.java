@@ -148,6 +148,9 @@ class PublishGateServiceTest {
         lenient().when(previewEvidencePort.countUnviewedFidelityWarnings(templateId, versionId)).thenReturn(0);
         lenient().when(contentModuleReferenceService.validateReferences(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 0, 0));
+        lenient().when(contentModuleReferenceService.evaluateEffectiveExpiry(versionId))
+                .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView(
+                        false, 0, 0, List.of()));
         lenient().when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
                 .thenReturn(List.of());
         lenient().when(nodeMatrixValidationService.countUnsupportedNodeBlockers(any()))
@@ -250,6 +253,59 @@ class PublishGateServiceTest {
 
         assertThat(checklist.ready()).isTrue();
         service.assertReadyForSubmitForApproval(templateId, admin);
+    }
+
+    @Test
+    void publishGate_blocksContentModuleEffectiveExpired_lm008() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        when(contentModuleReferenceService.evaluateEffectiveExpiry(versionId))
+                .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView(
+                        true,
+                        1,
+                        1,
+                        List.of("MOD-A@1.0.0 effectiveTo=2026-07-01T00:00:00Z")
+                ));
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.ready()).isFalse();
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED)
+                .findFirst()
+                .orElseThrow())
+                .satisfies(item -> {
+                    assertThat(item.blocker()).isTrue();
+                    assertThat(item.ready()).isFalse();
+                    assertThat(item.messageKey()).isEqualTo("api.publishGate.contentModuleEffectiveExpired.blocked");
+                    assertThat(item.summary()).contains("MOD-A@1.0.0");
+                });
+        assertThatThrownBy(() -> service.assertReady(templateId, admin))
+                .isInstanceOf(TemplateValidationException.class);
+    }
+
+    @Test
+    void publishGate_contentModuleReferencesPass_whenOnlyEffectiveExpired_lm013() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        when(contentModuleReferenceService.validateReferences(versionId))
+                .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 1, 0));
+        when(contentModuleReferenceService.evaluateEffectiveExpiry(versionId))
+                .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView(
+                        true, 1, 1, List.of("MOD-A@1.0.0 effectiveTo=2026-07-01T00:00:00Z")));
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.CONTENT_MODULE_REFERENCES)
+                .findFirst()
+                .orElseThrow()
+                .ready()).isTrue();
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED)
+                .findFirst()
+                .orElseThrow()
+                .blocker()).isTrue();
     }
 
     @Test
@@ -511,6 +567,9 @@ class PublishGateServiceTest {
         when(previewEvidencePort.countFailedPreviews(templateId, publishedVersionId)).thenReturn(0);
         when(contentModuleReferenceService.validateReferences(publishedVersionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 0, 0));
+        when(contentModuleReferenceService.evaluateEffectiveExpiry(publishedVersionId))
+                .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView(
+                        false, 0, 0, List.of()));
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(publishedVersionId))
                 .thenReturn(List.of());
         when(templateRuleValidationService.validateRulesForVersion(
