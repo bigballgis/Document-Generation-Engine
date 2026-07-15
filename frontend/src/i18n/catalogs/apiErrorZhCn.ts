@@ -53,6 +53,7 @@ export const apiErrorZhCn = {
     downloadFailed: "无法下载母版文件。",
     invalidReviewTransition: "母版当前状态不允许执行此审核操作。",
     currentRevisionUnavailable: "无法解析用于固定的当前母版修订版本。",
+    revisionDiffBaselineUnavailable: "对比需要上一版母版修订。",
     revisionInUseByPublishedRelease: "母版修订版本已被一个或多个已发布版本固定，无法删除。",
     revisionDeleteFailed: "无法删除母版修订版本。",
   },
