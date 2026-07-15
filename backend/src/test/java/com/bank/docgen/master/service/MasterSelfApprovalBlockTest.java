@@ -53,6 +53,9 @@ class MasterSelfApprovalBlockTest {
     @Mock private GroupAccessService groupAccessService;
     @Mock private ManagementUserDisplayService managementUserDisplayService;
 
+    @Mock
+    private MasterImpactAnalysisService impactAnalysisService;
+
     private MasterDocumentService service;
     private UUID masterId;
     private MasterDocumentEntity master;
@@ -70,6 +73,7 @@ class MasterSelfApprovalBlockTest {
                 managementUserDisplayService,
                 new SelfApprovalGuard(),
                 new com.fasterxml.jackson.databind.ObjectMapper(),
+                impactAnalysisService,
                 4096L
         );
         masterId = UUID.randomUUID();

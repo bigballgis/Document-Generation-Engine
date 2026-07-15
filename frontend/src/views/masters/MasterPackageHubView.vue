@@ -110,6 +110,7 @@ const {
       :upload-progress="mastersStore.uploadProgress"
       :replace-server-error-key="replaceFileOpen ? mastersStore.lastErrorMessageKey : null"
       :review-mode="reviewMode"
+      :impact="mastersStore.impactAnalysis"
       @metadata-submit="handleMetadataUpdate"
       @replace-submit="handleReplaceFile"
       @clear-server-error="clearReplaceServerError"

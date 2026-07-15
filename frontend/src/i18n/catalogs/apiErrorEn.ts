@@ -53,6 +53,7 @@ export const apiErrorEn = {
     downloadFailed: "Unable to download the letterhead file.",
     invalidReviewTransition: "The letterhead is not in a valid state for this review action.",
     currentRevisionUnavailable: "The current letterhead revision could not be resolved for pinning.",
+    revisionDiffBaselineUnavailable: "A previous letterhead revision is required for comparison.",
     revisionInUseByPublishedRelease:
       "The letterhead revision is pinned by one or more published releases and cannot be deleted.",
     revisionDeleteFailed: "Unable to delete the letterhead revision.",

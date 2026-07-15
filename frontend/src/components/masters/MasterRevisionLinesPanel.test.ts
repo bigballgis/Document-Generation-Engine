@@ -8,6 +8,7 @@ import * as mastersApi from '@/api/masters'
 
 vi.mock('@/api/masters', () => ({
   listMasterRevisionLines: vi.fn(),
+  getMasterRevisionDiff: vi.fn(),
 }))
 
 const routerPush = vi.fn()
@@ -49,6 +50,7 @@ function mountPanel() {
 
   return mount(MasterRevisionLinesPanel, {
     props: { masterId: 'master-1' },
+    attachTo: document.body,
     global: {
       plugins: [i18n, ElementPlus],
     },
@@ -59,6 +61,8 @@ describe('MasterRevisionLinesPanel', () => {
   beforeEach(() => {
     routerPush.mockReset()
     vi.mocked(mastersApi.listMasterRevisionLines).mockReset()
+    vi.mocked(mastersApi.getMasterRevisionDiff).mockReset()
+    document.body.innerHTML = ''
   })
 
   it('navigates to revision detail on row click', async () => {
@@ -150,5 +154,53 @@ describe('MasterRevisionLinesPanel', () => {
     await flushPromises()
 
     expect(wrapper.find('.list-pagination').exists()).toBe(false)
+  })
+
+  it('MIR-006 — revision diff dialog shows file hashes and added/removed/renamed anchors', async () => {
+    const baselineHash = 'aaa111baselinehashsha256aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    const candidateHash = 'bbb222candidatehashsha256bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
+      content: [currentLine, historicalLine],
+      page: 0,
+      size: 20,
+      totalElements: 2,
+      totalPages: 1,
+    })
+    vi.mocked(mastersApi.getMasterRevisionDiff).mockResolvedValue({
+      masterId: 'master-1',
+      baselineRevisionLineId: 'revision-1',
+      candidateRevisionLineId: 'revision-2',
+      addedAnchors: ['HEADER_NEW'],
+      removedAnchors: ['FOOTER'],
+      renamedAnchors: [{ fromAnchorKey: 'SIG_OLD', toAnchorKey: 'SIG_NEW' }],
+      baselineFileHash: baselineHash,
+      candidateFileHash: candidateHash,
+    })
+
+    const wrapper = mountPanel()
+    await flushPromises()
+
+    await wrapper.find('[data-testid="master-revision-compare"]').trigger('click')
+    await flushPromises()
+
+    expect(mastersApi.getMasterRevisionDiff).toHaveBeenCalledWith('master-1')
+    expect(wrapper.find('[data-testid="master-revision-diff-dialog"]').exists()).toBe(true)
+
+    const shownBaseline = wrapper.find('[data-testid="master-revision-baseline-hash"]').text()
+    const shownCandidate = wrapper.find('[data-testid="master-revision-candidate-hash"]').text()
+    expect(shownBaseline).toBe(baselineHash)
+    expect(shownCandidate).toBe(candidateHash)
+    expect(shownBaseline).not.toBe(shownCandidate)
+
+    const dialogText = wrapper.find('[data-testid="master-revision-diff-dialog"]').text()
+    expect(dialogText).toContain('HEADER_NEW')
+    expect(dialogText).toContain('FOOTER')
+    expect(dialogText).toContain('SIG_OLD')
+    expect(dialogText).toContain('SIG_NEW')
+    expect(dialogText).toMatch(/Added anchors/i)
+    expect(dialogText).toMatch(/Removed anchors/i)
+    expect(dialogText).toMatch(/Renamed anchors/i)
+
+    wrapper.unmount()
   })
 })

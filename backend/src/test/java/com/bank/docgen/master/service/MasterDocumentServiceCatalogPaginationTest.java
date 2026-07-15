@@ -56,6 +56,9 @@ class MasterDocumentServiceCatalogPaginationTest {
     @Mock
     private ManagementUserDisplayService managementUserDisplayService;
 
+    @Mock
+    private MasterImpactAnalysisService impactAnalysisService;
+
     private MasterDocumentService service;
     private ManagementSessionClaims session;
 
@@ -72,6 +75,7 @@ class MasterDocumentServiceCatalogPaginationTest {
                 managementUserDisplayService,
                 new SelfApprovalGuard(),
                 new com.fasterxml.jackson.databind.ObjectMapper(),
+                impactAnalysisService,
                 50L * 1024L * 1024L
         );
         session = new ManagementSessionClaims(

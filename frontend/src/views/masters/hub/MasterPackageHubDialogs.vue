@@ -3,7 +3,7 @@ import MasterMetadataEditDialog from '@/components/masters/MasterMetadataEditDia
 import MasterReplaceFileDialog from '@/components/masters/MasterReplaceFileDialog.vue'
 import MasterReviewDialog from '@/components/masters/MasterReviewDialog.vue'
 import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
-import type { MasterReviewDecision } from '@/types/master'
+import type { MasterImpactAnalysis, MasterReviewDecision } from '@/types/master'
 
 defineProps<{
   masterName: string
@@ -13,6 +13,7 @@ defineProps<{
   uploadProgress: number | null
   replaceServerErrorKey: string | null
   reviewMode: MasterReviewDecision
+  impact: MasterImpactAnalysis | null
 }>()
 
 const metadataEditOpen = defineModel<boolean>('metadataEditOpen', { required: true })
@@ -43,6 +44,7 @@ const emit = defineEmits<{
     :loading="submitting"
     :upload-progress="uploadProgress"
     :server-error-key="replaceServerErrorKey"
+    :impact="impact"
     @submit="emit('replaceSubmit', $event)"
     @clear-server-error="emit('clearServerError')"
   />

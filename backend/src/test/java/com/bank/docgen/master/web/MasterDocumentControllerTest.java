@@ -221,6 +221,8 @@ class MasterDocumentControllerTest {
                 .andExpect(jsonPath("$.result.masterId").value(masterId))
                 .andExpect(jsonPath("$.result.referencedTemplateIds").isArray())
                 .andExpect(jsonPath("$.result.referencedTemplateIds.length()").value(0))
+                .andExpect(jsonPath("$.result.referencedTemplates").isArray())
+                .andExpect(jsonPath("$.result.referencedTemplates.length()").value(0))
                 .andExpect(jsonPath("$.result.retestRequired").value(false));
     }
 

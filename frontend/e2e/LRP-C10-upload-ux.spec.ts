@@ -206,7 +206,8 @@ test.describe('LR-C10 master DOCX upload UX', () => {
     await expect(dialog.getByText(LIMIT_HINT)).toBeVisible()
 
     await dialog.locator('input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
-    await dialog.getByRole('button', { name: /^replace file$/i }).click()
+    await dialog.getByRole('button', { name: /^continue$/i }).click()
+    await dialog.getByRole('button', { name: /confirm replace|确认替换/i }).click()
 
     await expect(dialog.getByTestId('master-upload-progress')).toBeVisible({ timeout: 10_000 })
     await captureEvidence(page, 'C10-A-replace-progress')
@@ -223,7 +224,7 @@ test.describe('LR-C10 master DOCX upload UX', () => {
     await expect(dialog.locator('.upload-error')).toBeVisible()
     await expect(dialog.locator('.upload-error')).toHaveText(READABLE_TOO_LARGE)
     await expect(dialog.locator('.upload-error')).not.toHaveText(RAW_ENVELOPE)
-    await expect(dialog.getByRole('button', { name: /^replace file$/i })).toBeDisabled()
+    await expect(dialog.getByRole('button', { name: /^continue$/i })).toBeDisabled()
 
     await dialog.locator('input[type="file"]').setInputFiles({
       name: 'notes.pdf',
@@ -231,7 +232,7 @@ test.describe('LR-C10 master DOCX upload UX', () => {
       buffer: Buffer.from('%PDF-1.4 e2e-fake'),
     })
     await expect(dialog.locator('.upload-error')).toHaveText(READABLE_DOCX_ONLY)
-    await expect(dialog.getByRole('button', { name: /^replace file$/i })).toBeDisabled()
+    await expect(dialog.getByRole('button', { name: /^continue$/i })).toBeDisabled()
 
     await captureEvidence(page, 'C10-B-client-precheck')
   })
@@ -268,7 +269,8 @@ test.describe('LR-C10 master DOCX upload UX', () => {
 
     const dialog = await openReplaceDialog(page, hubPath)
     await dialog.locator('input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
-    await dialog.getByRole('button', { name: /^replace file$/i }).click()
+    await dialog.getByRole('button', { name: /^continue$/i }).click()
+    await dialog.getByRole('button', { name: /confirm replace|确认替换/i }).click()
 
     await expect(dialog.locator('.upload-error')).toBeVisible({ timeout: 10_000 })
     await expect(dialog.locator('.upload-error')).toHaveText(
@@ -276,7 +278,7 @@ test.describe('LR-C10 master DOCX upload UX', () => {
     )
     await expect(dialog.locator('.upload-error')).not.toHaveText(RAW_ENVELOPE)
     await expect(dialog).toBeVisible()
-    await expect(dialog.getByRole('button', { name: /^replace file$/i })).toBeEnabled()
+    await expect(dialog.getByRole('button', { name: /confirm replace|确认替换/i })).toBeEnabled()
 
     await captureEvidence(page, 'C10-B-server-inline')
   })

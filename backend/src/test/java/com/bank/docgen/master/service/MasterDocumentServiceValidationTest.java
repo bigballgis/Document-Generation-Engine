@@ -72,6 +72,9 @@ class MasterDocumentServiceValidationTest {
     @Mock
     private ManagementUserDisplayService managementUserDisplayService;
 
+    @Mock
+    private MasterImpactAnalysisService impactAnalysisService;
+
     private MasterDocumentService service;
 
     @BeforeEach
@@ -87,6 +90,7 @@ class MasterDocumentServiceValidationTest {
                 managementUserDisplayService,
                 new SelfApprovalGuard(),
                 new ObjectMapper(),
+                impactAnalysisService,
                 4096
         );
     }

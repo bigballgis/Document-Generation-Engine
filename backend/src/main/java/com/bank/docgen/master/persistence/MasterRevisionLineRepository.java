@@ -22,6 +22,20 @@ public interface MasterRevisionLineRepository extends JpaRepository<MasterRevisi
 
     Optional<MasterRevisionLineEntity> findByMasterIdAndCurrentTrueAndDeletedAtIsNull(UUID masterId);
 
+    @EntityGraph(attributePaths = "anchors")
+    Optional<MasterRevisionLineEntity> findWithAnchorsByMasterIdAndCurrentTrueAndDeletedAtIsNull(UUID masterId);
+
+    @EntityGraph(attributePaths = "anchors")
+    Optional<MasterRevisionLineEntity> findWithAnchorsByMasterIdAndRevisionSequenceAndDeletedAtIsNull(
+            UUID masterId,
+            int revisionSequence
+    );
+
+    Optional<MasterRevisionLineEntity> findByMasterIdAndRevisionSequenceAndDeletedAtIsNull(
+            UUID masterId,
+            int revisionSequence
+    );
+
     @Query("""
             SELECT COALESCE(MAX(line.revisionSequence), 0)
             FROM MasterRevisionLineEntity line

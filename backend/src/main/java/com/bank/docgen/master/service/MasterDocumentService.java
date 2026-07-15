@@ -21,7 +21,6 @@ import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,6 +39,7 @@ public class MasterDocumentService {
     private final MasterDocumentReviewSupport reviews;
     private final MasterDocumentFileMutationSupport fileMutations;
     private final GroupAccessService groupAccessService;
+    private final MasterImpactAnalysisService impactAnalysisService;
 
     public MasterDocumentService(
             MasterDocumentRepository masterDocumentRepository,
@@ -52,10 +52,12 @@ public class MasterDocumentService {
             ManagementUserDisplayService managementUserDisplayService,
             SelfApprovalGuard selfApprovalGuard,
             ObjectMapper objectMapper,
+            MasterImpactAnalysisService impactAnalysisService,
             @Value("${docgen.master.max-docx-upload-bytes:" + DEFAULT_MAX_DOCX_UPLOAD_BYTES + "}") long maxDocxUploadBytes
     ) {
         this.objectStoragePort = objectStoragePort;
         this.groupAccessService = groupAccessService;
+        this.impactAnalysisService = impactAnalysisService;
         MasterDocxUploadSupport docxUploadSupport = new MasterDocxUploadSupport(
                 objectStoragePort,
                 docxAnchorExtractor,
@@ -177,8 +179,7 @@ public class MasterDocumentService {
 
     @Transactional(readOnly = true)
     public MasterImpactAnalysisView impactAnalysis(UUID masterId, ManagementSessionClaims session) {
-        access.requireReadableMaster(masterId, session);
-        return new MasterImpactAnalysisView(masterId.toString(), List.of(), false);
+        return impactAnalysisService.impactAnalysis(masterId, session);
     }
 
     public record MasterDownloadArtifact(InputStream contentStream, String filename, String contentType)

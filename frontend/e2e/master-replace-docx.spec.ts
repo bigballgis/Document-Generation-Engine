@@ -38,7 +38,9 @@ test.describe('master DOCX replacement (demo retail letterhead)', () => {
     await page.goto('/masters')
 
     await expect(page.getByText(/unable to load letterheads/i)).not.toBeVisible()
-    await expect(page.getByRole('heading', { name: /^masters$/i })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: /^(masters|letterhead templates)$/i }),
+    ).toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
     await expect(page.getByText(DEMO_MASTER_NAME)).toBeVisible()
 
@@ -46,23 +48,30 @@ test.describe('master DOCX replacement (demo retail letterhead)', () => {
     await expect(page).toHaveURL(/\/masters\/[^/?]+$/)
 
     await expect(page.getByRole('heading', { level: 1, name: DEMO_MASTER_NAME })).toBeVisible()
-    await expect(page.locator('.header-actions').getByText(/^approved$/i)).toBeVisible()
+    await expect(page.getByText(/^approved$/i).first()).toBeVisible()
+    await expect(page.getByRole('button', { name: /update (master|letterhead) docx/i })).toBeVisible()
 
-    await page.getByRole('button', { name: /update master docx/i }).click()
-    await expect(page.locator('.el-dialog').getByText(/update master docx/i)).toBeVisible()
+    await page.getByRole('button', { name: /update (master|letterhead) docx/i }).click()
+    const dialog = page.getByTestId('master-replace-file-dialog')
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByText(/update (master|letterhead) docx/i)).toBeVisible()
 
-    await page.locator('.el-dialog input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
-    await page.getByRole('button', { name: /^replace file$/i }).click()
-
-    await expect(page.locator('.el-message').getByText(/master file replaced/i)).toBeVisible()
-    await expect(page).toHaveURL(/\/masters\/[^/]+\/revisions\/[^/?]+$/)
-    await expect(page.locator('.meta')).toContainText(REPLACEMENT_DOCX_FILENAME)
-    await expect(page.locator('.header-actions').getByText(/^draft$/i)).toBeVisible()
+    await dialog.locator('input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
+    await dialog.getByTestId('master-replace-continue').click()
+    await expect(dialog.getByTestId('master-replace-impact-confirm')).toBeVisible()
+    await dialog.getByTestId('master-replace-confirm').click()
 
     await expect(
-      page.locator('.detail-grid .el-table__body').getByRole('cell', { name: 'HEADER' }).first(),
+      page.locator('.el-message').getByText(/(master|letterhead) file replaced/i),
     ).toBeVisible()
-    await expect(page.locator('.workflow-banner').getByText(/submit master for review/i)).toBeVisible()
+    await expect(page).toHaveURL(/\/masters\/[^/]+\/revisions\/[^/?]+$/)
+    await expect(page.getByText(REPLACEMENT_DOCX_FILENAME)).toBeVisible()
+    await expect(page.getByText(/^draft$/i).first()).toBeVisible()
+
+    await expect(
+      page.locator('.detail-grid .el-table__body, .el-table__body').getByRole('cell', { name: 'HEADER' }).first(),
+    ).toBeVisible()
+    await expect(page.getByText(/submit (master|letterhead) for review/i).first()).toBeVisible()
     await expect(page.getByRole('button', { name: /submit for review/i })).toBeVisible()
   })
 })

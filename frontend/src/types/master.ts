@@ -46,10 +46,41 @@ export interface MasterDocumentDetail {
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management master impact analysis). */
+export interface MasterReferencedTemplate {
+  templateId: string
+  name: string
+  lifecycleStatus?: string
+  externalId?: string
+}
+
+export interface MasterRenamedAnchor {
+  fromAnchorKey: string
+  toAnchorKey: string
+}
+
+export interface MasterAnchorSetDelta {
+  addedAnchors: string[]
+  removedAnchors: string[]
+  renamedAnchors: MasterRenamedAnchor[]
+}
+
 export interface MasterImpactAnalysis {
   masterId: string
   referencedTemplateIds: string[]
+  referencedTemplates: MasterReferencedTemplate[]
   retestRequired: boolean
+  anchorDelta?: MasterAnchorSetDelta
+}
+
+export interface MasterRevisionDiff {
+  masterId: string
+  baselineRevisionLineId: string
+  candidateRevisionLineId: string
+  addedAnchors: string[]
+  removedAnchors: string[]
+  renamedAnchors: MasterRenamedAnchor[]
+  baselineFileHash: string
+  candidateFileHash: string
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management master create multipart). */

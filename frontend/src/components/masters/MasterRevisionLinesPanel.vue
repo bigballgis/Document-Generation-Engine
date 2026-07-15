@@ -11,7 +11,7 @@ import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { masterRevisionDetailPath } from '@/routing/routeKeys'
 import * as mastersApi from '@/api/masters'
-import type { MasterRevisionLineSummary } from '@/types/master'
+import type { MasterRevisionDiff, MasterRevisionLineSummary } from '@/types/master'
 import { formatMasterRevisionLineLabel } from '@/utils/masterRevisionLineLabel'
 import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 
@@ -29,6 +29,10 @@ const currentPage = ref(1)
 const totalElements = ref(0)
 const totalPages = ref(0)
 const revisionLines = ref<MasterRevisionLineSummary[]>([])
+const diffOpen = ref(false)
+const diffLoading = ref(false)
+const diffError = ref(false)
+const revisionDiff = ref<MasterRevisionDiff | null>(null)
 
 const pageSize = SERVER_TABLE_PAGE_SIZE
 
@@ -57,6 +61,22 @@ async function loadRevisionLines() {
     loading.value = false
   }
 }
+
+async function openRevisionDiff() {
+  diffOpen.value = true
+  diffLoading.value = true
+  diffError.value = false
+  revisionDiff.value = null
+  try {
+    revisionDiff.value = await mastersApi.getMasterRevisionDiff(props.masterId)
+  } catch {
+    diffError.value = true
+  } finally {
+    diffLoading.value = false
+  }
+}
+
+const canCompare = computed(() => revisionLines.value.length >= 2)
 
 onMounted(() => {
   void loadRevisionLines()
@@ -91,8 +111,18 @@ defineExpose({
   <el-card shadow="never" class="revision-lines-card">
     <template #header>
       <div class="card-header">
-        <span>{{ t('masters.revisionLines.title') }}</span>
-        <p class="card-hint">{{ t('masters.revisionLines.hint') }}</p>
+        <div class="card-header__title">
+          <span>{{ t('masters.revisionLines.title') }}</span>
+          <p class="card-hint">{{ t('masters.revisionLines.hint') }}</p>
+        </div>
+        <el-button
+          v-if="canCompare"
+          size="small"
+          data-testid="master-revision-compare"
+          @click="openRevisionDiff"
+        >
+          {{ t('masters.revisionLines.compare') }}
+        </el-button>
       </div>
     </template>
 
@@ -165,6 +195,48 @@ defineExpose({
         :total="totalElements"
       />
     </template>
+
+    <el-dialog
+      v-model="diffOpen"
+      :title="t('masters.revisionLines.diffTitle')"
+      width="640px"
+      destroy-on-close
+      data-testid="master-revision-diff-dialog"
+    >
+      <el-skeleton v-if="diffLoading" :rows="4" animated />
+      <p v-else-if="diffError" class="diff-error">{{ t('masters.revisionLines.diffError') }}</p>
+      <div v-else-if="revisionDiff" class="diff-body">
+        <p>
+          <strong>{{ t('masters.revisionLines.baselineHash') }}</strong>
+          <code data-testid="master-revision-baseline-hash">{{ revisionDiff.baselineFileHash }}</code>
+        </p>
+        <p>
+          <strong>{{ t('masters.revisionLines.candidateHash') }}</strong>
+          <code data-testid="master-revision-candidate-hash">{{ revisionDiff.candidateFileHash }}</code>
+        </p>
+        <p>
+          <strong>{{ t('masters.revisionLines.addedAnchors') }}</strong>
+          {{ revisionDiff.addedAnchors.join(', ') || '—' }}
+        </p>
+        <p>
+          <strong>{{ t('masters.revisionLines.removedAnchors') }}</strong>
+          {{ revisionDiff.removedAnchors.join(', ') || '—' }}
+        </p>
+        <p>
+          <strong>{{ t('masters.revisionLines.renamedAnchors') }}</strong>
+          <template v-if="revisionDiff.renamedAnchors.length">
+            <span
+              v-for="item in revisionDiff.renamedAnchors"
+              :key="`${item.fromAnchorKey}->${item.toAnchorKey}`"
+              class="rename-item"
+            >
+              {{ item.fromAnchorKey }} → {{ item.toAnchorKey }}
+            </span>
+          </template>
+          <template v-else>—</template>
+        </p>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -174,6 +246,13 @@ defineExpose({
 }
 
 .card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.card-header__title {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -187,5 +266,26 @@ defineExpose({
 
 .line-tag {
   margin-left: 0.5rem;
+}
+
+.diff-body p {
+  margin: 0 0 0.75rem;
+  word-break: break-all;
+}
+
+.diff-body code {
+  display: inline-block;
+  margin-left: 0.35rem;
+  font-size: 0.8rem;
+}
+
+.rename-item {
+  display: inline-block;
+  margin-right: 0.75rem;
+}
+
+.diff-error {
+  margin: 0;
+  color: var(--color-danger, #c45656);
 }
 </style>
