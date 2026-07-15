@@ -41,6 +41,7 @@ watch(
       form.displayLabel = props.initialDisplayLabel
     }
   },
+  { immediate: true },
 )
 
 function closeDialog() {

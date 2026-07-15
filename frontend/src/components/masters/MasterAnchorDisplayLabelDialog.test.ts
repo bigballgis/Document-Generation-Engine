@@ -31,6 +31,20 @@ function mountDialog(props: {
 }
 
 describe('MasterAnchorDisplayLabelDialog', () => {
+  it('BDD-CE-U06-MAC-003 — seeds current displayLabel on first open (mount with open=true)', () => {
+    const wrapper = mountDialog({
+      modelValue: true,
+      initialDisplayLabel: 'Header block',
+    })
+
+    const input = wrapper.get('[data-testid="master-anchor-display-label-input"]')
+    expect((input.element as HTMLInputElement).value).toBe('Header block')
+    expect(wrapper.find('[data-testid="master-anchor-display-label-error"]').exists()).toBe(false)
+    expect(
+      wrapper.get('[data-testid="master-anchor-display-label-save"]').attributes('disabled'),
+    ).toBeUndefined()
+  })
+
   it('BDD-CE-U06-MAC-008 — rejects blank displayLabel (English-first)', async () => {
     const wrapper = mountDialog({ initialDisplayLabel: 'Header block' })
     await wrapper.get('[data-testid="master-anchor-display-label-input"]').setValue('   ')
