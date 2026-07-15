@@ -17,7 +17,7 @@ related:
 
 ## Status
 
-Accepted
+Accepted (display-boundary amend 2026-07-15 — CE-C04)
 
 ## Context
 
@@ -45,6 +45,14 @@ Imported production templates still start from draft and must pass testing, appr
 
 When testing or approval fails and the template returns to draft, prior test and approval records remain as history. A later release candidate must fully repeat testing and approval and create new test and approval records.
 
+## Amendment — 2026-07-15 (display boundary only; CE-C04)
+
+**Scope:** Optional discovery metadata on callable-version list items. Does **not** change restore, permanent deprecation, import-conflict, or callable-candidate membership rules decided above.
+
+**Clarification:** OpenAPI `CallableVersion` may include optional `deprecated` (boolean) and `sunsetAt` (date-time) for contract/`listCallableVersions` display and discovery. For items that are already in the callable set (published, non-stopped under a non-deprecated template per this ADR), typical values are `deprecated=false` (or omitted) and `sunsetAt` omitted. These fields must not be used to expand the callable candidate set to include stopped or permanently deprecated templates/versions, and they do not weaken the “stopped before deprecate / no callable versions before deprecate” gates.
+
+**Unchanged:** Restore preview and audit, permanent deprecation irreversibility, production import keep-template-ID behavior, and re-test/re-approve after draft return remain as decided above.
+
 ## Consequences
 
 - Stopped templates and release versions remain operationally recoverable, but recovery is visible, confirmed, and auditable.
@@ -53,6 +61,7 @@ When testing or approval fails and the template returns to draft, prior test and
 - Stable template IDs and API addresses are preserved during production import, reducing downstream API churn.
 - Production imports cannot bypass template verification or release governance.
 - Test and approval rejection loops preserve evidence while requiring a fresh complete review cycle for later release candidates.
+- Optional `deprecated` / `sunsetAt` on callable-version discovery responses are display-only; membership in the callable set remains governed by this ADR’s lifecycle rules (and ADR-0003 routing display boundary).
 
 ## Alternatives Considered
 
@@ -70,3 +79,6 @@ When testing or approval fails and the template returns to draft, prior test and
 - [Permission Matrix](../../security/permission-matrix.md)
 - [Lifecycle Review](../../domain/lifecycle-review.md)
 - [API Contract Outline](../../api/contract-outline.md)
+- [OpenAPI v1](../../api/openapi-v1.yaml)
+- [CE-C04 behavior](../../behavior/ce-c04-credential-expires.md)
+- [ADR-0003](../api/0003-api-routing-and-batch-overrides.md)

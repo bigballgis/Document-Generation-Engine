@@ -67,7 +67,9 @@ final class ContractAssemblyViewSupport {
                         && !version.getReleaseVersion().isBlank())
                 .map(version -> new CallableVersionView(
                         version.getReleaseVersion(),
-                        base + version.getReleaseVersion() + "/generate"
+                        base + version.getReleaseVersion() + "/generate",
+                        Boolean.FALSE,
+                        null
                 ))
                 .toList();
     }
@@ -165,7 +167,8 @@ final class ContractAssemblyViewSupport {
         return new RuntimeCredentialSummaryView(
                 null,
                 credentialSummary.status(),
-                null
+                null,
+                credentialSummary.expiresAt()
         );
     }
 

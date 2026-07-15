@@ -212,6 +212,9 @@ class ApiAccessAlertQueryServiceTest {
                 "CRED-SOON",
                 NOW.minus(30, ChronoUnit.DAYS)
         );
+        // Persist EXPIRING_SOON while expiry remains far enough that derivation alone would be ACTIVE
+        // unless persisted status is honored (and expires_at still in window for alert path).
+        setInstant(credential, "expiresAt", NOW.plus(5, ChronoUnit.DAYS));
         setCredentialStatus(credential, ApiCredentialStatus.EXPIRING_SOON);
 
         stubScopedTemplates(List.of("RETAIL"), List.of(template), List.of());
@@ -222,6 +225,11 @@ class ApiAccessAlertQueryServiceTest {
 
         assertThat(alerts).extracting(ApiAccessAlertView::alertType)
                 .contains(ApiAccessAlertType.EXPIRING_CREDENTIAL);
+        ApiAccessAlertView expiring = alerts.stream()
+                .filter(alert -> alert.alertType() == ApiAccessAlertType.EXPIRING_CREDENTIAL)
+                .findFirst()
+                .orElseThrow();
+        assertThat(expiring.expiresAt()).isEqualTo(credential.getExpiresAt());
     }
 
     @Test
@@ -403,10 +411,14 @@ class ApiAccessAlertQueryServiceTest {
                 "hash",
                 "10000001"
         );
+        Instant expiresAt = createdAt.plus(ApiCredentialLifecycleSupport.DEFAULT_EXPIRY_DAYS, ChronoUnit.DAYS);
         try {
-            var field = ApiCredentialEntity.class.getDeclaredField("createdAt");
-            field.setAccessible(true);
-            field.set(credential, createdAt);
+            var createdField = ApiCredentialEntity.class.getDeclaredField("createdAt");
+            createdField.setAccessible(true);
+            createdField.set(credential, createdAt);
+            var expiresField = ApiCredentialEntity.class.getDeclaredField("expiresAt");
+            expiresField.setAccessible(true);
+            expiresField.set(credential, expiresAt);
         } catch (ReflectiveOperationException ex) {
             throw new IllegalStateException(ex);
         }
@@ -418,6 +430,16 @@ class ApiAccessAlertQueryServiceTest {
             var field = ApiCredentialEntity.class.getDeclaredField("status");
             field.setAccessible(true);
             field.set(credential, status);
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    private static void setInstant(ApiCredentialEntity credential, String fieldName, Instant value) {
+        try {
+            var field = ApiCredentialEntity.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(credential, value);
         } catch (ReflectiveOperationException ex) {
             throw new IllegalStateException(ex);
         }

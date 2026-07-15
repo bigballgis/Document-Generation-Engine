@@ -1,5 +1,6 @@
 package com.bank.docgen.apimgmt.persistence;
 
+import com.bank.docgen.apimgmt.domain.ApiCredentialLifecycleSupport;
 import com.bank.docgen.apimgmt.domain.ApiCredentialStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -45,6 +46,9 @@ public class ApiCredentialEntity {
     @Column(name = "rotation_generation", nullable = false)
     private int rotationGeneration;
 
+    @Column(name = "expires_at", nullable = false)
+    private Instant expiresAt;
+
     protected ApiCredentialEntity() {
     }
 
@@ -59,6 +63,7 @@ public class ApiCredentialEntity {
         this.createdAt = now;
         this.updatedAt = now;
         this.rotationGeneration = 0;
+        this.expiresAt = ApiCredentialLifecycleSupport.defaultExpiresAt(now);
     }
 
     public UUID getId() {
@@ -99,6 +104,10 @@ public class ApiCredentialEntity {
 
     public int getRotationGeneration() {
         return rotationGeneration;
+    }
+
+    public Instant getExpiresAt() {
+        return expiresAt;
     }
 
     public void revoke() {

@@ -87,6 +87,11 @@ public final class ApiErrorCodes {
     /** CE-K03: whitelist compute DSL evaluation failed (fail-closed). */
     public static final String VARIABLE_COMPUTE_FAILED = "VARIABLE_COMPUTE_FAILED";
 
+    /** CE-C04 / ADR-0009: credential past persisted expires_at. */
+    public static final String API_CREDENTIAL_EXPIRED = "API_CREDENTIAL_EXPIRED";
+    /** CE-C04 / ADR-0009: credential revoked. */
+    public static final String API_CREDENTIAL_REVOKED = "API_CREDENTIAL_REVOKED";
+
     private ApiErrorCodes() {
     }
 }

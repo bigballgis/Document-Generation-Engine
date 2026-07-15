@@ -1,27 +1,29 @@
 package com.bank.docgen.runtime.service;
 
+import com.bank.docgen.apimgmt.domain.ApiCredentialLifecycleSupport;
+import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
+import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.runtime.api.CallableVersionsResultView;
 import com.bank.docgen.runtime.api.ContractResultView;
-import com.bank.docgen.runtime.domain.ContractViewAudience;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.api.RuntimeCredentialSummaryView;
 import com.bank.docgen.runtime.api.SyncGenerateResult;
+import com.bank.docgen.runtime.domain.ContractViewAudience;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
-import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
-import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
-import com.bank.docgen.template.service.VersionFidelityWarningService;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateCallabilitySupport;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.template.service.VersionFidelityWarningService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,8 +82,9 @@ public class RuntimeGenerationService {
         RuntimeCredentialSummaryView credentialSummary = credential == null ? null
                 : new RuntimeCredentialSummaryView(
                         credential.getExternalId(),
-                        credential.getStatus().name(),
-                        "fp-" + credential.getExternalId()
+                        ApiCredentialLifecycleSupport.resolveEffectiveStatus(credential, Instant.now()).name(),
+                        "fp-" + credential.getExternalId(),
+                        credential.getExpiresAt()
                 );
         return contractAssemblyService.assemble(
                 template,

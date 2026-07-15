@@ -9,11 +9,13 @@
     "versions": [
       {
         "releaseVersion": "1.0.0",
-        "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.0.0/generate"
+        "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.0.0/generate",
+        "deprecated": false
       },
       {
         "releaseVersion": "1.1.0",
-        "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.1.0/generate"
+        "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.1.0/generate",
+        "deprecated": false
       }
     ]
   }

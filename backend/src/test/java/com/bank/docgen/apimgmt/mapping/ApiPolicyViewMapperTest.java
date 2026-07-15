@@ -93,10 +93,11 @@ class ApiPolicyViewMapperTest {
         assertThat(view.status()).isEqualTo(ApiCredentialStatus.REVOKED.name());
         assertThat(view.createdAt()).isEqualTo(credential.getCreatedAt());
         assertThat(view.revokedAt()).isEqualTo(credential.getRevokedAt());
+        assertThat(view.expiresAt()).isEqualTo(credential.getExpiresAt());
     }
 
     @Test
-    void toRuntimeCredentialSummary_buildsFingerprintPrefix() {
+    void toRuntimeCredentialSummary_buildsFingerprintPrefixAndExpiresAt() {
         UUID templateId = UUID.randomUUID();
         ApiCredentialEntity credential = new ApiCredentialEntity(
                 UUID.randomUUID(),
@@ -111,5 +112,30 @@ class ApiPolicyViewMapperTest {
         assertThat(view.credentialExternalId()).isEqualTo("runtime-ext");
         assertThat(view.status()).isEqualTo(ApiCredentialStatus.ACTIVE.name());
         assertThat(view.fingerprintSummary()).isEqualTo("fp-runtime-ext");
+        assertThat(view.expiresAt()).isEqualTo(credential.getExpiresAt());
+    }
+
+    @Test
+    void toRuntimeCredentialSummary_usesEffectiveExpiringSoonStatus() {
+        Instant now = Instant.now();
+        ApiCredentialEntity credential = new ApiCredentialEntity(
+                UUID.randomUUID(),
+                "runtime-soon",
+                UUID.randomUUID(),
+                "hash",
+                "actor01"
+        );
+        try {
+            var field = ApiCredentialEntity.class.getDeclaredField("expiresAt");
+            field.setAccessible(true);
+            field.set(credential, now.plus(5, java.time.temporal.ChronoUnit.DAYS));
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException(ex);
+        }
+
+        RuntimeCredentialSummaryView view = mapper.toRuntimeCredentialSummary(credential);
+
+        assertThat(view.status()).isEqualTo(ApiCredentialStatus.EXPIRING_SOON.name());
+        assertThat(view.expiresAt()).isEqualTo(credential.getExpiresAt());
     }
 }
