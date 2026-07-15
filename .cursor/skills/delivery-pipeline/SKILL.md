@@ -45,6 +45,12 @@ stage_done_definition:
 
 Every delivery session: stage 0 → code in `../DGE-<slice-id>` → merge via `integration-merger` → **doc-sync + commit on MAIN**.
 
+## Single-lane serial (default, 2026-07-16)
+
+At most **one** delivery leaf In Progress on this host. Queue other slices; do not
+fan out writers for “continue / 自动执行后续”. Override only with user
+`force-parallel` / `强制并行` (cap ≤2; still queue Docker).
+
 ## Docker
 
 Always `.\scripts\docker-deploy-queue.ps1` (never parallel stacks).

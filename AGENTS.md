@@ -11,15 +11,18 @@ Stay in **one main chat**. Speak the goal in natural language — the parent age
 
 | You say (examples) | Parent does |
 | --- | --- |
-| 「把 F7 做完」「修这个 bug」「按管线交付」 | **deliver** → `delivery-orchestrator` |
-| 「这两个切片并行」「同时改前后端」 | **multitask-slices** → worktree-router + ≤3 writers |
+| 「把 F7 做完」「修这个 bug」「按管线交付」「自动执行后续」 | **deliver** → `delivery-orchestrator` (**one leaf**; single-lane serial) |
+| 「这两个切片并行」「同时改前后端」 | **Refuse fan-out by default** → serial queue. Only `force-parallel` / `强制并行` → legacy multitask (≤2 writers) |
 | 「部署一下」「队列状态」「重启栈」 | **deploy-queue** → `build-deploy-agent` |
 | 「验收一下」「算不算 Done」 | **verify-done** → `verifier` |
 
-Optional shortcuts (same workflows): `/deliver`, `/multitask-slices`, `/deploy-queue`,
-`/verify-done` under `.cursor/commands/`.
+**Default (2026-07-16):** single-lane serial on this Docker host — at most one CE/delivery
+leaf In Progress. See CE plan §9.2.
 
-Native Cursor: `/multitask`, `/worktree`, `/best-of-n`, Agents Window — see
+Optional shortcuts: `/deliver` (preferred), `/multitask-slices` (legacy opt-in),
+`/deploy-queue`, `/verify-done` under `.cursor/commands/`.
+
+Native Cursor parallel primitives are **opt-in only** — see
 `.cursor/skills/cursor-native-parallel/SKILL.md`.
 
 ## Pipeline (0–14)

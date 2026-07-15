@@ -15,9 +15,10 @@ Skill: `.cursor/skills/delivery-pipeline/SKILL.md` (stage numbers + handoff payl
 ## Supervisor mode
 
 User stays in **one** parent session and speaks goals in natural language. Parent
-**auto-maps** intent (deliver / multitask-slices / deploy-queue / verify-done) without
+**auto-maps** intent (deliver / serial-queue / deploy-queue / verify-done) without
 requiring slash commands, then autonomously spawns `Task` workers and chains stages —
-no «请输入 /deliver» or «要继续吗？」 menus when direction is clear.
+no «请输入 /deliver» or «要继续吗？」 menus when direction is clear. Multitask is
+**opt-in only** (`force-parallel` / `强制并行`).
 
 Hard rule: `.cursor/rules/subagent-routing-mandate.mdc` (Auto-intent section).
 
@@ -67,16 +68,19 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 | Rendering / DOCX / PDF / LibreOffice | 0→1→2→(3)→4 **rendering-engineer**→8→(9)→10→(11)→12→13→(14) |
 | Frontend-only | 0→1→2→(3)→4 frontend→5→6→7→8→(9)→10→(11)→12→13→(14) |
 | Full-stack | backend (or rendering) then frontend; E2E after stack prep |
-| Docs-only (plan-only, no code) | 0→2→3→12→13 on **MAIN** or isolated if concurrent sessions |
+| Docs-only (plan-only, no code) | 0→2→3→12→13 on **MAIN** (or isolated if another session holds MAIN dirty) |
 | Deploy-only | build-deploy-agent (queue)→12→13 |
 | Bug fix | stage 0 worktree → failing regression first via owning engineer, then from stage 4 |
-| Parallel slices | one **mandatory** worktree per slice; queue Docker; merger per green slice |
+| Multiple pending slices | **Serial queue** — finish one leaf (0→13) then start the next; do **not** fan out |
 
-### Native Cursor (2026)
+### Single-lane serial (default, 2026-07-16)
 
-- Prefer `/multitask` for async chunks; compose with `/worktree` when files may overlap.
-- Cap fan-out (≤3 writers). Skill: `.cursor/skills/cursor-native-parallel/SKILL.md`.
-- Slash: `/deliver`, `/multitask-slices`, `/deploy-queue`, `/verify-done`.
+- **At most one** delivery leaf In Progress (1 worktree + 1 full pipeline).
+- Do not start a second slice’s verify / deploy / E2E while the active leaf is open.
+- Park extra worktrees; do not run their writers until the sole-active leaf merges.
+- User must say `force-parallel` / `强制并行` to override (then cap ≤2; still queue Docker).
+- Skill (opt-in only): `.cursor/skills/cursor-native-parallel/SKILL.md`.
+- Slash: prefer `/deliver`; `/multitask-slices` is legacy opt-in only.
 
 ### Deploy rules (resolve prior ambiguity)
 

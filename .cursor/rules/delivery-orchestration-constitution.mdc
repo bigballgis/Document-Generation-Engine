@@ -52,7 +52,7 @@ Optional stage **14** `verifier` matches `.cursor/skills/delivery-pipeline/SKILL
 5. Docker deploy gated and **queued** (`docker-deploy-queue.ps1`); single host.
 6. **Mandatory session worktree** via `worktree-router` (stage 0); merge + cleanup via `integration-merger` (stage 11). See `worktree-and-deploy-queue-constitution.mdc`.
 7. End gates 12 then 13 before Done (honor `no-commit` / `no-push`).
-8. Single active plan phase (or explicit Task Master active task).
+8. Single active plan phase (or Task Master sole-active leaf) — **single-lane serial**: at most **1** delivery leaf In Progress on this host.
 9. Behavior-changing acceptance surfaces require queued deploy evidence (stage 5 and/or 10).
 
 ## Forbidden
@@ -62,6 +62,7 @@ Optional stage **14** `verifier` matches `.cursor/skills/delivery-pipeline/SKILL
 - Skipping behavior spec for behavior-changing work.
 - Frontend Done without E2E functional + UIUX.
 - Deploy on red gates; secrets in images; parallel compose stacks.
+- **Default parallel CE writers** / multitask fan-out while another leaf is In Progress (unless user `force-parallel`).
 - Reordering/skipping end gates; leaving worktrees after merge.
 - Parent implementing delivery slices inline when a specialist exists.
 - Claiming Done from a feature worktree without stage 11 merge + MAIN doc-sync.

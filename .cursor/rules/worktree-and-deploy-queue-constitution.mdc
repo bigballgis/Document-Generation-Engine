@@ -72,11 +72,19 @@ Skill: `.cursor/skills/docker-deploy-queue/SKILL.md`.
 Stage **11** = `integration-merger` (merge + remove worktree) **before** doc-sync on MAIN.
 See `delivery-orchestration-constitution.mdc`.
 
+## Single-lane serial (default, 2026-07-16)
+
+At most **one** delivery leaf may run heavy work (`mvn verify` / full frontend gates /
+`docker-deploy-queue` / E2E) at a time. Extra feature worktrees may exist **parked**
+(BDD/docs only or idle) but must not run a second writer pipeline unless the user
+explicitly says `force-parallel` / `强制并行`.
+
 ## Forbidden
 
 - Implementing delivery slices on MAIN (except read-only / single-line exceptions above).
 - Two sessions writing the same worktree for different slices.
 - Running `mvn verify` or full frontend gates on MAIN while a feature worktree is active.
 - Parallel `docker-deploy` from two worktrees.
+- Default multitask fan-out of multiple CE leaves (retired; serial queue is default).
 - Claiming Done from a feature worktree without merge + MAIN doc-sync.
 - Leaving feature worktrees after successful merge without cleanup.
