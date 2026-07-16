@@ -57,9 +57,20 @@ Tiers describe **pipeline responsibility** only. Model slug is identical for all
 
 1. **Pin in frontmatter** — every agent file has `model: cursor-grok-4.5-high-fast`.
 2. **Parent `Task` calls** — do **not** pass `model` unless the user explicitly requests a different slug in the same session.
-3. **Built-in Cursor types** (`explore`, `bugbot`) — no project frontmatter; Cursor-owned.
+3. **Built-in Cursor Task types** — no project frontmatter; Cursor-owned. Observed in
+   live sessions (set may grow/shrink by product version):
+   - **Routing-relevant:** `explore`, `bugbot`
+   - **Also commonly present:** `generalPurpose`, `shell`, `cursor-guide`,
+     `ci-investigator`, `security-review`, `best-of-n-runner`, plus plugin agents such as
+     `usage-query-agent` / `case-feedback-agent` when those plugins are enabled
+   - **Not** in this built-in list: the **18** project specialists under `.cursor/agents/`
+     — those appear on `Task` only when Cursor injects them for the session
 4. **Region / availability failure** — if `cursor-grok-4.5-high-fast` is rejected, surface the error to the user; do **not** silently fall back to Composer/GLM without confirmation.
 5. **No `inherit`** — ever.
+6. **Enum vs files** — file existence under `.cursor/agents/` does **not** guarantee the
+   name is in the live Task enum. Runtime policy:
+   `.cursor/skills/specialist-runtime-fallback/SKILL.md` (retry → BLOCKED; GP only with
+   `allow-gp-fallback` / `允许降级`).
 
 ## Fallback (only with user confirmation)
 
@@ -67,6 +78,12 @@ Preferred order if Grok is unavailable in-region:
 
 1. User-approved alternate first-party slug
 2. Stop and report — do not invent a fleet-wide Composer rollback
+
+Preferred order if project specialist Task type is unavailable:
+
+1. Retry named type (≤3) / recover session (reload, new chat, correct workspace root)
+2. User opt-in `允许降级` / `allow-gp-fallback` if they accept GP under contract
+3. Otherwise remain **BLOCKED** — do not invent Done
 
 ## Supervisor mode
 

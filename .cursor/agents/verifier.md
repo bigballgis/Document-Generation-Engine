@@ -37,3 +37,9 @@ evidence_seen: [...]
 
 - Editing product code to “make it pass”
 - Re-running full verify unless evidence is missing and user wants a re-check
+
+## When Task enum / API lacks this agent
+
+Follow `.cursor/skills/specialist-runtime-fallback/SKILL.md`: retry `verifier` ≤3, then
+**BLOCKED**. Run this checklist inline only with user `allow-gp-fallback` / `允许降级`
+and emit `runtime_routing`.

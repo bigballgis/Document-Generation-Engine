@@ -67,7 +67,14 @@ next: move_agent_to_root → behavior-spec-author | backend-engineer | …
 - Leaving worktrees after merge without handoff to `integration-merger`.
 - Running `mvn verify` / `pnpm build` on MAIN for delivery work.
 
-## When Task enum lacks this agent
+## When Task enum / API lacks this agent
 
-Parent or `delivery-orchestrator` must run this checklist inline and emit the same
-placement record — **never skip stage 0 for delivery**.
+Follow `.cursor/skills/specialist-runtime-fallback/SKILL.md`:
+
+1. Prefer `Task(subagent_type=worktree-router)` when present; on flake **retry** ≤3.
+2. If still missing/failing → **`BLOCKED`** + recovery hints (do **not** auto GP).
+3. Run this checklist **inline** only when the user said `allow-gp-fallback` /
+   `允许降级` (or an equivalent same-session opt-in). Emit the same placement record and
+   `runtime_routing` with `mode: INLINE_CHECKLIST`.
+4. **Never skip stage 0** for delivery — if BLOCKED, stop writes until native Task works
+   or the user opts in to inline.

@@ -1,5 +1,12 @@
 # Execution Sync Ledger
 
+**Completion note (2026-07-16, ORCH-AGENT-ENUM-DOCS):** Docs accuracy align → **Done**.
+Fixed duplicate `## Docker` in `AGENTS.md`; documented live Task built-in catalog +
+project-vs-runtime enum gap in `MODEL-STRATEGY.md` / `AGENTS.md`; aligned
+`worktree-router` / `integration-merger` / `verifier` / `/verify-done` with
+**retry→BLOCKED** (inline only on `允许降级`). Formal phase **None**. Do **not**
+activate #81 CE-O01.
+
 **Completion note (2026-07-16, ORCH-SPECIALIST-RETRY-ONLY):** Policy change —
 `orch-specialist-retry-only` → **Done**. **Retry first (≤3) → BLOCKED**; no auto
 `generalPurpose`. Opt-in only: `允许降级` / `allow-gp-fallback`. BDD updated
