@@ -666,6 +666,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 如果业务需要立即停止使用包含问题条款或内容模块的已发布模板，必须通过停用对应模板或发布版本来阻断生成和 API 调用。
 - 条款或内容模块停用或废弃前的影响分析必须覆盖引用模板、引用发布版本、default 路由影响、近期调用摘要、是否需要停用模板或发布版本，以及可替代模块版本建议。
 - **CE-K08：** 法务元数据仅草稿版本可写；`effectiveFrom`/`effectiveTo` 皆非空时须 `effectiveFrom <= effectiveTo`；空 `effectiveTo` 表示无到期。内容模块目录 list 可按法务字段筛选（catalog filter version = 优先最新 `APPROVED`+`ACTIVE`，否则最新版本）。模板发布时，若任一引用版本满足 `effectiveTo != null && utcNow.isAfter(effectiveTo)`，发布门禁 `CONTENT_MODULE_EFFECTIVE_EXPIRED` 硬阻断；未来 `effectiveFrom` 不阻断；已锁定已发布版本运行期不因事后过期失败。规格：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)。
+- **CE-U20（目录摘要状态，2026-07-17）：** 管理目录 `ContentModuleSummaryView` 投影模块 **head 版本** 的 `reviewState`（必填）与 `lifecycleState`（可空）。Head 定义：该模块全部版本中 `updatedAt` 最大者；并列时取 `semanticVersion` 字典序更大者。目录状态列/徽章语义与详情版本表一致：若 head `lifecycleState` 为 `DEPRECATED` 或 `STOPPED` 则展示/筛选命中这些值，否则按 `reviewState`（`APPROVED` 且 lifecycle 为 `ACTIVE` 或 null/缺省）。`GET /content-modules` 可选 query `status`（`DRAFT` \| `SUBMITTED` \| `APPROVED` \| `STOPPED` \| `DEPRECATED`）对该展示状态做服务端精确过滤，与 search / groupCode / sort / CE-K08 legal filters **AND**；非法值 → 空页。此 head 选择规则与 CE-K08 catalog filter version **正交**。不改变审批/生命周期状态机。规格：[ce-u20-clause-create-structured.md](../behavior/ce-u20-clause-create-structured.md)。
 
 #### 2.9.2.1 产品状态 ↔ 实现映射（P14-T01）
 

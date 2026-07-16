@@ -557,7 +557,7 @@ export interface paths {
         };
         /**
          * List content modules (server-side PageView)
-         * @description Lists non-deleted content modules as a standard `PageView` (LR-C5 / BDD-LRP-C5-CATALOG-001). When `groupCode` is omitted, returns modules accessible to the caller across authorized groups (including shared modules). When `groupCode` is provided, exact-match filter intersected with session authorization (unauthorized group → empty page). Optional `search` is case-insensitive contains over `name` ∪ `moduleCode` ∪ `groupCode`. Default sort is group-first (`groupCodeAsc`: `groupCode ASC`, then `updatedAt DESC`). Pagination unit is **rows** (not group count). Requires catalog browse access per permission matrix §5.1. Breaking change vs pre-LR-C5 bare array: management UI upgrades in the same slice; no external runtime callers.
+         * @description Lists non-deleted content modules as a standard `PageView` (LR-C5 / BDD-LRP-C5-CATALOG-001; CE-U20 / BDD-CE-U20-CCS). When `groupCode` is omitted, returns modules accessible to the caller across authorized groups (including shared modules). When `groupCode` is provided, exact-match filter intersected with session authorization (unauthorized group → empty page). Optional `search` is case-insensitive contains over `name` ∪ `moduleCode` ∪ `groupCode`. Optional `status` filters by the module **head version** display status (CE-U20; AND with search / groupCode / sort / CE-K08 legal filters). Default sort is group-first (`groupCodeAsc`: `groupCode ASC`, then `updatedAt DESC`). Pagination unit is **rows** (not group count). Each summary row projects head `reviewState` (required) and `lifecycleState` (optional). Requires catalog browse access per permission matrix §5.1. Breaking change vs pre-LR-C5 bare array: management UI upgrades in the same slice; no external runtime callers.
          */
         get: operations["listContentModules"];
         put?: never;
@@ -3239,6 +3239,16 @@ export interface components {
             name: string;
             description?: string;
             sharedGroupCodes?: string[];
+            /**
+             * @description CE-U20 — projected from the module **head version** (max `updatedAt`; ties → greater `semanticVersion`). Required on successful list rows. Normal create path guarantees at least one version.
+             * @enum {string}
+             */
+            reviewState: "DRAFT" | "SUBMITTED" | "APPROVED";
+            /**
+             * @description CE-U20 — projected from the same head version. Optional/null when the head has no lifecycle axis yet (e.g. DRAFT/SUBMITTED). Badge UI prefers DEPRECATED/STOPPED over reviewState when present.
+             * @enum {string}
+             */
+            lifecycleState?: "ACTIVE" | "STOPPED" | "DEPRECATED";
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -5386,6 +5396,8 @@ export interface operations {
                 groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
                 /** @description Whitelist sort key. Default `groupCodeAsc`. Unknown values fall back to `groupCodeAsc` (no 400). Content-modules also support `moduleCodeAsc`. */
                 sort?: "groupCodeAsc" | "updatedAtDesc" | "updatedAtAsc" | "nameAsc" | "moduleCodeAsc";
+                /** @description CE-U20 — optional exact match on the catalog **head version** display status (badge-aligned). Head version = max `updatedAt` among the module's versions; ties broken by lexicographically greater `semanticVersion`. Match rules: if head `lifecycleState` is `DEPRECATED` or `STOPPED`, only those values match; otherwise match `reviewState` (`APPROVED` matches when lifecycle is `ACTIVE` or null/absent). Unknown/illegal values → successful empty page (not 400). AND with `search` / `groupCode` / sort / CE-K08 legal filters. Distinct from CE-K08 catalog-filter-version selection (latest APPROVED+ACTIVE, else latest). */
+                status?: "DRAFT" | "SUBMITTED" | "APPROVED" | "STOPPED" | "DEPRECATED";
                 /** @description CE-K08 — case-insensitive exact match on the catalog filter version jurisdiction (trim). Catalog filter version = latest APPROVED+ACTIVE, else latest version. */
                 jurisdiction?: string;
                 /** @description CE-K08 — case-insensitive exact match on the catalog filter version legalReviewRef (trim). */

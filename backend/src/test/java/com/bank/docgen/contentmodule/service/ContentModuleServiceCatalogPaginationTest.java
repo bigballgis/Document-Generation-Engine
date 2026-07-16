@@ -17,6 +17,7 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepositoryCustom.ContentModuleCatalogFilter;
 import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordRepository;
+import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,8 +30,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ContentModuleServiceCatalogPaginationTest {
 
     private static final UUID MODULE_ID = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
@@ -83,6 +87,16 @@ class ContentModuleServiceCatalogPaginationTest {
                 Instant.now().plusSeconds(3600)
         );
         when(groupAccessService.canBrowseContentModuleCatalog(author)).thenReturn(true);
+        when(versionRepository.findByModuleIdIn(any())).thenReturn(List.of(
+                new ContentModuleVersionEntity(
+                        UUID.fromString("11111111-1111-1111-1111-111111111111"),
+                        MODULE_ID,
+                        "1.0.0",
+                        "{}",
+                        "Initial",
+                        "10000003"
+                )
+        ));
     }
 
     @Test
@@ -97,6 +111,7 @@ class ContentModuleServiceCatalogPaginationTest {
 
         assertThat(page.content()).hasSize(1);
         assertThat(page.content().getFirst().moduleCode()).isEqualTo("MOD-LOAN-DISCLOSURE");
+        assertThat(page.content().getFirst().reviewState()).isEqualTo("DRAFT");
         assertThat(page.totalElements()).isEqualTo(1);
 
         ArgumentCaptor<ContentModuleCatalogFilter> filterCaptor =

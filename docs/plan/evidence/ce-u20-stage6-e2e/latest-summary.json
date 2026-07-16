@@ -1,0 +1,20 @@
+{
+  "slice": "ce-u20-clause-create-structured",
+  "taskId": "94",
+  "stage": 6,
+  "agent": "e2e-test-engineer",
+  "date": "2026-07-17",
+  "config": "frontend/playwright.docker.config.ts",
+  "frontendBaseUrl": "http://127.0.0.1:4173",
+  "backendBaseUrl": "http://127.0.0.1:8080",
+  "spec": "e2e/CE-U20-clause-create-structured.spec.ts",
+  "bddPrefix": "BDD-CE-U20-CCS",
+  "scenarios": ["CCS-001", "CCS-002", "CCS-003", "CCS-004", "CCS-005", "CCS-006", "CCS-007", "CCS-008", "CCS-009", "CCS-010"],
+  "result": "PASS",
+  "passed": 7,
+  "failed": 0,
+  "durationSeconds": 22.6,
+  "command": "$env:E2E_TARGET='docker'; $env:FRONTEND_PORT='4173'; pnpm exec playwright test e2e/CE-U20-clause-create-structured.spec.ts --config playwright.docker.config.ts --workers=1",
+  "manifest": "frontend/e2e/evidence/CE-U20-manifest.md",
+  "next": "stage-7-e2e-uiux-reviewer"
+}

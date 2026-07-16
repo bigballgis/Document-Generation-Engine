@@ -70,6 +70,7 @@ public class ContentModuleController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String groupCode,
             @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) String jurisdiction,
             @RequestParam(required = false) String legalReviewRef,
             @RequestParam(required = false) Instant effectiveFrom,
@@ -79,7 +80,7 @@ public class ContentModuleController {
     ) {
         return envelope(request, contentModuleService.list(
                 session, page, size, search, groupCode, sort,
-                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status
         ));
     }
 

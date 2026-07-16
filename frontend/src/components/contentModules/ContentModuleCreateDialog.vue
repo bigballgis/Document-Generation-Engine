@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { type FormInstance, type FormRules } from 'element-plus'
+import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
@@ -9,6 +10,11 @@ import { useContentModulesStore } from '@/stores/contentModules'
 import {
   excludeOwnerFromSharedGroupCodes,
 } from '@/utils/contentModuleSharedGroups'
+import {
+  DEFAULT_STRUCTURED_CONTENT_JSON,
+  parseStructuredContent,
+  serializeStructuredContent,
+} from '@/utils/structuredContentNodes'
 
 const props = defineProps<{
   modelValue: boolean
@@ -38,7 +44,7 @@ const form = reactive({
   name: '',
   description: '',
   semanticVersion: '1.0.0',
-  contentStructureJson: '{\n  "blocks": []\n}',
+  contentStructureJson: DEFAULT_STRUCTURED_CONTENT_JSON,
   changeDescription: '',
   sharedGroupCodes: [] as string[],
 })
@@ -81,13 +87,6 @@ const formRules = computed<FormRules>(() => ({
       trigger: 'blur',
     },
   ],
-  contentStructureJson: [
-    {
-      required: true,
-      message: t('contentModules.create.validation.contentStructureRequired'),
-      trigger: 'blur',
-    },
-  ],
 }))
 
 const apiErrorMessage = computed(() => {
@@ -104,6 +103,7 @@ watch(visible, async (open) => {
   }
   await groupSelectRef.value?.prepare()
   form.groupCode = resolveDefaultGroupCode(form.groupCode)
+  form.contentStructureJson = DEFAULT_STRUCTURED_CONTENT_JSON
 })
 
 watch(
@@ -122,7 +122,7 @@ function resetForm() {
   form.name = ''
   form.description = ''
   form.semanticVersion = '1.0.0'
-  form.contentStructureJson = '{\n  "blocks": []\n}'
+  form.contentStructureJson = DEFAULT_STRUCTURED_CONTENT_JSON
   form.changeDescription = ''
   form.sharedGroupCodes = []
 }
@@ -132,11 +132,9 @@ async function handleSubmit() {
   if (!valid) {
     return
   }
-  try {
-    JSON.parse(form.contentStructureJson)
-  } catch {
-    return
-  }
+  const contentStructureJson = serializeStructuredContent(
+    parseStructuredContent(form.contentStructureJson),
+  )
   try {
     await ensureGroupCatalog()
     const sharedGroupCodes = canConfigureSharedGroups.value
@@ -148,7 +146,7 @@ async function handleSubmit() {
       name: form.name.trim(),
       description: form.description.trim() || undefined,
       semanticVersion: form.semanticVersion.trim(),
-      contentStructureJson: form.contentStructureJson,
+      contentStructureJson,
       changeDescription: form.changeDescription.trim() || undefined,
       sharedGroupCodes,
     })
@@ -172,7 +170,7 @@ defineExpose({
   <el-dialog
     v-model="visible"
     :title="t('contentModules.create.title')"
-    width="640px"
+    width="900px"
     destroy-on-close
     @closed="resetForm"
   >
@@ -226,8 +224,8 @@ defineExpose({
       <el-form-item :label="t('contentModules.create.semanticVersion')" prop="semanticVersion">
         <el-input v-model="form.semanticVersion" />
       </el-form-item>
-      <el-form-item :label="t('contentModules.create.contentStructureJson')" prop="contentStructureJson">
-        <el-input v-model="form.contentStructureJson" type="textarea" :rows="6" />
+      <el-form-item :label="t('contentModules.create.contentStructure')">
+        <ControlledStructuredContentEditor v-model="form.contentStructureJson" />
       </el-form-item>
       <el-form-item :label="t('contentModules.create.changeDescription')" prop="changeDescription">
         <el-input v-model="form.changeDescription" type="textarea" :rows="2" />

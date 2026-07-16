@@ -288,6 +288,8 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 
 **CE-K08（BDD `ready`，2026-07-15）：** `ContentModuleVersionView` / create-update 请求增加可选法务字段 `jurisdiction`、`effectiveFrom`、`effectiveTo`、`legalReviewRef`；`GET /content-modules` 增加对应筛选 query；发布门禁新增硬项 `PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED`（与 `CONTENT_MODULE_REFERENCES` 正交）。行为 SoT：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)。OpenAPI 字段以同片实现同步为准。
 
+**CE-U20（BDD `ready`，2026-07-17；Task Master #94）：** `ContentModuleSummaryView` 增加 head 版本投影字段 `reviewState`（必填）与 `lifecycleState`（可选）；`GET /api/management/v1/content-modules` 增加可选 query `status`（`DRAFT` \| `SUBMITTED` \| `APPROVED` \| `STOPPED` \| `DEPRECATED`），按 **head 版本** 徽章语义服务端精确过滤，与 `search` / `groupCode` / sort / CE-K08 legal filters **AND**；非法 `status` → 成功空页（不 400）。Head 选择：`updatedAt` 最大，并列取 `semanticVersion` 字典序更大者。**不**改变 create 请求体（仍为 `CreateContentModuleRequest.contentStructureJson`）、**不**改变审批/生命周期状态机。行为 SoT：[ce-u20-clause-create-structured.md](../behavior/ce-u20-clause-create-structured.md)。正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。
+
 | 路由语义 | 用途 | 已确认规则 | 已确认路径 |
 | --- | --- | --- | --- |
 | 内容模块审批流转 | 对条款或内容模块版本执行提交、审批通过或审批不通过。 | 使用独立版本审批生命周期；审批前置条件和角色边界遵循权限矩阵与领域模型。 | `/api/{environment}/v1/admin/content-modules/{moduleId}/review/transition` |
@@ -298,6 +300,8 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 ### 内容模块治理响应字段语义确认
 
 - `ContentModuleVersionView.contentStructureJson`（[`ContentModuleVersionView`](openapi-v1.yaml)）：可选字段；仅当调用方具备结构查看权限（[权限矩阵 §5.1](../security/permission-matrix.md#51-条款或内容模块权限矩阵) — `GLOBAL_ADMIN`、`GROUP_ADMIN`、`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_APPROVER`）时在 list/detail 响应中返回；否则省略或为 `null`（fail-closed）。`TEMPLATE_TESTER` 无目录浏览权限（list/get 返回 `403`），不接收该字段。
+- `ContentModuleSummaryView.reviewState` / `lifecycleState`（[`ContentModuleSummaryView`](openapi-v1.yaml)；CE-U20）：目录 list 行投影自模块 **head 版本**（见上 CE-U20 注与 domain §2.9.2）。`reviewState` 必填；`lifecycleState` 可空。与详情版本表徽章语义一致（lifecycle `DEPRECATED`/`STOPPED` 优先于 review）。模块无版本为异常 fail-closed（正常 create 路径至少一版本）。
+- `GET /content-modules?status=`（CE-U20）：可选；枚举 `DRAFT` \| `SUBMITTED` \| `APPROVED` \| `STOPPED` \| `DEPRECATED`。匹配 head 展示状态；未知值 → 空页。与 CE-K08 legal query 的 **catalog filter version**（最新 `APPROVED`+`ACTIVE`，否则最新版本）选择规则正交，不得混用。
 - `ContentModuleLifecycleImpactSummary.templateStopRequired` / `releaseStopRequired`（[`ContentModuleLifecycleImpactSummary`](openapi-v1.yaml)）：当存在引用且 blocking 条件成立时（近 7 日 runtime 生成调用 > 0 或 default 路由受影响）分别提示管理员需停用引用模板或发布版本以立即阻断生成；与权限矩阵 §5.1 停用/废弃影响分析要求一致。示例见 [`content-module-lifecycle-operation-request.json`](examples/content-module-lifecycle-operation-request.json)。
 
 ### 内容模块治理校验与错误语义确认
@@ -466,7 +470,7 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 共用 query | `search`（可选，contains，空忽略）；`groupCode`（可选，精确，与会话授权求交） |
 | Templates 专有 | `lifecycleStatus`；`approvalSubState`（审批 chip：`APPROVAL` + `PENDING_DECISION`）；`sort` 另含 `externalIdAsc` |
 | Masters 专有 | `status`（`MasterDocumentReviewStatus`）；`sort` 接受 `groupAsc` 作为 `groupCodeAsc` 同义 |
-| Content-modules 专有 | 既有可选 `groupCode` 与 page/size/search/sort 共存；`sort` 另含 `moduleCodeAsc`；v1 **不**强制状态 filter |
+| Content-modules 专有 | 既有可选 `groupCode` 与 page/size/search/sort 共存；`sort` 另含 `moduleCodeAsc`；**CE-U20** 落地可选 `status`（head 版本徽章语义；见「条款或内容模块治理契约」CE-U20 注）。LR-C5 C5-C6 曾写「v1 不强制」——本表以 CE-U20 BDD `ready` 为最新确认 |
 | 破坏性契约 | Masters / Content-modules 自裸数组升级为 `PageView`（管理端一体升级） |
 | 溯源 | OPT-F4 residual（masters/modules + 端到端 filter）；COR-F09 语义保留为默认 group-first 行排序 |
 

@@ -1,0 +1,55 @@
+{
+  "frontend": {
+    "duration_sec": 549.2,
+    "overall": "PASS",
+    "results": [
+      {
+        "result": "PASS",
+        "exit_code": 0,
+        "command": "lint"
+      },
+      {
+        "result": "PASS",
+        "exit_code": 0,
+        "command": "type-check"
+      },
+      {
+        "detail": "242 files / 1481 tests",
+        "result": "PASS",
+        "exit_code": 0,
+        "command": "test"
+      },
+      {
+        "detail": "built in 24.30s",
+        "result": "PASS",
+        "exit_code": 0,
+        "command": "build"
+      }
+    ],
+    "commands": [
+      "pnpm -C frontend lint",
+      "pnpm -C frontend type-check",
+      "pnpm -C frontend test",
+      "pnpm -C frontend build"
+    ]
+  },
+  "overall": "GREEN",
+  "dirty_uncommitted": true,
+  "slice_id": "ce-u20-clause-create-structured",
+  "branch": "feat/ce-u20-clause-create-structured",
+  "tip_base": "da7581e8",
+  "deploy": "NOT_RUN",
+  "stage": "stage4-gate-verify-only",
+  "backend": {
+    "note": "BUILD SUCCESS",
+    "duration_sec": 494.6,
+    "result": "PASS",
+    "exit_code": 0,
+    "command": "mvn -B -ntp -f backend/pom.xml verify"
+  },
+  "captured_at": "2026-07-17T07:38:23.0966737+08:00",
+  "task_ids": [
+    94
+  ],
+  "worktree": "D:\\working\\DGE-ce-u20-clause-create-structured"
+}

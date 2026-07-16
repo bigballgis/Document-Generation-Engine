@@ -7,6 +7,7 @@ import ContentModuleListView from '@/views/contentModules/ContentModuleListView.
 import en from '@/i18n/locales/en'
 import * as contentModulesApi from '@/api/contentModules'
 import { useSessionStore } from '@/stores/session'
+import type { ContentModuleSummary } from '@/types/contentModule'
 
 vi.mock('@/api/contentModules', () => ({
   listContentModules: vi.fn(),
@@ -34,6 +35,21 @@ function pageView<T>(content: T[], totalElements = content.length) {
     size: 20,
     totalElements,
     totalPages: totalElements === 0 ? 0 : Math.ceil(totalElements / 20),
+  }
+}
+
+function summary(
+  overrides: Partial<ContentModuleSummary> & Pick<ContentModuleSummary, 'moduleId' | 'name'>,
+): ContentModuleSummary {
+  return {
+    moduleId: overrides.moduleId,
+    moduleCode: overrides.moduleCode ?? overrides.moduleId,
+    groupCode: overrides.groupCode ?? 'RETAIL',
+    name: overrides.name,
+    reviewState: overrides.reviewState ?? 'DRAFT',
+    lifecycleState: overrides.lifecycleState,
+    createdAt: overrides.createdAt ?? '2026-06-26T10:00:00Z',
+    updatedAt: overrides.updatedAt ?? '2026-06-26T10:00:00Z',
   }
 }
 
@@ -69,14 +85,11 @@ describe('ContentModuleListView', () => {
   it('renders content modules across authorized groups', async () => {
     vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(
       pageView([
-        {
+        summary({
           moduleId: 'MOD-LOAN-DISCLOSURE',
-          moduleCode: 'MOD-LOAN-DISCLOSURE',
-          groupCode: 'RETAIL',
           name: 'Loan disclosure',
-          createdAt: '2026-06-26T10:00:00Z',
-          updatedAt: '2026-06-26T10:00:00Z',
-        },
+          reviewState: 'DRAFT',
+        }),
       ]),
     )
 
@@ -100,6 +113,73 @@ describe('ContentModuleListView', () => {
     expect(wrapper.text()).toContain('RETAIL')
   })
 
+  it('CCS-005: Status column renders ContentModuleStatusBadge labels', async () => {
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(
+      pageView([
+        summary({
+          moduleId: 'MOD-DRAFT',
+          name: 'Draft clause',
+          reviewState: 'DRAFT',
+        }),
+        summary({
+          moduleId: 'MOD-APPROVED',
+          name: 'Approved clause',
+          reviewState: 'APPROVED',
+          lifecycleState: 'ACTIVE',
+        }),
+      ]),
+    )
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleListView, {
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Status')
+    expect(wrapper.text()).toContain('Draft')
+    expect(wrapper.text()).toContain('Approved')
+  })
+
+  it('CCS-006: status filter requests status=DRAFT and resets to page 0', async () => {
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(
+      pageView(
+        [
+          summary({
+            moduleId: 'MOD-LOAN-DISCLOSURE',
+            name: 'Loan disclosure',
+            reviewState: 'DRAFT',
+          }),
+        ],
+        25,
+      ),
+    )
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleListView, {
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    await flushPromises()
+
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(pageView([]))
+
+    const toolbar = wrapper.findComponent({ name: 'CatalogFilterToolbar' })
+    const filterValues = toolbar.props('filterValues') as Record<string, string>
+    filterValues.status = 'DRAFT'
+    await flushPromises()
+    await flushPromises()
+
+    expect(contentModulesApi.listContentModules).toHaveBeenCalledWith(
+      0,
+      20,
+      expect.objectContaining({ status: 'DRAFT', sort: 'groupCodeAsc' }),
+    )
+  })
+
   it('shows load error with retry when list fails', async () => {
     vi.mocked(contentModulesApi.listContentModules).mockRejectedValue(new Error('network'))
 
@@ -121,14 +201,11 @@ describe('ContentModuleListView', () => {
     vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(
       pageView(
         [
-          {
+          summary({
             moduleId: 'MOD-LOAN-DISCLOSURE',
-            moduleCode: 'MOD-LOAN-DISCLOSURE',
-            groupCode: 'RETAIL',
             name: 'Loan disclosure',
-            createdAt: '2026-06-26T10:00:00Z',
-            updatedAt: '2026-06-26T10:00:00Z',
-          },
+            reviewState: 'DRAFT',
+          }),
         ],
         25,
       ),
@@ -172,7 +249,7 @@ describe('ContentModuleListView', () => {
     expect(emptyActions.text()).toContain('New content module')
   })
 
-  it('LR-C9-B: empty catalog hides create CTA without author capability', async () => {
+  it('CCS-009 / LR-C9-B: empty catalog hides create CTA without author capability', async () => {
     vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(pageView([]))
     const sessionStore = useSessionStore()
     sessionStore.$patch({
@@ -205,14 +282,11 @@ describe('ContentModuleListView', () => {
       .mockRejectedValueOnce(new Error('network'))
       .mockResolvedValueOnce(
         pageView([
-          {
+          summary({
             moduleId: 'MOD-LOAN-DISCLOSURE',
-            moduleCode: 'MOD-LOAN-DISCLOSURE',
-            groupCode: 'RETAIL',
             name: 'Loan disclosure',
-            createdAt: '2026-06-26T10:00:00Z',
-            updatedAt: '2026-06-26T10:00:00Z',
-          },
+            reviewState: 'DRAFT',
+          }),
         ]),
       )
 

@@ -236,6 +236,7 @@ export const apiErrorZhCn = {
     groupCodeRequired: "列出标准条款时必须提供分组代码。",
     moduleCodeExists: "已存在使用该模块代码的标准条款。",
     versionExists: "已存在使用该语义版本的标准条款版本。",
+    versionRequired: "该标准条款没有可用于投影目录状态的版本。",
     draftOnlyEditable: "仅草稿版本可编辑。",
     contentStructureRequired: "内容结构为必填项。",
     moduleIdRequired: "标准条款标识为必填项。",

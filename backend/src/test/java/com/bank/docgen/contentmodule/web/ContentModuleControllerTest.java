@@ -82,7 +82,8 @@ class ContentModuleControllerTest {
                         .param("groupCode", "RETAIL")
                         .with(authentication(new ManagementAuthentication(author))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.content.length()").value(1));
+                .andExpect(jsonPath("$.result.content.length()").value(1))
+                .andExpect(jsonPath("$.result.content[0].reviewState").value("DRAFT"));
 
         mockMvc.perform(put("/api/management/v1/content-modules/" + MODULE_CODE + "/versions/1.0.0")
                         .with(authentication(new ManagementAuthentication(author)))
@@ -207,6 +208,36 @@ class ContentModuleControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.content.length()").value(1))
                 .andExpect(jsonPath("$.result.content[0].moduleCode").value(MODULE_CODE));
+    }
+
+    @Test
+    void list_unknownStatus_returnsEmptyPage_ceU20() throws Exception {
+        seedDraftModule();
+
+        mockMvc.perform(get("/api/management/v1/content-modules")
+                        .param("status", "NOT_A_REAL_STATUS")
+                        .with(authentication(new ManagementAuthentication(author))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.content.length()").value(0))
+                .andExpect(jsonPath("$.result.totalElements").value(0));
+    }
+
+    @Test
+    void list_statusDraft_filtersHeadDisplayStatus_ceU20() throws Exception {
+        seedDraftModule();
+
+        mockMvc.perform(get("/api/management/v1/content-modules")
+                        .param("status", "DRAFT")
+                        .with(authentication(new ManagementAuthentication(author))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.content.length()").value(1))
+                .andExpect(jsonPath("$.result.content[0].reviewState").value("DRAFT"));
+
+        mockMvc.perform(get("/api/management/v1/content-modules")
+                        .param("status", "APPROVED")
+                        .with(authentication(new ManagementAuthentication(author))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.content.length()").value(0));
     }
 
     @Test

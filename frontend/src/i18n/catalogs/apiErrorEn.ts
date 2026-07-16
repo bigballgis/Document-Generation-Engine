@@ -247,6 +247,7 @@ export const apiErrorEn = {
     groupCodeRequired: "A group code is required to list content modules.",
     moduleCodeExists: "A content module with this module code already exists.",
     versionExists: "A content module version with this semantic version already exists.",
+    versionRequired: "The content module has no version to project catalog status from.",
     draftOnlyEditable: "Only draft versions can be edited.",
     contentStructureRequired: "Content structure is required.",
     moduleIdRequired: "The content module identifier is required.",

@@ -117,6 +117,7 @@ class ContentModuleLegalMetadataServiceTest {
         lenient().when(groupAccessService.canViewContentModuleStructure(author)).thenReturn(true);
         lenient().when(groupAccessService.canBrowseContentModuleCatalog(tester)).thenReturn(false);
         lenient().when(reviewRecordRepository.findByModuleIdOrderByCreatedAtAsc(any())).thenReturn(List.of());
+        lenient().when(versionRepository.findByModuleIdIn(any())).thenReturn(List.of(draftVersion));
     }
 
     @Test

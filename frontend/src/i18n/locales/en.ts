@@ -2528,13 +2528,14 @@ export default {
     list: {
       title: 'Standard clauses',
       description:
-        'Browse reusable standard clauses for your authorized groups. Filter by group in the table, then open a clause to manage versions and review workflow.',
+        'Browse reusable standard clauses for your authorized groups. Filter by group or status, then open a clause to manage versions and review workflow.',
       empty: 'No standard clauses yet.',
       emptyDescription: 'Create a module to start authoring reusable clause content.',
       columns: {
         group: 'Group',
         moduleCode: 'Module code',
         name: 'Name',
+        status: 'Status',
         updatedAt: 'Last updated',
       },
     },
@@ -2636,6 +2637,7 @@ export default {
       name: 'Name',
       description: 'Description',
       semanticVersion: 'Initial version number',
+      contentStructure: 'Content structure',
       contentStructureJson: 'Content structure (JSON)',
       changeDescription: 'Change description',
       submit: 'Create module',
@@ -2646,7 +2648,7 @@ export default {
         moduleCodePattern: 'Use uppercase letters, digits, underscores, or hyphens.',
         nameRequired: 'Name is required.',
         semanticVersionRequired: 'Version number is required.',
-        contentStructureRequired: 'Content structure JSON is required.',
+        contentStructureRequired: 'Content structure is required.',
       },
     },
     version: {
