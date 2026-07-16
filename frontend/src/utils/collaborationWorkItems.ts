@@ -1,10 +1,11 @@
-import { templateLifecyclePanelPath } from '@/routing/routeKeys'
+import { templateDevVersionPath, templateLifecyclePanelPath } from '@/routing/routeKeys'
 import type { WorkflowTask, WorkflowTaskKind } from '@/composables/useWorkflowTasks'
 import type {
   CollaborationWorkItemQueue,
   CollaborationWorkItemSummary,
   CollaborationWorkItemTriggerType,
 } from '@/types/collaboration'
+import { resolveCollaborationQueueWorkspaceQuery } from '@/utils/templateJourneyWorkspaceLink'
 
 const QUEUE_KIND: Record<CollaborationWorkItemQueue, WorkflowTaskKind> = {
   TEST: 'template-test',
@@ -35,13 +36,37 @@ export type CollaborationWorkItemWithDisplay = CollaborationWorkItemSummary & {
   submitterDisplayName?: string | null
 }
 
-export function collaborationWorkItemToTask(item: CollaborationWorkItemWithDisplay): WorkflowTask {
+export function collaborationWorkItemPath(
+  item: { templateId: string; queue: CollaborationWorkItemQueue },
+  devVersionId?: string | null,
+): string {
+  const workspaceQuery = resolveCollaborationQueueWorkspaceQuery(item.queue)
+  const { workspaceTab, ...extra } = workspaceQuery
+
+  if (devVersionId) {
+    return templateDevVersionPath(item.templateId, devVersionId, undefined, {
+      workspaceTab,
+      ...extra,
+    })
+  }
+
+  return templateLifecyclePanelPath(item.templateId, {
+    queue: item.queue,
+    workspaceTab,
+    ...extra,
+  })
+}
+
+export function collaborationWorkItemToTask(
+  item: CollaborationWorkItemWithDisplay,
+  devVersionId?: string | null,
+): WorkflowTask {
   return {
     id: `collaboration-${item.workItemId}`,
     kind: QUEUE_KIND[item.queue],
     titleKey: QUEUE_TITLE_KEY[item.queue],
     descriptionKey: TRIGGER_DESCRIPTION_KEY[item.triggerType],
-    path: templateLifecyclePanelPath(item.templateId),
+    path: collaborationWorkItemPath(item, devVersionId),
     groupCode: item.groupCode,
     entityName: item.templateName,
     source: 'collaboration',

@@ -42,6 +42,15 @@ describe('routeKeys', () => {
     )
     expect(templateReleaseDetailPath('tpl-1', '1.0.0')).toBe('/templates/tpl-1/releases/1.0.0')
     expect(templateLifecyclePanelPath('tpl-1')).toBe('/templates/tpl-1?tab=lifecycle')
+    expect(
+      templateLifecyclePanelPath('tpl-1', {
+        queue: 'TEST',
+        workspaceTab: 'testing',
+        testingTab: 'previewRuns',
+      }),
+    ).toBe(
+      '/templates/tpl-1?tab=lifecycle&queue=TEST&workspaceTab=testing&testingTab=previewRuns',
+    )
   })
 
   it('falls back to forbidden for unknown route keys', () => {

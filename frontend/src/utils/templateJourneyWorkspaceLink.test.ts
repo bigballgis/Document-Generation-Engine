@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { resolveTemplateJourneyWorkspaceQuery } from '@/utils/templateJourneyWorkspaceLink'
+import {
+  resolveCollaborationQueueWorkspaceQuery,
+  resolveLifecycleHubDeepLinkTarget,
+  resolveTemplateJourneyWorkspaceQuery,
+} from '@/utils/templateJourneyWorkspaceLink'
 
 describe('templateJourneyWorkspaceLink', () => {
   it('maps author journey steps to dev workspace query', () => {
@@ -39,5 +43,54 @@ describe('templateJourneyWorkspaceLink', () => {
       approvalTab: 'publishReadiness',
     })
     expect(resolveTemplateJourneyWorkspaceQuery('TEAM_LEAD', 'reviewLetterhead')).toBeNull()
+  })
+
+  it('BDD-CE-U14: maps collaboration queues to journey decision surfaces', () => {
+    expect(resolveCollaborationQueueWorkspaceQuery('TEST')).toEqual({
+      workspaceTab: 'testing',
+      testingTab: 'previewRuns',
+    })
+    expect(resolveCollaborationQueueWorkspaceQuery('APPROVAL')).toEqual({
+      workspaceTab: 'approval',
+      approvalTab: 'submitApproval',
+    })
+    expect(resolveCollaborationQueueWorkspaceQuery('PENDING_RELEASE')).toEqual({
+      workspaceTab: 'approval',
+      approvalTab: 'publishReadiness',
+    })
+    expect(resolveCollaborationQueueWorkspaceQuery('REMEDIATION')).toEqual({
+      workspaceTab: 'approval',
+    })
+    expect(resolveCollaborationQueueWorkspaceQuery('ESCALATION')).toEqual({
+      workspaceTab: 'approval',
+    })
+  })
+
+  it('BDD-CE-U14-D3: hub lifecycle redirect prefers workspaceTab / queue over approval default', () => {
+    expect(
+      resolveLifecycleHubDeepLinkTarget({
+        workspaceTab: 'testing',
+        testingTab: 'previewRuns',
+      }),
+    ).toEqual({
+      workspaceTab: 'testing',
+      extraQuery: { testingTab: 'previewRuns' },
+    })
+    expect(resolveLifecycleHubDeepLinkTarget({ queue: 'TEST' })).toEqual({
+      workspaceTab: 'testing',
+      extraQuery: { testingTab: 'previewRuns' },
+    })
+    expect(resolveLifecycleHubDeepLinkTarget({ queue: 'APPROVAL' })).toEqual({
+      workspaceTab: 'approval',
+      extraQuery: { approvalTab: 'submitApproval' },
+    })
+    expect(resolveLifecycleHubDeepLinkTarget({ queue: 'PENDING_RELEASE' })).toEqual({
+      workspaceTab: 'approval',
+      extraQuery: { approvalTab: 'publishReadiness' },
+    })
+    expect(resolveLifecycleHubDeepLinkTarget({})).toEqual({
+      workspaceTab: 'approval',
+      extraQuery: {},
+    })
   })
 })

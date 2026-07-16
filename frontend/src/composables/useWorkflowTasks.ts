@@ -6,6 +6,7 @@ import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useContentModulesStore } from '@/stores/contentModules'
 import { useMastersStore } from '@/stores/masters'
+import { useTemplatesStore } from '@/stores/templates'
 import { collaborationWorkItemToTask } from '@/utils/collaborationWorkItems'
 import { isMasterReworkState } from '@/utils/masterDesignerJourney'
 import type { MasterDocumentSummary, MasterReviewRecord } from '@/types/master'
@@ -37,6 +38,7 @@ export {
 
 export function useWorkflowTasks() {
   const mastersStore = useMastersStore()
+  const templatesStore = useTemplatesStore()
   const collaborationStore = useCollaborationStore()
   const authorWorkflowStore = useAuthorWorkflowStore()
   const contentModulesStore = useContentModulesStore()
@@ -91,7 +93,16 @@ export function useWorkflowTasks() {
 
     if (canViewCollaborationWorkItems(context.value)) {
       for (const workItem of collaborationStore.workItems) {
-        items.push(collaborationWorkItemToTask(workItem))
+        const selectedDevVersionId =
+          templatesStore.selectedTemplate?.id === workItem.templateId
+            ? templatesStore.selectedTemplate.devVersionId
+            : undefined
+        items.push(
+          collaborationWorkItemToTask(
+            workItem,
+            templatesStore.devVersionIdByTemplateId[workItem.templateId] ?? selectedDevVersionId,
+          ),
+        )
       }
     }
 

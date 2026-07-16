@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 → Done. No sole-active CE delivery leaf. Next: #90 CE-U14 (pending/parked). Umbrella is program registry only — not a delivery leaf.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89 Done. No sole-active leaf (single-lane serial). Next parked: #90 CE-U14. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 → Done. Sole-active CE delivery leaf: #90 CE-U14 (in-progress). Next after U14 Done: #91 CE-U15. Umbrella is program registry only — not a delivery leaf.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89 Done. Sole-active leaf (single-lane serial): #90 CE-U14. Next queued: #91 CE-U15. P3 parked. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T14:00:00.000Z"
+        "updatedAt": "2026-07-16T14:28:00.000Z"
       },
       {
         "id": "54",
@@ -1248,16 +1248,16 @@
       {
         "id": "90",
         "title": "CE-U14: Dashboard template lifecycle todos",
-        "description": "PENDING. Slice ce-u14-dashboard-lifecycle-todos. Testing/approval/publish queues in Tasks tab. P2·S.",
-        "details": "Next after CE-G04 (#75 Done). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan section 4 CE-U14. Do NOT auto-start until activated.",
-        "testStrategy": "1. Lifecycle todos visible. 2. E2E+UIUX.",
+        "description": "IN PROGRESS 2026-07-16. Slice ce-u14-dashboard-lifecycle-todos. Sole-active CE delivery leaf (single-lane serial §9.2). Dashboard Tasks Tab — TEST/APPROVAL/PENDING_RELEASE queues with correct deep links (testing / approval / publishReadiness). P2·S. BDD ready (BDD-CE-U14-DLT-001…008).",
+        "details": "Activated after CE-G04 (#75 Done). Placement ISOLATED: D:/working/DGE-ce-u14-dashboard-lifecycle-todos · feat/ce-u14-dashboard-lifecycle-todos. Owning BDD: docs/behavior/ce-u14-dashboard-lifecycle-todos.md. frontend_ui_in_scope=true. Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U14 / §9.2. Next after Done: #91 CE-U15. Do NOT treat umbrella #53 as the delivery leaf.",
+        "testStrategy": "1. Lifecycle todos visible (TEST/APPROVAL/PENDING_RELEASE). 2. Deep links to testing / approval / publishReadiness (not always approval). 3. E2E+UIUX BDD-CE-U14-DLT-001…008.",
         "priority": "medium",
         "dependencies": [
           "89"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T14:00:00.000Z"
+        "updatedAt": "2026-07-16T14:28:00.000Z"
       },
       {
         "id": "91",
