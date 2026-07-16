@@ -1,0 +1,2 @@
+NAME                       STATUS              CONFIG FILES
+documentgenerationengine   running(6)          D:\working\DGE-ce-u18-batch-test-history\docker-compose.yml,D:\working\DGE-ce-u18-batch-test-history\docker-compose.prod.yml,D:\working\DGE-ce-u14-dashboard-lifecycle-todos\docker-compose.yml,D:\working\DGE-ce-u14-dashboard-lifecycle-todos\docker-compose.prod.yml

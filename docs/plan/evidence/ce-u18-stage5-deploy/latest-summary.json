@@ -1,0 +1,23 @@
+{
+  "result": "DEPLOY_OK",
+  "when": "2026-07-17T05:59:16+08:00",
+  "slice": "ce-u18-batch-test-history",
+  "task_ids": [
+    "93"
+  ],
+  "worktree": "D:/working/DGE-ce-u18-batch-test-history",
+  "branch": "feat/ce-u18-batch-test-history",
+  "head": "63985fb9",
+  "compose_project": "documentgenerationengine",
+  "frontend_port": 4173,
+  "backend_port": 8080,
+  "healthz_status": 200,
+  "healthz_body": "{\"status\":\"UP\"}",
+  "frontend_status": 200,
+  "backend_image_id": "sha256:155bda584944655cffdbdb4907e8f9e311619c5b23ff1ec2c07012772632ab30",
+  "frontend_image_id": "sha256:32c9c97d65f90d528ba41cac5352c504d2c765c1c472c893fa12dc9014910771",
+  "u18_fe_marker": "/usr/share/nginx/html/assets/TemplateDevVersionEditorView-CJF56Uxu.js, /usr/share/nginx/html/assets/index-BYNSw5-U.js, /usr/share/nginx/html/assets/templateBindingGateDisplay-B4yjuwQM.js, /usr/share/nginx/html/assets/templatePanelData-Gfw78bCu.js, /usr/share/nginx/html/assets/zh-CN-BVAjwcC-.js",
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"CE-U18 Stage 5 E2E stack prep #93\"",
+  "queue_status": "DEPLOY_QUEUE: idle (no lock) | Pending ticket files: 0",
+  "next": "6 e2e-test-engineer"
+}

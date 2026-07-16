@@ -1,0 +1,9 @@
+CE-U18 Stage 10 health re-check
+timestamp=2026-07-17T06:14:49+08:00
+mode=SkipBuild_not_required (direct health recheck; stack already DEPLOY_OK from Stage 5)
+queue=idle
+healthz=http://localhost:8080/healthz
+healthz_status=200
+healthz_body={"status":"UP"}
+ui_4173_status=200
+ui_4173_bytes=1202

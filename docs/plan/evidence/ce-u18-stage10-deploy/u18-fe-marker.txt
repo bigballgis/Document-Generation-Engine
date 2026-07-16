@@ -1,0 +1,5 @@
+/usr/share/nginx/html/assets/TemplateDevVersionEditorView-CJF56Uxu.js
+/usr/share/nginx/html/assets/index-BYNSw5-U.js
+/usr/share/nginx/html/assets/templateBindingGateDisplay-B4yjuwQM.js
+/usr/share/nginx/html/assets/templatePanelData-Gfw78bCu.js
+/usr/share/nginx/html/assets/zh-CN-BVAjwcC-.js

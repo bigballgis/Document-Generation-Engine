@@ -2,6 +2,7 @@ package com.bank.docgen.rendering.api;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 public record BatchTestRunSummaryView(
         String runId,
@@ -16,6 +17,7 @@ public record BatchTestRunSummaryView(
         BigDecimal variableCoveragePct,
         BigDecimal sampleCoveragePct,
         Boolean gatePassed,
-        Instant invalidatedAt
+        Instant invalidatedAt,
+        List<BatchTestHistorySampleResultView> sampleResults
 ) {
 }

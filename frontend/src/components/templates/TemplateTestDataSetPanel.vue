@@ -14,6 +14,7 @@ const props = defineProps<{
   variables?: VariableSchema[]
   generatingPreviewId?: string | null
   refreshToken?: number
+  selectedTestDataSetId?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -26,6 +27,7 @@ const api = reactive(
   useTemplateTestDataSetPanel({
     templateId: toRef(props, 'templateId'),
     refreshToken: toRef(props, 'refreshToken'),
+    selectedTestDataSetId: toRef(props, 'selectedTestDataSetId'),
     variables: () => props.variables ?? [],
     emitSelected: (id) => emit('selected', id),
     emitLoaded: (count) => emit('loaded', count),
