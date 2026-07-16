@@ -429,7 +429,9 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 `RenderProfileService` 在模板发布时锁定受控 `renderProfile`（默认 `authoring/default-render-profile-v1.json`，版本 `rp-v1`），持久化至 `template_version.render_profile_version` 与 `render_profile_json`。
 
-**Profile 维度：** 样式映射（`styleMappingPolicy`）、编号（`numberingBehavior`）、表格分页（`tablePaginationPolicy`）、图片缩放（`imageScalingPolicy`）、PDF 转换（`pdfConversionPolicy`）、保真策略（`fidelityPolicy`）、PDF 页码加盖（`pdfPageNumberStampingEnabled`，P22，可选布尔，默认由平台 profile 资产定义）。
+**Profile 维度：** 样式映射（`styleMappingPolicy`）、编号（`numberingBehavior`）、表格分页（`tablePaginationPolicy`）、图片缩放（`imageScalingPolicy`）、PDF 转换（`pdfConversionPolicy`）、保真策略（`fidelityPolicy`）、PDF 页码加盖（`pdfPageNumberStampingEnabled`，P22，可选布尔，默认由平台 profile 资产定义）、**PDF 归档配置（`pdfArchivalProfile`，CE-O01：`NONE` \| `PDF_A_2B`，缺省 `NONE`）**。
+
+**PDF 归档（CE-O01 / ADR-0058）：** `pdfArchivalProfile=PDF_A_2B` 且运行时 `output.format=PDF` 时，LibreOffice 使用 PDF/A-2b 导出过滤器；与请求 `encryption.enabled=true` **互斥**（`400 PDF_ARCHIVAL_ENCRYPTION_MUTEX`）。调用方不可覆盖。权威行为：[ce-o01-pdfa-output.md](../behavior/ce-o01-pdfa-output.md)。
 
 **锁定规则：** `TemplateLifecycleService.publish` 调用 `lockForPublish`；已锁定版本幂等跳过。运行期 `resolveEffectiveProfile` 忽略 `CallerRenderOverride`（调用方不得覆盖发布配置）；`DocumentGenerationEngine` 与 `DocumentArtifactPipeline` 使用锁定 profile。
 
@@ -486,7 +488,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **`PdfPageNumberStamper`：** LibreOffice 转换若未求值 Word 页码字段，则按节边界在 PDF 上还原 DOCX 页码语义（含双页码）。是否启用由发布锁定 `RenderProfile` 的 `pdfPageNumberStampingEnabled` 控制（**CE-K06c / BDD-CE-K06c-004…007，2026-07-15 确认优先级**）：当解析到非 null `RenderProfile` 时，**仅**该布尔为权威；全局 `docgen.rendering.pdf-page-number-stamping-enabled` **不得** OR/绕过已锁定 profile 的 true/false。仅 `renderProfile == null` 旁路才回落全局属性。调用方不可覆盖。加盖失败须记录 fidelity warning，不得在要求页码时静默返回无页码 PDF。规格：[ce-k06-rendering-fidelity.md](../behavior/ce-k06-rendering-fidelity.md) §18。
 
-**Profile 维度扩展（P22 + CE-K06c）：** 在 §2.6.8 既有维度基础上，`RenderProfile` 可包含 `pdfPageNumberStampingEnabled`（布尔，发布锁定，调用方不可覆盖）。**CE-K06c：** 非 null profile 时该字段为 stamp 唯一权威（全局应用属性不得绕过）。
+**Profile 维度扩展（P22 + CE-K06c + CE-O01）：** 在 §2.6.8 既有维度基础上，`RenderProfile` 可包含 `pdfPageNumberStampingEnabled`（布尔，发布锁定，调用方不可覆盖）与 `pdfArchivalProfile`（`NONE` \| `PDF_A_2B`，发布锁定，调用方不可覆盖；缺省 `NONE`）。**CE-K06c：** 非 null profile 时 stamp 字段为唯一权威（全局应用属性不得绕过）。**CE-O01：** 非 null profile 时归档字段为唯一权威；`PDF_A_2B` 与 PDF 动态加密互斥。
 
 ### 2.7 模板 Template
 

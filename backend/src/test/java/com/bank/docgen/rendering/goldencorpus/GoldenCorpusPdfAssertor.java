@@ -13,6 +13,9 @@ import org.apache.pdfbox.text.PDFTextStripper;
 public final class GoldenCorpusPdfAssertor {
 
     public void assertPlainPdf(byte[] pdfBytes, JsonNode assertionRoot) {
+        if (assertionRoot.path("requirePdfA2b").asBoolean(false)) {
+            PdfAidXmpAssertor.assertPdfA2bIdentifier(pdfBytes);
+        }
         applyTextAssertions(extractText(pdfBytes, null), assertionRoot);
     }
 

@@ -56,6 +56,15 @@ final class FailedSyncInvocationErrorMapper {
                     : ApiErrorCodes.ENCRYPTION_PARAMETER_INVALID;
             return envelope(code, ApiErrorCategories.ENCRYPTION, ex.messageKey(), false, messageResolver);
         }
+        if (throwable instanceof com.bank.docgen.rendering.PdfArchivalEncryptionMutexException ex) {
+            return envelope(
+                    ApiErrorCodes.PDF_ARCHIVAL_ENCRYPTION_MUTEX,
+                    ApiErrorCategories.GENERATION,
+                    ex.messageKey(),
+                    false,
+                    messageResolver
+            );
+        }
         if (throwable instanceof EncryptionFailedException ex) {
             return envelope(
                     ApiErrorCodes.ENCRYPTION_FAILED,

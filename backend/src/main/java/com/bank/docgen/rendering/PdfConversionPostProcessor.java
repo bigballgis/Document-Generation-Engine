@@ -1,5 +1,6 @@
 package com.bank.docgen.rendering;
 
+import com.bank.docgen.sharedkernel.document.PdfArchivalProfile;
 import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,13 @@ public class PdfConversionPostProcessor {
     }
 
     public PdfPageStampResult finishPdf(byte[] pdfBytes, PdfConversionOptions options) {
+        // CE-O01 O01-C9: PDFBox finish must not rewrite PDF/A archival bytes.
+        if (options != null && options.isPdfA2b()) {
+            if (options.pageNumberStampingEnabled()) {
+                return PdfPageStampResult.skippedForArchival(pdfBytes);
+            }
+            return PdfPageStampResult.success(pdfBytes);
+        }
         if (!isStampingEnabled(options)) {
             return PdfPageStampResult.success(pdfBytes);
         }
@@ -64,11 +72,14 @@ public class PdfConversionPostProcessor {
     }
 
     public PdfConversionOptions resolveOptions(byte[] docxBytes, RenderProfile renderProfile) {
+        PdfArchivalProfile archival = renderProfile == null
+                ? PdfArchivalProfile.NONE
+                : renderProfile.pdfArchivalProfile();
         boolean enabled = isStampingEnabled(renderProfile);
         if (!enabled) {
-            return PdfConversionOptions.stampingDisabled();
+            return PdfConversionOptions.stampingDisabled(archival);
         }
         PdfPageNumberStampPlan plan = DocxPdfPageNumberStampPlanResolver.resolve(docxBytes, renderProfile);
-        return PdfConversionOptions.stampingEnabled(plan);
+        return PdfConversionOptions.stampingEnabled(plan, archival);
     }
 }

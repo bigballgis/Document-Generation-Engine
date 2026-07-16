@@ -1,0 +1,7 @@
+{
+  "deferred": false,
+  "requirePdfA2b": true,
+  "assertions": [
+    {"type": "TEXT_CONTAINS", "substring": "PDF archival sample body"}
+  ]
+}

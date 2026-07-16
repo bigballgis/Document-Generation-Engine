@@ -17,7 +17,8 @@ public final class GoldenCorpusThemes {
             "chinese-uppercase-amount",
             "specimen-watermark",
             "encrypted-pdf",
-            "long-clause-limits"
+            "long-clause-limits",
+            "pdfa-2b"
     );
 
     private GoldenCorpusThemes() {

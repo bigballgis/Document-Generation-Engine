@@ -89,7 +89,8 @@ class GoldenCorpusStructureTest {
                 "chinese-uppercase-amount",
                 "cross-page-table",
                 "qr-barcode",
-                "attachment-list"
+                "attachment-list",
+                "pdfa-2b"
         );
         assertThat(placeholders).contains("long-clause-limits");
         assertThat(placeholders).doesNotContain(

@@ -182,6 +182,20 @@ public class RuntimeExceptionAdvice {
         );
     }
 
+    @ExceptionHandler(com.bank.docgen.rendering.PdfArchivalEncryptionMutexException.class)
+    public ResponseEntity<ErrorEnvelope> handlePdfArchivalEncryptionMutex(
+            HttpServletRequest request,
+            com.bank.docgen.rendering.PdfArchivalEncryptionMutexException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.BAD_REQUEST,
+                ApiErrorCodes.PDF_ARCHIVAL_ENCRYPTION_MUTEX,
+                ApiErrorCategories.GENERATION,
+                ex.messageKey()
+        );
+    }
+
     @ExceptionHandler(EncryptionFailedException.class)
     public ResponseEntity<ErrorEnvelope> handleEncryptionFailed(
             HttpServletRequest request,

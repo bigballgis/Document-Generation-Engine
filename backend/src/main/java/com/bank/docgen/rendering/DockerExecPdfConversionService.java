@@ -99,7 +99,7 @@ public class DockerExecPdfConversionService implements PdfConversionService {
                     "--nolockcheck",
                     "--nodefault",
                     "--nologo",
-                    "--convert-to", "pdf",
+                    "--convert-to", LibreOfficePdfExportFilters.convertToArgument(options.pdfArchivalProfile()),
                     "--outdir", "/tmp",
                     containerInput
             );

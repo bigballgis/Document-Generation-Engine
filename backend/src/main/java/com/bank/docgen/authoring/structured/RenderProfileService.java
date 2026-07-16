@@ -67,6 +67,11 @@ public class RenderProfileService {
                 return RenderProfile.fromJsonNode(objectMapper.readTree(version.getRenderProfileJson()));
             } catch (JsonProcessingException ex) {
                 return defaultProfile;
+            } catch (IllegalArgumentException ex) {
+                if ("api.error.rendering.renderProfileInvalid".equals(ex.getMessage())) {
+                    throw new StructuredContentSchemaException("api.error.rendering.renderProfileInvalid");
+                }
+                throw ex;
             }
         }
         return defaultProfile;

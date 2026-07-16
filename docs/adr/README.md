@@ -107,6 +107,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0055-cursor-sole-parent-agent.md](./documentation-governance/0055-cursor-sole-parent-agent.md) | Accepted | Cursor sole parent agent; MCP canonical `.cursor/mcp.json`; Claude dual-stack removed; amends ADR-0053 tooling (2026-07-14) |
 | [0056-whitelist-variable-compute-dsl-bounds.md](./rendering-authoring/0056-whitelist-variable-compute-dsl-bounds.md) | Accepted | Whitelist compute DSL bounds; forbid Groovy/JS/SpEL; FILTER form; locale default zh-CN; SPELL_AMOUNT CNY-only (CE-K03) |
 | [0057-invocation-parameters-retention-for-regenerate.md](./authorization-security/0057-invocation-parameters-retention-for-regenerate.md) | Accepted | Retention-scoped `parameters_storage` exception for caller reconciliation + CE-G06 regenerate; amends ADR-0020; aligns ADR-0040; encryption-at-rest deferred (2026-07-16) |
+| [0058-pdfa-2b-archival-output.md](./rendering-authoring/0058-pdfa-2b-archival-output.md) | Accepted | PDF/A-2b archival via publish-locked `pdfArchivalProfile` (`NONE`\|`PDF_A_2B`); LO filter; mutex with encryption (CE-O01 / D6, 2026-07-16) |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
 ### LR-A5 triad (0041 Accepted; 0042/0043 remain Proposed)

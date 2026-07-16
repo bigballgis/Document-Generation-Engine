@@ -1,0 +1,10 @@
+{
+  "id": "pdfa-2b",
+  "theme": "PDF/A-2b archival identifier (lightweight pdfaid XMP)",
+  "maturity": "ACTIVE",
+  "title": "PDF/A-2b — CE-O01 archival golden sample",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "SYNTHETIC",
+  "description": "ACTIVE PDF/A-2b sample. DOCX half asserts assembled body text. PDF half synthesizes a PDF with pdfaid part=2 / conformance=B XMP (lightweight archival check; veraPDF not required in mvn verify). Package renderProfile.pdfArchivalProfile=PDF_A_2B documents the publish-locked archival path; orthogonal to 07-encrypted-pdf.",
+  "owningFutureSlice": "CE-O01 / #81 — ADR-0058 PDF/A-2b archival output"
+}

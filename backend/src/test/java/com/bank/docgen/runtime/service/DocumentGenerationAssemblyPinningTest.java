@@ -24,6 +24,7 @@ import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.rendering.GeneratedArtifactSizeGuard;
 import com.bank.docgen.rendering.SpooledArtifact;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.document.PdfArchivalProfile;
 import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
@@ -243,8 +244,7 @@ class DocumentGenerationAssemblyPinningTest {
     private static RenderProfile renderProfile() {
         return new RenderProfile(
                 "rp-v1", "MASTER_CATALOG_LOCKED", "CONTROLLED_MULTILEVEL", "REPEAT_HEADER",
-                "PROPORTIONAL_FIT", "SEMANTIC_FIDELITY", "BLOCKERS_PREVENT_PUBLISH", false
-        );
+                "PROPORTIONAL_FIT", "SEMANTIC_FIDELITY", "BLOCKERS_PREVENT_PUBLISH", false, PdfArchivalProfile.NONE);
     }
 
     private static TemplateVersionEntity publishedPinnedVersion(UUID revisionId) {

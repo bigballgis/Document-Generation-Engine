@@ -191,6 +191,7 @@ class FidelityWarningContractTest {
                 "CONTROLLED_STYLE_FALLBACK",
                 "MASTER_STYLE_FALLBACK",
                 "PDF_PAGE_NUMBER_STAMP_FAILED",
+                "PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA",
                 "DOCX_PERMISSIONS_NOT_APPLIED"
         );
     }

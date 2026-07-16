@@ -10,6 +10,7 @@ import com.bank.docgen.rendering.PdfConversionPostProcessor;
 import com.bank.docgen.rendering.PdfEncryptionService;
 import com.bank.docgen.rendering.StructuredContentDocxWriterTestSupport;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.document.PdfArchivalProfile;
 import com.bank.docgen.sharedkernel.document.compute.ComputeVariableDefinition;
 import com.bank.docgen.sharedkernel.document.compute.VariableComputeEngine;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
@@ -98,11 +100,12 @@ public final class GoldenCorpusActiveRunner {
 
         JsonNode pdfAssertions = assertionLoader.loadPdfAssertions(corpusPackage.directory());
         EncryptionOptionsView encryption = extractEncryption(template);
-        runPdfHalf(corpusPackage, assembled, pdfAssertions, encryption);
+        runPdfHalf(corpusPackage, template, assembled, pdfAssertions, encryption);
     }
 
     private void runPdfHalf(
             GoldenCorpusPackage corpusPackage,
+            JsonNode template,
             byte[] assembledDocx,
             JsonNode pdfAssertions,
             EncryptionOptionsView encryption
@@ -113,16 +116,18 @@ public final class GoldenCorpusActiveRunner {
         boolean hasAssertions = pdfAssertions.path("assertions").isArray()
                 && !pdfAssertions.path("assertions").isEmpty();
         boolean requireEncrypted = pdfAssertions.path("requireEncrypted").asBoolean(false);
-        if (!hasAssertions && !requireEncrypted) {
+        boolean requirePdfA2b = pdfAssertions.path("requirePdfA2b").asBoolean(false);
+        if (!hasAssertions && !requireEncrypted && !requirePdfA2b) {
             return;
         }
 
         String pdfSource = corpusPackage.manifest().pdfSource() == null
                 ? "LIBREOFFICE"
                 : corpusPackage.manifest().pdfSource();
+        PdfArchivalProfile archivalProfile = extractArchivalProfile(template);
         byte[] plainPdf;
         if ("SYNTHETIC".equalsIgnoreCase(pdfSource)) {
-            plainPdf = synthesizePdfFromDocxText(assembledDocx);
+            plainPdf = synthesizePdfFromDocxText(assembledDocx, requirePdfA2b);
         } else {
             String soffice = System.getenv().getOrDefault("LIBREOFFICE_COMMAND", "soffice");
             Assumptions.assumeTrue(
@@ -130,7 +135,7 @@ public final class GoldenCorpusActiveRunner {
                     "Skipping PDF assertions for package '" + corpusPackage.id()
                             + "': LibreOffice soffice unavailable (DOCX assertions already executed)"
             );
-            plainPdf = convertWithLibreOffice(assembledDocx, soffice);
+            plainPdf = convertWithLibreOffice(assembledDocx, soffice, archivalProfile);
         }
 
         if (encryption != null && Boolean.TRUE.equals(encryption.enabled())) {
@@ -141,7 +146,7 @@ public final class GoldenCorpusActiveRunner {
         }
     }
 
-    private byte[] synthesizePdfFromDocxText(byte[] docxBytes) throws IOException {
+    private byte[] synthesizePdfFromDocxText(byte[] docxBytes, boolean withPdfA2bXmp) throws IOException {
         String xml = GoldenCorpusDocxAssertor.readZipPartAsString(docxBytes, "word/document.xml");
         String text = xml.replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim();
         if (text.length() > 200) {
@@ -157,10 +162,26 @@ public final class GoldenCorpusActiveRunner {
                 content.showText(sanitizeForPdf(text));
                 content.endText();
             }
+            if (withPdfA2bXmp) {
+                PDMetadata metadata = new PDMetadata(document);
+                metadata.importXMPMetadata(PDFA_2B_XMP.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                document.getDocumentCatalog().setMetadata(metadata);
+            }
             document.save(output);
             return output.toByteArray();
         }
     }
+
+    private static final String PDFA_2B_XMP = """
+            <?xpacket begin='' id='W5M0MpCehiHzreSzNTczkc9d'?>
+            <x:xmpmeta xmlns:x='adobe:ns:meta/'>
+              <rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+                <rdf:Description xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/'
+                  pdfaid:part='2' pdfaid:conformance='B'/>
+              </rdf:RDF>
+            </x:xmpmeta>
+            <?xpacket end='w'?>
+            """;
 
     private static String sanitizeForPdf(String text) {
         StringBuilder builder = new StringBuilder(text.length());
@@ -175,7 +196,11 @@ public final class GoldenCorpusActiveRunner {
         return sanitized.isEmpty() ? "golden-corpus" : sanitized;
     }
 
-    private byte[] convertWithLibreOffice(byte[] docxBytes, String soffice) {
+    private byte[] convertWithLibreOffice(
+            byte[] docxBytes,
+            String soffice,
+            PdfArchivalProfile archivalProfile
+    ) {
         DocgenRenderingProperties properties = new DocgenRenderingProperties();
         properties.setLibreOfficeCommand(soffice);
         properties.setConversionTimeoutSeconds(120);
@@ -195,10 +220,26 @@ public final class GoldenCorpusActiveRunner {
                     new PdfConversionPoolRejectionMetrics(new SimpleMeterRegistry())
             );
             return conversionService
-                    .convertWithResult(docxBytes, PdfConversionOptions.stampingDisabled())
+                    .convertWithResult(docxBytes, PdfConversionOptions.stampingDisabled(archivalProfile))
                     .pdfBytes();
         } finally {
             executor.shutdown();
+        }
+    }
+
+    private PdfArchivalProfile extractArchivalProfile(JsonNode template) {
+        JsonNode profile = template.path("renderProfile");
+        if (profile.isMissingNode() || profile.isNull()) {
+            return PdfArchivalProfile.NONE;
+        }
+        String raw = profile.path("pdfArchivalProfile").asText(null);
+        if (raw == null || raw.isBlank()) {
+            return PdfArchivalProfile.NONE;
+        }
+        try {
+            return PdfArchivalProfile.valueOf(raw.trim());
+        } catch (IllegalArgumentException ex) {
+            throw new GoldenCorpusException("Invalid pdfArchivalProfile in golden template: " + raw);
         }
     }
 

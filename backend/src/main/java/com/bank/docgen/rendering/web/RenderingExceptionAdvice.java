@@ -2,6 +2,7 @@ package com.bank.docgen.rendering.web;
 
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
 import com.bank.docgen.rendering.DocxAssemblyException;
+import com.bank.docgen.rendering.PdfArchivalEncryptionMutexException;
 import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.rendering.PdfConversionCapacityExceededException;
 import com.bank.docgen.rendering.service.BatchTestRunNotFoundException;
@@ -38,6 +39,20 @@ public class RenderingExceptionAdvice {
             PdfConversionCapacityExceededException ex
     ) {
         return errorEnvelopeFactory.pdfConversionCapacityExceeded(request, ex);
+    }
+
+    @ExceptionHandler(PdfArchivalEncryptionMutexException.class)
+    public ResponseEntity<ErrorEnvelope> handlePdfArchivalEncryptionMutex(
+            HttpServletRequest request,
+            PdfArchivalEncryptionMutexException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.BAD_REQUEST,
+                ApiErrorCodes.PDF_ARCHIVAL_ENCRYPTION_MUTEX,
+                ApiErrorCategories.GENERATION,
+                ex.messageKey()
+        );
     }
 
     @ExceptionHandler(PreviewNotFoundException.class)

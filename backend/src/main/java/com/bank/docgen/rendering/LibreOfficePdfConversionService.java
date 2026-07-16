@@ -80,20 +80,13 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
             Path inputDocx = tempDir.resolve("input.docx");
             byte[] pdfSourceDocx = pdfConversionPostProcessor.prepareDocxForConversion(docxBytes, options);
             Files.write(inputDocx, pdfSourceDocx);
-            ProcessBuilder processBuilder = new ProcessBuilder(
+            ProcessBuilder processBuilder = new ProcessBuilder(buildCliArguments(
                     renderingProperties.getLibreOfficeCommand(),
-                    "--headless",
-                    "-env:UserInstallation=" + profileUrl(profileDir),
-                    "--norestore",
-                    "--nolockcheck",
-                    "--nodefault",
-                    "--nologo",
-                    "--convert-to",
-                    "pdf",
-                    "--outdir",
-                    tempDir.toString(),
-                    inputDocx.toString()
-            );
+                    profileDir,
+                    inputDocx,
+                    tempDir,
+                    options
+            ));
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
             boolean finished = process.waitFor(
@@ -125,6 +118,35 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
                 deleteProfileTree(profileDir);
             }
         }
+    }
+
+    /**
+     * Build LibreOffice CLI argv (CE-O01 archival filter selection is asserted via this helper).
+     */
+    static java.util.List<String> buildCliArguments(
+            String libreOfficeCommand,
+            Path profileDir,
+            Path inputDocx,
+            Path outDir,
+            PdfConversionOptions options
+    ) {
+        PdfConversionOptions resolved = options == null
+                ? PdfConversionOptions.stampingDisabled()
+                : options;
+        return java.util.List.of(
+                libreOfficeCommand,
+                "--headless",
+                "-env:UserInstallation=" + profileUrl(profileDir),
+                "--norestore",
+                "--nolockcheck",
+                "--nodefault",
+                "--nologo",
+                "--convert-to",
+                LibreOfficePdfExportFilters.convertToArgument(resolved.pdfArchivalProfile()),
+                "--outdir",
+                outDir.toString(),
+                inputDocx.toString()
+        );
     }
 
     /**

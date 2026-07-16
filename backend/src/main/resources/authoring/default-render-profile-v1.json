@@ -6,5 +6,6 @@
   "imageScalingPolicy": "PROPORTIONAL_FIT",
   "pdfConversionPolicy": "SEMANTIC_FIDELITY",
   "fidelityPolicy": "BLOCKERS_PREVENT_PUBLISH",
-  "pdfPageNumberStampingEnabled": true
+  "pdfPageNumberStampingEnabled": true,
+  "pdfArchivalProfile": "NONE"
 }

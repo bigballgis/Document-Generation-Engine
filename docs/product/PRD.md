@@ -354,7 +354,7 @@ v1 模板绑定母版锚点必须来自已审核母版锚点目录中的稳定 `
 
 每个 `anchorId` 在同一模板发布候选中最多一个绑定；绑定对象承载一个有序结构化内容树。绑定内容类型必须符合锚点允许范围；绑定校验状态至少包括 `VALID`、`MISSING_ANCHOR`、`DUPLICATE_BINDING` 和 `INCOMPATIBLE_CONTENT_TYPE`，后三者均属于发布阻断项。
 
-v1 渲染配置采用发布锁定的受控 `renderProfile`，覆盖样式、编号、表格分页、图片缩放、PDF 转换和保真策略。API 调用方不得传入任意渲染参数覆盖模板发布配置；输出格式、输出模式和动态加密仍受 API 契约与 API 管理配置约束。
+v1 渲染配置采用发布锁定的受控 `renderProfile`，覆盖样式、编号、表格分页、图片缩放、PDF 转换、保真策略，以及 **PDF 归档配置** `pdfArchivalProfile`（`NONE` \| `PDF_A_2B`；CE-O01 / [ADR-0058](../adr/rendering-authoring/0058-pdfa-2b-archival-output.md)）。`PDF_A_2B` 时正式 PDF 经 LibreOffice PDF/A-2b 过滤器产出，且不得与请求侧 PDF 动态加密同时启用。API 调用方不得传入任意渲染参数覆盖模板发布配置；输出格式、输出模式和动态加密仍受 API 契约与 API 管理配置约束。
 
 v1 生成预览产物采用最终 DOCX/PDF 渲染链路产生的可追溯预览记录，至少包含 `previewId`、`testDataSetId`、`variablesHash`、`outputFormat`、`renderProfileVersion`、`status`、`documentId` 或预览引用、最终产物引用、警告摘要、阻断项摘要、对比摘要、创建时间、更新时间和非敏感摘要。预览状态集合为 `ACCEPTED`、`PROCESSING`、`SUCCEEDED`、`FAILED` 和 `EXPIRED`。
 
@@ -603,6 +603,8 @@ DOCX/PDF 动态加密 API 参数采用标准模型，支持：
 
 `encryption.enabled=true` 时，`openPassword` 必填，`ownerPassword` 可选。`permissions` 采用统一抽象权限枚举；**v1 仅对 PDF 输出映射并生效**（CE-C06）；DOCX 仍可用 `openPassword` 加密，但非空 `permissions` **不**映射为 DOCX 写保护——结构合法时成功并警告 `DOCX_PERMISSIONS_NOT_APPLIED`（`messageKey=generation.warning.fidelity.docxPermissionsNotApplied`；见 [ce-c06-docx-permissions-boundary.md](../behavior/ce-c06-docx-permissions-boundary.md)）。v1 权限枚举确认为 `ALLOW_PRINT`、`ALLOW_COPY`、`ALLOW_EDIT`、`ALLOW_ANNOTATE`、`ALLOW_FORM_FILL`；传入 `permissions` 时必须同时传入 `ownerPassword`。不支持的权限枚举值、缺少必需密码、`enabled=false` 或未传 `enabled` 时仍传入加密子字段，均返回 `400 ENCRYPTION_PARAMETER_INVALID`。Apache POI DOCX write-protect 不在 CE-C06 范围。
 
+**CE-O01：** 当发布锁定 `renderProfile.pdfArchivalProfile=PDF_A_2B` 且请求 `output.format=PDF` 时，不得同时 `encryption.enabled=true`——返回 `400 PDF_ARCHIVAL_ENCRYPTION_MUTEX`（`messageKey=api.error.generation.pdfArchivalEncryptionMutex`）。见 [ce-o01-pdfa-output.md](../behavior/ce-o01-pdfa-output.md) 与 [ADR-0058](../adr/rendering-authoring/0058-pdfa-2b-archival-output.md)。
+
 `openPassword` 和 `ownerPassword` 的密码强度基线为最少 12 字符、最长 128 字符；如果两者同时传入，二者必须不同。不满足时返回 `400 ENCRYPTION_PARAMETER_INVALID`。
 
 加密参数合法但实际加密处理失败时，返回 `500 ENCRYPTION_FAILED`，`retryable=true`；错误响应、日志和审计不得返回密码、内部加密细节或敏感配置值。
@@ -771,6 +773,7 @@ v1 不新增发布前或发布后中间状态。发布前检查、生成预览�
 - 导入生产不重新生成模板 ID 或 API 地址；导入后的模板仍需从草稿重新经过测试、审批、待发布和发布流程后才可形成新的发布版本。
 - **CE-E01（2026-07-16）：** 跨环境晋级可使用自包含导出包 v2（ZIP 内嵌钉扎母版 DOCX + 条款正文快照 + render profile + 资产键清单）。母版指纹消费 CE-K01 发布钉扎（`master_revision_id` / `master_file_hash`）。导入前可 dry-run 获取依赖预检报告，避免导入后半残；提交导入事务化落地草稿。默认导出保持 v1 兼容；管理端 dry-run/导出 UI 本片不交付（API-first）。行为规格：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)；钉扎上游：[ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)。
 - **CE-E02（2026-07-16）：** 管理端提供平台共享资产库（上传 / 列表 / 停用图片与签章资产）；键名约定固化且与渲染引用键一致；印章类（`SEAL`）上传需 `TEMPLATE_APPROVER` / 管理员；停用仅管理员；渲染侧 `StructuredContentImageResolver` 协议不变。行为规格：[ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md)；契约：[openapi-v1.yaml](../api/openapi-v1.yaml) `/api/management/v1/library/assets`。
+- **CE-O01（2026-07-16）：** 发布锁定 render profile 支持 PDF/A-2b 归档输出（`pdfArchivalProfile=PDF_A_2B`）；与 PDF 动态加密互斥；管理端 profile 编辑 UI 本片不交付。行为规格：[ce-o01-pdfa-output.md](../behavior/ce-o01-pdfa-output.md)；ADR：[0058-pdfa-2b-archival-output.md](../adr/rendering-authoring/0058-pdfa-2b-archival-output.md)。
 
 ## 11. 动态 API
 

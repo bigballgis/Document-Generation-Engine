@@ -4,20 +4,21 @@
 Fixed duplicate `## Docker` in `AGENTS.md`; documented live Task built-in catalog +
 project-vs-runtime enum gap in `MODEL-STRATEGY.md` / `AGENTS.md`; aligned
 `worktree-router` / `integration-merger` / `verifier` / `/verify-done` with
-**retry→BLOCKED** (inline only on `允许降级`). Formal phase **None**. Do **not**
-activate #81 CE-O01.
+**retry→BLOCKED** (inline only on `允许降级`). Formal phase **None**.
 
 **Completion note (2026-07-16, ORCH-SPECIALIST-RETRY-ONLY):** Policy change —
 `orch-specialist-retry-only` → **Done**. **Retry first (≤3) → BLOCKED**; no auto
 `generalPurpose`. Opt-in only: `允许降级` / `allow-gp-fallback`. BDD updated
 ([specialist-runtime-fallback.md](../behavior/specialist-runtime-fallback.md)).
 Skill + routing mandate + orchestrator + `/deliver` + AGENTS aligned. Supersedes
-auto-GP default from ORCH-SPECIALIST-FALLBACK. Formal phase **None**. Do **not**
-activate #81 CE-O01. Umbrella **#53** remains **in-progress**. Do **not** claim go-live.
+auto-GP default from ORCH-SPECIALIST-FALLBACK. Formal phase **None**. Umbrella **#53**
+remains **in-progress**. Do **not** claim go-live.
 
 **Completion note (2026-07-16, ORCH-SPECIALIST-FALLBACK):** Governance slice
 `orch-specialist-fallback` → **Done** — **policy superseded** by ORCH-SPECIALIST-RETRY-ONLY
 (auto GP default retired). Original artifacts remain; skill/BDD rewritten for retry-first.
+
+**Activation note (2026-07-16, CE-O01 sole-active):** **#81** CE-O01 → Task Master **in-progress** (sole-active CE delivery leaf; single-lane serial §9.2) after **#79** CE-E02 → **Done**. Slice `ce-o01-pdfa-output`; worktree `D:/working/DGE-ce-o01-pdfa-output` · `feat/ce-o01-pdfa-output`. BDD **ready** ([ce-o01-pdfa-output.md](../behavior/ce-o01-pdfa-output.md); **BDD-CE-O01-001…016**); [ADR-0058 Accepted](../adr/rendering-authoring/0058-pdfa-2b-archival-output.md); `frontend_ui_in_scope=false` (API/render-only; FE/E2E non-goal). Soft deps K07 (#54) + E02 (#79) satisfied. CE-O02 skipped (D5). Formal phase remains **None**. Umbrella **#53** remains **in-progress** (program registry only). Do **not** start another CE leaf. **After O01 (§9.2 next head):** **#75** CE-G04 (P2; deps G03 Done) → then **#90** CE-U14 (P2) → P3 (#80 E03 / #96+ / #77). Do **not** activate CD-3. Do **not** claim go-live.
 
 **Completion note (2026-07-16, ORCH-BATCH-RECOMMEND):** Governance slice
 `orch-batch-recommend` → **Done**. BDD **ready**
@@ -26,17 +27,17 @@ activate #81 CE-O01. Umbrella **#53** remains **in-progress**. Do **not** claim 
 pipeline stage **−1**; `delivery-orchestrator` + constitutions + `AGENTS.md` + `/deliver`;
 handoff `batch_recommendation`; plan note
 [orch-batch-recommend-governance.md](./orch-batch-recommend-governance.md).
-Product BE/FE **N/A**; E2E/UIUX/deploy **N/A**. Self-check **`solo`** (veto parked CE-O01).
-**Not** a CE leaf; formal phase **None**. **Do not activate #81 CE-O01**. Umbrella **#53**
-remains **in-progress** (program registry only). Do **not** claim go-live. Do **not**
+Product BE/FE **N/A**; E2E/UIUX/deploy **N/A**. Self-check **`solo`** (veto parked CE-O01 at orch time).
+**Not** a CE leaf; formal phase **None**. Umbrella **#53**
+remains **in-progress** (program registry only). Superseded as sole-active guidance by CE-O01 activation note above. Do **not** claim go-live. Do **not**
 activate CD-3.
 
 **Activation note (2026-07-16, ORCH-BATCH-RECOMMEND):** Governance slice
 `orch-batch-recommend` → **In Progress** — **superseded by completion note above**.
 ISOLATED `D:/working/DGE-orch-batch-recommend` · `feat/orch-batch-recommend`. **Not** CE;
-formal phase **None**. Do **not** activate #81 CE-O01.
+formal phase **None**.
 
-**Completion note (2026-07-16, CE-E02):** **#79** CE-E02 → **Done** (MAIN merge `5bd3611ee7e03b385caf3003296aee1bd604222e`). Slice `ce-e02-asset-library`; worktree `DGE-ce-e02-asset-library` removed. BDD **ready** ([ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md); **BDD-CE-E02-001…022**). **Gates:** `mvn verify` **PASS** (incl Yellow #4 fail-closed); pnpm lint/type-check/test/build **PASS**; E2E functional **4/4** (`ce-e02-asset-library.spec.ts`); UIUX **PASS** (manifest [CE-E02-asset-library-uiux](../../frontend/e2e/evidence/CE-E02-asset-library-uiux-manifest.md)); architecture **PASS** (Yellow 1–4 cleared); Stage 10 **DEPLOY_OK** ForceRebuild (`docker-deploy-queue`; compose `dge-ce-e02-asset-library`; `:8080` UP; `:4173` 200). **Evidence:** Asset library MinIO catalog API (upload/list/disable) + admin `/library/assets`; `assetKey` ≡ resolvable object key; `SEAL` upload gate; `StructuredContentImageResolver` protocol unchanged. Formal phase remains **None**. Umbrella **#53** remains **in-progress** (program registry only). **No sole-active CE delivery leaf.** Next queue head recommend **#81** CE-O01 (parked — do **not** activate in this sync). Do **not** reopen **#79**. Do **not** activate CD-3. Do **not** claim go-live.
+**Completion note (2026-07-16, CE-E02):** **#79** CE-E02 → **Done** (MAIN merge `5bd3611ee7e03b385caf3003296aee1bd604222e`). Slice `ce-e02-asset-library`; worktree `DGE-ce-e02-asset-library` removed. BDD **ready** ([ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md); **BDD-CE-E02-001…022**). **Gates:** `mvn verify` **PASS** (incl Yellow #4 fail-closed); pnpm lint/type-check/test/build **PASS**; E2E functional **4/4** (`ce-e02-asset-library.spec.ts`); UIUX **PASS** (manifest [CE-E02-asset-library-uiux](../../frontend/e2e/evidence/CE-E02-asset-library-uiux-manifest.md)); architecture **PASS** (Yellow 1–4 cleared); Stage 10 **DEPLOY_OK** ForceRebuild (`docker-deploy-queue`; compose `dge-ce-e02-asset-library`; `:8080` UP; `:4173` 200). **Evidence:** Asset library MinIO catalog API (upload/list/disable) + admin `/library/assets`; `assetKey` ≡ resolvable object key; `SEAL` upload gate; `StructuredContentImageResolver` protocol unchanged. Formal phase remains **None**. Umbrella **#53** remains **in-progress** (program registry only). Superseded as sole-active by CE-O01 activation note above. Do **not** reopen **#79**. Do **not** activate CD-3. Do **not** claim go-live.
 
 **Activation note (2026-07-16, CE-E02 sole-active):** **#79** CE-E02 → Task Master **in-progress** (sole-active CE delivery leaf; single-lane serial §9.2) after **#78** CE-E01 → **Done** — **superseded by CE-E02 completion note above**. Slice `ce-e02-asset-library`; worktree `D:/working/DGE-ce-e02-asset-library` · `feat/ce-e02-asset-library` · base `80bca4729a573f4a5803618816f24992b0ce6443` (removed after merge). BDD **ready** ([ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md); **BDD-CE-E02-001…022**); `frontend_ui_in_scope=true`. Soft dep E01 satisfied. Formal phase remains **None**. Umbrella **#53** remains **in-progress** (program registry only).
 

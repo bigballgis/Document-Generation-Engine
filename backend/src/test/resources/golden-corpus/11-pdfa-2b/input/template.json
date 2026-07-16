@@ -1,0 +1,8 @@
+{
+  "bindings": {
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"PDF archival sample body\"}]}]}"
+  },
+  "renderProfile": {
+    "pdfArchivalProfile": "PDF_A_2B"
+  }
+}

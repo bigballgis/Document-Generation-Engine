@@ -11,6 +11,7 @@ Regression fixtures for DOCX keypath + PDF text assertions (no pixel/visual comp
 | `chinese-uppercase-amount` | ACTIVE | CE-K03 |
 | `specimen-watermark` | ACTIVE | CE-G02 |
 | `encrypted-pdf` | ACTIVE | CE-K07 sample |
+| `pdfa-2b` | ACTIVE | CE-O01 (lightweight pdfaid XMP) |
 | `long-clause-limits` | PLACEHOLDER | follow-on |
 
 Harness: `com.bank.docgen.rendering.goldencorpus` (executed by `mvn verify`).
