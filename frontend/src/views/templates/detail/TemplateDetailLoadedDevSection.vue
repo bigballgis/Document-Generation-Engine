@@ -18,6 +18,7 @@ defineProps<{
     :rules="c.template.rules"
     :group-code="c.template.groupCode"
     :lifecycle-status="c.template.lifecycleStatus"
+    :approval-sub-state="c.template.approvalSubState"
     :can-edit-content-module-references="c.canEditContentModuleReferences"
     :coverage-refresh-token="c.coverageRefreshToken"
     :last-preview="c.lastPreview"

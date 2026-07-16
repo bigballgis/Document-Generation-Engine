@@ -1,0 +1,5 @@
+
+REPOSITORY                                                                     TAG                                                                           DIGEST                                                                    IMAGE ID       CREATED
+documentgenerationengine-docgen-backend                                        latest                                                                        sha256:6bf5f082724fc1a220e477065bd0d3cab861be7309ea5564b54849d8bc52ea9b   6bf5f082724f   31 minutes ago
+documentgenerationengine-docgen-frontend                                       latest                                                                        sha256:db27b86fec13fa3ef89c5fd976618e2b9ee54273e4dfbb18a0955815e15714fd   db27b86fec13   32 minutes ago
+

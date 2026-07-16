@@ -25,6 +25,7 @@ export type TemplateDetailDevWorkspaceProps = {
   rules: CompositionRule[] | null
   groupCode: string | null
   lifecycleStatus: TemplateLifecycleStatus
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
   canEditContentModuleReferences: boolean
   coverageRefreshToken: number
   lastPreview: PreviewRecord | null

@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import type { SemverBumpLevel } from '@/utils/semver'
 import type { BindingGateIssueItem } from '@/utils/templateBindingGateDisplay'
 import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
 import type { AnchorBinding, BindingValidationResult } from '@/types/template'
+import { resolvePublishGateGoFixTarget } from '@/utils/publishGateGoFixLink'
+import {
+  buildDevWorkspaceQuery,
+  type TemplateDevWorkspaceSubTab,
+} from '@/views/templates/templateDevWorkspaceTabs'
+import type { TemplateJourneyWorkspaceQuery } from '@/utils/templateJourneyWorkspaceLink'
 
 type PublishBumpOption = {
   level: SemverBumpLevel
@@ -30,12 +37,41 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 
 const showAdGroupsNotConfiguredWarning = computed(() =>
   props.publishGateItems.some(
     (item) => item.key === 'API_POLICY' && item.adGroupsConfigured === false,
   ),
 )
+
+function goFixQueryFor(item: PublishGateDisplayItem): TemplateJourneyWorkspaceQuery | null {
+  return resolvePublishGateGoFixTarget(item.key, item.ready)
+}
+
+function resolveGoFixSubTab(target: TemplateJourneyWorkspaceQuery): TemplateDevWorkspaceSubTab | undefined {
+  if (typeof target.designTab === 'string') {
+    return target.designTab as TemplateDevWorkspaceSubTab
+  }
+  if (typeof target.testingTab === 'string') {
+    return target.testingTab as TemplateDevWorkspaceSubTab
+  }
+  if (typeof target.approvalTab === 'string') {
+    return target.approvalTab as TemplateDevWorkspaceSubTab
+  }
+  return undefined
+}
+
+function navigateGoFix(item: PublishGateDisplayItem) {
+  const target = goFixQueryFor(item)
+  if (!target) {
+    return
+  }
+  void router.replace({
+    query: buildDevWorkspaceQuery(route.query, target.workspaceTab, resolveGoFixSubTab(target)),
+  })
+}
 </script>
 
 <template>
@@ -90,6 +126,16 @@ const showAdGroupsNotConfiguredWarning = computed(() =>
           <el-tag v-else :type="item.ready ? 'success' : 'warning'" size="small">
             {{ item.ready ? t('templates.publishGate.ready') : t('templates.publishGate.pending') }}
           </el-tag>
+          <el-button
+            v-if="goFixQueryFor(item)"
+            link
+            type="primary"
+            size="small"
+            :data-testid="`publish-gate-go-fix-${item.key}`"
+            @click="navigateGoFix(item)"
+          >
+            {{ t('templates.lifecycleStepper.goFix') }}
+          </el-button>
         </li>
       </ul>
     </template>

@@ -72,11 +72,12 @@ async function assertNoViewportOverflow(page: Page): Promise<void> {
   ).toBeLessThanOrEqual(overflow.clientWidth + 1)
 }
 
-/** CE-U15 Stepper must not appear on CE-U14 dashboard / workspace surfaces. */
-async function assertNoCeU15StepperDom(page: Page): Promise<void> {
-  await expect(page.locator('.el-steps')).toHaveCount(0)
-  await expect(page.locator('[class*="lifecycle-stepper"]')).toHaveCount(0)
-  await expect(page.locator('[data-testid*="stepper"]')).toHaveCount(0)
+/**
+ * CE-U15 Lifecycle Stepper is in scope on template **dev workspace** only.
+ * Dashboard Tasks surfaces must still not render a product lifecycle stepper.
+ */
+async function assertNoLifecycleStepperOnDashboard(page: Page): Promise<void> {
+  await expect(page.locator('[data-testid="lifecycle-stepper"]')).toHaveCount(0)
   await expect(page.locator('[data-ce-u15-stepper]')).toHaveCount(0)
 }
 
@@ -125,7 +126,7 @@ test.describe('CE-U14 dashboard lifecycle todos UIUX evidence @1920 dual-brand',
     )
     await expectDashboardPartitionHeading(page, /in testing/i)
     await expect(page.locator('[data-partition-id="queue-TEST"]')).toBeVisible()
-    await assertNoCeU15StepperDom(page)
+    await assertNoLifecycleStepperOnDashboard(page)
     await assertNoViewportOverflow(page)
     await expectNoCriticalAxeViolations(page, 'CE-U14 TEST queue REDBC')
 
@@ -161,7 +162,8 @@ test.describe('CE-U14 dashboard lifecycle todos UIUX evidence @1920 dual-brand',
     await expect(
       workspaceActions(page).getByRole('button', { name: /^record test failure$/i }),
     ).toBeVisible()
-    await assertNoCeU15StepperDom(page)
+    // CE-U15: lifecycle stepper is expected on #dev-workspace (not asserted absent here).
+    await expect(page.locator('[data-testid="lifecycle-stepper"]')).toBeVisible()
     await assertNoViewportOverflow(page)
     await expectNoCriticalAxeViolations(page, 'CE-U14 testing action rail REDBC')
 
@@ -180,7 +182,7 @@ test.describe('CE-U14 dashboard lifecycle todos UIUX evidence @1920 dual-brand',
     await expect(
       workspaceActions(page).getByRole('button', { name: /^confirm test pass$/i }),
     ).toBeVisible()
-    await assertNoCeU15StepperDom(page)
+    await expect(page.locator('[data-testid="lifecycle-stepper"]')).toBeVisible()
     await assertNoViewportOverflow(page)
 
     await captureCeU14Screenshot(page, '03-testing-action-rail-greenbc-1920x1080.png')
@@ -200,7 +202,7 @@ test.describe('CE-U14 dashboard lifecycle todos UIUX evidence @1920 dual-brand',
     // Dual-brand TEST queue (return to dashboard)
     await openDashboardQueueTasks(page, 'TEST')
     await expect(page.locator('[data-partition-id="queue-TEST"]')).toBeVisible()
-    await assertNoCeU15StepperDom(page)
+    await assertNoLifecycleStepperOnDashboard(page)
     await captureCeU14Screenshot(page, '03e-test-queue-greenbc-1920x1080.png')
   })
 
@@ -226,7 +228,7 @@ test.describe('CE-U14 dashboard lifecycle todos UIUX evidence @1920 dual-brand',
       'aria-selected',
       'true',
     )
-    await assertNoCeU15StepperDom(page)
+    await assertNoLifecycleStepperOnDashboard(page)
     await assertNoViewportOverflow(page)
 
     await filterDashboardTasksByItem(page, fixture.name)
@@ -251,7 +253,7 @@ test.describe('CE-U14 dashboard lifecycle todos UIUX evidence @1920 dual-brand',
       timeout: 15_000,
     })
     await expect(workspaceActions(page).getByRole('button', { name: /^reject$/i })).toBeVisible()
-    await assertNoCeU15StepperDom(page)
+    await expect(page.locator('[data-testid="lifecycle-stepper"]')).toBeVisible()
     await assertNoViewportOverflow(page)
     await expectNoCriticalAxeViolations(page, 'CE-U14 APPROVAL decision rail REDBC')
 
@@ -268,7 +270,7 @@ test.describe('CE-U14 dashboard lifecycle todos UIUX evidence @1920 dual-brand',
     await switchBrand(page, 'GREENBC')
     await expect(page.locator('html')).toHaveAttribute('data-brand', 'GREENBC')
     await expect(workspaceActions(page).getByRole('button', { name: /^approve$/i })).toBeVisible()
-    await assertNoCeU15StepperDom(page)
+    await expect(page.locator('[data-testid="lifecycle-stepper"]')).toBeVisible()
     await assertNoViewportOverflow(page)
 
     await captureCeU14Screenshot(page, '05-approval-action-rail-greenbc-1920x1080.png')
@@ -299,7 +301,7 @@ test.describe('CE-U14 dashboard lifecycle todos UIUX evidence @1920 dual-brand',
     await expect(page.locator('[data-partition-id="queue-TEST"]')).toHaveCount(0)
     await expect(page.locator('[data-partition-id="queue-APPROVAL"]')).toHaveCount(0)
     await expect(page.locator('[data-partition-id="queue-PENDING_RELEASE"]')).toHaveCount(0)
-    await assertNoCeU15StepperDom(page)
+    await assertNoLifecycleStepperOnDashboard(page)
     await assertNoViewportOverflow(page)
     await expectNoCriticalAxeViolations(page, 'CE-U14 author fail-closed REDBC')
 
@@ -314,7 +316,7 @@ test.describe('CE-U14 dashboard lifecycle todos UIUX evidence @1920 dual-brand',
     await expect(page.locator('[data-partition-id="queue-TEST"]')).toHaveCount(0)
     await expect(page.locator('[data-partition-id="queue-APPROVAL"]')).toHaveCount(0)
     await expect(page.locator('[data-partition-id="queue-PENDING_RELEASE"]')).toHaveCount(0)
-    await assertNoCeU15StepperDom(page)
+    await assertNoLifecycleStepperOnDashboard(page)
 
     await captureCeU14Screenshot(page, '07-author-fail-closed-greenbc-1920x1080.png')
     await captureCeU14LocatorScreenshot(
@@ -331,7 +333,7 @@ test.describe('CE-U14 dashboard lifecycle todos UIUX evidence @1920 dual-brand',
     await dismissOnboardingTourIfPresent(page)
     await expect(page.locator('#tasks-section')).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('[data-partition-id="queue-TEST"] .el-table__row')).toHaveCount(0)
-    await assertNoCeU15StepperDom(page)
+    await assertNoLifecycleStepperOnDashboard(page)
     await captureCeU14Screenshot(page, '07d-author-queue-test-deeplink-greenbc-1920x1080.png')
   })
 })

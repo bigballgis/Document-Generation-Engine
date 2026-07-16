@@ -1,0 +1,4 @@
+
+documentgenerationengine-docgen-backend:latest 65a9488711c9 sha256:65a9488711c9786029e4e96c8f5036065a0a833104cf33272e842ddf2db8bbd7 3 minutes ago
+documentgenerationengine-docgen-frontend:latest 6d3c60f33ca3 sha256:6d3c60f33ca303fc581c11831b5f2f17722cd3aa13ee7661602f2bf7e4f5c3e9 4 minutes ago
+

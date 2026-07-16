@@ -1284,6 +1284,7 @@ export default {
         PASTE_CLEANING_BLOCKERS: '粘贴清洗阻断',
         BLOCKER_STATUS: '阻塞项状态',
         FIDELITY_WARNINGS_VIEWED: '保真警告已审阅',
+        CONTENT_MODULE_EFFECTIVE_EXPIRED: '内容模块生效期',
       },
     },
     publishSummary: {
@@ -1788,6 +1789,19 @@ export default {
       PUBLISHED: '已上线',
       STOPPED: '已停用',
       DEPRECATED: '已废弃',
+    },
+    lifecycleStepper: {
+      title: '流转进度',
+      ariaLabel: '模板流转进度',
+      goFix: '前往修复',
+      steps: {
+        draft: '编写中',
+        testing: '测试中',
+        readyForApproval: '待提交审批',
+        pendingApproval: '待审批',
+        pendingRelease: '待上线',
+        published: '已上线',
+      },
     },
     lifecycle: {
       title: '工作流操作',

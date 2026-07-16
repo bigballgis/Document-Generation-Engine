@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import LifecycleCommentDialog from '@/components/common/LifecycleCommentDialog.vue'
 import BatchTestProgressDialog from '@/components/template/BatchTestProgressDialog.vue'
+import LifecycleStepper from '@/components/templates/LifecycleStepper.vue'
 import TemplateDetailDesignTab from '@/views/templates/detail/TemplateDetailDesignTab.vue'
 import TemplateDetailTestingTab from '@/views/templates/detail/TemplateDetailTestingTab.vue'
 import TemplateDetailApprovalTab from '@/views/templates/detail/TemplateDetailApprovalTab.vue'
@@ -10,6 +12,11 @@ import TemplateDetailDevWorkspaceActions from '@/views/templates/detail/Template
 import { useTemplateDetailDevWorkspace } from '@/views/templates/detail/useTemplateDetailDevWorkspace'
 import type { SemverBumpLevel } from '@/utils/semver'
 import type { PreviewRecord } from '@/types/template'
+import type { TemplateJourneyWorkspaceQuery } from '@/utils/templateJourneyWorkspaceLink'
+import {
+  buildDevWorkspaceQuery,
+  type TemplateDevWorkspaceSubTab,
+} from '@/views/templates/templateDevWorkspaceTabs'
 import type {
   GovernanceAction,
   TemplateDetailDevWorkspaceProps,
@@ -61,10 +68,36 @@ const {
 })
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+
+function resolveStepperSubTab(query: TemplateJourneyWorkspaceQuery): TemplateDevWorkspaceSubTab | undefined {
+  if (typeof query.designTab === 'string') {
+    return query.designTab as TemplateDevWorkspaceSubTab
+  }
+  if (typeof query.testingTab === 'string') {
+    return query.testingTab as TemplateDevWorkspaceSubTab
+  }
+  if (typeof query.approvalTab === 'string') {
+    return query.approvalTab as TemplateDevWorkspaceSubTab
+  }
+  return undefined
+}
+
+function onLifecycleStepperNavigate(query: TemplateJourneyWorkspaceQuery) {
+  void router.replace({
+    query: buildDevWorkspaceQuery(route.query, query.workspaceTab, resolveStepperSubTab(query)),
+  })
+}
 </script>
 
 <template>
   <section id="dev-workspace" class="dev-workspace">
+    <LifecycleStepper
+      :lifecycle-status="lifecycleStatus"
+      :approval-sub-state="approvalSubState"
+      @navigate="onLifecycleStepperNavigate"
+    />
     <WorkspaceTabShell v-model="activeWorkspaceTab" :tabs="workspaceTabs">
       <template #actions>
         <TemplateDetailDevWorkspaceActions

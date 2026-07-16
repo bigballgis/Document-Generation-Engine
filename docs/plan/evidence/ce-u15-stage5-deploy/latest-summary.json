@@ -1,0 +1,33 @@
+{
+  "images": {
+    "backend_id": "sha256:65a9488711c9786029e4e96c8f5036065a0a833104cf33272e842ddf2db8bbd7",
+    "frontend_id": "sha256:6d3c60f33ca303fc581c11831b5f2f17722cd3aa13ee7661602f2bf7e4f5c3e9",
+    "backend": "documentgenerationengine-docgen-backend:latest",
+    "frontend": "documentgenerationengine-docgen-frontend:latest"
+  },
+  "frontend_http_status": 200,
+  "queue_status": "idle",
+  "compose_project": "documentgenerationengine",
+  "branch": "feat/ce-u15-lifecycle-stepper",
+  "result": "DEPLOY_OK",
+  "notes": [
+    "Worktree .env JWT_SECRET synced from MAIN (acceptance refuse insecure defaults)",
+    "FRONTEND_PORT aligned to 4173; COMPOSE_PROJECT_NAME=documentgenerationengine (single acceptance stack)",
+    "First attempt without COMPOSE_PROJECT_NAME collided on fixed container_name; cleaned orphan WT volumes"
+  ],
+  "stage": 5,
+  "healthz_body": {
+    "status": "UP"
+  },
+  "when": "2026-07-16T18:38:19.9002453Z",
+  "when_local": "2026-07-17T02:38:19+08:00",
+  "slice": "ce-u15-lifecycle-stepper",
+  "worktree": "D:/working/DGE-ce-u15-lifecycle-stepper",
+  "frontend_port": 4173,
+  "healthz_status": 200,
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"CE-U15 stage5 E2E stack prep #91\"",
+  "task_ids": [
+    "91"
+  ],
+  "backend_port": 8080
+}

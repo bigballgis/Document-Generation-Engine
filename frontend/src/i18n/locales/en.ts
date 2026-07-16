@@ -980,6 +980,19 @@ export default {
       STOPPED: 'Paused',
       DEPRECATED: 'Retired',
     },
+    lifecycleStepper: {
+      title: 'Workflow progress',
+      ariaLabel: 'Template workflow progress',
+      goFix: 'Go fix',
+      steps: {
+        draft: 'Draft',
+        testing: 'Testing',
+        readyForApproval: 'Ready for approval',
+        pendingApproval: 'Pending approval',
+        pendingRelease: 'Pending release',
+        published: 'Published',
+      },
+    },
     lifecycle: {
       title: 'Workflow actions',
       commentDialogTitle: 'Add comment (optional)',
@@ -1228,6 +1241,7 @@ export default {
         PASTE_CLEANING_BLOCKERS: 'Paste cleaning blockers',
         BLOCKER_STATUS: 'Blocker status',
         FIDELITY_WARNINGS_VIEWED: 'Fidelity warnings reviewed',
+        CONTENT_MODULE_EFFECTIVE_EXPIRED: 'Content module effective period',
       },
     },
     publishSummary: {

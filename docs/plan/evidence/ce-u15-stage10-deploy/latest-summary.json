@@ -1,0 +1,37 @@
+{
+  "slice": "ce-u15-lifecycle-stepper",
+  "task_ids": ["91"],
+  "stage": 10,
+  "result": "DEPLOY_OK",
+  "mode": "SkipBuild_queued_recheck",
+  "when_local": "2026-07-17T03:05:00+08:00",
+  "worktree": "D:/working/DGE-ce-u15-lifecycle-stepper",
+  "branch": "feat/ce-u15-lifecycle-stepper",
+  "compose_project": "documentgenerationengine",
+  "backend_port": 8080,
+  "frontend_port": 4173,
+  "command": ".\\scripts\\docker-deploy-queue.ps1 -SkipBuild -Reason \"CE-U15 stage10 health re-check #91\"",
+  "queue_status": "idle",
+  "healthz_status": 200,
+  "healthz_body": { "status": "UP" },
+  "frontend_http_status": 200,
+  "images": {
+    "backend": "documentgenerationengine-docgen-backend:latest",
+    "frontend": "documentgenerationengine-docgen-frontend:latest",
+    "backend_id": "sha256:6bf5f082724fc1a220e477065bd0d3cab861be7309ea5564b54849d8bc52ea9b",
+    "frontend_id": "sha256:db27b86fec13fa3ef89c5fd976618e2b9ee54273e4dfbb18a0955815e15714fd"
+  },
+  "upstream": {
+    "stage5_evidence": "docs/plan/evidence/ce-u15-stage5-deploy/",
+    "stage6_e2e": "5/5",
+    "stage7_uiux": "PASS Critical=0",
+    "stage8_arch": "PASS_WITH_NOTES Critical=0",
+    "stage9_cq": "PASS_WITH_NOTES Critical=0"
+  },
+  "notes": [
+    "Pre-check: queue idle; :8080 UP; :4173 200 — preferred -SkipBuild path",
+    "COMPOSE_PROJECT_NAME=documentgenerationengine; single acceptance stack; no second project",
+    "Queued SkipBuild from CE-U15 worktree; docker image layers CACHED; app containers recreated healthy",
+    "No Critical FE fixes after stage 5 requiring forced full rebuild"
+  ]
+}
