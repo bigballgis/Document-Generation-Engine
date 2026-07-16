@@ -1,0 +1,20 @@
+{
+  "result": "DEPLOY_OK",
+  "when": "2026-07-17T03:48:14+08:00",
+  "slice": "ce-u16-authoring-path-compress",
+  "task_ids": [
+    "92"
+  ],
+  "worktree": "D:/working/DGE-ce-u16-authoring-path-compress",
+  "branch": "feat/ce-u16-authoring-path-compress",
+  "compose_project": "documentgenerationengine",
+  "frontend_port": 4173,
+  "backend_port": 8080,
+  "healthz_status": 200,
+  "healthz_body": "{\"status\":\"UP\"}",
+  "frontend_status": 200,
+  "backend_image_id": "sha256:c76680c0f629e4b2d0b671020f875ad3edb882cffcf8b1105d750eff0946e758",
+  "frontend_image_id": "sha256:5ae70fa815ff0e782fce957f35c832d02f06b01170cce4480c6098c7e996aaf8",
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"CE-U16 stage5 E2E stack prep #92\"",
+  "next": "6 e2e-test-engineer"
+}

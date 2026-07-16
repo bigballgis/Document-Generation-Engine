@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import LifecycleCommentDialog from '@/components/common/LifecycleCommentDialog.vue'
 import BatchTestProgressDialog from '@/components/template/BatchTestProgressDialog.vue'
+import AuthoringPathGuide from '@/components/templates/AuthoringPathGuide.vue'
+import AuthoringPathMasterPanel from '@/components/templates/AuthoringPathMasterPanel.vue'
 import LifecycleStepper from '@/components/templates/LifecycleStepper.vue'
 import TemplateDetailDesignTab from '@/views/templates/detail/TemplateDetailDesignTab.vue'
 import TemplateDetailTestingTab from '@/views/templates/detail/TemplateDetailTestingTab.vue'
@@ -13,6 +16,13 @@ import { useTemplateDetailDevWorkspace } from '@/views/templates/detail/useTempl
 import type { SemverBumpLevel } from '@/utils/semver'
 import type { PreviewRecord } from '@/types/template'
 import type { TemplateJourneyWorkspaceQuery } from '@/utils/templateJourneyWorkspaceLink'
+import {
+  dismissAuthoringPathGuide,
+  isAuthoringPathGuideVisible,
+  resolveAuthoringPathGuideStep,
+  stripAuthoringPathGuideQuery,
+  type AuthoringPathGuideNavigateQuery,
+} from '@/utils/templateAuthoringPathGuide'
 import {
   buildDevWorkspaceQuery,
   type TemplateDevWorkspaceSubTab,
@@ -71,6 +81,14 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
+const authoringPathGuideVisible = computed(() =>
+  isAuthoringPathGuideVisible(props.templateId, route.query),
+)
+const authoringPathGuideStep = computed(() => resolveAuthoringPathGuideStep(route.query))
+const showAuthoringPathMasterPanel = computed(
+  () => authoringPathGuideVisible.value && authoringPathGuideStep.value === 'master',
+)
+
 function resolveStepperSubTab(query: TemplateJourneyWorkspaceQuery): TemplateDevWorkspaceSubTab | undefined {
   if (typeof query.designTab === 'string') {
     return query.designTab as TemplateDevWorkspaceSubTab
@@ -89,6 +107,28 @@ function onLifecycleStepperNavigate(query: TemplateJourneyWorkspaceQuery) {
     query: buildDevWorkspaceQuery(route.query, query.workspaceTab, resolveStepperSubTab(query)),
   })
 }
+
+function onAuthoringPathNavigate(query: AuthoringPathGuideNavigateQuery) {
+  const workspaceQuery = buildDevWorkspaceQuery(
+    route.query,
+    query.workspaceTab,
+    resolveStepperSubTab(query),
+  )
+  void router.replace({
+    query: {
+      ...workspaceQuery,
+      authoringGuide: query.authoringGuide,
+      authoringGuideStep: query.authoringGuideStep,
+    },
+  })
+}
+
+function onAuthoringPathDismiss() {
+  dismissAuthoringPathGuide(props.templateId)
+  void router.replace({
+    query: stripAuthoringPathGuideQuery(route.query),
+  })
+}
 </script>
 
 <template>
@@ -98,7 +138,21 @@ function onLifecycleStepperNavigate(query: TemplateJourneyWorkspaceQuery) {
       :approval-sub-state="approvalSubState"
       @navigate="onLifecycleStepperNavigate"
     />
-    <WorkspaceTabShell v-model="activeWorkspaceTab" :tabs="workspaceTabs">
+    <AuthoringPathGuide
+      v-if="authoringPathGuideVisible"
+      :current-step="authoringPathGuideStep"
+      @navigate="onAuthoringPathNavigate"
+      @dismiss="onAuthoringPathDismiss"
+    />
+    <AuthoringPathMasterPanel
+      v-if="showAuthoringPathMasterPanel"
+      :master-id="masterId"
+    />
+    <WorkspaceTabShell
+      v-if="!showAuthoringPathMasterPanel"
+      v-model="activeWorkspaceTab"
+      :tabs="workspaceTabs"
+    >
       <template #actions>
         <TemplateDetailDevWorkspaceActions
           :active-workspace-tab="activeWorkspaceTab"

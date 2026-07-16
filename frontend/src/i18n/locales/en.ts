@@ -993,6 +993,31 @@ export default {
         published: 'Published',
       },
     },
+    authoringPathGuide: {
+      title: 'Authoring path',
+      subtitle: 'Confirm the master, then bind placeholders, declare variables, and preview.',
+      ariaLabel: 'Template authoring path',
+      next: 'Next',
+      skip: 'Skip guide',
+      dismiss: 'Dismiss',
+      steps: {
+        master: 'Master',
+        bindings: 'Bindings',
+        variables: 'Variables',
+        preview: 'Preview',
+      },
+      master: {
+        title: 'Confirm linked master',
+        description:
+          'Review the master document and its layout placeholders before configuring bindings.',
+        linkedMaster: 'Linked master',
+        groupLabel: 'Group: {groupCode}',
+        anchorCount: '{count} layout placeholders',
+        noAnchors: 'No layout placeholders found on the linked master.',
+        loadFailed: 'Unable to load master summary.',
+        retry: 'Retry',
+      },
+    },
     lifecycle: {
       title: 'Workflow actions',
       commentDialogTitle: 'Add comment (optional)',

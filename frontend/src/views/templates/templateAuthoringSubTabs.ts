@@ -7,7 +7,8 @@ export const TEMPLATE_AUTHORING_SUB_TABS = [
 
 export type TemplateAuthoringSubTab = (typeof TEMPLATE_AUTHORING_SUB_TABS)[number]
 
-export const DEFAULT_TEMPLATE_AUTHORING_SUB_TAB: TemplateAuthoringSubTab = 'variables'
+/** CE-U16 — design lands on Bindings when designTab / legacy authoringTab is absent or invalid. */
+export const DEFAULT_TEMPLATE_AUTHORING_SUB_TAB: TemplateAuthoringSubTab = 'bindings'
 
 const TEMPLATE_AUTHORING_SUB_TAB_LABEL_KEYS: Record<TemplateAuthoringSubTab, string> = {
   variables: 'templates.authoring.subTabs.variables',

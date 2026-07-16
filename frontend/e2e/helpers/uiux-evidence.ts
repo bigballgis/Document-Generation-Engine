@@ -1235,6 +1235,36 @@ export async function captureCeU15LocatorScreenshot(
   return filename
 }
 
+/** CE-U16 authoring path compress — 1920×1080 dual-brand evidence. */
+export const CE_U16_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-U16')
+export const CE_U16_SCREENSHOT_DIR = path.join(CE_U16_EVIDENCE_ROOT, 'screenshots')
+export const CE_U16_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensureCeU16EvidenceDirs(): void {
+  fs.mkdirSync(CE_U16_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceU16ScreenshotPath(filename: string): string {
+  return path.join(CE_U16_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeU16Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeU16EvidenceDirs()
+  const target = ceU16ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeU16LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeU16EvidenceDirs()
+  const target = ceU16ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
 /** CE-K05 master impact real — impact panel / replace confirm / revision diff @1440×900. */
 export const CE_K05_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-K05')
 export const CE_K05_SCREENSHOT_DIR = path.join(CE_K05_EVIDENCE_ROOT, 'screenshots')
