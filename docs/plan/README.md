@@ -7,20 +7,20 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Delivery focus note (2026-07-16):** **CORE-EXCELLENCE (CE)** — **sole-active leaf #81** CE-O01 → **In Progress** (slice `ce-o01-pdfa-output`; worktree `DGE-ce-o01-pdfa-output` · `feat/ce-o01-pdfa-output`; BDD ready; ADR-0058 Accepted; FE/E2E out of scope) — do **not** start another CE leaf; **#79** CE-E02 → **Done** (merge `5bd3611e`) — do **not** reopen; **#78** CE-E01 → **Done** (merge `6ae57974`) — do **not** reopen; **#76** CE-G06 → **Done** (merge `d8636232`) — do **not** reopen; **#71** CE-C06 → **Done** (merge `35f6f47d`) — do **not** reopen; **#89** CE-U13 → **Done** (merge `ccdfacda`); **#74** CE-G03 → **Done** (merge `50c1a524`); **#62** CE-K06 → **Done** (K06a `485a7f3e` + K06b `a689ca87` + K06c tip `76297d08`); **#69** CE-C04 / **#70** CE-C05 / **#88** CE-U06 → **Done** (merges `c7be8305` / `405f7cea` / `7734366e`); Wave 0 #61/#86/#87 **Done**; umbrella **#53** remains **in-progress** (program registry only); [core-excellence-program-2026-07.md](core-excellence-program-2026-07.md). Prior waves closed (#60/#84/#85; #59/#68/#83). **Batch 4 remains Done**. Batch 1–3 Done. Formal phase remains **None**; **not** go-live; do **not** activate CD-3; do **not** invent a formal P-phase. Overall checklist remains **NO-GO** (blocking **#3b**; #5a/#10 **CONDITIONAL**). **Scaffold hygiene (2026-07-14):** slice `cursor-scaffold-hygiene` — Cursor-only agent/docs; ADR-0055; see ledger. **Prior:** **BOOT-4-1-UPGRADE → Done** (Task Master **#51**; merge `993c287`). **CDP Wave CD-2 Done** (no CDP wave In Progress). **LRP A–E Done**.
+**Delivery focus note (2026-07-16):** **CORE-EXCELLENCE (CE)** — **#81** CE-O01 → **Done** (merge `e081bcfa`; worktree removed) — sole-active **cleared**; **§9.2 next queue head #75** CE-G04 (**pending** — activate via deliver); **#79** CE-E02 → **Done** (merge `5bd3611e`) — do **not** reopen; **#78** CE-E01 → **Done** (merge `6ae57974`) — do **not** reopen; **#76** CE-G06 → **Done** (merge `d8636232`) — do **not** reopen; **#71** CE-C06 → **Done** (merge `35f6f47d`) — do **not** reopen; **#89** CE-U13 → **Done** (merge `ccdfacda`); **#74** CE-G03 → **Done** (merge `50c1a524`); **#62** CE-K06 → **Done** (K06a `485a7f3e` + K06b `a689ca87` + K06c tip `76297d08`); **#69** CE-C04 / **#70** CE-C05 / **#88** CE-U06 → **Done** (merges `c7be8305` / `405f7cea` / `7734366e`); Wave 0 #61/#86/#87 **Done**; umbrella **#53** remains **in-progress** (program registry only); [core-excellence-program-2026-07.md](core-excellence-program-2026-07.md). Prior waves closed (#60/#84/#85; #59/#68/#83). **Batch 4 remains Done**. Batch 1–3 Done. Formal phase remains **None**; **not** go-live; do **not** activate CD-3; do **not** invent a formal P-phase. Overall checklist remains **NO-GO** (blocking **#3b**; #5a/#10 **CONDITIONAL**). **Scaffold hygiene (2026-07-14):** slice `cursor-scaffold-hygiene` — Cursor-only agent/docs; ADR-0055; see ledger. **Prior:** **BOOT-4-1-UPGRADE → Done** (Task Master **#51**; merge `993c287`). **CDP Wave CD-2 Done** (no CDP wave In Progress). **LRP A–E Done**.
 
 **Active formal phase / program:** **None** (2026-07-09). **CODE-QUALITY program Done** (CQ-01A…CQ-08; ArchUnit **11/11**); see [program entry](code-quality-program.md) and [task sheet](detail/CODE-QUALITY-code-hygiene.md). **CORE-FORTRESS program Done** (F1–F8; 2026-07-09). **CORE-EXCELLENCE** is the active delivery program (not a formal P-phase). **LRP waves A–E → Done**. **CDP Wave CD-2 → Done** (T01–T13; **no CDP wave In Progress**). Historical LR-C/D/E and CD-E2E slice evidence: [execution-sync-ledger.md](./execution-sync-ledger.md) · [LRP program](launch-readiness-program.md) · [CDP program](competitiveness-deepening-program.md).
 
 **Ad-hoc slice (2026-07-16):** **ORCH-AGENT-ENUM-DOCS → Done** — align AGENTS /
 MODEL-STRATEGY / inline-agent wording with retry-first runtime policy. Formal phase
-**None**. Do **not** activate **#81** CE-O01.
+**None**. **#81** CE-O01 is **Done** (`e081bcfa`).
 
 **Ad-hoc slice (2026-07-16):** **ORCH-SPECIALIST-RETRY-ONLY → Done** — supersedes auto-GP
 default; retry ≤3 then BLOCKED (`orch-specialist-retry-only`;
 [specialist-runtime-fallback.md](../behavior/specialist-runtime-fallback.md);
 [orch-specialist-fallback-governance.md](./orch-specialist-fallback-governance.md)).
 Opt-in downgrade: `允许降级` / `allow-gp-fallback`. Formal phase **None**. Do **not**
-activate **#81** CE-O01.
+**#81** CE-O01 is **Done** (`e081bcfa`).
 
 **Ad-hoc slice (2026-07-16):** **ORCH-SPECIALIST-FALLBACK → Done** (auto-GP default —
 **superseded** by retry-only policy above).
@@ -29,7 +29,7 @@ activate **#81** CE-O01.
 governance (`orch-batch-recommend`; skill + constitution + BDD
 [delivery-batch-recommend.md](../behavior/delivery-batch-recommend.md);
 note [orch-batch-recommend-governance.md](./orch-batch-recommend-governance.md)). Formal phase
-remains **None**. **#81** CE-O01 is now the sole-active CE leaf via deliver (not activated by this governance slice). Do **not** invent a P-phase.
+remains **None**. **#81** CE-O01 → **Done** (`e081bcfa`; not activated by this governance slice). Do **not** invent a P-phase.
 
 **Ad-hoc slice (2026-07-10):** **[MGMT-UI-DEFECTS](detail/MGMT-UI-defects.md)** — Round 2 / P0 **Done**; **Round 3 / P1 depth governance Done** (`mgmt-ui-p1`; merge `180bffb`; worktree removed).
 
@@ -129,7 +129,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | **[code-quality-program.md](./code-quality-program.md)** | **CODE-QUALITY program Done (2026-07-09):** behavior-preserving hygiene — module boundaries, god-class extraction, DRY demo/PDF/E2E infra (`CQ-*`) |
 | **[system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md)** | **Consolidated optimization review (SOR-0…7, 2026-07-04 closeout)** — open hygiene items superseded by **CODE-QUALITY** where duplicated |
 | **[core-excellence-program-2026-07.md](./core-excellence-program-2026-07.md)** | **Core Excellence（CE-K/U/C/G/E/O）** — Task Master **#53–#97**; **Batch 1–4 Done**; Wave 0 #61/#86/#87 **Done**; **#62/#69/#70/#88 Done**; prior #60/#84/#85 **Done**; formal phase **None** (optimization backlog, not a P-phase) |
-| **[orch-batch-recommend-governance.md](./orch-batch-recommend-governance.md)** | **Agent governance (2026-07-16)** — pre-0 Batch Recommendation (`merge`\|`solo`\|`split`); not a P-phase; do **not** activate #81 CE-O01 |
+| **[orch-batch-recommend-governance.md](./orch-batch-recommend-governance.md)** | **Agent governance (2026-07-16)** — pre-0 Batch Recommendation (`merge`\|`solo`\|`split`); not a P-phase; #81 CE-O01 later **Done** |
 | **[comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)** | **Unified prioritized map (COR-0…6): docs sync, API contract, template workflow, frontend UX, performance, E2E, P14–P20 — start here (2026-06-23)** |
 | [launch-readiness-program.md](./launch-readiness-program.md) | Launch-readiness deep optimization — production pitfalls + usability deepening (LR-A…E; sibling program; **Wave LR-C Done**; **Wave LR-D Done** — D1–D7; merge tip `218dcf1`; **Wave LR-E Done** — E1 merge `575d0aa` #42; E2 merge `ae39fbb` #43; docs gate; checklist **NO-GO**; **LRP planned waves → Done**) |
 | [optimization-plan.md](./optimization-plan.md) | Technical debt detail: quality gates, coverage, backend architecture/security/performance (OPT-A…G) |

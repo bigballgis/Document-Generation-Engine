@@ -801,7 +801,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T03:36:00.000Z"
+        "updatedAt": "2026-07-15T03:36:00Z"
       },
       {
         "id": "59",
@@ -815,7 +815,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T05:40:00.000Z"
+        "updatedAt": "2026-07-15T05:40:00Z"
       },
       {
         "id": "60",
@@ -830,7 +830,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T00:26:00.000Z"
+        "updatedAt": "2026-07-15T00:26:00Z"
       },
       {
         "id": "61",
@@ -845,7 +845,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T07:35:00.000Z"
+        "updatedAt": "2026-07-15T07:35:00Z"
       },
       {
         "id": "62",
@@ -860,7 +860,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T14:20:00.000Z"
+        "updatedAt": "2026-07-15T14:20:00Z"
       },
       {
         "id": "63",
@@ -874,7 +874,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T01:23:00.000Z"
+        "updatedAt": "2026-07-16T01:23:00Z"
       },
       {
         "id": "64",
@@ -888,7 +888,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T04:15:00.000Z"
+        "updatedAt": "2026-07-14T04:15:00Z"
       },
       {
         "id": "65",
@@ -902,7 +902,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T05:20:00.000Z"
+        "updatedAt": "2026-07-14T05:20:00Z"
       },
       {
         "id": "66",
@@ -916,7 +916,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T10:50:00.000Z"
+        "updatedAt": "2026-07-14T10:50:00Z"
       },
       {
         "id": "67",
@@ -931,7 +931,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T01:52:00.000Z"
+        "updatedAt": "2026-07-15T01:52:00Z"
       },
       {
         "id": "68",
@@ -945,7 +945,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T05:40:00.000Z"
+        "updatedAt": "2026-07-15T05:40:00Z"
       },
       {
         "id": "69",
@@ -959,7 +959,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T11:05:00.000Z"
+        "updatedAt": "2026-07-15T11:05:00Z"
       },
       {
         "id": "70",
@@ -973,7 +973,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T13:10:00.000Z"
+        "updatedAt": "2026-07-15T13:10:00Z"
       },
       {
         "id": "71",
@@ -987,7 +987,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T05:20:00.000Z"
+        "updatedAt": "2026-07-16T05:20:00Z"
       },
       {
         "id": "72",
@@ -1001,7 +1001,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T11:05:00.000Z"
+        "updatedAt": "2026-07-14T11:05:00Z"
       },
       {
         "id": "73",
@@ -1016,7 +1016,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T03:36:00.000Z"
+        "updatedAt": "2026-07-15T03:36:00Z"
       },
       {
         "id": "74",
@@ -1031,13 +1031,13 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T03:45:00.000Z"
+        "updatedAt": "2026-07-16T03:45:00Z"
       },
       {
         "id": "75",
         "title": "CE-G04: Legal hold minimum",
-        "description": "PENDING/parked 2026-07-16. §9.2 next queue head AFTER #81 CE-O01 Done (do not activate while O01 In Progress). Slice ce-g04-legal-hold. Hold entity + retention schedulers respect hold; GLOBAL_ADMIN page. P2·M.",
-        "details": "Soft after G03 (#74 Done). Recommend activate only after #81 CE-O01 merge + MAIN doc-sync (single-lane §9.2). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G04 / §9.2 row 2.",
+        "description": "PENDING/parked 2026-07-16. §9.2 next queue head AFTER #81 CE-O01 Done (recommended next deliver; do not auto-activate). Slice ce-g04-legal-hold. Hold entity + retention schedulers respect hold; GLOBAL_ADMIN page. P2·M.",
+        "details": "Soft after G03 (#74 Done). #81 CE-O01 → Done (merge e081bcfa). Recommend activate via /deliver (single-lane §9.2). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G04 / §9.2 row 1.",
         "testStrategy": "1. Hold blocks purge. 2. Admin UI. 3. mvn verify + FE gates.",
         "priority": "medium",
         "dependencies": [
@@ -1045,7 +1045,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-16T04:57:37.459Z"
       },
       {
         "id": "76",
@@ -1059,7 +1059,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T06:16:00.000Z"
+        "updatedAt": "2026-07-16T06:16:00Z"
       },
       {
         "id": "77",
@@ -1073,7 +1073,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T02:45:00Z"
       },
       {
         "id": "78",
@@ -1115,22 +1115,22 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T02:45:00Z"
       },
       {
         "id": "81",
         "title": "CE-O01: PDF/A-2b archival output option",
-        "description": "IN PROGRESS 2026-07-16 (sole-active CE leaf). Slice ce-o01-pdfa-output. Worktree D:/working/DGE-ce-o01-pdfa-output · feat/ce-o01-pdfa-output. BDD ready; ADR-0058 Accepted. pdfArchivalProfile NONE/PDF_A_2B; LO PDF/A-2b filter; encryption mutex → 400 PDF_ARCHIVAL_ENCRYPTION_MUTEX; golden/veraPDF or lightweight pdfaid. FE/E2E out of scope. P2·M. D6=A-2b.",
-        "details": "Sole-active (single-lane serial §9.2). BDD ready: docs/behavior/ce-o01-pdfa-output.md (BDD-CE-O01-001…016); ADR-0058 Accepted. Depends K07 (#54) + E02 (#79) Done. CE-O02 skipped (D5). FE profile UI / Playwright E2E out of scope (API/render-only). Gates before Done: mvn verify + golden archival check; frontend lint/type-check/test/build as applicable (no E2E/UIUX); queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §8 CE-O01 In Progress.",
+        "description": "DONE 2026-07-16. Slice ce-o01-pdfa-output. Merge e081bcfa. PDF/A-2b archival via pdfArchivalProfile; ADR-0058; encryption mutex; golden pdfaid. FE/E2E out of scope. Formal phase None.",
+        "details": "Completed 2026-07-16 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: ce-o01-pdfa-output. Placement was ISOLATED · feat/ce-o01-pdfa-output (worktree removed). Merge e081bcfa (e081bcfaea6987e6ca5da8f4ac8c7ed83c648e73). BDD ready docs/behavior/ce-o01-pdfa-output.md (BDD-CE-O01-001…016). ADR-0058 Accepted. Gates: mvn verify GREEN (1804 tests; 0 fail / 8 skipped); architecture PASS Critical=0 (ADR-0058 / rendering boundaries); Stage 10 DEPLOY_OK (docker-deploy-queue; compose dge-ce-o01-pdfa-output; :8080 healthz 200; frontend 200). FE/E2E/UIUX N/A (API/render-only). Formal phase remains None. Plan §8 CE-O01 Done. §9.2 next head #75 CE-G04 (pending — activate via deliver). Do NOT activate CD-3 / claim go-live.",
         "testStrategy": "1. PDF/A-2b option works (BDD-CE-O01-003). 2. ADR-0058 Accepted. 3. Encryption mutex (BDD-CE-O01-005). 4. mvn verify + golden archival assert. 5. No FE E2E required.",
         "priority": "medium",
         "dependencies": [
           "54",
           "79"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T04:11:12Z"
+        "updatedAt": "2026-07-16T04:57:37.459Z"
       },
       {
         "id": "82",
@@ -1144,7 +1144,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T01:52:00.000Z"
+        "updatedAt": "2026-07-15T01:52:00Z"
       },
       {
         "id": "83",
@@ -1158,7 +1158,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T05:54:00.000Z"
+        "updatedAt": "2026-07-15T05:54:00Z"
       },
       {
         "id": "84",
@@ -1172,7 +1172,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T00:26:00.000Z"
+        "updatedAt": "2026-07-15T00:26:00Z"
       },
       {
         "id": "85",
@@ -1186,7 +1186,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T01:00:00.000Z"
+        "updatedAt": "2026-07-15T01:00:00Z"
       },
       {
         "id": "86",
@@ -1200,7 +1200,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T07:35:00.000Z"
+        "updatedAt": "2026-07-15T07:35:00Z"
       },
       {
         "id": "87",
@@ -1214,7 +1214,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T07:35:00.000Z"
+        "updatedAt": "2026-07-15T07:35:00Z"
       },
       {
         "id": "88",
@@ -1229,7 +1229,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-15T13:10:00.000Z"
+        "updatedAt": "2026-07-15T13:10:00Z"
       },
       {
         "id": "89",
@@ -1243,7 +1243,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T04:40:00.000Z"
+        "updatedAt": "2026-07-16T04:40:00Z"
       },
       {
         "id": "90",
@@ -1257,7 +1257,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T02:45:00Z"
       },
       {
         "id": "91",
@@ -1271,7 +1271,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T02:45:00Z"
       },
       {
         "id": "92",
@@ -1285,7 +1285,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T02:45:00Z"
       },
       {
         "id": "93",
@@ -1299,7 +1299,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T02:45:00Z"
       },
       {
         "id": "94",
@@ -1313,7 +1313,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T02:45:00Z"
       },
       {
         "id": "95",
@@ -1327,7 +1327,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T02:45:00Z"
       },
       {
         "id": "96",
@@ -1341,7 +1341,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T02:45:00Z"
       },
       {
         "id": "97",
@@ -1355,18 +1355,18 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T02:45:00Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-15T09:13:00.000Z",
+      "lastModified": "2026-07-15T09:13:00Z",
       "taskCount": 97,
       "completedCount": 61,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-16T03:37:00.000Z"
+      "updated": "2026-07-16T03:37:00Z"
     }
   }
 }
