@@ -32,10 +32,14 @@ describe('templateDevWorkspaceTabs', () => {
     expect(resolveTemplateDevWorkspaceTabFromQuery({ tab: 'lifecycle' })).toBe('approval')
   })
 
-  it('resolves design sub-tab from designTab query with legacy fallback', () => {
+  it('BDD-CE-U16-APC-001/002: resolves design sub-tab with bindings default and explicit priority', () => {
+    expect(resolveDesignSubTabFromQuery({})).toBe('bindings')
+    expect(resolveDesignSubTabFromQuery({ workspaceTab: 'design' })).toBe('bindings')
+    expect(resolveDesignSubTabFromQuery({ designTab: 'variables' })).toBe('variables')
     expect(resolveDesignSubTabFromQuery({ designTab: 'contentModules' })).toBe('contentModules')
     expect(resolveDesignSubTabFromQuery({ authoringTab: 'bindings' })).toBe('bindings')
-    expect(resolveDesignSubTabFromQuery({ authoringTab: 'testPreview' })).toBe('variables')
+    expect(resolveDesignSubTabFromQuery({ authoringTab: 'testPreview' })).toBe('bindings')
+    expect(resolveDesignSubTabFromQuery({ designTab: 'not-a-tab' })).toBe('bindings')
   })
 
   it('maps workflow focus to approval workspace tab', () => {

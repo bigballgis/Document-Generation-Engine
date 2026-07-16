@@ -16,9 +16,10 @@ describe('templateAuthoringSubTabs', () => {
     ])
   })
 
-  it('defaults unknown query values to variables', () => {
+  it('BDD-CE-U16-APC-001: defaults unknown / missing query values to bindings', () => {
     expect(resolveTemplateAuthoringSubTab('rules')).toBe(DEFAULT_TEMPLATE_AUTHORING_SUB_TAB)
-    expect(resolveTemplateAuthoringSubTab(undefined)).toBe('variables')
+    expect(resolveTemplateAuthoringSubTab(undefined)).toBe('bindings')
+    expect(DEFAULT_TEMPLATE_AUTHORING_SUB_TAB).toBe('bindings')
   })
 
   it('resolves label keys for each sub-tab', () => {

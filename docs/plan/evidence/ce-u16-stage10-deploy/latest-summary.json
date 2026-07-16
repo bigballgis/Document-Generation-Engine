@@ -1,0 +1,17 @@
+{
+  "result": "DEPLOY_OK",
+  "frontend_image": "sha256:5ae70fa815ff0e782fce957f35c832d02f06b01170cce4480c6098c7e996aaf8",
+  "task": 92,
+  "healthz": "{\"status\":\"UP\"}",
+  "backend_image": "sha256:c76680c0f629e4b2d0b671020f875ad3edb882cffcf8b1105d750eff0946e758",
+  "http_8080": 200,
+  "branch": "feat/ce-u16-authoring-path-compress",
+  "http_4173": 200,
+  "slice": "ce-u16-authoring-path-compress",
+  "compose_project": "documentgenerationengine",
+  "when": "2026-07-17T04:49:05+08:00",
+  "stage": 10,
+  "worktree": "D:/working/DGE-ce-u16-authoring-path-compress",
+  "note": "Stage5 DEPLOY_OK stack still healthy; no image rebuild required for frontend-only closeout with no code change since E2E tip",
+  "command": "health re-check (SkipBuild aborted: container name conflict vs documentgenerationengine; stack already UP)"
+}

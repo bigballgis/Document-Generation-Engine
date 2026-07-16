@@ -11,6 +11,7 @@ import { templateDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateSummary } from '@/types/template'
 import { ElMessage } from 'element-plus'
+import { buildPostCreateAuthoringPath } from '@/utils/templateAuthoringPathGuide'
 import { createTemplateListCatalogControls } from '@/views/templates/createTemplateListCatalogControls'
 import {
   buildTemplateListQuery,
@@ -149,9 +150,25 @@ export function useTemplateListCatalog() {
     onWorkflowFilterChange: (key: WorkflowFilterKey, checked: boolean) => {
       activeWorkflowFilter.value = checked ? key : null
     },
-    handleCreated: (templateId: string) => {
+    handleCreated: async (templateId: string) => {
       ElMessage.success(t('templates.create.success'))
-      router.push(templateDetailPath(templateId))
+      let detail = templatesStore.selectedTemplate
+      if (!detail || detail.id !== templateId || !detail.devVersionId) {
+        try {
+          await templatesStore.fetchTemplate(templateId)
+          detail = templatesStore.selectedTemplate
+        } catch {
+          router.push(templateDetailPath(templateId))
+          return
+        }
+      }
+      const devVersionId = detail?.devVersionId
+      if (!devVersionId) {
+        router.push(templateDetailPath(templateId))
+        return
+      }
+      // CE-U16 — land on dev workspace with Authoring path micro-wizard (Master first).
+      router.push(buildPostCreateAuthoringPath(templateId, devVersionId))
     },
     handleImported: (templateId: string) => {
       ElMessage.success(t('templates.import.success'))

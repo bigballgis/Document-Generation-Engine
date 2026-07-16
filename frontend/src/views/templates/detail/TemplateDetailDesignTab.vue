@@ -66,7 +66,7 @@ watch(
       return
     }
     // contentModules pane is v-if gated on groupCode; re-apply query after it mounts
-    // so deep links (?designTab=contentModules) are not lost to the variables default.
+    // so deep links (?designTab=contentModules) are not lost to the bindings default.
     activeSubTab.value = resolveDesignSubTabFromQuery(route.query)
   },
 )
