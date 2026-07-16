@@ -7,7 +7,7 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Delivery focus note (2026-07-16):** **CORE-EXCELLENCE (CE)** — **sole-active CE delivery leaf = #75 CE-G04** (**in-progress**; slice `ce-g04-legal-hold`; worktree `DGE-ce-g04-legal-hold`); **#81** CE-O01 → **Done** (merge `e081bcfa`; worktree removed); **§9.2 next after G04 #90** CE-U14 (**pending**/parked); **#79** CE-E02 → **Done** (merge `5bd3611e`) — do **not** reopen; **#78** CE-E01 → **Done** (merge `6ae57974`) — do **not** reopen; **#76** CE-G06 → **Done** (merge `d8636232`) — do **not** reopen; **#71** CE-C06 → **Done** (merge `35f6f47d`) — do **not** reopen; **#89** CE-U13 → **Done** (merge `ccdfacda`); **#74** CE-G03 → **Done** (merge `50c1a524`); **#62** CE-K06 → **Done** (K06a `485a7f3e` + K06b `a689ca87` + K06c tip `76297d08`); **#69** CE-C04 / **#70** CE-C05 / **#88** CE-U06 → **Done** (merges `c7be8305` / `405f7cea` / `7734366e`); Wave 0 #61/#86/#87 **Done**; umbrella **#53** remains **in-progress** (program registry only); [core-excellence-program-2026-07.md](core-excellence-program-2026-07.md). Prior waves closed (#60/#84/#85; #59/#68/#83). **Batch 4 remains Done**. Batch 1–3 Done. Formal phase remains **None**; **not** go-live; do **not** activate CD-3; do **not** invent a formal P-phase. Overall checklist remains **NO-GO** (blocking **#3b**; #5a/#10 **CONDITIONAL**). **Scaffold hygiene (2026-07-14):** slice `cursor-scaffold-hygiene` — Cursor-only agent/docs; ADR-0055; see ledger. **Prior:** **BOOT-4-1-UPGRADE → Done** (Task Master **#51**; merge `993c287`). **CDP Wave CD-2 Done** (no CDP wave In Progress). **LRP A–E Done**.
+**Delivery focus note (2026-07-16):** **CORE-EXCELLENCE (CE)** — **#75** CE-G04 → **Done** (merge tip `42745ea5` / feature `b47ea896`; worktree removed; sole-active cleared); **§9.2 next #90** CE-U14 (**pending**/parked — do **not** auto-start); **#81** CE-O01 → **Done** (merge `e081bcfa`; worktree removed); **#79** CE-E02 → **Done** (merge `5bd3611e`) — do **not** reopen; **#78** CE-E01 → **Done** (merge `6ae57974`) — do **not** reopen; **#76** CE-G06 → **Done** (merge `d8636232`) — do **not** reopen; **#71** CE-C06 → **Done** (merge `35f6f47d`) — do **not** reopen; **#89** CE-U13 → **Done** (merge `ccdfacda`); **#74** CE-G03 → **Done** (merge `50c1a524`); **#62** CE-K06 → **Done** (K06a `485a7f3e` + K06b `a689ca87` + K06c tip `76297d08`); **#69** CE-C04 / **#70** CE-C05 / **#88** CE-U06 → **Done** (merges `c7be8305` / `405f7cea` / `7734366e`); Wave 0 #61/#86/#87 **Done**; umbrella **#53** remains **in-progress** (program registry only); [core-excellence-program-2026-07.md](core-excellence-program-2026-07.md). Prior waves closed (#60/#84/#85; #59/#68/#83). **Batch 4 remains Done**. Batch 1–3 Done. Formal phase remains **None**; **not** go-live; do **not** activate CD-3; do **not** invent a formal P-phase. Overall checklist remains **NO-GO** (blocking **#3b**; #5a/#10 **CONDITIONAL**). **Scaffold hygiene (2026-07-14):** slice `cursor-scaffold-hygiene` — Cursor-only agent/docs; ADR-0055; see ledger. **Prior:** **BOOT-4-1-UPGRADE → Done** (Task Master **#51**; merge `993c287`). **CDP Wave CD-2 Done** (no CDP wave In Progress). **LRP A–E Done**.
 
 **Active formal phase / program:** **None** (2026-07-09). **CODE-QUALITY program Done** (CQ-01A…CQ-08; ArchUnit **11/11**); see [program entry](code-quality-program.md) and [task sheet](detail/CODE-QUALITY-code-hygiene.md). **CORE-FORTRESS program Done** (F1–F8; 2026-07-09). **CORE-EXCELLENCE** is the active delivery program (not a formal P-phase). **LRP waves A–E → Done**. **CDP Wave CD-2 → Done** (T01–T13; **no CDP wave In Progress**). Historical LR-C/D/E and CD-E2E slice evidence: [execution-sync-ledger.md](./execution-sync-ledger.md) · [LRP program](launch-readiness-program.md) · [CDP program](competitiveness-deepening-program.md).
 
@@ -15,15 +15,17 @@ verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06
 MODEL-STRATEGY / inline-agent wording with retry-first runtime policy. Formal phase
 **None**. **#81** CE-O01 is **Done** (`e081bcfa`).
 
-**Ad-hoc slice (2026-07-16):** **ORCH-SPECIALIST-RETRY-ONLY → Done** — supersedes auto-GP
-default; retry ≤3 then BLOCKED (`orch-specialist-retry-only`;
+**Ad-hoc slice (2026-07-16):** **ORCH-SPECIALIST-RETRY-THEN-GP → Done** — retry ≤3
+then GP under contract (`orch-specialist-retry-then-gp`;
 [specialist-runtime-fallback.md](../behavior/specialist-runtime-fallback.md);
 [orch-specialist-fallback-governance.md](./orch-specialist-fallback-governance.md)).
-Opt-in downgrade: `允许降级` / `allow-gp-fallback`. Formal phase **None**. Do **not**
-**#81** CE-O01 is **Done** (`e081bcfa`).
+Forbid: `禁止降级` / `no-gp-fallback`. Early opt-in: `允许降级` / `allow-gp-fallback`.
+Formal phase **None**. Placement **MAIN** (`main-only`). Committed with CE-G04 closeout.
 
-**Ad-hoc slice (2026-07-16):** **ORCH-SPECIALIST-FALLBACK → Done** (auto-GP default —
-**superseded** by retry-only policy above).
+**Ad-hoc slice (2026-07-16):** **ORCH-SPECIALIST-RETRY-ONLY → superseded** by
+retry-then-GP policy above.
+
+**Ad-hoc slice (2026-07-16):** **ORCH-SPECIALIST-FALLBACK → superseded** (historical).
 
 **Ad-hoc slice (2026-07-16):** **ORCH-BATCH-RECOMMEND → Done** — pre-0 Batch Recommendation
 governance (`orch-batch-recommend`; skill + constitution + BDD

@@ -77,8 +77,7 @@ blockers: <if any>
 Follow `.cursor/skills/specialist-runtime-fallback/SKILL.md`:
 
 1. Prefer `Task(subagent_type=integration-merger)` when present; on flake **retry** ≤3.
-2. If still missing/failing → **`BLOCKED`** + recovery hints (do **not** auto GP).
-3. Follow this checklist **inline** (merge + `git worktree remove`) only with user
-   `allow-gp-fallback` / `允许降级`. Emit `runtime_routing` (`INLINE_CHECKLIST`).
-4. Prefer the dedicated subagent after Cursor reload / new chat when enum recovers.
+2. If still missing/failing → follow this checklist **inline** (merge +
+   `git worktree remove`) unless user said `禁止降级` / `no-gp-fallback`.
+3. Emit `runtime_routing` (`INLINE_CHECKLIST`). Prefer native Task after reload when enum recovers.
 

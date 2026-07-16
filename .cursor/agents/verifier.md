@@ -41,5 +41,5 @@ evidence_seen: [...]
 ## When Task enum / API lacks this agent
 
 Follow `.cursor/skills/specialist-runtime-fallback/SKILL.md`: retry `verifier` ≤3, then
-**BLOCKED**. Run this checklist inline only with user `allow-gp-fallback` / `允许降级`
-and emit `runtime_routing`.
+run this checklist **inline** unless user said `禁止降级` / `no-gp-fallback`. Emit
+`runtime_routing`.

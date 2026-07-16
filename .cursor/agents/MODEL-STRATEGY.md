@@ -69,10 +69,10 @@ Tiers describe **pipeline responsibility** only. Model slug is identical for all
 5. **No `inherit`** — ever.
 6. **Enum vs files** — file existence under `.cursor/agents/` does **not** guarantee the
    name is in the live Task enum. Runtime policy:
-   `.cursor/skills/specialist-runtime-fallback/SKILL.md` (retry → BLOCKED; GP only with
-   `allow-gp-fallback` / `允许降级`).
+   `.cursor/skills/specialist-runtime-fallback/SKILL.md` (retry ≤3 → GP under contract;
+   forbid with `禁止降级` / `no-gp-fallback`; early opt-in `allow-gp-fallback` / `允许降级`).
 
-## Fallback (only with user confirmation)
+## Fallback
 
 Preferred order if Grok is unavailable in-region:
 
@@ -82,8 +82,8 @@ Preferred order if Grok is unavailable in-region:
 Preferred order if project specialist Task type is unavailable:
 
 1. Retry named type (≤3) / recover session (reload, new chat, correct workspace root)
-2. User opt-in `允许降级` / `allow-gp-fallback` if they accept GP under contract
-3. Otherwise remain **BLOCKED** — do not invent Done
+2. After budget / ENUM_MISSING confirm → GP or inline under injected contract
+3. If user said `禁止降级` / `no-gp-fallback` → remain **BLOCKED** — do not invent Done
 
 ## Supervisor mode
 

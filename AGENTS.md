@@ -11,7 +11,7 @@ Stay in **one main chat**. Speak the goal in natural language — the parent age
 
 | You say (examples) | Parent does |
 | --- | --- |
-| 「把 F7 做完」「修这个 bug」「按管线交付」「自动执行后续」 | **deliver** → `delivery-orchestrator` (**stage −1 Batch Recommendation** then one leaf). Task flake → **retry** (≤3); still unavailable → **BLOCKED** (recovery hints). GP downgrade **only** if you say `允许降级` / `allow-gp-fallback` |
+| 「把 F7 做完」「修这个 bug」「按管线交付」「自动执行后续」 | **deliver** → `delivery-orchestrator` (**stage −1 Batch Recommendation** then one leaf). Task flake → **retry** (≤3); still unavailable → **GP/inline under contract**. Forbid GP: `禁止降级` / `no-gp-fallback`. Early GP: `允许降级` / `allow-gp-fallback` |
 | 「这两个切片并行」「同时改前后端」 | **Refuse fan-out by default** → serial queue. Only `force-parallel` / `强制并行` → legacy multitask (≤2 writers) |
 | 「部署一下」「队列状态」「重启栈」 | **deploy-queue** → `build-deploy-agent` |
 | 「验收一下」「算不算 Done」 | **verify-done** → `verifier` |
@@ -34,11 +34,11 @@ See `.cursor/skills/delivery-pipeline/SKILL.md` and `delivery-orchestrator`.
   behavior [delivery-batch-recommend.md](docs/behavior/delivery-batch-recommend.md).
   Decide `merge` | `solo` | `split` from repo facts so related work shares **one**
   worktree / one evidence run. **Not** multi-writer parallel.
-- **Specialist runtime (retry first):** Task flake / missing enum —
+- **Specialist runtime (retry then GP):** Task flake / missing enum —
   [specialist-runtime-fallback](.cursor/skills/specialist-runtime-fallback/SKILL.md);
   behavior [specialist-runtime-fallback.md](docs/behavior/specialist-runtime-fallback.md).
-  Retry named specialist → **BLOCKED** (no auto GP). Opt-in: `允许降级` / `allow-gp-fallback`.
-  Emit `runtime_routing`.
+  Retry named specialist (≤3) → **GP/inline under contract**. Forbid: `禁止降级` /
+  `no-gp-fallback`. Early opt-in: `允许降级` / `allow-gp-fallback`. Emit `runtime_routing`.
 - Stages **0–13** as before; optional stage **14** = `verifier`.
 
 ## Agents (18)
@@ -69,7 +69,7 @@ Other built-ins may appear in the live Task enum (e.g. `generalPurpose`, `shell`
 
 **Accuracy note:** `.cursor/agents/*.md` defines **18** specialists the pipeline names.
 Whether Cursor injects those names into the current session’s `Task` enum is runtime —
-if missing → retry (≤3) then **BLOCKED** (no auto GP).
+if missing → retry (≤3) then **GP under contract** (unless `禁止降级`).
 
 ## MCP (Cursor)
 

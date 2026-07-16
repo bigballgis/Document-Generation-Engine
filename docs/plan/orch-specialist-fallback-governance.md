@@ -1,17 +1,19 @@
-# Specialist Runtime — retry-first policy
+# Specialist Runtime — retry then GP downgrade
 
 | Field | Value |
 | --- | --- |
-| Slice | `orch-specialist-retry-only` |
+| Slice | `orch-specialist-retry-then-gp` |
 | Date | 2026-07-16 |
 | Formal phase | **None** |
-| Status | **Done** after merge |
-| Supersedes | Auto `FALLBACK_GENERAL_PURPOSE` default from `orch-specialist-fallback` |
+| Placement | MAIN (`main-only`) |
+| Status | **Done** (2026-07-16; committed with CE-G04 MAIN closeout) |
+| Supersedes | `orch-specialist-retry-only` (retry→BLOCKED; opt-in only GP) |
 
 ## Policy
 
-**Retry named specialist (≤3) → BLOCKED.** No automatic `generalPurpose` downgrade.
-User may opt in with `允许降级` / `allow-gp-fallback`.
+**Retry named specialist (≤3) → GP/inline under contract.**  
+User may forbid downgrade with `禁止降级` / `no-gp-fallback`.  
+Early opt-in: `允许降级` / `allow-gp-fallback` (skip waiting for full budget).
 
 ## Anchors
 
@@ -24,4 +26,6 @@ User may opt in with `允许降级` / `allow-gp-fallback`.
 ## Honest limit
 
 Retry fixes API flakes. It cannot invent Task enum entries when Cursor did not load
-`.cursor/agents` — then BLOCKED + recovery hints (or explicit user opt-in GP).
+`.cursor/agents` — then GP under injected contract (or BLOCKED if user forbade downgrade).
+Orphan worktree roots without `.cursor/agents/` commonly empty the project enum until
+Open Folder / Reload / new chat.

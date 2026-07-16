@@ -25,8 +25,9 @@ no «请输入 /deliver» or «要继续吗？」 menus when direction is clear.
 
 When project specialist names are **missing from the Task enum** or Task API fails,
 follow **specialist-runtime-fallback**: **retry** the named type (up to 3 attempts), then
-**BLOCKED** with recovery hints. Do **not** auto-use `generalPurpose` unless the user
-said `allow-gp-fallback` / `允许降级`. Emit `runtime_routing`. Do **not** pretend the
+**`FALLBACK_GENERAL_PURPOSE` / `INLINE_CHECKLIST`** with contract injection unless the
+user said `禁止降级` / `no-gp-fallback`. Early opt-in: `allow-gp-fallback` / `允许降级`.
+Emit `runtime_routing`. Do **not** pretend the
 named specialist ran after a downgrade.
 
 Hard rule: `.cursor/rules/subagent-routing-mandate.mdc` (Auto-intent section).
@@ -37,21 +38,22 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 
 1. Invoke **`Task(subagent_type=delivery-orchestrator)`** for any non-trivial delivery
    request before writing code or plan-status docs — unless the user explicitly opts out.
-   If that type fails → **retry** (skill); if still unavailable → **BLOCKED** unless user
-   opted in to GP downgrade (`允许降级` / `allow-gp-fallback`).
+   If that type fails → **retry** (skill); if still unavailable → GP under contract unless
+   user forbade downgrade (`禁止降级` / `no-gp-fallback`).
 2. **Not** implement multi-file backend/frontend changes as free-form parent work when
-   the owning engineer is in the enum; if unavailable → retry/BLOCKED (GP only with opt-in).
+   the owning engineer is in the enum; if unavailable → retry then GP under contract.
 3. End every behavior-changing slice with **`post-task-doc-sync`** then
    **`post-task-commit-review`** (when commit is delegated) before reporting Done.
 4. Use built-in **`explore`** for large read-only reviews (Cursor built-in; no project agent file).
-5. **Mandatory session worktree:** stage **0** `worktree-router` before any delivery write;
-   `move_agent_to_root` into `../DGE-<slice-id>`; stage **11** `integration-merger` before doc-sync on main.
+5. **Session worktree:** stage **0** `worktree-router` before any delivery write unless
+   user `main-only` / `no-worktree`; when isolated, `move_agent_to_root` into
+   `../DGE-<slice-id>` and stage **11** `integration-merger` before doc-sync on main.
 6. Docker: **single-host queue only** (`docker-deploy-queue.ps1`).
 7. Chain the next `Task` immediately after each stage; no permission-polling menus.
 8. **Pre-0 Batch Recommendation:** before stage 0, run the batch checklist and emit
    `batch_recommendation` (`merge` | `solo` | `split`) — intentional related merge into
    **one** leaf to amortize fixed cost; **never** a substitute for multi-writer parallel.
-9. **Runtime routing honesty:** emit `runtime_routing` on retry/BLOCKED/opt-in downgrade.
+9. **Runtime routing honesty:** emit `runtime_routing` on retry / GP downgrade / BLOCKED.
 
 ## Canonical pipeline (stage numbers are authoritative)
 
