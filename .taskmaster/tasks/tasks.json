@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 → Done. Sole-active CE delivery leaf: #91 CE-U15 (in-progress; slice ce-u15-lifecycle-stepper). Umbrella is program registry only — not a delivery leaf. P3 parked.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90 Done. Sole-active leaf (single-lane serial §9.2): #91 CE-U15. P3 parked. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 → Done. Sole-active cleared. §9.2 next / queue head #92 CE-U16 pending/parked (do not auto-activate). Umbrella is program registry only — not a delivery leaf. P3 parked.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91 Done. Sole-active cleared (single-lane serial §9.2); next queue head #92 CE-U16 pending/parked. P3 parked. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T16:27:00.323Z"
+        "updatedAt": "2026-07-17T07:15:00.000Z"
       },
       {
         "id": "54",
@@ -1262,22 +1262,22 @@
       {
         "id": "91",
         "title": "CE-U15: Lifecycle stepper + checklist deep links",
-        "description": "IN PROGRESS 2026-07-17. Sole-active CE delivery leaf (single-lane serial §9.2). Slice ce-u15-lifecycle-stepper; worktree D:/working/DGE-ce-u15-lifecycle-stepper · feat/ce-u15-lifecycle-stepper. Top-bar lifecycle Stepper (read-only) + publish-gate pending Go-fix deep links. BDD ready (docs/behavior/ce-u15-lifecycle-stepper.md; BDD-CE-U15-LSS-001…010); frontend_ui_in_scope=true. Deps U14 #90 Done. Formal phase None. Not go-live. Not CD-3. Not CE-U16.",
-        "details": "ACTIVATED 2026-07-17 Stage 2 plan-orchestrator. Sole-active CE delivery leaf. Slice id: ce-u15-lifecycle-stepper. Worktree: D:/working/DGE-ce-u15-lifecycle-stepper · branch feat/ce-u15-lifecycle-stepper. BDD ready: docs/behavior/ce-u15-lifecycle-stepper.md (BDD-CE-U15-LSS-001…010). Plan §4 CE-U15 → In Progress; §9.2 sole-active=#91. Umbrella #53 remains in-progress (program registry only). Formal phase remains None. P3 parked. Gates before Done: frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy; merge + MAIN doc-sync + commit-review. Do NOT activate CD-3. Do NOT claim go-live. Do NOT activate P3 CE leaves (#80/#77/#96…). Handoff: stage 4 frontend-engineer (skip doc-keeper — BDD ready, no SoT gaps).",
+        "description": "DONE 2026-07-17. Slice ce-u15-lifecycle-stepper. MAIN merge b2968052. Workflow progress Stepper + publish-gate Go-fix deep links. FE gates (1448 tests) + E2E 5/5 + UIUX PASS + arch/CQ PASS_WITH_NOTES + Stage 5/10 DEPLOY_OK. Formal phase None. Not go-live.",
+        "details": "Completed 2026-07-17 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: ce-u15-lifecycle-stepper. Worktree removed. Merge b2968052b41602c1dc71871e7cabb7da66b30e69. BDD ready docs/behavior/ce-u15-lifecycle-stepper.md (BDD-CE-U15-LSS-001…010). Gates: FE lint/type-check/test(1448)/build GREEN; E2E functional 5/5 (CE-U15-manifest.md); UIUX PASS Critical=0 (CE-U15-uiux-manifest.md); architecture PASS_WITH_NOTES Critical=0; Stage 9 CQ PASS_WITH_NOTES Critical=0; Stage 5 DEPLOY_OK (docs/plan/evidence/ce-u15-stage5-deploy/); Stage 10 DEPLOY_OK SkipBuild (docs/plan/evidence/ce-u15-stage10-deploy/). Formal phase remains None. Plan §4 CE-U15 Done. Sole-active cleared. Next #92 CE-U16 pending/parked (do not auto-activate). Push debt: main ahead of origin (github 443 timeout) — stage 13. Do NOT activate CD-3 / claim go-live / activate P3.",
         "testStrategy": "1. Stepper. 2. Deep links. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "90"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T16:27:00.323Z"
+        "updatedAt": "2026-07-17T07:15:00.000Z"
       },
       {
         "id": "92",
         "title": "CE-U16: Authoring path compression",
-        "description": "PENDING. Slice ce-u16-authoring-path-compress. design→bindings default; micro-wizard after create. P2·M.",
-        "details": "After U15 (#91). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U16.",
+        "description": "PENDING / §9.2 queue head (2026-07-17). Slice ce-u16-authoring-path-compress. design→bindings default; micro-wizard after create. P2·M. Do not auto-activate — orchestrator starts after CE-U15 stage 13.",
+        "details": "After U15 (#91 Done — merge b2968052). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U16. Status remains pending/parked until orchestrator activates.",
         "testStrategy": "1. Default landing bindings. 2. Micro-wizard. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
@@ -1285,7 +1285,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00Z"
+        "updatedAt": "2026-07-17T07:15:00.000Z"
       },
       {
         "id": "93",
