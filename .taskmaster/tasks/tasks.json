@@ -730,8 +730,8 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). #89 CE-U13 → Done (merge ccdfacda). #71 CE-C06 → Done (merge 35f6f47d). #76 CE-G06 → Done (merge d8636232). #78 CE-E01 → Done (merge 6ae57974). Sole-active CE delivery leaf = #79 CE-E02 in-progress (ce-e02-asset-library); do not start another CE leaf.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#76/#78/#88/#89 Done. Sole-active CE delivery leaf: #79 CE-E02 in-progress. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). #89 CE-U13 → Done (merge ccdfacda). #71 CE-C06 → Done (merge 35f6f47d). #76 CE-G06 → Done (merge d8636232). #78 CE-E01 → Done (merge 6ae57974). #79 CE-E02 → Done (merge 5bd3611e). No sole-active CE delivery leaf; next queue head recommend #81 CE-O01 (parked — do not activate until deliver).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#76/#78/#79/#88/#89 Done. No sole-active CE delivery leaf. Next recommend #81 CE-O01 (pending). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
@@ -1092,14 +1092,14 @@
       {
         "id": "79",
         "title": "CE-E02: Asset library management surface",
-        "description": "In Progress 2026-07-16 (sole-active CE delivery leaf). Slice ce-e02-asset-library. MinIO asset catalog API + admin /library/assets; seal uploads need TEMPLATE_APPROVER/admin; StructuredContentImageResolver unchanged. P2·M.",
-        "details": "ACTIVATED sole-active 2026-07-16. BDD ready: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-001…022). Soft dep E01 (#78) Done. Placement: ISOLATED D:/working/DGE-ce-e02-asset-library · feat/ce-e02-asset-library · base 80bca472. Formal phase None; not go-live; not CD-3. Implement order: BE (catalog+API+authz+audit+resolver regression) then FE (route+/library/assets+E2E/UIUX). Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX for admin /library/assets; queued docker-deploy; merge + MAIN doc-sync + commit-review. Do NOT change StructuredContentImageResolver protocol. OOS: CE-E03, CE-O01. Single-lane: no other CE delivery leaf In Progress (umbrella #53 registry only).",
+        "description": "DONE 2026-07-16. Slice ce-e02-asset-library. MinIO asset catalog API (upload/list/disable) + admin /library/assets; seal uploads need TEMPLATE_APPROVER/admin; StructuredContentImageResolver protocol unchanged. P2·M. Merge 5bd3611e; worktree removed.",
+        "details": "DONE 2026-07-16. Merge 5bd3611ee7e03b385caf3003296aee1bd604222e on main; worktree DGE-ce-e02-asset-library removed. BDD ready: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-001…022). Soft dep E01 (#78) Done. Gates: mvn verify PASS (incl Yellow #4 fail-closed); pnpm lint/type-check/test/build PASS; E2E functional 4/4 (ce-e02-asset-library.spec.ts); UIUX PASS (manifest CE-E02-asset-library-uiux); architecture PASS (Yellow 1–4 cleared); Stage 10 DEPLOY_OK ForceRebuild (compose dge-ce-e02-asset-library; :8080 UP; :4173 200). Formal phase None; not go-live; not CD-3. Sole-active cleared — next queue head recommend #81 CE-O01 (do not activate in this sync).",
         "testStrategy": "1. Upload/list/disable API + key rules. 2. Seal upload authz. 3. Resolver regression unchanged. 4. Admin UI E2E+UIUX. 5. Gates green.",
         "priority": "medium",
         "dependencies": [
           "78"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-15T23:42:39.235Z"
       },

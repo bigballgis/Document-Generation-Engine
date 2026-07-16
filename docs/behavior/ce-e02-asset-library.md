@@ -7,10 +7,10 @@
 | **编写日期** | 2026-07-16 |
 | **程序** | [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §7 Wave CE-E · CE-E02 |
 | **Slice** | `ce-e02-asset-library` |
-| **Worktree** | `D:/working/DGE-ce-e02-asset-library` · `feat/ce-e02-asset-library` |
-| **Task Master** | **#79**（**in-progress** · sole-active CE delivery leaf；软依赖 **#78** CE-E01 **Done**） |
+| **Worktree** | 已移除（merge `5bd3611e` 后） |
+| **Task Master** | **#79**（**Done** — merge `5bd3611e`；MAIN doc-sync 本片） |
 | **Formal phase** | **None**（CE 程序切片；不发明 sole-active 正式 P-phase） |
-| **Placement** | ISOLATED |
+| **Placement** | MAIN（merge 后） |
 | **上游** | CE-E01 (#78) **Done**（资产键清单 / 导入 ASSET_KEY 探测可消费本片 ACTIVE 对象）；F1-A3 `StructuredContentImageResolver` 已生产化 |
 | **Owning docs** | 本文件（行为 SoT）；计划 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §7；需求 [requirements-plan.md](../requirements/requirements-plan.md)；产品 [PRD.md](../product/PRD.md)；领域 [domain-model.md](../domain/domain-model.md)；权限 [permission-matrix.md](../security/permission-matrix.md)；API [contract-outline.md](../api/contract-outline.md) + [openapi-v1.yaml](../api/openapi-v1.yaml)（实现时扩展） |
 | **Frontend UI** | **In scope** — 管理端资产库页 + Playwright E2E/UIUX（用户可见面） |
@@ -366,10 +366,12 @@ bdd_readiness: ready
 task_ids: ["79"]
 slice: ce-e02-asset-library
 behavior_doc: docs/behavior/ce-e02-asset-library.md
+status: Done
+merge: 5bd3611ee7e03b385caf3003296aee1bd604222e
 frontend_ui_in_scope: true
 structured_content_image_resolver: UNCHANGED
 formal_phase: None
-next: backend-engineer (TDD Red→Green) → frontend-engineer → E2E/UIUX → merge → MAIN doc-sync
+next_sole_active_recommend: #81 CE-O01 (pending/parked — do not activate in this sync)
 ```
 
-**Handoff：** Task Master **#79** → **in-progress**（sole-active）。行为已持久化；计划 §7 / §9.2 已同步。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。下一管线：`backend-engineer`（目录+API+authz+审计+resolver 回归）→ `frontend-engineer`（`/library/assets` + E2E/UIUX）。
+**Handoff（Done）：** Task Master **#79** → **Done**（merge `5bd3611e`）。资产库 MinIO 目录 API + 管理端 `/library/assets` 已交付；resolver 协议不变。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。下一 sole-active 建议：**#81** CE-O01（pending，勿提前激活）。

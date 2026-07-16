@@ -356,6 +356,6 @@ next: #79 CE-E02 pending/parked (do not activate until deliver)
 formal_phase: None
 ```
 
-**Handoff（Done）：** Task Master **#78** → **Done**（merge `6ae57974`）。自包含导出包 v2 + 导入 dry-run 已交付。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。下一 sole-active 建议：**#79** CE-E02（pending，勿提前激活）。
+**Handoff（Done）：** Task Master **#78** → **Done**（merge `6ae57974`）。自包含导出包 v2 + 导入 dry-run 已交付。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。**#79** CE-E02 → **Done**（merge `5bd3611e`）。下一 sole-active 建议：**#81** CE-O01（pending，勿提前激活）。
 
 **Open questions:** 无（已由 CE §7 + K01 Done + P14 基线裁定；E01-C1…C22）。
