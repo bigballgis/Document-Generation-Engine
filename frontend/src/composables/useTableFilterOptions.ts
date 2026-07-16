@@ -39,6 +39,32 @@ export function useMasterStatusFilterOptions() {
   )
 }
 
+/** CE-U20 — content-module catalog status filter (badge-aligned). */
+const CONTENT_MODULE_CATALOG_STATUSES = [
+  'DRAFT',
+  'SUBMITTED',
+  'APPROVED',
+  'STOPPED',
+  'DEPRECATED',
+] as const
+
+export function useContentModuleStatusFilterOptions() {
+  const { t, te } = useI18n()
+  return computed<TableColumnFilterOption[]>(() =>
+    CONTENT_MODULE_CATALOG_STATUSES.map((status) => {
+      const reviewKey = `contentModules.reviewState.${status}`
+      const lifecycleKey = `contentModules.lifecycle.${status}`
+      if (te(reviewKey)) {
+        return { value: status, label: t(reviewKey) }
+      }
+      if (te(lifecycleKey)) {
+        return { value: status, label: t(lifecycleKey) }
+      }
+      return { value: status, label: status }
+    }),
+  )
+}
+
 export function useYesNoFilterOptions() {
   const { t } = useI18n()
   return computed<TableColumnFilterOption[]>(() => [

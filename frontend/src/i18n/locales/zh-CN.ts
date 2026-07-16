@@ -2480,13 +2480,14 @@ export default {
     list: {
       title: '标准条款',
       description:
-        '浏览授权分组内可复用的标准条款。在表格中按分组筛选后打开条款以管理版本与审批流程。',
+        '浏览授权分组内可复用的标准条款。可按分组或状态筛选，然后打开条款以管理版本与审批流程。',
       empty: '暂无标准条款。',
       emptyDescription: '创建模块以开始编写可复用条款内容。',
       columns: {
         group: '分组',
         moduleCode: '模块代码',
         name: '名称',
+        status: '状态',
         updatedAt: '最后更新',
       },
     },
@@ -2587,6 +2588,7 @@ export default {
       name: '名称',
       description: '描述',
       semanticVersion: '初始版本号',
+      contentStructure: '内容结构',
       contentStructureJson: '内容结构（JSON）',
       changeDescription: '变更说明',
       submit: '创建模块',
@@ -2597,7 +2599,7 @@ export default {
         moduleCodePattern: '请使用大写字母、数字、下划线或连字符。',
         nameRequired: '名称为必填项。',
         semanticVersionRequired: '版本号为必填项。',
-        contentStructureRequired: '内容结构 JSON 为必填项。',
+        contentStructureRequired: '内容结构为必填项。',
       },
     },
     version: {

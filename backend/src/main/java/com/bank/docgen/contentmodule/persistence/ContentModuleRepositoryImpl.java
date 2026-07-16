@@ -3,6 +3,7 @@ package com.bank.docgen.contentmodule.persistence;
 import com.bank.docgen.authorization.management.api.CatalogPageSupport;
 import com.bank.docgen.authorization.management.api.CatalogQueryPage;
 import com.bank.docgen.authorization.management.api.CatalogSortKey;
+import com.bank.docgen.contentmodule.domain.ContentModuleCatalogDisplayStatus;
 import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import jakarta.persistence.EntityManager;
@@ -83,10 +84,75 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
             ));
         }
 
+        if (filter.status() != null) {
+            predicates.add(buildHeadDisplayStatusPredicate(cb, query, root, filter.status()));
+        }
+
         if (filter.hasLegalFilters()) {
             predicates.add(buildCatalogFilterVersionLegalPredicate(cb, query, root, filter));
         }
         return predicates.toArray(Predicate[]::new);
+    }
+
+    /**
+     * CE-U20 — match badge-aligned display status of the module head version
+     * (max {@code updatedAt}, tie → greater {@code semanticVersion}).
+     */
+    private Predicate buildHeadDisplayStatusPredicate(
+            CriteriaBuilder cb,
+            CriteriaQuery<?> query,
+            Root<ContentModuleEntity> moduleRoot,
+            ContentModuleCatalogDisplayStatus status
+    ) {
+        Subquery<Integer> exists = query.subquery(Integer.class);
+        Root<ContentModuleVersionEntity> version = exists.from(ContentModuleVersionEntity.class);
+        exists.select(cb.literal(1));
+        exists.where(
+                cb.equal(version.get("moduleId"), moduleRoot.get("id")),
+                isHeadVersion(cb, exists, moduleRoot, version),
+                matchesDisplayStatus(cb, version, status)
+        );
+        return cb.exists(exists);
+    }
+
+    private Predicate isHeadVersion(
+            CriteriaBuilder cb,
+            Subquery<?> outer,
+            Root<ContentModuleEntity> moduleRoot,
+            Root<ContentModuleVersionEntity> version
+    ) {
+        Subquery<Integer> newer = outer.subquery(Integer.class);
+        Root<ContentModuleVersionEntity> other = newer.from(ContentModuleVersionEntity.class);
+        newer.select(cb.literal(1));
+        newer.where(
+                cb.equal(other.get("moduleId"), moduleRoot.get("id")),
+                cb.or(
+                        cb.greaterThan(other.get("updatedAt"), version.get("updatedAt")),
+                        cb.and(
+                                cb.equal(other.get("updatedAt"), version.get("updatedAt")),
+                                cb.greaterThan(other.get("semanticVersion"), version.get("semanticVersion"))
+                        )
+                )
+        );
+        return cb.not(cb.exists(newer));
+    }
+
+    private Predicate matchesDisplayStatus(
+            CriteriaBuilder cb,
+            Root<ContentModuleVersionEntity> version,
+            ContentModuleCatalogDisplayStatus status
+    ) {
+        return switch (status) {
+            case STOPPED -> cb.equal(version.get("lifecycleState"), ContentModuleLifecycleState.STOPPED);
+            case DEPRECATED -> cb.equal(version.get("lifecycleState"), ContentModuleLifecycleState.DEPRECATED);
+            case DRAFT, SUBMITTED, APPROVED -> cb.and(
+                    cb.or(
+                            cb.isNull(version.get("lifecycleState")),
+                            cb.equal(version.get("lifecycleState"), ContentModuleLifecycleState.ACTIVE)
+                    ),
+                    cb.equal(version.get("reviewState"), ContentModuleReviewState.valueOf(status.name()))
+            );
+        };
     }
 
     /**

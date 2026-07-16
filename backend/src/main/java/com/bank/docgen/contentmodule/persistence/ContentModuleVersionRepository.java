@@ -2,6 +2,7 @@ package com.bank.docgen.contentmodule.persistence;
 
 import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +14,8 @@ public interface ContentModuleVersionRepository extends JpaRepository<ContentMod
     Optional<ContentModuleVersionEntity> findByModuleIdAndSemanticVersion(UUID moduleId, String semanticVersion);
 
     List<ContentModuleVersionEntity> findByModuleIdOrderBySemanticVersionDesc(UUID moduleId);
+
+    List<ContentModuleVersionEntity> findByModuleIdIn(Collection<UUID> moduleIds);
 
     List<ContentModuleVersionEntity> findByModuleIdAndReviewStateAndLifecycleState(
             UUID moduleId,

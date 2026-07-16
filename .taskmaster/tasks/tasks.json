@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 → Done. No sole-active delivery leaf. §9.2 next serial: #94 CE-U20 pending/parked (then #95). Umbrella is program registry only — not a delivery leaf. P3 parked. Leave #50 alone.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93 Done. No sole-active delivery leaf (single-lane serial §9.2). Serial next: #94 U20 → #95 U21 pending (do not auto-activate until stage 0). P3 parked (#77/#80/#96/#97). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 → Done. Sole-active delivery leaf: #94 CE-U20 (slice ce-u20-clause-create-structured). §9.2 next after U20: #95 CE-U21 pending. Umbrella is program registry only — not a delivery leaf. P3 parked. Leave #50 alone.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93 Done. Sole-active delivery leaf #94 CE-U20 (single-lane serial §9.2). Serial next after U20: #95 U21 pending. P3 parked (#77/#80/#96/#97). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T22:25:00.000Z"
+        "updatedAt": "2026-07-17T06:30:00.000Z"
       },
       {
         "id": "54",
@@ -1304,16 +1304,16 @@
       {
         "id": "94",
         "title": "CE-U20: Clause create structured + list status",
-        "description": "PENDING. Slice ce-u20-clause-create-structured. Structured create dialog; catalog status column/filter. P2·S.",
-        "details": "After U18 (#93). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U20.",
+        "description": "IN PROGRESS 2026-07-17. Slice ce-u20-clause-create-structured. Sole-active delivery leaf (single-lane serial §9.2). Structured create dialog; catalog status column/filter. P2·S. Worktree D:/working/DGE-ce-u20-clause-create-structured · feat/ce-u20-clause-create-structured. Batch recommendation solo #94. Formal phase None. Not go-live. Do NOT activate CD-3. Leave #50 alone. P3 parked. #95 stays pending.",
+        "details": "Activated 2026-07-17 (stage 2 plan-orchestrator) after #93 CE-U18 Done. Slice id: ce-u20-clause-create-structured. Placement ISOLATED D:/working/DGE-ce-u20-clause-create-structured · feat/ce-u20-clause-create-structured · base origin/main. Batch recommendation solo (member_task_ids: [\"94\"]). Scope: structured clause create dialog (no JSON textarea); catalog status column/filter. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U20. Do not mark Done until gates green + stage 11–13.",
         "testStrategy": "1. No JSON textarea create. 2. Status column. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "93"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00Z"
+        "updatedAt": "2026-07-17T06:30:00.000Z"
       },
       {
         "id": "95",
@@ -1360,13 +1360,13 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-15T09:13:00Z",
+      "lastModified": "2026-07-17T06:30:00.000Z",
       "taskCount": 97,
       "completedCount": 61,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-16T03:37:00Z"
+      "updated": "2026-07-17T06:30:00.000Z"
     }
   }
 }

@@ -95,6 +95,7 @@ class ContentModuleServiceTest {
         lenient().when(groupAccessService.canViewContentModuleStructure(author)).thenReturn(true);
         lenient().when(groupAccessService.canBrowseContentModuleCatalog(tester)).thenReturn(false);
         lenient().when(reviewRecordRepository.findByModuleIdOrderByCreatedAtAsc(any())).thenReturn(List.of());
+        lenient().when(versionRepository.findByModuleIdIn(any())).thenReturn(List.of(draftVersion));
     }
 
     @Test
@@ -114,8 +115,9 @@ class ContentModuleServiceTest {
 
     @Test
     void list_includesModulesSharedIntoGroup() {
+        UUID sharedId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
         ContentModuleEntity sharedModule = new ContentModuleEntity(
-                UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                sharedId,
                 "MOD-CORP-SHARED",
                 "CORP",
                 "Shared Into Retail",
@@ -128,6 +130,17 @@ class ContentModuleServiceTest {
         when(groupAccessService.accessibleGroupCodes(author)).thenReturn(List.of("RETAIL"));
         when(moduleRepository.searchCatalog(any(), eq(0), eq(100)))
                 .thenReturn(new CatalogQueryPage<>(List.of(module, sharedModule), 2, 1));
+        when(versionRepository.findByModuleIdIn(any())).thenReturn(List.of(
+                draftVersion,
+                new ContentModuleVersionEntity(
+                        UUID.fromString("22222222-2222-2222-2222-222222222222"),
+                        sharedId,
+                        "1.0.0",
+                        "{}",
+                        "Initial",
+                        "10000003"
+                )
+        ));
 
         var result = service.list("RETAIL", author);
 

@@ -48,6 +48,7 @@ describe('TemplateClauseAuthoringPanel', () => {
           moduleCode: 'MOD-LOAN-DISCLOSURE',
           groupCode: 'RETAIL',
           name: 'Loan disclosure',
+          reviewState: 'DRAFT',
           createdAt: '2026-06-26T10:00:00Z',
           updatedAt: '2026-06-26T10:00:00Z',
         },

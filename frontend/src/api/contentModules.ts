@@ -25,6 +25,8 @@ export type ContentModuleListQueryOptions = {
   signal?: AbortSignal
   search?: string
   groupCode?: string
+  /** CE-U20 — head display status filter (badge-aligned). */
+  status?: string
   sort?: string
 }
 
@@ -45,6 +47,9 @@ export async function listContentModules(
   }
   if (options.search) {
     params.search = options.search
+  }
+  if (options.status?.trim()) {
+    params.status = options.status.trim()
   }
   if (options.sort) {
     params.sort = options.sort

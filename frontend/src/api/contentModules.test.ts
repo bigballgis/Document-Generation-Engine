@@ -75,6 +75,31 @@ describe('contentModules API', () => {
     })
   })
 
+  it('CE-U20: forwards status query param to list endpoint', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [],
+          page: 0,
+          size: 20,
+          totalElements: 0,
+          totalPages: 0,
+        },
+      },
+    })
+
+    await contentModulesApi.listContentModules(0, 20, {
+      status: 'DRAFT',
+      sort: 'groupCodeAsc',
+    })
+
+    expect(http.get).toHaveBeenCalledWith('/content-modules', {
+      params: { page: 0, size: 20, status: 'DRAFT', sort: 'groupCodeAsc' },
+      signal: undefined,
+    })
+  })
+
   it('creates a content module with initial draft version', async () => {
     vi.mocked(http.post).mockResolvedValue({
       data: {

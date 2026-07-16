@@ -25,6 +25,7 @@ describe('contentModules store', () => {
           moduleCode: 'MOD-LOAN-DISCLOSURE',
           groupCode: 'RETAIL',
           name: 'Loan disclosure',
+          reviewState: 'DRAFT',
           createdAt: '2026-06-26T10:00:00Z',
           updatedAt: '2026-06-26T10:00:00Z',
         },
@@ -36,10 +37,15 @@ describe('contentModules store', () => {
     })
 
     const store = useContentModulesStore()
-    await store.fetchModules(0, 20, { groupCode: 'RETAIL', sort: 'groupCodeAsc' })
+    await store.fetchModules(0, 20, {
+      groupCode: 'RETAIL',
+      status: 'DRAFT',
+      sort: 'groupCodeAsc',
+    })
 
     expect(contentModulesApi.listContentModules).toHaveBeenCalledWith(0, 20, {
       groupCode: 'RETAIL',
+      status: 'DRAFT',
       sort: 'groupCodeAsc',
     })
     expect(store.modules).toHaveLength(1)

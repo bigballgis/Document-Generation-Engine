@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.bank.docgen.authorization.management.api.CatalogQueryPage;
+import com.bank.docgen.contentmodule.domain.ContentModuleCatalogDisplayStatus;
 import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.infrastructure.config.QuerydslConfig;
@@ -159,6 +160,105 @@ class ContentModuleRepositoryTest {
                 null,
                 null,
                 null,
+                null,
+                "England and Wales",
+                null,
+                null,
+                null
+        );
+        CatalogQueryPage<ContentModuleEntity> page = moduleRepository.searchCatalog(filter, 0, 20);
+
+        assertThat(page.content()).extracting(ContentModuleEntity::getModuleCode)
+                .containsExactly("MOD-RETAIL-DISCLOSURE");
+    }
+
+    @Test
+    void searchCatalog_filtersByHeadDisplayStatus_draft_ceU20() {
+        versionRepository.save(new ContentModuleVersionEntity(
+                VERSION_V1, MODULE_RETAIL, "1.0.0", "{}", "draft", "10000001"));
+        ContentModuleVersionEntity approved = new ContentModuleVersionEntity(
+                VERSION_V2, MODULE_CORP, "1.0.0", "{}", "approved", "10000002");
+        approved.setReviewState(ContentModuleReviewState.APPROVED);
+        approved.setLifecycleState(ContentModuleLifecycleState.ACTIVE);
+        versionRepository.save(approved);
+        entityManager.flush();
+
+        var filter = new ContentModuleRepositoryCustom.ContentModuleCatalogFilter(
+                List.of("RETAIL", "CORP"),
+                false,
+                null,
+                null,
+                null,
+                ContentModuleCatalogDisplayStatus.DRAFT,
+                null,
+                null,
+                null,
+                null
+        );
+        CatalogQueryPage<ContentModuleEntity> page = moduleRepository.searchCatalog(filter, 0, 20);
+
+        assertThat(page.content()).extracting(ContentModuleEntity::getModuleCode)
+                .containsExactly("MOD-RETAIL-DISCLOSURE");
+    }
+
+    @Test
+    void searchCatalog_stoppedHeadDoesNotMatchDraft_ceU20() {
+        ContentModuleVersionEntity stopped = approvedActiveVersion(VERSION_V1, "1.0.0");
+        stopped.setLifecycleState(ContentModuleLifecycleState.STOPPED);
+        versionRepository.save(stopped);
+        entityManager.flush();
+
+        var draftFilter = new ContentModuleRepositoryCustom.ContentModuleCatalogFilter(
+                List.of("RETAIL"),
+                false,
+                null,
+                null,
+                null,
+                ContentModuleCatalogDisplayStatus.DRAFT,
+                null,
+                null,
+                null,
+                null
+        );
+        var stoppedFilter = new ContentModuleRepositoryCustom.ContentModuleCatalogFilter(
+                List.of("RETAIL"),
+                false,
+                null,
+                null,
+                null,
+                ContentModuleCatalogDisplayStatus.STOPPED,
+                null,
+                null,
+                null,
+                null
+        );
+
+        assertThat(moduleRepository.searchCatalog(draftFilter, 0, 20).content()).isEmpty();
+        assertThat(moduleRepository.searchCatalog(stoppedFilter, 0, 20).content())
+                .extracting(ContentModuleEntity::getModuleCode)
+                .containsExactly("MOD-RETAIL-DISCLOSURE");
+    }
+
+    @Test
+    void searchCatalog_statusAndJurisdictionAnd_ceU20() {
+        ContentModuleVersionEntity englandDraft = new ContentModuleVersionEntity(
+                VERSION_V1, MODULE_RETAIL, "1.0.0", "{}", "draft", "10000001");
+        englandDraft.setJurisdiction("England and Wales");
+        versionRepository.save(englandDraft);
+
+        ContentModuleVersionEntity hongKongDraft = new ContentModuleVersionEntity(
+                VERSION_V2, MODULE_CORP, "1.0.0", "{}", "draft", "10000002");
+        hongKongDraft.setJurisdiction("Hong Kong");
+        versionRepository.save(hongKongDraft);
+        entityManager.flush();
+
+        var filter = new ContentModuleRepositoryCustom.ContentModuleCatalogFilter(
+                List.of("RETAIL", "CORP"),
+                false,
+                null,
+                null,
+                null,
+                ContentModuleCatalogDisplayStatus.DRAFT,
                 "England and Wales",
                 null,
                 null,

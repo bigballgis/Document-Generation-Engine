@@ -12,6 +12,8 @@ public record ContentModuleSummaryView(
         String name,
         String description,
         List<String> sharedGroupCodes,
+        String reviewState,
+        String lifecycleState,
         Instant createdAt,
         Instant updatedAt
 ) {

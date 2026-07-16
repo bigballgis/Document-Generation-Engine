@@ -534,6 +534,77 @@ export async function createDraftContentModule(
   }
 }
 
+export interface ContentModuleCatalogSummary {
+  moduleId: string
+  moduleCode: string
+  name: string
+  groupCode: string
+  reviewState: string
+  lifecycleState?: string | null
+}
+
+/** CE-U20: list content modules with optional head-status filter. */
+export async function listContentModulesViaApi(
+  request: APIRequestContext,
+  filters: {
+    search?: string
+    groupCode?: string
+    status?: string
+    page?: number
+    size?: number
+  } = {},
+): Promise<CatalogPageView<ContentModuleCatalogSummary>> {
+  const token = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const page = filters.page ?? 0
+  const size = filters.size ?? E2E_CATALOG_PAGE_SIZE
+  return authorizedGet<CatalogPageView<ContentModuleCatalogSummary>>(
+    request,
+    token,
+    `/content-modules${buildCatalogQuery({
+      search: filters.search,
+      groupCode: filters.groupCode,
+      status: filters.status,
+      page,
+      size,
+    })}`,
+  )
+}
+
+/** CE-U20: approve then STOP_USE so catalog head badge is STOPPED. */
+export async function createStoppedContentModule(
+  request: APIRequestContext,
+  options?: { moduleCode?: string; name?: string; semanticVersion?: string },
+): Promise<ApprovedContentModuleFixture> {
+  const approved = await createApprovedContentModule(request, options)
+  const adminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  const impact = await authorizedGet<{
+    referenceTemplateCount: number
+    referenceTemplateListHint: string
+    impactedReleaseVersionsHint: string
+    defaultRouteAffected: boolean
+    recentCallSummary: string
+    remediationHint: string
+    templateStopRequired: boolean
+    releaseStopRequired: boolean
+  }>(request, adminToken, `/content-modules/${approved.moduleId}/lifecycle/impact/preview`)
+
+  await authorizedPost(
+    request,
+    adminToken,
+    `/content-modules/${approved.moduleId}/lifecycle/operation/apply`,
+    {
+      operationType: 'STOP_USE',
+      actorRole: 'GROUP_ADMIN',
+      actorId: E2E_GROUP_ADMIN.username,
+      impactSummaryViewed: true,
+      secondConfirmation: true,
+      impactSummary: impact,
+    },
+  )
+
+  return approved
+}
+
 /** CE-U08: module with a SUBMITTED version (Dashboard PENDING_REVIEW task). */
 export async function createSubmittedContentModuleForReview(
   request: APIRequestContext,

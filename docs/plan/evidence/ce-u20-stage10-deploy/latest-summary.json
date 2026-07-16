@@ -1,0 +1,49 @@
+{
+  "result": "DEPLOY_OK",
+  "stage": 10,
+  "when": "2026-07-17T07:42:52+08:00",
+  "slice": "ce-u20-clause-create-structured",
+  "task_ids": [
+    94
+  ],
+  "worktree": "D:/working/DGE-ce-u20-clause-create-structured",
+  "branch": "feat/ce-u20-clause-create-structured",
+  "git_sha": "da7581e83624a155c4e32d1e57b35fa18ca64587",
+  "working_tree_dirty": true,
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"CE-U20 Stage 10 deploy evidence #94\"",
+  "compose_project": "documentgenerationengine",
+  "images": {
+    "backend": {
+      "tag": "documentgenerationengine-docgen-backend:latest",
+      "id": "sha256:5ba6b88db512e55226019f6f876811571be3bfedd181e9bc4f609c5178c2e4e1",
+      "created": "2026-07-16T23:04:29.36618556Z"
+    },
+    "frontend": {
+      "tag": "documentgenerationengine-docgen-frontend:latest",
+      "id": "sha256:904d275bd0d7b13e24753631283f6f31c20d6505ff465de8fa9242dd7418a289",
+      "created": "2026-07-16T23:04:21.130909026Z"
+    }
+  },
+  "healthz": {
+    "url": "http://localhost:8080/healthz",
+    "body": {
+      "status": "UP"
+    },
+    "status_code": 200
+  },
+  "frontend_ui": {
+    "status_code": 200,
+    "url": "http://localhost:4173"
+  },
+  "u20_fe_markers": [
+    "/usr/share/nginx/html/assets/ControlledStructuredContentEditor-Ddpl_eZo.js",
+    "/usr/share/nginx/html/assets/ControlledStructuredContentEditor-Duuk5yFe.css",
+    "/usr/share/nginx/html/assets/index-Cl768m0s.js",
+    "/usr/share/nginx/html/assets/zh-CN-Djg22M9W.js"
+  ],
+  "notes": [
+    "First attempt without COMPOSE_PROJECT_NAME failed (container name conflict); retried with canonical project documentgenerationengine (same as Stage 5).",
+    "Full rebuild (not -SkipBuild): host mvn package + pnpm build + docker image package + recreate app containers.",
+    "Docker layer cache hit for packaged images after host rebuild; containers recreated and health-gated."
+  ]
+}

@@ -1,0 +1,3 @@
+Repository:Tag	ID	Created
+documentgenerationengine-docgen-backend:latest	sha256:5ba6b88db512e55226019f6f876811571be3bfedd181e9bc4f609c5178c2e4e1	2026-07-16T23:04:29.36618556Z
+documentgenerationengine-docgen-frontend:latest	sha256:904d275bd0d7b13e24753631283f6f31c20d6505ff465de8fa9242dd7418a289	2026-07-16T23:04:21.130909026Z

@@ -7,10 +7,12 @@ import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
+import { useContentModuleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { contentModuleDetailPath } from '@/routing/routeKeys'
 import { useContentModulesStore } from '@/stores/contentModules'
 import type { ContentModuleSummary } from '@/types/contentModule'
+import { contentModuleCatalogDisplayStatus } from '@/utils/contentModuleCatalogDisplayStatus'
 import { ElMessage } from 'element-plus'
 
 export function useContentModuleListView() {
@@ -20,6 +22,7 @@ export function useContentModuleListView() {
   const contentModulesStore = useContentModulesStore()
   const { authorContentModules } = useCapabilities()
   const { contentModuleDetailLink } = useEntityLinkTargets()
+  const statusFilterOptions = useContentModuleStatusFilterOptions()
 
   const createDialogOpen = ref(false)
   const currentPage = ref(1)
@@ -45,6 +48,12 @@ export function useContentModuleListView() {
         key: 'groupCode',
         labelKey: 'contentModules.list.columns.group',
         getValue: (row) => row.groupCode,
+      },
+      {
+        key: 'status',
+        labelKey: 'contentModules.list.columns.status',
+        getValue: (row) => contentModuleCatalogDisplayStatus(row),
+        matchMode: 'exact',
       },
     ],
     sortOptions: [
@@ -88,6 +97,12 @@ export function useContentModuleListView() {
       labelKey: 'contentModules.list.columns.group',
       type: 'text' as const,
     },
+    {
+      key: 'status',
+      labelKey: 'contentModules.list.columns.status',
+      type: 'select' as const,
+      options: statusFilterOptions.value,
+    },
   ])
 
   const catalogSortOptions = computed(() => [
@@ -109,6 +124,7 @@ export function useContentModuleListView() {
     return {
       search: searchQuery.value.trim() || undefined,
       groupCode: filters.groupCode?.trim() || undefined,
+      status: filters.status?.trim() || undefined,
       sort: activeSortKey.value || 'groupCodeAsc',
     }
   }

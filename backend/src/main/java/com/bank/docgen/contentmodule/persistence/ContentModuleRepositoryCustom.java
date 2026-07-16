@@ -2,6 +2,7 @@ package com.bank.docgen.contentmodule.persistence;
 
 import com.bank.docgen.authorization.management.api.CatalogQueryPage;
 import com.bank.docgen.authorization.management.api.CatalogSortKey;
+import com.bank.docgen.contentmodule.domain.ContentModuleCatalogDisplayStatus;
 import java.time.Instant;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public interface ContentModuleRepositoryCustom {
             String groupCodeExact,
             String search,
             CatalogSortKey sort,
+            ContentModuleCatalogDisplayStatus status,
             String jurisdiction,
             String legalReviewRef,
             Instant effectiveFrom,
@@ -27,7 +29,7 @@ public interface ContentModuleRepositoryCustom {
                 String search,
                 CatalogSortKey sort
         ) {
-            this(accessibleGroupCodes, allGroups, groupCodeExact, search, sort, null, null, null, null);
+            this(accessibleGroupCodes, allGroups, groupCodeExact, search, sort, null, null, null, null, null);
         }
 
         public boolean hasLegalFilters() {

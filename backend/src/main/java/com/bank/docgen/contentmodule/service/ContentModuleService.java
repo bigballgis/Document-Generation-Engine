@@ -67,11 +67,31 @@ public class ContentModuleService {
             String jurisdiction,
             String legalReviewRef,
             Instant effectiveFrom,
-            Instant effectiveTo
+            Instant effectiveTo,
+            String status
     ) {
         return catalog.list(
                 session, page, size, search, groupCode, sort,
-                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PageView<ContentModuleSummaryView> list(
+            ManagementSessionClaims session,
+            Integer page,
+            Integer size,
+            String search,
+            String groupCode,
+            String sort,
+            String jurisdiction,
+            String legalReviewRef,
+            Instant effectiveFrom,
+            Instant effectiveTo
+    ) {
+        return list(
+                session, page, size, search, groupCode, sort,
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, null
         );
     }
 
@@ -84,7 +104,7 @@ public class ContentModuleService {
             String groupCode,
             String sort
     ) {
-        return list(session, page, size, search, groupCode, sort, null, null, null, null);
+        return list(session, page, size, search, groupCode, sort, null, null, null, null, null);
     }
 
     @Transactional(readOnly = true)

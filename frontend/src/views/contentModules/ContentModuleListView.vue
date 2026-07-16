@@ -8,6 +8,7 @@ import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import ContentModuleCreateDialog from '@/components/contentModules/ContentModuleCreateDialog.vue'
+import ContentModuleStatusBadge from '@/components/contentModules/ContentModuleStatusBadge.vue'
 import { useContentModuleListView } from '@/views/contentModules/useContentModuleListView'
 
 const {
@@ -94,6 +95,17 @@ const {
                 :label="row.name"
                 :subtitle="row.moduleCode"
                 :to="contentModuleDetailLink(row.moduleId)"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column
+            :label="t('contentModules.list.columns.status')"
+            width="160"
+          >
+            <template #default="{ row }">
+              <ContentModuleStatusBadge
+                :review-state="row.reviewState"
+                :lifecycle-state="row.lifecycleState"
               />
             </template>
           </el-table-column>

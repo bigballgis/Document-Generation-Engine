@@ -40,6 +40,7 @@ export const useContentModulesStore = defineStore('contentModules', () => {
     options: AbortableRequestOptions & {
       search?: string
       groupCode?: string
+      status?: string
       sort?: string
     } = {},
   ): Promise<void> {
