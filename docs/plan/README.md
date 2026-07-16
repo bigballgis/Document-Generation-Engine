@@ -15,7 +15,7 @@ verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06
 governance (`orch-batch-recommend`; skill + constitution + BDD
 [delivery-batch-recommend.md](../behavior/delivery-batch-recommend.md);
 note [orch-batch-recommend-governance.md](./orch-batch-recommend-governance.md)). Formal phase
-remains **None**. Do **not** activate **#81** CE-O01. Do **not** invent a P-phase.
+remains **None**. **#81** CE-O01 is now the sole-active CE leaf via deliver (not activated by this governance slice). Do **not** invent a P-phase.
 
 **Ad-hoc slice (2026-07-10):** **[MGMT-UI-DEFECTS](detail/MGMT-UI-defects.md)** — Round 2 / P0 **Done**; **Round 3 / P1 depth governance Done** (`mgmt-ui-p1`; merge `180bffb`; worktree removed).
 
