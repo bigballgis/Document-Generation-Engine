@@ -1,5 +1,18 @@
 # Execution Sync Ledger
 
+**Completion note (2026-07-16, ORCH-SPECIALIST-FALLBACK):** Governance slice
+`orch-specialist-fallback` → **Done**. BDD **ready**
+([specialist-runtime-fallback.md](../behavior/specialist-runtime-fallback.md); **SRF-01…10**).
+**Artifacts:** skill [specialist-runtime-fallback](../../.cursor/skills/specialist-runtime-fallback/SKILL.md);
+routing mandate + delivery constitution; `delivery-orchestrator` / pipeline handoff
+`runtime_routing`; `AGENTS.md` + `/deliver`; note
+[orch-specialist-fallback-governance.md](./orch-specialist-fallback-governance.md).
+Product BE/FE **N/A**; E2E/UIUX/deploy **N/A**. Batch self-check **`solo`**;
+`runtime_routing` self-check **`INLINE_CHECKLIST`** (parent landed docs when Task API /
+worktree-root migrate flaky). **Not** CE; formal phase **None**. **Do not activate #81
+CE-O01**. Umbrella **#53** remains **in-progress**. Do **not** claim go-live. Do **not**
+activate CD-3.
+
 **Completion note (2026-07-16, ORCH-BATCH-RECOMMEND):** Governance slice
 `orch-batch-recommend` → **Done**. BDD **ready**
 ([delivery-batch-recommend.md](../behavior/delivery-batch-recommend.md); **DBR-01…16**).

@@ -11,6 +11,12 @@ verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06
 
 **Active formal phase / program:** **None** (2026-07-09). **CODE-QUALITY program Done** (CQ-01A…CQ-08; ArchUnit **11/11**); see [program entry](code-quality-program.md) and [task sheet](detail/CODE-QUALITY-code-hygiene.md). **CORE-FORTRESS program Done** (F1–F8; 2026-07-09). **CORE-EXCELLENCE** is the active delivery program (not a formal P-phase). **LRP waves A–E → Done**. **CDP Wave CD-2 → Done** (T01–T13; **no CDP wave In Progress**). Historical LR-C/D/E and CD-E2E slice evidence: [execution-sync-ledger.md](./execution-sync-ledger.md) · [LRP program](launch-readiness-program.md) · [CDP program](competitiveness-deepening-program.md).
 
+**Ad-hoc slice (2026-07-16):** **ORCH-SPECIALIST-FALLBACK → Done** — Task enum/API
+runtime fallback (`orch-specialist-fallback`; skill + routing constitution + BDD
+[specialist-runtime-fallback.md](../behavior/specialist-runtime-fallback.md);
+note [orch-specialist-fallback-governance.md](./orch-specialist-fallback-governance.md)).
+Formal phase remains **None**. Do **not** activate **#81** CE-O01.
+
 **Ad-hoc slice (2026-07-16):** **ORCH-BATCH-RECOMMEND → Done** — pre-0 Batch Recommendation
 governance (`orch-batch-recommend`; skill + constitution + BDD
 [delivery-batch-recommend.md](../behavior/delivery-batch-recommend.md);

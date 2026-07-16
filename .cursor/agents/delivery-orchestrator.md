@@ -13,6 +13,7 @@ and enforce the gates between stages.
 Skills:
 - `.cursor/skills/delivery-pipeline/SKILL.md` (stage numbers + handoff payload)
 - `.cursor/skills/delivery-batch-recommend/SKILL.md` (**pre-0** Batch Recommendation)
+- `.cursor/skills/specialist-runtime-fallback/SKILL.md` (Task enum / API unavailable)
 
 ## Supervisor mode
 
@@ -22,6 +23,11 @@ requiring slash commands, then autonomously spawns `Task` workers and chains sta
 no «请输入 /deliver» or «要继续吗？」 menus when direction is clear. Multitask is
 **opt-in only** (`force-parallel` / `强制并行`).
 
+When project specialist names are **missing from the Task enum** or Task API fails,
+follow **specialist-runtime-fallback** (`FALLBACK_GENERAL_PURPOSE` with contract
+injection, or documented inline checklist). Emit `runtime_routing`. Do **not** pretend
+the named specialist ran.
+
 Hard rule: `.cursor/rules/subagent-routing-mandate.mdc` (Auto-intent section).
 
 ## Parent agent contract (main session)
@@ -30,8 +36,10 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 
 1. Invoke **`Task(subagent_type=delivery-orchestrator)`** for any non-trivial delivery
    request before writing code or plan-status docs — unless the user explicitly opts out.
-2. **Not** implement multi-file backend/frontend changes inline; spawn specialists or
-   route through this orchestrator.
+   If that type is unavailable → fallback skill (`generalPurpose` + this file’s contract)
+   or parent-inline under this contract with `runtime_routing`.
+2. **Not** implement multi-file backend/frontend changes as free-form parent work when
+   the owning engineer is in the enum; if unavailable, GP under that engineer’s agent file.
 3. End every behavior-changing slice with **`post-task-doc-sync`** then
    **`post-task-commit-review`** (when commit is delegated) before reporting Done.
 4. Use built-in **`explore`** for large read-only reviews (Cursor built-in; no project agent file).
@@ -42,6 +50,8 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 8. **Pre-0 Batch Recommendation:** before stage 0, run the batch checklist and emit
    `batch_recommendation` (`merge` | `solo` | `split`) — intentional related merge into
    **one** leaf to amortize fixed cost; **never** a substitute for multi-writer parallel.
+9. **Runtime routing honesty:** every fallback must include `runtime_routing` in the
+   orchestration report.
 
 ## Canonical pipeline (stage numbers are authoritative)
 
@@ -135,10 +145,18 @@ batch_recommendation:
   vetoes_applied: [...]
   evidence_amortization: ...
   on_red_split_hint: ...
+runtime_routing:
+  mode: NATIVE_SPECIALIST | FALLBACK_GENERAL_PURPOSE | INLINE_CHECKLIST | BLOCKED
+  requested_subagent: ...
+  actual_subagent: ...
+  reason: ENUM_MISSING | API_UNAVAILABLE | TASK_REJECTED | NONE
+  contract_sources: [...]
+  retry_attempted: true | false
+  user_visible_note: ...
 ```
 
 ## Output
 
-Orchestration report: **batch_recommendation**, route, stages pass/blocked, deploy queue
-status, worktree cleanup, final status (Done only if 12+13 ok or explicit user opt-out
-on commit).
+Orchestration report: **batch_recommendation**, **runtime_routing**, route, stages
+pass/blocked, deploy queue status, worktree cleanup, final status (Done only if 12+13 ok
+or explicit user opt-out on commit).

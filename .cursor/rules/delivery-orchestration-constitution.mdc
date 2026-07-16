@@ -49,11 +49,17 @@ pipeline cost; it is **not** multi-writer parallel. Skill:
 `.cursor/skills/delivery-batch-recommend/SKILL.md`. Behavior:
 `docs/behavior/delivery-batch-recommend.md`.
 
+**Specialist runtime fallback:** when Task enum lacks project specialists or Task API
+fails, follow `.cursor/skills/specialist-runtime-fallback/SKILL.md` and emit
+`runtime_routing`. Fallback does **not** waive stages or gates.
+
 ## Non-negotiables
 
 0. Strategic direction autonomy — proceed without end-of-turn permission prompts when clear.
 0a. **Batch Recommendation on every deliver** — emit `batch_recommendation` before stage 0;
     `merge` = one leaf with multiple `member_task_ids`; never fold into an In Progress leaf.
+0b. **Runtime routing honesty** — if specialists are unavailable, use the fallback ladder;
+    never silent improvisation; never fake named-`Task` success.
 1. BDD first — no tests/code before spec or `not-applicable`.
 2. TDD always — failing test first.
 3. Frontend E2E mandatory for user-facing changes (stages 5–7).
@@ -75,7 +81,9 @@ pipeline cost; it is **not** multi-writer parallel. Skill:
 - **Default parallel CE writers** / multitask fan-out while another leaf is In Progress (unless user `force-parallel`).
 - Treating Batch Recommendation `merge` as permission to spawn a second writer.
 - Reordering/skipping end gates; leaving worktrees after merge.
-- Parent implementing delivery slices inline when a specialist exists.
+- Parent free-form delivery when a specialist is **available in the Task enum**.
+- Lazy `generalPurpose` while the named specialist is in the enum.
+- Silent fallback without `runtime_routing` / without binding to `.cursor/agents/<requested>.md`.
 - Claiming Done from a feature worktree without stage 11 merge + MAIN doc-sync.
 
 ## Done definition
