@@ -11,6 +11,12 @@ verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06
 
 **Active formal phase / program:** **None** (2026-07-09). **CODE-QUALITY program Done** (CQ-01A…CQ-08; ArchUnit **11/11**); see [program entry](code-quality-program.md) and [task sheet](detail/CODE-QUALITY-code-hygiene.md). **CORE-FORTRESS program Done** (F1–F8; 2026-07-09). **CORE-EXCELLENCE** is the active delivery program (not a formal P-phase). **LRP waves A–E → Done**. **CDP Wave CD-2 → Done** (T01–T13; **no CDP wave In Progress**). Historical LR-C/D/E and CD-E2E slice evidence: [execution-sync-ledger.md](./execution-sync-ledger.md) · [LRP program](launch-readiness-program.md) · [CDP program](competitiveness-deepening-program.md).
 
+**Ad-hoc slice (2026-07-16):** **ORCH-BATCH-RECOMMEND → Done** — pre-0 Batch Recommendation
+governance (`orch-batch-recommend`; skill + constitution + BDD
+[delivery-batch-recommend.md](../behavior/delivery-batch-recommend.md);
+note [orch-batch-recommend-governance.md](./orch-batch-recommend-governance.md)). Formal phase
+remains **None**. Do **not** activate **#81** CE-O01. Do **not** invent a P-phase.
+
 **Ad-hoc slice (2026-07-10):** **[MGMT-UI-DEFECTS](detail/MGMT-UI-defects.md)** — Round 2 / P0 **Done**; **Round 3 / P1 depth governance Done** (`mgmt-ui-p1`; merge `180bffb`; worktree removed).
 
 **Formal phase P23:** **[P23 Demo typography & layout excellence](detail/P23-demo-typography-layout-excellence.md)** — **Done** (2026-07-08; T01–T16; bank-grade Word output for all demo packages).
@@ -109,6 +115,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | **[code-quality-program.md](./code-quality-program.md)** | **CODE-QUALITY program Done (2026-07-09):** behavior-preserving hygiene — module boundaries, god-class extraction, DRY demo/PDF/E2E infra (`CQ-*`) |
 | **[system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md)** | **Consolidated optimization review (SOR-0…7, 2026-07-04 closeout)** — open hygiene items superseded by **CODE-QUALITY** where duplicated |
 | **[core-excellence-program-2026-07.md](./core-excellence-program-2026-07.md)** | **Core Excellence（CE-K/U/C/G/E/O）** — Task Master **#53–#97**; **Batch 1–4 Done**; Wave 0 #61/#86/#87 **Done**; **#62/#69/#70/#88 Done**; prior #60/#84/#85 **Done**; formal phase **None** (optimization backlog, not a P-phase) |
+| **[orch-batch-recommend-governance.md](./orch-batch-recommend-governance.md)** | **Agent governance (2026-07-16)** — pre-0 Batch Recommendation (`merge`\|`solo`\|`split`); not a P-phase; do **not** activate #81 CE-O01 |
 | **[comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)** | **Unified prioritized map (COR-0…6): docs sync, API contract, template workflow, frontend UX, performance, E2E, P14–P20 — start here (2026-06-23)** |
 | [launch-readiness-program.md](./launch-readiness-program.md) | Launch-readiness deep optimization — production pitfalls + usability deepening (LR-A…E; sibling program; **Wave LR-C Done**; **Wave LR-D Done** — D1–D7; merge tip `218dcf1`; **Wave LR-E Done** — E1 merge `575d0aa` #42; E2 merge `ae39fbb` #43; docs gate; checklist **NO-GO**; **LRP planned waves → Done**) |
 | [optimization-plan.md](./optimization-plan.md) | Technical debt detail: quality gates, coverage, backend architecture/security/performance (OPT-A…G) |

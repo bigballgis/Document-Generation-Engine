@@ -219,6 +219,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[Management invocation history](./behavior/management-invocation-history.md)** | **ready** | Management-plane invocation history / records journey |
 | **[API access cross-package alerts](./behavior/api-access-cross-package-alerts.md)** | **ready** | Cross-package API access alert surfaces |
 | **[Cursor scaffold hygiene](./behavior/cursor-scaffold-hygiene.md)** | **not-applicable** (2026-07-14) | Ops/docs agent scaffold — Cursor-only; no product E2E |
+| **[Delivery Batch Recommendation](./behavior/delivery-batch-recommend.md)** | **ready** (2026-07-16) · slice `orch-batch-recommend` | **BDD-ORCH-BATCH-RECOMMEND** DBR-01…16 — pre-0 `merge`\|`solo`\|`split` into one leaf; amortize fixed pipeline cost; **not** multi-writer parallel; skill [delivery-batch-recommend](../.cursor/skills/delivery-batch-recommend/SKILL.md); formal phase **None**; do **not** activate #81 CE-O01 |
 
 ## Evidence & acceptance artifacts
 

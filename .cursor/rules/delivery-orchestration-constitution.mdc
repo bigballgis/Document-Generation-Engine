@@ -26,6 +26,7 @@ plan-status updates, or Done claims — only orchestration and synthesis.
 ## Fixed pipeline order (authoritative)
 
 ```
+−1 Batch Recommendation (delivery-orchestrator; skill delivery-batch-recommend) →
 0 worktree-router (MANDATORY ISOLATED for delivery) → 1 behavior-spec-author → 2 plan-orchestrator → 3 doc-keeper(if docs)
  → 4 backend-engineer | frontend-engineer | rendering-engineer   [all in feature worktree]
  → 5 build-deploy-agent (E2E stack prep, queued)
@@ -42,9 +43,17 @@ plan-status updates, or Done claims — only orchestration and synthesis.
 **Session worktree:** code only in `../DGE-<slice-id>`; merge at 11; doc-sync+commit (12–13) on **main**.
 Optional stage **14** `verifier` matches `.cursor/skills/delivery-pipeline/SKILL.md`.
 
+**Pre-0 Batch Recommendation:** before stage 0, decide `merge` | `solo` | `split` from
+repo facts so related tasks share **one** leaf and one evidence run. This amortizes fixed
+pipeline cost; it is **not** multi-writer parallel. Skill:
+`.cursor/skills/delivery-batch-recommend/SKILL.md`. Behavior:
+`docs/behavior/delivery-batch-recommend.md`.
+
 ## Non-negotiables
 
 0. Strategic direction autonomy — proceed without end-of-turn permission prompts when clear.
+0a. **Batch Recommendation on every deliver** — emit `batch_recommendation` before stage 0;
+    `merge` = one leaf with multiple `member_task_ids`; never fold into an In Progress leaf.
 1. BDD first — no tests/code before spec or `not-applicable`.
 2. TDD always — failing test first.
 3. Frontend E2E mandatory for user-facing changes (stages 5–7).
@@ -57,12 +66,14 @@ Optional stage **14** `verifier` matches `.cursor/skills/delivery-pipeline/SKILL
 
 ## Forbidden
 
+- Skipping **stage −1** Batch Recommendation on deliver (or inventing merge without facts).
 - Skipping **stage 0** worktree for delivery writes (MAIN is not the implementation sandbox).
 - Running `mvn verify` / full frontend gates on **MAIN** for active delivery slices.
 - Skipping behavior spec for behavior-changing work.
 - Frontend Done without E2E functional + UIUX.
 - Deploy on red gates; secrets in images; parallel compose stacks.
 - **Default parallel CE writers** / multitask fan-out while another leaf is In Progress (unless user `force-parallel`).
+- Treating Batch Recommendation `merge` as permission to spawn a second writer.
 - Reordering/skipping end gates; leaving worktrees after merge.
 - Parent implementing delivery slices inline when a specialist exists.
 - Claiming Done from a feature worktree without stage 11 merge + MAIN doc-sync.

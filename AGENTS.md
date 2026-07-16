@@ -11,7 +11,7 @@ Stay in **one main chat**. Speak the goal in natural language — the parent age
 
 | You say (examples) | Parent does |
 | --- | --- |
-| 「把 F7 做完」「修这个 bug」「按管线交付」「自动执行后续」 | **deliver** → `delivery-orchestrator` (**one leaf**; single-lane serial) |
+| 「把 F7 做完」「修这个 bug」「按管线交付」「自动执行后续」 | **deliver** → `delivery-orchestrator` (**stage −1 Batch Recommendation** then one leaf; single-lane serial; may `merge` related tasks) |
 | 「这两个切片并行」「同时改前后端」 | **Refuse fan-out by default** → serial queue. Only `force-parallel` / `强制并行` → legacy multitask (≤2 writers) |
 | 「部署一下」「队列状态」「重启栈」 | **deploy-queue** → `build-deploy-agent` |
 | 「验收一下」「算不算 Done」 | **verify-done** → `verifier` |
@@ -25,10 +25,16 @@ Optional shortcuts: `/deliver` (preferred), `/multitask-slices` (legacy opt-in),
 Native Cursor parallel primitives are **opt-in only** — see
 `.cursor/skills/cursor-native-parallel/SKILL.md`.
 
-## Pipeline (0–14)
+## Pipeline (−1, then 0–14)
 
 See `.cursor/skills/delivery-pipeline/SKILL.md` and `delivery-orchestrator`.
-Optional stage **14** = `verifier`.
+
+- **Stage −1 — Batch Recommendation** (mandatory on deliver): skill
+  [delivery-batch-recommend](.cursor/skills/delivery-batch-recommend/SKILL.md);
+  behavior [delivery-batch-recommend.md](docs/behavior/delivery-batch-recommend.md).
+  Decide `merge` | `solo` | `split` from repo facts so related work shares **one**
+  worktree / one evidence run. **Not** multi-writer parallel.
+- Stages **0–13** as before; optional stage **14** = `verifier`.
 
 ## Agents (18)
 

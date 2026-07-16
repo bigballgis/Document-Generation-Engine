@@ -68,9 +68,17 @@ Skill: `.cursor/skills/docker-deploy-queue/SKILL.md`.
 
 ## Pipeline hooks
 
-`delivery-orchestrator` stage **0** = provision worktree (always for delivery).
+`delivery-orchestrator` stage **−1** = Batch Recommendation (decide `merge`|`solo`|`split`
+into **one** leaf — amortize fixed cost; **not** a second writer). Skill:
+`.cursor/skills/delivery-batch-recommend/SKILL.md`.
+Stage **0** = provision worktree (always for delivery) for the **single**
+`proposed_slice_id`.
 Stage **11** = `integration-merger` (merge + remove worktree) **before** doc-sync on MAIN.
 See `delivery-orchestration-constitution.mdc`.
+
+Do **not** fold new work into an already sole-active / In Progress leaf — queue the next
+leaf serially (Batch Recommendation may still `merge` related *pending* tasks into the
+**next** leaf before stage 0).
 
 ## Single-lane serial (default, 2026-07-16)
 
