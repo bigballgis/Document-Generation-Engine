@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 → Done. Sole-active = #92 CE-U16 (In Progress; slice ce-u16-authoring-path-compress). Umbrella is program registry only — not a delivery leaf. P3 parked.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91 Done. Sole-active = #92 CE-U16 (single-lane serial §9.2). P3 parked. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 → Done. No sole-active delivery leaf. §9.2 next serial: #93 CE-U18 → pending/parked (P2 continuum). Umbrella is program registry only — not a delivery leaf. P3 parked. Leave #50 alone.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92 Done. Sole-active cleared (single-lane serial §9.2). Next queue head #93 CE-U18 pending until stage 0. P3 parked (#77/#80/#96/#97). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T19:25:00.000Z"
+        "updatedAt": "2026-07-17T20:55:00.000Z"
       },
       {
         "id": "54",
@@ -1276,22 +1276,22 @@
       {
         "id": "92",
         "title": "CE-U16: Authoring path compression",
-        "description": "IN PROGRESS 2026-07-17. Sole-active CE delivery leaf. Slice ce-u16-authoring-path-compress; worktree D:/working/DGE-ce-u16-authoring-path-compress · feat/ce-u16-authoring-path-compress. Design default→bindings; post-create Authoring path micro-wizard (Master→Bindings→Variables→Preview). P2·M. BDD ready (BDD-CE-U16-APC-001…010). After #91 CE-U15 Done (MAIN ed8a15e6 / merge b2968052).",
-        "details": "Activated 2026-07-17 (stage 2 plan-orchestrator) after U15 (#91 Done — MAIN closeout ed8a15e6; feature merge b2968052). Placement ISOLATED. BDD ready: docs/behavior/ce-u16-authoring-path-compress.md (BDD-CE-U16-APC-001…010). Batch recommendation solo (member_task_ids: [\"92\"]). Gates before Done: frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U16 In Progress; §9.2 sole-active=#92. Do NOT activate CD-3 / claim go-live / activate P3. Next: stage 4 frontend-engineer.",
+        "description": "DONE 2026-07-17. Slice ce-u16-authoring-path-compress. MAIN merge 5d683c40 / feature 1a3d0f20. Design default→bindings; post-create Authoring path micro-wizard (Master→Bindings→Variables→Preview). FE gates + E2E 5/5 + UIUX Critical=0 + arch PASS_WITH_NOTES + Stage 5/10 DEPLOY_OK. Formal phase None. Not go-live.",
+        "details": "Completed 2026-07-17 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: ce-u16-authoring-path-compress. Worktree REMOVED. Merge 5d683c4039b51b9c7f2ed32bc002bb7200973410; feature 1a3d0f203c360a257594c9ea1ac2477ab245588c. BDD ready docs/behavior/ce-u16-authoring-path-compress.md (BDD-CE-U16-APC-001…010). Gates: FE lint/type-check/test/build GREEN exit 0; Stage 5 DEPLOY_OK (docs/plan/evidence/ce-u16-stage5-deploy/); Stage 6 E2E 5/5 (CE-U16-manifest.md; docs/plan/evidence/ce-u16-stage6-e2e/); Stage 7 UIUX Critical=0 (CE-U16-uiux-manifest.md); architecture PASS_WITH_NOTES Critical=0; Stage 10 DEPLOY_OK (docs/plan/evidence/ce-u16-stage10-deploy/). Yellow open (not Done): Master×Stepper sync; Create dialog E2E transitional (fetchAllMasters on open — CE-U16-manifest Known gap). Formal phase remains None. Plan §4 CE-U16 Done. Sole-active cleared. Next #93 CE-U18 pending/parked (do not auto-activate until stage 0). Batch recommendation solo #92 closed; serial #93→#94→#95. Leave P3 parked; leave #50 alone. Do NOT activate CD-3 / claim go-live / activate P3.",
         "testStrategy": "1. Default landing bindings. 2. Micro-wizard. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "91"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T19:25:00.000Z"
+        "updatedAt": "2026-07-17T20:55:00.000Z"
       },
       {
         "id": "93",
         "title": "CE-U18: Batch test history drill + unify paths",
-        "description": "PENDING. Slice ce-u18-batch-test-history. Consume sampleResultsJson; remove legacy sync batch path. P2·M.",
-        "details": "After U16 (#92). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U18.",
+        "description": "PENDING 2026-07-17. §9.2 next serial queue head after #92 CE-U16 Done. Slice ce-u18-batch-test-history. Consume sampleResultsJson; remove legacy sync batch path. P2·M. Do not activate until stage 0 of next leaf.",
+        "details": "After U16 (#92 Done — MAIN merge 5d683c40 / feature 1a3d0f20). Remain pending until stage 0 worktree for next leaf (single-lane serial §9.2 — no second In Progress delivery leaf). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U18. Serial after this: #94 U20 → #95 U21. P3 parked. Leave #50 alone. Do NOT activate CD-3 / claim go-live.",
         "testStrategy": "1. Expand history rows. 2. Legacy path removed. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
@@ -1299,7 +1299,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00Z"
+        "updatedAt": "2026-07-17T20:55:00.000Z"
       },
       {
         "id": "94",
