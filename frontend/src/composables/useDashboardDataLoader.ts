@@ -159,12 +159,30 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
         })
       }
     }
+    if (shouldLoadCollaborationWorkItems.value && collaborationStore.workItems.length > 0) {
+      await templatesStore
+        .enrichDevVersionIdsForWorkflow(
+          collaborationStore.workItems.map((item) => item.templateId),
+        )
+        .catch(() => {
+          /* degrade to Hub + queue-aware redirect */
+        })
+    }
     loading.value = false
   }
 
   async function retryCollaborationLoad() {
     try {
       await fetchCollaborationWorkItems()
+      if (collaborationStore.workItems.length > 0) {
+        await templatesStore
+          .enrichDevVersionIdsForWorkflow(
+            collaborationStore.workItems.map((item) => item.templateId),
+          )
+          .catch(() => {
+            /* degrade to Hub + queue-aware redirect */
+          })
+      }
     } catch {
       /* error captured in collaboration store */
     }
@@ -214,9 +232,18 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
   watch(
     () => [route.query.queue, route.query.filter, route.query.tab] as const,
     () => {
-      void fetchCollaborationWorkItems().catch(() => {
-        /* error captured in collaboration store */
-      })
+      void (async () => {
+        try {
+          await fetchCollaborationWorkItems()
+          if (collaborationStore.workItems.length > 0) {
+            await templatesStore.enrichDevVersionIdsForWorkflow(
+              collaborationStore.workItems.map((item) => item.templateId),
+            )
+          }
+        } catch {
+          /* error captured in collaboration store / hub fallback */
+        }
+      })()
     },
   )
 

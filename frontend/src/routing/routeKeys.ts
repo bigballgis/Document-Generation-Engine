@@ -103,8 +103,22 @@ export function templateReleaseDetailPath(templateId: string, releaseVersion: st
   return `${TEMPLATE_DETAIL_PATH_PREFIX}${templateId}/releases/${encodeURIComponent(releaseVersion)}`
 }
 
-export function templateLifecyclePanelPath(templateId: string): string {
-  return templatePackageHubPath(templateId, 'lifecycle')
+export function templateLifecyclePanelPath(
+  templateId: string,
+  extraQuery?: Record<string, string>,
+): string {
+  const base = templatePackageHubPath(templateId, 'lifecycle')
+  if (!extraQuery) {
+    return base
+  }
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(extraQuery)) {
+    if (value) {
+      params.set(key, value)
+    }
+  }
+  const query = params.toString()
+  return query ? `${base}&${query}` : base
 }
 
 /** Canonical external-access surface — package hub tab (P13 IA convergence). */

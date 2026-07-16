@@ -44,12 +44,14 @@ test.describe('P14-T02 collaboration to-dos', () => {
     ageCollaborationWorkItem(workItem.workItemId, "INTERVAL '3 hours'")
 
     await loginAs(page, E2E_TEMPLATE_TESTER)
-    await page.goto('/dashboard#tasks-section')
+    // Tabbed dashboard requires ?queue=TEST to mount #tasks-section (hash alone stays on Overview).
+    await page.goto('/dashboard?queue=TEST#tasks-section')
 
     await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
-    await expect(page.locator('#tasks-section').getByRole('heading', { name: /^my to-dos$/i })).toBeVisible()
+    await expect(page.getByRole('tab', { name: /waiting on my testing/i })).toBeVisible()
+    await expect(page.locator('#tasks-section').getByRole('heading', { name: /^in testing$/i })).toBeVisible()
     await expect(page.getByText(/unable to load collaboration to-do items/i)).not.toBeVisible()
-    await expect(page.locator('.el-skeleton')).toHaveCount(0)
+    await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 60_000 })
 
     await filterDashboardTasksByItem(page, template.name)
     const row = await dashboardTaskRow(page, template.name)
@@ -59,9 +61,20 @@ test.describe('P14-T02 collaboration to-dos', () => {
     await expect(row.getByRole('button', { name: /^open$/i })).toBeVisible()
 
     await row.getByRole('button', { name: /^open$/i }).click()
-    await expect(page).toHaveURL(/tab=lifecycle/)
+    // CE-U14: TEST Open deep-links to testing workspace (enriched /dev/… or hub lifecycle fallback).
+    await expect(page).toHaveURL(/workspaceTab=testing|tab=lifecycle/, { timeout: 15_000 })
     await expect(page.getByText(/an internal error occurred/i)).not.toBeVisible()
-    await expect(page.locator('#template-lifecycle-panel')).toBeVisible({ timeout: 15_000 })
+    await expect
+      .poll(async () => {
+        if (await page.locator('#dev-workspace').isVisible().catch(() => false)) {
+          return 'dev'
+        }
+        if (await page.locator('#template-lifecycle-panel').isVisible().catch(() => false)) {
+          return 'hub'
+        }
+        return 'pending'
+      }, { timeout: 15_000 })
+      .not.toBe('pending')
 
     const apiItems = await listCollaborationWorkItems(request, E2E_TEMPLATE_TESTER, { queue: 'TEST' })
     expect(apiItems.some((item) => item.workItemId === workItem.workItemId)).toBeTruthy()
@@ -102,10 +115,11 @@ test.describe('P14-T02 collaboration to-dos', () => {
     await loginAs(page, E2E_GROUP_ADMIN)
     await page.goto('/dashboard?queue=ESCALATION#tasks-section')
 
-    await expect(page.getByRole('heading', { level: 1, name: /overdue to follow up/i })).toBeVisible()
-    await expect(page.locator('#tasks-section').getByRole('heading', { name: /^my to-dos$/i })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /my tasks/i })).toBeVisible()
+    await expect(page.getByRole('tab', { name: /overdue to follow up/i })).toBeVisible()
+    await expect(page.locator('#tasks-section').getByRole('heading', { name: /overdue follow-up/i })).toBeVisible()
     await expect(page.getByText(/unable to load collaboration to-do items/i)).not.toBeVisible()
-    await expect(page.locator('.el-skeleton')).toHaveCount(0)
+    await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 60_000 })
 
     await filterDashboardTasksByItem(page, template.name)
     const row = await dashboardTaskRow(page, template.name)

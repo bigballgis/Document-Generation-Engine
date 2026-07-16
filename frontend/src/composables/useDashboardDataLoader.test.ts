@@ -271,6 +271,41 @@ describe('useDashboardDataLoader', () => {
     expect(deepLinkSpy).toHaveBeenCalled()
   })
 
+  it('enriches template devVersionIds for collaboration deep links (CE-U14)', async () => {
+    setupSession()
+    isOverviewTab.value = true
+
+    const sessionStore = useSessionStore()
+    vi.spyOn(sessionStore, 'canAccessRoute').mockReturnValue(false)
+
+    const collaborationStore = useCollaborationStore()
+    collaborationStore.workItems = [
+      {
+        workItemId: 'wi-1',
+        templateId: 'tpl-1',
+        templateName: 'Letter',
+        groupCode: 'RETAIL',
+        queue: 'TEST',
+        triggerType: 'SUBMIT_FOR_TEST',
+        submitterUserId: '10000003',
+        summaryText: 'Submitted',
+        createdAt: '2026-06-26T10:00:00Z',
+        ageSeconds: 120,
+      },
+    ]
+    vi.spyOn(collaborationStore, 'fetchWorkItems').mockResolvedValue(undefined)
+
+    const templatesStore = useTemplatesStore()
+    const enrichSpy = vi
+      .spyOn(templatesStore, 'enrichDevVersionIdsForWorkflow')
+      .mockResolvedValue(undefined)
+
+    mountDataLoaderHarness()
+    await flushPromises()
+
+    expect(enrichSpy).toHaveBeenCalledWith(['tpl-1'])
+  })
+
   it('reports collaboration fetch failure from store', async () => {
     setupSession()
     routeQuery.value = { queue: 'TEST' }

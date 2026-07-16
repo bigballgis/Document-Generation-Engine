@@ -51,7 +51,8 @@ test.describe('P21-T01a task hub deepening (§12.3)', () => {
     await expect(row.getByText(workItem.submitterUserId, { exact: true })).toBeVisible()
 
     await row.getByRole('button', { name: /^open$/i }).click()
-    await expect(page).toHaveURL(/\/templates\/[^/?]+\?tab=lifecycle/)
+    // CE-U14: TEST Open → testing decision surface (/dev/… preferred; hub lifecycle fallback OK).
+    await expect(page).toHaveURL(/workspaceTab=testing|tab=lifecycle/, { timeout: 15_000 })
   })
 
   test('invalid queue falls back to unfiltered hub title', async ({ page }) => {

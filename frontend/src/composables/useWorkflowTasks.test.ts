@@ -12,6 +12,7 @@ import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
 import { useContentModulesStore } from '@/stores/contentModules'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
+import { useTemplatesStore } from '@/stores/templates'
 import type { ManagementCapabilities } from '@/types/session'
 
 const testerCapabilities: ManagementCapabilities = {
@@ -84,6 +85,83 @@ describe('useWorkflowTasks', () => {
 
     const { tasks } = useWorkflowTasks()
     expect(tasks.value.some((task) => task.kind === 'template-test' && task.source === 'collaboration')).toBe(true)
+  })
+
+  it('BDD-CE-U14-DLT-001: deep-links template-test tasks using enriched devVersionId', () => {
+    const collaborationStore = useCollaborationStore()
+    collaborationStore.workItems = [
+      {
+        workItemId: 'wi-1',
+        templateId: 't1',
+        templateName: 'Letter',
+        groupCode: 'RETAIL',
+        queue: 'TEST',
+        triggerType: 'SUBMIT_FOR_TEST',
+        submitterUserId: '10000003',
+        summaryText: 'Template submitted for testing',
+        createdAt: '2026-06-26T10:00:00Z',
+        ageSeconds: 120,
+      },
+    ]
+    const templatesStore = useTemplatesStore()
+    templatesStore.devVersionIdByTemplateId = { t1: 'dev-t1' }
+
+    const { tasks } = useWorkflowTasks()
+    const testTask = tasks.value.find((task) => task.kind === 'template-test')
+    expect(testTask?.path).toBe(
+      '/templates/t1/dev/dev-t1?workspaceTab=testing&testingTab=previewRuns',
+    )
+  })
+
+  it('BDD-CE-U14-DLT-002/003: deep-links approval and publish queues to decision tabs', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      ...sessionStore.session,
+      roles: ['GLOBAL_ADMIN'],
+      capabilities: {
+        ...testerCapabilities,
+        decideApprovals: true,
+        publishTemplates: true,
+      },
+    } as never
+
+    const collaborationStore = useCollaborationStore()
+    collaborationStore.workItems = [
+      {
+        workItemId: 'wi-appr',
+        templateId: 'tpl-a',
+        templateName: 'TPL-APPR',
+        groupCode: 'RETAIL',
+        queue: 'APPROVAL',
+        triggerType: 'SUBMIT_FOR_APPROVAL',
+        submitterUserId: '10000003',
+        summaryText: 'Awaiting approval',
+        createdAt: '2026-06-26T10:00:00Z',
+        ageSeconds: 120,
+      },
+      {
+        workItemId: 'wi-pub',
+        templateId: 'tpl-p',
+        templateName: 'TPL-PUB',
+        groupCode: 'RETAIL',
+        queue: 'PENDING_RELEASE',
+        triggerType: 'APPROVAL_PENDING_RELEASE',
+        submitterUserId: '10000003',
+        summaryText: 'Ready to publish',
+        createdAt: '2026-06-26T11:00:00Z',
+        ageSeconds: 60,
+      },
+    ]
+    const templatesStore = useTemplatesStore()
+    templatesStore.devVersionIdByTemplateId = { 'tpl-a': 'dev-a', 'tpl-p': 'dev-p' }
+
+    const { tasks } = useWorkflowTasks()
+    expect(tasks.value.find((task) => task.kind === 'template-approval')?.path).toBe(
+      '/templates/tpl-a/dev/dev-a?workspaceTab=approval&approvalTab=submitApproval',
+    )
+    expect(tasks.value.find((task) => task.kind === 'template-publish')?.path).toBe(
+      '/templates/tpl-p/dev/dev-p?workspaceTab=approval&approvalTab=publishReadiness',
+    )
   })
 
   it('builds master review tasks for pending review masters', () => {

@@ -227,6 +227,7 @@ export function stubTemplates(templates: unknown[] | 'empty' | 'resolved' = 'res
       templatesStore.templates = templates as never
     })
   }
+  vi.spyOn(templatesStore, 'enrichDevVersionIdsForWorkflow').mockResolvedValue(undefined)
   return templatesStore
 }
 

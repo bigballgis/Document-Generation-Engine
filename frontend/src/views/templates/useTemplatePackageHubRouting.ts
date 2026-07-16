@@ -5,6 +5,7 @@ import {
   templatePackageHubPath,
 } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
+import { resolveLifecycleHubDeepLinkTarget } from '@/utils/templateJourneyWorkspaceLink'
 import type { TemplateDevWorkspaceTab } from '@/views/templates/templateDevWorkspaceTabs'
 
 const HUB_SECONDARY_TABS = ['overview', 'apiAccess'] as const
@@ -55,7 +56,8 @@ export function useTemplatePackageHubRouting(options: UseTemplatePackageHubRouti
       if (!template.value) {
         await templatesStore.fetchTemplate(templateId.value)
       }
-      openDevEditor('approval')
+      const target = resolveLifecycleHubDeepLinkTarget(route.query)
+      openDevEditor(target.workspaceTab, target.extraQuery)
     } catch {
       await router.replace(templatePackageHubPath(templateId.value))
     }

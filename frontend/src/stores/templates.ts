@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import * as templatesApi from '@/api/templates'
 import { createTemplatesAuthoringActions } from '@/stores/createTemplatesAuthoringActions'
 import { createTemplatesLifecycleActions } from '@/stores/createTemplatesLifecycleActions'
 import { createTemplatesCatalogActions } from '@/stores/createTemplatesCatalogActions'
@@ -26,6 +27,8 @@ export const useTemplatesStore = defineStore('templates', () => {
   const lastErrorMessageKey = ref<string | null>(null)
   const lastListErrorRetryable = ref(false)
   const masterStyleCatalogByTemplateId = ref<Record<string, MasterStyleCatalog>>({})
+  /** CE-U14: resolve in-flight dev version ids for dashboard collaboration deep links. */
+  const devVersionIdByTemplateId = ref<Record<string, string>>({})
 
   const publishedTemplates = computed(() =>
     templates.value.filter((item) => item.lifecycleStatus === 'PUBLISHED'),
@@ -90,6 +93,37 @@ export const useTemplatesStore = defineStore('templates', () => {
     }
   }
 
+  /** Resolve in-flight devVersionId for collaboration Tasks deep links (CE-U14). */
+  async function enrichDevVersionIdsForWorkflow(templateIds: string[]): Promise<void> {
+    const uniqueIds = [...new Set(templateIds.filter(Boolean))]
+    await Promise.all(
+      uniqueIds.map(async (templateId) => {
+        if (devVersionIdByTemplateId.value[templateId]) {
+          return
+        }
+        if (selectedTemplate.value?.id === templateId && selectedTemplate.value.devVersionId) {
+          devVersionIdByTemplateId.value = {
+            ...devVersionIdByTemplateId.value,
+            [templateId]: selectedTemplate.value.devVersionId,
+          }
+          return
+        }
+        try {
+          const page = await templatesApi.listTemplateVersionLines(templateId, 0, 5)
+          const inFlight = page.content.find((line) => line.lineKind === 'IN_FLIGHT')
+          if (inFlight?.devVersionId) {
+            devVersionIdByTemplateId.value = {
+              ...devVersionIdByTemplateId.value,
+              [templateId]: inFlight.devVersionId,
+            }
+          }
+        } catch {
+          /* degrade to Hub + queue-aware redirect */
+        }
+      }),
+    )
+  }
+
   return {
     templates,
     templateListPage,
@@ -102,11 +136,13 @@ export const useTemplatesStore = defineStore('templates', () => {
     submitting,
     lastErrorMessageKey,
     lastListErrorRetryable,
+    devVersionIdByTemplateId,
     publishedTemplates,
     templatesByGroup,
     ...catalogActions,
     ...lifecycleActions,
     ...authoringActions,
     clearSelected,
+    enrichDevVersionIdsForWorkflow,
   }
 })

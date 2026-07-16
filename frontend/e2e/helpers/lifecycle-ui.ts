@@ -74,11 +74,9 @@ export async function confirmTestPassFromDevWorkspace(page: Page) {
 }
 
 /**
- * Tester dashboard Open deep-links to hub `?tab=lifecycle`.
- * After routeCapabilities fix, Open may land on either:
- * - hub `#template-lifecycle-panel` (legacy / collaboration-todos path), or
- * - `/dev/...` `#dev-workspace` (current hub redirect to approval workspace).
- * Confirm test pass actions live on hub lifecycle actions or the testing tab.
+ * Tester/approver/team-lead dashboard Open destination after CE-U14.
+ * Primary path: `/dev/...?workspaceTab=…` with decision actions already on the action rail.
+ * Legacy fallback: hub `#template-lifecycle-panel` (queue-aware redirect may still land here briefly).
  */
 async function waitForTesterOrApproverOpenDestination(page: Page): Promise<'hub' | 'dev'> {
   await expect(page).not.toHaveURL(/\/forbidden/, { timeout: 15_000 })
@@ -108,22 +106,31 @@ async function waitForTesterOrApproverOpenDestination(page: Page): Promise<'hub'
 }
 
 /**
+ * CE-U14: decision buttons must be on the action rail after Open — no extra tab click.
+ * Hub fallback still accepts lifecycle-panel actions.
+ */
+async function clickWorkspaceDecisionButton(page: Page, buttonName: RegExp, destination: 'hub' | 'dev') {
+  if (destination === 'hub') {
+    const button = page
+      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
+      .getByRole('button', { name: buttonName })
+      .first()
+    await expect(button).toBeVisible({ timeout: 15_000 })
+    await button.click()
+    return
+  }
+
+  const button = workspaceActions(page).getByRole('button', { name: buttonName })
+  await expect(button).toBeVisible({ timeout: 15_000 })
+  await button.click()
+}
+
+/**
  * Tester dashboard Open → open Confirm test pass dialog (does not submit).
  */
 export async function openConfirmTestPassDialogAfterTesterOpen(page: Page) {
   const destination = await waitForTesterOrApproverOpenDestination(page)
-
-  if (destination === 'hub') {
-    const passButton = page
-      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
-      .getByRole('button', { name: /^confirm test pass$/i })
-      .first()
-    await expect(passButton).toBeVisible({ timeout: 15_000 })
-    await passButton.click()
-  } else {
-    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i }).click()
-    await workspaceActions(page).getByRole('button', { name: /^confirm test pass$/i }).click()
-  }
+  await clickWorkspaceDecisionButton(page, /^confirm test pass$/i, destination)
 
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText(/confirm test pass/i)).toBeVisible()
@@ -147,20 +154,7 @@ export async function confirmTestFailAfterTesterOpen(
   },
 ) {
   const destination = await waitForTesterOrApproverOpenDestination(page)
-  const failButtonName = /^record test failure$/i
-
-  if (destination === 'hub') {
-    const failButton = page
-      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
-      .getByRole('button', { name: failButtonName })
-      .first()
-    await expect(failButton).toBeVisible({ timeout: 15_000 })
-    await failButton.click()
-  } else {
-    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i }).click()
-    await workspaceActions(page).getByRole('button', { name: failButtonName }).click()
-  }
-
+  await clickWorkspaceDecisionButton(page, /^record test failure$/i, destination)
   await completeConfirmTestFailDialog(page, options)
 }
 
@@ -229,18 +223,7 @@ async function completeConfirmTestFailDialog(
  */
 export async function openApproveDialogAfterApproverOpen(page: Page) {
   const destination = await waitForTesterOrApproverOpenDestination(page)
-
-  if (destination === 'hub') {
-    const approveButton = page
-      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
-      .getByRole('button', { name: /^approve$/i })
-      .first()
-    await expect(approveButton).toBeVisible({ timeout: 15_000 })
-    await approveButton.click()
-  } else {
-    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template approval$/i }).click()
-    await workspaceActions(page).getByRole('button', { name: /^approve$/i }).click()
-  }
+  await clickWorkspaceDecisionButton(page, /^approve$/i, destination)
 
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText(/confirm approval/i)).toBeVisible()
@@ -368,7 +351,7 @@ export async function openGoLiveSummaryAfterTeamLeadOpen(page: Page) {
     await expect(publishButton).toBeEnabled({ timeout: 60_000 })
     await publishButton.click()
   } else {
-    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template approval$/i }).click()
+    // CE-U14: PENDING_RELEASE Open lands on publishReadiness with Confirm go-live visible.
     const publishButton = workspaceActions(page).getByRole('button', { name: /^confirm go-live$/i })
     await expect(publishButton).toBeEnabled({ timeout: 60_000 })
     await publishButton.click()

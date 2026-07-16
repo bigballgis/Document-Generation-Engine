@@ -7,6 +7,7 @@ import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 vi.mock('@/api/templates', () => ({
   listTemplates: vi.fn(),
   listAllTemplates: vi.fn(),
+  listTemplateVersionLines: vi.fn(),
   getTemplate: vi.fn(),
   submitForTest: vi.fn(),
   recordTestDecision: vi.fn(),
@@ -23,6 +24,7 @@ describe('templates store', () => {
     setActivePinia(createPinia())
     vi.mocked(templatesApi.listTemplates).mockReset()
     vi.mocked(templatesApi.listAllTemplates).mockReset()
+    vi.mocked(templatesApi.listTemplateVersionLines).mockReset()
     vi.mocked(templatesApi.getTemplate).mockReset()
     vi.mocked(templatesApi.createTemplate).mockReset()
     vi.mocked(templatesApi.publishTemplate).mockReset()
@@ -312,5 +314,66 @@ describe('templates store', () => {
       approvalSubState: 'PENDING_DECISION',
       sort: 'groupCodeAsc',
     })
+  })
+
+  it('enriches in-flight devVersionId for collaboration deep links (CE-U14)', async () => {
+    vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
+      content: [
+        {
+          devVersionId: 'dev-in-flight',
+          devVersionNumber: 2,
+          releaseVersion: null,
+          lifecycleStatus: 'TESTING',
+          lineKind: 'IN_FLIGHT',
+          updatedAt: '2026-06-26T10:00:00Z',
+          updatedBy: '10000003',
+          defaultRouteTarget: null,
+          cloneable: false,
+        },
+      ],
+      page: 0,
+      size: 5,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const store = useTemplatesStore()
+    await store.enrichDevVersionIdsForWorkflow(['tpl-1', 'tpl-1'])
+
+    expect(templatesApi.listTemplateVersionLines).toHaveBeenCalledTimes(1)
+    expect(store.devVersionIdByTemplateId['tpl-1']).toBe('dev-in-flight')
+  })
+
+  it('does not enrich when no IN_FLIGHT line (Hub + queue-aware path)', async () => {
+    vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
+      content: [
+        {
+          devVersionId: 'dev-published',
+          devVersionNumber: 1,
+          releaseVersion: '1.0.0',
+          lifecycleStatus: 'PUBLISHED',
+          lineKind: 'PUBLISHED',
+          updatedAt: '2026-06-20T10:00:00Z',
+          updatedBy: '10000003',
+          defaultRouteTarget: null,
+          cloneable: true,
+        },
+      ],
+      page: 0,
+      size: 5,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const store = useTemplatesStore()
+    await store.enrichDevVersionIdsForWorkflow(['tpl-published-only'])
+
+    expect(templatesApi.listTemplateVersionLines).toHaveBeenCalledWith(
+      'tpl-published-only',
+      0,
+      5,
+    )
+    expect(store.devVersionIdByTemplateId['tpl-published-only']).toBeUndefined()
+    expect(store.devVersionIdByTemplateId).toEqual({})
   })
 })
