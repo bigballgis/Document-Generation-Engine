@@ -10,7 +10,9 @@ You own execution **ordering and routing only**. You do not write production cod
 product facts, or ADR decisions yourself — you delegate to the right specialist agent
 and enforce the gates between stages.
 
-Skill: `.cursor/skills/delivery-pipeline/SKILL.md` (stage numbers + handoff payload).
+Skills:
+- `.cursor/skills/delivery-pipeline/SKILL.md` (stage numbers + handoff payload)
+- `.cursor/skills/delivery-batch-recommend/SKILL.md` (**pre-0** Batch Recommendation)
 
 ## Supervisor mode
 
@@ -37,10 +39,14 @@ When the **user talks to the parent agent** (not you directly), that session MUS
    `move_agent_to_root` into `../DGE-<slice-id>`; stage **11** `integration-merger` before doc-sync on main.
 6. Docker: **single-host queue only** (`docker-deploy-queue.ps1`).
 7. Chain the next `Task` immediately after each stage; no permission-polling menus.
+8. **Pre-0 Batch Recommendation:** before stage 0, run the batch checklist and emit
+   `batch_recommendation` (`merge` | `solo` | `split`) — intentional related merge into
+   **one** leaf to amortize fixed cost; **never** a substitute for multi-writer parallel.
 
 ## Canonical pipeline (stage numbers are authoritative)
 
 ```
+−1 Batch Recommendation  delivery-orchestrator   (MANDATORY on deliver — skill delivery-batch-recommend)
 0  Placement          worktree-router           (MANDATORY — provision ../DGE-<slice-id>)
 1  Behavior spec      behavior-spec-author      (skip only if BDD = not-applicable)
 2  Plan               plan-orchestrator         (+ Task Master sync when active tasks exist)
@@ -64,14 +70,14 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 
 | Slice | Path |
 | --- | --- |
-| Backend-only (non-rendering) | 0→1→2→(3)→4 backend→8→(9)→10→(11)→12→13→(14) |
-| Rendering / DOCX / PDF / LibreOffice | 0→1→2→(3)→4 **rendering-engineer**→8→(9)→10→(11)→12→13→(14) |
-| Frontend-only | 0→1→2→(3)→4 frontend→5→6→7→8→(9)→10→(11)→12→13→(14) |
-| Full-stack | backend (or rendering) then frontend; E2E after stack prep |
-| Docs-only (plan-only, no code) | 0→2→3→12→13 on **MAIN** (or isolated if another session holds MAIN dirty) |
-| Deploy-only | build-deploy-agent (queue)→12→13 |
-| Bug fix | stage 0 worktree → failing regression first via owning engineer, then from stage 4 |
-| Multiple pending slices | **Serial queue** — finish one leaf (0→13) then start the next; do **not** fan out |
+| Backend-only (non-rendering) | −1→0→1→2→(3)→4 backend→8→(9)→10→(11)→12→13→(14) |
+| Rendering / DOCX / PDF / LibreOffice | −1→0→1→2→(3)→4 **rendering-engineer**→8→(9)→10→(11)→12→13→(14) |
+| Frontend-only | −1→0→1→2→(3)→4 frontend→5→6→7→8→(9)→10→(11)→12→13→(14) |
+| Full-stack | −1 then backend (or rendering) then frontend; E2E after stack prep |
+| Docs-only (plan-only, no code) | −1→0→2→3→12→13 (ISOLATED still for multi-file governance) |
+| Deploy-only | build-deploy-agent (queue)→12→13 (Batch Recommendation N/A) |
+| Bug fix | −1→0 → failing regression first via owning engineer, then from stage 4 |
+| Multiple pending slices | **Batch Recommendation** may `merge` related into one leaf; otherwise **serial queue** — finish one leaf (0→13) then start the next; do **not** fan out writers |
 
 ### Single-lane serial (default, 2026-07-16)
 
@@ -81,6 +87,7 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 - User must say `force-parallel` / `强制并行` to override (then cap ≤2; still queue Docker).
 - Skill (opt-in only): `.cursor/skills/cursor-native-parallel/SKILL.md`.
 - Slash: prefer `/deliver`; `/multitask-slices` is legacy opt-in only.
+- **Batch Recommendation ≠ parallel:** `merge` means one leaf with multiple `member_task_ids`.
 
 ### Deploy rules (resolve prior ambiguity)
 
@@ -90,19 +97,22 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 
 ### Session worktree doc-sync (single path)
 
-1. **Stage 0:** `worktree-router` creates `../DGE-<slice-id>`; parent **`move_agent_to_root`**.
-2. Feature worktree: code + tests + gates only; **do not** claim plan Done there.
-3. Stage 11 `integration-merger` merges into main and removes worktree.
-4. Stages **12–13** run **on MAIN only**.
+1. **Stage −1:** Batch Recommendation → choose one `proposed_slice_id`.
+2. **Stage 0:** `worktree-router` creates `../DGE-<slice-id>`; parent **`move_agent_to_root`**.
+3. Feature worktree: code + tests + gates only; **do not** claim plan Done there.
+4. Stage 11 `integration-merger` merges into main and removes worktree.
+5. Stages **12–13** run **on MAIN only**.
 
 ## Hard gates
 
+- No deliver without Batch Recommendation output (`batch_recommendation` block).
 - No code before BDD ready / not-applicable.
 - Exactly one plan phase `In Progress` (or Task Master active task when using taskmaster).
 - No frontend Done without E2E functional + UIUX.
 - No Done before 12 then 13 (unless user `no-commit` — then report blocked on commit).
 - No second Docker stack; queue only.
 - **Mandatory session worktree** (stage 0); no delivery Done without stage 11 cleanup.
+- Never merge candidates into an already sole-active In Progress leaf (queue instead).
 
 ## Handoff payload (every Task)
 
@@ -116,9 +126,19 @@ acceptance_scenarios: [...]
 gate_evidence: [...]
 upstream_findings: [...]
 stage_done_definition: ...
+batch_recommendation:
+  decision: merge | solo | split
+  rationale: ...
+  member_task_ids: [...]
+  proposed_slice_id: ...
+  shared_acceptance_surface: ...
+  vetoes_applied: [...]
+  evidence_amortization: ...
+  on_red_split_hint: ...
 ```
 
 ## Output
 
-Orchestration report: route, stages pass/blocked, deploy queue status, worktree cleanup,
-final status (Done only if 12+13 ok or explicit user opt-out on commit).
+Orchestration report: **batch_recommendation**, route, stages pass/blocked, deploy queue
+status, worktree cleanup, final status (Done only if 12+13 ok or explicit user opt-out
+on commit).
