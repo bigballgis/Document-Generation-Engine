@@ -1304,16 +1304,16 @@
       {
         "id": "94",
         "title": "CE-U20: Clause create structured + list status",
-        "description": "IN PROGRESS 2026-07-17. Slice ce-u20-clause-create-structured. Sole-active delivery leaf (single-lane serial §9.2). Structured create dialog; catalog status column/filter. P2·S. Worktree D:/working/DGE-ce-u20-clause-create-structured · feat/ce-u20-clause-create-structured. Batch recommendation solo #94. Formal phase None. Not go-live. Do NOT activate CD-3. Leave #50 alone. P3 parked. #95 stays pending.",
-        "details": "Activated 2026-07-17 (stage 2 plan-orchestrator) after #93 CE-U18 Done. Slice id: ce-u20-clause-create-structured. Placement ISOLATED D:/working/DGE-ce-u20-clause-create-structured · feat/ce-u20-clause-create-structured · base origin/main. Batch recommendation solo (member_task_ids: [\"94\"]). Scope: structured clause create dialog (no JSON textarea); catalog status column/filter. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U20. Do not mark Done until gates green + stage 11–13.",
+        "description": "DONE 2026-07-17. Slice ce-u20-clause-create-structured. MAIN merge b9327a11 / feature b4b0b420. Structured create dialog (ControlledStructuredContentEditor; no JSON textarea) + catalog Status column/filter. BE mvn verify + FE lint/type-check/test(1481)/build + E2E 7/7 + UIUX PASS Critical=0 + arch Critical=0 + Stage 5/10 DEPLOY_OK. Formal phase None. Not go-live. Do NOT activate CD-3. Leave #50 alone. P3 parked. #95 stays pending.",
+        "details": "Completed 2026-07-17 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: ce-u20-clause-create-structured. Worktree REMOVED. Merge b9327a11d14ca3242c722c1fb7c01d2c9692fc8c; feature b4b0b420cca39c9efe840e90ec50c6dc81dd91f3. BDD ready docs/behavior/ce-u20-clause-create-structured.md (BDD-CE-U20-CCS-001…010). Gates: BE mvn verify GREEN; FE lint/type-check/test(1481)/build GREEN (docs/plan/evidence/ce-u20-fe-be-gates/); Stage 5 DEPLOY_OK (docs/plan/evidence/ce-u20-stage5-deploy/); Stage 6 E2E 7/7 (frontend/e2e/evidence/CE-U20-manifest.md; docs/plan/evidence/ce-u20-stage6-e2e/); Stage 7 UIUX PASS Critical=0 (frontend/e2e/evidence/CE-U20-uiux-manifest.md); architecture Critical=0; Stage 10 DEPLOY_OK (docs/plan/evidence/ce-u20-stage10-deploy/). Formal phase None. Not go-live. Not CD-3. #95 pending for next deliver leaf. Leave #50 alone.",
         "testStrategy": "1. No JSON textarea create. 2. Status column. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "93"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T06:30:00.000Z"
+        "updatedAt": "2026-07-17T23:50:00.000Z"
       },
       {
         "id": "95",
