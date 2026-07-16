@@ -3,12 +3,12 @@
  * Dual-brand REDBC/GREENBC @1440×900 (Stage 7).
  * BDD surfaces: BDD-CE-G04-015…017 visual/UX; GLOBAL_ADMIN catalog.
  *
- * Acceptance stack for this slice: FRONTEND_PORT=5173 + backend :8080
+ * Acceptance stack (Stage 5/7): Docker FE :4173 + API :8080
  *
+ *   $env:E2E_TARGET='docker'; $env:FRONTEND_PORT='4173'
  *   pnpm -C frontend exec playwright test `
  *     e2e/a11y-smoke.spec.ts e2e/CE-G04-legal-hold-uiux-evidence.spec.ts `
- *     --workers=1
- *   # or with FRONTEND_PORT=4173 + playwright.docker.config.ts when Docker FE is up
+ *     --config playwright.docker.config.ts --workers=1
  */
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
@@ -33,10 +33,9 @@ import {
   switchLocale,
 } from './helpers/uiux-evidence'
 
-const dockerTarget =
-  process.env.E2E_TARGET === 'docker' || process.env.FRONTEND_PORT === '4173'
-const defaultPort = dockerTarget ? 4173 : 5173
-const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${defaultPort}`
+/** Default 4173 to match playwright.docker.config + stack-readiness; override via E2E_BASE_URL / FRONTEND_PORT. */
+const FRONTEND_BASE_URL =
+  process.env.E2E_BASE_URL ?? `http://127.0.0.1:${process.env.FRONTEND_PORT ?? '4173'}`
 
 const LEGAL_HOLDS_PATH = '/governance/legal-holds'
 
