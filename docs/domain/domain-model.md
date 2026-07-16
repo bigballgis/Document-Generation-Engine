@@ -722,6 +722,7 @@ PRD §6.4.2 与 [P14-T01](../plan/detail/P14-confirmed-large-domains.md) 使用�
 - Template Test Data Set 默认使用脱敏或合成数据；确需使用敏感测试值时，必须按 Sensitive Data Classification 保护，审计、摘要、Preview Artifact 和 Release Evidence 仅保存数据集版本、`variablesHash` 和非敏感统计，不保存模板变量测试值明文。
 - **CE-G03（2026-07-15）：** 对 `piiCategory ≠ NONE` 的字段，create/update 测试数据集时必须提供 `piiHandling=SYNTHETIC`（合成/脱敏声明）或 `piiHandling=EXPLICIT_SENSITIVE`（显式确认：非空 `piiConfirmReason` + `secondaryConfirmed=true` + 耐久管理审计）。禁止无声明静默入库。审计可含 PII 字段键名、类别、原因与 `variablesHash`，不得含变量明文。权威场景：[ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。
 - Batch Test Summary 记录同一 Release Candidate 上多组测试样例的批量测试结果，至少包含参与样例清单、必选/可选标记、逐样例测试生成记录引用、Preview Artifact 引用、警告摘要、阻断项摘要、覆盖率摘要、批量状态和非敏感统计。
+- **CE-U18（管理面历史钻取，已确认）：** 管理 API 向 FE 暴露可消费的逐样本结果数组 `sampleResults`（源自持久化 `sampleResultsJson`），供 Testing 批量测试历史展开与跳转；不得要求 FE 直读 DB。权威契约：[openapi-v1.yaml](../api/openapi-v1.yaml) / [ce-u18-batch-test-history.md](../behavior/ce-u18-batch-test-history.md)。
 - Sample Coverage Summary 记录单组测试样例覆盖率；Template Coverage Summary 汇总当前发布候选的综合覆盖率。覆盖维度至少包括变量取值与必填字段、条件/循环/规则分支、锚点/章节、表格等受控组件和 DOCX/PDF 输出格式。
 - Release Candidate 需要至少一组必选测试样例；所有必选测试样例必须测试通过且无未解决阻断项。模板综合覆盖率和关键维度覆盖率必须达到可配置阈值，低于阈值属于发布阻断项。
 - 生成预览需要供模板测试和审批查看。

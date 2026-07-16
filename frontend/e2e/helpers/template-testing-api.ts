@@ -33,6 +33,18 @@ export interface BatchTestStarted {
   streamUrl: string
 }
 
+/** CE-U18 per-sample result from GET .../batch-tests (sampleResults). */
+export interface BatchTestHistorySampleResult {
+  dataSetExternalId?: string | null
+  success?: boolean | null
+  errorDetail?: string | null
+  docxKey?: string | null
+  pdfKey?: string | null
+  testDataSetId?: string | null
+  previewId?: string | null
+  status?: string | null
+}
+
 export interface BatchTestRunSummary {
   runId: string
   createdAt: string
@@ -46,6 +58,8 @@ export interface BatchTestRunSummary {
   anchorCoveragePct: number | null
   variableCoveragePct: number | null
   sampleCoveragePct: number | null
+  /** CE-U18 — present on history list after sampleResults exposure. */
+  sampleResults?: BatchTestHistorySampleResult[] | null
 }
 
 export interface SubmitTestEligibilityResult {

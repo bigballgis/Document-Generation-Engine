@@ -1,6 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
-import ElementPlus from 'element-plus'
+import ElementPlus, { ElMessage } from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import BatchTestHistoryPanel from '@/components/template/BatchTestHistoryPanel.vue'
@@ -10,7 +10,20 @@ import type { BatchTestRunSummary } from '@/types/template'
 
 vi.mock('@/api/templates', () => ({
   getBatchTestHistory: vi.fn(),
+  listTestDataSets: vi.fn(),
 }))
+
+vi.mock('element-plus', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('element-plus')>()
+  return {
+    ...actual,
+    ElMessage: {
+      success: vi.fn(),
+      error: vi.fn(),
+      warning: vi.fn(),
+    },
+  }
+})
 
 function makeI18n() {
   return createI18n({ legacy: false, locale: 'en', messages: { en } })
@@ -31,6 +44,10 @@ const mockHistory: BatchTestRunSummary[] = [
     sampleCoveragePct: 100.0,
     gatePassed: true,
     invalidatedAt: null,
+    sampleResults: [
+      { dataSetExternalId: 'EXT-OK', success: true },
+      { dataSetExternalId: 'EXT-FAIL', success: false, errorDetail: 'Sample failed detail' },
+    ],
   },
   {
     runId: 'run-099',
@@ -45,6 +62,7 @@ const mockHistory: BatchTestRunSummary[] = [
     sampleCoveragePct: 80.0,
     gatePassed: false,
     invalidatedAt: null,
+    sampleResults: [],
   },
   {
     runId: 'run-098',
@@ -59,12 +77,43 @@ const mockHistory: BatchTestRunSummary[] = [
     sampleCoveragePct: 100.0,
     gatePassed: true,
     invalidatedAt: '2026-07-03T08:00:00Z',
+    sampleResults: [],
+  },
+  {
+    runId: 'run-running',
+    createdAt: '2026-07-03T11:00:00Z',
+    createdBy: 'alice',
+    status: 'RUNNING',
+    totalSamples: 2,
+    succeededCount: 0,
+    failedCount: 0,
+    anchorCoveragePct: null,
+    variableCoveragePct: null,
+    sampleCoveragePct: null,
+    gatePassed: null,
+    invalidatedAt: null,
+    sampleResults: [],
   },
 ]
+
+async function mountPanel(history: BatchTestRunSummary[] = mockHistory, props: Record<string, unknown> = {}) {
+  vi.mocked(templatesApi.getBatchTestHistory).mockResolvedValue(history)
+  const i18n = makeI18n()
+  const wrapper = mount(BatchTestHistoryPanel, {
+    props: { templateId: 'tpl-1', ...props },
+    global: { plugins: [createPinia(), i18n, ElementPlus] },
+    attachTo: document.body,
+  })
+  await flushPromises()
+  return wrapper
+}
 
 describe('BatchTestHistoryPanel', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
+    vi.mocked(ElMessage.warning).mockReset()
+    vi.mocked(ElMessage.error).mockReset()
+    vi.mocked(templatesApi.listTestDataSets).mockReset()
   })
 
   afterEach(() => {
@@ -73,108 +122,151 @@ describe('BatchTestHistoryPanel', () => {
   })
 
   it('shows empty state when no history', async () => {
-    vi.mocked(templatesApi.getBatchTestHistory).mockResolvedValue([])
-    const i18n = makeI18n()
-
-    const wrapper = mount(BatchTestHistoryPanel, {
-      props: { templateId: 'tpl-1' },
-      global: { plugins: [createPinia(), i18n, ElementPlus] },
-      attachTo: document.body,
-    })
-    await flushPromises()
-
+    const wrapper = await mountPanel([])
     expect(document.body.textContent).toContain('No full test runs yet')
     wrapper.unmount()
   })
 
   it('renders history rows with correct status tags', async () => {
-    vi.mocked(templatesApi.getBatchTestHistory).mockResolvedValue(mockHistory)
-    const i18n = makeI18n()
-
-    const wrapper = mount(BatchTestHistoryPanel, {
-      props: { templateId: 'tpl-1' },
-      global: { plugins: [createPinia(), i18n, ElementPlus] },
-      attachTo: document.body,
-    })
-    await flushPromises()
-
-    // run-100 should show gate passed
+    const wrapper = await mountPanel()
     expect(document.body.textContent).toContain('Readiness checks passed')
-    // run-099 readiness not met
     expect(document.body.textContent).toContain('Readiness checks not met')
-
     wrapper.unmount()
   })
 
   it('renders createdBy display name when available', async () => {
-    vi.mocked(templatesApi.getBatchTestHistory).mockResolvedValue(mockHistory)
-    const i18n = makeI18n()
-
-    const wrapper = mount(BatchTestHistoryPanel, {
-      props: { templateId: 'tpl-1' },
-      global: { plugins: [createPinia(), i18n, ElementPlus] },
-      attachTo: document.body,
-    })
-    await flushPromises()
-
+    const wrapper = await mountPanel()
     expect(document.body.textContent).toContain('Alice Author')
-
     wrapper.unmount()
   })
 
   it('shows INVALIDATED tag for invalidated run', async () => {
-    vi.mocked(templatesApi.getBatchTestHistory).mockResolvedValue(mockHistory)
-    const i18n = makeI18n()
-
-    const wrapper = mount(BatchTestHistoryPanel, {
-      props: { templateId: 'tpl-1' },
-      global: { plugins: [createPinia(), i18n, ElementPlus] },
-      attachTo: document.body,
-    })
-    await flushPromises()
-
+    const wrapper = await mountPanel()
     expect(document.body.textContent).toContain('Invalidated')
-
     wrapper.unmount()
   })
 
   it('shows sample success counts', async () => {
-    vi.mocked(templatesApi.getBatchTestHistory).mockResolvedValue(mockHistory)
-    const i18n = makeI18n()
-
-    const wrapper = mount(BatchTestHistoryPanel, {
-      props: { templateId: 'tpl-1' },
-      global: { plugins: [createPinia(), i18n, ElementPlus] },
-      attachTo: document.body,
-    })
-    await flushPromises()
-
-    // run-100: 5/5 passed
+    const wrapper = await mountPanel()
     expect(document.body.textContent).toContain('5 / 5')
-    // run-099: 4/5 passed
     expect(document.body.textContent).toContain('4 / 5')
-
     wrapper.unmount()
   })
 
   it('refreshes when refreshToken changes', async () => {
-    vi.mocked(templatesApi.getBatchTestHistory).mockResolvedValue(mockHistory)
-    const i18n = makeI18n()
-
-    const wrapper = mount(BatchTestHistoryPanel, {
-      props: { templateId: 'tpl-1', refreshToken: 0 },
-      global: { plugins: [createPinia(), i18n, ElementPlus] },
-      attachTo: document.body,
-    })
-    await flushPromises()
-
+    const wrapper = await mountPanel(mockHistory, { refreshToken: 0 })
     expect(vi.mocked(templatesApi.getBatchTestHistory)).toHaveBeenCalledTimes(1)
-
     await wrapper.setProps({ refreshToken: 1 })
     await flushPromises()
-
     expect(vi.mocked(templatesApi.getBatchTestHistory)).toHaveBeenCalledTimes(2)
+    wrapper.unmount()
+  })
 
+  it('BDD-CE-U18-BTH-001: expands row and shows sample results', async () => {
+    const wrapper = await mountPanel()
+    const expandIcon = wrapper.find('.el-table__expand-icon')
+    expect(expandIcon.exists()).toBe(true)
+    await expandIcon.trigger('click')
+    await flushPromises()
+
+    expect(document.body.textContent).toContain('Sample results')
+    expect(document.body.textContent).toContain('EXT-OK')
+    expect(document.body.textContent).toContain('EXT-FAIL')
+    expect(document.body.textContent).toContain('Sample failed detail')
+    expect(document.body.textContent).toContain('Succeeded')
+    expect(document.body.textContent).toContain('Failed')
+    wrapper.unmount()
+  })
+
+  it('BDD-CE-U18-BTH-007: RUNNING with empty samples shows in-progress empty state', async () => {
+    const wrapper = await mountPanel([mockHistory[3]!])
+    const expandIcon = wrapper.find('.el-table__expand-icon')
+    await expandIcon.trigger('click')
+    await flushPromises()
+
+    expect(document.body.textContent).toContain('Sample results are not available yet')
+    wrapper.unmount()
+  })
+
+  it('BDD-CE-U18-BTH-002: Open data set emits matched selection', async () => {
+    vi.mocked(templatesApi.listTestDataSets).mockResolvedValue([
+      {
+        testDataSetId: 'ds-1',
+        externalId: 'EXT-FAIL',
+        templateId: 'tpl-1',
+        name: 'Fail set',
+        description: null,
+        variables: {},
+        required: false,
+        scenarioName: null,
+        coverageTags: [],
+        datasetVersion: 1,
+        locked: false,
+        derivedFromId: null,
+        createdAt: '2026-07-01T00:00:00Z',
+        updatedAt: '2026-07-01T00:00:00Z',
+      },
+    ])
+
+    const wrapper = await mountPanel()
+    await wrapper.find('.el-table__expand-icon').trigger('click')
+    await flushPromises()
+
+    const openButtons = wrapper.findAll('[data-testid="batch-history-open-data-set"]')
+    expect(openButtons.length).toBeGreaterThan(0)
+    await openButtons[0]!.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.emitted('open-data-set')).toBeTruthy()
+    expect(wrapper.emitted('open-data-set')![0]).toEqual([
+      { dataSetExternalId: 'EXT-OK', testDataSetId: null, matched: false },
+    ])
+
+    await openButtons[1]!.trigger('click')
+    await flushPromises()
+    expect(wrapper.emitted('open-data-set')![1]).toEqual([
+      { dataSetExternalId: 'EXT-FAIL', testDataSetId: 'ds-1', matched: true },
+    ])
+    wrapper.unmount()
+  })
+
+  it('BDD-CE-U18-BTH-003: match miss still emits navigate with matched false', async () => {
+    vi.mocked(templatesApi.listTestDataSets).mockResolvedValue([])
+    const wrapper = await mountPanel()
+    await wrapper.find('.el-table__expand-icon').trigger('click')
+    await flushPromises()
+
+    await wrapper.find('[data-testid="batch-history-open-data-set"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.emitted('open-data-set')![0]).toEqual([
+      { dataSetExternalId: 'EXT-OK', testDataSetId: null, matched: false },
+    ])
+    wrapper.unmount()
+  })
+
+  it('BDD-CE-U18-BTH-009: legacy sample with previewId offers Open preview', async () => {
+    const legacyHistory: BatchTestRunSummary[] = [
+      {
+        ...mockHistory[0]!,
+        sampleResults: [
+          {
+            testDataSetId: 'legacy-ds',
+            previewId: 'prev-99',
+            status: 'SUCCEEDED',
+          },
+        ],
+      },
+    ]
+    const wrapper = await mountPanel(legacyHistory)
+    await wrapper.find('.el-table__expand-icon').trigger('click')
+    await flushPromises()
+
+    expect(document.body.textContent).toContain('legacy-ds')
+    const previewBtn = wrapper.find('[data-testid="batch-history-open-preview"]')
+    expect(previewBtn.exists()).toBe(true)
+    await previewBtn.trigger('click')
+    expect(wrapper.emitted('open-preview')).toEqual([[{ previewId: 'prev-99' }]])
     wrapper.unmount()
   })
 })

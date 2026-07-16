@@ -56,6 +56,5 @@ export type TemplateDetailDevWorkspaceProps = {
   submitting: boolean
   generatingPreview: boolean
   generatingPreviewId: string | null
-  batchTesting: boolean
   openSubmitForTestDialog?: boolean
 }

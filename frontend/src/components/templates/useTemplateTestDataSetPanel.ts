@@ -12,6 +12,7 @@ import { createTemplateTestDataSetPanelActions } from '@/components/templates/cr
 export interface UseTemplateTestDataSetPanelOptions {
   templateId: Ref<string> | (() => string)
   refreshToken: Ref<number | undefined> | (() => number | undefined)
+  selectedTestDataSetId?: Ref<string | null | undefined> | (() => string | null | undefined)
   variables: Ref<VariableSchema[]> | (() => VariableSchema[])
   emitSelected: (testDataSetId: string | null) => void
   emitLoaded: (count: number) => void
@@ -68,6 +69,17 @@ export function useTemplateTestDataSetPanel(options: UseTemplateTestDataSetPanel
     () => {
       void loadDataSets()
     },
+  )
+
+  watch(
+    () => (options.selectedTestDataSetId ? readValue(options.selectedTestDataSetId) : undefined),
+    (externalId) => {
+      if (externalId === undefined) {
+        return
+      }
+      selectedId.value = externalId
+    },
+    { immediate: true },
   )
 
   function handlePreviewRetry() {

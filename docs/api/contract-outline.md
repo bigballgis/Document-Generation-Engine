@@ -400,6 +400,22 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 粘贴清洗（P18-T10 / ops-paste-binding-seam） | 编辑期将 Word/HTML 清洗为受控结构化 JSON + 非敏感摘要。 | SoT **ADR-0019**：script / iframe / **object** / **absolute** → `BLOCKED`（整次 `blocked=true`，无 cleaned JSON）。Accept 后绑定持久化非敏感 `pasteCleaningEvidence`；未解除阻断在 validate / `computeBindingStatus` / PublishGate **fail-closed**。**不**新增权限面（复用配置锚点内容）。行为：[ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md)；领域 §2.6.7。 | `POST /api/management/v1/templates/{templateId}/paste-clean`（管理面；OpenAPI 绑定/validate/export 已声明 `pasteCleaningEvidence`） |
 | 变量 Schema PII 标签（CE-G03） | 变量 upsert/view 可选 `piiCategory`。 | 见下方「测试数据集 PII 治理（CE-G03）」；导出 bundle `variables[]` 携带该字段（OpenAPI `TemplateExportVariableSchemaView.piiCategory`）。 | 既有变量 Schema 管理路由（与配置模板变量同权） |
 | 测试数据集 PII 闸门（CE-G03） | create/update 触及 PII 标记字段非空值时强制 `piiHandling`。 | fail-closed；`SYNTHETIC` 或 `EXPLICIT_SENSITIVE`+审计；无新权限。行为：[ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。 | `POST/PUT /api/management/v1/templates/{templateId}/test-data-sets[/{testDataSetId}]` |
+| 批量测试历史钻取（CE-U18） | 管理端历史摘要暴露可消费的逐样本结果，供 Testing 历史展开与跳转。 | 见下方「批量测试历史 sampleResults（CE-U18）」；正式字段以 [OpenAPI v1](openapi-v1.yaml) `BatchTestRunSummaryView.sampleResults` 为准。 | `GET /api/management/v1/templates/{templateId}/batch-tests`（首选）；或同字段的 `GET .../batch-tests/{runId}` 详情（实现择一） |
+
+### 批量测试历史 sampleResults（CE-U18）
+
+管理面契约（**不**改变 caller-facing runtime generate / `batch-generate`）。权威行为：[ce-u18-batch-test-history.md](../behavior/ce-u18-batch-test-history.md)。正式 schema：[openapi-v1.yaml](openapi-v1.yaml) `BatchTestHistorySampleResultView` / `BatchTestRunSummaryView` / `BatchTestRunSummaryListResponse`。
+
+| 项 | 已确认 |
+| --- | --- |
+| 数据来源 | 持久化 `BatchTestRunEntity.sampleResultsJson`（P12）；API **不得**要求 FE 直读 DB |
+| 响应字段名 | `sampleResults`（数组；`null` 或 `[]` 表示尚未可用 / 空） |
+| 暴露面 | **首选**扩展 `GET .../batch-tests` 列表项；**允许**改为（或另加）`GET .../batch-tests/{runId}` 详情返回同名字段 — 实现择一并单测锁定 |
+| 规范样本形状（异步） | `dataSetExternalId`、`success`、可选 `errorDetail` / `docxKey` / `pdfKey` |
+| 历史兼容 | 旧同步形状（`testDataSetId` / `previewId` / `status` 等）可能仍出现在 JSON 中；**FE normalize** 到同一展示模型 |
+| 授权 | 沿用 `requireReadableSnapshot`；无读权限 → 既有 403/404，不泄露他组样本 |
+| 管理 UI 路径 | 全量测试用户旅程仅异步 `POST .../batch-tests/run` + SSE；退役同步 `POST .../previews/batch-test` 的用户旅程调用（后端 endpoint / seed 服务直调可暂留） |
+| 非目标 | Runtime P11 generation 批处理；历史保留策略变更；go-live / CD-3 / #50 |
 
 ### 测试数据集 PII 治理（CE-G03）
 

@@ -41,7 +41,7 @@ const emit = defineEmits<{
   'update:publishBumpLevel': [value: SemverBumpLevel]
   'update:openSubmitForTestDialog': [value: boolean]
   'test-generate': [testDataSetId: string | undefined]
-  'test-generate-batch': []
+  'batch-test-completed': []
   'submit-for-test': [comment: string]
   'test-decision': [decision: 'PASSED' | 'FAILED']
   submitForApproval: []
@@ -74,7 +74,7 @@ const {
   openSubmitForTestDialog: () => props.openSubmitForTestDialog,
   onClearOpenSubmitForTestDialog: () => emit('update:openSubmitForTestDialog', false),
   onSubmitForTest: (comment) => emit('submit-for-test', comment),
-  onBatchCompleted: () => emit('test-generate-batch'),
+  onBatchCompleted: () => emit('batch-test-completed'),
 })
 
 const { t } = useI18n()

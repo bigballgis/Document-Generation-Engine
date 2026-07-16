@@ -114,6 +114,18 @@ No physical DELETE. Stable fail-closed keys:
 | Mixed / invalid scope payload | 422 | `REQUEST_BODY_INVALID` / validation | `api.error.validation.*` |
 | Template missing (TEMPLATE_WINDOW) | 404 | `TEMPLATE_NOT_FOUND`（既有） | 既有模板 not-found 键 |
 
+### Template batch-test history sampleResults (CE-U18)
+
+Management batch-test history is a **management-API** contract (documented in [contract-outline.md](contract-outline.md) «批量测试历史 sampleResults（CE-U18）」 and [openapi-v1.yaml](openapi-v1.yaml)).
+
+| Operation | Method / path |
+| --- | --- |
+| List recent runs (with `sampleResults`) | `GET /api/management/v1/templates/{templateId}/batch-tests?limit=` (default 5) |
+
+`BatchTestRunSummaryView.sampleResults` is derived from persisted `sampleResultsJson`. Canonical async item shape: `dataSetExternalId`, `success`, optional `errorDetail` / `docxKey` / `pdfKey`. Frontend must normalize legacy sync-shaped historical items. Implementer may instead expose the same field on `GET .../batch-tests/{runId}` — choose one primary surface. Management UI retires the sync `POST .../previews/batch-test` journey (async `POST .../batch-tests/run` only). Caller-facing runtime generate paths are unchanged.
+
+Behavior SoT: [ce-u18-batch-test-history.md](../behavior/ce-u18-batch-test-history.md).
+
 ### Platform asset library catalog (CE-E02)
 
 Management asset catalog routes in [openapi-v1.yaml](openapi-v1.yaml) / [contract-outline.md](contract-outline.md) «资产库管理契约（CE-E02）」:

@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
 import BatchTestHistoryPanel from '@/components/template/BatchTestHistoryPanel.vue'
 import TemplateTestDataSetPanel from '@/components/templates/TemplateTestDataSetPanel.vue'
@@ -68,6 +69,35 @@ watch(
     }
   },
 )
+
+function handleOpenDataSet(payload: {
+  dataSetExternalId: string
+  testDataSetId: string | null
+  matched: boolean
+}) {
+  activeSubTab.value = 'dataSets'
+  void router.replace({
+    query: buildDevWorkspaceQuery(route.query, 'testing', 'dataSets'),
+  })
+  if (payload.matched && payload.testDataSetId) {
+    emit('update:selectedTestDataSetId', payload.testDataSetId)
+    return
+  }
+  emit('update:selectedTestDataSetId', null)
+  ElMessage.warning(
+    t('templates.batchTestHistory.sampleResults.dataSetNotFound', {
+      id: payload.dataSetExternalId,
+    }),
+  )
+}
+
+function handleOpenPreview(payload: { previewId: string }) {
+  activeSubTab.value = 'previewRuns'
+  void router.replace({
+    query: buildDevWorkspaceQuery(route.query, 'testing', 'previewRuns'),
+  })
+  emit('update:selectedPreviewId', payload.previewId)
+}
 </script>
 
 <template>
@@ -89,6 +119,7 @@ watch(
           :variables="variables"
           :generating-preview-id="generatingPreviewId"
           :refresh-token="coverageRefreshToken"
+          :selected-test-data-set-id="selectedTestDataSetId"
           @selected="emit('update:selectedTestDataSetId', $event)"
           @test-generate="emit('update:selectedTestDataSetId', $event)"
           @loaded="emit('loaded-data-set-count', $event)"
@@ -99,6 +130,8 @@ watch(
         <BatchTestHistoryPanel
           :template-id="templateId"
           :refresh-token="coverageRefreshToken"
+          @open-data-set="handleOpenDataSet"
+          @open-preview="handleOpenPreview"
         />
 
         <TemplatePreviewRunHistoryPanel

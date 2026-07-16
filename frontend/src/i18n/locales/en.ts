@@ -1873,6 +1873,21 @@ export default {
       },
       counts: '{succeeded} / {total} passed',
       coverageSummary: 'Binding:{binding}% Var:{variable}% Sample:{sample}%',
+      sampleResults: {
+        title: 'Sample results',
+        dataSet: 'Data set',
+        status: 'Status',
+        error: 'Error',
+        actions: 'Actions',
+        succeeded: 'Succeeded',
+        failed: 'Failed',
+        empty: 'No sample results for this run.',
+        inProgress: 'Sample results are not available yet. Refresh after the run completes.',
+        openDataSet: 'Open data set',
+        openPreview: 'Open preview',
+        dataSetNotFound:
+          'Could not find data set "{id}" in the current list. Opened Data sets so you can review.',
+      },
       error: {
         load: 'Unable to load test run history.',
       },

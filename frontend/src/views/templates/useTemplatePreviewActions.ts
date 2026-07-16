@@ -23,7 +23,6 @@ export function useTemplatePreviewActions(options: UseTemplatePreviewActionsOpti
   const selectedTestDataSetId = ref<string | null>(null)
   const generatingPreview = ref(false)
   const generatingPreviewId = ref<string | null>(null)
-  const batchTesting = ref(false)
   const coverageRefreshToken = ref(0)
 
   async function handleTestGenerate(testDataSetId?: string) {
@@ -49,31 +48,9 @@ export function useTemplatePreviewActions(options: UseTemplatePreviewActionsOpti
     }
   }
 
-  async function handleBatchTestGenerate() {
-    batchTesting.value = true
-    try {
-      const dataSets = await templatesApi.listTestDataSets(templateId.value)
-      if (dataSets.length === 0) {
-        ElMessage.warning(t('templates.testDataSets.error.noDataSetsForBatch'))
-        return
-      }
-      const summary = await templatesApi.batchTestGenerate(templateId.value, {
-        testDataSetIds: dataSets.map((row) => row.testDataSetId),
-      })
-      coverageRefreshToken.value += 1
-      openDevWorkspaceTab('testing')
-      ElMessage.success(
-        t('templates.testDataSets.batchSuccess', {
-          succeeded: summary.succeededCount,
-          failed: summary.failedCount,
-          warnings: summary.warningCount,
-        }),
-      )
-    } catch {
-      ElMessage.error(t('templates.testDataSets.error.batch'))
-    } finally {
-      batchTesting.value = false
-    }
+  /** CE-U18: bump coverage/history refresh after async batch completes — never sync batch. */
+  function bumpCoverageRefresh() {
+    coverageRefreshToken.value += 1
   }
 
   async function handlePreviewSelected(previewId: string | null) {
@@ -100,10 +77,9 @@ export function useTemplatePreviewActions(options: UseTemplatePreviewActionsOpti
     selectedTestDataSetId,
     generatingPreview,
     generatingPreviewId,
-    batchTesting,
     coverageRefreshToken,
     handleTestGenerate,
-    handleBatchTestGenerate,
+    bumpCoverageRefresh,
     handlePreviewSelected,
     handlePreviewRefreshed,
   }

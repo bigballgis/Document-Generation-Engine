@@ -1227,6 +1227,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/templates/{templateId}/batch-tests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List recent template batch-test history (CE-U18 sampleResults)
+         * @description Returns the most recent non-hidden batch-test runs for a template (default limit 5; P12 soft-hide retention). Each summary includes coverage/gate fields and CE-U18 `sampleResults` derived from persisted `sampleResultsJson` so the management UI can expand per-sample detail without reading the database. Authorization reuses `requireReadableSnapshot` (fail-closed 403/404). Alternative allowed by BDD CE-U18: expose the same `sampleResults` on `GET .../batch-tests/{runId}` detail instead of (or in addition to) embedding on this list — implement exactly one primary FE-consumable surface and lock with tests. Sync `POST .../previews/batch-test` remains out of the management UI journey (may stay for demo/seed service calls).
+         */
+        get: operations["listTemplateBatchTestRuns"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/api-access/alerts": {
         parameters: {
             query?: never;
@@ -3786,6 +3806,25 @@ export interface components {
                 content: components["schemas"]["MasterDocumentSummaryView"][];
             };
         };
+        /** @description Per-sample result for management batch-test history drill-down (CE-U18). Canonical async shape (written by AsyncBatchTestOrchestrator): `dataSetExternalId`, `success`, optional `errorDetail` / `docxKey` / `pdfKey`. Historical rows may still contain legacy sync-shaped objects (`testDataSetId`, `previewId`, `status`, …). Frontend MUST normalize either shape to one display model; API MUST NOT require FE to read DB. */
+        BatchTestHistorySampleResultView: {
+            /** @description Canonical async dataset external id. */
+            dataSetExternalId?: string;
+            /** @description Canonical async success flag. */
+            success?: boolean;
+            /** @description Failure detail when success is false. */
+            errorDetail?: string | null;
+            docxKey?: string | null;
+            pdfKey?: string | null;
+            /** @description Legacy sync-shaped dataset id (normalize on FE). */
+            testDataSetId?: string | null;
+            /** @description Legacy sync-shaped preview id (optional Open preview). */
+            previewId?: string | null;
+            /** @description Legacy sync-shaped preview/status enum string. */
+            status?: string | null;
+        } & {
+            [key: string]: unknown;
+        };
         BatchTestRunSummaryView: {
             /** Format: uuid */
             runId: string;
@@ -3808,6 +3847,13 @@ export interface components {
             gatePassed?: boolean | null;
             /** Format: date-time */
             invalidatedAt?: string | null;
+            /** @description CE-U18: per-sample results derived from persisted `sampleResultsJson`. Null or empty when not yet available (e.g. RUNNING) or when the JSON is empty; parse failures must not crash the list — return null/empty and keep summary columns usable. */
+            sampleResults?: components["schemas"]["BatchTestHistorySampleResultView"][] | null;
+        };
+        /** @description Envelope for `GET /api/management/v1/templates/{templateId}/batch-tests` (CE-U18 history list with sampleResults). */
+        BatchTestRunSummaryListResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["BatchTestRunSummaryView"][];
         };
         TemplateDetailView: {
             /** Format: uuid */
@@ -6521,6 +6567,38 @@ export interface operations {
             409: components["responses"]["ErrorResponse"];
             410: components["responses"]["ErrorResponse"];
             422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listTemplateBatchTestRuns: {
+        parameters: {
+            query?: {
+                /** @description Maximum number of recent runs (default 5). */
+                limit?: number;
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recent batch-test run summaries returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchTestRunSummaryListResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };

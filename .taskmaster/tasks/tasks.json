@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 → Done. No sole-active delivery leaf. §9.2 next serial: #93 CE-U18 → pending/parked (P2 continuum). Umbrella is program registry only — not a delivery leaf. P3 parked. Leave #50 alone.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92 Done. Sole-active cleared (single-lane serial §9.2). Next queue head #93 CE-U18 pending until stage 0. P3 parked (#77/#80/#96/#97). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 → Done. Sole-active delivery leaf: #93 CE-U18 (P2 continuum; slice ce-u18-batch-test-history). Umbrella is program registry only — not a delivery leaf. #94/#95 pending. P3 parked. Leave #50 alone.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92 Done. Sole-active delivery leaf #93 CE-U18 in-progress (single-lane serial §9.2). Serial after this: #94 U20 → #95 U21 pending. P3 parked (#77/#80/#96/#97). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T20:55:00.000Z"
+        "updatedAt": "2026-07-17T21:10:00.000Z"
       },
       {
         "id": "54",
@@ -1290,16 +1290,16 @@
       {
         "id": "93",
         "title": "CE-U18: Batch test history drill + unify paths",
-        "description": "PENDING 2026-07-17. §9.2 next serial queue head after #92 CE-U16 Done. Slice ce-u18-batch-test-history. Consume sampleResultsJson; remove legacy sync batch path. P2·M. Do not activate until stage 0 of next leaf.",
-        "details": "After U16 (#92 Done — MAIN merge 5d683c40 / feature 1a3d0f20). Remain pending until stage 0 worktree for next leaf (single-lane serial §9.2 — no second In Progress delivery leaf). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U18. Serial after this: #94 U20 → #95 U21. P3 parked. Leave #50 alone. Do NOT activate CD-3 / claim go-live.",
+        "description": "IN PROGRESS 2026-07-17. Sole-active delivery leaf (§9.2). Slice ce-u18-batch-test-history. Worktree D:/working/DGE-ce-u18-batch-test-history · feat/ce-u18-batch-test-history · base 63985fb9. Consume sampleResultsJson; remove legacy sync batch path. P2·M. Batch recommendation solo #93. Formal phase None. Not go-live.",
+        "details": "Activated 2026-07-17 (stage 2 plan-orchestrator after stage 0 worktree; WITH BDD in same leaf). After U16 (#92 Done — MAIN merge 5d683c40 / feature 1a3d0f20). Slice id: ce-u18-batch-test-history. Worktree D:/working/DGE-ce-u18-batch-test-history · branch feat/ce-u18-batch-test-history · base 63985fb9. Batch recommendation solo (member_task_ids: [\"93\"]). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U18 In Progress. Serial after this: #94 U20 → #95 U21 pending. P3 parked. Leave #50 alone. Do NOT activate CD-3 / claim go-live. Do NOT mark Done until gates green.",
         "testStrategy": "1. Expand history rows. 2. Legacy path removed. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "92"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T20:55:00.000Z"
+        "updatedAt": "2026-07-17T21:10:00.000Z"
       },
       {
         "id": "94",

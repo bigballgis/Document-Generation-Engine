@@ -129,37 +129,16 @@ describe('useTemplatePreviewActions', () => {
     wrapper.unmount()
   })
 
-  it('BDD-F6-A1-002: handleBatchTestGenerate increments coverageRefreshToken on success', async () => {
-    vi.mocked(templatesApi.listTestDataSets).mockResolvedValue([
-      { testDataSetId: 'ds-1', name: 'Set 1', createdAt: '2026-06-23T10:00:00Z' },
-    ] as never)
-    vi.mocked(templatesApi.batchTestGenerate).mockResolvedValue({
-      succeededCount: 1,
-      failedCount: 0,
-      warningCount: 0,
-    } as never)
-
+  it('BDD-CE-U18-BTH-005/006: bumpCoverageRefresh does not call sync batchTestGenerate', () => {
     const { preview, wrapper } = mountPreviewActions(pinia)
     const tokenBefore = preview.coverageRefreshToken.value
-    await preview.handleBatchTestGenerate()
-    await flushPromises()
 
-    expect(preview.batchTesting.value).toBe(false)
+    preview.bumpCoverageRefresh()
+
     expect(preview.coverageRefreshToken.value).toBe(tokenBefore + 1)
-    expect(openDevWorkspaceTab).toHaveBeenCalledWith('testing')
-    expect(ElMessage.success).toHaveBeenCalled()
-    wrapper.unmount()
-  })
-
-  it('BDD-F6-A1-002: handleBatchTestGenerate warns when no data sets', async () => {
-    vi.mocked(templatesApi.listTestDataSets).mockResolvedValue([])
-
-    const { preview, wrapper } = mountPreviewActions(pinia)
-    await preview.handleBatchTestGenerate()
-    await flushPromises()
-
-    expect(ElMessage.warning).toHaveBeenCalled()
-    expect(preview.batchTesting.value).toBe(false)
+    expect(templatesApi.batchTestGenerate).not.toHaveBeenCalled()
+    expect(ElMessage.success).not.toHaveBeenCalled()
+    expect(preview).not.toHaveProperty('handleBatchTestGenerate')
     wrapper.unmount()
   })
 

@@ -242,6 +242,23 @@ export interface SubmitTestEligibility {
 
 type BatchTestRunStatus = 'RUNNING' | 'COMPLETED' | 'FAILED' | 'INVALIDATED'
 
+/**
+ * Raw per-sample result from management batch-test history (CE-U18).
+ * Canonical async fields plus optional legacy sync fields — normalize via
+ * `normalizeSampleResults` before display.
+ */
+export interface BatchTestHistorySampleResult {
+  dataSetExternalId?: string | null
+  success?: boolean | null
+  errorDetail?: string | null
+  docxKey?: string | null
+  pdfKey?: string | null
+  /** Legacy sync shape */
+  testDataSetId?: string | null
+  previewId?: string | null
+  status?: string | null
+}
+
 /** Not yet modeled in `openapi-v1.yaml` (management batch test run history). */
 export interface BatchTestRunSummary {
   runId: string
@@ -257,4 +274,6 @@ export interface BatchTestRunSummary {
   sampleCoveragePct: number | null
   gatePassed: boolean | null
   invalidatedAt: string | null
+  /** Never null from API after CE-U18; treat missing as []. */
+  sampleResults?: BatchTestHistorySampleResult[] | null
 }
