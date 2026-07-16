@@ -1,96 +1,99 @@
 ---
 name: specialist-runtime-fallback
-description: Formal runtime fallback when Cursor Task enum lacks project specialists or Task API fails — use generalPurpose (or documented inline checklist) under the requested agent contract with auditable runtime_routing. Use on every ENUM_MISSING / API_UNAVAILABLE before improvising.
+description: Retry-first specialist routing when Cursor Task fails or project agents are missing from the enum. Default is retry then BLOCKED — no automatic generalPurpose downgrade unless the user explicitly opts in (allow-gp-fallback / 允许降级).
 ---
 
-# Specialist Runtime Fallback
+# Specialist Runtime — Retry First (no silent downgrade)
 
 **Owner:** parent agent + `delivery-orchestrator`  
 **Behavior SoT:** [docs/behavior/specialist-runtime-fallback.md](../../../docs/behavior/specialist-runtime-fallback.md)
 
+**Policy (2026-07-16, user confirmed):** Prefer **retry**, not **downgrade**.
+Automatic `generalPurpose` fallback is **off** unless the user says `allow-gp-fallback` /
+`允许降级` in the same session.
+
 ## Problem
 
-Project specialists live in `.cursor/agents/*.md` and routing rules name them
-(`delivery-orchestrator`, `backend-engineer`, …). Cursor’s `Task` tool enum sometimes
-exposes **only built-ins** (`generalPurpose`, `explore`, `shell`, `bugbot`, …). Agents then
-say “specialist enum unavailable” and silently improvise — or stop.
+Project specialists live in `.cursor/agents/*.md`. Cursor’s `Task` tool may:
 
-This skill makes the degradation **explicit, ordered, and contract-bound**.
+1. **API flake** — type exists but call fails (`ENOTFOUND`, timeout, `unavailable`)
+2. **ENUM_MISSING** — session only exposes built-ins (`generalPurpose`, `explore`, …)
+
+Downgrading to `generalPurpose` hides the real failure and weakens gates. This skill
+requires **honest retry**, then **BLOCKED** with recovery hints.
 
 ## Decision ladder (mandatory)
 
-1. **Prefer native** — `Task(subagent_type=<requested project agent>)` when the enum
-   includes that name.
-2. **One retry** — if first call fails with transport/`ENOTFOUND`/`unavailable`, retry
-   **once** with the same `subagent_type` (short wait OK).
-3. **Classify failure**
-   - `ENUM_MISSING` — name not in current Task enum
-   - `API_UNAVAILABLE` — enum may exist but Task/subagent API fails (DNS, 5xx, timeout)
-   - `TASK_REJECTED` — Cursor rejected the type for another stated reason
-4. **Fallback (in order)**
-   - **A.** `Task(subagent_type=generalPurpose)` with **full contract injection** (below)
-   - **B.** Documented **inline checklist** only for agents that already authorize it
-     (`worktree-router`, `integration-merger`, `verifier`, and checklist-style
-     `post-task-doc-sync` / `post-task-commit-review` when the agent file says so)
-   - **C.** `BLOCKED` — stop and report; do **not** invent a second compose stack or skip
-     gates to “look Done”
-5. **Never** treat fallback as success of the named specialist. Emit `runtime_routing`.
+1. **Native** — `Task(subagent_type=<requested project agent>)` when the enum includes it.
+2. **Retry (API flake)** — on transport / `ENOTFOUND` / `unavailable` / timeout:
+   - Retry the **same** `subagent_type` up to **3** total attempts (initial + 2 retries)
+   - Space retries briefly (a few seconds); do not change the type or invent GP
+   - Record `retry_count` in `runtime_routing`
+3. **ENUM_MISSING** — if the name is **not** in the Task enum:
+   - Retrying the same missing name will not help
+   - Emit `BLOCKED` with recovery hints (below) — **do not** auto-switch to GP
+4. **After retries exhausted / enum still missing** → `mode: BLOCKED`
+   - Stop delivery writes (except safe read-only diagnosis)
+   - Tell the user clearly; do **not** claim Done
+5. **Opt-in downgrade only** — if user said `allow-gp-fallback` / `允许降级`:
+   - Then and only then may use `FALLBACK_GENERAL_PURPOSE` with full contract injection
+   - Or documented `INLINE_CHECKLIST` for agents that authorize it
+6. **Never** treat GP/inline as success of the named specialist. Emit `runtime_routing`.
 
-## Contract injection (required for FALLBACK_GENERAL_PURPOSE)
+## Recovery hints (for BLOCKED)
 
-The `generalPurpose` Task prompt **must** include:
+Surface these to the user (pick what fits the facts):
 
-1. `You are acting as <requested_subagent> under FALLBACK_GENERAL_PURPOSE.`
-2. Absolute paths to read and obey:
-   - `.cursor/agents/<requested_subagent>.md`
-   - Owning skill(s) named in that agent file
-   - `.cursor/skills/delivery-pipeline/SKILL.md` (if delivery)
-   - `.cursor/skills/delivery-batch-recommend/SKILL.md` (if deliver entry / orchestrator)
-3. The stage handoff payload (including `batch_recommendation` when applicable).
-4. Hard constraints: single-lane serial; one Docker queue; no fake Done; emit
-   `runtime_routing` in the final report.
-5. `requested_subagent` + `reason` + `retry_attempted`.
+- New Agent chat / reload window so `.cursor/agents` re-registers on Task
+- Confirm workspace root is the repo (or intended feature worktree), not a stale path
+- Wait and retry when `api2.cursor.sh` / Task API is down
+- Same-session opt-in: `允许降级` / `allow-gp-fallback` if they accept GP under contract
 
-Do **not** pass a different `model` unless the user explicitly requested one.
+## Contract injection (only when user opted into GP)
+
+Same as before — prompt must bind `.cursor/agents/<requested>.md` + skills + pipeline;
+emit `runtime_routing` with `mode: FALLBACK_GENERAL_PURPOSE` and
+`user_opt_in: allow-gp-fallback`.
 
 ## Mandatory output block
 
-Emit whenever fallback or inline checklist is used (and optionally when native succeeds
-as `NATIVE_SPECIALIST` for audit):
-
 ```
 runtime_routing:
-  mode: NATIVE_SPECIALIST | FALLBACK_GENERAL_PURPOSE | INLINE_CHECKLIST | BLOCKED
+  mode: NATIVE_SPECIALIST | RETRYING | BLOCKED | FALLBACK_GENERAL_PURPOSE | INLINE_CHECKLIST
   requested_subagent: <name>
-  actual_subagent: <name or parent-inline>
+  actual_subagent: <name or none>
   reason: ENUM_MISSING | API_UNAVAILABLE | TASK_REJECTED | NONE
-  contract_sources: [.cursor/agents/....md, skills...]
+  retry_count: <0..3>
   retry_attempted: true | false
+  user_opt_in_gp: true | false
   user_visible_note: <one line>
 ```
 
-Routing line example:
+Routing line examples:
 
-`[routing] intent=deliver → subagent=delivery-orchestrator → runtime=FALLBACK_GENERAL_PURPOSE (ENUM_MISSING)`
+- `[routing] intent=deliver → subagent=delivery-orchestrator → runtime=RETRYING (1/3)`
+- `[routing] intent=deliver → subagent=delivery-orchestrator → runtime=BLOCKED (API_UNAVAILABLE after 3 attempts)`
+- `[routing] intent=deliver → subagent=delivery-orchestrator → runtime=FALLBACK_GENERAL_PURPOSE (user allow-gp-fallback)`
 
-## What is still forbidden
+## Forbidden
 
 | Action | Status |
 | --- | --- |
-| `generalPurpose` when the enum **includes** the named specialist | **Forbidden** (lazy routing) |
-| Skipping worktree / Batch Recommendation / doc-sync because of fallback | **Forbidden** |
-| Claiming `Task(delivery-orchestrator)` ran when it was GP | **Forbidden** |
-| Using fallback to justify `force-parallel` or second Docker stack | **Forbidden** |
-| Silent parent multi-file product implementation without even GP contract | **Forbidden** |
+| Auto `generalPurpose` without user `allow-gp-fallback` / `允许降级` | **Forbidden** |
+| Lazy GP when named specialist is in the enum | **Forbidden** |
+| Skipping worktree / Batch Recommendation / gates because of BLOCKED | **Forbidden** (stop instead) |
+| Claiming named `Task(specialist)` succeeded after GP/inline | **Forbidden** |
+| Infinite retry loops with no cap | **Forbidden** (cap = 3 attempts) |
 
-## Built-in Cursor types
+## Limits (honest)
 
-`explore` / `bugbot` remain preferred for their niches when available — they are not
-project specialists and do not need this fallback ladder.
+- **API flake** — retry often recovers (as with `api2.cursor.sh` blips).
+- **ENUM_MISSING** — retry cannot invent enum entries; only session/workspace recovery
+  or explicit user opt-in GP can unblock.
+- This skill cannot force Cursor to always inject `.cursor/agents` into Task.
 
 ## Related
 
 - Routing: `.cursor/rules/subagent-routing-mandate.mdc`
 - Orchestrator: `.cursor/agents/delivery-orchestrator.md`
 - Pipeline: `.cursor/skills/delivery-pipeline/SKILL.md`
-- Model pin (orthogonal): `.cursor/agents/MODEL-STRATEGY.md`

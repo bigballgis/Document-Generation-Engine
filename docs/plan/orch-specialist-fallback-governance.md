@@ -1,17 +1,17 @@
-# Specialist Runtime Fallback — governance note
+# Specialist Runtime — retry-first policy
 
 | Field | Value |
 | --- | --- |
-| Slice | `orch-specialist-fallback` |
+| Slice | `orch-specialist-retry-only` |
 | Date | 2026-07-16 |
-| Formal phase | **None** (agent governance — not CE-O01) |
-| Status | **Done** after merge + MAIN doc-sync |
+| Formal phase | **None** |
+| Status | **Done** after merge |
+| Supersedes | Auto `FALLBACK_GENERAL_PURPOSE` default from `orch-specialist-fallback` |
 
-## Purpose
+## Policy
 
-Harden routing when Cursor `Task` lacks project specialist enums or the subagent API
-fails: formal ladder to `generalPurpose` / documented inline checklist with auditable
-`runtime_routing`, without skipping delivery gates.
+**Retry named specialist (≤3) → BLOCKED.** No automatic `generalPurpose` downgrade.
+User may opt in with `允许降级` / `allow-gp-fallback`.
 
 ## Anchors
 
@@ -19,12 +19,9 @@ fails: formal ladder to `generalPurpose` / documented inline checklist with audi
 | --- | --- |
 | Skill | `.cursor/skills/specialist-runtime-fallback/SKILL.md` |
 | Behavior | [docs/behavior/specialist-runtime-fallback.md](../behavior/specialist-runtime-fallback.md) |
-| Routing rule | `.cursor/rules/subagent-routing-mandate.mdc` |
-| Orchestrator | `.cursor/agents/delivery-orchestrator.md` |
-| Pipeline handoff | `.cursor/skills/delivery-pipeline/SKILL.md` |
+| Routing | `.cursor/rules/subagent-routing-mandate.mdc` |
 
-## Explicit non-goals
+## Honest limit
 
-- Changing fleet model pin (`cursor-grok-4.5-high-fast`)
-- Activating Task Master **#81** CE-O01
-- Making `generalPurpose` the default when native specialists are available
+Retry fixes API flakes. It cannot invent Task enum entries when Cursor did not load
+`.cursor/agents` — then BLOCKED + recovery hints (or explicit user opt-in GP).

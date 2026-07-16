@@ -11,7 +11,7 @@ Stay in **one main chat**. Speak the goal in natural language — the parent age
 
 | You say (examples) | Parent does |
 | --- | --- |
-| 「把 F7 做完」「修这个 bug」「按管线交付」「自动执行后续」 | **deliver** → `delivery-orchestrator` (**stage −1 Batch Recommendation** then one leaf; single-lane serial; may `merge` related tasks). If Task enum lacks project specialists → **specialist-runtime-fallback** (`generalPurpose` / inline under contract + `runtime_routing`) |
+| 「把 F7 做完」「修这个 bug」「按管线交付」「自动执行后续」 | **deliver** → `delivery-orchestrator` (**stage −1 Batch Recommendation** then one leaf). Task flake → **retry** (≤3); still unavailable → **BLOCKED** (recovery hints). GP downgrade **only** if you say `允许降级` / `allow-gp-fallback` |
 | 「这两个切片并行」「同时改前后端」 | **Refuse fan-out by default** → serial queue. Only `force-parallel` / `强制并行` → legacy multitask (≤2 writers) |
 | 「部署一下」「队列状态」「重启栈」 | **deploy-queue** → `build-deploy-agent` |
 | 「验收一下」「算不算 Done」 | **verify-done** → `verifier` |
@@ -34,10 +34,11 @@ See `.cursor/skills/delivery-pipeline/SKILL.md` and `delivery-orchestrator`.
   behavior [delivery-batch-recommend.md](docs/behavior/delivery-batch-recommend.md).
   Decide `merge` | `solo` | `split` from repo facts so related work shares **one**
   worktree / one evidence run. **Not** multi-writer parallel.
-- **Specialist runtime fallback:** when Task enum lacks project agents or Task API
-  fails — [specialist-runtime-fallback](.cursor/skills/specialist-runtime-fallback/SKILL.md);
+- **Specialist runtime (retry first):** Task flake / missing enum —
+  [specialist-runtime-fallback](.cursor/skills/specialist-runtime-fallback/SKILL.md);
   behavior [specialist-runtime-fallback.md](docs/behavior/specialist-runtime-fallback.md).
-  Emit `runtime_routing`; bind to `.cursor/agents/<requested>.md`; do not skip gates.
+  Retry named specialist → **BLOCKED** (no auto GP). Opt-in: `允许降级` / `allow-gp-fallback`.
+  Emit `runtime_routing`.
 - Stages **0–13** as before; optional stage **14** = `verifier`.
 
 ## Agents (18)

@@ -36,11 +36,12 @@ tasks into **one** leaf — it is **not** multi-writer parallel.
 
 Behavior: [docs/behavior/delivery-batch-recommend.md](../../../docs/behavior/delivery-batch-recommend.md).
 
-## Specialist runtime fallback
+## Specialist runtime (retry first)
 
 When `Task` lacks a project specialist name or the subagent API fails, follow
-`.cursor/skills/specialist-runtime-fallback/SKILL.md` and emit `runtime_routing`.
-Fallback must still obey the stage table above — it does **not** authorize skipping gates.
+`.cursor/skills/specialist-runtime-fallback/SKILL.md`: **retry** named type (≤3), then
+**BLOCKED**. Auto GP is off unless user `allow-gp-fallback` / `允许降级`. Emit
+`runtime_routing`. Does **not** authorize skipping gates.
 
 Behavior: [docs/behavior/specialist-runtime-fallback.md](../../../docs/behavior/specialist-runtime-fallback.md).
 
@@ -67,12 +68,13 @@ batch_recommendation:
   evidence_amortization:
   on_red_split_hint:
 runtime_routing:
-  mode: NATIVE_SPECIALIST | FALLBACK_GENERAL_PURPOSE | INLINE_CHECKLIST | BLOCKED
+  mode: NATIVE_SPECIALIST | RETRYING | BLOCKED | FALLBACK_GENERAL_PURPOSE | INLINE_CHECKLIST
   requested_subagent:
   actual_subagent:
   reason: ENUM_MISSING | API_UNAVAILABLE | TASK_REJECTED | NONE
-  contract_sources: []
+  retry_count: 0
   retry_attempted: false
+  user_opt_in_gp: false
   user_visible_note:
 ```
 
