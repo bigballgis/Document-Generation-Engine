@@ -151,9 +151,7 @@ class DocumentGenerationEngineTest {
                         "REPEAT_HEADER",
                         "PROPORTIONAL_FIT",
                         "SEMANTIC_FIDELITY",
-                        "BLOCKERS_PREVENT_PUBLISH",
-                        false
-                ));
+                        "BLOCKERS_PREVENT_PUBLISH", false, com.bank.docgen.sharedkernel.document.PdfArchivalProfile.NONE));
         when(documentArtifactPipeline.finalizeArtifact(any(), eq("DOCX"), any(), any())).thenReturn(artifact);
         when(versionFidelityWarningService.resolveWarningCodes(any(), eq(MASTER_ID))).thenReturn(List.of());
 
@@ -232,9 +230,7 @@ class DocumentGenerationEngineTest {
                         "REPEAT_HEADER",
                         "PROPORTIONAL_FIT",
                         "SEMANTIC_FIDELITY",
-                        "BLOCKERS_PREVENT_PUBLISH",
-                        false
-                ));
+                        "BLOCKERS_PREVENT_PUBLISH", false, com.bank.docgen.sharedkernel.document.PdfArchivalProfile.NONE));
         when(documentArtifactPipeline.finalizeArtifact(any(), eq("DOCX"), any(), any())).thenReturn(artifact);
         when(versionFidelityWarningService.resolveWarningCodes(version, MASTER_ID))
                 .thenReturn(List.of("CACHED_WARNING"));
@@ -285,9 +281,7 @@ class DocumentGenerationEngineTest {
                         "REPEAT_HEADER",
                         "PROPORTIONAL_FIT",
                         "SEMANTIC_FIDELITY",
-                        "BLOCKERS_PREVENT_PUBLISH",
-                        false
-                ));
+                        "BLOCKERS_PREVENT_PUBLISH", false, com.bank.docgen.sharedkernel.document.PdfArchivalProfile.NONE));
         when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenThrow(
                 new DocxAssemblyException(
                         ApiErrorCodes.OOXML_VALIDATION_FAILED,

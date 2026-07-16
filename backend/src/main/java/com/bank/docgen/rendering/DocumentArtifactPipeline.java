@@ -1,6 +1,7 @@
 package com.bank.docgen.rendering;
 
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.document.PdfArchivalProfile;
 import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.sharedkernel.document.fidelity.FidelityWarningCode;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class DocumentArtifactPipeline {
             throw new IllegalStateException("Render profile missing PDF conversion policy");
         }
         if ("PDF".equalsIgnoreCase(outputFormat)) {
+            assertPdfArchivalEncryptionMutex(renderProfile, encryption);
             PdfConversionOptions options = pdfConversionPostProcessor.resolveOptions(docxBytes, renderProfile);
             PdfConversionResult conversionResult = pdfConversionService.convertWithResult(docxBytes, options);
             byte[] pdfBytes = pdfEncryptionService.encrypt(conversionResult.pdfBytes(), encryption);
@@ -70,6 +72,22 @@ public class DocumentArtifactPipeline {
                 "output.docx",
                 docxPermissionsBoundaryWarnings(encryption)
         );
+    }
+
+    /**
+     * CE-O01: PDF/A-2b and request encryption are mutually exclusive on PDF output.
+     * Fail closed before LibreOffice conversion or PDFBox encryption.
+     */
+    private static void assertPdfArchivalEncryptionMutex(
+            RenderProfile renderProfile,
+            EncryptionOptionsView encryption
+    ) {
+        if (renderProfile == null || renderProfile.pdfArchivalProfile() != PdfArchivalProfile.PDF_A_2B) {
+            return;
+        }
+        if (encryption != null && Boolean.TRUE.equals(encryption.enabled())) {
+            throw new PdfArchivalEncryptionMutexException();
+        }
     }
 
     /**

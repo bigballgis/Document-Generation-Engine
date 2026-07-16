@@ -44,6 +44,8 @@ public final class ApiErrorCodes {
     public static final String ENCRYPTION_PARAMETER_INVALID = "ENCRYPTION_PARAMETER_INVALID";
     public static final String ENCRYPTION_NOT_ALLOWED = "ENCRYPTION_NOT_ALLOWED";
     public static final String ENCRYPTION_FAILED = "ENCRYPTION_FAILED";
+    /** CE-O01 / ADR-0058: PDF/A-2b archival profile cannot combine with encryption. */
+    public static final String PDF_ARCHIVAL_ENCRYPTION_MUTEX = "PDF_ARCHIVAL_ENCRYPTION_MUTEX";
     public static final String RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED";
     public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
     public static final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";

@@ -18,4 +18,12 @@ public record PdfPageStampResult(byte[] pdfBytes, Optional<FidelityWarningCode> 
                 Optional.of(FidelityWarningCode.PDF_PAGE_NUMBER_STAMP_FAILED)
         );
     }
+
+    /** CE-O01: skip PDFBox stamp when archival PDF/A must be preserved. */
+    public static PdfPageStampResult skippedForArchival(byte[] pdfBytes) {
+        return new PdfPageStampResult(
+                pdfBytes,
+                Optional.of(FidelityWarningCode.PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA)
+        );
+    }
 }

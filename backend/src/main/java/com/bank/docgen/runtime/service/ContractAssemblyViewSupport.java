@@ -149,6 +149,8 @@ final class ContractAssemblyViewSupport {
                         "api.error.encryption.encryptionParameterInvalid", false),
                 errorCode(ApiErrorCategories.ENCRYPTION, ApiErrorCodes.ENCRYPTION_NOT_ALLOWED,
                         "api.error.encryption.encryptionNotAllowed", false),
+                errorCode(ApiErrorCategories.GENERATION, ApiErrorCodes.PDF_ARCHIVAL_ENCRYPTION_MUTEX,
+                        "api.error.generation.pdfArchivalEncryptionMutex", false),
                 errorCode(ApiErrorCategories.RUNTIME, ApiErrorCodes.DOCUMENT_NOT_FOUND,
                         "api.error.runtime.documentNotFound", false),
                 errorCode(ApiErrorCategories.RUNTIME, ApiErrorCodes.DOWNLOAD_URL_EXPIRED,

@@ -34,6 +34,7 @@ goto parse
 :finalize
 if not "%PROFILE%"=="" mkdir "%PROFILE%" 2>nul
 if "%OUTDIR%"=="" exit /b 1
+echo %CONVERT_TO%> "%OUTDIR%\convert-to.txt"
 if /I "%CONVERT_TO%"=="docx" (
   if exist "%INPUT%" (
     copy /Y "%INPUT%" "%OUTDIR%\%~nx1" >nul
@@ -43,4 +44,5 @@ if /I "%CONVERT_TO%"=="docx" (
   exit /b 0
 )
 echo %%PDF-1.4> "%OUTDIR%\input.pdf"
+echo convert-to=%CONVERT_TO%>> "%OUTDIR%\input.pdf"
 exit /b 0

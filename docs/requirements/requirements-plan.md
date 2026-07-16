@@ -30,6 +30,7 @@
 - 业务人员需要在不开发的情况下修改模板，即支持低代码编排。
 - 输出格式需要支持 DOCX 和 PDF。
 - DOCX 和 PDF 输出均需要支持根据 API 参数动态加密；加密能力必须受 API 管理配置控制。
+- **CE-O01：** 发布锁定 `pdfArchivalProfile=PDF_A_2B` 的 PDF 生成不得与 `encryption.enabled=true` 同时使用（`400 PDF_ARCHIVAL_ENCRYPTION_MUTEX`）。详见 [ce-o01-pdfa-output.md](../behavior/ce-o01-pdfa-output.md)。
 - 最重要使用者是信贷客户经理。
 - v1 正式业务出信由上游业务系统通过动态 API 间接触发；文档生成平台 v1 不提供面向信贷客户经理的正式生成门户。
 - 平台后台手工生成能力仅用于模板测试、审批预览和管理员治理排查，不作为信贷客户经理正式出信入口。
@@ -698,6 +699,7 @@
 - 导入生产不重新生成模板 ID 或 API 地址；导入后的模板仍需从草稿重新经过测试、审批、待发布和发布流程后才可形成新的发布版本。
 - **CE-E01（2026-07-16 确认 / BDD `ready`）：** 支持自包含导出包 **v2**（`template-export-bundle-v2-json`）：ZIP 内嵌钉扎母版 DOCX（`artifacts/master.docx`）+ JSON 清单（CE-K01 母版 revision 指纹 `master_revision_id`/`master_file_hash`、条款正文快照、render profile 快照、资产键清单；**不**嵌资产二进制、**不**含 secret/凭证/测试数据明文）。默认导出仍为 v1 以兼容既有客户端；`bundleVersion=2` 显式选择 v2。导入支持 **dry-run**（`dryRun=true`）：仅返回依赖预检报告（母版指纹、条款将物化/缺失、资产键缺失等），**零**业务表写入；`readyToCommit=false` 时提交导入 **422**（`IMPORT_DEPENDENCIES_UNSATISFIED`）且禁止半残状态；通过则单事务落地 `DRAFT`（可物化缺失条款快照为草稿模块；母版仍绑定目标 `masterId`，本片不从 DOCX 自动建母版）。权限与矩阵 §5 导出/导入一致；**管理端 UI / E2E 本片 out of scope**（API-first）。非目标：CE-E02 资产库、CE-E03 全库导出、CE-O01 PDF/A。完整 Given/When/Then：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md) `BDD-CE-E01-001…018`；钉扎上游：[ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)。
 - **CE-E02（2026-07-16 确认 / BDD `ready`）：** 平台共享 **资产库管理面**：管理 API 上传 / 分页列表 / 停用 MinIO 图片与签章资产；固化 `assetKey` ≡ 可解析对象键（语法 `^[A-Za-z][A-Za-z0-9._-]{0,127}$`；禁止强制 `library/` 前缀）；`assetClass`=`IMAGE`\|`SEAL`\|`OTHER`；`SEAL` 上传仅 `TEMPLATE_APPROVER` / `GLOBAL_ADMIN` / `GROUP_ADMIN`；停用仅 `GLOBAL_ADMIN` / `GROUP_ADMIN`；capability `manageAssetLibrary` + 路由 `route.asset-library-management` → `/library/assets`；停用后移除可解析对象使渲染 fail-closed；停用已 `DISABLED` → **已确认**幂等 `200`；上传 `Idempotency-Key` **预留 / 本片不强制不生效**。**不**修改 `StructuredContentImageResolver` 协议。管理端 `/library/assets` + E2E/UIUX in scope。非目标：CE-E03 全库导出、CE-O01 PDF/A、密码学电子签章、病毒扫描。完整 Given/When/Then：[ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md) `BDD-CE-E02-001…022`；契约：[openapi-v1.yaml](../api/openapi-v1.yaml)。
+- **CE-O01（2026-07-16 确认 / BDD `ready`）：** 发布锁定 `RenderProfile.pdfArchivalProfile`：`NONE` \| `PDF_A_2B`（缺省 `NONE`；调用方不可覆盖）。`PDF_A_2B` 且 `output.format=PDF` 时 LibreOffice 使用 **PDF/A-2b** 导出过滤器；与请求 `encryption.enabled=true` **互斥** → `400 PDF_ARCHIVAL_ENCRYPTION_MUTEX`（`messageKey=api.error.generation.pdfArchivalEncryptionMutex`）。选型记入 [ADR-0058](../adr/rendering-authoring/0058-pdfa-2b-archival-output.md)（D6）。金标 ACTIVE 包以 veraPDF 或轻量 `pdfaid` 断言接入 `mvn verify`。**管理端 profile UI / E2E 本片 out of scope**（API/render-only）。非目标：CE-O02（D5 skipped）、A-1b、调用方覆盖。完整 Given/When/Then：[ce-o01-pdfa-output.md](../behavior/ce-o01-pdfa-output.md) `BDD-CE-O01-001…016`。
 
 ## 已确认：登录起点角色旅程重构（T01 首波）
 

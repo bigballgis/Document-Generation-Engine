@@ -12,6 +12,7 @@ Field names, capability breakdown, error-code names, and response structure are 
 - [领域模型](../domain/domain-model.md)
 - [权限矩阵](../security/permission-matrix.md)
 - [输出加密 ADR](../adr/authorization-security/0001-output-encryption.md)
+- [PDF/A-2b 归档输出 ADR](../adr/rendering-authoring/0058-pdfa-2b-archival-output.md)（CE-O01）
 - [API 管理配置范围 ADR](../adr/api-management/0002-api-management-template-scope.md)
 - [API 路由与批量覆盖 ADR](../adr/api/0003-api-routing-and-batch-overrides.md)
 - [API 幂等策略 ADR](../adr/api/0004-api-idempotency-strategy.md)
@@ -88,6 +89,7 @@ Field names, capability breakdown, error-code names, and response structure are 
 - API 支持 DOCX/PDF 动态加密参数，是否允许加密以及可用加密能力由 API 管理配置控制。
 - `encryption.enabled=true` 时，`openPassword` 必填，`ownerPassword` 可选；`permissions` 采用统一抽象权限枚举，**v1 仅对 PDF 映射并生效**（CE-C06）；DOCX + 非空 `permissions` 结构合法时成功并警告 `DOCX_PERMISSIONS_NOT_APPLIED`（`messageKey=generation.warning.fidelity.docxPermissionsNotApplied`）；传入 `permissions` 时必须同时传入 `ownerPassword`。
 - `encryption.enabled=false` 或未传 `enabled` 时，如果仍传入 `openPassword`、`ownerPassword` 或 `permissions`，返回 `400 ENCRYPTION_PARAMETER_INVALID`，不得静默忽略。
+- **CE-O01：** 发布锁定 `pdfArchivalProfile=PDF_A_2B` 与 PDF 请求 `encryption.enabled=true` 互斥 → `400 PDF_ARCHIVAL_ENCRYPTION_MUTEX`（`api.error.generation.pdfArchivalEncryptionMutex`）。行为 SoT：[ce-o01-pdfa-output.md](../behavior/ce-o01-pdfa-output.md)；ADR：[0058-pdfa-2b-archival-output.md](../adr/rendering-authoring/0058-pdfa-2b-archival-output.md)。
 - `openPassword` 和 `ownerPassword` 的密码强度基线为最少 12 字符、最长 128 字符；如果两者同时传入，二者必须不同。
 - 加密参数合法但实际加密处理失败时，返回 `500 ENCRYPTION_FAILED`，`retryable=true`；错误响应、日志和审计不得返回密码、内部加密细节或敏感配置值。
 - 动态 API v1 请求字段命名基线采用 `output.format`、`output.mode`、`variables`、`encryption`、`requestId`、`idempotencyKey`、`items[].itemId` 和 `context`。
@@ -1265,6 +1267,7 @@ Async task query response structure
 | `RENDERING` | `PINNED_MASTER_UNAVAILABLE` | `api.error.rendering.pinnedMasterUnavailable` | `false` | Pinned master revision is unavailable. |
 | `GENERATION` | `DOCX_GENERATION_FAILED` | `api.error.generation.docxGenerationFailed` | `true` | DOCX generation failed. |
 | `GENERATION` | `PDF_CONVERSION_FAILED` | `api.error.generation.pdfConversionFailed` | `true` | PDF conversion failed. |
+| `GENERATION` | `PDF_ARCHIVAL_ENCRYPTION_MUTEX` | `api.error.generation.pdfArchivalEncryptionMutex` | `false` | PDF/A archival profile cannot be combined with encryption (CE-O01). |
 | `GENERATION` | `GENERATION_TIMEOUT` | `api.error.generation.generationTimeout` | `true` | Document generation timed out. |
 | `GENERATION` | `GENERATION_SERVICE_UNAVAILABLE` | `api.error.generation.generationServiceUnavailable` | `true` | Document generation service is temporarily unavailable. |
 | `GENERATION` | `ASYNC_TASK_NOT_FOUND` | `api.error.generation.asyncTaskNotFound` | `false` | Async task was not found. |

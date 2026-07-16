@@ -131,6 +131,12 @@ public class RuntimeFidelityWarningMapper {
                 "region=pdf-page-number",
                 "Page-number stamp post-processing failed without blocking generation.",
                 "Retry generation or inspect the PDF page-number profile if page numbers are required.");
+        put(catalog, "PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA",
+                "pdfPageNumberStampSkippedForPdfa",
+                "PDF page-number stamping was skipped to preserve PDF/A-2b archival conformance.",
+                "region=pdf-page-number",
+                "Post-conversion PDFBox stamp was skipped because pdfArchivalProfile is PDF_A_2B.",
+                "Rely on DOCX page-number fields before LibreOffice conversion when archival PDF is required.");
         put(catalog, "DOCX_PERMISSIONS_NOT_APPLIED",
                 "docxPermissionsNotApplied",
                 "Requested encryption permissions were not applied because permissions map only to PDF output.",

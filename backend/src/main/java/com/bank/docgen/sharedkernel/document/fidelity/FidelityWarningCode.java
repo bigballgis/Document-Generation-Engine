@@ -26,6 +26,8 @@ public enum FidelityWarningCode {
     DUPLICATE_NUMBER,
     BROKEN_NUMBER_CROSS_REFERENCE,
     PDF_PAGE_NUMBER_STAMP_FAILED,
+    /** CE-O01: PDFBox page-number stamp skipped to preserve PDF/A-2b archival bytes. */
+    PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA,
     /** CE-C06: DOCX requested encryption.permissions; permissions apply only to PDF. */
     DOCX_PERMISSIONS_NOT_APPLIED
 }

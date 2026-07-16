@@ -33,6 +33,7 @@ fi
 if [[ -z "$OUTDIR" ]]; then
   exit 1
 fi
+printf '%s\n' "$CONVERT_TO" > "$OUTDIR/convert-to.txt"
 if [[ "$CONVERT_TO" == "docx" ]]; then
   if [[ -n "$INPUT" && -f "$INPUT" ]]; then
     cp "$INPUT" "$OUTDIR/$(basename "$INPUT")"
@@ -41,5 +42,5 @@ if [[ "$CONVERT_TO" == "docx" ]]; then
   fi
   exit 0
 fi
-printf '%%PDF-1.4\n' > "$OUTDIR/input.pdf"
+printf '%%PDF-1.4\nconvert-to=%s\n' "$CONVERT_TO" > "$OUTDIR/input.pdf"
 exit 0

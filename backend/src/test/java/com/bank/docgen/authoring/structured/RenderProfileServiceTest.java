@@ -1,6 +1,7 @@
 package com.bank.docgen.authoring.structured;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
 import com.bank.docgen.sharedkernel.document.RenderProfile;
@@ -42,8 +43,32 @@ class RenderProfileServiceTest {
         assertThat(effective).isEqualTo(locked);
         assertThat(effective.imageScalingPolicy()).isEqualTo(locked.imageScalingPolicy());
         assertThat(effective.pdfConversionPolicy()).isEqualTo(locked.pdfConversionPolicy());
+        assertThat(effective.pdfArchivalProfile()).isEqualTo(locked.pdfArchivalProfile());
         assertThat(effective.imageScalingPolicy()).isNotEqualTo("STRETCH");
         assertThat(effective.pdfConversionPolicy()).isNotEqualTo("LOSSLESS");
+    }
+
+    @Test
+    void publish_persistsPdfArchivalProfileInSnapshot() {
+        TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), UUID.randomUUID(), "10000001");
+
+        service.lockForPublish(version);
+
+        assertThat(version.getRenderProfileJson()).contains("\"pdfArchivalProfile\"");
+        assertThat(service.resolveEffectiveProfile(version, CallerRenderOverride.empty()).pdfArchivalProfile())
+                .isEqualTo(com.bank.docgen.sharedkernel.document.PdfArchivalProfile.NONE);
+    }
+
+    @Test
+    void resolve_rejectsUnknownPdfArchivalProfileFailClosed() {
+        TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), UUID.randomUUID(), "10000001");
+        version.setRenderProfileVersion("rp-v1");
+        version.setRenderProfileJson("{\"pdfArchivalProfile\":\"PDF_A_1B\"}");
+
+        assertThatThrownBy(() -> service.resolveEffectiveProfile(version, CallerRenderOverride.empty()))
+                .isInstanceOf(StructuredContentSchemaException.class)
+                .extracting(ex -> ((StructuredContentSchemaException) ex).messageKey())
+                .isEqualTo("api.error.rendering.renderProfileInvalid");
     }
 
     @Test

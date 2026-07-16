@@ -108,6 +108,39 @@ class LibreOfficePdfConversionServiceTest {
     }
 
     @Test
+    void usesPdfA2bExportFilterWhenArchivalProfileSet() {
+        List<String> args = LibreOfficePdfConversionService.buildCliArguments(
+                "soffice",
+                Path.of("C:/tmp/profile"),
+                Path.of("C:/tmp/in.docx"),
+                Path.of("C:/tmp/out"),
+                PdfConversionOptions.stampingDisabled(
+                        com.bank.docgen.sharedkernel.document.PdfArchivalProfile.PDF_A_2B
+                )
+        );
+
+        assertThat(args).contains("--convert-to");
+        int convertIdx = args.indexOf("--convert-to");
+        assertThat(args.get(convertIdx + 1)).isEqualTo(LibreOfficePdfExportFilters.PDF_A_2B);
+        assertThat(args.get(convertIdx + 1)).contains("SelectPdfVersion");
+        assertThat(args.get(convertIdx + 1)).contains("\"value\":\"2\"");
+    }
+
+    @Test
+    void usesConventionalPdfFilterWhenArchivalIsNone() {
+        List<String> args = LibreOfficePdfConversionService.buildCliArguments(
+                "soffice",
+                Path.of("C:/tmp/profile"),
+                Path.of("C:/tmp/in.docx"),
+                Path.of("C:/tmp/out"),
+                PdfConversionOptions.stampingDisabled()
+        );
+
+        int convertIdx = args.indexOf("--convert-to");
+        assertThat(args.get(convertIdx + 1)).isEqualTo("pdf");
+    }
+
+    @Test
     void removesTempDirectoryAfterFailedConversion() throws URISyntaxException, IOException {
         Path failScript = resolveFakeLibreOfficeScript("fake-libreoffice-fail");
         ensureExecutable(failScript);

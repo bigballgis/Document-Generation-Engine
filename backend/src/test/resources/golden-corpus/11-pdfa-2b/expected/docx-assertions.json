@@ -1,0 +1,6 @@
+{
+  "deferred": false,
+  "assertions": [
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "PDF archival sample body"}
+  ]
+}

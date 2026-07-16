@@ -110,6 +110,7 @@ Source-of-truth boundary:
 | Template rendering engine strategy | DOCX template engine + separate rendering service | ADR Accepted | ADR 0019 | 2026-06-08 |
 | qrBarcodeRef PNG generation | ZXing core + javase 3.5.3 | Session Confirmed, ADR Pending | CE-K06b; `backend/pom.xml` (`zxing.version`) | 2026-07-15 |
 | PDF conversion engine strategy | LibreOffice headless mode | ADR Accepted | ADR 0019 | 2026-06-08 |
+| PDF/A archival level | PDF/A-2b via publish-locked `pdfArchivalProfile` (`NONE`\|`PDF_A_2B`); mutex with encryption | ADR Accepted | ADR 0058 | 2026-07-16 |
 | Document preview generation strategy | Asynchronous pre-generated preview files | ADR Accepted | ADR 0019 | 2026-06-08 |
 | Frontend package manager lock strategy | Enforce pnpm-lock.yaml | ADR Accepted | ADR 0029 | 2026-06-08 |
 | Task retry and backoff strategy | Exponential backoff + max retries + dead-letter queue | ADR Accepted | ADR 0033 | 2026-06-08 |
