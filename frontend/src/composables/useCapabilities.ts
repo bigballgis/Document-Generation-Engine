@@ -12,6 +12,7 @@ import {
   canExportTemplates,
   canManageApiPolicy,
   canManageAssetLibrary,
+  canManageLegalHold,
   canManageContentModuleLifecycle,
   canPublishTemplates,
   canManageReleaseVersionState,
@@ -52,6 +53,7 @@ export function useCapabilities() {
     canConfigureContentModuleSharedGroups(context.value),
   )
   const manageAssetLibrary = computed(() => canManageAssetLibrary(context.value))
+  const manageLegalHold = computed(() => canManageLegalHold(context.value))
   const uploadAnyLibraryAsset = computed(() => canUploadAnyLibraryAsset(context.value))
   const uploadImageOrOtherAsset = computed(() => canUploadImageOrOtherAsset(context.value))
   const uploadSealAsset = computed(() => canUploadSealAsset(context.value))
@@ -78,6 +80,7 @@ export function useCapabilities() {
     manageContentModuleLifecycle,
     configureContentModuleSharedGroups,
     manageAssetLibrary,
+    manageLegalHold,
     uploadAnyLibraryAsset,
     uploadImageOrOtherAsset,
     uploadSealAsset,

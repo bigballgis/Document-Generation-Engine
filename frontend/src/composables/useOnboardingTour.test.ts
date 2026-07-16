@@ -48,6 +48,7 @@ const BASE_CAPABILITIES: ManagementCapabilities = {
   manageApiPolicy: false,
   readAudit: false,
   manageAssetLibrary: false,
+  manageLegalHold: false,
 }
 
 function patchAuthorSession(username = 'author.user') {

@@ -332,6 +332,40 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 
 **键与类：** `assetKey` ≡ 可被 `StructuredContentImageResolver` 命中的对象键（语法 `^[A-Za-z][A-Za-z0-9._-]{0,127}$`，E02-C2）；`assetClass`=`IMAGE`\|`SEAL`\|`OTHER`。MIME：`image/png`\|`image/jpeg`；应用层单文件上限 **5 MiB** → `422` `api.error.assetLibrary.payloadTooLarge`（nginx/Spring 边界超限仍可能为 413，须可读可翻译）。**不**改变 `StructuredContentImageResolver` 协议。权限见 [permission-matrix.md](../security/permission-matrix.md) §13.2 CE-E02。错误码（`error.code`）与 messageKey：`ASSET_LIBRARY_ASSET_KEY_INVALID` / `ASSET_LIBRARY_ASSET_KEY_CONFLICT` / `ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED` / `ASSET_LIBRARY_CONTENT_TYPE_MISMATCH` / `ASSET_LIBRARY_PAYLOAD_TOO_LARGE` / `ASSET_LIBRARY_ASSET_NOT_FOUND`（messageKey 前缀 `api.error.assetLibrary.*`）。
 
+## Legal hold 管理契约（CE-G04）
+
+**CE-G04（2026-07-16 确认 / BDD `ready`）：** 平台级 legal hold 管理 API + retention 删除前豁免叠加。权威行为：[ce-g04-legal-hold.md](../behavior/ce-g04-legal-hold.md)。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准。权限：[permission-matrix.md](../security/permission-matrix.md) §13.1 / §13.2 CE-G04。领域：[domain-model.md](../domain/domain-model.md) §2.15.1。
+
+**Confirmed — 路由：**
+
+| 操作 | 方法 / 路径 | 说明 |
+| --- | --- | --- |
+| 列表 | `GET /api/management/v1/legal-holds` | 分页 `page`/`size`（默认 0/20）；可选 `status=ACTIVE|RELEASED`；缺省含 ACTIVE+RELEASED；统一 envelope + `PageView` |
+| 详情 | `GET /api/management/v1/legal-holds/{id}` | 按 UUID；含 `invocationExternalIds`（INVOCATION_SET） |
+| 创建 | `POST /api/management/v1/legal-holds` | `201`；`scopeType` 互斥字段见下 |
+| 释放 | `POST /api/management/v1/legal-holds/{id}/release` | `ACTIVE`→`RELEASED`；**无**物理 DELETE |
+
+**Confirmed — 请求/范围：**
+
+| 项 | 规则 |
+| --- | --- |
+| 授权 | **仅** `GLOBAL_ADMIN`；其他已认证角色 **403** `ACCESS_DENIED` / `api.error.authorization.accessDenied`；未认证 401 |
+| `TEMPLATE_WINDOW` | 必填 `effectiveFrom`；`templateId` **或** `templateExternalId`；可选 `effectiveTo`（`null`=开放结束）、`reason`（≤512）；**禁止**非空 `invocationExternalIds` |
+| `INVOCATION_SET` | 非空 `invocationExternalIds`（1…500，去重 trim）；**禁止** template/window 字段 |
+| 审计 | 成功 create → `LEGAL_HOLD_CREATED`；成功 release → `LEGAL_HOLD_RELEASED`；摘要无 variables / 凭证 / 完整参数体 |
+| 豁免语义 | ACTIVE hold 叠加于 ADR-0040 / ADR-0048 硬删调度器；**不**改 ADR 正文；INVOCATION_SET **不**豁免 management 审计行（G04-C13） |
+| Out of scope | eDiscovery 导出；GROUP_ADMIN 范围 hold；go-live / CD-3 |
+
+**Fail-closed messageKeys（English-first；management legal-hold surface）：**
+
+| Condition | HTTP | category | `error.code` | messageKey（稳定） |
+| --- | --- | --- | --- | --- |
+| 非 GLOBAL_ADMIN | 403 | `AUTHORIZATION` | `ACCESS_DENIED` | `api.error.authorization.accessDenied` |
+| Hold 不存在 | 404 | `NOT_FOUND` | `LEGAL_HOLD_NOT_FOUND` | `api.error.notFound.legalHoldNotFound` |
+| 模板不存在（TEMPLATE_WINDOW） | 404 | `NOT_FOUND` | `TEMPLATE_NOT_FOUND` | 既有模板 not-found 键 |
+| 已 RELEASED 再释放 | 409 | `CONFLICT` | `LEGAL_HOLD_ALREADY_RELEASED` | `api.error.conflict.legalHoldAlreadyReleased` |
+| 混合 scope / 校验失败 | 422 | `VALIDATION` | `REQUEST_BODY_INVALID` 等 | `api.error.validation.requestBodyInvalid` / `fieldRequired` / `fieldInvalid` / `fieldSizeInvalid` |
+
 ## 模板导出/导入契约
 
 已确认模板跨环境导出/导入接口与 [P14-T03](../plan/detail/P14-confirmed-large-domains.md) 行为一致，并经 **CE-E01** 扩展自包含 v2 + dry-run。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准；本文档提供路由索引、bundle 语义、冲突策略与权限说明。权威行为：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)。

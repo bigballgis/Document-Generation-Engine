@@ -37,6 +37,7 @@ const capabilities: ManagementCapabilities = {
   manageApiPolicy: false,
   readAudit: false,
   manageAssetLibrary: false,
+  manageLegalHold: false,
 }
 
 function patchSession(viewCollaborationWorkItems: boolean) {

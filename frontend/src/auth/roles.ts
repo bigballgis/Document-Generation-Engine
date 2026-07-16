@@ -54,6 +54,11 @@ export {
   isAssetLibraryTesterOnly,
 } from '@/auth/roleCapabilitiesAssetLibrary'
 
+export {
+  canManageLegalHold,
+  canAccessLegalHoldAdministration,
+} from '@/auth/roleCapabilitiesLegalHold'
+
 import type { CapabilityContext } from '@/auth/roleCapabilityCore'
 
 /** @deprecated Use sessionStore.canAccessRoute for route guards. */

@@ -4,6 +4,7 @@ import com.bank.docgen.audit.api.ContentModuleLifecycleAuditDetail;
 import com.bank.docgen.audit.api.PolicyUpdateAuditDetail;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemTriggerType;
+import com.bank.docgen.legalhold.persistence.LegalHoldEntity;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,6 +26,7 @@ public class ManagementAuditRecorder {
     private final TestDataSetAuditRecorder testDataSetAuditRecorder;
     private final InvocationRegenerationAuditRecorder invocationRegenerationAuditRecorder;
     private final AssetLibraryAuditRecorder assetLibraryAuditRecorder;
+    private final LegalHoldAuditRecorder legalHoldAuditRecorder;
 
     public ManagementAuditRecorder(
             ApiPolicyAuditRecorder apiPolicyAuditRecorder,
@@ -34,7 +36,8 @@ public class ManagementAuditRecorder {
             TemplateTransferAuditRecorder templateTransferAuditRecorder,
             TestDataSetAuditRecorder testDataSetAuditRecorder,
             InvocationRegenerationAuditRecorder invocationRegenerationAuditRecorder,
-            AssetLibraryAuditRecorder assetLibraryAuditRecorder
+            AssetLibraryAuditRecorder assetLibraryAuditRecorder,
+            LegalHoldAuditRecorder legalHoldAuditRecorder
     ) {
         this.apiPolicyAuditRecorder = apiPolicyAuditRecorder;
         this.identityAuditRecorder = identityAuditRecorder;
@@ -44,6 +47,7 @@ public class ManagementAuditRecorder {
         this.testDataSetAuditRecorder = testDataSetAuditRecorder;
         this.invocationRegenerationAuditRecorder = invocationRegenerationAuditRecorder;
         this.assetLibraryAuditRecorder = assetLibraryAuditRecorder;
+        this.legalHoldAuditRecorder = legalHoldAuditRecorder;
     }
 
     @Transactional
@@ -501,5 +505,23 @@ public class ManagementAuditRecorder {
         assetLibraryAuditRecorder.recordReupload(
                 assetKey, assetClass, actorUsername, actorSummary, contentSha256
         );
+    }
+
+    @Transactional
+    public void recordLegalHoldCreated(
+            LegalHoldEntity hold,
+            String actorUsername,
+            String actorSummary
+    ) {
+        legalHoldAuditRecorder.recordCreated(hold, actorUsername, actorSummary);
+    }
+
+    @Transactional
+    public void recordLegalHoldReleased(
+            LegalHoldEntity hold,
+            String actorUsername,
+            String actorSummary
+    ) {
+        legalHoldAuditRecorder.recordReleased(hold, actorUsername, actorSummary);
     }
 }

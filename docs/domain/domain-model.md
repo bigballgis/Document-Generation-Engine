@@ -13,6 +13,7 @@
 - [文档治理规则](../governance.md)
 - [模板创作与渲染一阶原则审查](../product/authoring-rendering-first-principles-review.md)
 - [综合演示包扩展行为规格](../requirements/demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；P22）
+- [CE-G04 Legal hold 行为规格](../behavior/ce-g04-legal-hold.md)（BDD-CE-G04；#75）
 
 ## 2. 核心领域对象
 
@@ -842,6 +843,7 @@ Template Collaboration Work Item 用于站内待办和状态提示，不是 Temp
 - 四层时钟：下载 URL 15m、幂等 7d、document artifact（包级）、record（包级）。
 - **CE-G06（2026-07-16）：** 成功解析到 PUBLISHED release 的生成行持久化 `release_bundle_snapshot_id`（=`template_version.id`）与 `release_bundle_hash`（=`master_file_hash` 拷贝；落库时不重算对象字节）。`SINGLE` / `BATCH_ITEM` / `ASYNC_TASK` 有解析 release 时必须写；`BATCH_ROOT` 不要求；解析失败行保持 NULL；**不**回填历史行。
 - **CE-G06 受控再生：** 管理端 `POST …/templates/{templateId}/api/invocations/{invocationId}/regenerate` 按 invocation 内部重放 parameters + 钉扎母版，强制 CE-G02 SPECIMEN 水印，写 `INVOCATION_REGENERATED` 审计；**不得**新建调用方 runtime SUCCESS 记录；管理查询仍禁止返回 parameters 明文，可返回 snapshot id + hash。再生元数据可独立表或对象键+审计（实现选型，须可按 `regenerationId` 取回）。行为规格：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。
+- **CE-G04 Legal hold 叠加：** ACTIVE hold 可在调用记录产物清理与行删除前豁免匹配行（见 §2.15.1）；**不**改写 `record_expires_at` / 包级 retention 天数；默认 ADR-0040 硬删语义不变。
 
 模板发布后需要生成：
 
@@ -1052,6 +1054,7 @@ API 管理侧审计事件包括：
 - DOCX/PDF 动态加密配置变更。
 - default 路径目标发布版本配置变更。
 - **CE-G06：** 按 invocation 受控再生终态 `INVOCATION_REGENERATED`（成功与失败；摘要含 sourceInvocationId、regenerationId、fingerprint、outcome、actor；禁止 variables 明文）。
+- **CE-G04：** `LEGAL_HOLD_CREATED` / `LEGAL_HOLD_RELEASED`（摘要含 hold id / external id、scopeType、status、templateId（若有）、invocationCount（若有）、reason、actorUsername；**禁止** variables、凭证、完整 invocation 参数体）。
 
 API 调用审计至少记录：
 
@@ -1096,7 +1099,29 @@ API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 
 
 - **Tier-1（Confirmed）：** `management_audit_event` 默认 **90 天**硬删除；`runtime_generation_audit_event` 默认 **365 天**硬删除；窗口可配置；无 soft-delete。
 - **Tier-2（Deferred）：** 历史「默认保留 5 年」为多年合规归档意图，由对象存储归档承担（待建）；**不是** Tier-1 热库默认窗口。
+- **CE-G04 Legal hold 叠加：** 见 §2.15.1；ACTIVE hold 在硬删前豁免匹配行；**不**修订 ADR-0040 / ADR-0048 正文默认窗口。
 - 详见 [permission-matrix.md](../security/permission-matrix.md) §10 与 [ADR-0048](../adr/operations/0048-audit-data-retention-policy.md)。
+
+### 2.15.1 Legal Hold（CE-G04）
+
+Legal Hold 是平台级诉讼/内控冻结实体：在调用记录留存清理（ADR-0040）与管理/运行时审计留存清理（ADR-0048 / LR-D1）**删除前**提供可审计豁免。权威行为：[ce-g04-legal-hold.md](../behavior/ce-g04-legal-hold.md)。
+
+**Confirmed：**
+
+| 项 | 规则 |
+| --- | --- |
+| 表 | `legal_hold`（Flyway **V66**）：`id` UUID PK；`hold_external_id` 稳定对外 ID；`scope_type`；`status`；可选 `reason`（≤512，可进审计）；`created_at` / `created_by_username`；释放后 `released_at` / `released_by_username` |
+| `scope_type` | `TEMPLATE_WINDOW` \| `INVOCATION_SET`（互斥；枚举 **UPPER_SNAKE_CASE**） |
+| `status` | `ACTIVE` \| `RELEASED`；**仅 ACTIVE 豁免**；释放改状态，**不** soft-delete hold 行 |
+| `TEMPLATE_WINDOW` | `template_id` / `template_external_id`（创建时 `templateId` **或** `templateExternalId` 必填，二者皆提供须一致）；`effective_from` 必填；`effective_to` 可选（`null` = 开放结束直至释放）；窗内匹配：`t >= effectiveFrom` 且（`effectiveTo == null` 或 `t <= effectiveTo`）；调用记录用 `createdAt`，审计用 `eventAt` |
+| `INVOCATION_SET` | 子表 `legal_hold_invocation` `(hold_id, invocation_external_id)`；至少 1、最多 **500** 个 ID；禁止带 template/window 字段 |
+| 豁免入口 | `LegalHoldExemptionService`（名以实现为准）为唯一判定入口；两调度器删除前调用；**禁止**先删后补 |
+| Invocation | TEMPLATE_WINDOW：模板匹配 + `createdAt` 在窗内 → 豁免产物清理与行删除。INVOCATION_SET：`invocationExternalId` ∈ 集合 → 同上 |
+| Management audit | TEMPLATE_WINDOW：行 `templateId` 匹配且 `eventAt` 在窗内 → 不删；`templateId == null` 的平台级行（如 purge-evidence）**不**因 TEMPLATE_WINDOW 豁免。INVOCATION_SET：**v1 不**按 invocation 集合豁免管理审计行 |
+| Runtime audit | TEMPLATE_WINDOW：同 management（`templateId` + `eventAt`）。INVOCATION_SET：`taskExternalId` **或** `documentId` 等于任一受保护 `invocation_external_id` → 豁免 |
+| 多 hold | 任一 ACTIVE 命中即豁免（OR） |
+| 管理 | **仅** `GLOBAL_ADMIN` 可 list / create / release；路由 `route.legal-hold-administration` |
+| 非目标 | 自动 eDiscovery / 诉讼导出包；GROUP_ADMIN 组范围 hold；改 ADR-0040/0048 正文；改默认 retention 天数；CE-G05 年检；go-live / CD-3 |
 
 ### 2.16 授权判定 Authorization Decision
 

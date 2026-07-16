@@ -13,6 +13,7 @@
 - [文档治理规则](../governance.md)
 - [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
 - [LR-D1 行为规格](../behavior/lrp-d1-audit-retention.md)
+- [CE-G04 Legal hold 行为规格](../behavior/ce-g04-legal-hold.md)（BDD-CE-G04；#75 — retention 豁免叠加，不改 ADR-0040/0048 正文）
 
 ## 2. 权限设计原则
 
@@ -366,6 +367,7 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - `runtime_generation_audit_event`：默认保留 **365 天**；超龄行 **硬删除**；可通过 `docgen.audit.runtime-retention-days` 配置。
 - 处置方式与 [ADR-0040](../adr/api-management/0040-api-package-access-and-invocation-retention.md) 调用记录清理一致：**硬删除**，无 soft-delete；v1 **不做**热库归档导出。
 - 平台级 purge-evidence（`AUDIT_RETENTION_PURGE`）仅 **审计管理员 / 全局管理员** 可查；**分组管理员** 不可见无 `group_code` 的平台级 purge 行。
+- **CE-G04 Legal hold（2026-07-16）：** ACTIVE legal hold 在 retention 硬删前提供豁免（模板+时间窗 和/或 invocation 集合）。**仅 GLOBAL_ADMIN** 可创建/列表/释放 hold；其他角色 fail-closed **403**。行为 SoT：[ce-g04-legal-hold.md](../behavior/ce-g04-legal-hold.md)。不改变 ADR-0040/0048 默认窗口正文。
 
 **Deferred — Tier-2 归档（对象存储；非 D1）：**
 
@@ -431,11 +433,13 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 | `route.content-module-management` | ✓ | ✓ | ✓ | ✓ | — | ✓ | — |
 | `route.api-policy-management` | ✓ | ✓ | — | — | — | — | — |
 | `route.asset-library-management` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — |
+| `route.legal-hold-administration` | ✓ | — | — | — | — | — | — |
 | `route.audit-console` | ✓ | ✓ | — | — | — | — | ✓ default |
 
 **Canonical 前端路径：** `route.dashboard-home` → `/dashboard`（`DashboardView`）；
 `route.identity-administration` → `/entitlement/users` 与 `/entitlement/groups`
-（`UserManagementView` / `GroupManagementView`）；`route.asset-library-management` → `/library/assets`；其余可见路由见 `ROUTE_PATH_BY_KEY`。
+（`UserManagementView` / `GroupManagementView`）；`route.asset-library-management` → `/library/assets`；
+`route.legal-hold-administration` → `/governance/legal-holds`（**仅 GLOBAL_ADMIN**）；其余可见路由见 `ROUTE_PATH_BY_KEY`。
 
 ### 13.1.1 Dashboard 合并（COR-T11 Done，2026-06-24）
 
@@ -526,6 +530,16 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - `TEMPLATE_AUTHOR` / `TEMPLATE_TESTER` / `TEMPLATE_APPROVER` / `MASTER_DESIGNER` / 调用方 **禁止** regenerate（403 fail-closed）。
 - 再生**内部**可读 `parametersStorage`（ADR-0057 授权的留存例外）；响应、审计、管理 UI **仍禁止** variables / 加密密码明文（HIST C6 不放宽）。见 §11 ADR-0057 条。
 - 行为 SoT：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)；ADR：[0057-invocation-parameters-retention-for-regenerate.md](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)。
+
+**CE-G04 Legal hold（2026-07-16）：**
+
+- 新逻辑路由 `route.legal-hold-administration` → `/governance/legal-holds`（§13.1 表）；**仅 GLOBAL_ADMIN** 可见与可调用。
+- **无新 capability bit**（角色硬闸门）：`GROUP_ADMIN` / `AUDIT_ADMIN` / 其他运营角色 → API **403**；路由不可见 → Forbidden。
+- Hold 范围：`TEMPLATE_WINDOW`（模板 + UTC 时间窗）或 `INVOCATION_SET`（invocation external ID 集合，≤500）。
+- **ACTIVE 豁免（叠加，不改 ADR-0040/0048 默认窗口正文）：** 调用记录产物/行删除；management/runtime 审计硬删按 BDD 匹配规则。**Confirmed 边界：** INVOCATION_SET **不**豁免 management 审计行；`templateId == null` 的平台级 purge-evidence **不**因 TEMPLATE_WINDOW 豁免。
+- 管理审计：`LEGAL_HOLD_CREATED` / `LEGAL_HOLD_RELEASED`；禁止 variables / 凭证 / 完整参数体。
+- **Out of scope：** GROUP_ADMIN 组范围 hold；eDiscovery 导出；CE-G05；go-live / CD-3。
+- 行为 SoT：[ce-g04-legal-hold.md](../behavior/ce-g04-legal-hold.md) `BDD-CE-G04-001…017`；领域：[domain-model.md](../domain/domain-model.md) §2.15.1；契约：[contract-outline.md](../api/contract-outline.md) «Legal hold 管理契约（CE-G04）」。
 
 ### 13.3 禁止路由访问（forbidden-route）行为基线
 

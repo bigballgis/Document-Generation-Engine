@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
+import com.bank.docgen.legalhold.service.LegalHoldExemptionService;
 import com.bank.docgen.runtime.domain.InvocationKind;
 import com.bank.docgen.runtime.domain.InvocationStatus;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordEntity;
@@ -29,12 +30,18 @@ class InvocationRetentionCleanupSchedulerTest {
     private ApiInvocationRecordRepository repository;
     @Mock
     private ObjectStoragePort objectStoragePort;
+    @Mock
+    private LegalHoldExemptionService legalHoldExemptionService;
 
     private InvocationRetentionCleanupScheduler scheduler;
 
     @BeforeEach
     void setUp() {
-        scheduler = new InvocationRetentionCleanupScheduler(repository, objectStoragePort);
+        scheduler = new InvocationRetentionCleanupScheduler(
+                repository,
+                objectStoragePort,
+                legalHoldExemptionService
+        );
     }
 
     @Test
@@ -42,6 +49,7 @@ class InvocationRetentionCleanupSchedulerTest {
         ApiInvocationRecordEntity expired = sampleRecord("INV-EXPIRED1", "storage/doc.docx");
         expired = expiredWithRecordExpiry(expired, Instant.now().minusSeconds(60));
         when(repository.findByRecordExpiresAtBefore(any(Instant.class))).thenReturn(List.of(expired));
+        when(legalHoldExemptionService.isInvocationExempt(any(), any(), any())).thenReturn(false);
 
         scheduler.cleanExpiredRecords();
 
@@ -51,13 +59,13 @@ class InvocationRetentionCleanupSchedulerTest {
 
     @Test
     void cleanExpiredRecords_destroysParametersStorageWithInvocationRow_adr0057() {
-        // ADR-0057: parameters_storage shares invocation TTL — no orphan parameter blobs.
         ApiInvocationRecordEntity expired = sampleRecordWithParameters(
                 "INV-PARAMS01",
                 "{\"variables\":{\"name\":\"Alice\"},\"encryption\":{\"enabled\":false}}"
         );
         expired = expiredWithRecordExpiry(expired, Instant.now().minusSeconds(30));
         when(repository.findByRecordExpiresAtBefore(any(Instant.class))).thenReturn(List.of(expired));
+        when(legalHoldExemptionService.isInvocationExempt(any(), any(), any())).thenReturn(false);
 
         scheduler.cleanExpiredRecords();
 
@@ -70,6 +78,34 @@ class InvocationRetentionCleanupSchedulerTest {
     }
 
     @Test
+    void cleanExpiredRecords_skipsLegalHoldProtectedInvocation() {
+        ApiInvocationRecordEntity protectedRow = expiredWithRecordExpiry(
+                sampleRecord("INV-HOLD1", "storage/doc.docx"),
+                Instant.now().minusSeconds(60)
+        );
+        ApiInvocationRecordEntity unprotected = expiredWithRecordExpiry(
+                sampleRecord("INV-FREE1", "storage/doc2.docx"),
+                Instant.now().minusSeconds(60)
+        );
+        when(repository.findByRecordExpiresAtBefore(any(Instant.class)))
+                .thenReturn(List.of(protectedRow, unprotected));
+        when(legalHoldExemptionService.isInvocationExempt(
+                protectedRow.getTemplateId(),
+                "INV-HOLD1",
+                protectedRow.getCreatedAt()
+        )).thenReturn(true);
+        when(legalHoldExemptionService.isInvocationExempt(
+                unprotected.getTemplateId(),
+                "INV-FREE1",
+                unprotected.getCreatedAt()
+        )).thenReturn(false);
+
+        scheduler.cleanExpiredRecords();
+
+        verify(repository).deleteAll(List.of(unprotected));
+    }
+
+    @Test
     void cleanExpiredDocumentArtifacts_deletesStorageAndClearsKey() {
         ApiInvocationRecordEntity artifactExpired = artifactExpiredRecord(
                 "INV-DOCEXP1",
@@ -78,6 +114,7 @@ class InvocationRetentionCleanupSchedulerTest {
         );
         when(repository.findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(any(Instant.class)))
                 .thenReturn(List.of(artifactExpired));
+        when(legalHoldExemptionService.isInvocationExempt(any(), any(), any())).thenReturn(false);
         when(objectStoragePort.exists("generated/doc-1.docx")).thenReturn(true);
         when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -87,6 +124,23 @@ class InvocationRetentionCleanupSchedulerTest {
         ArgumentCaptor<ApiInvocationRecordEntity> captor = ArgumentCaptor.forClass(ApiInvocationRecordEntity.class);
         verify(repository).save(captor.capture());
         assertThat(captor.getValue().getArtifactStorageKey()).isNull();
+    }
+
+    @Test
+    void cleanExpiredDocumentArtifacts_skipsLegalHoldProtectedArtifact() {
+        ApiInvocationRecordEntity artifactExpired = artifactExpiredRecord(
+                "INV-HOLD-ART",
+                "generated/doc-hold.docx",
+                Instant.now().minusSeconds(60)
+        );
+        when(repository.findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(any(Instant.class)))
+                .thenReturn(List.of(artifactExpired));
+        when(legalHoldExemptionService.isInvocationExempt(any(), any(), any())).thenReturn(true);
+
+        scheduler.cleanExpiredDocumentArtifacts();
+
+        verify(objectStoragePort, never()).delete(anyString());
+        verify(repository, never()).save(any());
     }
 
     @Test

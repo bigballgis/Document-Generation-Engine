@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). #89 CE-U13 → Done (merge ccdfacda). #71 CE-C06 → Done (merge 35f6f47d). #76 CE-G06 → Done (merge d8636232). #78 CE-E01 → Done (merge 6ae57974). #79 CE-E02 → Done (merge 5bd3611e). Sole-active CE delivery leaf: #81 CE-O01 (in-progress; slice ce-o01-pdfa-output; worktree DGE-ce-o01-pdfa-output).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#76/#78/#79/#88/#89 Done. Sole-active leaf #81 CE-O01 in-progress (single-lane serial §9.2). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed (#59/#68/#83; #60/#84/#85). Wave 0 closed: #61 CE-K05 + #86 CE-U11 + #87 CE-U12 → Done. #69 CE-C04 → Done (merge c7be8305). #70 CE-C05 → Done (merge 405f7cea). #88 CE-U06 → Done (merge 7734366e). #62 CE-K06 → Done (K06a 485a7f3e; K06b a689ca87; K06c tip 76297d08). #63 CE-K08 → Done (35f57503 on main). #74 CE-G03 → Done (merge 50c1a524). #89 CE-U13 → Done (merge ccdfacda). #71 CE-C06 → Done (merge 35f6f47d). #76 CE-G06 → Done (merge d8636232). #78 CE-E01 → Done (merge 6ae57974). #79 CE-E02 → Done (merge 5bd3611e). #81 CE-O01 → Done (merge e081bcfa). Sole-active CE delivery leaf: #75 CE-G04 (in-progress; slice ce-g04-legal-hold; worktree DGE-ce-g04-legal-hold). Umbrella is program registry only — not a delivery leaf.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#76/#78/#79/#81/#88/#89 Done. Sole-active leaf #75 CE-G04 in-progress (single-lane serial §9.2). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T04:11:12Z"
+        "updatedAt": "2026-07-16T06:36:00.000Z"
       },
       {
         "id": "54",
@@ -1036,16 +1036,16 @@
       {
         "id": "75",
         "title": "CE-G04: Legal hold minimum",
-        "description": "PENDING/parked 2026-07-16. §9.2 next queue head AFTER #81 CE-O01 Done (recommended next deliver; do not auto-activate). Slice ce-g04-legal-hold. Hold entity + retention schedulers respect hold; GLOBAL_ADMIN page. P2·M.",
-        "details": "Soft after G03 (#74 Done). #81 CE-O01 → Done (merge e081bcfa). Recommend activate via /deliver (single-lane §9.2). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G04 / §9.2 row 1.",
-        "testStrategy": "1. Hold blocks purge. 2. Admin UI. 3. mvn verify + FE gates.",
+        "description": "IN PROGRESS 2026-07-16. Sole-active §9.2 delivery leaf. Slice ce-g04-legal-hold. Hold entity + retention schedulers respect hold; GLOBAL_ADMIN page. P2·M. Worktree D:/working/DGE-ce-g04-legal-hold · feat/ce-g04-legal-hold.",
+        "details": "Stage 2 plan-orchestrator confirmed sole-active (single-lane §9.2). Soft after G03 (#74 Done). BDD ready: docs/behavior/ce-g04-legal-hold.md (BDD-CE-G04-001…017). Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G04 / §9.2 sole-active. Do NOT mark Done until delivery gates complete.",
+        "testStrategy": "1. Hold blocks purge (invocation + audit). 2. GLOBAL_ADMIN UI create/release. 3. Non-admin 403. 4. mvn verify + FE gates + E2E.",
         "priority": "medium",
         "dependencies": [
           "74"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T04:57:37.459Z"
+        "updatedAt": "2026-07-16T06:36:00.000Z"
       },
       {
         "id": "76",
@@ -1121,7 +1121,7 @@
         "id": "81",
         "title": "CE-O01: PDF/A-2b archival output option",
         "description": "DONE 2026-07-16. Slice ce-o01-pdfa-output. Merge e081bcfa. PDF/A-2b archival via pdfArchivalProfile; ADR-0058; encryption mutex; golden pdfaid. FE/E2E out of scope. Formal phase None.",
-        "details": "Completed 2026-07-16 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: ce-o01-pdfa-output. Placement was ISOLATED · feat/ce-o01-pdfa-output (worktree removed). Merge e081bcfa (e081bcfaea6987e6ca5da8f4ac8c7ed83c648e73). BDD ready docs/behavior/ce-o01-pdfa-output.md (BDD-CE-O01-001…016). ADR-0058 Accepted. Gates: mvn verify GREEN (1804 tests; 0 fail / 8 skipped); architecture PASS Critical=0 (ADR-0058 / rendering boundaries); Stage 10 DEPLOY_OK (docker-deploy-queue; compose dge-ce-o01-pdfa-output; :8080 healthz 200; frontend 200). FE/E2E/UIUX N/A (API/render-only). Formal phase remains None. Plan §8 CE-O01 Done. §9.2 next head #75 CE-G04 (pending — activate via deliver). Do NOT activate CD-3 / claim go-live.",
+        "details": "Completed 2026-07-16 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: ce-o01-pdfa-output. Placement was ISOLATED · feat/ce-o01-pdfa-output (worktree removed). Merge e081bcfa (e081bcfaea6987e6ca5da8f4ac8c7ed83c648e73). BDD ready docs/behavior/ce-o01-pdfa-output.md (BDD-CE-O01-001…016). ADR-0058 Accepted. Gates: mvn verify GREEN (1804 tests; 0 fail / 8 skipped); architecture PASS Critical=0 (ADR-0058 / rendering boundaries); Stage 10 DEPLOY_OK (docker-deploy-queue; compose dge-ce-o01-pdfa-output; :8080 healthz 200; frontend 200). FE/E2E/UIUX N/A (API/render-only). Formal phase remains None. Plan §8 CE-O01 Done. Succeeded as sole-active by #75 CE-G04 (in-progress). Do NOT activate CD-3 / claim go-live.",
         "testStrategy": "1. PDF/A-2b option works (BDD-CE-O01-003). 2. ADR-0058 Accepted. 3. Encryption mutex (BDD-CE-O01-005). 4. mvn verify + golden archival assert. 5. No FE E2E required.",
         "priority": "medium",
         "dependencies": [

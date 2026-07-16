@@ -112,6 +112,7 @@ const BASE_CAPABILITIES: ManagementCapabilities = {
   manageApiPolicy: false,
   readAudit: false,
   manageAssetLibrary: false,
+  manageLegalHold: false,
 }
 
 describe('useDashboardDataLoader', () => {

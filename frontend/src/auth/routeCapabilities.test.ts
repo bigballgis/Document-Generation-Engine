@@ -42,6 +42,7 @@ describe('routeCapabilities', () => {
           manageApiPolicy: false,
           readAudit: false,
           manageAssetLibrary: false,
+          manageLegalHold: false,
         },
       }),
     )
@@ -72,6 +73,7 @@ describe('routeCapabilities', () => {
           manageApiPolicy: false,
           readAudit: false,
           manageAssetLibrary: false,
+          manageLegalHold: false,
         },
       }),
     )
@@ -103,6 +105,7 @@ describe('routeCapabilities', () => {
           manageApiPolicy: false,
           readAudit: false,
           manageAssetLibrary: false,
+          manageLegalHold: false,
         },
       }),
     )
@@ -134,6 +137,7 @@ describe('routeCapabilities', () => {
           manageApiPolicy: false,
           readAudit: false,
           manageAssetLibrary: false,
+          manageLegalHold: false,
         },
       }),
     )
@@ -165,6 +169,7 @@ describe('routeCapabilities', () => {
           manageApiPolicy: false,
           readAudit: false,
           manageAssetLibrary: false,
+          manageLegalHold: false,
         },
       }),
     )
@@ -233,10 +238,87 @@ describe('routeCapabilities', () => {
           manageApiPolicy: false,
           readAudit: false,
           manageAssetLibrary: true,
+          manageLegalHold: false,
         },
       }),
     )
     expect(allowed).toBe(true)
+  })
+
+  it('allows legal hold administration when manageLegalHold is true', () => {
+    const allowed = canAccessRouteWithCapability(
+      ROUTE_KEYS.legalHoldAdministration,
+      session({
+        roles: ['GLOBAL_ADMIN'],
+        visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.legalHoldAdministration],
+        capabilities: {
+          manageMasters: false,
+          reviewMasters: false,
+          authorTemplates: false,
+          decideTests: false,
+          decideApprovals: false,
+          publishTemplates: false,
+          stopTemplates: false,
+          restoreOrDeprecateTemplates: false,
+          deleteTemplates: false,
+          exportTemplates: false,
+          viewCollaborationWorkItems: false,
+          maintainCollaborationTimeoutConfig: false,
+          authorContentModules: false,
+          decideContentModuleReviews: false,
+          manageContentModuleLifecycle: false,
+          manageApiPolicy: false,
+          readAudit: false,
+          manageAssetLibrary: false,
+          manageLegalHold: true,
+        },
+      }),
+    )
+    expect(allowed).toBe(true)
+  })
+
+  it('denies legal hold administration for non-admin even when listed in visibleRoutes', () => {
+    const denied = canAccessRouteWithCapability(
+      ROUTE_KEYS.legalHoldAdministration,
+      session({
+        roles: ['GROUP_ADMIN'],
+        visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.legalHoldAdministration],
+        capabilities: {
+          manageMasters: true,
+          reviewMasters: true,
+          authorTemplates: true,
+          decideTests: true,
+          decideApprovals: true,
+          publishTemplates: true,
+          stopTemplates: true,
+          restoreOrDeprecateTemplates: true,
+          deleteTemplates: true,
+          exportTemplates: true,
+          viewCollaborationWorkItems: true,
+          maintainCollaborationTimeoutConfig: true,
+          authorContentModules: true,
+          decideContentModuleReviews: true,
+          manageContentModuleLifecycle: true,
+          manageApiPolicy: true,
+          readAudit: true,
+          manageAssetLibrary: true,
+          manageLegalHold: false,
+        },
+      }),
+    )
+    expect(denied).toBe(false)
+  })
+
+  it('denies legal hold administration when route is not in visibleRoutes', () => {
+    const denied = canAccessRouteWithCapability(
+      ROUTE_KEYS.legalHoldAdministration,
+      session({
+        roles: ['GLOBAL_ADMIN'],
+        visibleRoutes: [ROUTE_KEYS.dashboardHome],
+        capabilities: undefined,
+      }),
+    )
+    expect(denied).toBe(false)
   })
 
   it('denies asset library for AUDIT_ADMIN even when listed in visibleRoutes', () => {

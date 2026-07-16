@@ -30,6 +30,7 @@ export const apiErrorEn = {
     serviceUnavailable: "The generation service is temporarily unavailable.",
     pdfConversionFailed: "PDF conversion failed.",
     pdfConversionCapacityExceeded: "PDF conversion capacity is temporarily exceeded; retry later.",
+    pdfArchivalEncryptionMutex: "PDF/A archival output cannot be combined with encryption.",
     artifactTooLarge: "Generated artifact exceeds the configured size limit.",
     docxNormalizationFailed: "DOCX normalization failed.",
     idempotencyDigestFailed: "The request could not be processed safely. Please retry."
@@ -232,11 +233,13 @@ export const apiErrorEn = {
   },
   notFound: {
     userNotFound: "The requested user does not exist.",
-    groupNotFound: "The requested business group does not exist."
+    groupNotFound: "The requested business group does not exist.",
+    legalHoldNotFound: "The legal hold was not found."
   },
   conflict: {
     usernameAlreadyExists: "A user with this username already exists.",
-    groupCodeAlreadyExists: "A business group with this code already exists."
+    groupCodeAlreadyExists: "A business group with this code already exists.",
+    legalHoldAlreadyReleased: "The legal hold has already been released."
   },
   contentModule: {
     notFound: "The content module was not found.",

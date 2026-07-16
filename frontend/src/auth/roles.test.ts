@@ -39,6 +39,7 @@ const globalAdminCapabilities: ManagementCapabilities = {
   manageApiPolicy: true,
   readAudit: true,
   manageAssetLibrary: true,
+  manageLegalHold: false,
 }
 
 const testerCapabilities: ManagementCapabilities = {
@@ -60,6 +61,7 @@ const testerCapabilities: ManagementCapabilities = {
   manageApiPolicy: false,
   readAudit: false,
   manageAssetLibrary: true,
+  manageLegalHold: false,
 }
 
 describe('management roles', () => {

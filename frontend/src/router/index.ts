@@ -74,6 +74,12 @@ const router = createRouter({
       meta: { logicalRoute: ROUTE_KEYS.auditConsole },
     },
     {
+      path: '/governance/legal-holds',
+      name: 'legal-hold-administration',
+      component: () => import('@/views/legalHold/LegalHoldListView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.legalHoldAdministration },
+    },
+    {
       path: '/masters',
       name: 'master-list',
       component: () => import('@/views/masters/MasterListView.vue'),
@@ -195,6 +201,7 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
   'master-list': 'masters.list.title',
   'master-package-hub': 'masters.hub.breadcrumbLabel',
   'audit-console': 'audit.title',
+  'legal-hold-administration': 'legalHold.list.title',
   'api-policy-management': 'apiPolicy.home.title',
   'entitlement-users': 'identity.usersPageTitle',
   'entitlement-groups': 'identity.groupsPageTitle',

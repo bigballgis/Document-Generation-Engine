@@ -46,6 +46,7 @@ export interface ManagementCapabilities {
   manageApiPolicy: boolean
   readAudit: boolean
   manageAssetLibrary: boolean
+  manageLegalHold: boolean
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management auth session). */

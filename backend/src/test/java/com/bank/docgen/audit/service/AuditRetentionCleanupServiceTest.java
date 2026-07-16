@@ -9,12 +9,17 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.audit.persistence.ManagementAuditEventCleanupRepository;
+import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
+import com.bank.docgen.legalhold.service.LegalHoldExemptionService;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordRepository;
 import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventCleanupRepository;
+import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventEntity;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * BDD-LRP-D1-001…004, 007, 009, 010 — audit retention purge service (ADR-0048).
+ * BDD-CE-G04-011…014 — legal hold exemptions.
  */
 @ExtendWith(MockitoExtension.class)
 class AuditRetentionCleanupServiceTest {
@@ -37,6 +43,8 @@ class AuditRetentionCleanupServiceTest {
     @Mock
     private AuditRetentionPurgeEvidenceWriter purgeEvidenceWriter;
     @Mock
+    private LegalHoldExemptionService legalHoldExemptionService;
+    @Mock
     private ApiInvocationRecordRepository invocationRecordRepository;
 
     private Clock clock;
@@ -49,6 +57,7 @@ class AuditRetentionCleanupServiceTest {
                 managementCleanup,
                 runtimeCleanup,
                 purgeEvidenceWriter,
+                legalHoldExemptionService,
                 clock,
                 90,
                 365,
@@ -59,54 +68,58 @@ class AuditRetentionCleanupServiceTest {
     @Test
     void purgeManagement_deletesOlderThanCutoffAndWritesEvidence() {
         Instant cutoff = NOW.minus(90, ChronoUnit.DAYS);
-        when(managementCleanup.deleteOlderThan(cutoff)).thenReturn(3);
+        ManagementAuditEventEntity aged = managementEvent(UUID.randomUUID(), cutoff.minusSeconds(1));
+        when(managementCleanup.findByEventAtBefore(cutoff)).thenReturn(List.of(aged));
+        when(legalHoldExemptionService.isManagementAuditExempt(any(), any())).thenReturn(false);
 
         int deleted = service.purgeManagementAudit();
 
-        assertThat(deleted).isEqualTo(3);
-        verify(managementCleanup).deleteOlderThan(cutoff);
+        assertThat(deleted).isEqualTo(1);
+        verify(managementCleanup).deleteAll(List.of(aged));
         verify(purgeEvidenceWriter).write(
                 eq(AuditRetentionCleanupService.MANAGEMENT_TABLE),
                 eq(90),
                 eq(cutoff),
-                eq(3)
+                eq(1)
         );
     }
 
     @Test
     void purgeRuntime_deletesOlderThanCutoffAndWritesEvidence() {
         Instant cutoff = NOW.minus(365, ChronoUnit.DAYS);
-        when(runtimeCleanup.deleteOlderThan(cutoff)).thenReturn(2);
+        RuntimeGenerationAuditEventEntity aged = runtimeEvent(cutoff.minusSeconds(1), null, null);
+        when(runtimeCleanup.findByEventAtBefore(cutoff)).thenReturn(List.of(aged));
+        when(legalHoldExemptionService.isRuntimeAuditExempt(any(), any(), any(), any())).thenReturn(false);
 
         int deleted = service.purgeRuntimeAudit();
 
-        assertThat(deleted).isEqualTo(2);
-        verify(runtimeCleanup).deleteOlderThan(cutoff);
+        assertThat(deleted).isEqualTo(1);
+        verify(runtimeCleanup).deleteAll(List.of(aged));
         verify(purgeEvidenceWriter).write(
                 eq(AuditRetentionCleanupService.RUNTIME_TABLE),
                 eq(365),
                 eq(cutoff),
-                eq(2)
+                eq(1)
         );
     }
 
     @Test
     void purgeManagement_retainsBoundaryAndInWindow_whenDeletePredicateIsStrictLessThan() {
         Instant cutoff = NOW.minus(90, ChronoUnit.DAYS);
-        when(managementCleanup.deleteOlderThan(cutoff)).thenReturn(0);
+        when(managementCleanup.findByEventAtBefore(cutoff)).thenReturn(List.of());
 
         int deleted = service.purgeManagementAudit();
 
         assertThat(deleted).isZero();
         ArgumentCaptor<Instant> cutoffCaptor = ArgumentCaptor.forClass(Instant.class);
-        verify(managementCleanup).deleteOlderThan(cutoffCaptor.capture());
+        verify(managementCleanup).findByEventAtBefore(cutoffCaptor.capture());
         assertThat(cutoffCaptor.getValue()).isEqualTo(cutoff);
         verify(purgeEvidenceWriter, never()).write(any(), any(Integer.class), any(), any(Integer.class));
     }
 
     @Test
     void purgeManagement_skipsEvidenceWhenNothingDeleted() {
-        when(managementCleanup.deleteOlderThan(any())).thenReturn(0);
+        when(managementCleanup.findByEventAtBefore(any())).thenReturn(List.of());
 
         service.purgeManagementAudit();
 
@@ -116,19 +129,20 @@ class AuditRetentionCleanupServiceTest {
     @Test
     void purgeManagement_selfProtectsEvidence_byDeletingBeforeRecording() {
         Instant cutoff = NOW.minus(90, ChronoUnit.DAYS);
-        when(managementCleanup.deleteOlderThan(cutoff)).thenReturn(1);
+        ManagementAuditEventEntity aged = managementEvent(UUID.randomUUID(), cutoff.minusSeconds(1));
+        when(managementCleanup.findByEventAtBefore(cutoff)).thenReturn(List.of(aged));
+        when(legalHoldExemptionService.isManagementAuditExempt(any(), any())).thenReturn(false);
 
         service.purgeManagementAudit();
 
         var inOrder = org.mockito.Mockito.inOrder(managementCleanup, purgeEvidenceWriter);
-        inOrder.verify(managementCleanup).deleteOlderThan(cutoff);
+        inOrder.verify(managementCleanup).deleteAll(List.of(aged));
         inOrder.verify(purgeEvidenceWriter).write(
                 AuditRetentionCleanupService.MANAGEMENT_TABLE,
                 90,
                 cutoff,
                 1
         );
-        verify(managementCleanup).deleteOlderThan(any());
     }
 
     @Test
@@ -137,13 +151,16 @@ class AuditRetentionCleanupServiceTest {
                 managementCleanup,
                 runtimeCleanup,
                 purgeEvidenceWriter,
+                legalHoldExemptionService,
                 clock,
                 30,
                 365,
                 true
         );
         Instant cutoff = NOW.minus(30, ChronoUnit.DAYS);
-        when(managementCleanup.deleteOlderThan(cutoff)).thenReturn(1);
+        ManagementAuditEventEntity aged = managementEvent(UUID.randomUUID(), cutoff.minusSeconds(1));
+        when(managementCleanup.findByEventAtBefore(cutoff)).thenReturn(List.of(aged));
+        when(legalHoldExemptionService.isManagementAuditExempt(any(), any())).thenReturn(false);
 
         service.purgeManagementAudit();
 
@@ -161,6 +178,7 @@ class AuditRetentionCleanupServiceTest {
                 managementCleanup,
                 runtimeCleanup,
                 purgeEvidenceWriter,
+                legalHoldExemptionService,
                 clock,
                 90,
                 365,
@@ -174,8 +192,14 @@ class AuditRetentionCleanupServiceTest {
 
     @Test
     void purgeDoesNotTouchInvocationRecords() {
-        when(managementCleanup.deleteOlderThan(any())).thenReturn(1);
-        when(runtimeCleanup.deleteOlderThan(any())).thenReturn(1);
+        Instant cutoffMgmt = NOW.minus(90, ChronoUnit.DAYS);
+        Instant cutoffRuntime = NOW.minus(365, ChronoUnit.DAYS);
+        ManagementAuditEventEntity mgmt = managementEvent(UUID.randomUUID(), cutoffMgmt.minusSeconds(1));
+        RuntimeGenerationAuditEventEntity runtime = runtimeEvent(cutoffRuntime.minusSeconds(1), null, null);
+        when(managementCleanup.findByEventAtBefore(cutoffMgmt)).thenReturn(List.of(mgmt));
+        when(runtimeCleanup.findByEventAtBefore(cutoffRuntime)).thenReturn(List.of(runtime));
+        when(legalHoldExemptionService.isManagementAuditExempt(any(), any())).thenReturn(false);
+        when(legalHoldExemptionService.isRuntimeAuditExempt(any(), any(), any(), any())).thenReturn(false);
 
         service.purgeManagementAudit();
         service.purgeRuntimeAudit();
@@ -193,15 +217,16 @@ class AuditRetentionCleanupServiceTest {
 
     @Test
     void purgeManagement_coversSecurityEventTypesOnSameTableCutoff() {
-        // BDD-LRP-D7-009: SECURITY_* rows live on management_audit_event and are purged by event_at
-        // cutoff with no event_type filter (ADR-0048 / LR-D1).
         Instant cutoff = NOW.minus(90, ChronoUnit.DAYS);
-        when(managementCleanup.deleteOlderThan(cutoff)).thenReturn(2);
+        ManagementAuditEventEntity a = managementEvent(UUID.randomUUID(), cutoff.minusSeconds(2));
+        ManagementAuditEventEntity b = managementEvent(UUID.randomUUID(), cutoff.minusSeconds(1));
+        when(managementCleanup.findByEventAtBefore(cutoff)).thenReturn(List.of(a, b));
+        when(legalHoldExemptionService.isManagementAuditExempt(any(), any())).thenReturn(false);
 
         int deleted = service.purgeManagementAudit();
 
         assertThat(deleted).isEqualTo(2);
-        verify(managementCleanup).deleteOlderThan(cutoff);
+        verify(managementCleanup).deleteAll(List.of(a, b));
         assertThat(SecurityManagementAuditRecorder.SECURITY_LOGIN_FAILURE)
                 .isEqualTo("SECURITY_LOGIN_FAILURE");
         assertThat(SecurityManagementAuditRecorder.SECURITY_ROUTE_ACCESS_DENIED)
@@ -211,5 +236,98 @@ class AuditRetentionCleanupServiceTest {
         assertThat(SecurityManagementAuditRecorder.SECURITY_DOCUMENT_DOWNLOAD_DENIED)
                 .isEqualTo("SECURITY_DOCUMENT_DOWNLOAD_DENIED");
         assertThat(AuditRetentionCleanupService.MANAGEMENT_TABLE).isEqualTo("management_audit_event");
+    }
+
+    @Test
+    void purgeManagement_skipsLegalHoldExemptRows() {
+        Instant cutoff = NOW.minus(90, ChronoUnit.DAYS);
+        UUID templateId = UUID.randomUUID();
+        ManagementAuditEventEntity protectedRow = managementEvent(templateId, cutoff.minusSeconds(1));
+        ManagementAuditEventEntity platformRow = managementEvent(null, cutoff.minusSeconds(2));
+        when(managementCleanup.findByEventAtBefore(cutoff)).thenReturn(List.of(protectedRow, platformRow));
+        when(legalHoldExemptionService.isManagementAuditExempt(templateId, protectedRow.getEventAt()))
+                .thenReturn(true);
+        when(legalHoldExemptionService.isManagementAuditExempt(null, platformRow.getEventAt()))
+                .thenReturn(false);
+
+        int deleted = service.purgeManagementAudit();
+
+        assertThat(deleted).isEqualTo(1);
+        verify(managementCleanup).deleteAll(List.of(platformRow));
+    }
+
+    @Test
+    void purgeRuntime_skipsLegalHoldExemptRows() {
+        Instant cutoff = NOW.minus(365, ChronoUnit.DAYS);
+        RuntimeGenerationAuditEventEntity protectedRow = runtimeEvent(cutoff.minusSeconds(1), "inv-1", null);
+        when(runtimeCleanup.findByEventAtBefore(cutoff)).thenReturn(List.of(protectedRow));
+        when(legalHoldExemptionService.isRuntimeAuditExempt(
+                protectedRow.getTemplateId(),
+                protectedRow.getEventAt(),
+                "inv-1",
+                null
+        )).thenReturn(true);
+
+        int deleted = service.purgeRuntimeAudit();
+
+        assertThat(deleted).isZero();
+        verify(runtimeCleanup, never()).deleteAll(any());
+        verify(purgeEvidenceWriter, never()).write(any(), any(Integer.class), any(), any(Integer.class));
+    }
+
+    private ManagementAuditEventEntity managementEvent(UUID templateId, Instant eventAt) {
+        return new ManagementAuditEventEntity(
+                UUID.randomUUID(),
+                eventAt,
+                "SOME_EVENT",
+                templateId,
+                null,
+                null,
+                null,
+                null,
+                "[]",
+                false,
+                null,
+                "10000001",
+                "Admin",
+                null,
+                "summary",
+                "[]"
+        );
+    }
+
+    private RuntimeGenerationAuditEventEntity runtimeEvent(
+            Instant eventAt,
+            String taskExternalId,
+            String documentId
+    ) {
+        return new RuntimeGenerationAuditEventEntity(
+                UUID.randomUUID(),
+                eventAt,
+                "GENERATION",
+                "dev",
+                UUID.randomUUID(),
+                "RETAIL",
+                UUID.randomUUID(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                taskExternalId,
+                null,
+                documentId,
+                "SUCCESS",
+                null,
+                null,
+                null,
+                "audit-1",
+                "trace-1"
+        );
     }
 }

@@ -38,7 +38,8 @@ public class ManagementCapabilitiesService {
                 groupAccessService.canDecideContentModuleReviews(session),
                 groupAccessService.canManageContentModuleLifecycle(session),
                 groupAccessService.canReadAudit(session),
-                groupAccessService.canManageAssetLibrary(session)
+                groupAccessService.canManageAssetLibrary(session),
+                groupAccessService.canManageLegalHold(session)
         );
     }
 

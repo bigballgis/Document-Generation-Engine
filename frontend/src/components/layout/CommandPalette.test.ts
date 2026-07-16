@@ -47,6 +47,7 @@ const capabilities: ManagementCapabilities = {
   manageApiPolicy: true,
   readAudit: true,
   manageAssetLibrary: true,
+  manageLegalHold: false,
 }
 
 function mountPalette(visibleRoutes: string[]) {

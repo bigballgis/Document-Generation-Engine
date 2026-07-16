@@ -1267,6 +1267,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/legal-holds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List legal holds (CE-G04)
+         * @description Returns a management `PageView` of legal hold rows (ACTIVE and/or RELEASED). Optional `status` filter. GLOBAL_ADMIN only; other roles receive 403. Behavior SoT: docs/behavior/ce-g04-legal-hold.md (BDD-CE-G04-001…017). Retention exemption overlays ADR-0040 / ADR-0048 without changing those ADR decision bodies.
+         */
+        get: operations["listLegalHolds"];
+        put?: never;
+        /**
+         * Create an ACTIVE legal hold (CE-G04)
+         * @description Creates an ACTIVE hold with mutually exclusive scope `TEMPLATE_WINDOW` or `INVOCATION_SET`. Writes `LEGAL_HOLD_CREATED` audit without variables / credentials / full parameter bodies. GLOBAL_ADMIN only.
+         */
+        post: operations["createLegalHold"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/legal-holds/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a legal hold by id (CE-G04)
+         * @description Returns one legal hold. GLOBAL_ADMIN only.
+         */
+        get: operations["getLegalHold"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/legal-holds/{id}/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Release an ACTIVE legal hold (CE-G04)
+         * @description Transitions ACTIVE → RELEASED. No physical DELETE. Already RELEASED → 409 `LEGAL_HOLD_ALREADY_RELEASED`. Writes `LEGAL_HOLD_RELEASED` audit. GLOBAL_ADMIN only. Released holds stop retention exemption immediately.
+         */
+        post: operations["releaseLegalHold"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/library/assets": {
         parameters: {
             query?: never;
@@ -1282,7 +1346,7 @@ export interface paths {
         put?: never;
         /**
          * Upload a platform asset-library object (CE-E02)
-         * @description Multipart upload of an IMAGE / SEAL / OTHER asset. Logical `assetKey` (trim) is the MinIO resolvable object key — must match `^[A-Za-z][A-Za-z0-9._-]{0,127}$`; no forced `library/` prefix. Allowed MIME `image/png` | `image/jpeg`; application-layer max 5 MiB → 422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. ACTIVE key conflict → 409 `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; DISABLED key may re-upload and reactivate (audit `ASSET_LIBRARY_REUPLOAD`). SEAL upload requires TEMPLATE_APPROVER / GLOBAL_ADMIN / GROUP_ADMIN (fail-closed 403). Does not modify `StructuredContentImageResolver`. Optional `Idempotency-Key` header. Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-001…009, 021–022).
+         * @description Multipart upload of an IMAGE / SEAL / OTHER asset. Logical `assetKey` (trim) is the MinIO resolvable object key — must match `^[A-Za-z][A-Za-z0-9._-]{0,127}$`; no forced `library/` prefix. Allowed MIME `image/png` | `image/jpeg`; application-layer max 5 MiB → 422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. ACTIVE key conflict → 409 `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; DISABLED key may re-upload and reactivate (audit `ASSET_LIBRARY_REUPLOAD`). SEAL upload requires TEMPLATE_APPROVER / GLOBAL_ADMIN / GROUP_ADMIN (fail-closed 403). Does not modify `StructuredContentImageResolver`. Header `Idempotency-Key` is reserved for a future slice and is **not enforced** in CE-E02 (accepted if present; ignored — no claim/replay/dedup). Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-001…009, 021–022).
          */
         post: operations["uploadLibraryAsset"];
         delete?: never;
@@ -1631,7 +1695,7 @@ export interface components {
          * @description Caller-visible fidelity warning codes for runtime success paths (JSON `fidelityWarnings[].warningCode` and SYNC_STREAM `fidelityWarningCodes` header). Baseline ADR-0019 codes plus engine-emitted codes that may appear on the formal runtime success path (CE-C03 honest enum). Includes DOCX_PERMISSIONS_NOT_APPLIED (CE-C06) when DOCX requests non-empty encryption.permissions; JSON path `messageKey` for that code is generation.warning.fidelity.docxPermissionsNotApplied.
          * @enum {string}
          */
-        FidelityWarningCode: "OPTIONAL_CONTENT_EMPTY" | "LOW_RISK_PAGINATION_DIFFERENCE" | "LOW_RISK_TABLE_PAGE_BREAK" | "CONTROLLED_STYLE_FALLBACK" | "IMAGE_SCALING_ADJUSTED" | "MASTER_STYLE_FALLBACK" | "PARTIAL_TABLE_LAYOUT_ADJUSTMENT" | "UNRESOLVED_VARIABLE" | "INVALID_CONDITION_EXPRESSION" | "MISSING_ANCHOR_CONTENT" | "UNSUPPORTED_NODE" | "MISSING_STYLE_REFERENCE" | "INAPPLICABLE_STYLE" | "DIRECT_FORMAT_OUT_OF_WHITELIST" | "DIRECT_FORMAT_GLOBAL_LAYOUT" | "NESTED_TABLE" | "UNRELIABLE_TABLE_LAYOUT" | "INVALID_TABLE_COMPONENT" | "SEAL_OUTSIDE_AUTHORIZED_AREA" | "SEAL_SCALING_NOT_ALLOWED" | "MISSING_REFERENCE_KEY" | "DUPLICATE_NUMBER" | "BROKEN_NUMBER_CROSS_REFERENCE" | "PDF_PAGE_NUMBER_STAMP_FAILED" | "DOCX_PERMISSIONS_NOT_APPLIED";
+        FidelityWarningCode: "OPTIONAL_CONTENT_EMPTY" | "LOW_RISK_PAGINATION_DIFFERENCE" | "LOW_RISK_TABLE_PAGE_BREAK" | "CONTROLLED_STYLE_FALLBACK" | "IMAGE_SCALING_ADJUSTED" | "MASTER_STYLE_FALLBACK" | "PARTIAL_TABLE_LAYOUT_ADJUSTMENT" | "UNRESOLVED_VARIABLE" | "INVALID_CONDITION_EXPRESSION" | "MISSING_ANCHOR_CONTENT" | "UNSUPPORTED_NODE" | "MISSING_STYLE_REFERENCE" | "INAPPLICABLE_STYLE" | "DIRECT_FORMAT_OUT_OF_WHITELIST" | "DIRECT_FORMAT_GLOBAL_LAYOUT" | "NESTED_TABLE" | "UNRELIABLE_TABLE_LAYOUT" | "INVALID_TABLE_COMPONENT" | "SEAL_OUTSIDE_AUTHORIZED_AREA" | "SEAL_SCALING_NOT_ALLOWED" | "MISSING_REFERENCE_KEY" | "DUPLICATE_NUMBER" | "BROKEN_NUMBER_CROSS_REFERENCE" | "PDF_PAGE_NUMBER_STAMP_FAILED" | "PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA" | "DOCX_PERMISSIONS_NOT_APPLIED";
         /** @enum {string} */
         IdempotencyStatus: "IDEMPOTENCY_NEW" | "IDEMPOTENCY_REPLAYED" | "IDEMPOTENCY_CONFLICTED";
         /** @enum {string} */
@@ -3442,6 +3506,78 @@ export interface components {
         /** @enum {string} */
         TemplateExportAssetKeyUsage: "IMAGE" | "OTHER";
         /**
+         * @description CE-G04 hold scope (UPPER_SNAKE_CASE; mutually exclusive).
+         * @enum {string}
+         */
+        LegalHoldScopeType: "TEMPLATE_WINDOW" | "INVOCATION_SET";
+        /**
+         * @description CE-G04 hold lifecycle status. Only ACTIVE grants exemption.
+         * @enum {string}
+         */
+        LegalHoldStatus: "ACTIVE" | "RELEASED";
+        /** @description CE-G04 create body. Exactly one scope; field sets are mutually exclusive per docs/behavior/ce-g04-legal-hold.md G04-C3. */
+        CreateLegalHoldRequest: {
+            scopeType: components["schemas"]["LegalHoldScopeType"];
+            /** @description Optional reason; may appear in management audit summary. */
+            reason?: string | null;
+            /**
+             * Format: uuid
+             * @description TEMPLATE_WINDOW — template UUID (or use templateExternalId).
+             */
+            templateId?: string | null;
+            /** @description TEMPLATE_WINDOW — template external id (or use templateId). */
+            templateExternalId?: string | null;
+            /**
+             * Format: date-time
+             * @description TEMPLATE_WINDOW — UTC window start (required for that scope).
+             */
+            effectiveFrom?: string | null;
+            /**
+             * Format: date-time
+             * @description TEMPLATE_WINDOW — UTC window end; null means open-ended until release.
+             */
+            effectiveTo?: string | null;
+            /** @description INVOCATION_SET — 1…500 invocation external ids. */
+            invocationExternalIds?: string[] | null;
+        };
+        /** @description CE-G04 legal hold management view (no sensitive payloads). */
+        LegalHoldView: {
+            /** Format: uuid */
+            id: string;
+            holdExternalId: string;
+            scopeType: components["schemas"]["LegalHoldScopeType"];
+            status: components["schemas"]["LegalHoldStatus"];
+            reason?: string | null;
+            /** Format: uuid */
+            templateId?: string | null;
+            templateExternalId?: string | null;
+            /** Format: date-time */
+            effectiveFrom?: string | null;
+            /** Format: date-time */
+            effectiveTo?: string | null;
+            /** @description Empty for TEMPLATE_WINDOW; sorted ids for INVOCATION_SET. */
+            invocationExternalIds?: string[];
+            invocationCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            createdByUsername: string;
+            /** Format: date-time */
+            releasedAt?: string | null;
+            releasedByUsername?: string | null;
+        };
+        /** @description CE-G04 list envelope for `GET /api/management/v1/legal-holds`. */
+        LegalHoldPageResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PageView"] & {
+                content: components["schemas"]["LegalHoldView"][];
+            };
+        };
+        /** @description CE-G04 single-hold envelope (get / create / release). */
+        LegalHoldResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["LegalHoldView"];
+        };
+        /**
          * @description CE-E02 platform asset class (UPPER_SNAKE_CASE). SEAL is image seal/signature asset, not cryptographic e-seal.
          * @enum {string}
          */
@@ -3927,7 +4063,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "RENDERING" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED";
     };
     responses: {
         /** @description Async task accepted. */
@@ -6440,6 +6576,172 @@ export interface operations {
             default: components["responses"]["ErrorResponse"];
         };
     };
+    listLegalHolds: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+                page?: components["parameters"]["CatalogPageQuery"];
+                /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+                size?: components["parameters"]["CatalogSizeQuery"];
+                /** @description Optional status filter. Omit → ACTIVE ∪ RELEASED. `ACTIVE` or `RELEASED` when provided. */
+                status?: components["schemas"]["LegalHoldStatus"];
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated legal holds. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalHoldPageResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    createLegalHold: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLegalHoldRequest"];
+            };
+        };
+        responses: {
+            /** @description Hold created ACTIVE. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalHoldResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Template not found for TEMPLATE_WINDOW (`TEMPLATE_NOT_FOUND`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Mixed scope / validation failure. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getLegalHold: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                /** @description Legal hold UUID primary key. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Legal hold view. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalHoldResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Hold not found (`LEGAL_HOLD_NOT_FOUND` / `api.error.notFound.legalHoldNotFound`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    releaseLegalHold: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                /** @description Legal hold UUID primary key. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Hold released. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalHoldResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Hold not found (`LEGAL_HOLD_NOT_FOUND` / `api.error.notFound.legalHoldNotFound`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Already RELEASED (`LEGAL_HOLD_ALREADY_RELEASED` / `api.error.conflict.legalHoldAlreadyReleased`). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
     listLibraryAssets: {
         parameters: {
             query?: {
@@ -6484,7 +6786,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: {
-                /** @description Optional idempotency key for upload (management path). */
+                /** @description Reserved / not enforced in CE-E02. May be sent on the management upload path; the server ignores it (no idempotency store, replay, or conflict semantics). */
                 "Idempotency-Key"?: string;
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
                 "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];

@@ -180,6 +180,14 @@ public class RuntimeGenerationAuditEventEntity {
         return requestId;
     }
 
+    public String getTaskExternalId() {
+        return taskExternalId;
+    }
+
+    public String getDocumentId() {
+        return documentId;
+    }
+
     public String getOutcome() {
         return outcome;
     }

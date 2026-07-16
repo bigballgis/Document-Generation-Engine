@@ -10,6 +10,7 @@ export const ROUTE_KEYS = {
   contentModuleManagement: 'route.content-module-management',
   assetLibraryManagement: 'route.asset-library-management',
   identityAdministration: 'route.identity-administration',
+  legalHoldAdministration: 'route.legal-hold-administration',
 } as const
 
 export type RouteKey = (typeof ROUTE_KEYS)[keyof typeof ROUTE_KEYS]
@@ -36,6 +37,7 @@ export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.contentModuleManagement]: '/content-modules',
   [ROUTE_KEYS.assetLibraryManagement]: '/library/assets',
   [ROUTE_KEYS.identityAdministration]: '/entitlement/users',
+  [ROUTE_KEYS.legalHoldAdministration]: '/governance/legal-holds',
 }
 
 

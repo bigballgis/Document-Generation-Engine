@@ -33,7 +33,8 @@ const globalAdminCapabilities: ManagementCapabilities = {
   manageContentModuleLifecycle: true,
   manageApiPolicy: true,
   readAudit: true,
-        manageAssetLibrary: true,
+  manageAssetLibrary: true,
+  manageLegalHold: true,
 }
 
 const testerCapabilities: ManagementCapabilities = {
@@ -54,7 +55,8 @@ const testerCapabilities: ManagementCapabilities = {
   manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
-        manageAssetLibrary: true,
+  manageAssetLibrary: true,
+  manageLegalHold: false,
 }
 
 const approverCapabilities: ManagementCapabilities = {
@@ -260,6 +262,7 @@ describe('navStructure', () => {
           manageApiPolicy: false,
           readAudit: true,
           manageAssetLibrary: true,
+          manageLegalHold: false,
         },
       )
 
@@ -351,7 +354,30 @@ describe('navStructure', () => {
         },
         { id: 'api-policies', routeKey: ROUTE_KEYS.apiPolicyManagement, path: '/api/policies' },
         { id: 'audit', routeKey: ROUTE_KEYS.auditConsole, path: '/audit' },
+        {
+          id: 'legal-holds',
+          routeKey: ROUTE_KEYS.legalHoldAdministration,
+          path: '/governance/legal-holds',
+        },
       ])
+    })
+
+    it('shows legal holds only when route is visible', () => {
+      const withHold = buildVisibleNavGroups(
+        [dashboardRoute, ROUTE_KEYS.legalHoldAdministration],
+        ['GLOBAL_ADMIN'],
+        globalAdminCapabilities,
+      )
+      const security = withHold.find((group) => group.id === 'security')
+      expect(security?.items.map((item) => item.id)).toEqual(['legal-holds'])
+
+      const withoutHold = buildVisibleNavGroups(
+        [dashboardRoute, ROUTE_KEYS.auditConsole],
+        ['GROUP_ADMIN'],
+        { ...globalAdminCapabilities, manageLegalHold: false },
+      )
+      const securityWithout = withoutHold.find((group) => group.id === 'security')
+      expect(securityWithout?.items.map((item) => item.id)).toEqual(['audit'])
     })
 
     it('keeps API management hidden for tester without api-policy route', () => {

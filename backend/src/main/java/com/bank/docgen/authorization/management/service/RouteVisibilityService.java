@@ -38,6 +38,7 @@ public class RouteVisibilityService {
             visible.add(ManagementRoute.API_POLICY_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.AUDIT_CONSOLE.routeKey());
             visible.add(ManagementRoute.IDENTITY_ADMINISTRATION.routeKey());
+            visible.add(ManagementRoute.LEGAL_HOLD_ADMINISTRATION.routeKey());
             return new ArrayList<>(visible);
         }
         if (roles.contains(ManagementRole.AUDIT_ADMIN)) {

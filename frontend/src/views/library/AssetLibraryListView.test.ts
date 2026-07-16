@@ -41,6 +41,7 @@ const authorCapabilities: ManagementCapabilities = {
   manageApiPolicy: false,
   readAudit: false,
   manageAssetLibrary: true,
+  manageLegalHold: false,
 }
 
 function pageView<T>(content: T[], totalElements = content.length) {

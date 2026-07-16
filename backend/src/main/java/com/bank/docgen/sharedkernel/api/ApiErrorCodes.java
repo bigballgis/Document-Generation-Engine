@@ -124,6 +124,11 @@ public final class ApiErrorCodes {
     /** CE-E02: catalog key not found for authorized admin. */
     public static final String ASSET_LIBRARY_ASSET_NOT_FOUND = "ASSET_LIBRARY_ASSET_NOT_FOUND";
 
+    /** CE-G04: legal hold not found. */
+    public static final String LEGAL_HOLD_NOT_FOUND = "LEGAL_HOLD_NOT_FOUND";
+    /** CE-G04: release requested on already RELEASED hold. */
+    public static final String LEGAL_HOLD_ALREADY_RELEASED = "LEGAL_HOLD_ALREADY_RELEASED";
+
     private ApiErrorCodes() {
     }
 }
