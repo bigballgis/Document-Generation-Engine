@@ -72,9 +72,13 @@ blockers: <if any>
 - Skipping cleanup after a successful merge without stating why.
 - Implementing new features inside the merge session.
 
-## When Task enum lacks this agent
+## When Task enum / API lacks this agent
 
-If `Task(subagent_type=integration-merger)` is rejected by the tool schema, the parent or
-`delivery-orchestrator` must follow this checklist inline (merge + `git worktree remove`)
-before claiming Done for an isolated slice. Prefer the dedicated subagent after Cursor reload.
+Follow `.cursor/skills/specialist-runtime-fallback/SKILL.md`:
+
+1. Prefer `Task(subagent_type=integration-merger)` when present; on flake **retry** ≤3.
+2. If still missing/failing → **`BLOCKED`** + recovery hints (do **not** auto GP).
+3. Follow this checklist **inline** (merge + `git worktree remove`) only with user
+   `allow-gp-fallback` / `允许降级`. Emit `runtime_routing` (`INLINE_CHECKLIST`).
+4. Prefer the dedicated subagent after Cursor reload / new chat when enum recovers.
 

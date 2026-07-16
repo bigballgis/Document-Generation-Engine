@@ -54,16 +54,26 @@ Tiers below are **pipeline roles only** — model pin is identical. `inherit` fo
 
 See `.cursor/agents/MODEL-STRATEGY.md`.
 
-## Built-in (no project file)
+## Built-in (Cursor Task — no project `.md`)
+
+Project routing primarily uses:
 
 - `explore` — deep read-only audit
 - `bugbot` — defect-oriented review
 
+Other built-ins may appear in the live Task enum (e.g. `generalPurpose`, `shell`,
+`cursor-guide`, `ci-investigator`, `security-review`, `best-of-n-runner`). They are
+**not** substitutes for the 18 project specialists. See
+[MODEL-STRATEGY.md](.cursor/agents/MODEL-STRATEGY.md) and
+[specialist-runtime-fallback](.cursor/skills/specialist-runtime-fallback/SKILL.md).
+
+**Accuracy note:** `.cursor/agents/*.md` defines **18** specialists the pipeline names.
+Whether Cursor injects those names into the current session’s `Task` enum is runtime —
+if missing → retry (≤3) then **BLOCKED** (no auto GP).
+
 ## MCP (Cursor)
 
 `.cursor/mcp.json`: `task-master-ai`, `docgen-postgres` (local Docker only), `fetch`.
-
-## Docker
 
 ## Docker
 
