@@ -1,7 +1,7 @@
 /**
  * CE-G04 — Legal Hold management UI journeys (BDD-CE-G04-015…017 + fail-closed)
  *
- * Acceptance stack (Stage 5 for this slice): FRONTEND_PORT=5173 + backend :8080
+ * Acceptance stack (Stage 5 for this slice): FRONTEND_PORT=4173 + backend :8080
  * BDD SoT: docs/behavior/ce-g04-legal-hold.md
  */
 import path from 'node:path'
@@ -16,8 +16,10 @@ import {
   loginAs,
 } from './helpers/auth'
 import {
+  createLegalHoldViaApi,
   ensureLegalHoldTemplateFixture,
   findLegalHoldByReason,
+  releaseLegalHoldViaApi,
   type LegalHoldTemplateFixture,
 } from './helpers/legal-holds-api'
 import { managementNav } from './helpers/nav'
@@ -25,10 +27,12 @@ import { requireDockerStack } from './helpers/stack-readiness'
 import { selectElementPlusOption } from './helpers/ui'
 import { E2E_API_BASE_URL } from './helpers/masters-api'
 
-const dockerTarget =
-  process.env.E2E_TARGET === 'docker' || process.env.FRONTEND_PORT === '4173'
-const defaultPort = dockerTarget ? 4173 : 5173
-const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${defaultPort}`
+// Docker :4173 is canonical for Stage 5/6 acceptance. Dev loop: FRONTEND_PORT=5173.
+const FRONTEND_BASE_URL =
+  process.env.E2E_BASE_URL ??
+  (process.env.FRONTEND_PORT === '5173'
+    ? 'http://127.0.0.1:5173'
+    : 'http://127.0.0.1:4173')
 
 const EVIDENCE_DIR = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -139,9 +143,65 @@ test.describe('CE-G04 Legal Hold UI (BDD-CE-G04-015…017)', () => {
   test.beforeAll(async ({ request }) => {
     await requireDockerStack(request, {
       frontendBaseUrl: FRONTEND_BASE_URL,
-      skipMessage: `Acceptance stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Stage 5 uses FRONTEND_PORT=5173.`,
+      skipMessage: `Acceptance stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Stage 5 uses FRONTEND_PORT=4173.`,
     })
     templateFixture = await ensureLegalHoldTemplateFixture(request)
+  })
+
+  test('BDD-CE-G04-015b: status filter narrows ACTIVE vs RELEASED rows', async ({
+    page,
+    request,
+  }) => {
+    const reason = `E2E CE-G04 filter ${Date.now()}`
+    const hold = await createLegalHoldViaApi(request, {
+      scopeType: 'TEMPLATE_WINDOW',
+      reason,
+      templateExternalId: templateFixture.externalId,
+      effectiveFrom: new Date().toISOString(),
+    })
+    expect(hold.status).toBe('ACTIVE')
+
+    await loginAs(page, E2E_ADMIN)
+    await dismissOnboardingTourIfPresent(page)
+    await openLegalHoldsPage(page)
+
+    const table = page.getByTestId('legal-hold-table')
+    const statusFilter = page.getByTestId('legal-hold-status-filter')
+
+    await statusFilter.click()
+    await selectElementPlusOption(page, /^active$/i)
+    await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 20_000 })
+    const activeRow = table.locator('.el-table__row').filter({ hasText: reason }).first()
+    await expect(activeRow).toBeVisible({ timeout: 20_000 })
+    await expect(activeRow.getByTestId('legal-hold-status-ACTIVE')).toBeVisible()
+
+    await statusFilter.click()
+    await selectElementPlusOption(page, /^released$/i)
+    await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 20_000 })
+    await expect(table.locator('.el-table__row').filter({ hasText: reason })).toHaveCount(0)
+
+    await releaseLegalHoldViaApi(request, hold.id)
+
+    // Force refetch: watch only fires on filter value change
+    await statusFilter.click()
+    await selectElementPlusOption(page, /^all statuses$/i)
+    await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 20_000 })
+    await statusFilter.click()
+    await selectElementPlusOption(page, /^released$/i)
+    await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 20_000 })
+    const releasedRow = table.locator('.el-table__row').filter({ hasText: reason }).first()
+    await expect(releasedRow).toBeVisible({ timeout: 20_000 })
+    await expect(releasedRow.getByTestId('legal-hold-status-RELEASED')).toBeVisible()
+
+    await statusFilter.click()
+    await selectElementPlusOption(page, /^active$/i)
+    await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 20_000 })
+    await expect(table.locator('.el-table__row').filter({ hasText: reason })).toHaveCount(0)
+
+    await page.screenshot({
+      path: path.join(EVIDENCE_DIR, 'BDD-CE-G04-015b-status-filter.png'),
+      fullPage: true,
+    })
   })
 
   test('BDD-CE-G04-015: GLOBAL_ADMIN sees Legal Holds page and can open create', async ({
