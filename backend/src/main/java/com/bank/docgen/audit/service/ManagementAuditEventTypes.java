@@ -36,6 +36,12 @@ public final class ManagementAuditEventTypes {
     public static final String TEMPLATE_TEST_DATA_PII_EXPLICIT_CONFIRM = "TEMPLATE_TEST_DATA_PII_EXPLICIT_CONFIRM";
     /** CE-G06: controlled regenerate terminal event (success or failure). */
     public static final String INVOCATION_REGENERATED = "INVOCATION_REGENERATED";
+    /** CE-E02: asset library catalog upload. */
+    public static final String ASSET_LIBRARY_UPLOAD = "ASSET_LIBRARY_UPLOAD";
+    /** CE-E02: asset library catalog disable. */
+    public static final String ASSET_LIBRARY_DISABLE = "ASSET_LIBRARY_DISABLE";
+    /** CE-E02: DISABLED key re-upload reactivation. */
+    public static final String ASSET_LIBRARY_REUPLOAD = "ASSET_LIBRARY_REUPLOAD";
 
     private ManagementAuditEventTypes() {
     }

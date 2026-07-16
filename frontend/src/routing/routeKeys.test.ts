@@ -23,6 +23,7 @@ describe('routeKeys', () => {
     )
     expect(apiPolicyDetailPath('tpl-1')).toBe('/templates/tpl-1?tab=apiAccess')
     expect(pathForRouteKey(ROUTE_KEYS.identityAdministration)).toBe('/entitlement/users')
+    expect(pathForRouteKey(ROUTE_KEYS.assetLibraryManagement)).toBe('/library/assets')
   })
 
   it('redirects legacy workbench route keys to dashboard tasks section', () => {

@@ -111,6 +111,22 @@ export const apiErrorEn = {
     importBundleContainsSecrets: "The template import bundle must not contain secrets or credentials.",
     importConflict: "The template import conflicts with an existing template.",
     importFailed: "The template import could not be completed.",
+    importDependenciesUnsatisfied: "Template import dependencies are not satisfied.",
+    dep: {
+      bundleFormatOk: "The import bundle format is supported.",
+      masterPinAbsent: "The import bundle is missing a master pin fingerprint.",
+      masterDocxAbsent: "The import ZIP is missing artifacts/master.docx.",
+      masterDocxHashMismatch: "The embedded master DOCX hash does not match the bundle master pin.",
+      masterFingerprintMismatch: "The target master fingerprint does not match the bundle master pin.",
+      masterFingerprintOk: "The target master fingerprint matches the bundle master pin.",
+      clausePresent: "The content module clause is already present in the target environment.",
+      clauseWillMaterialize: "The content module clause will be materialized from the bundle snapshot.",
+      clauseMissing: "The content module clause is missing and no snapshot is available to materialize.",
+      assetKeyPresent: "The asset key exists in object storage.",
+      assetKeyMissing: "The asset key does not exist in object storage.",
+      renderProfileAbsent: "The export bundle does not include a render profile snapshot.",
+      renderProfilePresent: "The export bundle includes a render profile snapshot."
+    },
     computeExpressionInvalid: "The compute expression is invalid."
   },
   variable: {
@@ -203,7 +219,13 @@ export const apiErrorEn = {
   },
   audit: {
     invalidTimeWindow: "The audit time window is invalid.",
-    scopeRequired: "Group scope and template identifier are required for group-scoped audit queries."
+    scopeRequired: "Group scope and template identifier are required for group-scoped audit queries.",
+    releaseBundleSnapshotUnavailable: "Release-bundle snapshot is not available for this invocation.",
+    releaseBundleHashMismatch: "Release-bundle hash does not match the pinned master object.",
+    invocationKindNotRegenerable:
+      "This invocation kind cannot be regenerated; use a SINGLE, BATCH_ITEM, or ASYNC_TASK record.",
+    invocationRecordExpired: "Invocation record has expired.",
+    specimenWatermarkFailed: "SPECIMEN watermark could not be applied."
   },
   batch: {
     originalBatchNotFound: "Original batch was not found."
@@ -240,5 +262,15 @@ export const apiErrorEn = {
     accessDenied: "You do not have permission to view collaboration work items.",
     queueDenied: "You do not have permission to view this collaboration work item queue.",
     workItemNotFound: "The collaboration work item was not found."
+  },
+  assetLibrary: {
+    accessDenied: "You do not have permission to access the asset library.",
+    assetKeyInvalid: "The asset key is invalid.",
+    assetKeyConflict: "An active asset with this key already exists.",
+    contentTypeUnsupported: "The uploaded content type is not supported.",
+    contentTypeMismatch: "The uploaded content type does not match the file contents.",
+    payloadTooLarge: "The uploaded file exceeds the maximum allowed size of 5 MiB.",
+    payloadEmpty: "The uploaded file is empty.",
+    assetNotFound: "The asset library entry was not found."
   }
 } as const

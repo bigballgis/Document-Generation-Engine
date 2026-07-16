@@ -36,6 +36,7 @@ const capabilities: ManagementCapabilities = {
   manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
+  manageAssetLibrary: false,
 }
 
 function patchSession(viewCollaborationWorkItems: boolean) {

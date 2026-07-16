@@ -79,8 +79,12 @@ public class MinioObjectStorage implements ObjectStoragePort {
                     .build());
             return true;
         } catch (ErrorResponseException ex) {
-            LOG.debug("Object not found for key {}: {}", objectKey, ex.errorResponse().code());
-            return false;
+            String code = ex.errorResponse() == null ? "" : ex.errorResponse().code();
+            if (isNotFoundCode(code)) {
+                LOG.debug("Object not found for key {}: {}", objectKey, code);
+                return false;
+            }
+            throw new ObjectStorageException("Failed to stat object", ex);
         } catch (IOException
                 | InvalidKeyException
                 | NoSuchAlgorithmException
@@ -89,9 +93,15 @@ public class MinioObjectStorage implements ObjectStoragePort {
                 | InvalidResponseException
                 | ServerException
                 | XmlParserException ex) {
-            LOG.warn("Failed to stat object key {}: {}", objectKey, ex.getMessage());
-            return false;
+            throw new ObjectStorageException("Failed to stat object", ex);
         }
+    }
+
+    private static boolean isNotFoundCode(String code) {
+        return "NoSuchKey".equals(code)
+                || "NotFound".equals(code)
+                || "NoSuchObject".equals(code)
+                || "ResourceNotFound".equals(code);
     }
 
     private void putInternal(String objectKey, InputStream content, long contentLength, String contentType) {

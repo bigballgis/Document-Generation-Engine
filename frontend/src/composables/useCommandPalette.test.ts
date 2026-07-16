@@ -44,6 +44,7 @@ const fullCapabilities: ManagementCapabilities = {
   manageContentModuleLifecycle: true,
   manageApiPolicy: true,
   readAudit: true,
+  manageAssetLibrary: true,
 }
 
 function translate(key: string): string {

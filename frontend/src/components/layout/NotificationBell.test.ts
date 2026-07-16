@@ -49,6 +49,7 @@ const withCollab: ManagementCapabilities = {
   manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
+  manageAssetLibrary: false,
 }
 
 const withoutCollab: ManagementCapabilities = {

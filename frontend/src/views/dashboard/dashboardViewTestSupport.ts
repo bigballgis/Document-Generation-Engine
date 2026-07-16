@@ -26,6 +26,7 @@ export const BASE_CAPABILITIES: ManagementCapabilities = {
   manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
+  manageAssetLibrary: false,
 }
 
 export function caps(overrides: Partial<ManagementCapabilities> = {}): ManagementCapabilities {

@@ -23,6 +23,7 @@ class RouteVisibilityServiceTest {
                         ManagementRoute.MASTER_MANAGEMENT.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
                         ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey(),
+                        ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey(),
                         ManagementRoute.API_POLICY_MANAGEMENT.routeKey(),
                         ManagementRoute.AUDIT_CONSOLE.routeKey(),
                         ManagementRoute.IDENTITY_ADMINISTRATION.routeKey()
@@ -41,6 +42,7 @@ class RouteVisibilityServiceTest {
                         ManagementRoute.MASTER_MANAGEMENT.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
                         ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey(),
+                        ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey(),
                         ManagementRoute.API_POLICY_MANAGEMENT.routeKey(),
                         ManagementRoute.AUDIT_CONSOLE.routeKey(),
                         ManagementRoute.IDENTITY_ADMINISTRATION.routeKey()
@@ -57,7 +59,8 @@ class RouteVisibilityServiceTest {
                 .containsExactly(
                         ManagementRoute.DASHBOARD_HOME.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
-                        ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey()
+                        ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey(),
+                        ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey()
                 );
     }
 
@@ -72,7 +75,8 @@ class RouteVisibilityServiceTest {
                         ManagementRoute.DASHBOARD_HOME.routeKey(),
                         ManagementRoute.MASTER_MANAGEMENT.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
-                        ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey()
+                        ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey(),
+                        ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey()
                 );
     }
 
@@ -85,7 +89,8 @@ class RouteVisibilityServiceTest {
         assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
                 .containsExactly(
                         ManagementRoute.DASHBOARD_HOME.routeKey(),
-                        ManagementRoute.TEMPLATE_MANAGEMENT.routeKey()
+                        ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
+                        ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey()
                 );
     }
 
@@ -99,7 +104,8 @@ class RouteVisibilityServiceTest {
                 .containsExactly(
                         ManagementRoute.DASHBOARD_HOME.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
-                        ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey()
+                        ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey(),
+                        ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey()
                 );
     }
 

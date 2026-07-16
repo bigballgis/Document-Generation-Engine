@@ -17,6 +17,7 @@ public record ManagementCapabilitiesView(
         boolean authorContentModules,
         boolean decideContentModuleReviews,
         boolean manageContentModuleLifecycle,
-        boolean readAudit
+        boolean readAudit,
+        boolean manageAssetLibrary
 ) {
 }

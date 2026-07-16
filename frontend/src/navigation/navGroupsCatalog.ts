@@ -55,6 +55,12 @@ export const NAV_GROUPS: NavGroupDefinition[] = [
         path: '/content-modules',
         labelKey: 'nav.items.contentModules',
       },
+      {
+        id: 'asset-library',
+        routeKey: ROUTE_KEYS.assetLibraryManagement,
+        path: '/library/assets',
+        labelKey: 'nav.items.assetLibrary',
+      },
     ],
   },
   {

@@ -1265,3 +1265,33 @@ export async function captureCeG03LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** CE-E02 Asset Library admin — list / upload / disable @1440×900 dual-brand. */
+export const CE_E02_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-E02-asset-library')
+export const CE_E02_SCREENSHOT_DIR = path.join(CE_E02_EVIDENCE_ROOT, 'screenshots')
+export const CE_E02_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureCeE02EvidenceDirs(): void {
+  fs.mkdirSync(CE_E02_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceE02ScreenshotPath(filename: string): string {
+  return path.join(CE_E02_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeE02Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeE02EvidenceDirs()
+  const target = ceE02ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeE02LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeE02EvidenceDirs()
+  const target = ceE02ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

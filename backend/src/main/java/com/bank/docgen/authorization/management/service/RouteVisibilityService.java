@@ -34,6 +34,7 @@ public class RouteVisibilityService {
             visible.add(ManagementRoute.MASTER_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey());
+            visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.API_POLICY_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.AUDIT_CONSOLE.routeKey());
             visible.add(ManagementRoute.IDENTITY_ADMINISTRATION.routeKey());
@@ -48,6 +49,7 @@ public class RouteVisibilityService {
             visible.add(ManagementRoute.MASTER_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey());
+            visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.API_POLICY_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.AUDIT_CONSOLE.routeKey());
             visible.add(ManagementRoute.IDENTITY_ADMINISTRATION.routeKey());
@@ -57,20 +59,24 @@ public class RouteVisibilityService {
             visible.add(ManagementRoute.MASTER_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey());
+            visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
         }
         if (roles.contains(ManagementRole.TEMPLATE_AUTHOR)) {
             visible.add(ManagementRoute.DASHBOARD_HOME.routeKey());
             visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey());
+            visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
         }
         if (roles.contains(ManagementRole.TEMPLATE_TESTER)) {
             visible.add(ManagementRoute.DASHBOARD_HOME.routeKey());
             visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
+            visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
         }
         if (roles.contains(ManagementRole.TEMPLATE_APPROVER)) {
             visible.add(ManagementRoute.DASHBOARD_HOME.routeKey());
             visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey());
+            visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
         }
         return new ArrayList<>(visible);
     }

@@ -109,6 +109,19 @@ public final class ApiErrorCodes {
     /** CE-G06: regenerate outputFormat outside DOCX/PDF allow-list. */
     public static final String OUTPUT_FORMAT_NOT_ALLOWED = "OUTPUT_FORMAT_NOT_ALLOWED";
 
+    /** CE-E02: asset key grammar invalid. */
+    public static final String ASSET_LIBRARY_ASSET_KEY_INVALID = "ASSET_LIBRARY_ASSET_KEY_INVALID";
+    /** CE-E02: ACTIVE asset key conflict. */
+    public static final String ASSET_LIBRARY_ASSET_KEY_CONFLICT = "ASSET_LIBRARY_ASSET_KEY_CONFLICT";
+    /** CE-E02: unsupported upload content type. */
+    public static final String ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED = "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED";
+    /** CE-E02: declared content type vs magic mismatch (or empty payload). */
+    public static final String ASSET_LIBRARY_CONTENT_TYPE_MISMATCH = "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH";
+    /** CE-E02: application-layer payload exceeds 5 MiB. */
+    public static final String ASSET_LIBRARY_PAYLOAD_TOO_LARGE = "ASSET_LIBRARY_PAYLOAD_TOO_LARGE";
+    /** CE-E02: catalog key not found for authorized admin. */
+    public static final String ASSET_LIBRARY_ASSET_NOT_FOUND = "ASSET_LIBRARY_ASSET_NOT_FOUND";
+
     private ApiErrorCodes() {
     }
 }

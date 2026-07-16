@@ -41,6 +41,7 @@ describe('routeCapabilities', () => {
           manageContentModuleLifecycle: false,
           manageApiPolicy: false,
           readAudit: false,
+          manageAssetLibrary: false,
         },
       }),
     )
@@ -70,6 +71,7 @@ describe('routeCapabilities', () => {
           manageContentModuleLifecycle: false,
           manageApiPolicy: false,
           readAudit: false,
+          manageAssetLibrary: false,
         },
       }),
     )
@@ -100,6 +102,7 @@ describe('routeCapabilities', () => {
           manageContentModuleLifecycle: false,
           manageApiPolicy: false,
           readAudit: false,
+          manageAssetLibrary: false,
         },
       }),
     )
@@ -130,6 +133,7 @@ describe('routeCapabilities', () => {
           manageContentModuleLifecycle: false,
           manageApiPolicy: false,
           readAudit: false,
+          manageAssetLibrary: false,
         },
       }),
     )
@@ -160,6 +164,7 @@ describe('routeCapabilities', () => {
           manageContentModuleLifecycle: false,
           manageApiPolicy: false,
           readAudit: false,
+          manageAssetLibrary: false,
         },
       }),
     )
@@ -200,6 +205,49 @@ describe('routeCapabilities', () => {
       }),
     )
 
+    expect(denied).toBe(false)
+  })
+
+  it('allows asset library route when manageAssetLibrary is true', () => {
+    const allowed = canAccessRouteWithCapability(
+      ROUTE_KEYS.assetLibraryManagement,
+      session({
+        roles: ['TEMPLATE_AUTHOR'],
+        visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.assetLibraryManagement],
+        capabilities: {
+          manageMasters: false,
+          reviewMasters: false,
+          authorTemplates: true,
+          decideTests: false,
+          decideApprovals: false,
+          publishTemplates: false,
+          stopTemplates: false,
+          restoreOrDeprecateTemplates: false,
+          deleteTemplates: false,
+          exportTemplates: false,
+          viewCollaborationWorkItems: false,
+          maintainCollaborationTimeoutConfig: false,
+          authorContentModules: false,
+          decideContentModuleReviews: false,
+          manageContentModuleLifecycle: false,
+          manageApiPolicy: false,
+          readAudit: false,
+          manageAssetLibrary: true,
+        },
+      }),
+    )
+    expect(allowed).toBe(true)
+  })
+
+  it('denies asset library for AUDIT_ADMIN even when listed in visibleRoutes', () => {
+    const denied = canAccessRouteWithCapability(
+      ROUTE_KEYS.assetLibraryManagement,
+      session({
+        roles: ['AUDIT_ADMIN'],
+        visibleRoutes: [ROUTE_KEYS.auditConsole, ROUTE_KEYS.assetLibraryManagement],
+        capabilities: undefined,
+      }),
+    )
     expect(denied).toBe(false)
   })
 

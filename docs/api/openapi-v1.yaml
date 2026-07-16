@@ -21,7 +21,7 @@ tags:
   - name: Invocation
     description: Caller-scoped invocation record query and parameter backup.
   - name: Admin
-    description: API management, credential lifecycle administration, template lifecycle governance, template/master/content-module catalog list pagination (LR-C5 PageView), template export/import, master revision-line read paths, content-module governance, and collaboration timeout configuration.
+    description: API management, credential lifecycle administration, template lifecycle governance, template/master/content-module catalog list pagination (LR-C5 PageView), template export/import, master revision-line read paths, content-module governance, collaboration timeout configuration, and platform asset-library catalog (CE-E02 upload/list/disable).
   - name: Collaboration
     description: Collaboration work-item queues and timeout threshold administration.
 security:
@@ -2874,6 +2874,177 @@ paths:
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/library/assets:
+    get:
+      tags: [Admin]
+      operationId: listLibraryAssets
+      summary: List platform asset-library catalog entries (CE-E02)
+      description: >-
+        Returns a management `PageView` of shared MinIO asset catalog rows
+        (metadata only; no binary). Default `status=ACTIVE` when omitted;
+        `DISABLED` or `ALL` must be explicit. Optional filters: `assetClass`,
+        `q` (case-insensitive contains on `assetKey` / `originalFileName`).
+        Requires `manageAssetLibrary` / `route.asset-library-management`;
+        `TEMPLATE_TESTER` is ACTIVE-only. Does not change
+        `StructuredContentImageResolver` protocol. Behavior SoT:
+        docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-010…012).
+      parameters:
+        - $ref: '#/components/parameters/CatalogPageQuery'
+        - $ref: '#/components/parameters/CatalogSizeQuery'
+        - name: assetClass
+          in: query
+          required: false
+          description: Optional exact asset class filter.
+          schema:
+            $ref: '#/components/schemas/AssetLibraryAssetClass'
+        - name: status
+          in: query
+          required: false
+          description: >-
+            Catalog status filter. Omit or `ACTIVE` → ACTIVE only (default).
+            `DISABLED` → disabled only. `ALL` → ACTIVE ∪ DISABLED.
+          schema:
+            $ref: '#/components/schemas/AssetLibraryListStatusFilter'
+          example: ACTIVE
+        - name: q
+          in: query
+          required: false
+          description: >-
+            Optional case-insensitive contains search over `assetKey` and
+            `originalFileName`. Blank ignored.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Paginated asset catalog metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetLibraryAssetPageResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      tags: [Admin]
+      operationId: uploadLibraryAsset
+      summary: Upload a platform asset-library object (CE-E02)
+      description: >-
+        Multipart upload of an IMAGE / SEAL / OTHER asset. Logical `assetKey`
+        (trim) is the MinIO resolvable object key — must match
+        `^[A-Za-z][A-Za-z0-9._-]{0,127}$`; no forced `library/` prefix.
+        Allowed MIME `image/png` | `image/jpeg`; application-layer max 5 MiB →
+        422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. ACTIVE key conflict → 409
+        `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; DISABLED key may re-upload and
+        reactivate (audit `ASSET_LIBRARY_REUPLOAD`). SEAL upload requires
+        TEMPLATE_APPROVER / GLOBAL_ADMIN / GROUP_ADMIN (fail-closed 403).
+        Does not modify `StructuredContentImageResolver`. Header
+        `Idempotency-Key` is reserved for a future slice and is
+        **not enforced** in CE-E02 (accepted if present; ignored —
+        no claim/replay/dedup). Behavior SoT:
+        docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-001…009, 021–022).
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: >-
+            Reserved / not enforced in CE-E02. May be sent on the
+            management upload path; the server ignores it (no
+            idempotency store, replay, or conflict semantics).
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssetLibraryUploadRequest'
+            encoding:
+              file:
+                contentType: image/png, image/jpeg
+      responses:
+        '201':
+          description: Asset stored ACTIVE; catalog row returned (no binary).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetLibraryAssetResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          description: >-
+            ACTIVE `assetKey` already exists
+            (`ASSET_LIBRARY_ASSET_KEY_CONFLICT` /
+            `api.error.assetLibrary.assetKeyConflict`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: >-
+            Validation failure (invalid key, unsupported/mismatched content
+            type, empty file, or application-layer payload > 5 MiB).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/library/assets/{assetKey}/disable:
+    post:
+      tags: [Admin]
+      operationId: disableLibraryAsset
+      summary: Disable a platform asset-library entry (CE-E02)
+      description: >-
+        Marks catalog row DISABLED and deletes resolvable MinIO object key(s)
+        so `StructuredContentImageResolver` fail-closes with existing
+        IMAGE_ASSET_NOT_FOUND / SEAL_ASSET_NOT_FOUND. Admin-only
+        (GLOBAL_ADMIN / GROUP_ADMIN). Unauthorized callers receive 403 without
+        existence leakage. Behavior SoT:
+        docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-013…014).
+        Disable of an already-DISABLED key is idempotent HTTP 200
+        (catalog remains DISABLED; resolvable objects re-checked for deletion).
+      parameters:
+        - name: assetKey
+          in: path
+          required: true
+          description: Logical asset key (same grammar as upload).
+          schema:
+            type: string
+            pattern: '^[A-Za-z][A-Za-z0-9._-]{0,127}$'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Asset disabled; catalog metadata returned (no binary).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetLibraryAssetResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: >-
+            Key not found for authorized admin
+            (`ASSET_LIBRARY_ASSET_NOT_FOUND` /
+            `api.error.assetLibrary.assetNotFound`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -8201,6 +8372,109 @@ components:
     TemplateExportAssetKeyUsage:
       type: string
       enum: [IMAGE, OTHER]
+    AssetLibraryAssetClass:
+      type: string
+      description: CE-E02 platform asset class (UPPER_SNAKE_CASE). SEAL is image seal/signature asset, not cryptographic e-seal.
+      enum: [IMAGE, SEAL, OTHER]
+    AssetLibraryAssetStatus:
+      type: string
+      description: CE-E02 catalog row status.
+      enum: [ACTIVE, DISABLED]
+    AssetLibraryListStatusFilter:
+      type: string
+      description: >-
+        List filter for CE-E02. Omit/`ACTIVE` defaults to ACTIVE-only;
+        `ALL` returns ACTIVE ∪ DISABLED.
+      enum: [ACTIVE, DISABLED, ALL]
+    AssetLibraryAssetView:
+      type: object
+      additionalProperties: false
+      description: >-
+        CE-E02 catalog metadata row. Binary bytes are never returned.
+        `assetKey` is the MinIO-resolvable object key consumed unchanged by
+        StructuredContentImageResolver.
+      required:
+        - assetKey
+        - assetClass
+        - status
+        - contentType
+        - sizeBytes
+        - contentSha256
+        - originalFileName
+        - uploadedBy
+        - uploadedAt
+      properties:
+        assetKey:
+          type: string
+          pattern: '^[A-Za-z][A-Za-z0-9._-]{0,127}$'
+          description: Logical key ≡ storage object key (trim on write).
+        assetClass:
+          $ref: '#/components/schemas/AssetLibraryAssetClass'
+        status:
+          $ref: '#/components/schemas/AssetLibraryAssetStatus'
+        contentType:
+          type: string
+          description: Stored MIME (`image/png` or `image/jpeg`).
+          enum: [image/png, image/jpeg]
+        sizeBytes:
+          type: integer
+          minimum: 1
+          maximum: 5242880
+        contentSha256:
+          type: string
+          description: Lowercase hex SHA-256 of stored bytes.
+          pattern: '^[a-f0-9]{64}$'
+        originalFileName:
+          type: string
+        uploadedBy:
+          type: string
+          description: Actor username.
+        uploadedAt:
+          type: string
+          format: date-time
+    AssetLibraryAssetPageResponse:
+      type: object
+      additionalProperties: false
+      description: CE-E02 list envelope for `GET /api/management/v1/library/assets`.
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageView'
+            - type: object
+              additionalProperties: false
+              required: [content]
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AssetLibraryAssetView'
+    AssetLibraryAssetResponse:
+      type: object
+      additionalProperties: false
+      description: CE-E02 single-asset envelope (upload / disable).
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/AssetLibraryAssetView'
+    AssetLibraryUploadRequest:
+      type: object
+      additionalProperties: false
+      required: [file, assetKey, assetClass]
+      properties:
+        file:
+          type: string
+          format: binary
+          description: PNG or JPEG bytes; application max 5 MiB.
+        assetKey:
+          type: string
+          pattern: '^[A-Za-z][A-Za-z0-9._-]{0,127}$'
+        assetClass:
+          $ref: '#/components/schemas/AssetLibraryAssetClass'
     TemplateExportAssetKeyManifestItemView:
       type: object
       additionalProperties: false
@@ -9253,3 +9527,9 @@ components:
         - INVOCATION_KIND_NOT_REGENERABLE
         - SPECIMEN_WATERMARK_FAILED
         - INVOCATION_RECORD_EXPIRED
+        - ASSET_LIBRARY_ASSET_KEY_INVALID
+        - ASSET_LIBRARY_ASSET_KEY_CONFLICT
+        - ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED
+        - ASSET_LIBRARY_CONTENT_TYPE_MISMATCH
+        - ASSET_LIBRARY_PAYLOAD_TOO_LARGE
+        - ASSET_LIBRARY_ASSET_NOT_FOUND

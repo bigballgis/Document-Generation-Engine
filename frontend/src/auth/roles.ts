@@ -44,6 +44,16 @@ export {
   canViewEscalationQueue,
 } from '@/auth/roleCapabilitiesContentCollab'
 
+export {
+  canManageAssetLibrary,
+  canAccessAssetLibraryManagement,
+  canUploadImageOrOtherAsset,
+  canUploadSealAsset,
+  canUploadAnyLibraryAsset,
+  canDisableAssetLibrary,
+  isAssetLibraryTesterOnly,
+} from '@/auth/roleCapabilitiesAssetLibrary'
+
 import type { CapabilityContext } from '@/auth/roleCapabilityCore'
 
 /** @deprecated Use sessionStore.canAccessRoute for route guards. */

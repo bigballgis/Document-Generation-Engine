@@ -153,4 +153,45 @@ public class GroupAccessService {
                 || session.roles().contains("GROUP_ADMIN")
                 || session.roles().contains("TEMPLATE_AUTHOR");
     }
+
+    /**
+     * CE-E02: capability {@code manageAssetLibrary} / route visibility for the shared asset catalog.
+     * Fine-grained upload/disable still enforced separately.
+     */
+    public boolean canManageAssetLibrary(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("MASTER_DESIGNER")
+                || session.roles().contains("TEMPLATE_AUTHOR")
+                || session.roles().contains("TEMPLATE_TESTER")
+                || session.roles().contains("TEMPLATE_APPROVER");
+    }
+
+    public boolean canUploadImageOrOtherAsset(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("MASTER_DESIGNER")
+                || session.roles().contains("TEMPLATE_AUTHOR");
+    }
+
+    public boolean canUploadSealAsset(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("TEMPLATE_APPROVER");
+    }
+
+    public boolean canDisableAssetLibrary(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN");
+    }
+
+    /** CE-E02: TEMPLATE_TESTER list is ACTIVE-only even when DISABLED/ALL is requested. */
+    public boolean isAssetLibraryTesterOnly(ManagementSessionClaims session) {
+        return session.roles().contains("TEMPLATE_TESTER")
+                && !session.roles().contains("GLOBAL_ADMIN")
+                && !session.roles().contains("GROUP_ADMIN")
+                && !session.roles().contains("MASTER_DESIGNER")
+                && !session.roles().contains("TEMPLATE_AUTHOR")
+                && !session.roles().contains("TEMPLATE_APPROVER");
+    }
 }

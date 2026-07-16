@@ -127,6 +127,12 @@ const router = createRouter({
       component: () => import('@/views/contentModules/ContentModuleDetailView.vue'),
       meta: { logicalRoute: ROUTE_KEYS.contentModuleManagement },
     },
+    {
+      path: '/library/assets',
+      name: 'asset-library-list',
+      component: () => import('@/views/library/AssetLibraryListView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.assetLibraryManagement },
+    },
     { path: '/workbench/tester', redirect: '/dashboard#tasks-section' },
     { path: '/workbench/approver', redirect: '/dashboard#tasks-section' },
     { path: '/workbench/escalation', redirect: '/dashboard#tasks-section' },
@@ -193,6 +199,7 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
   'entitlement-users': 'identity.usersPageTitle',
   'entitlement-groups': 'identity.groupsPageTitle',
   'content-module-list': 'contentModules.list.title',
+  'asset-library-list': 'assetLibrary.list.title',
   login: 'login.title',
   forbidden: 'forbidden.title',
 }

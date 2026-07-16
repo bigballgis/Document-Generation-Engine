@@ -896,7 +896,7 @@ export interface paths {
         };
         /**
          * Export a template as JSON or ZIP bundle
-         * @description Exports an eligible template (`PENDING_RELEASE`, `PUBLISHED`, `STOPPED`, or `DEPRECATED`) as `template-export-bundle-v1-json`. JSON responses use the management success envelope; ZIP responses (`format=zip`) return a single `application/zip` attachment containing `template-export-bundle.json`. Bundle includes metadata, variables, bindings, composition rules, content-module references, and API policy snapshot. Export omits secrets, API credential material, and runtime credentials. Permission boundary per permission-matrix section 5: `GLOBAL_ADMIN` (all templates), `GROUP_ADMIN` (authorized groups), `TEMPLATE_AUTHOR` (own templates only). Export actions are audited.
+         * @description Exports an eligible template (`PENDING_RELEASE`, `PUBLISHED`, `STOPPED`, or `DEPRECATED`) as `template-export-bundle-v1-json` by default, or `template-export-bundle-v2-json` when `bundleVersion=2` (CE-E01). JSON responses use the management success envelope; ZIP responses (`format=zip`) return an `application/zip` attachment. v1 ZIP contains only `template-export-bundle.json`. v2 ZIP additionally embeds `artifacts/master.docx` (pinned master revision bytes) and the JSON carries `masterPin`, `clauseSnapshots`, `renderProfile`, and `assetKeyManifest`. Bundle omits secrets, API credential material, and runtime credentials. Permission boundary per permission-matrix section 5: `GLOBAL_ADMIN` (all templates), `GROUP_ADMIN` (authorized groups), `TEMPLATE_AUTHOR` (own templates only). Export actions are audited. Traceability: BDD-CE-E01-001…006; docs/behavior/ce-e01-export-bundle-v2.md. When the pinned master DOCX object is unavailable at export time, fail-closed with `PINNED_MASTER_UNAVAILABLE` / `api.error.rendering.pinnedMasterUnavailable` (reuse CE-K01 / CE-G06 key).
          */
         get: operations["exportTemplateBundle"];
         put?: never;
@@ -957,8 +957,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Import a template export bundle into DRAFT
-         * @description Imports a validated `template-export-bundle-v1-json` bundle. Imported templates land in `DRAFT` and must re-run test, approval, and publish in the target environment. `masterId` must reference an `APPROVED` master in the same `groupCode` as bundle metadata. `importConflictPolicy` defaults to `REJECT_IMPORT` when omitted. `KEEP_TEMPLATE_ID` applies only when the internal template UUID in bundle metadata already exists; conflicting `externalId` always rejects import. Permission boundary per permission-matrix section 5 matches export. Import actions are audited and return `importBatchId`.
+         * Import a template export bundle into DRAFT (or dry-run dependency pre-check)
+         * @description Imports a validated `template-export-bundle-v1-json` or `template-export-bundle-v2-json` (CE-E01) bundle. Imported templates land in `DRAFT` and must re-run test, approval, and publish in the target environment. `masterId` must reference an `APPROVED` master in the same `groupCode` as bundle metadata. `importConflictPolicy` defaults to `REJECT_IMPORT` when omitted. `KEEP_TEMPLATE_ID` applies only when the internal template UUID in bundle metadata already exists; conflicting `externalId` always rejects import. When `dryRun=true`, the API returns a dependency pre-check report (`dependencyReport`) with HTTP 200 and performs no business-table writes (CE-E01). Commit import with blocking unmet dependencies returns 422 `api.error.template.importDependenciesUnsatisfied` with the same report shape — never a half-imported state. v2 may materialize missing clause snapshots as DRAFT content-module versions inside a single transaction. Permission boundary per permission-matrix section 5 matches export. Import and dry-run actions are audited; successful commit returns `importBatchId`. Traceability: BDD-CE-E01-007…017; docs/behavior/ce-e01-export-bundle-v2.md.
          */
         post: operations["importTemplateBundle"];
         delete?: never;
@@ -1196,11 +1196,31 @@ export interface paths {
         };
         /**
          * Get management invocation detail summary
-         * @description Returns non-sensitive invocation detail for administrators. Does not include caller variable plaintext. Includes audit deep-link hints.
+         * @description Returns non-sensitive invocation detail for administrators. Does not include caller variable plaintext. Includes audit deep-link hints. CE-G06 may include releaseBundleSnapshotId and releaseBundleHash when persisted (nullable for pre-G06 / unresolved-release rows).
          */
         get: operations["getTemplateManagementInvocationDetail"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates/{templateId}/api/invocations/{invocationId}/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Controlled regenerate SPECIMEN artifact by invocation (CE-G06)
+         * @description Permissioned audit regenerate for a SINGLE / BATCH_ITEM / ASYNC_TASK invocation that has non-null release-bundle fingerprint fields and is within retention. Replays stored parameters against the K01-pinned master, applies CE-G02 SPECIMEN watermark, writes management audit INVOCATION_REGENERATED, and never returns variables or encryption passwords. Does not create a caller-facing runtime SUCCESS invocation or consume caller idempotency keys. No idempotencyKey required. Authorized roles: GLOBAL_ADMIN, in-scope GROUP_ADMIN, in-scope AUDIT_ADMIN (readAudit + template visibility). FE regenerate CTA is out of scope for this leaf.
+         */
+        post: operations["regenerateTemplateManagementInvocation"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1241,6 +1261,50 @@ export interface paths {
         get: operations["getApiAccessReadinessSummary"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/library/assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List platform asset-library catalog entries (CE-E02)
+         * @description Returns a management `PageView` of shared MinIO asset catalog rows (metadata only; no binary). Default `status=ACTIVE` when omitted; `DISABLED` or `ALL` must be explicit. Optional filters: `assetClass`, `q` (case-insensitive contains on `assetKey` / `originalFileName`). Requires `manageAssetLibrary` / `route.asset-library-management`; `TEMPLATE_TESTER` is ACTIVE-only. Does not change `StructuredContentImageResolver` protocol. Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-010…012).
+         */
+        get: operations["listLibraryAssets"];
+        put?: never;
+        /**
+         * Upload a platform asset-library object (CE-E02)
+         * @description Multipart upload of an IMAGE / SEAL / OTHER asset. Logical `assetKey` (trim) is the MinIO resolvable object key — must match `^[A-Za-z][A-Za-z0-9._-]{0,127}$`; no forced `library/` prefix. Allowed MIME `image/png` | `image/jpeg`; application-layer max 5 MiB → 422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. ACTIVE key conflict → 409 `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; DISABLED key may re-upload and reactivate (audit `ASSET_LIBRARY_REUPLOAD`). SEAL upload requires TEMPLATE_APPROVER / GLOBAL_ADMIN / GROUP_ADMIN (fail-closed 403). Does not modify `StructuredContentImageResolver`. Optional `Idempotency-Key` header. Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-001…009, 021–022).
+         */
+        post: operations["uploadLibraryAsset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/library/assets/{assetKey}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Disable a platform asset-library entry (CE-E02)
+         * @description Marks catalog row DISABLED and deletes resolvable MinIO object key(s) so `StructuredContentImageResolver` fail-closes with existing IMAGE_ASSET_NOT_FOUND / SEAL_ASSET_NOT_FOUND. Admin-only (GLOBAL_ADMIN / GROUP_ADMIN). Unauthorized callers receive 403 without existence leakage. Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-013…014). Disable of an already-DISABLED key is idempotent HTTP 200 (catalog remains DISABLED; resolvable objects re-checked for deletion).
+         */
+        post: operations["disableLibraryAsset"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1564,10 +1628,10 @@ export interface components {
         /** @enum {string} */
         RouteType: "EXPLICIT_VERSION" | "DEFAULT_ROUTE";
         /**
-         * @description Caller-visible fidelity warning codes for runtime success paths (JSON `fidelityWarnings[].warningCode` and SYNC_STREAM `fidelityWarningCodes` header). Baseline ADR-0019 codes plus engine-emitted codes that may appear on the formal runtime success path (CE-C03 honest enum).
+         * @description Caller-visible fidelity warning codes for runtime success paths (JSON `fidelityWarnings[].warningCode` and SYNC_STREAM `fidelityWarningCodes` header). Baseline ADR-0019 codes plus engine-emitted codes that may appear on the formal runtime success path (CE-C03 honest enum). Includes DOCX_PERMISSIONS_NOT_APPLIED (CE-C06) when DOCX requests non-empty encryption.permissions; JSON path `messageKey` for that code is generation.warning.fidelity.docxPermissionsNotApplied.
          * @enum {string}
          */
-        FidelityWarningCode: "OPTIONAL_CONTENT_EMPTY" | "LOW_RISK_PAGINATION_DIFFERENCE" | "LOW_RISK_TABLE_PAGE_BREAK" | "CONTROLLED_STYLE_FALLBACK" | "IMAGE_SCALING_ADJUSTED" | "MASTER_STYLE_FALLBACK" | "PARTIAL_TABLE_LAYOUT_ADJUSTMENT" | "UNRESOLVED_VARIABLE" | "INVALID_CONDITION_EXPRESSION" | "MISSING_ANCHOR_CONTENT" | "UNSUPPORTED_NODE" | "MISSING_STYLE_REFERENCE" | "INAPPLICABLE_STYLE" | "DIRECT_FORMAT_OUT_OF_WHITELIST" | "DIRECT_FORMAT_GLOBAL_LAYOUT" | "NESTED_TABLE" | "UNRELIABLE_TABLE_LAYOUT" | "INVALID_TABLE_COMPONENT" | "SEAL_OUTSIDE_AUTHORIZED_AREA" | "SEAL_SCALING_NOT_ALLOWED" | "MISSING_REFERENCE_KEY" | "DUPLICATE_NUMBER" | "BROKEN_NUMBER_CROSS_REFERENCE" | "PDF_PAGE_NUMBER_STAMP_FAILED";
+        FidelityWarningCode: "OPTIONAL_CONTENT_EMPTY" | "LOW_RISK_PAGINATION_DIFFERENCE" | "LOW_RISK_TABLE_PAGE_BREAK" | "CONTROLLED_STYLE_FALLBACK" | "IMAGE_SCALING_ADJUSTED" | "MASTER_STYLE_FALLBACK" | "PARTIAL_TABLE_LAYOUT_ADJUSTMENT" | "UNRESOLVED_VARIABLE" | "INVALID_CONDITION_EXPRESSION" | "MISSING_ANCHOR_CONTENT" | "UNSUPPORTED_NODE" | "MISSING_STYLE_REFERENCE" | "INAPPLICABLE_STYLE" | "DIRECT_FORMAT_OUT_OF_WHITELIST" | "DIRECT_FORMAT_GLOBAL_LAYOUT" | "NESTED_TABLE" | "UNRELIABLE_TABLE_LAYOUT" | "INVALID_TABLE_COMPONENT" | "SEAL_OUTSIDE_AUTHORIZED_AREA" | "SEAL_SCALING_NOT_ALLOWED" | "MISSING_REFERENCE_KEY" | "DUPLICATE_NUMBER" | "BROKEN_NUMBER_CROSS_REFERENCE" | "PDF_PAGE_NUMBER_STAMP_FAILED" | "DOCX_PERMISSIONS_NOT_APPLIED";
         /** @enum {string} */
         IdempotencyStatus: "IDEMPOTENCY_NEW" | "IDEMPOTENCY_REPLAYED" | "IDEMPOTENCY_CONFLICTED";
         /** @enum {string} */
@@ -1588,11 +1652,12 @@ export interface components {
             format: components["schemas"]["OutputFormat"];
             mode: components["schemas"]["OutputMode"];
         };
-        /** @description Dynamic encryption options. When enabled is true, openPassword is required. When permissions are provided, ownerPassword is required. When enabled is false, openPassword, ownerPassword, and permissions are not allowed. openPassword and ownerPassword must be different when both are present. */
+        /** @description Dynamic encryption options. When enabled is true, openPassword is required. When permissions are provided, ownerPassword is required. When enabled is false, openPassword, ownerPassword, and permissions are not allowed. openPassword and ownerPassword must be different when both are present. permissions apply only when output.format is PDF (CE-C06); for DOCX (non-PDF), a non-empty permissions array that passes structural validation does not map to document protection — generation succeeds with fidelity warning DOCX_PERMISSIONS_NOT_APPLIED (messageKey generation.warning.fidelity.docxPermissionsNotApplied). Apache POI DOCX write-protect is out of scope for CE-C06. DOCX openPassword encryption remains supported. */
         EncryptionOptions: {
             enabled: boolean;
             openPassword?: string;
             ownerPassword?: string;
+            /** @description Abstract allow-list permissions. Applied only for PDF output. For DOCX, non-empty values are accepted structurally (ownerPassword still required) but ignored for file protection; callers receive DOCX_PERMISSIONS_NOT_APPLIED on the success path with messageKey generation.warning.fidelity.docxPermissionsNotApplied. */
             permissions?: components["schemas"]["Permission"][];
         } & (unknown & unknown & unknown);
         /** @description Template variables constrained by the selected release version variable schema. */
@@ -1798,6 +1863,7 @@ export interface components {
         /** @description Full fidelity warning object for JSON success paths (batch items, task query result layers, and DownloadUrlResponse when that mode is delivered). SYNC_STREAM responses do not embed this array in the body — they return only fidelityWarningCount / fidelityWarningCodes headers; complete non-sensitive detail enters the audit summary (CE-C03). */
         FidelityWarning: {
             warningCode: components["schemas"]["FidelityWarningCode"];
+            /** @description Stable localization key. For CE-C06 DOCX_PERMISSIONS_NOT_APPLIED the key is generation.warning.fidelity.docxPermissionsNotApplied. */
             messageKey: string;
             message: string;
             locationSummary: string;
@@ -1811,6 +1877,7 @@ export interface components {
             outputFormat: components["schemas"]["OutputFormat"];
             openPasswordProvided: boolean;
             ownerPasswordProvided: boolean;
+            /** @description Request-side permissions summary echo (not proof of file-level apply). For DOCX with non-empty requested permissions, callers must also read DOCX_PERMISSIONS_NOT_APPLIED on the success path. */
             permissions: components["schemas"]["Permission"][];
         };
         ContractResponse: {
@@ -1943,6 +2010,13 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
             accessAccountSummary: string;
+            /**
+             * Format: uuid
+             * @description CE-G06 — PUBLISHED template_version.id captured at generation time; null when release was not resolved or record predates G06.
+             */
+            releaseBundleSnapshotId?: string | null;
+            /** @description CE-G06 — copy of template_version.master_file_hash (64-char lowercase hex SHA-256); null when snapshot id is null. */
+            releaseBundleHash?: string | null;
         };
         ManagementInvocationAuditLinkHintView: {
             requestId: string;
@@ -1965,6 +2039,13 @@ export interface components {
             createdAt: string;
             documentPresent: boolean;
             auditLinkHint: components["schemas"]["ManagementInvocationAuditLinkHintView"];
+            /**
+             * Format: uuid
+             * @description CE-G06 — PUBLISHED template_version.id captured at generation time; null when release was not resolved or record predates G06.
+             */
+            releaseBundleSnapshotId?: string | null;
+            /** @description CE-G06 — copy of template_version.master_file_hash (64-char lowercase hex SHA-256); null when snapshot id is null. */
+            releaseBundleHash?: string | null;
             /** @description Unified error envelope code for failed invocations; omitted/null when unavailable. */
             errorCode?: string | null;
             errorCategory?: string | null;
@@ -1972,6 +2053,35 @@ export interface components {
             errorRetryable?: boolean | null;
             /** @description Optional resolved message; may be absent for legacy rows. */
             errorMessage?: string | null;
+        };
+        ManagementInvocationRegenerateRequest: {
+            /**
+             * @description Optional. Defaults to the source invocation output_format; when that is null/empty, defaults to PDF.
+             * @enum {string}
+             */
+            outputFormat?: "DOCX" | "PDF";
+        };
+        ManagementInvocationRegenerateView: {
+            /** Format: uuid */
+            regenerationId: string;
+            sourceInvocationId: string;
+            /** Format: uuid */
+            releaseBundleSnapshotId: string;
+            releaseBundleHash: string;
+            /** @enum {string} */
+            outputFormat: "DOCX" | "PDF";
+            /** @description Always true for CE-G06 regenerate artifacts. */
+            specimen: boolean;
+            /** @description Always false — original encryption passwords are not retained; regenerate artifacts are unencrypted SPECIMEN samples. */
+            encryptionReapplied: boolean;
+            /** @description Short-lived download URL when issued; may be omitted in favor of artifactPath. */
+            downloadUrl?: string | null;
+            /** @description Management artifact reference under regenerations/{regenerationId}/… (preferred when downloadUrl is not issued). */
+            artifactPath?: string | null;
+        };
+        ManagementInvocationRegenerateResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["ManagementInvocationRegenerateView"];
         };
         ManagementInvocationPageResponse: {
             metadata: components["schemas"]["Metadata"];
@@ -3278,19 +3388,146 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        /**
+         * @description Origin of the master fingerprint written into a v2 export bundle (CE-E01 / CE-K01). `EXPORT_TIME` is computed at export without mutating DB.
+         * @enum {string}
+         */
+        TemplateExportMasterPinOrigin: "PUBLISHED" | "PINNED_RETROACTIVELY" | "EXPORT_TIME";
+        /** @description CE-E01 v2 master revision fingerprint. Consumes CE-K01 fields `master_revision_id` / `master_file_hash` (or EXPORT_TIME hash). See docs/behavior/ce-k01-release-bundle-pinning.md and docs/behavior/ce-e01-export-bundle-v2.md (E01-C4). */
+        TemplateExportMasterPinView: {
+            /**
+             * Format: uuid
+             * @description Pinned `master_revision_line.id` (or current line at EXPORT_TIME).
+             */
+            masterRevisionId: string;
+            /** @description SHA-256 of pinned master DOCX bytes (lowercase hex). */
+            masterFileHash: string;
+            /** @description Optional `master_revision_line.revision_sequence` snapshot. */
+            revisionSequence?: number | null;
+            pinOrigin?: components["schemas"]["TemplateExportMasterPinOrigin"];
+        };
+        /** @description CE-E01 clause body/structure snapshot embedded in v2 bundle (no test data). */
+        TemplateExportClauseSnapshotView: {
+            moduleCode: string;
+            /** Format: uuid */
+            moduleVersionId: string;
+            /** @description Major component of the pinned semantic version (compat / display). */
+            versionNumber: number;
+            /** @description Structured content / body snapshot as JSON text (non-secret). */
+            contentStructureJson: string;
+            /** @description Whether the template content-module reference was locked at export. */
+            locked?: boolean | null;
+            /** @description Optional CE-K08 legal metadata snapshot when present on the module version. */
+            jurisdiction?: string | null;
+            /** Format: date */
+            effectiveFrom?: string | null;
+            /** Format: date */
+            effectiveTo?: string | null;
+            legalReviewRef?: string | null;
+            /** @description Full semantic version string at export (e.g. 1.2.3). Prefer this over collapsing to major-only N.0.0 when materializing on import. */
+            semanticVersion?: string | null;
+            /**
+             * Format: uuid
+             * @description Export-time content module UUID. Used to correlate contentModuleReferences on a fresh target (do not treat as target identity).
+             */
+            sourceModuleId?: string | null;
+        };
+        /** @description CE-E01 publish-locked (or version-row) render profile snapshot for v2. */
+        TemplateExportRenderProfileView: {
+            /** @description Render profile version id (e.g. rp-v1). */
+            version: string;
+            /** @description Render profile JSON text snapshot (non-secret). */
+            json: string;
+        };
+        /** @enum {string} */
+        TemplateExportAssetKeyUsage: "IMAGE" | "OTHER";
+        /**
+         * @description CE-E02 platform asset class (UPPER_SNAKE_CASE). SEAL is image seal/signature asset, not cryptographic e-seal.
+         * @enum {string}
+         */
+        AssetLibraryAssetClass: "IMAGE" | "SEAL" | "OTHER";
+        /**
+         * @description CE-E02 catalog row status.
+         * @enum {string}
+         */
+        AssetLibraryAssetStatus: "ACTIVE" | "DISABLED";
+        /**
+         * @description List filter for CE-E02. Omit/`ACTIVE` defaults to ACTIVE-only; `ALL` returns ACTIVE ∪ DISABLED.
+         * @enum {string}
+         */
+        AssetLibraryListStatusFilter: "ACTIVE" | "DISABLED" | "ALL";
+        /** @description CE-E02 catalog metadata row. Binary bytes are never returned. `assetKey` is the MinIO-resolvable object key consumed unchanged by StructuredContentImageResolver. */
+        AssetLibraryAssetView: {
+            /** @description Logical key ≡ storage object key (trim on write). */
+            assetKey: string;
+            assetClass: components["schemas"]["AssetLibraryAssetClass"];
+            status: components["schemas"]["AssetLibraryAssetStatus"];
+            /**
+             * @description Stored MIME (`image/png` or `image/jpeg`).
+             * @enum {string}
+             */
+            contentType: "image/png" | "image/jpeg";
+            sizeBytes: number;
+            /** @description Lowercase hex SHA-256 of stored bytes. */
+            contentSha256: string;
+            originalFileName: string;
+            /** @description Actor username. */
+            uploadedBy: string;
+            /** Format: date-time */
+            uploadedAt: string;
+        };
+        /** @description CE-E02 list envelope for `GET /api/management/v1/library/assets`. */
+        AssetLibraryAssetPageResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PageView"] & {
+                content: components["schemas"]["AssetLibraryAssetView"][];
+            };
+        };
+        /** @description CE-E02 single-asset envelope (upload / disable). */
+        AssetLibraryAssetResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["AssetLibraryAssetView"];
+        };
+        AssetLibraryUploadRequest: {
+            /**
+             * Format: binary
+             * @description PNG or JPEG bytes; application max 5 MiB.
+             */
+            file: string;
+            assetKey: string;
+            assetClass: components["schemas"]["AssetLibraryAssetClass"];
+        };
+        /** @description CE-E01 asset key inventory item (key only; no binary payload). */
+        TemplateExportAssetKeyManifestItemView: {
+            /** @description Object-storage or structured-content reference key. */
+            referenceKey: string;
+            usage: components["schemas"]["TemplateExportAssetKeyUsage"];
+        };
+        /** @description Template export bundle. v1 uses format `template-export-bundle-v1-json`. v2 (CE-E01) uses `template-export-bundle-v2-json` and includes `masterPin`, `clauseSnapshots`, optional `renderProfile`, and `assetKeyManifest`. Behavior SoT: docs/behavior/ce-e01-export-bundle-v2.md. */
         TemplateExportBundleView: {
-            /** @constant */
-            format: "template-export-bundle-v1-json";
+            /**
+             * @description Bundle format constant (v1 or v2).
+             * @enum {string}
+             */
+            format: "template-export-bundle-v1-json" | "template-export-bundle-v2-json";
             metadata: components["schemas"]["TemplateExportMetadataView"];
             variables: components["schemas"]["TemplateExportVariableSchemaView"][];
             bindings: components["schemas"]["TemplateExportAnchorBindingView"][];
             rules: components["schemas"]["TemplateExportCompositionRuleView"][];
             contentModuleReferences: components["schemas"]["TemplateExportContentModuleReferenceView"][];
             policySnapshot?: components["schemas"]["TemplateExportApiPolicySnapshot"];
+            /** @description Required for v2 format; omit on v1. */
+            masterPin?: components["schemas"]["TemplateExportMasterPinView"];
+            /** @description Required for v2 (may be empty); omit on v1. */
+            clauseSnapshots?: components["schemas"]["TemplateExportClauseSnapshotView"][];
+            /** @description Optional on v2; absent → dry-run INFO `RENDER_PROFILE_ABSENT`. */
+            renderProfile?: components["schemas"]["TemplateExportRenderProfileView"];
+            /** @description Required for v2 (may be empty); omit on v1; no binaries. */
+            assetKeyManifest?: components["schemas"]["TemplateExportAssetKeyManifestItemView"][];
         };
         TemplateExportResult: {
-            /** @constant */
-            format: "template-export-bundle-v1-json";
+            /** @enum {string} */
+            format: "template-export-bundle-v1-json" | "template-export-bundle-v2-json";
             bundle: components["schemas"]["TemplateExportBundleView"];
         };
         TemplateExportResponse: {
@@ -3305,6 +3542,52 @@ export interface components {
             masterId: string;
             bundle: components["schemas"]["TemplateExportBundleView"];
             importConflictPolicy?: components["schemas"]["TemplateImportConflictPolicy"];
+            /**
+             * @description CE-E01: when true, return dependency pre-check report only (HTTP 200); no business-table writes. When false/omitted, commit import (or 422 if blocking dependencies remain). v2 JSON-only bundles may dry-run; self-contained commit requires multipart ZIP with `artifacts/master.docx`.
+             * @default false
+             */
+            dryRun: boolean;
+        };
+        /** @description CE-E01 normative ZIP import carrier (multipart). Prefer this for v2 self-contained commit. Optional raw `Content-Type: application/zip` whole-body POST is a non-normative equivalent implementation. */
+        ImportTemplateMultipartRequest: {
+            /** Format: uuid */
+            masterId: string;
+            /**
+             * Format: binary
+             * @description ZIP archive (`template-export-bundle.json` [+ `artifacts/master.docx` for v2]).
+             */
+            file: string;
+            importConflictPolicy?: components["schemas"]["TemplateImportConflictPolicy"];
+            /** @default false */
+            dryRun: boolean;
+        };
+        /** @enum {string} */
+        TemplateImportDependencyType: "MASTER_PIN" | "CLAUSE" | "ASSET_KEY" | "RENDER_PROFILE" | "BUNDLE_FORMAT";
+        /**
+         * @description Item severity. `MISSING` / `MISMATCH` are blocking unless noted otherwise in behavior SoT; `WILL_MATERIALIZE` and `INFO` are non-blocking; `OK` is success.
+         * @enum {string}
+         */
+        TemplateImportDependencySeverity: "OK" | "MISSING" | "MISMATCH" | "WILL_MATERIALIZE" | "INFO";
+        TemplateImportDependencyItemView: {
+            dependencyType: components["schemas"]["TemplateImportDependencyType"];
+            severity: components["schemas"]["TemplateImportDependencySeverity"];
+            /** @description Stable UPPER_SNAKE code (e.g. MASTER_FINGERPRINT_MISMATCH, MASTER_DOCX_ABSENT). */
+            code: string;
+            /** @description English-first i18n key (e.g. api.error.template.dep.masterFingerprintMismatch). */
+            messageKey: string;
+            /** @description Non-sensitive detail (no clause body, secrets, or DOCX bytes). */
+            detail?: string | null;
+        };
+        /** @description CE-E01 import dependency pre-check report (dry-run 200 or commit 422). */
+        TemplateImportDependencyReportView: {
+            items: components["schemas"]["TemplateImportDependencyItemView"][];
+            blockingCount: number;
+            warningCount: number;
+            infoCount: number;
+            /** @description True iff `blockingCount == 0`. */
+            readyToCommit: boolean;
+            /** @enum {string|null} */
+            bundleFormat?: "template-export-bundle-v1-json" | "template-export-bundle-v2-json" | null;
         };
         TemplateImportSummaryView: {
             /** Format: uuid */
@@ -3312,6 +3595,13 @@ export interface components {
             newDevelopmentVersion: number;
             /** Format: uuid */
             importBatchId: string;
+            /**
+             * @description CE-E01: format of the committed bundle.
+             * @enum {string|null}
+             */
+            bundleFormat?: "template-export-bundle-v1-json" | "template-export-bundle-v2-json" | null;
+            /** @description CE-E01: count of clause snapshots materialized as DRAFT module versions. */
+            materializedClauseCount?: number | null;
         };
         TemplateSummaryView: {
             /** Format: uuid */
@@ -3420,6 +3710,16 @@ export interface components {
         TemplateImportResponse: {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["TemplateImportResult"];
+        };
+        /** @description CE-E01 dry-run success payload (`imported` always false). */
+        TemplateImportDryRunResult: {
+            /** @enum {boolean} */
+            imported: false;
+            dependencyReport: components["schemas"]["TemplateImportDependencyReportView"];
+        };
+        TemplateImportDryRunResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["TemplateImportDryRunResult"];
         };
         ContentModuleReviewSnapshot: {
             moduleId: string;
@@ -3615,6 +3915,8 @@ export interface components {
                 [key: string]: unknown;
             };
             items?: components["schemas"]["BatchResultItem"][];
+            /** @description CE-E01: present on 422 `IMPORT_DEPENDENCIES_UNSATISFIED` (commit gate); same shape as dry-run `result.dependencyReport`. */
+            dependencyReport?: components["schemas"]["TemplateImportDependencyReportView"];
         };
         FieldError: {
             field: string;
@@ -3623,9 +3925,9 @@ export interface components {
             message: string;
         };
         /** @enum {string} */
-        ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "GENERATION" | "ENCRYPTION" | "BATCH";
+        ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "RENDERING" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND";
     };
     responses: {
         /** @description Async task accepted. */
@@ -5495,6 +5797,8 @@ export interface operations {
             query?: {
                 /** @description When `zip`, returns a ZIP attachment instead of the JSON envelope. */
                 format?: "zip";
+                /** @description Export bundle schema generation. `1` (default) = `template-export-bundle-v1-json`. `2` (CE-E01) = `template-export-bundle-v2-json` with self-contained ZIP artifacts. */
+                bundleVersion?: 1 | 2;
             };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
@@ -5608,9 +5912,19 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["ImportTemplateRequest"];
+                "multipart/form-data": components["schemas"]["ImportTemplateMultipartRequest"];
             };
         };
         responses: {
+            /** @description CE-E01 dry-run (`dryRun=true`): dependency pre-check report only; `imported=false`; no business-table writes. Audit `TEMPLATE_IMPORT_DRY_RUN` still recorded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateImportDryRunResponse"];
+                };
+            };
             /** @description Template imported; lands in DRAFT. */
             201: {
                 headers: {
@@ -5623,7 +5937,15 @@ export interface operations {
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
             404: components["responses"]["ErrorResponse"];
-            422: components["responses"]["ErrorResponse"];
+            /** @description Validation / dependency gate failure. For unmet blocking import dependencies, `error.code=IMPORT_DEPENDENCIES_UNSATISFIED` and `error.messageKey=api.error.template.importDependenciesUnsatisfied` with `error.dependencyReport` (same shape as dry-run). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -6028,6 +6350,44 @@ export interface operations {
             default: components["responses"]["ErrorResponse"];
         };
     };
+    regenerateTemplateManagementInvocation: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+                invocationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ManagementInvocationRegenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description SPECIMEN regeneration accepted and artifact available. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagementInvocationRegenerateResponse"];
+                };
+            };
+            400: components["responses"]["ErrorResponse"];
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            409: components["responses"]["ErrorResponse"];
+            410: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
     listApiAccessAlerts: {
         parameters: {
             query?: never;
@@ -6077,6 +6437,135 @@ export interface operations {
             };
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listLibraryAssets: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+                page?: components["parameters"]["CatalogPageQuery"];
+                /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+                size?: components["parameters"]["CatalogSizeQuery"];
+                /** @description Optional exact asset class filter. */
+                assetClass?: components["schemas"]["AssetLibraryAssetClass"];
+                /**
+                 * @description Catalog status filter. Omit or `ACTIVE` → ACTIVE only (default). `DISABLED` → disabled only. `ALL` → ACTIVE ∪ DISABLED.
+                 * @example ACTIVE
+                 */
+                status?: components["schemas"]["AssetLibraryListStatusFilter"];
+                /** @description Optional case-insensitive contains search over `assetKey` and `originalFileName`. Blank ignored. */
+                q?: string;
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated asset catalog metadata. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetLibraryAssetPageResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    uploadLibraryAsset: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional idempotency key for upload (management path). */
+                "Idempotency-Key"?: string;
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["AssetLibraryUploadRequest"];
+            };
+        };
+        responses: {
+            /** @description Asset stored ACTIVE; catalog row returned (no binary). */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetLibraryAssetResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description ACTIVE `assetKey` already exists (`ASSET_LIBRARY_ASSET_KEY_CONFLICT` / `api.error.assetLibrary.assetKeyConflict`). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Validation failure (invalid key, unsupported/mismatched content type, empty file, or application-layer payload > 5 MiB). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    disableLibraryAsset: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                /** @description Logical asset key (same grammar as upload). */
+                assetKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Asset disabled; catalog metadata returned (no binary). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetLibraryAssetResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Key not found for authorized admin (`ASSET_LIBRARY_ASSET_NOT_FOUND` / `api.error.assetLibrary.assetNotFound`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            409: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };

@@ -8,6 +8,7 @@ export const ROUTE_KEYS = {
   masterManagement: 'route.master-management',
   templateManagement: 'route.template-management',
   contentModuleManagement: 'route.content-module-management',
+  assetLibraryManagement: 'route.asset-library-management',
   identityAdministration: 'route.identity-administration',
 } as const
 
@@ -33,6 +34,7 @@ export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.masterManagement]: '/masters',
   [ROUTE_KEYS.templateManagement]: '/templates',
   [ROUTE_KEYS.contentModuleManagement]: '/content-modules',
+  [ROUTE_KEYS.assetLibraryManagement]: '/library/assets',
   [ROUTE_KEYS.identityAdministration]: '/entitlement/users',
 }
 

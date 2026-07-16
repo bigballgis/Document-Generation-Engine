@@ -92,3 +92,24 @@ Stable English-first fail-closed keys (implement in `messages_en.properties`):
 | SPECIMEN watermark failure | 500 | `api.error.audit.specimenWatermarkFailed` |
 
 Behavior SoT: [ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md).
+
+### Platform asset library catalog (CE-E02)
+
+Management asset catalog routes in [openapi-v1.yaml](openapi-v1.yaml) / [contract-outline.md](contract-outline.md) «资产库管理契约（CE-E02）」:
+
+- `GET /api/management/v1/library/assets` — paginated metadata (`PageView`; default `status=ACTIVE`)
+- `POST /api/management/v1/library/assets` — multipart upload (`file` + `assetKey` + `assetClass`)
+- `POST /api/management/v1/library/assets/{assetKey}/disable` — disable + remove resolvable MinIO keys
+
+`assetKey` ≡ MinIO-resolvable object key (`^[A-Za-z][A-Za-z0-9._-]{0,127}$`). **Does not** change `StructuredContentImageResolver` protocol. Virus scan pending (OOS). Disable-already-DISABLED is **confirmed idempotent HTTP 200** (catalog remains `DISABLED`; resolvable objects re-checked for deletion). Upload `Idempotency-Key` is **reserved / not enforced** in CE-E02.
+
+| Condition | HTTP | `error.messageKey` |
+| --- | --- | --- |
+| Invalid `assetKey` | 422 | `api.error.assetLibrary.assetKeyInvalid` |
+| ACTIVE key conflict | 409 | `api.error.assetLibrary.assetKeyConflict` |
+| Unsupported content type | 422 | `api.error.assetLibrary.contentTypeUnsupported` |
+| Magic / Content-Type mismatch | 422 | `api.error.assetLibrary.contentTypeMismatch` |
+| Application payload > 5 MiB | 422 | `api.error.assetLibrary.payloadTooLarge` |
+| Not found (authorized admin) | 404 | `api.error.assetLibrary.assetNotFound` |
+
+Behavior SoT: [ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md). Permissions: [permission-matrix.md](../security/permission-matrix.md) §13.2.

@@ -8,6 +8,7 @@ import {
   canDecideApprovals,
   canDecideContentModuleReviews,
   canDecideTests,
+  canManageAssetLibrary,
   canManageContentModuleLifecycle,
   canPublishTemplates,
   canReviewMasters,
@@ -45,6 +46,7 @@ function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
       routeKey === ROUTE_KEYS.masterManagement ||
       routeKey === ROUTE_KEYS.templateManagement ||
       routeKey === ROUTE_KEYS.contentModuleManagement ||
+      routeKey === ROUTE_KEYS.assetLibraryManagement ||
       routeKey === ROUTE_KEYS.apiPolicyManagement ||
       routeKey === ROUTE_KEYS.auditConsole ||
       routeKey === ROUTE_KEYS.identityAdministration ||
@@ -62,6 +64,7 @@ function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
     allowed.add(ROUTE_KEYS.masterManagement)
     allowed.add(ROUTE_KEYS.templateManagement)
     allowed.add(ROUTE_KEYS.contentModuleManagement)
+    allowed.add(ROUTE_KEYS.assetLibraryManagement)
     allowed.add(ROUTE_KEYS.apiPolicyManagement)
     allowed.add(ROUTE_KEYS.auditConsole)
     allowed.add(ROUTE_KEYS.identityAdministration)
@@ -72,21 +75,25 @@ function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
     allowed.add(ROUTE_KEYS.masterManagement)
     allowed.add(ROUTE_KEYS.templateManagement)
     allowed.add(ROUTE_KEYS.contentModuleManagement)
+    allowed.add(ROUTE_KEYS.assetLibraryManagement)
   }
   if (roleSet.has(MANAGEMENT_ROLES.TEMPLATE_AUTHOR)) {
     allowed.add(ROUTE_KEYS.dashboardHome)
     allowed.add(ROUTE_KEYS.templateAuthoringHome)
     allowed.add(ROUTE_KEYS.templateManagement)
     allowed.add(ROUTE_KEYS.contentModuleManagement)
+    allowed.add(ROUTE_KEYS.assetLibraryManagement)
   }
   if (roleSet.has(MANAGEMENT_ROLES.TEMPLATE_TESTER)) {
     allowed.add(ROUTE_KEYS.dashboardHome)
     allowed.add(ROUTE_KEYS.templateManagement)
+    allowed.add(ROUTE_KEYS.assetLibraryManagement)
   }
   if (roleSet.has(MANAGEMENT_ROLES.TEMPLATE_APPROVER)) {
     allowed.add(ROUTE_KEYS.dashboardHome)
     allowed.add(ROUTE_KEYS.templateManagement)
     allowed.add(ROUTE_KEYS.contentModuleManagement)
+    allowed.add(ROUTE_KEYS.assetLibraryManagement)
   }
   return allowed.has(routeKey)
 }
@@ -133,6 +140,10 @@ const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContext) => b
       context,
       [canAuthorContentModules, canDecideContentModuleReviews, canManageContentModuleLifecycle],
       canAccessContentModuleManagement,
+    ),
+  [ROUTE_KEYS.assetLibraryManagement]: (context) =>
+    strictRouteCapability(context, [canManageAssetLibrary], (roles) =>
+      canManageAssetLibrary({ roles }),
     ),
   [ROUTE_KEYS.apiPolicyManagement]: canAccessApiPolicyManagement,
   [ROUTE_KEYS.auditConsole]: canAccessAuditConsole,

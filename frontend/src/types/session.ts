@@ -45,6 +45,7 @@ export interface ManagementCapabilities {
   manageContentModuleLifecycle: boolean
   manageApiPolicy: boolean
   readAudit: boolean
+  manageAssetLibrary: boolean
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management auth session). */

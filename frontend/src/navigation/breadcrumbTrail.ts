@@ -12,6 +12,7 @@ const TOP_LEVEL_LIST_PATHS = new Set([
   '/masters',
   '/templates',
   '/content-modules',
+  '/library/assets',
   '/api/policies',
   '/audit',
 ])

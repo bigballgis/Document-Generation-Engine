@@ -46,6 +46,7 @@ const capabilities: ManagementCapabilities = {
   manageContentModuleLifecycle: true,
   manageApiPolicy: true,
   readAudit: true,
+  manageAssetLibrary: true,
 }
 
 function mountPalette(visibleRoutes: string[]) {

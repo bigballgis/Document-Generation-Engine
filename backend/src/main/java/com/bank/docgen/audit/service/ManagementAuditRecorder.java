@@ -24,6 +24,7 @@ public class ManagementAuditRecorder {
     private final TemplateTransferAuditRecorder templateTransferAuditRecorder;
     private final TestDataSetAuditRecorder testDataSetAuditRecorder;
     private final InvocationRegenerationAuditRecorder invocationRegenerationAuditRecorder;
+    private final AssetLibraryAuditRecorder assetLibraryAuditRecorder;
 
     public ManagementAuditRecorder(
             ApiPolicyAuditRecorder apiPolicyAuditRecorder,
@@ -32,7 +33,8 @@ public class ManagementAuditRecorder {
             ContentModuleAuditRecorder contentModuleAuditRecorder,
             TemplateTransferAuditRecorder templateTransferAuditRecorder,
             TestDataSetAuditRecorder testDataSetAuditRecorder,
-            InvocationRegenerationAuditRecorder invocationRegenerationAuditRecorder
+            InvocationRegenerationAuditRecorder invocationRegenerationAuditRecorder,
+            AssetLibraryAuditRecorder assetLibraryAuditRecorder
     ) {
         this.apiPolicyAuditRecorder = apiPolicyAuditRecorder;
         this.identityAuditRecorder = identityAuditRecorder;
@@ -41,6 +43,7 @@ public class ManagementAuditRecorder {
         this.templateTransferAuditRecorder = templateTransferAuditRecorder;
         this.testDataSetAuditRecorder = testDataSetAuditRecorder;
         this.invocationRegenerationAuditRecorder = invocationRegenerationAuditRecorder;
+        this.assetLibraryAuditRecorder = assetLibraryAuditRecorder;
     }
 
     @Transactional
@@ -459,5 +462,44 @@ public class ManagementAuditRecorder {
             com.bank.docgen.apimgmt.api.InvocationRegeneratedAuditDetail detail
     ) {
         invocationRegenerationAuditRecorder.record(detail);
+    }
+
+    @Transactional
+    public void recordAssetLibraryUpload(
+            String assetKey,
+            String assetClass,
+            String actorUsername,
+            String actorSummary,
+            String contentSha256
+    ) {
+        assetLibraryAuditRecorder.recordUpload(
+                assetKey, assetClass, actorUsername, actorSummary, contentSha256
+        );
+    }
+
+    @Transactional
+    public void recordAssetLibraryDisable(
+            String assetKey,
+            String assetClass,
+            String actorUsername,
+            String actorSummary,
+            String contentSha256
+    ) {
+        assetLibraryAuditRecorder.recordDisable(
+                assetKey, assetClass, actorUsername, actorSummary, contentSha256
+        );
+    }
+
+    @Transactional
+    public void recordAssetLibraryReupload(
+            String assetKey,
+            String assetClass,
+            String actorUsername,
+            String actorSummary,
+            String contentSha256
+    ) {
+        assetLibraryAuditRecorder.recordReupload(
+                assetKey, assetClass, actorUsername, actorSummary, contentSha256
+        );
     }
 }

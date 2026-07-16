@@ -107,6 +107,22 @@ export const apiErrorZhCn = {
     importBundleContainsSecrets: "模板导入包不得包含密钥或凭据。",
     importConflict: "模板导入与现有模板冲突。",
     importFailed: "模板导入未能完成。",
+    importDependenciesUnsatisfied: "模板导入依赖未满足。",
+    dep: {
+      bundleFormatOk: "导入包格式受支持。",
+      masterPinAbsent: "导入包缺少母版锁定指纹。",
+      masterDocxAbsent: "导入 ZIP 缺少 artifacts/master.docx。",
+      masterDocxHashMismatch: "内嵌母版 DOCX 哈希与包内母版锁定不一致。",
+      masterFingerprintMismatch: "目标母版指纹与包内母版锁定不一致。",
+      masterFingerprintOk: "目标母版指纹与包内母版锁定一致。",
+      clausePresent: "目标环境中已存在该标准条款。",
+      clauseWillMaterialize: "将从包快照物化该标准条款。",
+      clauseMissing: "标准条款缺失且无可用快照可物化。",
+      assetKeyPresent: "对象存储中存在该资产键。",
+      assetKeyMissing: "对象存储中不存在该资产键。",
+      renderProfileAbsent: "导出包不包含渲染配置快照。",
+      renderProfilePresent: "导出包包含渲染配置快照。"
+    },
     computeExpressionInvalid: "计算表达式无效。"
   },
   variable: {
@@ -193,7 +209,12 @@ export const apiErrorZhCn = {
   },
   audit: {
     invalidTimeWindow: "审计时间窗口无效。",
-    scopeRequired: "组范围审计查询需要组范围和模板标识符。"
+    scopeRequired: "组范围审计查询需要组范围和模板标识符。",
+    releaseBundleSnapshotUnavailable: "此调用记录的发布包快照不可用。",
+    releaseBundleHashMismatch: "发布包哈希与锁定的母版对象不匹配。",
+    invocationKindNotRegenerable: "此调用类型不可重新生成；请使用 SINGLE、BATCH_ITEM 或 ASYNC_TASK 记录。",
+    invocationRecordExpired: "调用记录已过期。",
+    specimenWatermarkFailed: "无法应用 SPECIMEN 水印。"
   },
   batch: {
     originalBatchNotFound: "未找到原始批次。"
@@ -230,5 +251,15 @@ export const apiErrorZhCn = {
     accessDenied: "您无权查看协作待办事项。",
     queueDenied: "您无权查看此协作待办队列。",
     workItemNotFound: "未找到该协作待办事项。"
+  },
+  assetLibrary: {
+    accessDenied: "您无权访问资产库。",
+    assetKeyInvalid: "资产键无效。",
+    assetKeyConflict: "已存在使用该键的启用资产。",
+    contentTypeUnsupported: "不支持的上传内容类型。",
+    contentTypeMismatch: "上传内容类型与文件内容不一致。",
+    payloadTooLarge: "上传文件超过最大允许大小 5 MiB。",
+    payloadEmpty: "上传文件为空。",
+    assetNotFound: "未找到资产库条目。"
   }
 } as const

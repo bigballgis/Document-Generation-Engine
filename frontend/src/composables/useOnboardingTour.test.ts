@@ -47,6 +47,7 @@ const BASE_CAPABILITIES: ManagementCapabilities = {
   manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
+  manageAssetLibrary: false,
 }
 
 function patchAuthorSession(username = 'author.user') {

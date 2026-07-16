@@ -7,16 +7,22 @@ import {
   canDecideContentModuleReviews,
   canDecideTests,
   canDeleteTemplates,
+  canDisableAssetLibrary,
   canEditTemplateMetadata,
   canExportTemplates,
   canManageApiPolicy,
+  canManageAssetLibrary,
   canManageContentModuleLifecycle,
   canPublishTemplates,
   canManageReleaseVersionState,
   canRestoreOrDeprecateTemplates,
   canReviewMasters,
   canStopTemplates,
+  canUploadAnyLibraryAsset,
+  canUploadImageOrOtherAsset,
   canUploadMasters,
+  canUploadSealAsset,
+  isAssetLibraryTesterOnly,
   sessionContext,
 } from '@/auth/roles'
 import { useSessionStore } from '@/stores/session'
@@ -45,6 +51,12 @@ export function useCapabilities() {
   const configureContentModuleSharedGroups = computed(() =>
     canConfigureContentModuleSharedGroups(context.value),
   )
+  const manageAssetLibrary = computed(() => canManageAssetLibrary(context.value))
+  const uploadAnyLibraryAsset = computed(() => canUploadAnyLibraryAsset(context.value))
+  const uploadImageOrOtherAsset = computed(() => canUploadImageOrOtherAsset(context.value))
+  const uploadSealAsset = computed(() => canUploadSealAsset(context.value))
+  const disableAssetLibrary = computed(() => canDisableAssetLibrary(context.value))
+  const assetLibraryTesterOnly = computed(() => isAssetLibraryTesterOnly(context.value))
 
   return {
     context,
@@ -65,5 +77,11 @@ export function useCapabilities() {
     decideContentModuleReviews,
     manageContentModuleLifecycle,
     configureContentModuleSharedGroups,
+    manageAssetLibrary,
+    uploadAnyLibraryAsset,
+    uploadImageOrOtherAsset,
+    uploadSealAsset,
+    disableAssetLibrary,
+    assetLibraryTesterOnly,
   }
 }

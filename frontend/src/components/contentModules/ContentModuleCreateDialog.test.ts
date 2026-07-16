@@ -60,6 +60,7 @@ const AUTHOR_CAPABILITIES: ManagementCapabilities = {
   manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
+  manageAssetLibrary: true,
 }
 
 function patchSession(roles: string[], capabilities?: ManagementCapabilities) {

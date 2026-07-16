@@ -32,6 +32,7 @@ const testerCapabilities: ManagementCapabilities = {
   manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
+  manageAssetLibrary: false,
 }
 
 const reviewerCapabilities: ManagementCapabilities = {

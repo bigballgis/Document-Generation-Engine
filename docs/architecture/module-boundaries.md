@@ -50,6 +50,7 @@ This view defines implementation-facing module boundaries. It is a planning base
 | Rendering Worker or Service | DOCX assembly, PDF conversion, output encryption execution, preview generation, rendering diagnostics | API authorization, API credential validation, release approval decisions |
 | Authorization | API credential validation, AD Group resolution use, template-level authorization decision orchestration, fail-closed behavior | External directory synchronization internals, UI-specific permission display |
 | Audit | Security audit summaries, lifecycle audit records, generation audit records, policy change audit records | Sensitive plaintext storage, business variable raw-value retention |
+| Asset Library (CE-E02) | Platform shared image/seal catalog (`library_asset`), MinIO object keys for ACTIVE assets, management upload/list/disable APIs and admin UI route `/library/assets` | `StructuredContentImageResolver` protocol, authorization policy source of truth, generation orchestration, CE-E03 full-library export |
 | Contract Publication | API contract summaries, callable version lists, OpenAPI/example publication workflow | Runtime request processing beyond contract accuracy checks |
 | Shared Kernel | Stable value objects, identifiers, error envelope concepts, time/trace abstractions | Business workflow ownership |
 

@@ -430,11 +430,12 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 | `route.template-management` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `route.content-module-management` | ✓ | ✓ | ✓ | ✓ | — | ✓ | — |
 | `route.api-policy-management` | ✓ | ✓ | — | — | — | — | — |
+| `route.asset-library-management` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `route.audit-console` | ✓ | ✓ | — | — | — | — | ✓ default |
 
 **Canonical 前端路径：** `route.dashboard-home` → `/dashboard`（`DashboardView`）；
 `route.identity-administration` → `/entitlement/users` 与 `/entitlement/groups`
-（`UserManagementView` / `GroupManagementView`）；其余可见路由见 `ROUTE_PATH_BY_KEY`。
+（`UserManagementView` / `GroupManagementView`）；`route.asset-library-management` → `/library/assets`；其余可见路由见 `ROUTE_PATH_BY_KEY`。
 
 ### 13.1.1 Dashboard 合并（COR-T11 Done，2026-06-24）
 
@@ -495,7 +496,15 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 | `decideContentModuleReviews` | GLOBAL, GROUP, TEMPLATE_APPROVER |
 | `manageContentModuleLifecycle` | GLOBAL, GROUP |
 | `manageApiPolicy` | GLOBAL, GROUP |
+| `manageAssetLibrary` | GLOBAL, GROUP, MASTER_DESIGNER, TEMPLATE_AUTHOR, TEMPLATE_TESTER, TEMPLATE_APPROVER |
 | `readAudit` | GLOBAL, GROUP, AUDIT_ADMIN |
+
+**CE-E02 资产库管理面（2026-07-16）：**
+
+- 新逻辑路由 `route.asset-library-management` → canonical `/library/assets`；新 capability `manageAssetLibrary`（上表）。
+- **动作细粒度（服务层强制，非仅 capability）：** 上传 `IMAGE`/`OTHER` → GLOBAL / GROUP / MASTER_DESIGNER / TEMPLATE_AUTHOR；上传 `SEAL` → GLOBAL / GROUP / **TEMPLATE_APPROVER**；停用 → 仅 GLOBAL / GROUP；列表 → 有路由角色（`TEMPLATE_TESTER` **仅 ACTIVE**）。
+- `AUDIT_ADMIN` **无**资产库路由；经 §10 审计查询看 `ASSET_LIBRARY_*` 事件。
+- 行为 SoT：[ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md) `BDD-CE-E02-001…022`。
 
 **CE-G01 同人审批阻断 / 例外干预（2026-07-14）：**
 

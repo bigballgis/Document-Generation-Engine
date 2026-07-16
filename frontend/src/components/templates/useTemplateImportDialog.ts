@@ -135,6 +135,7 @@ export function useTemplateImportDialog(options: UseTemplateImportDialogOptions)
         masterId: form.masterId,
         bundle: parsedBundle.value,
         importConflictPolicy: form.importConflictPolicy,
+        dryRun: false,
       })
       visible.value = false
       options.emitImported(result.template.id)

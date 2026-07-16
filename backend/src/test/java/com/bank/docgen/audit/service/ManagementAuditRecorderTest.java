@@ -41,7 +41,8 @@ class ManagementAuditRecorderTest {
                 new ContentModuleAuditRecorder(eventWriter),
                 new TemplateTransferAuditRecorder(eventWriter),
                 new TestDataSetAuditRecorder(eventWriter),
-                new InvocationRegenerationAuditRecorder(eventWriter)
+                new InvocationRegenerationAuditRecorder(eventWriter),
+                new AssetLibraryAuditRecorder(eventWriter)
         );
     }
 

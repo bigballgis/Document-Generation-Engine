@@ -87,6 +87,7 @@ describe('templates export/import API', () => {
         policySnapshot: undefined,
       },
       importConflictPolicy: 'REJECT_IMPORT' as const,
+      dryRun: false,
     }
 
     const result = await templatesApi.importTemplate(payload)

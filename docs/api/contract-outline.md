@@ -318,6 +318,18 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 - 生命周期状态前置条件不满足返回 `409 CONTENT_MODULE_STATE_TRANSITION_DENIED`。
 - 请求体解析失败或必要字段缺失返回 `422 CONTENT_MODULE_REQUEST_INVALID`。
 
+## 资产库管理契约（CE-E02）
+
+**CE-E02（2026-07-16 确认 / BDD `ready`）：** 平台共享资产目录管理 API。权威行为：[ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md)。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准。
+
+| 操作 | 方法 / 路径 | 说明 |
+| --- | --- | --- |
+| 列表 | `GET /api/management/v1/library/assets` | 分页 `page`/`size`；过滤 `assetClass` / `status`（默认 `ACTIVE`；`DISABLED`\|`ALL` 显式）/ `q`；统一 envelope + `PageView` |
+| 上传 | `POST /api/management/v1/library/assets` | multipart：`file` + `assetKey` + `assetClass`；`201`；`Idempotency-Key` **预留 / CE-E02 不强制不生效**（可传、忽略） |
+| 停用 | `POST /api/management/v1/library/assets/{assetKey}/disable` | `ACTIVE`→`DISABLED`；移除可解析 MinIO 键；已 `DISABLED` → **已确认**幂等 `200` |
+
+**键与类：** `assetKey` ≡ 可被 `StructuredContentImageResolver` 命中的对象键（语法 `^[A-Za-z][A-Za-z0-9._-]{0,127}$`，E02-C2）；`assetClass`=`IMAGE`\|`SEAL`\|`OTHER`。MIME：`image/png`\|`image/jpeg`；应用层单文件上限 **5 MiB** → `422` `api.error.assetLibrary.payloadTooLarge`（nginx/Spring 边界超限仍可能为 413，须可读可翻译）。**不**改变 `StructuredContentImageResolver` 协议。权限见 [permission-matrix.md](../security/permission-matrix.md) §13.2 CE-E02。错误码（`error.code`）与 messageKey：`ASSET_LIBRARY_ASSET_KEY_INVALID` / `ASSET_LIBRARY_ASSET_KEY_CONFLICT` / `ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED` / `ASSET_LIBRARY_CONTENT_TYPE_MISMATCH` / `ASSET_LIBRARY_PAYLOAD_TOO_LARGE` / `ASSET_LIBRARY_ASSET_NOT_FOUND`（messageKey 前缀 `api.error.assetLibrary.*`）。
+
 ## 模板导出/导入契约
 
 已确认模板跨环境导出/导入接口与 [P14-T03](../plan/detail/P14-confirmed-large-domains.md) 行为一致，并经 **CE-E01** 扩展自包含 v2 + dry-run。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准；本文档提供路由索引、bundle 语义、冲突策略与权限说明。权威行为：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)。

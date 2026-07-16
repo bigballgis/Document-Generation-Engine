@@ -33,6 +33,7 @@ const globalAdminCapabilities: ManagementCapabilities = {
   manageContentModuleLifecycle: true,
   manageApiPolicy: true,
   readAudit: true,
+        manageAssetLibrary: true,
 }
 
 const testerCapabilities: ManagementCapabilities = {
@@ -53,6 +54,7 @@ const testerCapabilities: ManagementCapabilities = {
   manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
+        manageAssetLibrary: true,
 }
 
 const approverCapabilities: ManagementCapabilities = {
@@ -109,6 +111,33 @@ describe('navStructure', () => {
 
     const overviewGroup = groups.find((group) => group.id === 'overview')
     expect(overviewGroup?.items.map((item) => item.id)).toEqual(['dashboard'])
+  })
+
+  it('includes asset library under document content when route is visible', () => {
+    const groups = buildVisibleNavGroups(
+      [
+        dashboardRoute,
+        ROUTE_KEYS.templateManagement,
+        ROUTE_KEYS.assetLibraryManagement,
+      ],
+      ['TEMPLATE_AUTHOR'],
+      authorCapabilities,
+    )
+    const contentGroup = groups.find((group) => group.id === 'documentContent')
+    expect(contentGroup?.items.some((item) => item.id === 'asset-library')).toBe(true)
+    expect(contentGroup?.items.find((item) => item.id === 'asset-library')?.path).toBe(
+      '/library/assets',
+    )
+  })
+
+  it('hides asset library when route is not visible', () => {
+    const groups = buildVisibleNavGroups(
+      [dashboardRoute, ROUTE_KEYS.templateManagement],
+      ['TEMPLATE_AUTHOR'],
+      authorCapabilities,
+    )
+    const contentGroup = groups.find((group) => group.id === 'documentContent')
+    expect(contentGroup?.items.some((item) => item.id === 'asset-library')).toBe(false)
   })
 
   describe('behavior nav visibility (Spec C)', () => {
@@ -230,6 +259,7 @@ describe('navStructure', () => {
           manageContentModuleLifecycle: false,
           manageApiPolicy: false,
           readAudit: true,
+          manageAssetLibrary: true,
         },
       )
 
@@ -313,6 +343,11 @@ describe('navStructure', () => {
           id: 'content-modules',
           routeKey: ROUTE_KEYS.contentModuleManagement,
           path: '/content-modules',
+        },
+        {
+          id: 'asset-library',
+          routeKey: ROUTE_KEYS.assetLibraryManagement,
+          path: '/library/assets',
         },
         { id: 'api-policies', routeKey: ROUTE_KEYS.apiPolicyManagement, path: '/api/policies' },
         { id: 'audit', routeKey: ROUTE_KEYS.auditConsole, path: '/audit' },
