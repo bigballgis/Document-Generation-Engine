@@ -42,6 +42,10 @@ public final class ManagementAuditEventTypes {
     public static final String ASSET_LIBRARY_DISABLE = "ASSET_LIBRARY_DISABLE";
     /** CE-E02: DISABLED key re-upload reactivation. */
     public static final String ASSET_LIBRARY_REUPLOAD = "ASSET_LIBRARY_REUPLOAD";
+    /** CE-G04: legal hold created. */
+    public static final String LEGAL_HOLD_CREATED = "LEGAL_HOLD_CREATED";
+    /** CE-G04: legal hold released. */
+    public static final String LEGAL_HOLD_RELEASED = "LEGAL_HOLD_RELEASED";
 
     private ManagementAuditEventTypes() {
     }

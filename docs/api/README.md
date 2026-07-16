@@ -93,6 +93,27 @@ Stable English-first fail-closed keys (implement in `messages_en.properties`):
 
 Behavior SoT: [ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md).
 
+### Legal hold administration (CE-G04)
+
+Management legal-hold routes are a **management-API** contract (documented in [contract-outline.md](contract-outline.md) «Legal hold 管理契约（CE-G04）」 and [openapi-v1.yaml](openapi-v1.yaml)). Caller-facing runtime generate paths are unchanged. ACTIVE holds overlay retention exemption on ADR-0040 / ADR-0048 hard-delete schedulers — **do not** edit those ADR decision bodies. Authorization is **GLOBAL_ADMIN only** (no new capability bit). Behavior SoT: [ce-g04-legal-hold.md](../behavior/ce-g04-legal-hold.md).
+
+| Operation | Method / path |
+| --- | --- |
+| List | `GET /api/management/v1/legal-holds` |
+| Get | `GET /api/management/v1/legal-holds/{id}` |
+| Create | `POST /api/management/v1/legal-holds` → `201` |
+| Release | `POST /api/management/v1/legal-holds/{id}/release` → `200` |
+
+No physical DELETE. Stable fail-closed keys:
+
+| Condition | HTTP | `error.code` | `error.messageKey` |
+| --- | --- | --- | --- |
+| Non-GLOBAL_ADMIN | 403 | `ACCESS_DENIED` | `api.error.authorization.accessDenied` |
+| Hold not found | 404 | `LEGAL_HOLD_NOT_FOUND` | `api.error.notFound.legalHoldNotFound` |
+| Already RELEASED | 409 | `LEGAL_HOLD_ALREADY_RELEASED` | `api.error.conflict.legalHoldAlreadyReleased` |
+| Mixed / invalid scope payload | 422 | `REQUEST_BODY_INVALID` / validation | `api.error.validation.*` |
+| Template missing (TEMPLATE_WINDOW) | 404 | `TEMPLATE_NOT_FOUND`（既有） | 既有模板 not-found 键 |
+
 ### Platform asset library catalog (CE-E02)
 
 Management asset catalog routes in [openapi-v1.yaml](openapi-v1.yaml) / [contract-outline.md](contract-outline.md) «资产库管理契约（CE-E02）」:

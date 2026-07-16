@@ -90,6 +90,11 @@ public class GroupAccessService {
         return session.roles().contains("GLOBAL_ADMIN");
     }
 
+    /** CE-G04: legal hold administration — GLOBAL_ADMIN only. */
+    public boolean canManageLegalHold(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN");
+    }
+
     public boolean canReadAudit(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN")

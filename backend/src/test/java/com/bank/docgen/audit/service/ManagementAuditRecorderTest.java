@@ -10,10 +10,15 @@ import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
 import com.bank.docgen.audit.persistence.ManagementAuditEventRepository;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemTriggerType;
+import com.bank.docgen.legalhold.domain.LegalHoldScopeType;
+import com.bank.docgen.legalhold.domain.LegalHoldStatus;
+import com.bank.docgen.legalhold.persistence.LegalHoldEntity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +47,8 @@ class ManagementAuditRecorderTest {
                 new TemplateTransferAuditRecorder(eventWriter),
                 new TestDataSetAuditRecorder(eventWriter),
                 new InvocationRegenerationAuditRecorder(eventWriter),
-                new AssetLibraryAuditRecorder(eventWriter)
+                new AssetLibraryAuditRecorder(eventWriter),
+                new LegalHoldAuditRecorder(eventWriter)
         );
     }
 
@@ -329,5 +335,49 @@ class ManagementAuditRecorderTest {
         assertThat(payload.get("outcome").asText()).isEqualTo("SUCCESS");
         assertThat(payload.get("encryptionReapplied").asBoolean()).isFalse();
         assertThat(payload.has("variables")).isFalse();
+    }
+
+    @Test
+    void legalHoldCreated_recordsSummaryWithoutSensitivePayload() throws Exception {
+        UUID holdId = UUID.randomUUID();
+        LegalHoldEntity hold = new LegalHoldEntity(
+                holdId,
+                "HOLD-AB12CD34",
+                LegalHoldScopeType.INVOCATION_SET,
+                LegalHoldStatus.ACTIVE,
+                "litigation matter",
+                null,
+                null,
+                null,
+                null,
+                Instant.parse("2026-07-01T00:00:00Z"),
+                "10000001",
+                Set.of("INV-SECRET-1", "INV-SECRET-2")
+        );
+
+        recorder.recordLegalHoldCreated(hold, "10000001", "Admin (10000001)");
+
+        ArgumentCaptor<ManagementAuditEventEntity> captor = ArgumentCaptor.forClass(ManagementAuditEventEntity.class);
+        verify(repository).save(captor.capture());
+        ManagementAuditEventEntity saved = captor.getValue();
+
+        assertThat(saved.getEventType()).isEqualTo(ManagementAuditEventTypes.LEGAL_HOLD_CREATED);
+        assertThat(saved.getActorUsername()).isEqualTo("10000001");
+        assertThat(saved.getChangedAreasJson()).doesNotContain("INV-SECRET");
+        assertThat(saved.getChangedAreasJson()).doesNotContain("variables");
+        assertThat(saved.getStatusSummary()).doesNotContain("INV-SECRET");
+        assertThat(saved.getWarningCodesJson()).isEqualTo("[]");
+
+        JsonNode payload = objectMapper.readTree(saved.getChangedAreasJson());
+        assertThat(payload.get("holdId").asText()).isEqualTo(holdId.toString());
+        assertThat(payload.get("holdExternalId").asText()).isEqualTo("HOLD-AB12CD34");
+        assertThat(payload.get("scopeType").asText()).isEqualTo("INVOCATION_SET");
+        assertThat(payload.get("status").asText()).isEqualTo("ACTIVE");
+        assertThat(payload.get("invocationCount").asInt()).isEqualTo(2);
+        assertThat(payload.get("reason").asText()).isEqualTo("litigation matter");
+        assertThat(payload.get("actorUsername").asText()).isEqualTo("10000001");
+        assertThat(payload.has("templateId")).isFalse();
+        assertThat(payload.has("variables")).isFalse();
+        assertThat(payload.has("invocationExternalIds")).isFalse();
     }
 }

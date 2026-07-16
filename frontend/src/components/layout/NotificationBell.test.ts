@@ -50,6 +50,7 @@ const withCollab: ManagementCapabilities = {
   manageApiPolicy: false,
   readAudit: false,
   manageAssetLibrary: false,
+  manageLegalHold: false,
 }
 
 const withoutCollab: ManagementCapabilities = {

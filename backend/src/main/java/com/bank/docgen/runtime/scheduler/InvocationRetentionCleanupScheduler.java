@@ -1,9 +1,11 @@
 package com.bank.docgen.runtime.scheduler;
 
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
+import com.bank.docgen.legalhold.service.LegalHoldExemptionService;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordEntity;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordRepository;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
@@ -19,13 +21,16 @@ public class InvocationRetentionCleanupScheduler {
 
     private final ApiInvocationRecordRepository repository;
     private final ObjectStoragePort objectStoragePort;
+    private final LegalHoldExemptionService legalHoldExemptionService;
 
     public InvocationRetentionCleanupScheduler(
             ApiInvocationRecordRepository repository,
-            ObjectStoragePort objectStoragePort
+            ObjectStoragePort objectStoragePort,
+            LegalHoldExemptionService legalHoldExemptionService
     ) {
         this.repository = repository;
         this.objectStoragePort = objectStoragePort;
+        this.legalHoldExemptionService = legalHoldExemptionService;
     }
 
     // LR-B2: lockAtMostFor PT10M >> observed runtime (seconds); lockAtLeastFor PT20S << 1h interval.
@@ -40,7 +45,16 @@ public class InvocationRetentionCleanupScheduler {
         List<ApiInvocationRecordEntity> expiredArtifacts =
                 repository.findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(Instant.now());
         int cleaned = 0;
+        int skipped = 0;
         for (ApiInvocationRecordEntity record : expiredArtifacts) {
+            if (legalHoldExemptionService.isInvocationExempt(
+                    record.getTemplateId(),
+                    record.getInvocationExternalId(),
+                    record.getCreatedAt()
+            )) {
+                skipped++;
+                continue;
+            }
             try {
                 deleteArtifact(record.getArtifactStorageKey());
                 record.markDocumentArtifactCleaned(Instant.now());
@@ -54,8 +68,12 @@ public class InvocationRetentionCleanupScheduler {
                 );
             }
         }
-        if (cleaned > 0) {
-            LOG.info("[InvocationCleanupScheduler] Cleaned {} expired invocation artifact(s)", cleaned);
+        if (cleaned > 0 || skipped > 0) {
+            LOG.info(
+                    "[InvocationCleanupScheduler] Cleaned {} expired invocation artifact(s); skipped {} under legal hold",
+                    cleaned,
+                    skipped
+            );
         }
     }
 
@@ -69,12 +87,39 @@ public class InvocationRetentionCleanupScheduler {
     public void cleanExpiredRecords() {
         // ADR-0057 / ADR-0040: hard-delete expired invocation rows — parameters_storage is destroyed
         // with the row (same TTL; no orphan parameter blobs; no longer regenerable).
+        // CE-G04: skip ACTIVE legal-hold protected rows before delete.
         List<ApiInvocationRecordEntity> expiredRecords = repository.findByRecordExpiresAtBefore(Instant.now());
         if (expiredRecords.isEmpty()) {
             return;
         }
-        repository.deleteAll(expiredRecords);
-        LOG.info("[InvocationCleanupScheduler] Deleted {} expired invocation record(s)", expiredRecords.size());
+        List<ApiInvocationRecordEntity> toDelete = new ArrayList<>();
+        int skipped = 0;
+        for (ApiInvocationRecordEntity record : expiredRecords) {
+            if (legalHoldExemptionService.isInvocationExempt(
+                    record.getTemplateId(),
+                    record.getInvocationExternalId(),
+                    record.getCreatedAt()
+            )) {
+                skipped++;
+                continue;
+            }
+            toDelete.add(record);
+        }
+        if (toDelete.isEmpty()) {
+            if (skipped > 0) {
+                LOG.info(
+                        "[InvocationCleanupScheduler] Skipped {} expired invocation record(s) under legal hold",
+                        skipped
+                );
+            }
+            return;
+        }
+        repository.deleteAll(toDelete);
+        LOG.info(
+                "[InvocationCleanupScheduler] Deleted {} expired invocation record(s); skipped {} under legal hold",
+                toDelete.size(),
+                skipped
+        );
     }
 
     private void deleteArtifact(String storageKey) {

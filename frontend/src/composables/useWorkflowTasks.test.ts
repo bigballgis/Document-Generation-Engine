@@ -33,6 +33,7 @@ const testerCapabilities: ManagementCapabilities = {
   manageApiPolicy: false,
   readAudit: false,
   manageAssetLibrary: false,
+  manageLegalHold: false,
 }
 
 const reviewerCapabilities: ManagementCapabilities = {

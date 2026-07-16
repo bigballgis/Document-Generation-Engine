@@ -85,6 +85,12 @@ export const NAV_GROUPS: NavGroupDefinition[] = [
         path: '/audit',
         labelKey: 'nav.items.audit',
       },
+      {
+        id: 'legal-holds',
+        routeKey: ROUTE_KEYS.legalHoldAdministration,
+        path: '/governance/legal-holds',
+        labelKey: 'nav.items.legalHolds',
+      },
     ],
   },
 ]

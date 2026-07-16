@@ -33,6 +33,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.manageContentModuleLifecycle()).isTrue();
         assertThat(capabilities.readAudit()).isTrue();
         assertThat(capabilities.manageAssetLibrary()).isTrue();
+        assertThat(capabilities.manageLegalHold()).isTrue();
     }
 
     @Test
@@ -50,6 +51,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.decideContentModuleReviews()).isTrue();
         assertThat(capabilities.manageContentModuleLifecycle()).isTrue();
         assertThat(capabilities.manageAssetLibrary()).isTrue();
+        assertThat(capabilities.manageLegalHold()).isFalse();
     }
 
     @Test
@@ -72,6 +74,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.decideContentModuleReviews()).isFalse();
         assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
         assertThat(capabilities.manageAssetLibrary()).isTrue();
+        assertThat(capabilities.manageLegalHold()).isFalse();
     }
 
     @Test
@@ -88,6 +91,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.manageApiPolicy()).isFalse();
         assertThat(capabilities.deleteTemplates()).isFalse();
         assertThat(capabilities.manageAssetLibrary()).isTrue();
+        assertThat(capabilities.manageLegalHold()).isFalse();
     }
 
     @Test
@@ -105,6 +109,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.decideContentModuleReviews()).isFalse();
         assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
         assertThat(capabilities.manageAssetLibrary()).isTrue();
+        assertThat(capabilities.manageLegalHold()).isFalse();
     }
 
     @Test
@@ -121,6 +126,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.authorContentModules()).isFalse();
         assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
         assertThat(capabilities.manageAssetLibrary()).isTrue();
+        assertThat(capabilities.manageLegalHold()).isFalse();
     }
 
     @Test
@@ -138,5 +144,6 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.decideContentModuleReviews()).isFalse();
         assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
         assertThat(capabilities.manageAssetLibrary()).isFalse();
+        assertThat(capabilities.manageLegalHold()).isFalse();
     }
 }

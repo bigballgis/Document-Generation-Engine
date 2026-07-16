@@ -1,10 +1,15 @@
 package com.bank.docgen.audit.service;
 
 import com.bank.docgen.audit.persistence.ManagementAuditEventCleanupRepository;
+import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
+import com.bank.docgen.legalhold.service.LegalHoldExemptionService;
 import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventCleanupRepository;
+import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventEntity;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * LR-D1 / ADR-0048: hard-delete aged management + runtime audit rows and write purge evidence.
+ * CE-G04: filter ACTIVE legal-hold exemptions before delete (G04-C12…C16).
  */
 @Service
 public class AuditRetentionCleanupService {
@@ -28,6 +34,7 @@ public class AuditRetentionCleanupService {
     private final ManagementAuditEventCleanupRepository managementCleanup;
     private final RuntimeGenerationAuditEventCleanupRepository runtimeCleanup;
     private final AuditRetentionPurgeEvidenceWriter purgeEvidenceWriter;
+    private final LegalHoldExemptionService legalHoldExemptionService;
     private final Clock clock;
     private final int managementRetentionDays;
     private final int runtimeRetentionDays;
@@ -37,6 +44,7 @@ public class AuditRetentionCleanupService {
             ManagementAuditEventCleanupRepository managementCleanup,
             RuntimeGenerationAuditEventCleanupRepository runtimeCleanup,
             AuditRetentionPurgeEvidenceWriter purgeEvidenceWriter,
+            LegalHoldExemptionService legalHoldExemptionService,
             Clock clock,
             @Value("${docgen.audit.management-retention-days:90}") int managementRetentionDays,
             @Value("${docgen.audit.runtime-retention-days:365}") int runtimeRetentionDays,
@@ -45,6 +53,7 @@ public class AuditRetentionCleanupService {
         this.managementCleanup = managementCleanup;
         this.runtimeCleanup = runtimeCleanup;
         this.purgeEvidenceWriter = purgeEvidenceWriter;
+        this.legalHoldExemptionService = legalHoldExemptionService;
         this.clock = clock;
         this.managementRetentionDays = requireRetentionDays(managementRetentionDays, "management");
         this.runtimeRetentionDays = requireRetentionDays(runtimeRetentionDays, "runtime");
@@ -57,16 +66,36 @@ public class AuditRetentionCleanupService {
             return 0;
         }
         Instant cutoff = cutoff(managementRetentionDays);
-        int deleted = managementCleanup.deleteOlderThan(cutoff);
-        if (deleted > 0) {
-            purgeEvidenceWriter.write(MANAGEMENT_TABLE, managementRetentionDays, cutoff, deleted);
-            LOG.info(
-                    "LR-D1 management audit retention purge: deleted={} retentionDays={} cutoff={}",
-                    deleted,
-                    managementRetentionDays,
-                    cutoff
-            );
+        List<ManagementAuditEventEntity> candidates = managementCleanup.findByEventAtBefore(cutoff);
+        List<ManagementAuditEventEntity> toDelete = new ArrayList<>();
+        int skipped = 0;
+        for (ManagementAuditEventEntity event : candidates) {
+            if (legalHoldExemptionService.isManagementAuditExempt(event.getTemplateId(), event.getEventAt())) {
+                skipped++;
+                continue;
+            }
+            toDelete.add(event);
         }
+        if (toDelete.isEmpty()) {
+            if (skipped > 0) {
+                LOG.info(
+                        "LR-D1 management audit retention purge: deleted=0 skippedLegalHold={} cutoff={}",
+                        skipped,
+                        cutoff
+                );
+            }
+            return 0;
+        }
+        managementCleanup.deleteAll(toDelete);
+        int deleted = toDelete.size();
+        purgeEvidenceWriter.write(MANAGEMENT_TABLE, managementRetentionDays, cutoff, deleted);
+        LOG.info(
+                "LR-D1 management audit retention purge: deleted={} skippedLegalHold={} retentionDays={} cutoff={}",
+                deleted,
+                skipped,
+                managementRetentionDays,
+                cutoff
+        );
         return deleted;
     }
 
@@ -76,16 +105,41 @@ public class AuditRetentionCleanupService {
             return 0;
         }
         Instant cutoff = cutoff(runtimeRetentionDays);
-        int deleted = runtimeCleanup.deleteOlderThan(cutoff);
-        if (deleted > 0) {
-            purgeEvidenceWriter.write(RUNTIME_TABLE, runtimeRetentionDays, cutoff, deleted);
-            LOG.info(
-                    "LR-D1 runtime audit retention purge: deleted={} retentionDays={} cutoff={}",
-                    deleted,
-                    runtimeRetentionDays,
-                    cutoff
-            );
+        List<RuntimeGenerationAuditEventEntity> candidates = runtimeCleanup.findByEventAtBefore(cutoff);
+        List<RuntimeGenerationAuditEventEntity> toDelete = new ArrayList<>();
+        int skipped = 0;
+        for (RuntimeGenerationAuditEventEntity event : candidates) {
+            if (legalHoldExemptionService.isRuntimeAuditExempt(
+                    event.getTemplateId(),
+                    event.getEventAt(),
+                    event.getTaskExternalId(),
+                    event.getDocumentId()
+            )) {
+                skipped++;
+                continue;
+            }
+            toDelete.add(event);
         }
+        if (toDelete.isEmpty()) {
+            if (skipped > 0) {
+                LOG.info(
+                        "LR-D1 runtime audit retention purge: deleted=0 skippedLegalHold={} cutoff={}",
+                        skipped,
+                        cutoff
+                );
+            }
+            return 0;
+        }
+        runtimeCleanup.deleteAll(toDelete);
+        int deleted = toDelete.size();
+        purgeEvidenceWriter.write(RUNTIME_TABLE, runtimeRetentionDays, cutoff, deleted);
+        LOG.info(
+                "LR-D1 runtime audit retention purge: deleted={} skippedLegalHold={} retentionDays={} cutoff={}",
+                deleted,
+                skipped,
+                runtimeRetentionDays,
+                cutoff
+        );
         return deleted;
     }
 

@@ -30,6 +30,7 @@ export const apiErrorZhCn = {
     serviceUnavailable: "生成服务暂时不可用。",
     pdfConversionFailed: "PDF 转换失败。",
     pdfConversionCapacityExceeded: "PDF 转换容量暂时已满，请稍后重试。",
+    pdfArchivalEncryptionMutex: "PDF/A 归档输出不能与加密同时使用。",
     artifactTooLarge: "生成的产物超过配置的大小上限。",
     docxNormalizationFailed: "DOCX 规范化失败。",
     idempotencyDigestFailed: "请求无法安全处理，请重试。"
@@ -221,11 +222,13 @@ export const apiErrorZhCn = {
   },
   notFound: {
     userNotFound: "请求的用户不存在。",
-    groupNotFound: "请求的业务组不存在。"
+    groupNotFound: "请求的业务组不存在。",
+    legalHoldNotFound: "未找到法律冻结记录。"
   },
   conflict: {
     usernameAlreadyExists: "具有此用户名的用户已存在。",
-    groupCodeAlreadyExists: "具有此代码的业务组已存在。"
+    groupCodeAlreadyExists: "具有此代码的业务组已存在。",
+    legalHoldAlreadyReleased: "该法律冻结记录已释放。"
   },
   contentModule: {
     notFound: "未找到标准条款。",

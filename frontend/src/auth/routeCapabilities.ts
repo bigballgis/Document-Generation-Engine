@@ -10,6 +10,7 @@ import {
   canDecideTests,
   canManageAssetLibrary,
   canManageContentModuleLifecycle,
+  canManageLegalHold,
   canPublishTemplates,
   canReviewMasters,
   canUploadMasters,
@@ -50,6 +51,7 @@ function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
       routeKey === ROUTE_KEYS.apiPolicyManagement ||
       routeKey === ROUTE_KEYS.auditConsole ||
       routeKey === ROUTE_KEYS.identityAdministration ||
+      routeKey === ROUTE_KEYS.legalHoldAdministration ||
       routeKey === ROUTE_KEYS.templateAuthoringHome
     )
   }
@@ -149,6 +151,7 @@ const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContext) => b
   [ROUTE_KEYS.auditConsole]: canAccessAuditConsole,
   [ROUTE_KEYS.identityAdministration]: (context) =>
     isGlobalAdmin(context.roles) || context.roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN),
+  [ROUTE_KEYS.legalHoldAdministration]: canManageLegalHold,
 }
 
 export function canAccessRouteWithCapability(

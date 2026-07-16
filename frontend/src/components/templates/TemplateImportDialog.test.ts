@@ -169,6 +169,7 @@ describe('TemplateImportDialog', () => {
         metadata: expect.objectContaining({ externalId: 'TPL-IMPORT' }),
       }),
       importConflictPolicy: 'KEEP_TEMPLATE_ID',
+      dryRun: false,
     })
   })
 })

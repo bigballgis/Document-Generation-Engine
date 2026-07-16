@@ -26,7 +26,8 @@ class RouteVisibilityServiceTest {
                         ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey(),
                         ManagementRoute.API_POLICY_MANAGEMENT.routeKey(),
                         ManagementRoute.AUDIT_CONSOLE.routeKey(),
-                        ManagementRoute.IDENTITY_ADMINISTRATION.routeKey()
+                        ManagementRoute.IDENTITY_ADMINISTRATION.routeKey(),
+                        ManagementRoute.LEGAL_HOLD_ADMINISTRATION.routeKey()
                 );
     }
 

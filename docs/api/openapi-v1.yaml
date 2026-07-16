@@ -2877,6 +2877,171 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/legal-holds:
+    get:
+      tags: [Admin]
+      operationId: listLegalHolds
+      summary: List legal holds (CE-G04)
+      description: >-
+        Returns a management `PageView` of legal hold rows (ACTIVE and/or
+        RELEASED). Optional `status` filter. GLOBAL_ADMIN only; other roles
+        receive 403. Behavior SoT: docs/behavior/ce-g04-legal-hold.md
+        (BDD-CE-G04-001…017). Retention exemption overlays ADR-0040 / ADR-0048
+        without changing those ADR decision bodies.
+      parameters:
+        - $ref: '#/components/parameters/CatalogPageQuery'
+        - $ref: '#/components/parameters/CatalogSizeQuery'
+        - name: status
+          in: query
+          required: false
+          description: >-
+            Optional status filter. Omit → ACTIVE ∪ RELEASED. `ACTIVE` or
+            `RELEASED` when provided.
+          schema:
+            $ref: '#/components/schemas/LegalHoldStatus'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Paginated legal holds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalHoldPageResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      tags: [Admin]
+      operationId: createLegalHold
+      summary: Create an ACTIVE legal hold (CE-G04)
+      description: >-
+        Creates an ACTIVE hold with mutually exclusive scope
+        `TEMPLATE_WINDOW` or `INVOCATION_SET`. Writes `LEGAL_HOLD_CREATED`
+        audit without variables / credentials / full parameter bodies.
+        GLOBAL_ADMIN only.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLegalHoldRequest'
+      responses:
+        '201':
+          description: Hold created ACTIVE.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalHoldResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: >-
+            Template not found for TEMPLATE_WINDOW
+            (`TEMPLATE_NOT_FOUND`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Mixed scope / validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/legal-holds/{id}:
+    get:
+      tags: [Admin]
+      operationId: getLegalHold
+      summary: Get a legal hold by id (CE-G04)
+      description: >-
+        Returns one legal hold. GLOBAL_ADMIN only.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Legal hold UUID primary key.
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Legal hold view.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalHoldResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: >-
+            Hold not found (`LEGAL_HOLD_NOT_FOUND` /
+            `api.error.notFound.legalHoldNotFound`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/legal-holds/{id}/release:
+    post:
+      tags: [Admin]
+      operationId: releaseLegalHold
+      summary: Release an ACTIVE legal hold (CE-G04)
+      description: >-
+        Transitions ACTIVE → RELEASED. No physical DELETE. Already RELEASED
+        → 409 `LEGAL_HOLD_ALREADY_RELEASED`. Writes `LEGAL_HOLD_RELEASED`
+        audit. GLOBAL_ADMIN only. Released holds stop retention exemption
+        immediately.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Legal hold UUID primary key.
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Hold released.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalHoldResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: >-
+            Hold not found (`LEGAL_HOLD_NOT_FOUND` /
+            `api.error.notFound.legalHoldNotFound`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: >-
+            Already RELEASED (`LEGAL_HOLD_ALREADY_RELEASED` /
+            `api.error.conflict.legalHoldAlreadyReleased`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/library/assets:
     get:
       tags: [Admin]
@@ -8373,6 +8538,148 @@ components:
     TemplateExportAssetKeyUsage:
       type: string
       enum: [IMAGE, OTHER]
+    LegalHoldScopeType:
+      type: string
+      description: CE-G04 hold scope (UPPER_SNAKE_CASE; mutually exclusive).
+      enum: [TEMPLATE_WINDOW, INVOCATION_SET]
+    LegalHoldStatus:
+      type: string
+      description: CE-G04 hold lifecycle status. Only ACTIVE grants exemption.
+      enum: [ACTIVE, RELEASED]
+    CreateLegalHoldRequest:
+      type: object
+      additionalProperties: false
+      description: >-
+        CE-G04 create body. Exactly one scope; field sets are mutually
+        exclusive per docs/behavior/ce-g04-legal-hold.md G04-C3.
+      required: [scopeType]
+      properties:
+        scopeType:
+          $ref: '#/components/schemas/LegalHoldScopeType'
+        reason:
+          type: string
+          maxLength: 512
+          nullable: true
+          description: Optional reason; may appear in management audit summary.
+        templateId:
+          type: string
+          format: uuid
+          nullable: true
+          description: TEMPLATE_WINDOW — template UUID (or use templateExternalId).
+        templateExternalId:
+          type: string
+          nullable: true
+          description: TEMPLATE_WINDOW — template external id (or use templateId).
+        effectiveFrom:
+          type: string
+          format: date-time
+          nullable: true
+          description: TEMPLATE_WINDOW — UTC window start (required for that scope).
+        effectiveTo:
+          type: string
+          format: date-time
+          nullable: true
+          description: >-
+            TEMPLATE_WINDOW — UTC window end; null means open-ended until release.
+        invocationExternalIds:
+          type: array
+          nullable: true
+          minItems: 1
+          maxItems: 500
+          items:
+            type: string
+            minLength: 1
+          description: INVOCATION_SET — 1…500 invocation external ids.
+    LegalHoldView:
+      type: object
+      additionalProperties: false
+      description: CE-G04 legal hold management view (no sensitive payloads).
+      required:
+        - id
+        - holdExternalId
+        - scopeType
+        - status
+        - invocationCount
+        - createdAt
+        - createdByUsername
+      properties:
+        id:
+          type: string
+          format: uuid
+        holdExternalId:
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/LegalHoldScopeType'
+        status:
+          $ref: '#/components/schemas/LegalHoldStatus'
+        reason:
+          type: string
+          nullable: true
+        templateId:
+          type: string
+          format: uuid
+          nullable: true
+        templateExternalId:
+          type: string
+          nullable: true
+        effectiveFrom:
+          type: string
+          format: date-time
+          nullable: true
+        effectiveTo:
+          type: string
+          format: date-time
+          nullable: true
+        invocationExternalIds:
+          type: array
+          items:
+            type: string
+          description: Empty for TEMPLATE_WINDOW; sorted ids for INVOCATION_SET.
+        invocationCount:
+          type: integer
+          minimum: 0
+          maximum: 500
+        createdAt:
+          type: string
+          format: date-time
+        createdByUsername:
+          type: string
+        releasedAt:
+          type: string
+          format: date-time
+          nullable: true
+        releasedByUsername:
+          type: string
+          nullable: true
+    LegalHoldPageResponse:
+      type: object
+      additionalProperties: false
+      description: CE-G04 list envelope for `GET /api/management/v1/legal-holds`.
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageView'
+            - type: object
+              additionalProperties: false
+              required: [content]
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/LegalHoldView'
+    LegalHoldResponse:
+      type: object
+      additionalProperties: false
+      description: CE-G04 single-hold envelope (get / create / release).
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/LegalHoldView'
     AssetLibraryAssetClass:
       type: string
       description: CE-E02 platform asset class (UPPER_SNAKE_CASE). SEAL is image seal/signature asset, not cryptographic e-seal.
@@ -9535,3 +9842,5 @@ components:
         - ASSET_LIBRARY_CONTENT_TYPE_MISMATCH
         - ASSET_LIBRARY_PAYLOAD_TOO_LARGE
         - ASSET_LIBRARY_ASSET_NOT_FOUND
+        - LEGAL_HOLD_NOT_FOUND
+        - LEGAL_HOLD_ALREADY_RELEASED

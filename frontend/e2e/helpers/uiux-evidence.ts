@@ -1295,3 +1295,34 @@ export async function captureCeE02LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** CE-G04 Legal Hold admin — list / create / release @1440×900 dual-brand. */
+export const CE_G04_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-G04-legal-hold')
+export const CE_G04_SCREENSHOT_DIR = path.join(CE_G04_EVIDENCE_ROOT, 'screenshots')
+export const CE_G04_VIEWPORT = { width: 1440, height: 900 } as const
+export const CE_G04_NARROW_VIEWPORT = { width: 1280, height: 800 } as const
+
+export function ensureCeG04EvidenceDirs(): void {
+  fs.mkdirSync(CE_G04_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceG04ScreenshotPath(filename: string): string {
+  return path.join(CE_G04_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeG04Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeG04EvidenceDirs()
+  const target = ceG04ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeG04LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeG04EvidenceDirs()
+  const target = ceG04ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

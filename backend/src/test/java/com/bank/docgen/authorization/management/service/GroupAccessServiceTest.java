@@ -111,6 +111,13 @@ class GroupAccessServiceTest {
     }
 
     @Test
+    void manageLegalHoldRequiresGlobalAdminOnly() {
+        assertThat(service.canManageLegalHold(session(List.of("GLOBAL_ADMIN"), List.of()))).isTrue();
+        assertThat(service.canManageLegalHold(session(List.of("GROUP_ADMIN"), List.of()))).isFalse();
+        assertThat(service.canManageLegalHold(session(List.of("AUDIT_ADMIN"), List.of()))).isFalse();
+    }
+
+    @Test
     void contentModuleCatalogBrowseFollowsPermissionMatrix() {
         assertThat(service.canBrowseContentModuleCatalog(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isTrue();
         assertThat(service.canBrowseContentModuleCatalog(session(List.of("MASTER_DESIGNER"), List.of()))).isTrue();

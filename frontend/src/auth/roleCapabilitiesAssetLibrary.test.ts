@@ -29,6 +29,7 @@ const baseCaps: ManagementCapabilities = {
   manageApiPolicy: false,
   readAudit: false,
   manageAssetLibrary: false,
+  manageLegalHold: false,
 }
 
 describe('roleCapabilitiesAssetLibrary', () => {

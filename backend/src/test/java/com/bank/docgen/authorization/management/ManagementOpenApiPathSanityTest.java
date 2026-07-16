@@ -55,6 +55,9 @@ class ManagementOpenApiPathSanityTest {
         if (path.startsWith("/api/management/v1/library/assets")) {
             return java.util.Optional.of("com.bank.docgen.library");
         }
+        if (path.startsWith("/api/management/v1/legal-holds")) {
+            return java.util.Optional.of("com.bank.docgen.legalhold");
+        }
         if (path.startsWith("/api/management/v1/collaboration-work-items")
                 || path.startsWith("/api/management/v1/collaboration-timeout-config")
                 || path.startsWith("/api/management/v1/collaboration-notifications")) {
