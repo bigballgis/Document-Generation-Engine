@@ -6,6 +6,10 @@ frontmatter. **`inherit` is forbidden.**
 > **Active policy (2026-07-15):** **All project specialists pin `cursor-grok-4.5-high-fast`.**
 > Single-model fleet for production consistency — no Composer / GLM tier split.
 > Do **not** pin `glm-5.2-*` (Cursor API pool). Do **not** use `inherit`.
+>
+> **Orthogonal:** Model pin ≠ Task enum availability. If Cursor does not expose project
+> agent names on `Task`, follow `.cursor/skills/specialist-runtime-fallback/SKILL.md`
+> (still keep this model pin on agent frontmatter; do not silently switch Composer/GLM).
 
 ## Canonical pin
 
