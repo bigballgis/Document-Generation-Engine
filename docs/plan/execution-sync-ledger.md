@@ -1,17 +1,16 @@
 # Execution Sync Ledger
 
+**Completion note (2026-07-16, ORCH-SPECIALIST-RETRY-ONLY):** Policy change —
+`orch-specialist-retry-only` → **Done**. **Retry first (≤3) → BLOCKED**; no auto
+`generalPurpose`. Opt-in only: `允许降级` / `allow-gp-fallback`. BDD updated
+([specialist-runtime-fallback.md](../behavior/specialist-runtime-fallback.md)).
+Skill + routing mandate + orchestrator + `/deliver` + AGENTS aligned. Supersedes
+auto-GP default from ORCH-SPECIALIST-FALLBACK. Formal phase **None**. Do **not**
+activate #81 CE-O01. Umbrella **#53** remains **in-progress**. Do **not** claim go-live.
+
 **Completion note (2026-07-16, ORCH-SPECIALIST-FALLBACK):** Governance slice
-`orch-specialist-fallback` → **Done**. BDD **ready**
-([specialist-runtime-fallback.md](../behavior/specialist-runtime-fallback.md); **SRF-01…10**).
-**Artifacts:** skill [specialist-runtime-fallback](../../.cursor/skills/specialist-runtime-fallback/SKILL.md);
-routing mandate + delivery constitution; `delivery-orchestrator` / pipeline handoff
-`runtime_routing`; `AGENTS.md` + `/deliver`; note
-[orch-specialist-fallback-governance.md](./orch-specialist-fallback-governance.md).
-Product BE/FE **N/A**; E2E/UIUX/deploy **N/A**. Batch self-check **`solo`**;
-`runtime_routing` self-check **`INLINE_CHECKLIST`** (parent landed docs when Task API /
-worktree-root migrate flaky). **Not** CE; formal phase **None**. **Do not activate #81
-CE-O01**. Umbrella **#53** remains **in-progress**. Do **not** claim go-live. Do **not**
-activate CD-3.
+`orch-specialist-fallback` → **Done** — **policy superseded** by ORCH-SPECIALIST-RETRY-ONLY
+(auto GP default retired). Original artifacts remain; skill/BDD rewritten for retry-first.
 
 **Completion note (2026-07-16, ORCH-BATCH-RECOMMEND):** Governance slice
 `orch-batch-recommend` → **Done**. BDD **ready**

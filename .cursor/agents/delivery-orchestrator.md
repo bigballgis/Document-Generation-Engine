@@ -24,9 +24,10 @@ no «请输入 /deliver» or «要继续吗？」 menus when direction is clear.
 **opt-in only** (`force-parallel` / `强制并行`).
 
 When project specialist names are **missing from the Task enum** or Task API fails,
-follow **specialist-runtime-fallback** (`FALLBACK_GENERAL_PURPOSE` with contract
-injection, or documented inline checklist). Emit `runtime_routing`. Do **not** pretend
-the named specialist ran.
+follow **specialist-runtime-fallback**: **retry** the named type (up to 3 attempts), then
+**BLOCKED** with recovery hints. Do **not** auto-use `generalPurpose` unless the user
+said `allow-gp-fallback` / `允许降级`. Emit `runtime_routing`. Do **not** pretend the
+named specialist ran after a downgrade.
 
 Hard rule: `.cursor/rules/subagent-routing-mandate.mdc` (Auto-intent section).
 
@@ -36,10 +37,10 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 
 1. Invoke **`Task(subagent_type=delivery-orchestrator)`** for any non-trivial delivery
    request before writing code or plan-status docs — unless the user explicitly opts out.
-   If that type is unavailable → fallback skill (`generalPurpose` + this file’s contract)
-   or parent-inline under this contract with `runtime_routing`.
+   If that type fails → **retry** (skill); if still unavailable → **BLOCKED** unless user
+   opted in to GP downgrade (`允许降级` / `allow-gp-fallback`).
 2. **Not** implement multi-file backend/frontend changes as free-form parent work when
-   the owning engineer is in the enum; if unavailable, GP under that engineer’s agent file.
+   the owning engineer is in the enum; if unavailable → retry/BLOCKED (GP only with opt-in).
 3. End every behavior-changing slice with **`post-task-doc-sync`** then
    **`post-task-commit-review`** (when commit is delegated) before reporting Done.
 4. Use built-in **`explore`** for large read-only reviews (Cursor built-in; no project agent file).
@@ -50,8 +51,7 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 8. **Pre-0 Batch Recommendation:** before stage 0, run the batch checklist and emit
    `batch_recommendation` (`merge` | `solo` | `split`) — intentional related merge into
    **one** leaf to amortize fixed cost; **never** a substitute for multi-writer parallel.
-9. **Runtime routing honesty:** every fallback must include `runtime_routing` in the
-   orchestration report.
+9. **Runtime routing honesty:** emit `runtime_routing` on retry/BLOCKED/opt-in downgrade.
 
 ## Canonical pipeline (stage numbers are authoritative)
 
@@ -146,12 +146,13 @@ batch_recommendation:
   evidence_amortization: ...
   on_red_split_hint: ...
 runtime_routing:
-  mode: NATIVE_SPECIALIST | FALLBACK_GENERAL_PURPOSE | INLINE_CHECKLIST | BLOCKED
+  mode: NATIVE_SPECIALIST | RETRYING | BLOCKED | FALLBACK_GENERAL_PURPOSE | INLINE_CHECKLIST
   requested_subagent: ...
   actual_subagent: ...
   reason: ENUM_MISSING | API_UNAVAILABLE | TASK_REJECTED | NONE
-  contract_sources: [...]
+  retry_count: 0
   retry_attempted: true | false
+  user_opt_in_gp: true | false
   user_visible_note: ...
 ```
 

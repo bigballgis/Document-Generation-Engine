@@ -1,61 +1,59 @@
 ---
 id: BDD-ORCH-SPECIALIST-FALLBACK
-title: Specialist runtime fallback (Task enum / API)
+title: Specialist runtime — retry first (no auto GP downgrade)
 status: ready
 date: 2026-07-16
 bdd_readiness: ready
-task_ids: [orch-specialist-fallback]
+task_ids: [orch-specialist-retry-only]
 placement: ISOLATED
-worktree_path: D:/working/DGE-orch-specialist-fallback
-branch: feat/orch-specialist-fallback
+worktree_path: D:/working/DGE-orch-specialist-retry
+branch: feat/orch-specialist-retry-only
+supersedes: orch-specialist-fallback auto-GP policy (2026-07-16)
 ---
 
-# Specialist Runtime Fallback — BDD behavior spec
+# Specialist Runtime — Retry First — BDD behavior spec
 
 | Field | Value |
 | --- | --- |
-| **Slice** | `orch-specialist-fallback` |
+| **Slice** | `orch-specialist-retry-only` |
 | **bdd_readiness** | **`ready`** |
 | **Actor** | Parent agent / `delivery-orchestrator` |
 | **Owning skill** | [`.cursor/skills/specialist-runtime-fallback/SKILL.md`](../../.cursor/skills/specialist-runtime-fallback/SKILL.md) |
 | **Product E2E / UIUX / backend** | **`not-applicable`** |
-| **CE-O01 / Task #81** | **Do not activate** |
+| **User policy** | **Retry, do not auto-downgrade** (confirmed 2026-07-16) |
 
 ---
 
 ## 1. Goal
 
-When Cursor’s `Task` tool cannot run a **project** specialist named in
-`.cursor/agents/*.md` (enum missing or API unavailable), the session must degrade in a
-**documented, auditable** way — still obeying that specialist’s contract — instead of
-silent improvisation or false “specialist succeeded” claims.
+When `Task` cannot run a project specialist, **retry the named specialist** (API flake)
+or **BLOCK with recovery hints** (enum missing / retries exhausted). Do **not**
+automatically switch to `generalPurpose` unless the user explicitly opts in
+(`allow-gp-fallback` / `允许降级`).
 
 ---
 
-## 2. Confirmed decisions (v1)
+## 2. Confirmed decisions
 
 ### 2.1 Modes
 
 | `runtime_routing.mode` | Meaning |
 | --- | --- |
-| `NATIVE_SPECIALIST` | `Task(subagent_type=<requested>)` succeeded |
-| `FALLBACK_GENERAL_PURPOSE` | Named type unavailable; `generalPurpose` runs with contract injection |
-| `INLINE_CHECKLIST` | Parent follows agent-file checklist (only when that agent documents inline fallback) |
-| `BLOCKED` | Cannot proceed safely; stop and report |
+| `NATIVE_SPECIALIST` | Named Task succeeded |
+| `RETRYING` | Mid retry loop (same `subagent_type`) |
+| `BLOCKED` | Retries exhausted or ENUM_MISSING; stop; no auto GP |
+| `FALLBACK_GENERAL_PURPOSE` | **Only** after user `allow-gp-fallback` / `允许降级` |
+| `INLINE_CHECKLIST` | **Only** after same user opt-in (or agent-doc + opt-in) |
 
-### 2.2 Reasons
+### 2.2 Retry budget
 
-`ENUM_MISSING` | `API_UNAVAILABLE` | `TASK_REJECTED` | `NONE`
+Up to **3** attempts total (1 initial + 2 retries) for `API_UNAVAILABLE` / transport errors.
+`ENUM_MISSING` does not burn useless retries of the same missing name — go to `BLOCKED`
+with recovery hints.
 
-### 2.3 Ladder
+### 2.3 Default after failure
 
-Native → one retry on transport failure → GP fallback with contract injection →
-documented inline checklist → `BLOCKED`.
-
-### 2.4 Lazy GP still forbidden
-
-If the Task enum **includes** the requested project specialist, using `generalPurpose`
-instead is **forbidden**.
+**`BLOCKED`**, not GP.
 
 ---
 
@@ -65,124 +63,86 @@ instead is **forbidden**.
 
 **Given** Task enum includes `delivery-orchestrator`  
 **When** parent starts deliver  
-**Then** it invokes `Task(subagent_type=delivery-orchestrator)`  
-**And** does not use `generalPurpose` for that stage  
-**And** may record `mode: NATIVE_SPECIALIST`.
+**Then** it uses `Task(subagent_type=delivery-orchestrator)`  
+**And** does not use `generalPurpose`.
 
-### SRF-02 — ENUM_MISSING → GP with contract
+### SRF-02 — ENUM_MISSING → BLOCKED (no auto GP)
 
-**Given** Task enum lacks `delivery-orchestrator` (and other project names)  
-**When** parent must run deliver orchestration  
-**Then** it emits `runtime_routing` with `mode: FALLBACK_GENERAL_PURPOSE`, `reason: ENUM_MISSING`  
-**And** spawns `generalPurpose` whose prompt requires reading
-`.cursor/agents/delivery-orchestrator.md` + pipeline/batch skills  
-**And** still runs stage −1 Batch Recommendation before stage 0.
+**Given** Task enum lacks `delivery-orchestrator`  
+**And** user has **not** said `允许降级` / `allow-gp-fallback`  
+**When** parent would orchestrate deliver  
+**Then** `mode: BLOCKED`, `reason: ENUM_MISSING`  
+**And** it does **not** spawn `generalPurpose`  
+**And** it surfaces recovery hints (new chat / reload / workspace root / opt-in).
 
-### SRF-03 — API_UNAVAILABLE → retry then GP
+### SRF-03 — API_UNAVAILABLE → retry up to 3, then BLOCKED
 
-**Given** named `Task` fails with transport/`ENOTFOUND`/`unavailable`  
+**Given** named Task fails with transport/`ENOTFOUND`/`unavailable`  
+**And** no user GP opt-in  
 **When** parent handles the failure  
-**Then** it retries the **same** `subagent_type` once  
-**And** if still failing, uses `FALLBACK_GENERAL_PURPOSE` with `reason: API_UNAVAILABLE`  
-**And** `retry_attempted: true`.
+**Then** it retries the **same** `subagent_type` until success or **3** attempts  
+**And** if all fail → `mode: BLOCKED`, `reason: API_UNAVAILABLE`, `retry_count: 3`  
+**And** it does **not** auto-switch to `generalPurpose`.
 
-### SRF-04 — No false specialist claim
+### SRF-04 — User opt-in enables GP
 
-**Given** work completed via `FALLBACK_GENERAL_PURPOSE`  
-**When** the session reports status  
-**Then** it must **not** claim `Task(<named>)` succeeded  
-**And** the user-visible note states fallback was used.
+**Given** retries exhausted or ENUM_MISSING  
+**And** user said `允许降级` or `allow-gp-fallback` in this session  
+**When** parent continues  
+**Then** it may use `FALLBACK_GENERAL_PURPOSE` with contract injection  
+**And** `user_opt_in_gp: true`  
+**And** must not claim named specialist ran.
 
-### SRF-05 — Lazy GP forbidden
+### SRF-05 — Lazy GP still forbidden
 
-**Given** Task enum includes `backend-engineer`  
-**When** a backend slice is routed  
-**Then** parent must not choose `generalPurpose` merely for convenience  
-**And** must use `backend-engineer` (or orchestrator path that delegates to it).
+**Given** named specialist is in the enum  
+**When** routing  
+**Then** `generalPurpose` must not be used for convenience.
 
-### SRF-06 — Inline checklist only when documented
+### SRF-06 — No fake Done while BLOCKED
 
-**Given** `worktree-router` is unavailable in the enum  
-**And** `.cursor/agents/worktree-router.md` documents inline fallback  
-**When** stage 0 must run  
-**Then** parent may use `INLINE_CHECKLIST` and emit the same placement record  
-**And** must not skip worktree creation.
+**Given** `mode: BLOCKED`  
+**When** reporting to the user  
+**Then** delivery is not claimed Done  
+**And** no skip of gates “to finish somehow”.
 
-### SRF-07 — Gates not skipped under fallback
+### SRF-07 — Opt-in inline checklist
 
-**Given** any fallback mode for a delivery leaf  
-**When** the leaf reaches Done criteria  
-**Then** Batch Recommendation, worktree, required gates, merge, doc-sync, and commit-review
-still apply per surface  
-**And** fallback is not used as an excuse to skip them.
+**Given** user opted in to downgrade  
+**And** `worktree-router.md` documents inline checklist  
+**When** stage 0 must run and enum lacks the agent  
+**Then** `INLINE_CHECKLIST` is allowed  
+**And** placement record is still emitted.
 
-### SRF-08 — BLOCKED when unsafe
+### SRF-08 — Built-ins unchanged
 
-**Given** GP Task also fails and no documented inline checklist applies  
-**When** continuing would require inventing gates or writing without isolation  
-**Then** `mode: BLOCKED`  
-**And** parent stops with a clear blocker (no fake Done).
+**Given** deep read-only audit  
+**When** `explore` is available  
+**Then** use `explore` (not this ladder).
 
-### SRF-09 — Built-ins unchanged
+### SRF-09 — Honesty
 
-**Given** a deep read-only audit request  
-**When** `explore` is in the enum  
-**Then** parent uses `explore` (not project-specialist fallback).
+**Given** any non-native mode  
+**When** reporting  
+**Then** `runtime_routing` is present and accurate.
 
-### SRF-10 — This slice stays solo; CE-O01 untouched
+### SRF-10 — CE-O01 untouched
 
-**Given** slice `orch-specialist-fallback` and parked CE-O01  
+**Given** this governance slice  
 **When** Batch Recommendation runs  
-**Then** `decision` is `solo`  
-**And** CE-O01 / #81 are not activated.
+**Then** `solo`; do not activate #81 CE-O01.
 
 ---
 
-## 4. Handoff fields
+## 4. Limits (confirmed facts)
 
-```
-runtime_routing:
-  mode: NATIVE_SPECIALIST | FALLBACK_GENERAL_PURPOSE | INLINE_CHECKLIST | BLOCKED
-  requested_subagent: ...
-  actual_subagent: ...
-  reason: ENUM_MISSING | API_UNAVAILABLE | TASK_REJECTED | NONE
-  contract_sources: [...]
-  retry_attempted: true | false
-  user_visible_note: ...
-```
-
-### This slice self-check
-
-```
-batch_recommendation:
-  decision: solo
-  member_task_ids: [orch-specialist-fallback]
-  proposed_slice_id: orch-specialist-fallback
-  vetoes_applied: [unrelated-parked-CE-O01]
-runtime_routing:
-  mode: INLINE_CHECKLIST
-  requested_subagent: delivery-orchestrator
-  actual_subagent: parent-inline
-  reason: API_UNAVAILABLE
-  retry_attempted: true
-  user_visible_note: Specialist Task unavailable; parent landed governance docs in worktree per fallback skill.
-```
-
----
-
-## 5. Traceability
-
-| Artifact | Role |
-| --- | --- |
-| This doc | Behavior SoT |
-| `.cursor/skills/specialist-runtime-fallback/SKILL.md` | Runtime ladder |
-| `.cursor/rules/subagent-routing-mandate.mdc` | Parent hard rule |
-| `.cursor/agents/delivery-orchestrator.md` | Orchestrator consumer |
-| `.cursor/skills/delivery-pipeline/SKILL.md` | Handoff payload |
+- Retry **can** recover API flakes.
+- Retry **cannot** create Task enum entries when Cursor did not load `.cursor/agents`.
+- Platform injection of custom agents is outside this repo’s control.
 
 ```
 bdd_readiness: ready
-task_ids: [orch-specialist-fallback]
+task_ids: [orch-specialist-retry-only]
 open_questions: []
 product_e2e_uiux_backend: not-applicable
 ```
