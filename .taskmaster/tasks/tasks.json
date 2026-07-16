@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-16. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 → Done. Sole-active CE delivery leaf: #90 CE-U14 (in-progress). Next after U14 Done: #91 CE-U15. Umbrella is program registry only — not a delivery leaf.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89 Done. Sole-active leaf (single-lane serial): #90 CE-U14. Next queued: #91 CE-U15. P3 parked. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 → Done. Sole-active CE delivery leaf: none (cleared). Next / queue head: #91 CE-U15 (pending/parked). Umbrella is program registry only — not a delivery leaf.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90 Done. Sole-active leaf (single-lane serial): none. Next queued: #91 CE-U15 (pending/parked — do not auto-start). P3 parked. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-16T14:28:00.000Z"
+        "updatedAt": "2026-07-16T16:10:00.000Z"
       },
       {
         "id": "54",
@@ -1248,22 +1248,22 @@
       {
         "id": "90",
         "title": "CE-U14: Dashboard template lifecycle todos",
-        "description": "IN PROGRESS 2026-07-16. Slice ce-u14-dashboard-lifecycle-todos. Sole-active CE delivery leaf (single-lane serial §9.2). Dashboard Tasks Tab — TEST/APPROVAL/PENDING_RELEASE queues with correct deep links (testing / approval / publishReadiness). P2·S. BDD ready (BDD-CE-U14-DLT-001…008).",
-        "details": "Activated after CE-G04 (#75 Done). Placement ISOLATED: D:/working/DGE-ce-u14-dashboard-lifecycle-todos · feat/ce-u14-dashboard-lifecycle-todos. Owning BDD: docs/behavior/ce-u14-dashboard-lifecycle-todos.md. frontend_ui_in_scope=true. Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U14 / §9.2. Next after Done: #91 CE-U15. Do NOT treat umbrella #53 as the delivery leaf.",
+        "description": "DONE 2026-07-17. Slice ce-u14-dashboard-lifecycle-todos. MAIN merge 05e845e4 / feature 09e0d251. Dashboard Tasks Tab TEST/APPROVAL/PENDING_RELEASE + queue-aware deep links. FE gates + E2E 6/6 + UIUX PASS + arch PASS_WITH_NOTES + Stage 5/10 DEPLOY_OK. Formal phase None. Not go-live.",
+        "details": "Completed 2026-07-17 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: ce-u14-dashboard-lifecycle-todos. Placement was ISOLATED then main-only closeout; worktree Git-removed (disk dir may linger). Merge 05e845e4b3dd7dc2fb4651dcf0d783b0323988ae; feature 09e0d251. BDD ready docs/behavior/ce-u14-dashboard-lifecycle-todos.md (BDD-CE-U14-DLT-001…008). Gates: FE lint/type-check/test(1429+)/build GREEN; E2E functional 6/6 CE-U14 + collaboration-todos 4/4 + CDP-T02 regression; UIUX PASS Critical=0 (CE-U14-uiux-manifest.md, 24 screenshots); architecture PASS_WITH_NOTES Critical=0 (Yellow #1 fixed — no content[0] fallback); Stage 5 DEPLOY_OK; Stage 10 DEPLOY_OK ForceRebuild. Formal phase remains None. Plan §4 CE-U14 Done. Sole-active cleared. Next #91 CE-U15 pending/parked. Do NOT activate CD-3 / claim go-live / activate P3.",
         "testStrategy": "1. Lifecycle todos visible (TEST/APPROVAL/PENDING_RELEASE). 2. Deep links to testing / approval / publishReadiness (not always approval). 3. E2E+UIUX BDD-CE-U14-DLT-001…008.",
         "priority": "medium",
         "dependencies": [
           "89"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T14:28:00.000Z"
+        "updatedAt": "2026-07-16T16:10:00.000Z"
       },
       {
         "id": "91",
         "title": "CE-U15: Lifecycle stepper + checklist deep links",
-        "description": "PENDING. Slice ce-u15-lifecycle-stepper. Top-bar state stepper; publish gate fix links. P2·M.",
-        "details": "After U14 (#90). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U15.",
+        "description": "PENDING (queue head after #90 CE-U14 Done). Slice ce-u15-lifecycle-stepper. Top-bar state stepper; publish gate fix links. P2·M. Parked — do not auto-start.",
+        "details": "§9.2 queue head after U14 (#90 Done). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U15. Do NOT auto-start until next deliver activation.",
         "testStrategy": "1. Stepper. 2. Deep links. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
@@ -1271,7 +1271,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00Z"
+        "updatedAt": "2026-07-16T16:10:00.000Z"
       },
       {
         "id": "92",
