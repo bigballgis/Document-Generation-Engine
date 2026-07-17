@@ -5,11 +5,11 @@
 | **文件状态** | `ready` |
 | **BDD ID 前缀** | `BDD-PRR-A01` / `BDD-PRR-A02` / `BDD-PRR-A03` |
 | **编写日期** | 2026-07-17 |
-| **Slice** | `prod-scale-bounded-queries` |
-| **Branch** | `feat/prod-scale-bounded-queries` |
-| **Worktree** | `D:/working/DGE-prod-scale-bounded-queries` |
-| **Placement** | ISOLATED |
-| **Task IDs** | Task Master **#98** (PRR-A01, leaf lead) · **#99** (PRR-A02) · **#100** (PRR-A03) — Batch Recommendation **merge** (`member_task_ids: ["98","99","100"]`) |
+| **Slice** | `prod-scale-bounded-queries` — **Done** (MAIN merge `4197770f` / feature tip `b107e9e6`; worktree **REMOVED**) |
+| **Branch** | `feat/prod-scale-bounded-queries` (merged) |
+| **Worktree** | removed |
+| **Placement** | ISOLATED → merged to MAIN |
+| **Task IDs** | Task Master **#98** (PRR-A01, leaf lead) · **#99** (PRR-A02) · **#100** (PRR-A03) — Batch Recommendation **merge** **closed** (`member_task_ids: ["98","99","100"]`) → **Done** |
 | **`frontend_ui_in_scope`** | **`false`** |
 | **Formal phase** | **None**（可靠性加固叶；不发明 sole-active 正式 P-phase） |
 | **上游行为** | [lrp-d1-audit-retention.md](./lrp-d1-audit-retention.md)；[ce-g04-legal-hold.md](./ce-g04-legal-hold.md)；[ce-u18-batch-test-history.md](./ce-u18-batch-test-history.md)；[ce-u08-content-module-review-loop.md](./ce-u08-content-module-review-loop.md)；[template-testing-overhaul.md](./template-testing-overhaul.md) |
@@ -370,10 +370,11 @@
 **`bdd_readiness: ready`**  
 **`frontend_ui_in_scope: false`**
 
-规格完整、可测、已与 LR-D1 / CE-G04 / CE-U08 / CE-U18 对齐；确认默认足以启动 TDD。可 hand off：
+规格完整、可测、已与 LR-D1 / CE-G04 / CE-U08 / CE-U18 对齐。**交付已关闭（2026-07-17）：** Task Master **#98/#99/#100** → **Done**；MAIN merge `4197770f`；`mvn verify` **1925** GREEN；Stage 10 **DEPLOY_OK**；sole-active **cleared**；下一队列头 **#101** PRR-A04（solo，未激活）。
 
-1. `plan-orchestrator` — **Done**（本 worktree）：Task Master **#98/#99/#100** registered；sole-active = `#98` leaf lead  
-2. `backend-engineer` — TDD Red → Pageable 清理 / TopN / SUBMITTED 扫描（本 worktree；成员 `#98+#99+#100`）  
-3. FE / e2e / uiux — **跳过**（本叶）
+1. `plan-orchestrator` — **Done**  
+2. `backend-engineer` — **Done**（成员 `#98+#99+#100`）  
+3. FE / e2e / uiux — **N/A**（本叶）  
+4. `post-task-doc-sync` — **Done**（MAIN）
 
-**stage_done_definition:** BDD persisted ready; scenarios Given/When/Then; legal-hold safe; batch size 500–2000; no FE UI in scope
+**stage_done_definition:** BDD persisted ready; scenarios Given/When/Then; legal-hold safe; batch size 500–2000; no FE UI in scope；gates green；merged + doc-sync
