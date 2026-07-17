@@ -26,7 +26,8 @@ public record TemplateDetailView(
         Instant updatedAt,
         String updatedBy,
         String updatedByDisplayName,
-        boolean readOnly
+        boolean readOnly,
+        TemplateExportMasterPinView masterPin
 ) {
     public TemplateDetailView {
         variables = DefensiveCopies.copyList(variables);

@@ -397,7 +397,7 @@ class TemplateSelfApprovalBlockTest {
                 templateId.toString(), "TPL-001", "RETAIL", "Sample", null,
                 UUID.randomUUID().toString(), TemplateLifecycleStatus.PENDING_RELEASE, null, null,
                 UUID.randomUUID().toString(), 1, List.of(), List.of(), List.of(),
-                Instant.now(), Instant.now(), null, null, false);
+                Instant.now(), Instant.now(), null, null, false, null);
     }
 
     private ManagementSessionClaims session(String username, List<String> roles) {

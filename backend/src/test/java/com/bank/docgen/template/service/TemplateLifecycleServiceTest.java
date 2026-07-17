@@ -448,7 +448,6 @@ class TemplateLifecycleServiceTest {
                 Instant.now(),
                 null,
                 null,
-                false
-        );
+                false, null);
     }
 }

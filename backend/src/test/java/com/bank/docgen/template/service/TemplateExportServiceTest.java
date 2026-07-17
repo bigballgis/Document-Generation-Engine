@@ -208,7 +208,8 @@ class TemplateExportServiceTest {
                 Instant.now(),
                 "test-user",
                 "Test User",
-                true
+                true,
+                null
         );
     }
 

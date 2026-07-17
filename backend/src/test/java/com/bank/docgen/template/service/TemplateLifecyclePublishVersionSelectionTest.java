@@ -220,7 +220,6 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 Instant.now(),
                 null,
                 null,
-                false
-        );
+                false, null);
     }
 }

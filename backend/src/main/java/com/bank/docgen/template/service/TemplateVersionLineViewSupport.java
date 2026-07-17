@@ -2,6 +2,7 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.template.api.TemplateDetailView;
+import com.bank.docgen.template.api.TemplateExportMasterPinView;
 import com.bank.docgen.template.api.TemplateVersionLineSummaryView;
 import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
@@ -91,7 +92,8 @@ final class TemplateVersionLineViewSupport {
 
     TemplateDetailView overlayReleaseDetailUpdatedBy(
             TemplateDetailView detail,
-            TemplateVersionEntity version
+            TemplateVersionEntity version,
+            TemplateExportMasterPinView masterPin
     ) {
         String updatedBy = version.getCreatedBy();
         String updatedByDisplayName = updatedBy == null || updatedBy.isBlank()
@@ -116,7 +118,8 @@ final class TemplateVersionLineViewSupport {
                 detail.updatedAt(),
                 updatedBy,
                 updatedByDisplayName,
-                detail.readOnly()
+                detail.readOnly(),
+                masterPin
         );
     }
 

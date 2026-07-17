@@ -343,6 +343,16 @@ export async function validateBindingsViaApi(
   return authorizedPost(request, authorToken, `/templates/${templateId}/bindings/validate`, {})
 }
 
+/** Draft with no bindings — for CE-U19 empty Anchors partition (DRV-005). */
+export async function prepareEmptyDraftTemplate(
+  request: APIRequestContext,
+): Promise<StructuredAuthoringFixture> {
+  return createDraftTemplate(request, {
+    externalId: uniqueExternalId('E2E-CE-U19'),
+    name: `E2E CE-U19 Empty Bindings ${Date.now()}`,
+  })
+}
+
 export async function prepareDraftTemplateWithCleanBinding(
   request: APIRequestContext,
 ): Promise<StructuredAuthoringFixture> {

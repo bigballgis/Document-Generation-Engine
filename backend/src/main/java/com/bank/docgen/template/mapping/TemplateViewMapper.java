@@ -122,7 +122,8 @@ public class TemplateViewMapper {
                 template.getUpdatedAt(),
                 readOnly ? version.getCreatedBy() : null,
                 null,
-                readOnly
+                readOnly,
+                null
         );
     }
 

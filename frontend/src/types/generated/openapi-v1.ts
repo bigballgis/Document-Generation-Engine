@@ -996,7 +996,7 @@ export interface paths {
         };
         /**
          * Get template version line detail
-         * @description Returns read-only variable, binding, and composition-rule snapshots for a version line belonging to the template. Unknown id or id belonging to another template returns `404` without cross-template leakage.
+         * @description Returns read-only variable, binding, and composition-rule snapshots for a version line belonging to the template. Unknown id or id belonging to another template returns `404` without cross-template leakage. CE-U19: published lines may include optional `result.masterPin` (same shape as release GET) when CE-K01 pin fields are present; in-flight / unpinned lines omit or null.
          */
         get: operations["getTemplateVersionLine"];
         put?: never;
@@ -1096,7 +1096,7 @@ export interface paths {
         };
         /**
          * Get read-only published release snapshot
-         * @description Returns read-only release detail for a published (or published-then-stopped) release line keyed by semantic release version. Unknown release version returns `404`.
+         * @description Returns read-only release detail for a published (or published-then-stopped) release line keyed by semantic release version. Unknown release version returns `404`. CE-U19: when CE-K01 pin fields exist on the release row, `result.masterPin` is populated (shape `TemplateExportMasterPinView`); omit or null when not pinned. Same template-read authorization as package hub; no new permission. Behavior: docs/behavior/ce-u19-dependency-readonly-view.md (U19-D5).
          */
         get: operations["getTemplateReleaseVersionDetail"];
         put?: never;
@@ -2646,6 +2646,8 @@ export interface components {
             variables: components["schemas"]["TemplateExportVariableSchemaView"][];
             bindings: components["schemas"]["TemplateExportAnchorBindingView"][];
             rules: components["schemas"]["TemplateExportCompositionRuleView"][];
+            /** @description CE-U19 additive optional CE-K01 master revision pin for published release (or version-line) detail. Shape aligns with CE-E01 `TemplateExportMasterPinView` (`masterRevisionId`, `masterFileHash`, optional `revisionSequence` / `pinOrigin`). Null or omitted when the line is not pinned (e.g. in-flight). Does not invent a new dependency-aggregate API. See docs/behavior/ce-u19-dependency-readonly-view.md (U19-D5). */
+            masterPin?: components["schemas"]["TemplateExportMasterPinView"];
         };
         TemplateVersionLinePageResponse: {
             metadata: components["schemas"]["Metadata"];
@@ -3533,7 +3535,7 @@ export interface components {
          * @enum {string}
          */
         TemplateExportMasterPinOrigin: "PUBLISHED" | "PINNED_RETROACTIVELY" | "EXPORT_TIME";
-        /** @description CE-E01 v2 master revision fingerprint. Consumes CE-K01 fields `master_revision_id` / `master_file_hash` (or EXPORT_TIME hash). See docs/behavior/ce-k01-release-bundle-pinning.md and docs/behavior/ce-e01-export-bundle-v2.md (E01-C4). */
+        /** @description CE-E01 v2 master revision fingerprint. Consumes CE-K01 fields `master_revision_id` / `master_file_hash` (or EXPORT_TIME hash). Reused by CE-U19 as optional `masterPin` on management release / version-line detail GET (published pin read-back; not a new schema). See docs/behavior/ce-k01-release-bundle-pinning.md, docs/behavior/ce-e01-export-bundle-v2.md (E01-C4), and docs/behavior/ce-u19-dependency-readonly-view.md (U19-D5). */
         TemplateExportMasterPinView: {
             /**
              * Format: uuid
@@ -3940,6 +3942,8 @@ export interface components {
             updatedByDisplayName?: string | null;
             /** @description True when the detail is an immutable published release snapshot. */
             readOnly?: boolean;
+            /** @description CE-U19 additive optional CE-K01 master revision pin for published release detail GET. Shape aligns with CE-E01 `TemplateExportMasterPinView` (`masterRevisionId`, `masterFileHash`, optional `revisionSequence` / `pinOrigin`). Null or omitted when the release is not pinned. Same contract as version-line detail `masterPin`. See docs/behavior/ce-u19-dependency-readonly-view.md (U19-D5). */
+            masterPin?: components["schemas"]["TemplateExportMasterPinView"];
         };
         TemplateImportResult: {
             importSummary: components["schemas"]["TemplateImportSummaryView"];

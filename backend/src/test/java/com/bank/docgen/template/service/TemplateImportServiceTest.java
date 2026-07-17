@@ -333,8 +333,7 @@ class TemplateImportServiceTest {
                 Instant.now(),
                 null,
                 null,
-                false
-        );
+                false, null);
     }
 
     private static ManagementSessionClaims session(
