@@ -37,6 +37,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.template.web.RiskPromptConfigController",
             "com.bank.docgen.template.web.TemplateAuthoringController",
             "com.bank.docgen.template.web.TemplateAuthorWorkflowController",
+            "com.bank.docgen.template.web.AuthorWordPageCountController",
             "com.bank.docgen.template.web.TemplateController",
             "com.bank.docgen.template.web.TemplateExportController",
             "com.bank.docgen.template.web.TemplateImportController",
@@ -204,6 +205,10 @@ final class ManagementAuthorizationRegistry {
             Map.entry(
                     "com.bank.docgen.template.web.TemplateRiskPromptConfigController",
                     Set.of("com.bank.docgen.template.service.RiskPromptConfigService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.template.web.AuthorWordPageCountController",
+                    Set.of("com.bank.docgen.template.service.TemplateVersionLineService")
             ),
             Map.entry(
                     "com.bank.docgen.template.web.TemplateVersionLineController",
