@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR #98+#99+#100+#101+#102+#105 → Done. Host sole-active delivery leaf = #103 PRR-C01 (Wave C) — NOT under this umbrella. Next after #103: #104. #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 + #102 + #105 Done outside this umbrella. Host sole-active = NON-CE #103 Wave C (prod-adr-0042-0043-closeout); next #104. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR #98+#99+#100+#101+#102+#105 → Done. Host sole-active delivery leaf = #103 PRR-C01 Path X (Wave C) ISOLATED resume — NOT under this umbrella. Next after #103: #104. IBL #106 registry-only pending (not a delivery leaf). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 + #102 + #105 Done outside this umbrella. Host sole-active = NON-CE #103 Wave C Path X (prod-adr-0042-0043-closeout; ISOLATED resume); next #104 (not activated). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:41:00.000Z"
+        "updatedAt": "2026-07-18T02:00:00.000Z"
       },
       {
         "id": "54",
@@ -1468,13 +1468,13 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-18T01:41:00.000Z",
+      "lastModified": "2026-07-18T02:00:00.000Z",
       "taskCount": 105,
       "completedCount": 102,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-18T01:28:00.000Z"
+      "updated": "2026-07-18T02:00:00.000Z"
     }
   }
 }

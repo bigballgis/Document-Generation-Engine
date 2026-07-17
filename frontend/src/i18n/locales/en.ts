@@ -1344,6 +1344,7 @@ export default {
         CONTENT_MODULE_REFERENCES: 'Content module references',
         UNSUPPORTED_STRUCTURED_NODES: 'Unsupported structured nodes',
         PASTE_CLEANING_BLOCKERS: 'Paste cleaning blockers',
+        PAGINATION_DELTA_BUDGET: 'Word–PDF pagination delta budget',
         BLOCKER_STATUS: 'Blocker status',
         FIDELITY_WARNINGS_VIEWED: 'Fidelity warnings reviewed',
         CONTENT_MODULE_EFFECTIVE_EXPIRED: 'Content module effective period',

@@ -1360,6 +1360,7 @@ export default {
         CONTENT_MODULE_REFERENCES: '内容模块引用',
         UNSUPPORTED_STRUCTURED_NODES: '不支持的结构化节点',
         PASTE_CLEANING_BLOCKERS: '粘贴清洗阻断',
+        PAGINATION_DELTA_BUDGET: 'Word–PDF 分页偏差预算',
         BLOCKER_STATUS: '阻塞项状态',
         FIDELITY_WARNINGS_VIEWED: '保真警告已审阅',
         CONTENT_MODULE_EFFECTIVE_EXPIRED: '内容模块生效期',
