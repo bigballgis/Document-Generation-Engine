@@ -730,8 +730,8 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR #98+#99+#100+#101+#102 → Done. Host sole-active: NON-CE #105 PRR-B02 LDAP SPI (in-progress) — not under this umbrella. Next after #105: #103 Wave C → #104. #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 + #102 Done outside this umbrella. Host sole-active: #105 PRR-B02 (NON-CE) in-progress; then #103 Wave C. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR #98+#99+#100+#101+#102+#105 → Done. Host sole-active cleared. Next queue head (not activated): #103 Wave C → #104. #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 + #102 + #105 Done outside this umbrella. Host sole-active cleared; next queue #103 Wave C (not activated). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
@@ -1426,8 +1426,8 @@
       {
         "id": "103",
         "title": "PRR-C01: ADR-0042/0043 closeout (#3b)",
-        "description": "PENDING (queued after sole-active #105 Wave B LDAP SPI — not activated). Wave C — ADR-0042/0043 rendering acceptance closeout tied to launch checklist #3b blocker. Formal phase None. Not go-live. Do NOT flip #3b until Accepted + evidence.",
-        "details": "Serial queue: #102 Done → #105 PRR-B02 LDAP SPI (sole-active in-progress) → this leaf (Wave C) → #104. Do not activate while #105 is In Progress (single-lane serial). Scope: ADR-0042/0043 path to Accepted with durable evidence for checklist #3b. Formal phase None. Not go-live.",
+        "description": "PENDING (next queue head after #105 Done — not activated). Wave C — ADR-0042/0043 rendering acceptance closeout tied to launch checklist #3b blocker. Formal phase None. Not go-live. Do NOT flip #3b until Accepted + evidence.",
+        "details": "Serial queue: #102 Done → #105 PRR-B02 LDAP SPI Done (50448016) → this leaf (Wave C, not activated) → #104. Sole-active cleared. Scope: ADR-0042/0043 path to Accepted with durable evidence for checklist #3b. Formal phase None. Not go-live.",
         "testStrategy": "TBD at activation — BDD/ADR acceptance evidence; do not flip #3b without durable proof.",
         "priority": "high",
         "dependencies": [
@@ -1435,13 +1435,13 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:04:00.000Z"
+        "updatedAt": "2026-07-18T01:28:00.000Z"
       },
       {
         "id": "104",
         "title": "PRR-D01: Ops hardening (ResilienceFailureMapper / actuator / nginx / dashboard / doc hygiene)",
         "description": "PENDING (queued after Wave C — not activated). Wave D — ResilienceFailureMapper, actuator exposure, nginx, dashboard, and doc hygiene hardening. Formal phase None. Not go-live. Do NOT flip checklist #3b.",
-        "details": "Serial queue after #103 PRR-C01 Wave C (full chain: #102 → #105 sole-active → #103 → this leaf). Do not activate while earlier PRR leaves are In Progress. Scope: ops/reliability surfacing + doc hygiene. Formal phase None. Not go-live.",
+        "details": "Serial queue after #103 PRR-C01 Wave C (full chain: #102 → #105 Done → #103 → this leaf). Do not activate while earlier PRR leaves are In Progress. Scope: ops/reliability surfacing + doc hygiene. Formal phase None. Not go-live.",
         "testStrategy": "TBD at activation — BDD if behavior-changing; mvn/pnpm gates; deploy evidence as required.",
         "priority": "medium",
         "dependencies": [
@@ -1449,32 +1449,32 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:04:00.000Z"
+        "updatedAt": "2026-07-18T01:28:00.000Z"
       },
       {
         "id": "105",
         "title": "PRR-B02: LDAP AdGroupResolver SPI (CONDITIONAL)",
-        "description": "IN PROGRESS 2026-07-18 (sole-active). Wave B item 6 — AdGroupResolver SPI decoupling + honest production boundary toward checklist #5a CONDITIONAL residual. Slice prod-ldap-ad-group-resolver-spi; worktree D:/working/DGE-prod-ldap-ad-group-resolver-spi · feat/prod-ldap-ad-group-resolver-spi. BDD ready docs/behavior/prod-ldap-ad-group-resolver-spi.md (BDD-PRR-B02-LDAP-SPI). frontend_ui_in_scope=false. LAB override ≠ production AD. Do NOT invent directory coords. Formal phase None. Not go-live. Do NOT flip checklist #3b. Do NOT mark #5a GO without durable company AD evidence. Next after: #103 Wave C.",
-        "details": "ACTIVATED 2026-07-18 (stage 2 plan-orchestrator). Sole-active delivery leaf. Batch recommendation solo (member_task_ids: [\"105\"]). Placement ISOLATED. Scope: AdGroupResolver SPI contract + consumer DI decoupling + claimed-prod fail-closed honesty; do NOT invent LDAP/AD host/DN/credentials; do NOT flip #5a to GO. Formal phase remains None. Umbrella #53 registry only (not a delivery leaf). Serial queue: #105 (sole-active) → #103 Wave C PRR-C01 → #104. No code in this activation.",
-        "testStrategy": "1. BDD-PRR-B02-LDAP-SPI ready (docs/behavior/prod-ldap-ad-group-resolver-spi.md). 2. TDD for SPI consumer DI / fail-closed boundaries. 3. mvn -B -ntp -f backend/pom.xml verify GREEN. 4. FE/E2E N/A (frontend_ui_in_scope=false). 5. Do NOT invent company directory coords. 6. Do NOT mark #5a GO; do NOT flip #3b; do NOT claim go-live.",
+        "description": "DONE 2026-07-18. PRR-B02 LDAP AdGroupResolver SPI → Done. MAIN merge 50448016; worktree REMOVED. Slice prod-ldap-ad-group-resolver-spi. AdGroupResolver SPI + consumer DI decoupling; LAB ConfigAdGroupResolver ≠ production AD; claimed-prod fail-closed. BDD ready docs/behavior/prod-ldap-ad-group-resolver-spi.md (BDD-PRR-B02-LDAP-SPI). frontend_ui_in_scope=false. Checklist #5a remains CONDITIONAL (not GO). Formal phase None. Not go-live. Do NOT flip checklist #3b. Sole-active cleared. Next queue head (not activated): #103 Wave C.",
+        "details": "COMPLETED 2026-07-18 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: prod-ldap-ad-group-resolver-spi. Batch recommendation solo (member_task_ids: [\"105\"]) closed. Merge SHA 50448016. Gates: mvn verify GREEN 1946; architecture PASS_WITH_NOTES; DEPLOY_OK; E2E/UIUX N/A. Evidence: AdGroupResolver SPI + DI decoupling; fail-closed claimed-prod without inventing directory coords. Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b. Do NOT mark #5a GO (stays CONDITIONAL). Next queue head (not activated): #103 Wave C PRR-C01 → #104.",
+        "testStrategy": "1. BDD-PRR-B02-LDAP-SPI ready (docs/behavior/prod-ldap-ad-group-resolver-spi.md). 2. TDD for SPI consumer DI / fail-closed boundaries. 3. mvn -B -ntp -f backend/pom.xml verify GREEN (1946). 4. FE/E2E N/A (frontend_ui_in_scope=false). 5. Do NOT invent company directory coords. 6. Do NOT mark #5a GO; do NOT flip #3b; do NOT claim go-live.",
         "priority": "medium",
         "dependencies": [
           "102"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:04:00.000Z"
+        "updatedAt": "2026-07-18T01:28:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-18T01:04:00.000Z",
+      "lastModified": "2026-07-18T01:28:00.000Z",
       "taskCount": 105,
-      "completedCount": 101,
+      "completedCount": 102,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-18T01:04:00.000Z"
+      "updated": "2026-07-18T01:28:00.000Z"
     }
   }
 }
