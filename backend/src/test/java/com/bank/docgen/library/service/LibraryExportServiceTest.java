@@ -36,6 +36,8 @@ import com.bank.docgen.template.service.TemplateGovernanceException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -44,6 +46,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,31 +123,32 @@ class LibraryExportServiceTest {
         stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(), List.of());
         stubV2Build(templateBId, "TPL-B", masterHash, masterBytes, List.of(), List.of());
 
-        LibraryExportService.LibraryExportZipArtifact artifact =
-                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin);
-
-        Set<String> names = zipEntryNames(artifact.content());
-        assertThat(names).contains(
-                LibraryExportService.MANIFEST_ENTRY,
-                "templates/" + templateAId + ".zip",
-                "templates/" + templateBId + ".zip",
-                "masters/" + masterHash + ".docx"
-        );
-        LibraryExportManifestView manifest = readManifest(artifact.content());
-        assertThat(manifest.format()).isEqualTo(LibraryExportService.LIBRARY_EXPORT_FORMAT);
-        assertThat(manifest.bundleVersion()).isEqualTo(2);
-        assertThat(manifest.counts().includedCount()).isEqualTo(2);
-        assertThat(manifest.counts().uniqueMasterCount()).isEqualTo(1);
-        verify(managementAuditRecorder).recordLibraryExport(
-                eq(manifest.exportBatchId()),
-                eq("ALL_AUTHORIZED"),
-                eq(2),
-                eq(0),
-                eq(0),
-                eq(0),
-                eq("10000002"),
-                any()
-        );
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin)) {
+            byte[] zipBytes = artifact.readAllBytes();
+            Set<String> names = zipEntryNames(zipBytes);
+            assertThat(names).contains(
+                    LibraryExportService.MANIFEST_ENTRY,
+                    "templates/" + templateAId + ".zip",
+                    "templates/" + templateBId + ".zip",
+                    "masters/" + masterHash + ".docx"
+            );
+            LibraryExportManifestView manifest = readManifest(zipBytes);
+            assertThat(manifest.format()).isEqualTo(LibraryExportService.LIBRARY_EXPORT_FORMAT);
+            assertThat(manifest.bundleVersion()).isEqualTo(2);
+            assertThat(manifest.counts().includedCount()).isEqualTo(2);
+            assertThat(manifest.counts().uniqueMasterCount()).isEqualTo(1);
+            verify(managementAuditRecorder).recordLibraryExport(
+                    eq(manifest.exportBatchId()),
+                    eq("ALL_AUTHORIZED"),
+                    eq(2),
+                    eq(0),
+                    eq(0),
+                    eq(0),
+                    eq("10000002"),
+                    any()
+            );
+        }
     }
 
     @Test
@@ -154,23 +159,164 @@ class LibraryExportServiceTest {
         stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(clause), List.of());
         stubV2Build(templateBId, "TPL-B", masterHash, masterBytes, List.of(clause), List.of());
 
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin)) {
+            byte[] zipBytes = artifact.readAllBytes();
+            Set<String> names = zipEntryNames(zipBytes);
+            long masterEntries = names.stream().filter(n -> n.startsWith("masters/")).count();
+            long clauseEntries = names.stream().filter(n -> n.startsWith("clauses/")).count();
+            assertThat(masterEntries).isEqualTo(1);
+            assertThat(clauseEntries).isEqualTo(1);
+            LibraryExportManifestView manifest = readManifest(zipBytes);
+            assertThat(manifest.masterCatalog()).hasSize(1);
+            assertThat(manifest.masterCatalog().getFirst().sourceTemplateIds())
+                    .containsExactlyInAnyOrder(templateAId.toString(), templateBId.toString());
+            assertThat(manifest.clauseCatalog()).hasSize(1);
+            assertThat(manifest.clauseCatalog().getFirst().sourceTemplateIds())
+                    .containsExactlyInAnyOrder(templateAId.toString(), templateBId.toString());
+            assertThat(manifest.counts().uniqueMasterCount()).isEqualTo(1);
+            assertThat(manifest.counts().uniqueClauseCount()).isEqualTo(1);
+        }
+    }
+
+    @Test
+    void libraryExport_doesNotRetainAllNestedZipsOnHeap() throws Exception {
+        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(List.of("RETAIL")))
+                .thenReturn(List.of(templateA, templateB));
+        stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(), List.of());
+        stubV2Build(templateBId, "TPL-B", masterHash, masterBytes, List.of(), List.of());
+
+        AtomicInteger nestedWrites = new AtomicInteger();
+        AtomicInteger peakRetainedNestedMapEntries = new AtomicInteger();
+        LibraryExportService.LibraryExportAssemblyProbe probe = retained -> {
+            nestedWrites.incrementAndGet();
+            peakRetainedNestedMapEntries.updateAndGet(current -> Math.max(current, retained));
+        };
+        service = new LibraryExportService(
+                templateRepository,
+                businessGroupRepository,
+                templateExportService,
+                exportAccessService,
+                new GroupAccessService(),
+                managementAuditRecorder,
+                objectMapper,
+                probe,
+                LibraryExportService.LibraryExportTempZipFactory.SYSTEM
+        );
+
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin)) {
+            assertThat(artifact.contentPath()).isNotNull();
+            assertThat(Files.isRegularFile(artifact.contentPath())).isTrue();
+            assertThat(nestedWrites.get()).isEqualTo(2);
+            assertThat(peakRetainedNestedMapEntries.get()).isZero();
+            assertThat(LibraryExportService.LibraryExportZipArtifact.class.isRecord()).isFalse();
+            assertThat(LibraryExportService.LibraryExportZipArtifact.class.getMethods())
+                    .extracting(java.lang.reflect.Method::getName)
+                    .doesNotContain("content");
+            assertThat(artifact.readAllBytes()).isNotEmpty();
+        }
+    }
+
+    @Test
+    void libraryExport_tempFileDeletedOnSuccess() throws Exception {
+        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(List.of("RETAIL")))
+                .thenReturn(List.of(templateA));
+        stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(), List.of());
+
+        AtomicReference<Path> created = new AtomicReference<>();
+        LibraryExportService.LibraryExportTempZipFactory factory = () -> {
+            Path path = Files.createTempFile("dge-library-export-test-", ".zip");
+            created.set(path);
+            return path;
+        };
+        service = new LibraryExportService(
+                templateRepository,
+                businessGroupRepository,
+                templateExportService,
+                exportAccessService,
+                new GroupAccessService(),
+                managementAuditRecorder,
+                objectMapper,
+                LibraryExportService.LibraryExportAssemblyProbe.NOOP,
+                factory
+        );
+
         LibraryExportService.LibraryExportZipArtifact artifact =
                 service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin);
+        assertThat(Files.isRegularFile(created.get())).isTrue();
+        artifact.close();
+        assertThat(Files.exists(created.get())).isFalse();
+    }
 
-        Set<String> names = zipEntryNames(artifact.content());
-        long masterEntries = names.stream().filter(n -> n.startsWith("masters/")).count();
-        long clauseEntries = names.stream().filter(n -> n.startsWith("clauses/")).count();
-        assertThat(masterEntries).isEqualTo(1);
-        assertThat(clauseEntries).isEqualTo(1);
-        LibraryExportManifestView manifest = readManifest(artifact.content());
-        assertThat(manifest.masterCatalog()).hasSize(1);
-        assertThat(manifest.masterCatalog().getFirst().sourceTemplateIds())
-                .containsExactlyInAnyOrder(templateAId.toString(), templateBId.toString());
-        assertThat(manifest.clauseCatalog()).hasSize(1);
-        assertThat(manifest.clauseCatalog().getFirst().sourceTemplateIds())
-                .containsExactlyInAnyOrder(templateAId.toString(), templateBId.toString());
-        assertThat(manifest.counts().uniqueMasterCount()).isEqualTo(1);
-        assertThat(manifest.counts().uniqueClauseCount()).isEqualTo(1);
+    @Test
+    void libraryExport_tempFileDeletedOnEmpty422() {
+        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(List.of("RETAIL")))
+                .thenReturn(List.of(draft));
+
+        AtomicInteger tempCreates = new AtomicInteger();
+        LibraryExportService.LibraryExportTempZipFactory factory = () -> {
+            tempCreates.incrementAndGet();
+            return Files.createTempFile("dge-library-export-test-", ".zip");
+        };
+        service = new LibraryExportService(
+                templateRepository,
+                businessGroupRepository,
+                templateExportService,
+                exportAccessService,
+                new GroupAccessService(),
+                managementAuditRecorder,
+                objectMapper,
+                LibraryExportService.LibraryExportAssemblyProbe.NOOP,
+                factory
+        );
+
+        assertThatThrownBy(() -> service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin))
+                .isInstanceOf(LibraryExportValidationException.class)
+                .satisfies(ex -> {
+                    LibraryExportValidationException vex = (LibraryExportValidationException) ex;
+                    assertThat(vex.errorCode()).isEqualTo(ApiErrorCodes.LIBRARY_EXPORT_EMPTY);
+                });
+        assertThat(tempCreates.get()).isZero();
+    }
+
+    @Test
+    void libraryExport_tempFileDeletedWhenAllEligibleFail() throws Exception {
+        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(List.of("RETAIL")))
+                .thenReturn(List.of(templateA));
+        when(templateExportService.buildV2ExportWithoutAudit(templateAId, groupAdmin))
+                .thenThrow(new TemplateGovernanceException(
+                        ApiErrorCodes.PINNED_MASTER_UNAVAILABLE,
+                        "api.error.rendering.pinnedMasterUnavailable",
+                        HttpStatus.UNPROCESSABLE_ENTITY
+                ));
+
+        AtomicReference<Path> created = new AtomicReference<>();
+        LibraryExportService.LibraryExportTempZipFactory factory = () -> {
+            Path path = Files.createTempFile("dge-library-export-test-", ".zip");
+            created.set(path);
+            return path;
+        };
+        service = new LibraryExportService(
+                templateRepository,
+                businessGroupRepository,
+                templateExportService,
+                exportAccessService,
+                new GroupAccessService(),
+                managementAuditRecorder,
+                objectMapper,
+                LibraryExportService.LibraryExportAssemblyProbe.NOOP,
+                factory
+        );
+
+        assertThatThrownBy(() -> service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin))
+                .isInstanceOf(LibraryExportValidationException.class)
+                .satisfies(ex -> {
+                    LibraryExportValidationException vex = (LibraryExportValidationException) ex;
+                    assertThat(vex.errorCode()).isEqualTo(ApiErrorCodes.LIBRARY_EXPORT_EMPTY);
+                });
+        assertThat(created.get()).isNotNull();
+        assertThat(Files.exists(created.get())).isFalse();
     }
 
     @Test
@@ -186,15 +332,16 @@ class LibraryExportServiceTest {
                 List.of(new TemplateExportAssetKeyManifestItemView("LOGO-1", TemplateExportAssetKeyUsage.IMAGE))
         );
 
-        LibraryExportService.LibraryExportZipArtifact artifact =
-                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin);
-
-        LibraryExportManifestView manifest = readManifest(artifact.content());
-        assertThat(manifest.assetKeyManifest()).hasSize(1);
-        assertThat(manifest.assetKeyManifest().getFirst().referenceKey()).isEqualTo("LOGO-1");
-        assertThat(zipEntryNames(artifact.content()).stream().noneMatch(n -> n.startsWith("assets/")))
-                .isTrue();
-        assertThat(manifest.counts().uniqueAssetKeyCount()).isEqualTo(1);
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin)) {
+            byte[] zipBytes = artifact.readAllBytes();
+            LibraryExportManifestView manifest = readManifest(zipBytes);
+            assertThat(manifest.assetKeyManifest()).hasSize(1);
+            assertThat(manifest.assetKeyManifest().getFirst().referenceKey()).isEqualTo("LOGO-1");
+            assertThat(zipEntryNames(zipBytes).stream().noneMatch(n -> n.startsWith("assets/")))
+                    .isTrue();
+            assertThat(manifest.counts().uniqueAssetKeyCount()).isEqualTo(1);
+        }
     }
 
     @Test
@@ -203,18 +350,19 @@ class LibraryExportServiceTest {
                 .thenReturn(List.of(templateA, draft));
         stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(), List.of());
 
-        LibraryExportService.LibraryExportZipArtifact artifact =
-                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin);
-
-        LibraryExportManifestView manifest = readManifest(artifact.content());
-        assertThat(manifest.counts().includedCount()).isEqualTo(1);
-        assertThat(manifest.counts().skippedCount()).isEqualTo(1);
-        assertThat(manifest.templates()).anyMatch(t ->
-                t.templateId().equals(draftId.toString())
-                        && "SKIPPED".equals(t.status())
-                        && "EXPORT_NOT_ELIGIBLE".equals(t.reasonCode()));
-        assertThat(zipEntryNames(artifact.content())).doesNotContain("templates/" + draftId + ".zip");
-        verify(templateExportService, never()).buildV2ExportWithoutAudit(eq(draftId), any());
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin)) {
+            byte[] zipBytes = artifact.readAllBytes();
+            LibraryExportManifestView manifest = readManifest(zipBytes);
+            assertThat(manifest.counts().includedCount()).isEqualTo(1);
+            assertThat(manifest.counts().skippedCount()).isEqualTo(1);
+            assertThat(manifest.templates()).anyMatch(t ->
+                    t.templateId().equals(draftId.toString())
+                            && "SKIPPED".equals(t.status())
+                            && "EXPORT_NOT_ELIGIBLE".equals(t.reasonCode()));
+            assertThat(zipEntryNames(zipBytes)).doesNotContain("templates/" + draftId + ".zip");
+            verify(templateExportService, never()).buildV2ExportWithoutAudit(eq(draftId), any());
+        }
     }
 
     @Test
@@ -224,16 +372,16 @@ class LibraryExportServiceTest {
         stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(), List.of());
         stubV2Build(templateBId, "TPL-B", masterHash, masterBytes, List.of(), List.of());
 
-        LibraryExportService.LibraryExportZipArtifact artifact = service.exportLibrary(
+        try (LibraryExportService.LibraryExportZipArtifact artifact = service.exportLibrary(
                 new LibraryExportRequest(null, List.of(templateAId, templateBId), true),
                 groupAdmin
-        );
-
-        LibraryExportManifestView manifest = readManifest(artifact.content());
-        assertThat(manifest.scope().selection()).isEqualTo("TEMPLATE_IDS");
-        assertThat(manifest.counts().includedCount()).isEqualTo(2);
-        assertThat(manifest.templates()).extracting(t -> t.templateId())
-                .containsExactlyInAnyOrder(templateAId.toString(), templateBId.toString());
+        )) {
+            LibraryExportManifestView manifest = readManifest(artifact.readAllBytes());
+            assertThat(manifest.scope().selection()).isEqualTo("TEMPLATE_IDS");
+            assertThat(manifest.counts().includedCount()).isEqualTo(2);
+            assertThat(manifest.templates()).extracting(t -> t.templateId())
+                    .containsExactlyInAnyOrder(templateAId.toString(), templateBId.toString());
+        }
     }
 
     @Test
@@ -243,16 +391,16 @@ class LibraryExportServiceTest {
                 .thenReturn(List.of(templateA));
         stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(), List.of());
 
-        LibraryExportService.LibraryExportZipArtifact artifact = service.exportLibrary(
+        try (LibraryExportService.LibraryExportZipArtifact artifact = service.exportLibrary(
                 new LibraryExportRequest(null, List.of(foreignId, templateAId), true),
                 groupAdmin
-        );
-
-        LibraryExportManifestView manifest = readManifest(artifact.content());
-        assertThat(manifest.templates()).extracting(t -> t.templateId())
-                .containsExactly(templateAId.toString())
-                .doesNotContain(foreignId.toString());
-        assertThat(manifest.counts().omittedUnauthorizedOrUnknownCount()).isEqualTo(1);
+        )) {
+            LibraryExportManifestView manifest = readManifest(artifact.readAllBytes());
+            assertThat(manifest.templates()).extracting(t -> t.templateId())
+                    .containsExactly(templateAId.toString())
+                    .doesNotContain(foreignId.toString());
+            assertThat(manifest.counts().omittedUnauthorizedOrUnknownCount()).isEqualTo(1);
+        }
     }
 
     @Test
@@ -295,6 +443,12 @@ class LibraryExportServiceTest {
         ObjectMapper failingMapper = mock(ObjectMapper.class);
         when(failingMapper.writeValueAsBytes(any()))
                 .thenThrow(new JsonProcessingException("assemble-failed") { });
+        AtomicReference<Path> created = new AtomicReference<>();
+        LibraryExportService.LibraryExportTempZipFactory factory = () -> {
+            Path path = Files.createTempFile("dge-library-export-test-", ".zip");
+            created.set(path);
+            return path;
+        };
         service = new LibraryExportService(
                 templateRepository,
                 businessGroupRepository,
@@ -302,7 +456,9 @@ class LibraryExportServiceTest {
                 exportAccessService,
                 new GroupAccessService(),
                 managementAuditRecorder,
-                failingMapper
+                failingMapper,
+                LibraryExportService.LibraryExportAssemblyProbe.NOOP,
+                factory
         );
         when(templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(List.of("RETAIL")))
                 .thenReturn(List.of(templateA));
@@ -319,6 +475,8 @@ class LibraryExportServiceTest {
                 any(), any(), org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt(),
                 org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt(), any(), any()
         );
+        assertThat(created.get()).isNotNull();
+        assertThat(Files.exists(created.get())).isFalse();
     }
 
     @Test
@@ -333,19 +491,20 @@ class LibraryExportServiceTest {
                 ));
         stubV2Build(templateBId, "TPL-B", masterHash, masterBytes, List.of(), List.of());
 
-        LibraryExportService.LibraryExportZipArtifact artifact =
-                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin);
-
-        LibraryExportManifestView manifest = readManifest(artifact.content());
-        assertThat(manifest.counts().includedCount()).isEqualTo(1);
-        assertThat(manifest.counts().failedCount()).isEqualTo(1);
-        assertThat(manifest.templates()).anyMatch(t ->
-                t.templateId().equals(templateAId.toString())
-                        && "FAILED".equals(t.status())
-                        && "PINNED_MASTER_UNAVAILABLE".equals(t.reasonCode()));
-        assertThat(zipEntryNames(artifact.content()))
-                .contains("templates/" + templateBId + ".zip")
-                .doesNotContain("templates/" + templateAId + ".zip");
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin)) {
+            byte[] zipBytes = artifact.readAllBytes();
+            LibraryExportManifestView manifest = readManifest(zipBytes);
+            assertThat(manifest.counts().includedCount()).isEqualTo(1);
+            assertThat(manifest.counts().failedCount()).isEqualTo(1);
+            assertThat(manifest.templates()).anyMatch(t ->
+                    t.templateId().equals(templateAId.toString())
+                            && "FAILED".equals(t.status())
+                            && "PINNED_MASTER_UNAVAILABLE".equals(t.reasonCode()));
+            assertThat(zipEntryNames(zipBytes))
+                    .contains("templates/" + templateBId + ".zip")
+                    .doesNotContain("templates/" + templateAId + ".zip");
+        }
     }
 
     @Test
@@ -355,13 +514,13 @@ class LibraryExportServiceTest {
                 .thenReturn(List.of(templateA));
         stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(), List.of());
 
-        LibraryExportService.LibraryExportZipArtifact artifact =
-                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin);
-
-        LibraryExportManifestView manifest = readManifest(artifact.content());
-        assertThat(manifest.templates()).extracting(t -> t.templateId())
-                .containsExactly(templateAId.toString())
-                .doesNotContain(corporate.getId().toString());
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin)) {
+            LibraryExportManifestView manifest = readManifest(artifact.readAllBytes());
+            assertThat(manifest.templates()).extracting(t -> t.templateId())
+                    .containsExactly(templateAId.toString())
+                    .doesNotContain(corporate.getId().toString());
+        }
     }
 
     @Test
@@ -371,13 +530,13 @@ class LibraryExportServiceTest {
                 .thenReturn(List.of(templateA, otherOwned));
         stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(), List.of());
 
-        LibraryExportService.LibraryExportZipArtifact artifact =
-                service.exportLibrary(new LibraryExportRequest(null, null, true), author);
-
-        LibraryExportManifestView manifest = readManifest(artifact.content());
-        assertThat(manifest.templates()).extracting(t -> t.templateId())
-                .containsExactly(templateAId.toString())
-                .doesNotContain(otherOwned.getId().toString());
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                service.exportLibrary(new LibraryExportRequest(null, null, true), author)) {
+            LibraryExportManifestView manifest = readManifest(artifact.readAllBytes());
+            assertThat(manifest.templates()).extracting(t -> t.templateId())
+                    .containsExactly(templateAId.toString())
+                    .doesNotContain(otherOwned.getId().toString());
+        }
     }
 
     @Test
@@ -396,15 +555,15 @@ class LibraryExportServiceTest {
         stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(), List.of());
         stubV2Build(templateBId, "TPL-B", masterHash, masterBytes, List.of(), List.of());
 
-        LibraryExportService.LibraryExportZipArtifact artifact = service.exportLibrary(
+        try (LibraryExportService.LibraryExportZipArtifact artifact = service.exportLibrary(
                 new LibraryExportRequest(groupId, null, true),
                 globalAdmin
-        );
-
-        LibraryExportManifestView manifest = readManifest(artifact.content());
-        assertThat(manifest.scope().selection()).isEqualTo("GROUP");
-        assertThat(manifest.scope().groupId()).isEqualTo(groupId.toString());
-        assertThat(manifest.counts().includedCount()).isEqualTo(2);
+        )) {
+            LibraryExportManifestView manifest = readManifest(artifact.readAllBytes());
+            assertThat(manifest.scope().selection()).isEqualTo("GROUP");
+            assertThat(manifest.scope().groupId()).isEqualTo(groupId.toString());
+            assertThat(manifest.counts().includedCount()).isEqualTo(2);
+        }
     }
 
     @Test
@@ -424,14 +583,14 @@ class LibraryExportServiceTest {
         when(templateExportService.exportZip(templateAId, groupAdmin, 2))
                 .thenReturn(new TemplateExportService.TemplateExportZipArtifact("TPL-A-export.zip", nestedZip));
 
-        LibraryExportService.LibraryExportZipArtifact artifact =
-                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin);
-
-        byte[] fromLibrary = readZipEntry(artifact.content(), "templates/" + templateAId + ".zip");
-        TemplateExportService.TemplateExportZipArtifact single =
-                templateExportService.exportZip(templateAId, groupAdmin, 2);
-        assertThat(sha256Hex(fromLibrary)).isEqualTo(sha256Hex(single.content()));
-        assertThat(readZipEntry(fromLibrary, TemplateExportV2Support.ZIP_MASTER_ENTRY)).isEqualTo(masterBytes);
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin)) {
+            byte[] fromLibrary = readZipEntry(artifact.readAllBytes(), "templates/" + templateAId + ".zip");
+            TemplateExportService.TemplateExportZipArtifact single =
+                    templateExportService.exportZip(templateAId, groupAdmin, 2);
+            assertThat(sha256Hex(fromLibrary)).isEqualTo(sha256Hex(single.content()));
+            assertThat(readZipEntry(fromLibrary, TemplateExportV2Support.ZIP_MASTER_ENTRY)).isEqualTo(masterBytes);
+        }
     }
 
     @Test
@@ -440,14 +599,14 @@ class LibraryExportServiceTest {
                 .thenReturn(List.of(templateA));
         stubV2Build(templateAId, "TPL-A", masterHash, masterBytes, List.of(), List.of());
 
-        LibraryExportService.LibraryExportZipArtifact artifact =
-                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin);
-
-        String manifestJson = new String(readZipEntry(artifact.content(), LibraryExportService.MANIFEST_ENTRY));
-        assertThat(manifestJson.toLowerCase())
-                .doesNotContain("clientsecret")
-                .doesNotContain("credentialid")
-                .doesNotContain("password");
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                service.exportLibrary(new LibraryExportRequest(null, null, true), groupAdmin)) {
+            String manifestJson = new String(readZipEntry(artifact.readAllBytes(), LibraryExportService.MANIFEST_ENTRY));
+            assertThat(manifestJson.toLowerCase())
+                    .doesNotContain("clientsecret")
+                    .doesNotContain("credentialid")
+                    .doesNotContain("password");
+        }
     }
 
     private void stubV2Build(
