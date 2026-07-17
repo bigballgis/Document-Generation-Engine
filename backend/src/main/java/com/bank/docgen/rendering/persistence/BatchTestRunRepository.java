@@ -15,6 +15,14 @@ public interface BatchTestRunRepository extends JpaRepository<BatchTestRunEntity
 
     List<BatchTestRunEntity> findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(UUID templateId);
 
+    /**
+     * PRR-A02: TopN batch-test history at DB (Pageable / LIMIT).
+     */
+    List<BatchTestRunEntity> findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+            UUID templateId,
+            Pageable pageable
+    );
+
     @Query("SELECT b FROM BatchTestRunEntity b WHERE b.templateId = :templateId "
             + "AND b.hidden = false AND b.invalidatedAt IS NULL "
             + "ORDER BY b.createdAt DESC")

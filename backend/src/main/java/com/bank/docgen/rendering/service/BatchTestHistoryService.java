@@ -18,6 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,9 +51,13 @@ public class BatchTestHistoryService {
             ManagementSessionClaims session
     ) {
         previewAuthorizationPort.requireReadableSnapshot(templateId, session);
-        return enrichSummaries(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId)
+        if (limit <= 0) {
+            return List.of();
+        }
+        // PRR-A02: TopN at DB — do not load-all then stream().limit.
+        return enrichSummaries(batchTestRunRepository
+                .findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId, PageRequest.of(0, limit))
                 .stream()
-                .limit(limit)
                 .map(this::toSummaryView)
                 .toList());
     }

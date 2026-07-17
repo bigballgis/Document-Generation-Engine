@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -37,6 +38,14 @@ public interface ContentModuleVersionRepository extends JpaRepository<ContentMod
     );
 
     List<ContentModuleVersionEntity> findByReviewStateOrderByUpdatedAtDesc(ContentModuleReviewState reviewState);
+
+    /**
+     * PRR-A03: bounded SUBMITTED scan page (Pageable / LIMIT).
+     */
+    List<ContentModuleVersionEntity> findByReviewStateOrderByUpdatedAtDesc(
+            ContentModuleReviewState reviewState,
+            Pageable pageable
+    );
 
     @Query("""
             select v from ContentModuleVersionEntity v

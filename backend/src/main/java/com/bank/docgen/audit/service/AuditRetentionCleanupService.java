@@ -13,18 +13,25 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * LR-D1 / ADR-0048: hard-delete aged management + runtime audit rows and write purge evidence.
  * CE-G04: filter ACTIVE legal-hold exemptions before delete (G04-C12…C16).
+ * PRR-A01: Pageable / LIMIT batch loads; short per-batch deletes (no outer long transaction).
  */
 @Service
 public class AuditRetentionCleanupService {
 
     public static final String MANAGEMENT_TABLE = "management_audit_event";
     public static final String RUNTIME_TABLE = "runtime_generation_audit_event";
+
+    public static final int DEFAULT_CLEANUP_BATCH_SIZE = 1000;
+    public static final int MIN_CLEANUP_BATCH_SIZE = 500;
+    public static final int MAX_CLEANUP_BATCH_SIZE = 2000;
 
     private static final int MIN_RETENTION_DAYS = 1;
     private static final int MAX_RETENTION_DAYS = 2555;
@@ -39,6 +46,7 @@ public class AuditRetentionCleanupService {
     private final int managementRetentionDays;
     private final int runtimeRetentionDays;
     private final boolean retentionEnabled;
+    private final int cleanupBatchSize;
 
     public AuditRetentionCleanupService(
             ManagementAuditEventCleanupRepository managementCleanup,
@@ -48,7 +56,8 @@ public class AuditRetentionCleanupService {
             Clock clock,
             @Value("${docgen.audit.management-retention-days:90}") int managementRetentionDays,
             @Value("${docgen.audit.runtime-retention-days:365}") int runtimeRetentionDays,
-            @Value("${docgen.audit.retention-enabled:true}") boolean retentionEnabled
+            @Value("${docgen.audit.retention-enabled:true}") boolean retentionEnabled,
+            @Value("${docgen.audit.cleanup-batch-size:1000}") int cleanupBatchSize
     ) {
         this.managementCleanup = managementCleanup;
         this.runtimeCleanup = runtimeCleanup;
@@ -58,89 +67,127 @@ public class AuditRetentionCleanupService {
         this.managementRetentionDays = requireRetentionDays(managementRetentionDays, "management");
         this.runtimeRetentionDays = requireRetentionDays(runtimeRetentionDays, "runtime");
         this.retentionEnabled = retentionEnabled;
+        this.cleanupBatchSize = requireCleanupBatchSize(cleanupBatchSize, "docgen.audit.cleanup-batch-size");
     }
 
-    @Transactional
     public int purgeManagementAudit() {
         if (!retentionEnabled) {
             return 0;
         }
         Instant cutoff = cutoff(managementRetentionDays);
-        List<ManagementAuditEventEntity> candidates = managementCleanup.findByEventAtBefore(cutoff);
-        List<ManagementAuditEventEntity> toDelete = new ArrayList<>();
-        int skipped = 0;
-        for (ManagementAuditEventEntity event : candidates) {
-            if (legalHoldExemptionService.isManagementAuditExempt(event.getTemplateId(), event.getEventAt())) {
-                skipped++;
-                continue;
+        int totalDeleted = 0;
+        int totalSkipped = 0;
+        int batches = 0;
+        int page = 0;
+        while (true) {
+            Pageable pageable = cleanupPage(page);
+            List<ManagementAuditEventEntity> candidates =
+                    managementCleanup.findByEventAtBefore(cutoff, pageable);
+            if (candidates.isEmpty()) {
+                break;
             }
-            toDelete.add(event);
-        }
-        if (toDelete.isEmpty()) {
-            if (skipped > 0) {
-                LOG.info(
-                        "LR-D1 management audit retention purge: deleted=0 skippedLegalHold={} cutoff={}",
-                        skipped,
-                        cutoff
-                );
+            batches++;
+            List<ManagementAuditEventEntity> toDelete = new ArrayList<>();
+            int skipped = 0;
+            for (ManagementAuditEventEntity event : candidates) {
+                if (legalHoldExemptionService.isManagementAuditExempt(event.getTemplateId(), event.getEventAt())) {
+                    skipped++;
+                    continue;
+                }
+                toDelete.add(event);
             }
-            return 0;
+            totalSkipped += skipped;
+            if (!toDelete.isEmpty()) {
+                // Repository @Transactional provides a short transaction per batch (PS-C2).
+                managementCleanup.deleteAll(toDelete);
+                totalDeleted += toDelete.size();
+            } else {
+                page++;
+            }
         }
-        managementCleanup.deleteAll(toDelete);
-        int deleted = toDelete.size();
-        purgeEvidenceWriter.write(MANAGEMENT_TABLE, managementRetentionDays, cutoff, deleted);
-        LOG.info(
-                "LR-D1 management audit retention purge: deleted={} skippedLegalHold={} retentionDays={} cutoff={}",
-                deleted,
-                skipped,
-                managementRetentionDays,
-                cutoff
-        );
-        return deleted;
+        if (totalDeleted > 0) {
+            purgeEvidenceWriter.write(MANAGEMENT_TABLE, managementRetentionDays, cutoff, totalDeleted);
+        }
+        if (totalDeleted > 0 || totalSkipped > 0) {
+            LOG.info(
+                    "LR-D1 management audit retention purge: deleted={} skippedLegalHold={} batches={} "
+                            + "retentionDays={} cutoff={}",
+                    totalDeleted,
+                    totalSkipped,
+                    batches,
+                    managementRetentionDays,
+                    cutoff
+            );
+        }
+        return totalDeleted;
     }
 
-    @Transactional
     public int purgeRuntimeAudit() {
         if (!retentionEnabled) {
             return 0;
         }
         Instant cutoff = cutoff(runtimeRetentionDays);
-        List<RuntimeGenerationAuditEventEntity> candidates = runtimeCleanup.findByEventAtBefore(cutoff);
-        List<RuntimeGenerationAuditEventEntity> toDelete = new ArrayList<>();
-        int skipped = 0;
-        for (RuntimeGenerationAuditEventEntity event : candidates) {
-            if (legalHoldExemptionService.isRuntimeAuditExempt(
-                    event.getTemplateId(),
-                    event.getEventAt(),
-                    event.getTaskExternalId(),
-                    event.getDocumentId()
-            )) {
-                skipped++;
-                continue;
+        int totalDeleted = 0;
+        int totalSkipped = 0;
+        int batches = 0;
+        int page = 0;
+        while (true) {
+            Pageable pageable = cleanupPage(page);
+            List<RuntimeGenerationAuditEventEntity> candidates =
+                    runtimeCleanup.findByEventAtBefore(cutoff, pageable);
+            if (candidates.isEmpty()) {
+                break;
             }
-            toDelete.add(event);
-        }
-        if (toDelete.isEmpty()) {
-            if (skipped > 0) {
-                LOG.info(
-                        "LR-D1 runtime audit retention purge: deleted=0 skippedLegalHold={} cutoff={}",
-                        skipped,
-                        cutoff
-                );
+            batches++;
+            List<RuntimeGenerationAuditEventEntity> toDelete = new ArrayList<>();
+            int skipped = 0;
+            for (RuntimeGenerationAuditEventEntity event : candidates) {
+                if (legalHoldExemptionService.isRuntimeAuditExempt(
+                        event.getTemplateId(),
+                        event.getEventAt(),
+                        event.getTaskExternalId(),
+                        event.getDocumentId()
+                )) {
+                    skipped++;
+                    continue;
+                }
+                toDelete.add(event);
             }
-            return 0;
+            totalSkipped += skipped;
+            if (!toDelete.isEmpty()) {
+                runtimeCleanup.deleteAll(toDelete);
+                totalDeleted += toDelete.size();
+            } else {
+                page++;
+            }
         }
-        runtimeCleanup.deleteAll(toDelete);
-        int deleted = toDelete.size();
-        purgeEvidenceWriter.write(RUNTIME_TABLE, runtimeRetentionDays, cutoff, deleted);
-        LOG.info(
-                "LR-D1 runtime audit retention purge: deleted={} skippedLegalHold={} retentionDays={} cutoff={}",
-                deleted,
-                skipped,
-                runtimeRetentionDays,
-                cutoff
+        if (totalDeleted > 0) {
+            purgeEvidenceWriter.write(RUNTIME_TABLE, runtimeRetentionDays, cutoff, totalDeleted);
+        }
+        if (totalDeleted > 0 || totalSkipped > 0) {
+            LOG.info(
+                    "LR-D1 runtime audit retention purge: deleted={} skippedLegalHold={} batches={} "
+                            + "retentionDays={} cutoff={}",
+                    totalDeleted,
+                    totalSkipped,
+                    batches,
+                    runtimeRetentionDays,
+                    cutoff
+            );
+        }
+        return totalDeleted;
+    }
+
+    public int cleanupBatchSize() {
+        return cleanupBatchSize;
+    }
+
+    private Pageable cleanupPage(int page) {
+        return PageRequest.of(
+                page,
+                cleanupBatchSize,
+                Sort.by(Sort.Order.asc("eventAt"), Sort.Order.asc("id"))
         );
-        return deleted;
     }
 
     private Instant cutoff(int retentionDays) {
@@ -155,5 +202,15 @@ public class AuditRetentionCleanupService {
             );
         }
         return days;
+    }
+
+    static int requireCleanupBatchSize(int size, String propertyName) {
+        if (size < MIN_CLEANUP_BATCH_SIZE || size > MAX_CLEANUP_BATCH_SIZE) {
+            throw new IllegalStateException(
+                    propertyName + " must be between " + MIN_CLEANUP_BATCH_SIZE
+                            + " and " + MAX_CLEANUP_BATCH_SIZE + " (inclusive); got " + size
+            );
+        }
+        return size;
     }
 }
