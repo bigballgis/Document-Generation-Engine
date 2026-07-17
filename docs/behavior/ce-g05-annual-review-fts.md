@@ -7,12 +7,12 @@
 | **编写日期** | 2026-07-17 |
 | **程序** | [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §6 Wave CE-G · CE-G05 |
 | **Slice** | `ce-g05-annual-review-fts` |
-| **Worktree** | `D:/working/DGE-ce-g05-annual-review-fts` · `feat/ce-g05-annual-review-fts` |
-| **Task Master** | **#77** · **In Progress** (sole-active) |
+| **Worktree** | **REMOVED**（merge `c3f6a288` / feature `744b628a` on `main`） |
+| **Task Master** | **#77** · **Done** |
 | **Formal phase** | **None**（CE 程序切片；不发明 sole-active 正式 P-phase） |
-| **Placement** | ISOLATED |
+| **Placement** | ISOLATED（已 merge；sole-active cleared；P3 queue empty） |
 | **Soft dep** | CE-G04 (#75) **Done**（软依赖已满足；本片不依赖 hold 语义） |
-| **Owning docs** | 本文件（行为 SoT）；计划映射 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md)；契约/领域/权限已由 `doc-keeper` 同步（OpenAPI / contract-outline / domain-model / permission-matrix / requirements-plan）— handoff **backend-engineer** |
+| **Owning docs** | 本文件（行为 SoT）；计划映射 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md)；契约/领域/权限已同步（OpenAPI / contract-outline / domain-model / permission-matrix / requirements-plan） |
 
 **完成声明约束：** 关闭内控缺口「年检/正文检索缺失」的最小闭环（模板 `nextReviewDue` + Dashboard 到期待办 + 条款 `content_structure_json` PostgreSQL tsvector 全文检索与 where-used）；**不**宣称 go-live；**不**激活 CD-3；**不**实现 CE-O02；**leave #50 alone**；**不**做全库导入/eDiscovery/诉讼包。
 

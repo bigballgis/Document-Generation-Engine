@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #80 CE-E03 → Done (merge f1f02554 / feature 86e4ff10). Sole-active = #77 CE-G05 (last remaining P3; full-stack FE+E2E). Do NOT claim program Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3: #80 CE-E03 Done; sole-active = #77 CE-G05 in-progress (single-lane serial §9.2; last P3 leaf). Do NOT claim program Done. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #77 CE-G05 → Done (merge c3f6a288 / feature 744b628a). P3 queue empty (#96/#97/#80/#77 all Done). Sole-active cleared (no delivery leaf). Do NOT claim program Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#77/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3 queue empty; sole-active cleared (single-lane serial §9.2 — no delivery leaf). Do NOT claim program Done (CE-O02 deferred per D5; leave #50 alone). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T07:00:00.000Z"
+        "updatedAt": "2026-07-17T08:53:00.000Z"
       },
       {
         "id": "54",
@@ -1064,16 +1064,16 @@
       {
         "id": "77",
         "title": "CE-G05: Template annual review + clause full-text search",
-        "description": "IN PROGRESS 2026-07-17. Slice ce-g05-annual-review-fts. Sole-active (last remaining P3 after #80 CE-E03 Done). nextReviewDue + Dashboard due todos; PostgreSQL tsvector FULL_TEXT on content_structure_json + where-used. BDD ready (docs/behavior/ce-g05-annual-review-fts.md; BDD-CE-G05-001…019). frontend_ui_in_scope=true — E2E+UIUX mandatory. Worktree D:/working/DGE-ce-g05-annual-review-fts · feat/ce-g05-annual-review-fts. Formal phase None. Not go-live. Not CD-3.",
-        "details": "ACTIVATED 2026-07-17 as sole-active after #80 CE-E03 Done (merge f1f02554 / feature 86e4ff10). Soft after G04 (#75). Batch recommendation solo (member_task_ids: [\"77\"]; proposed_slice_id: ce-g05-annual-review-fts). BDD ready — nextReviewDue seed/complete API + annual-review-due-tasks list; clause searchMode FULL_TEXT + where-used; Dashboard Annual review due partition; FE clause body search. Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G05. Next: doc-keeper (API/domain/matrix) → backend-engineer → frontend-engineer.",
+        "description": "DONE 2026-07-17. Slice ce-g05-annual-review-fts. nextReviewDue + Dashboard due todos; PostgreSQL tsvector FULL_TEXT on content_structure_json + where-used. BDD ready (docs/behavior/ce-g05-annual-review-fts.md; BDD-CE-G05-001…019). frontend_ui_in_scope=true. Merge c3f6a288 / feature 744b628a; worktree removed. Formal phase None. Not go-live. Not CD-3. Leave #50 alone.",
+        "details": "COMPLETED 2026-07-17. Slice id: ce-g05-annual-review-fts. Status: done. MAIN merge c3f6a288 / feature 744b628a; worktree DGE-ce-g05-annual-review-fts REMOVED. Batch recommendation solo (member_task_ids: [\"77\"]) closed. BDD ready; frontend_ui_in_scope=true. Gates: mvn verify GREEN (1908 tests); FE lint/type-check/test/build PASS; E2E functional 17/17; UIUX PASS Critical=0; architecture Critical=0; CQ Critical=0; Stage 10 DEPLOY_OK; Flyway V67. Evidence: nextReviewDue seed/complete + annual-review-due-tasks; searchMode=FULL_TEXT + where-used; Dashboard Annual review due. Formal phase remains None. Umbrella #53 remains in-progress (program registry only — not program Done). Sole-active cleared; P3 queue empty (#96/#97/#80/#77 all Done). Do not activate CD-3. Do not claim go-live. Do not activate CE-O02. Leave #50 alone.",
         "testStrategy": "1. Due todos + complete annual review. 2. FTS FULL_TEXT + where-used. 3. FE E2E+UIUX. 4. Gates green.",
         "priority": "low",
         "dependencies": [
           "75"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T07:00:00.000Z"
+        "updatedAt": "2026-07-17T08:53:00.000Z"
       },
       {
         "id": "78",
