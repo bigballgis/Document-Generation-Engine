@@ -15,6 +15,7 @@
 [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md)（SOR，非功能为主）、
 [optimization-plan.md](./optimization-plan.md)（技术债）互补，不重复其条目。
 执行真相记录在 `.taskmaster/tasks/tasks.json`（新工作）+ 本文件状态列。
+**Sibling (deferred):** [intl-bank-letter-readiness-program.md](./intl-bank-letter-readiness-program.md)（IBL）— Task Master **#106–#134** registered backlog; waves **Not Started**; separate program after remaining PRR **#103→#104** (**#105 Done**) — do not fold into an In Progress CE/PRR leaf.
 
 **执行纪律（对任何执行模型强制）：**
 
