@@ -9,7 +9,7 @@
 **Task Master:** Umbrella **#106** (registry only) + leaves **#107–#134** (28 tasks = A6+B7+C3+D5+E7). All IBL TM statuses **`pending`**; B7 + Wave E descriptions start with **BLOCKED**. See § Task Master ID map.  
 **Audit provenance:** Four-track (+ multinational template track) **read-only** deep audit, evidence spot-verified **2026-07-17**. Findings F1–F28 below are **confirmed symptoms** (code/docs evidence). Proposed remediations are **not** confirmed product requirements until activation + (where noted) ADR/user decision.
 
-**Queue policy (critical):** Host serial delivery queue remains **PRR #105 → #103 → #104** first. IBL tasks are **pending / deferred** for later sessions **after** PRR (or when the user explicitly redirects). Next IBL activation head after PRR = **IBL-A1** (#107) or a Wave A batch per Batch Recommendation at that time. Umbrella **#106** is **registry only** — **not** a sole-active delivery leaf.
+**Queue policy (critical):** Host serial delivery queue: PRR **#105 Done** (`50448016`); remaining ahead of IBL = **#103 → #104** (both **pending**, not activated). IBL tasks are **pending / deferred** for later sessions **after** remaining PRR (or when the user explicitly redirects). Next IBL activation head after PRR = **IBL-A1** (#107) or a Wave A batch per Batch Recommendation at that time. Umbrella **#106** is **registry only** — **not** a sole-active delivery leaf.
 
 **Authoritative entry for lower-tier implementers:** Read this file first. Execute only `IBL-*` task IDs after wave activation. Do **not** invent a formal phase. Do **not** touch [launch-readiness-checklist.md](../operations/launch-readiness-checklist.md) from IBL work unless a task explicitly owns a checklist cross-link.
 
@@ -99,7 +99,7 @@ Registered **2026-07-18** under `.taskmaster/tasks/tasks.json`. Program status =
 | IBL-E6 | **133** | pending (**BLOCKED** in description — §Pending decisions) |
 | IBL-E7 | **134** | pending (**BLOCKED** in description — §Pending decisions) |
 
-**Queue note:** Do **not** reorder ahead of **PRR #105 → #103 → #104**. Do **not** treat #106 as sole-active. After PRR (or explicit user redirect), activate **IBL-A1** (#107) or Wave A batch via delivery-orchestrator Batch Recommendation — still one leaf at a time.
+**Queue note:** Do **not** reorder ahead of remaining PRR **#103 → #104** (**#105** already **Done**). Do **not** treat #106 as sole-active. After remaining PRR (or explicit user redirect), activate **IBL-A1** (#107) or Wave A batch via delivery-orchestrator Batch Recommendation — still one leaf at a time.
 
 ---
 
@@ -366,7 +366,7 @@ An IBL task is `Done` only when:
 
 ### 10.3 Program activation (human gate)
 
-Task Master registration is **complete** (#106–#134). Waves remain **Not Started** until the user (or orchestrator under explicit redirect) activates delivery — typically **IBL-A** after the PRR serial queue (**#105 → #103 → #104**). Registration alone does **not** mark any wave `In Progress`, create a formal phase, or flip checklist **#3b**.
+Task Master registration is **complete** (#106–#134; MAIN merge `9fc2bc97`). Waves remain **Not Started** until the user (or orchestrator under explicit redirect) activates delivery — typically **IBL-A** after remaining PRR (**#103 → #104**; **#105** already **Done**). Registration alone does **not** mark any wave `In Progress`, create a formal phase, or flip checklist **#3b**.
 
 ---
 
@@ -413,9 +413,9 @@ Task Master registration is **complete** (#106–#134). Waves remain **Not Start
 
 | Date | Change |
 | --- | --- |
-| 2026-07-18 | **Registered in Task Master** umbrella **#106** + leaves **#107–#134** (**28** tasks). Status → **Registered / Not Started** (waves **not** activated). PRR serial queue preserved (**#105 → #103 → #104** ahead of IBL). Task-count correction **27 → 28**. No checklist **#3b** flip; no go-live; no Wave A `In Progress`. |
+| 2026-07-18 | **Registered in Task Master** umbrella **#106** + leaves **#107–#134** (**28** tasks). Status → **Registered / Not Started** (waves **not** activated). MAIN merge `9fc2bc97`; worktree removed. PRR truth: **#105 Done**; remaining ahead of IBL **#103 → #104** (pending). Task-count correction **27 → 28**. No checklist **#3b** flip; no go-live; no Wave A `In Progress`. |
 | 2026-07-17 | Program document created from 2026-07-17 deep audit. Waves IBL-A…E defined (scheduled task set later counted as **28**). All activatable tasks **Not Started**; B7 + Wave E **Blocked**. Formal phase unchanged (**None**). Task Master then untouched. Proposal awaiting user confirmation to write TM. |
 
 ---
 
-**Next action:** After PRR queue (**#105 → #103 → #104**) — or on explicit user redirect — activate **IBL-A** via delivery-orchestrator (head **IBL-A1** / #107, or Wave A batch per Batch Recommendation). Do **not** mark any IBL wave `In Progress` from this registration sync alone. Do **not** invent a formal P-phase. Do **not** flip checklist **#3b**.
+**Next action:** After remaining PRR (**#103 → #104**; **#105 Done**) — or on explicit user redirect — activate **IBL-A** via delivery-orchestrator (head **IBL-A1** / #107, or Wave A batch per Batch Recommendation). Do **not** mark any IBL wave `In Progress` from this registration sync alone. Do **not** invent a formal P-phase. Do **not** flip checklist **#3b**.
