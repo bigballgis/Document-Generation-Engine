@@ -7,8 +7,8 @@
 | **编写日期** | 2026-07-17 |
 | **程序** | [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §7 Wave CE-E · CE-E03 |
 | **Slice** | `ce-e03-full-library-export` |
-| **Worktree** | `D:/working/DGE-ce-e03-full-library-export` · `feat/ce-e03-full-library-export` |
-| **Task Master** | **#80**（**in-progress** / sole-active → 本片交付） |
+| **Worktree** | **REMOVED** after merge（was `D:/working/DGE-ce-e03-full-library-export` · `feat/ce-e03-full-library-export`） |
+| **Task Master** | **#80** → **Done**（MAIN merge `f1f02554` / feature `86e4ff10`） |
 | **Formal phase** | **None**（CE 程序切片；不发明 sole-active 正式 P-phase） |
 | **Placement** | ISOLATED（交付实现） |
 | **上游** | CE-E01 (#78) **Done**（`template-export-bundle-v2-json` 自包含 ZIP：母版 DOCX + 条款快照 + render profile + 资产键清单） |

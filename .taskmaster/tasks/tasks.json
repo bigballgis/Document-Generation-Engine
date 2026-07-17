@@ -730,8 +730,8 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 / #94 CE-U20 / #95 CE-U21 / #96 CE-U17 / #97 CE-U19 → Done. P2 continuum complete. P3 in flight — sole-active #80 CE-E03 (slice ce-e03-full-library-export; BDD ready; API-first FE/E2E N/A). #97 CE-U19 Done (merge e4679421 / feature 90a9e5cd; worktree removed). Queued after #80: #77 CE-G05 pending. Umbrella is program registry only — not a delivery leaf. Do NOT claim program Done. Leave #50 alone.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3 sole-active #80 CE-E03 in-progress (single-lane serial §9.2); #77 CE-G05 remains pending after #80. Do NOT claim program Done. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #80 CE-E03 → Done (merge f1f02554 / feature 86e4ff10). Sole-active cleared. Only remaining P3: #77 CE-G05 pending (do not auto-activate). Do NOT claim program Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3: #80 CE-E03 Done; sole-active cleared; only remaining P3 #77 CE-G05 pending (single-lane serial §9.2 — do not activate here). Do NOT claim program Done. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
@@ -1064,8 +1064,8 @@
       {
         "id": "77",
         "title": "CE-G05: Template annual review + clause full-text search",
-        "description": "PENDING. Slice ce-g05-annual-review-fts. nextReviewDue todos; tsvector where-used on content_structure_json. P3·M. Queued after sole-active #80 CE-E03 — do not activate while #80 In Progress.",
-        "details": "Soft after G04 (#75). Remains pending until #80 CE-E03 Done (merge + MAIN doc-sync). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G05.",
+        "description": "PENDING. Slice ce-g05-annual-review-fts. nextReviewDue todos; tsvector where-used on content_structure_json. P3·M. Only remaining P3 after #80 CE-E03 Done — queue head; sole-active cleared; do not activate until orchestrator starts #77.",
+        "details": "Soft after G04 (#75). Remains pending after #80 CE-E03 Done (merge f1f02554 / feature 86e4ff10). Sole-active cleared — do not mark in-progress in this sync. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G05.",
         "testStrategy": "1. Due todos. 2. FTS works. 3. Gates green.",
         "priority": "low",
         "dependencies": [
@@ -1106,14 +1106,14 @@
       {
         "id": "80",
         "title": "CE-E03: Full-library export",
-        "description": "IN PROGRESS 2026-07-17. Slice ce-e03-full-library-export. Sole-active §9.2. Full-library ZIP (template-library-export-v1-zip): root manifest + nested E01 v2 per-template bundles + deduped masters/clauses catalogs. P3·M. BDD ready (docs/behavior/ce-e03-full-library-export.md; BDD-CE-E03-001…017). API-first — FE/E2E N/A. Formal phase None. Not go-live. Not CD-3. Not CE-O02. Leave #50 alone.",
-        "details": "Activated 2026-07-17 after #97 CE-U19 Done (merge e4679421 / feature 90a9e5cd). Slice id: ce-e03-full-library-export. Placement ISOLATED; worktree D:/working/DGE-ce-e03-full-library-export · feat/ce-e03-full-library-export. Batch recommendation solo (member_task_ids: [\"80\"]). Depends E01 (#78) Done. BDD ready; frontend_ui_in_scope=false (API-first, same as E01). Handoff: doc-keeper if OpenAPI yaml still lacks POST /api/management/v1/library/export, then backend-engineer. Gates before Done: mvn verify (primary); FE/E2E/UIUX N/A; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §7 CE-E03 In Progress. #77 CE-G05 remains pending after this leaf.",
+        "description": "DONE 2026-07-17. Slice ce-e03-full-library-export. Full-library ZIP (template-library-export-v1-zip): root manifest + nested E01 v2 per-template bundles + deduped masters/clauses catalogs. P3·M. BDD ready (docs/behavior/ce-e03-full-library-export.md; BDD-CE-E03-001…017). API-first — FE/E2E N/A. Merge f1f02554 / feature 86e4ff10; worktree removed. Formal phase None. Not go-live. Not CD-3. Not CE-O02. Leave #50 alone. Sole-active cleared; next queue #77 CE-G05 only remaining P3 (do not auto-activate).",
+        "details": "COMPLETED 2026-07-17. Slice id: ce-e03-full-library-export. Status: done. MAIN merge f1f02554 / feature 86e4ff10; worktree DGE-ce-e03-full-library-export REMOVED. Batch recommendation solo (member_task_ids: [\"80\"]) closed. BDD ready; frontend_ui_in_scope=false (API-first, same as E01). Gates: mvn verify GREEN (1887 tests); architecture Critical=0; CQ Critical=0; Stage 10 DEPLOY_OK healthz 200; FE/E2E N/A. Evidence: POST /api/management/v1/library/export → template-library-export-v1-zip (root library-export-manifest.json + nested E01 v2 + deduped masters/clauses; assetKeyManifest keys only). Formal phase remains None. Umbrella #53 remains in-progress (program registry only — not program Done). Sole-active cleared. Next queue head #77 CE-G05 pending (only remaining P3) — do not activate in this sync. Do not activate CD-3. Do not claim go-live. Do not activate CE-O02. Leave #50 alone.",
         "testStrategy": "1. Bulk export ZIP + root manifest + nested E01 v2. 2. Authz/empty/limit/partial-success per BDD-CE-E03-001…016. 3. mvn verify GREEN. 4. FE/E2E N/A.",
         "priority": "low",
         "dependencies": [
           "78"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-17T05:46:00.000Z"
       },
