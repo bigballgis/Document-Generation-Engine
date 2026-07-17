@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,15 +17,23 @@ import com.bank.docgen.runtime.persistence.ApiInvocationRecordRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
+/**
+ * ADR-0040 / CE-G04 invocation retention cleanup.
+ * BDD-PRR-A01-004 / 005 — bounded Pageable batch delete + legal-hold.
+ */
 @ExtendWith(MockitoExtension.class)
 class InvocationRetentionCleanupSchedulerTest {
+
+    private static final int BATCH_SIZE = 500;
 
     @Mock
     private ApiInvocationRecordRepository repository;
@@ -40,7 +49,8 @@ class InvocationRetentionCleanupSchedulerTest {
         scheduler = new InvocationRetentionCleanupScheduler(
                 repository,
                 objectStoragePort,
-                legalHoldExemptionService
+                legalHoldExemptionService,
+                BATCH_SIZE
         );
     }
 
@@ -48,7 +58,9 @@ class InvocationRetentionCleanupSchedulerTest {
     void cleanExpiredRecords_deletesPastRecordExpiryRows() {
         ApiInvocationRecordEntity expired = sampleRecord("INV-EXPIRED1", "storage/doc.docx");
         expired = expiredWithRecordExpiry(expired, Instant.now().minusSeconds(60));
-        when(repository.findByRecordExpiresAtBefore(any(Instant.class))).thenReturn(List.of(expired));
+        when(repository.findByRecordExpiresAtBefore(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of(expired))
+                .thenReturn(List.of());
         when(legalHoldExemptionService.isInvocationExempt(any(), any(), any())).thenReturn(false);
 
         scheduler.cleanExpiredRecords();
@@ -64,7 +76,9 @@ class InvocationRetentionCleanupSchedulerTest {
                 "{\"variables\":{\"name\":\"Alice\"},\"encryption\":{\"enabled\":false}}"
         );
         expired = expiredWithRecordExpiry(expired, Instant.now().minusSeconds(30));
-        when(repository.findByRecordExpiresAtBefore(any(Instant.class))).thenReturn(List.of(expired));
+        when(repository.findByRecordExpiresAtBefore(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of(expired))
+                .thenReturn(List.of());
         when(legalHoldExemptionService.isInvocationExempt(any(), any(), any())).thenReturn(false);
 
         scheduler.cleanExpiredRecords();
@@ -87,8 +101,10 @@ class InvocationRetentionCleanupSchedulerTest {
                 sampleRecord("INV-FREE1", "storage/doc2.docx"),
                 Instant.now().minusSeconds(60)
         );
-        when(repository.findByRecordExpiresAtBefore(any(Instant.class)))
-                .thenReturn(List.of(protectedRow, unprotected));
+        when(repository.findByRecordExpiresAtBefore(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of(protectedRow, unprotected))
+                .thenReturn(List.of(protectedRow))
+                .thenReturn(List.of());
         when(legalHoldExemptionService.isInvocationExempt(
                 protectedRow.getTemplateId(),
                 "INV-HOLD1",
@@ -112,8 +128,10 @@ class InvocationRetentionCleanupSchedulerTest {
                 "generated/doc-1.docx",
                 Instant.now().minusSeconds(60)
         );
-        when(repository.findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(any(Instant.class)))
-                .thenReturn(List.of(artifactExpired));
+        when(repository.findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(
+                any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of(artifactExpired))
+                .thenReturn(List.of());
         when(legalHoldExemptionService.isInvocationExempt(any(), any(), any())).thenReturn(false);
         when(objectStoragePort.exists("generated/doc-1.docx")).thenReturn(true);
         when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -133,8 +151,10 @@ class InvocationRetentionCleanupSchedulerTest {
                 "generated/doc-hold.docx",
                 Instant.now().minusSeconds(60)
         );
-        when(repository.findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(any(Instant.class)))
-                .thenReturn(List.of(artifactExpired));
+        when(repository.findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(
+                any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of(artifactExpired))
+                .thenReturn(List.of());
         when(legalHoldExemptionService.isInvocationExempt(any(), any(), any())).thenReturn(true);
 
         scheduler.cleanExpiredDocumentArtifacts();
@@ -145,13 +165,69 @@ class InvocationRetentionCleanupSchedulerTest {
 
     @Test
     void cleanExpiredDocumentArtifacts_skipsWhenNothingExpired() {
-        when(repository.findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(any(Instant.class)))
+        when(repository.findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(
+                any(Instant.class), any(Pageable.class)))
                 .thenReturn(List.of());
 
         scheduler.cleanExpiredDocumentArtifacts();
 
         verify(objectStoragePort, never()).delete(anyString());
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void cleanExpiredRecords_largeCandidateSet_usesBoundedBatches() {
+        // BDD-PRR-A01-004
+        List<ApiInvocationRecordEntity> all = IntStream.range(0, BATCH_SIZE * 3)
+                .mapToObj(i -> expiredWithRecordExpiry(
+                        sampleRecord("INV-LARGE-" + i, "storage/doc-" + i + ".docx"),
+                        Instant.now().minusSeconds(60)
+                ))
+                .toList();
+        when(repository.findByRecordExpiresAtBefore(any(Instant.class), any(Pageable.class)))
+                .thenReturn(all.subList(0, BATCH_SIZE))
+                .thenReturn(all.subList(BATCH_SIZE, BATCH_SIZE * 2))
+                .thenReturn(all.subList(BATCH_SIZE * 2, BATCH_SIZE * 3))
+                .thenReturn(List.of());
+        when(legalHoldExemptionService.isInvocationExempt(any(), any(), any())).thenReturn(false);
+
+        scheduler.cleanExpiredRecords();
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(repository, times(4)).findByRecordExpiresAtBefore(any(Instant.class), pageableCaptor.capture());
+        assertThat(pageableCaptor.getAllValues())
+                .allMatch(pageable -> pageable.getPageSize() == BATCH_SIZE);
+        verify(repository, times(3)).deleteAll(any());
+    }
+
+    @Test
+    void cleanExpiredDocumentArtifacts_largeCandidateSet_usesBoundedBatches() {
+        // BDD-PRR-A01-005
+        List<ApiInvocationRecordEntity> all = IntStream.range(0, BATCH_SIZE * 3)
+                .mapToObj(i -> artifactExpiredRecord(
+                        "INV-ART-" + i,
+                        "generated/doc-" + i + ".docx",
+                        Instant.now().minusSeconds(60)
+                ))
+                .toList();
+        when(repository.findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(
+                any(Instant.class), any(Pageable.class)))
+                .thenReturn(all.subList(0, BATCH_SIZE))
+                .thenReturn(all.subList(BATCH_SIZE, BATCH_SIZE * 2))
+                .thenReturn(all.subList(BATCH_SIZE * 2, BATCH_SIZE * 3))
+                .thenReturn(List.of());
+        when(legalHoldExemptionService.isInvocationExempt(any(), any(), any())).thenReturn(false);
+        when(objectStoragePort.exists(anyString())).thenReturn(true);
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        scheduler.cleanExpiredDocumentArtifacts();
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(repository, times(4)).findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(
+                any(Instant.class), pageableCaptor.capture());
+        assertThat(pageableCaptor.getAllValues())
+                .allMatch(pageable -> pageable.getPageSize() == BATCH_SIZE);
+        verify(repository, times(BATCH_SIZE * 3)).save(any());
     }
 
     private ApiInvocationRecordEntity sampleRecord(String externalId, String storageKey) {

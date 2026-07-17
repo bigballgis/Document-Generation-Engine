@@ -47,6 +47,10 @@ docgen:
       burst-capacity: ${RUNTIME_RATE_LIMIT_BURST:120}
   invocation:
     cleanup-interval-ms: ${DOCGEN_INVOCATION_CLEANUP_INTERVAL_MS:3600000}
+    cleanup-batch-size: ${DOCGEN_INVOCATION_CLEANUP_BATCH_SIZE:1000}
+  content-module:
+    pending-review-inbox-limit: ${DOCGEN_CM_PENDING_REVIEW_INBOX_LIMIT:500}
+    submitted-scan-page-size: ${DOCGEN_CM_SUBMITTED_SCAN_PAGE_SIZE:1000}
   idempotency:
     cache: ${IDEMPOTENCY_CACHE:redis}
     redis-key-prefix: "docgen:idempotency:"
@@ -130,6 +134,7 @@ docgen:
     management-retention-days: ${DOCGEN_AUDIT_MANAGEMENT_RETENTION_DAYS:90}
     runtime-retention-days: ${DOCGEN_AUDIT_RUNTIME_RETENTION_DAYS:365}
     retention-cron: ${DOCGEN_AUDIT_RETENTION_CRON:0 0 3 * * *}
+    cleanup-batch-size: ${DOCGEN_AUDIT_CLEANUP_BATCH_SIZE:1000}
 
 springdoc:
   api-docs:

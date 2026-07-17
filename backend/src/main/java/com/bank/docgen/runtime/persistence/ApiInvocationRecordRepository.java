@@ -35,9 +35,18 @@ public interface ApiInvocationRecordRepository
             UUID credentialId
     );
 
-    List<ApiInvocationRecordEntity> findByRecordExpiresAtBefore(Instant before);
+    /**
+     * Bounded candidate load for invocation record retention cleanup (PRR-A01).
+     */
+    List<ApiInvocationRecordEntity> findByRecordExpiresAtBefore(Instant before, Pageable pageable);
 
-    List<ApiInvocationRecordEntity> findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(Instant before);
+    /**
+     * Bounded candidate load for invocation artifact retention cleanup (PRR-A01).
+     */
+    List<ApiInvocationRecordEntity> findByDocumentExpiresAtBeforeAndArtifactStorageKeyIsNotNull(
+            Instant before,
+            Pageable pageable
+    );
 
     Page<ApiInvocationRecordEntity> findByTemplateIdAndCredentialIdAndInvocationKindInAndRecordExpiresAtAfterOrderByCreatedAtDesc(
             UUID templateId,

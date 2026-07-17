@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #77 CE-G05 → Done (merge c3f6a288 / feature 744b628a). P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done (merge 6c8fff7d) — not a CE leaf. No sole-active delivery leaf. #53 is registry only, NOT a delivery leaf. Do NOT claim program Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#77/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3 queue empty. Tooling #50 Done (6c8fff7d) — not a CE leaf; do NOT treat #53 as delivery leaf. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #77 CE-G05 → Done (merge c3f6a288 / feature 744b628a). P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done (merge 6c8fff7d) — not a CE leaf. Host sole-active delivery leaf is NON-CE PRR #98 (merge #98+#99+#100; slice prod-scale-bounded-queries) — #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#77/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3 queue empty. Tooling #50 Done (6c8fff7d) — not a CE leaf; do NOT treat #53 as delivery leaf. Host sole-active is PRR merge leaf #98 (not under this umbrella). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T10:54:00.000Z"
+        "updatedAt": "2026-07-17T14:37:00.000Z"
       },
       {
         "id": "54",
@@ -1356,17 +1356,69 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-17T05:30:00.000Z"
+      },
+      {
+        "id": "98",
+        "title": "PRR-A01: Retention bounded batch delete",
+        "description": "IN PROGRESS 2026-07-17. Sole-active merge leaf lead for slice prod-scale-bounded-queries (members #98+#99+#100 = PRR-A01/A02/A03). Bound AuditRetentionCleanupService + InvocationRetentionCleanupScheduler: Pageable/LIMIT batch delete (500–2000, default 1000); short tx; legal-hold safe via LegalHoldExemptionService. BDD ready docs/behavior/prod-scale-bounded-queries.md (BDD-PRR-A01-001…007). frontend_ui_in_scope=false. Formal phase None. Not go-live. Do NOT flip checklist #3b. Umbrella #53 stays registry-only.",
+        "details": "Slice id: prod-scale-bounded-queries. Placement ISOLATED D:/working/DGE-prod-scale-bounded-queries · feat/prod-scale-bounded-queries. Batch recommendation merge (member_task_ids: [\"98\",\"99\",\"100\"]; proposed_slice_id: prod-scale-bounded-queries). This task is the sole-active delivery leaf lead — implement #99+#100 in the same worktree; do not open a second writer. Scope A01: replace unbounded findBy*Before → List → deleteAll with Pageable batches; legal-hold skip; no false purge-evidence. Out of scope: Library export streaming (#101), Wave B/C/D, FE/E2E, ADR-0040/0048 body edits, CE-G04 admin API. Formal phase remains None. Do NOT claim go-live. Do NOT activate CD-3.",
+        "testStrategy": "1. BDD-PRR-A01-001…007 (hard floor 001/003/004). 2. Batch size window 500–2000 default 1000. 3. Legal-hold rows never deleted. 4. mvn -B -ntp -f backend/pom.xml verify GREEN. 5. FE/E2E N/A.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-17T14:37:00.000Z"
+      },
+      {
+        "id": "99",
+        "title": "PRR-A02: Preview/batch-test history TopN at DB",
+        "description": "PENDING (merged into sole-active leaf #98). Push PreviewGenerationService + BatchTestHistoryService TopN to DB (Pageable/LIMIT); keep external limit semantics (preview 50; batch-test history default 5). BDD-PRR-A02-001…004. Same slice prod-scale-bounded-queries. Do NOT activate as a separate delivery leaf.",
+        "details": "INCLUDED in sole-active merge leaf #98 / slice prod-scale-bounded-queries (member_task_ids: [\"98\",\"99\",\"100\"]). Worktree D:/working/DGE-prod-scale-bounded-queries. Implement with #98+#100 in one evidence run. Out of scope: changing public limit defaults; FE UI. Formal phase None. Not go-live.",
+        "testStrategy": "1. BDD-PRR-A02-001…004 (hard floor 001/002). 2. No full-table load then stream().limit. 3. Auth fail-closed unchanged. 4. Covered by leaf #98 mvn verify.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [],
+        "updatedAt": "2026-07-17T14:37:00.000Z"
+      },
+      {
+        "id": "100",
+        "title": "PRR-A03: ContentModule SUBMITTED bounded query",
+        "description": "PENDING (merged into sole-active leaf #98). Bound ContentModuleWorkflowService SUBMITTED inbox candidate load (page/scan + honest cap). BDD-PRR-A03-001…005. Same slice prod-scale-bounded-queries. Do NOT activate as a separate delivery leaf.",
+        "details": "INCLUDED in sole-active merge leaf #98 / slice prod-scale-bounded-queries (member_task_ids: [\"98\",\"99\",\"100\"]). Worktree D:/working/DGE-prod-scale-bounded-queries. Implement with #98+#99 in one evidence run. REWORK unbounded path not hard gate. Formal phase None. Not go-live.",
+        "testStrategy": "1. BDD-PRR-A03-001…005 (hard floor 001/002). 2. Pagination covers visible pending (not silent first page). 3. Cap honesty + fail-closed auth. 4. Covered by leaf #98 mvn verify.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [],
+        "updatedAt": "2026-07-17T14:37:00.000Z"
+      },
+      {
+        "id": "101",
+        "title": "PRR-A04: Library export streaming",
+        "description": "PENDING (queued solo after #98 merge leaf). Stream LibraryExportService full-library export to avoid unbounded in-memory ZIP assembly. Do NOT start until sole-active #98/#99/#100 leaf merges + MAIN doc-sync. Formal phase None. Not go-live.",
+        "details": "Serial queue after prod-scale-bounded-queries (#98+#99+#100). Batch recommendation expected solo. Out of scope for current sole-active leaf. Formal phase remains None. Do NOT flip checklist #3b. Do NOT claim go-live.",
+        "testStrategy": "TBD at activation — BDD first if behavior-changing; mvn verify; FE/E2E per scope.",
+        "priority": "medium",
+        "dependencies": [
+          "98",
+          "99",
+          "100"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "updatedAt": "2026-07-17T14:37:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-17T05:46:00.000Z",
-      "taskCount": 97,
+      "lastModified": "2026-07-17T14:37:00.000Z",
+      "taskCount": 101,
       "completedCount": 62,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-17T05:46:00.000Z"
+      "updated": "2026-07-17T14:37:00.000Z"
     }
   }
 }

@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -188,8 +189,10 @@ public class PreviewGenerationService {
     @Transactional(readOnly = true)
     public List<PreviewSummaryView> listPreviews(UUID templateId, ManagementSessionClaims session) {
         previewAuthorizationPort.requireReadableSnapshot(templateId, session);
-        return previewRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId).stream()
-                .limit(PREVIEW_HISTORY_LIMIT)
+        // PRR-A02: TopN at DB — do not load-all then stream().limit.
+        return previewRecordRepository
+                .findByTemplateIdOrderByCreatedAtDesc(templateId, PageRequest.of(0, PREVIEW_HISTORY_LIMIT))
+                .stream()
                 .map(mapping::toSummaryView)
                 .toList();
     }

@@ -2,6 +2,8 @@ package com.bank.docgen.rendering.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -22,12 +24,18 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
+/**
+ * CE-U18 batch-test history + BDD-PRR-A02-002…004 TopN at DB.
+ */
 @ExtendWith(MockitoExtension.class)
 class BatchTestHistoryServiceTest {
 
@@ -65,7 +73,8 @@ class BatchTestHistoryServiceTest {
     void listRecentRuns_returnsVisibleRunsInOrder() {
         BatchTestRunEntity run1 = completedRun(templateId, "[]");
         BatchTestRunEntity run2 = completedRun(templateId, "[]");
-        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId))
+        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), any(Pageable.class)))
                 .thenReturn(List.of(run1, run2));
 
         List<BatchTestRunSummaryView> result = service.listRecentRuns(templateId, 5, session);
@@ -78,7 +87,8 @@ class BatchTestHistoryServiceTest {
     void listRecentRuns_invalidatedRun_showsInvalidatedStatus() {
         BatchTestRunEntity run = completedRun(templateId, "[]");
         run.invalidate();
-        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId))
+        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), any(Pageable.class)))
                 .thenReturn(List.of(run));
 
         List<BatchTestRunSummaryView> result = service.listRecentRuns(templateId, 5, session);
@@ -89,23 +99,46 @@ class BatchTestHistoryServiceTest {
     }
 
     @Test
-    void listRecentRuns_respectsLimit() {
+    void listRecentRuns_respectsLimitViaPageable() {
+        // BDD-PRR-A02-002
+        List<BatchTestRunEntity> top5 = IntStream.range(0, 5)
+                .mapToObj(i -> completedRun(templateId, "[]"))
+                .toList();
+        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), any(Pageable.class)))
+                .thenReturn(top5);
+
+        List<BatchTestRunSummaryView> result = service.listRecentRuns(templateId, 5, session);
+
+        assertThat(result).hasSize(5);
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(batchTestRunRepository).findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), pageableCaptor.capture());
+        assertThat(pageableCaptor.getValue().getPageNumber()).isZero();
+        assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(5);
+    }
+
+    @Test
+    void listRecentRuns_fewerThanLimit_returnsAll() {
+        // BDD-PRR-A02-003
         List<BatchTestRunEntity> runs = List.of(
                 completedRun(templateId, "[]"),
                 completedRun(templateId, "[]"),
                 completedRun(templateId, "[]")
         );
-        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId))
+        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), any(Pageable.class)))
                 .thenReturn(runs);
 
-        List<BatchTestRunSummaryView> result = service.listRecentRuns(templateId, 2, session);
+        List<BatchTestRunSummaryView> result = service.listRecentRuns(templateId, 5, session);
 
-        assertThat(result).hasSize(2);
+        assertThat(result).hasSize(3);
     }
 
     @Test
     void listRecentRuns_emptyList_returnsEmpty() {
-        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId))
+        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), any(Pageable.class)))
                 .thenReturn(List.of());
 
         List<BatchTestRunSummaryView> result = service.listRecentRuns(templateId, 5, session);
@@ -122,7 +155,8 @@ class BatchTestHistoryServiceTest {
                 ]
                 """;
         BatchTestRunEntity run = completedRun(templateId, sampleJson);
-        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId))
+        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), any(Pageable.class)))
                 .thenReturn(List.of(run));
 
         List<BatchTestRunSummaryView> result = service.listRecentRuns(templateId, 5, session);
@@ -154,7 +188,8 @@ class BatchTestHistoryServiceTest {
                 ]
                 """;
         BatchTestRunEntity run = completedRun(templateId, legacyJson);
-        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId))
+        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), any(Pageable.class)))
                 .thenReturn(List.of(run));
 
         List<BatchTestRunSummaryView> result = service.listRecentRuns(templateId, 5, session);
@@ -173,7 +208,8 @@ class BatchTestHistoryServiceTest {
         BatchTestRunEntity running = BatchTestRunEntity.startNew(
                 UUID.randomUUID(), templateId, UUID.randomUUID(), "author", 2
         );
-        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId))
+        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), any(Pageable.class)))
                 .thenReturn(List.of(emptyJson, running));
 
         List<BatchTestRunSummaryView> result = service.listRecentRuns(templateId, 5, session);
@@ -186,7 +222,8 @@ class BatchTestHistoryServiceTest {
     @Test
     void listRecentRuns_malformedSampleResultsJson_keepsSummaryAndReturnsEmptySamples() {
         BatchTestRunEntity run = completedRun(templateId, "{not-valid-json");
-        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId))
+        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), any(Pageable.class)))
                 .thenReturn(List.of(run));
 
         List<BatchTestRunSummaryView> result = service.listRecentRuns(templateId, 5, session);
@@ -199,7 +236,8 @@ class BatchTestHistoryServiceTest {
 
     @Test
     void listRecentRuns_requiresReadableSnapshot() {
-        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId))
+        when(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
+                eq(templateId), any(Pageable.class)))
                 .thenReturn(List.of());
 
         service.listRecentRuns(templateId, 5, session);
@@ -209,6 +247,7 @@ class BatchTestHistoryServiceTest {
 
     @Test
     void listRecentRuns_unreadableTemplate_propagatesAccessDenied() {
+        // BDD-PRR-A02-004
         doThrow(new TemplateAccessDeniedException())
                 .when(previewAuthorizationPort).requireReadableSnapshot(templateId, session);
 
