@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 / #94 CE-U20 / #95 CE-U21 / #96 CE-U17 → Done. P2 continuum complete. P3 in flight — sole-active=#97 CE-U19 (ce-u19-dependency-readonly-view; in-progress). Queued pending: #80 CE-E03 / #77 CE-G05. Umbrella is program registry only — not a delivery leaf. Do NOT claim program Done. Leave #50 alone.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96 Done. P2 continuum complete with U21. P3 in flight as delivery program — sole-active=#97 CE-U19 (single-lane serial §9.2); remaining queued #80/#77. Do NOT claim program Done. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 / #94 CE-U20 / #95 CE-U21 / #96 CE-U17 / #97 CE-U19 → Done. P2 continuum complete. P3 in flight — #97 CE-U19 Done (merge e4679421 / feature 90a9e5cd; worktree removed). Sole-active cleared. Next queue head #80 CE-E03 pending (then #77 CE-G05). Umbrella is program registry only — not a delivery leaf. Do NOT claim program Done. Leave #50 alone.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3 in flight as delivery program — #97 CE-U19 Done; sole-active cleared (single-lane serial §9.2); next queue head #80 CE-E03 pending; remaining #80/#77. Do NOT claim program Done. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T03:26:00.000Z"
+        "updatedAt": "2026-07-17T05:30:00.000Z"
       },
       {
         "id": "54",
@@ -1106,8 +1106,8 @@
       {
         "id": "80",
         "title": "CE-E03: Full-library export",
-        "description": "PENDING. Slice ce-e03-full-library-export. Batch export via per-template bundles + manifest. P3·M.",
-        "details": "Depends E01 (#78). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §7 CE-E03.",
+        "description": "PENDING. Slice ce-e03-full-library-export. Batch export via per-template bundles + manifest. P3·M. Next §9.2 queue head after #97 CE-U19 Done (do not auto-activate).",
+        "details": "Depends E01 (#78). P3 after U19 (#97 Done — merge e4679421 / feature 90a9e5cd). Remains pending — sole-active cleared; do not start until next deliver leaf activates. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §7 CE-E03.",
         "testStrategy": "1. Bulk export + manifest. 2. Gates green.",
         "priority": "low",
         "dependencies": [
@@ -1115,7 +1115,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00Z"
+        "updatedAt": "2026-07-17T05:30:00.000Z"
       },
       {
         "id": "81",
@@ -1346,27 +1346,27 @@
       {
         "id": "97",
         "title": "CE-U19: Dependency read-only view",
-        "description": "IN PROGRESS 2026-07-17. Slice ce-u19-dependency-readonly-view. Package Hub Dependencies read-only tab: master revision (pin), anchors, clause versions, release lines. P3·M. Sole-active delivery leaf (§9.2). BDD ready (docs/behavior/ce-u19-dependency-readonly-view.md; BDD-CE-U19-DRV-001…012). Placement ISOLATED D:/working/DGE-ce-u19-dependency-readonly-view · feat/ce-u19-dependency-readonly-view. After #96 CE-U17 Done. Formal phase None. Not go-live. Not CD-3. Leave #50 alone. #80/#77 stay pending queued.",
-        "details": "Activated 2026-07-17 as sole-active after #96 CE-U17 Done (merge 4fc2dbdb / feature d3293db1). Slice id: ce-u19-dependency-readonly-view. Batch recommendation solo (member_task_ids: [\"97\"]; proposed_slice_id: ce-u19-dependency-readonly-view). BDD ready; frontend_ui_in_scope=true. Likely full-stack: additive release GET masterPin (U19-D5 / TemplateExportMasterPinView shape) then FE Dependencies tab. Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy when acceptance surface changes; worktree merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U19. Queued after this leaf: #80 CE-E03 / #77 CE-G05. Do NOT activate CD-3 / CE-O02 / #50. Do NOT claim program Done.",
-        "testStrategy": "1. Read-only dependency page (Hub Dependencies tab). 2. Optional BE masterPin on release GET. 3. E2E+UIUX dual-brand.",
+        "description": "DONE 2026-07-17. Slice ce-u19-dependency-readonly-view. MAIN merge e4679421c312a175679076c40b042ba70537868a / feature 90a9e5cd72fec000176c0c145aa2946043e2814a. Worktree REMOVED. Package Hub Dependencies read-only tab: master revision pin / not-pinned, anchors, clause versions, release lines; additive release GET masterPin (U19-D5). P3·M. BDD ready (docs/behavior/ce-u19-dependency-readonly-view.md; BDD-CE-U19-DRV-001…012). Formal phase None. Not go-live. Not CD-3. Leave #50 alone.",
+        "details": "Done 2026-07-17 after isolated delivery + stage 11 merge. Slice id: ce-u19-dependency-readonly-view. Placement ISOLATED; worktree REMOVED. Batch recommendation solo (member_task_ids: [\"97\"]) closed. BDD ready (ce-u19-dependency-readonly-view.md; BDD-CE-U19-DRV-001…012); frontend_ui_in_scope=true. Gates: BE mvn verify GREEN; FE lint/type-check/test/build PASS; E2E functional 11/11; UIUX PASS Critical=0; architecture Critical=0; CQ Critical=0; Stage 10 DEPLOY_OK SkipBuild health 200. Formal phase stays None. Plan §4 CE-U19 Done.",
+        "testStrategy": "BE unit/IT + Playwright CE-U19-dependency-readonly-view.spec.ts (11/11) + CE-U19-dependency-readonly-view-uiux-evidence.spec.ts; UIUX manifest frontend/e2e/evidence/CE-U19-uiux-manifest.md; queued docker-deploy Stage 10 SkipBuild.",
         "priority": "low",
         "dependencies": [
           "96"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T03:26:00.000Z"
+        "updatedAt": "2026-07-17T05:30:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-17T07:55:00.000Z",
+      "lastModified": "2026-07-17T05:30:00.000Z",
       "taskCount": 97,
-      "completedCount": 61,
+      "completedCount": 62,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-17T07:55:00.000Z"
+      "updated": "2026-07-17T05:30:00.000Z"
     }
   }
 }

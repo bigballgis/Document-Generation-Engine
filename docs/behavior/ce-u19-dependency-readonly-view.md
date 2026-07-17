@@ -5,9 +5,9 @@
 **编写日期:** 2026-07-17  
 **程序:** [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §4 CE-U19  
 **Slice:** `ce-u19-dependency-readonly-view`  
-**Task Master:** **#97**  
+**Task Master:** **#97** → **Done** (MAIN merge `e4679421` / feature `90a9e5cd`)  
 **Formal phase:** **None**  
-**Placement:** ISOLATED `D:/working/DGE-ce-u19-dependency-readonly-view` · `feat/ce-u19-dependency-readonly-view`  
+**Placement:** ISOLATED (worktree **REMOVED** after merge) · was `D:/working/DGE-ce-u19-dependency-readonly-view` · `feat/ce-u19-dependency-readonly-view`  
 **完成声明约束:** 关闭「模板详情缺少依赖关系只读聚合面」缺口；在 Package Hub 增加 **Dependencies** 只读页，展示母版 revision、锚点、条款版本、release 线；复用既有 template/master/content-module/version-lines 读路径；**不**实现 CE-E03 / CE-G05；**不**改 CE-U17 快捷键；**不**宣称 go-live；**不**激活 CD-3；**leave #50 alone**
 
 ---
