@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #77 CE-G05 → Done (merge c3f6a288 / feature 744b628a). P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done (merge 6c8fff7d) — not a CE leaf. NON-CE PRR #98+#99+#100+#101 → Done (A04 merge 5b705f56) — not under this umbrella. Host sole-active delivery leaf: #102 PRR-B01 true prod contract (Wave B item 5; slice prod-true-prod-contract) — NOT a CE leaf. Serial queue after #102: #105 PRR-B02 LDAP CONDITIONAL → #103 PRR-C01 → #104 PRR-D01. #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#77/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3 queue empty. Tooling #50 Done (6c8fff7d) — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 PRR-A04 Done outside this umbrella. Host sole-active is NON-CE #102 (true prod contract only); LDAP residual is #105 pending. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #77 CE-G05 → Done (merge c3f6a288 / feature 744b628a). P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done (merge 6c8fff7d) — not a CE leaf. NON-CE PRR #98+#99+#100+#101+#102 → Done (#102 true prod contract merge 40e264e7) — not under this umbrella. Host sole-active cleared. Next queue head (not activated): #105 PRR-B02 LDAP CONDITIONAL → #103 PRR-C01 → #104 PRR-D01. #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#77/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3 queue empty. Tooling #50 Done (6c8fff7d) — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 PRR-A04 + #102 PRR-B01 Done outside this umbrella. Host sole-active cleared; next NON-CE queue head #105 pending (not activated). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T00:22:00.000Z"
+        "updatedAt": "2026-07-18T00:51:00.000Z"
       },
       {
         "id": "54",
@@ -1396,7 +1396,7 @@
       {
         "id": "101",
         "title": "PRR-A04: Library export streaming",
-        "description": "DONE 2026-07-17. PRR-A04 library export streaming → Done. MAIN merge 5b705f56 / feature tip 834ca1a6; worktree REMOVED. Slice prod-library-export-streaming. Stream/bounded-temp LibraryExportService full-library export (no unbounded in-memory ZIP assembly); CE-E03 contract compatible. BDD ready docs/behavior/prod-library-export-streaming.md (BDD-PRR-A04). frontend_ui_in_scope=false. Formal phase None. Not go-live. Do NOT flip checklist #3b. Sole-active superseded 2026-07-18 by #102 PRR-B01 true prod contract (in-progress).",
+        "description": "DONE 2026-07-17. PRR-A04 library export streaming → Done. MAIN merge 5b705f56 / feature tip 834ca1a6; worktree REMOVED. Slice prod-library-export-streaming. Stream/bounded-temp LibraryExportService full-library export (no unbounded in-memory ZIP assembly); CE-E03 contract compatible. BDD ready docs/behavior/prod-library-export-streaming.md (BDD-PRR-A04). frontend_ui_in_scope=false. Formal phase None. Not go-live. Do NOT flip checklist #3b. Superseded by #102 PRR-B01 → Done (merge 40e264e7).",
         "details": "COMPLETED 2026-07-17. Slice id: prod-library-export-streaming. Batch recommendation solo (member_task_ids: [\"101\"]) closed. Merge SHA 5b705f569124c76865de110e8ebb7d95fdeba7ae (feature tip 834ca1a6). Gates: mvn verify GREEN 1929; architecture PASS_WITH_NOTES Critical=0; Stage 10 DEPLOY_OK; E2E/UIUX N/A (API-first). Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT activate CD-3. Do NOT flip checklist #3b.",
         "testStrategy": "1. BDD-PRR-A04-001…010 (contract compat + no full-heap ZIP buffer + temp cleanup). 2. mvn -B -ntp -f backend/pom.xml verify GREEN (1929). 3. FE/E2E N/A (API-first; frontend_ui_in_scope=false).",
         "priority": "medium",
@@ -1412,22 +1412,22 @@
       {
         "id": "102",
         "title": "PRR-B01: True production contract (Wave B item 5)",
-        "description": "IN PROGRESS 2026-07-18. Sole-active delivery leaf. Wave B item 5 ONLY — claimed-production vs LAB acceptance honesty for docker-compose.prod.yml / Production*Guards (single prod profile, APP_ENVIRONMENT=prod, force Kafka async, no demo classpath / AD stub LAB defaults). Slice prod-true-prod-contract. Worktree D:/working/DGE-prod-true-prod-contract · feat/prod-true-prod-contract. BDD ready docs/behavior/prod-true-prod-contract.md (BDD-PRR-B01-TPC). frontend_ui_in_scope=false. LDAP/AdGroupResolver directory adapter OUT OF SCOPE (residual → #105). Formal phase None. Not go-live. Do NOT flip checklist #3b. Do NOT mark #5a GO.",
-        "details": "Activated 2026-07-18 as sole-active (single-lane serial). Re-scoped from prior combined \"prod contract / LDAP\" title: this leaf delivers Wave B item 5 true prod contract only. Scope: TPC-C1…C8 per BDD — compose claimed-production defaults; ProductionAsyncTransportGuard aligned with JWT/AD guards; LAB knobs only via explicit LAB overlay. Explicit non-goals: real LDAP/AD adapter, inventing directory coords, #5a GO, #3b flip, go-live, CD-3, FE/E2E. Serial queue after this leaf: #105 PRR-B02 LDAP CONDITIONAL → #103 PRR-C01 → #104 PRR-D01. Umbrella #53 registry only (not this leaf). Formal phase remains None.",
-        "testStrategy": "1. BDD ready — docs/behavior/prod-true-prod-contract.md (BDD-PRR-B01-TPC-001…012). 2. TDD Red first on ProductionAsyncTransportGuard prod-profile enforce. 3. mvn -B -ntp -f backend/pom.xml verify GREEN. 4. FE/E2E N/A (frontend_ui_in_scope=false). 5. Queued deploy evidence as required. 6. Do NOT claim LDAP/#5a GO; do NOT flip #3b; do NOT claim go-live.",
+        "description": "DONE 2026-07-18. PRR-B01 true production contract (Wave B item 5) → Done. MAIN merge 40e264e7; worktree REMOVED. Slice prod-true-prod-contract. Claimed-prod docker-compose.prod.yml + ProductionAsyncTransportGuard; LAB knobs on docker-compose.lab.yml. BDD ready docs/behavior/prod-true-prod-contract.md (BDD-PRR-B01-TPC). frontend_ui_in_scope=false. LDAP residual → #105. Formal phase None. Not go-live. Do NOT flip checklist #3b. Do NOT mark #5a GO. Sole-active cleared.",
+        "details": "COMPLETED 2026-07-18 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: prod-true-prod-contract. Batch recommendation solo (member_task_ids: [\"102\"]) closed. Merge SHA 40e264e76c1e9b7e6f6087194e6ed3e530be81b7. Gates: mvn verify GREEN; architecture PASS_WITH_NOTES; DEPLOY_OK LAB stack; E2E/UIUX N/A. Evidence: ProductionAsyncTransportGuard + docker-compose.prod.yml claimed-prod defaults; LAB overlay docker-compose.lab.yml. Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b/#5a GO. Next queue head (not activated): #105 PRR-B02 LDAP CONDITIONAL → #103 → #104.",
+        "testStrategy": "1. BDD-PRR-B01-TPC-001…012. 2. TDD ProductionAsyncTransportGuard. 3. mvn -B -ntp -f backend/pom.xml verify GREEN. 4. FE/E2E N/A. 5. DEPLOY_OK LAB stack. 6. Do NOT claim LDAP/#5a GO; do NOT flip #3b; do NOT claim go-live.",
         "priority": "medium",
         "dependencies": [
           "101"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T00:22:00.000Z"
+        "updatedAt": "2026-07-18T00:51:00.000Z"
       },
       {
         "id": "103",
         "title": "PRR-C01: ADR-0042/0043 closeout (#3b)",
         "description": "PENDING (queued after #105 Wave B LDAP residual — not activated). Wave C — ADR-0042/0043 rendering acceptance closeout tied to launch checklist #3b blocker. Formal phase None. Not go-live. Do NOT flip #3b until Accepted + evidence.",
-        "details": "Serial queue: #102 (active true prod contract) → #105 PRR-B02 LDAP CONDITIONAL → this leaf → #104. Do not activate while #102 or #105 is In Progress (single-lane serial). Scope: ADR-0042/0043 path to Accepted with durable evidence for checklist #3b. Formal phase None. Not go-live.",
+        "details": "Serial queue: #102 Done → #105 PRR-B02 LDAP CONDITIONAL (next queue head, not activated) → this leaf → #104. Do not activate while #105 is In Progress (single-lane serial). Scope: ADR-0042/0043 path to Accepted with durable evidence for checklist #3b. Formal phase None. Not go-live.",
         "testStrategy": "TBD at activation — BDD/ADR acceptance evidence; do not flip #3b without durable proof.",
         "priority": "high",
         "dependencies": [
@@ -1454,8 +1454,8 @@
       {
         "id": "105",
         "title": "PRR-B02: LDAP AdGroupResolver SPI (CONDITIONAL)",
-        "description": "PENDING (queued after #102 — not activated). Wave B item 6 — real LDAP/AD AdGroupResolver SPI + company directory evidence toward checklist #5a CONDITIONAL residual. LAB override ≠ production AD. Do NOT invent directory coords (host/DN/credentials UNKNOWN until company provides). Formal phase None. Not go-live. Do NOT flip checklist #3b. Do NOT mark #5a GO without durable company AD evidence.",
-        "details": "Serial queue: depends on #102 PRR-B01 true prod contract Done; then this leaf; then #103 Wave C. Scope: production directory adapter SPI / integration evidence for #5a — CONDITIONAL residual after ADR-0054 honest-bound stub close (#46). Explicit forbidden: inventing LDAP/AD endpoint, DN, bind credentials, or silent permissive defaults. BDD required at activation if behavior-changing. Formal phase remains None. Umbrella #53 registry only.",
+        "description": "PENDING (next queue head after #102 Done — not activated). Wave B item 6 — real LDAP/AD AdGroupResolver SPI + company directory evidence toward checklist #5a CONDITIONAL residual. LAB override (docker-compose.lab.yml) ≠ production AD. Do NOT invent directory coords (host/DN/credentials UNKNOWN until company provides). Formal phase None. Not go-live. Do NOT flip checklist #3b. Do NOT mark #5a GO without durable company AD evidence.",
+        "details": "Serial queue head after #102 PRR-B01 Done (merge 40e264e7); then this leaf; then #103 Wave C. Scope: production directory adapter SPI / integration evidence for #5a — CONDITIONAL residual after ADR-0054 honest-bound stub close (#46). Explicit forbidden: inventing LDAP/AD endpoint, DN, bind credentials, or silent permissive defaults. BDD required at activation if behavior-changing. Formal phase remains None. Umbrella #53 registry only. Do NOT auto-activate here.",
         "testStrategy": "TBD at activation — BDD first if behavior-changing; company-supplied directory evidence only (no invented coords); mvn verify; FE/E2E N/A unless scope expands; do not flip #5a to GO without durable proof; do not flip #3b; do not claim go-live.",
         "priority": "medium",
         "dependencies": [
@@ -1468,13 +1468,13 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-18T00:22:00.000Z",
+      "lastModified": "2026-07-18T00:51:00.000Z",
       "taskCount": 105,
-      "completedCount": 100,
+      "completedCount": 101,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-18T00:22:00.000Z"
+      "updated": "2026-07-18T00:51:00.000Z"
     }
   }
 }
