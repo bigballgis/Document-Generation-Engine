@@ -31,9 +31,10 @@ public class DocgenRenderingProperties {
     private long maxGeneratedArtifactBytes = 52_428_800L;
 
     /**
-     * LR-A7 / ADR-0042: pagination delta budget (pages). If |pdfPages - wordPages| exceeds
-     * this, a fidelity warning fires; at 2x, a fidelity blocker. The budget is a pending
-     * proposal until the user confirms — until then the delta is logged but not enforced.
+     * ADR-0042 Accepted budget B (pages). When {@code authorWordPageCount} is set and PDF
+     * conversion succeeds: {@code B < delta ≤ 2×B} → fidelity warning;
+     * {@code delta > 2×B} → PublishGate blocker. Missing Word page count skips enforcement
+     * (never fabricate Word pages from LO/PDF).
      */
     private int paginationDeltaBudgetPages = 1;
 

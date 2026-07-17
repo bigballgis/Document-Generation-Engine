@@ -10,6 +10,7 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
 import com.bank.docgen.authorization.management.domain.AuthSource;
+import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import com.bank.docgen.template.port.BatchTestRunGateSnapshot;
 import com.bank.docgen.template.port.PreviewEvidencePort;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -82,8 +83,13 @@ class PublishGateServiceTest {
     private ManagementSessionClaims admin;
     private TemplateEntity template;
 
+    private DocgenRenderingProperties renderingProperties;
+    private TemplateVersionEntity inFlightVersion;
+
     @BeforeEach
     void setUp() {
+        renderingProperties = new DocgenRenderingProperties();
+        renderingProperties.setPaginationDeltaBudgetPages(1);
         service = new PublishGateService(
                 templateService,
                 templateVersionRepository,
@@ -98,7 +104,8 @@ class PublishGateServiceTest {
                 templateCurrentVersionResolver,
                 anchorBindingRepository,
                 nodeMatrixValidationService,
-                new com.fasterxml.jackson.databind.ObjectMapper()
+                new com.fasterxml.jackson.databind.ObjectMapper(),
+                renderingProperties
         );
         templateId = UUID.randomUUID();
         versionId = UUID.randomUUID();
@@ -111,6 +118,7 @@ class PublishGateServiceTest {
                 UUID.randomUUID(),
                 "10000002"
         );
+        inFlightVersion = new TemplateVersionEntity(versionId, templateId, "10000002");
         admin = new ManagementSessionClaims(
                 "10000002",
                 "Admin",
@@ -124,7 +132,7 @@ class PublishGateServiceTest {
         );
         when(templateService.requireReadableTemplate(templateId, admin)).thenReturn(template);
         lenient().when(templateCurrentVersionResolver.requireInFlightDevVersion(templateId))
-                .thenReturn(new TemplateVersionEntity(versionId, templateId, "10000002"));
+                .thenReturn(inFlightVersion);
         lenient().when(templateService.loadRules(any(TemplateVersionEntity.class))).thenReturn(List.of());
         lenient().when(templateRuleValidationService.validateRules(
                 org.mockito.ArgumentMatchers.eq(templateId),
@@ -146,6 +154,8 @@ class PublishGateServiceTest {
         lenient().when(previewEvidencePort.countSuccessfulPreviews(templateId, versionId)).thenReturn(1);
         lenient().when(previewEvidencePort.countFailedPreviews(templateId, versionId)).thenReturn(0);
         lenient().when(previewEvidencePort.countUnviewedFidelityWarnings(templateId, versionId)).thenReturn(0);
+        lenient().when(previewEvidencePort.latestSuccessfulPdfPageCount(any(), any()))
+                .thenReturn(Optional.empty());
         lenient().when(contentModuleReferenceService.validateReferences(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 0, 0));
         lenient().when(contentModuleReferenceService.evaluateEffectiveExpiry(versionId))
@@ -197,6 +207,65 @@ class PublishGateServiceTest {
         assertThat(checklist.ready()).isTrue();
         assertThat(checklist.blockerCount()).isZero();
         service.assertReady(templateId, admin);
+    }
+
+    @Test
+    void bdd003_paginationDeltaOver2xBudget_blocksPublish() {
+        inFlightVersion.setAuthorWordPageCount(6);
+        when(previewEvidencePort.latestSuccessfulPdfPageCount(templateId, versionId))
+                .thenReturn(Optional.of(9));
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.ready()).isFalse();
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.PAGINATION_DELTA_BUDGET)
+                .findFirst())
+                .get()
+                .satisfies(item -> {
+                    assertThat(item.blocker()).isTrue();
+                    assertThat(item.ready()).isFalse();
+                });
+        assertThatThrownBy(() -> service.assertReady(templateId, admin))
+                .isInstanceOf(TemplateValidationException.class);
+    }
+
+    @Test
+    void bdd002_paginationDeltaWarningBand_doesNotBlockPublishGate() {
+        inFlightVersion.setAuthorWordPageCount(6);
+        when(previewEvidencePort.latestSuccessfulPdfPageCount(templateId, versionId))
+                .thenReturn(Optional.of(8));
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.PAGINATION_DELTA_BUDGET)
+                .findFirst())
+                .get()
+                .satisfies(item -> assertThat(item.blocker()).isFalse());
+        assertThat(checklist.ready()).isTrue();
+    }
+
+    @Test
+    void bdd004_missingAuthorWordPageCount_skipsPaginationBudgetBlocker() {
+        inFlightVersion.setAuthorWordPageCount(null);
+        when(previewEvidencePort.latestSuccessfulPdfPageCount(templateId, versionId))
+                .thenReturn(Optional.of(6));
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.PAGINATION_DELTA_BUDGET)
+                .findFirst())
+                .get()
+                .satisfies(item -> assertThat(item.blocker()).isFalse());
+        assertThat(checklist.ready()).isTrue();
     }
 
     @Test
@@ -589,7 +658,8 @@ class PublishGateServiceTest {
                         PublishGateCheckCode.ANCHOR_INTEGRITY,
                         PublishGateCheckCode.VARIABLE_SCHEMA,
                         PublishGateCheckCode.APPROVAL_SUMMARY,
-                        PublishGateCheckCode.API_POLICY
+                        PublishGateCheckCode.API_POLICY,
+                        PublishGateCheckCode.PAGINATION_DELTA_BUDGET
                 );
     }
 

@@ -45,6 +45,13 @@ public class TemplateVersionEntity {
     @Column(name = "fidelity_warning_codes_json", columnDefinition = "TEXT")
     private String fidelityWarningCodesJson;
 
+    /**
+     * ADR-0042: Microsoft Word authoring page count declared by the template author.
+     * Never backfilled from LibreOffice / Docker PDF page counts.
+     */
+    @Column(name = "author_word_page_count")
+    private Integer authorWordPageCount;
+
     // CE-K01: immutable release-bundle pinning. Populated on publish or by the
     // retroactive backfill service. Nullable for non-PUBLISHED / pre-migration rows.
     @Column(name = "master_revision_id")
@@ -149,6 +156,15 @@ public class TemplateVersionEntity {
 
     public void setFidelityWarningCodesJson(String fidelityWarningCodesJson) {
         this.fidelityWarningCodesJson = fidelityWarningCodesJson;
+        this.updatedAt = Instant.now();
+    }
+
+    public Integer getAuthorWordPageCount() {
+        return authorWordPageCount;
+    }
+
+    public void setAuthorWordPageCount(Integer authorWordPageCount) {
+        this.authorWordPageCount = authorWordPageCount;
         this.updatedAt = Instant.now();
     }
 

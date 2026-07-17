@@ -6,6 +6,7 @@ import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
+import com.bank.docgen.rendering.PaginationDeltaFidelitySupport;
 import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.api.PreviewSummaryView;
 import com.bank.docgen.rendering.api.TestGenerateRequest;
@@ -61,7 +62,8 @@ public class PreviewGenerationService {
             RenderProfileService renderProfileService,
             FidelityValidationService fidelityValidationService,
             FidelityWarningJsonSupport fidelityWarningJsonSupport,
-            VariableComputePort variableComputePort
+            VariableComputePort variableComputePort,
+            PaginationDeltaFidelitySupport paginationDeltaFidelitySupport
     ) {
         this.previewAuthorizationPort = previewAuthorizationPort;
         this.testDataSetEvidencePort = testDataSetEvidencePort;
@@ -85,7 +87,8 @@ public class PreviewGenerationService {
                 renderContextPort,
                 renderProfileService,
                 fidelityValidationService,
-                variableComputePort
+                variableComputePort,
+                paginationDeltaFidelitySupport
         );
     }
 
@@ -160,7 +163,8 @@ public class PreviewGenerationService {
             preview.markSucceeded(
                     assembled.storageKey(),
                     assembled.pdfStorageKey(),
-                    mapping.writeWarnings(assembled.warnings())
+                    mapping.writeWarnings(assembled.warnings()),
+                    assembled.pdfPageCount()
             );
             previewRecordRepository.save(preview);
             if (request.testDataSetId() != null && !request.testDataSetId().isBlank()) {

@@ -48,6 +48,7 @@ final class PublishGateChecklistSupport {
         checklistItems.add(items.contentModuleEffectiveExpiredItem(version.getId()));
         checklistItems.add(items.unsupportedStructuredNodesItem(version.getId()));
         checklistItems.add(items.pasteCleaningBlockersItem(version.getId()));
+        checklistItems.add(items.paginationDeltaBudgetItem(templateId, version));
         checklistItems.add(items.blockerStatusItem(templateId, version.getId(), bindings, coverage));
 
         List<PublishGateItemView> phaseItems = filterForPhase(checklistItems, phase);

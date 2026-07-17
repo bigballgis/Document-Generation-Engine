@@ -2498,6 +2498,77 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/dev-version/author-word-page-count:
+    get:
+      tags: [Admin]
+      operationId: getAuthorWordPageCount
+      summary: Get author-declared Microsoft Word page count for the in-flight DEV version
+      description: >-
+        ADR-0042 / BDD-PRR-C01-008. Returns the optional `authorWordPageCount`
+        used for Word↔PDF pagination delta enforcement. Never fabricates a value
+        from LibreOffice or Docker PDF page counts.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Author Word page count view.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorWordPageCountResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    put:
+      tags: [Admin]
+      operationId: putAuthorWordPageCount
+      summary: Set or clear author-declared Microsoft Word page count on the in-flight DEV version
+      description: >-
+        ADR-0042 / BDD-PRR-C01-008. Sets a positive integer Word authoring page
+        count, or clears it with `null` (skips pagination delta enforcement).
+        Does not accept PDF page counts as a substitute.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAuthorWordPageCountRequest'
+      responses:
+        '200':
+          description: Updated author Word page count view.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorWordPageCountResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/templates/{templateId}/bindings/{anchorId}:
     put:
       tags: [Admin]
@@ -6879,6 +6950,7 @@ components:
         - CONTENT_MODULE_EFFECTIVE_EXPIRED
         - UNSUPPORTED_STRUCTURED_NODES
         - PASTE_CLEANING_BLOCKERS
+        - PAGINATION_DELTA_BUDGET
         - BLOCKER_STATUS
         - FIDELITY_WARNINGS_VIEWED
     PublishGateItemView:
@@ -6913,6 +6985,44 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PublishGateItemView'
+    UpdateAuthorWordPageCountRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        authorWordPageCount:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          nullable: true
+          description: >-
+            Microsoft Word authoring page count. Null clears the declaration
+            (pagination delta enforcement skips). Never set from LO/PDF pages.
+    AuthorWordPageCountView:
+      type: object
+      additionalProperties: false
+      required: [templateId, devVersionId]
+      properties:
+        templateId:
+          type: string
+          format: uuid
+        devVersionId:
+          type: string
+          format: uuid
+        authorWordPageCount:
+          type: integer
+          minimum: 1
+          nullable: true
+    AuthorWordPageCountResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/AuthorWordPageCountView'
+        error:
+          $ref: '#/components/schemas/ApiError'
     PublishGateChecklistResponse:
       type: object
       additionalProperties: false
