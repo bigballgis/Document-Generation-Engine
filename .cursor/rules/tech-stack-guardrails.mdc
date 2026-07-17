@@ -23,7 +23,7 @@ switches; confirm with the user before changing a baseline choice.
 
 - Vue 3 + TypeScript + Vite + Element Plus + Pinia + Vue Router 4 + Axios.
 - pnpm only (direct `pnpm` or shared resolver; never `corepack pnpm` in scripts).
-- SCSS + CSS Modules; Vitest + Vue Test Utils + Playwright.
+- SCSS + CSS Modules; Vitest **3.x** (security floor **≥3.2.6**; align `@vitest/coverage-v8`) + Vue Test Utils + Playwright.
 
 ## API contract
 

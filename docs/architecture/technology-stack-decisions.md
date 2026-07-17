@@ -54,7 +54,7 @@ Source-of-truth boundary:
 | Object storage | MinIO | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Frontend UI stack | Element Plus + Pinia + Vue Router 4 + Axios + pnpm | ADR Accepted | ADR 0029 | 2026-06-08 |
 | Frontend styling | SCSS + CSS Modules | ADR Accepted | ADR 0029 | 2026-06-08 |
-| Frontend testing | Vitest + Vue Test Utils + Playwright | ADR Accepted | ADR 0029 | 2026-06-08 |
+| Frontend testing | Vitest **3.x** (security floor **≥3.2.6**; align `@vitest/coverage-v8`) + Vue Test Utils + Playwright | ADR Accepted (amended 2026-07-17) | ADR 0029; Task Master **#50**; [fe-vitest-3-upgrade](../behavior/fe-vitest-3-upgrade.md) | 2026-07-17 |
 | Backend testing | JUnit 5 + Mockito + Testcontainers + RestAssured | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Backend build tool | Maven | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Database migration tool | Flyway | ADR Accepted | ADR 0028 | 2026-06-08 |

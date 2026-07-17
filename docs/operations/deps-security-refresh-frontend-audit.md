@@ -23,7 +23,7 @@ pnpm -C frontend audit
 | Scope | Result |
 | --- | --- |
 | `audit --prod` | **No known vulnerabilities found** |
-| `audit` (all) | **1 critical** remaining (Vitest — see exception) |
+| `audit` (all) | **No known vulnerabilities found** (2026-07-17 — Vitest Critical closed; see exception CLOSED) |
 | High / Moderate | **0** after `pnpm.overrides.vite = 6.4.3` |
 
 ### Pre-remediation findings (before overrides / floors)
@@ -52,7 +52,7 @@ Direct app `vite@6.4.3` was already on the patched line; High/Moderate came from
 | Package | Before (package.json floor / lock tip) | After |
 | --- | --- | --- |
 | `vite` | `^6.0.5` / app tip 6.4.3 + nested 5.4.21 | `^6.4.3` + override **6.4.3 only** |
-| `vitest` | `^2.1.8` → 2.1.9 | `^2.1.9` / **2.1.9** (stay on Vitest 2) |
+| `vitest` | `^2.1.8` → 2.1.9 | `^3.2.7` / **3.2.7** (Task Master **#50** — 2026-07-17) |
 | `vue` | `^3.5.13` / 3.5.38 | `^3.5.39` / **3.5.39** |
 | `element-plus` | `^2.9.1` / 2.14.2 | `^2.14.3` / **2.14.3** |
 | `axios` | `^1.7.9` / 1.18.1 | `^1.18.1` / **1.18.1** |
@@ -65,26 +65,34 @@ Direct app `vite@6.4.3` was already on the patched line; High/Moderate came from
 
 ---
 
-## Exception (Critical — ADR / baseline blocked)
+## Exception (Critical — GHSA-5xrq-8626-4rwp)
 
 Exception Handling metadata per [quality-gate-threshold-baseline.md](../architecture/quality-gate-threshold-baseline.md) (reason, risk, owner, expiration date, cleanup task id):
 
 | Field | Value |
 | --- | --- |
 | Finding | [GHSA-5xrq-8626-4rwp](https://github.com/advisories/GHSA-5xrq-8626-4rwp) — Vitest UI arbitrary file read/exec |
-| Current | `vitest@2.1.9` / `@vitest/coverage-v8@2.1.9` |
-| Fix requires | `vitest >= 3.2.6` (**major** jump Vitest 2 → 3+) |
-| **Reason** | Session baseline: stay on **Vitest 2**; no unconfirmed ADR major framework jump (Vitest 3.2.6+ is the patched line) |
-| **Risk** | **Dev-only**. Exploit requires Vitest **UI server** listening; production Docker UI (`4173`) and prod deps are unaffected. `audit --prod` clean. Project default scripts use `vitest run` / `vitest` watch — avoid exposing `@vitest/ui` to untrusted networks. |
-| **Owner** | Frontend platform / Task Master follow-up |
-| **Expiration date** | **2026-10-13** (90 days from 2026-07-13) |
-| **Cleanup task id** | Task Master **#50** — Vitest 3.2.6+ upgrade (pending; blocked on ADR confirmation) |
+| **Status** | **CLOSED (2026-07-17)** — pins landed on `feat/fe-vitest-3-upgrade` (Task Master **#50**): `vitest@3.2.7` + `@vitest/coverage-v8@3.2.7`; `pnpm -C frontend audit` and `audit --prod` both report **No known vulnerabilities found**; frontend gates green (see Gate evidence below). |
+| Resolved versions | `vitest@^3.2.7` → **3.2.7** / `@vitest/coverage-v8@3.2.7` |
+| Authorized target | `vitest >= 3.2.6` + aligned `@vitest/coverage-v8 >= 3.2.6` ([ADR-0029](../adr/technology-stack/0029-frontend-application-stack-baseline.md) amendment 2026-07-17) — **met** |
+| **Reason (historical #49)** | Session stayed on Vitest **2** pending ADR major confirmation; ADR gate cleared 2026-07-17; pin delivered by **#50**. |
+| **Risk (historical)** | Was **dev-only** (Vitest UI server). Production Docker UI / prod deps were never affected. |
+| **Owner** | Frontend platform / Task Master **#50** (`fe-vitest-3-upgrade`) |
+| **Expiration date** | N/A — **CLOSED** |
+| **Cleanup task id** | Task Master **#50** — Vitest 3.2.6+ upgrade (**implemented** 2026-07-17; merge/doc-sync pending orchestrator) |
 
-### Deferred majors (also ADR-blocked)
+### Closeout evidence (2026-07-17)
 
-| Package | Latest | Stay on | Reason |
+1. `frontend/package.json` (+ lockfile): `vitest` **^3.2.7** / **3.2.7**, `@vitest/coverage-v8` **3.2.7**
+2. `pnpm -C frontend audit` — **No known vulnerabilities found** (GHSA-5xrq-8626-4rwp cleared)
+3. Frontend gates green (`lint` / `type-check` / `test` / `build`) — see Gate evidence below
+4. Status row above stamped **CLOSED (2026-07-17)** with resolved versions
+
+### Deferred majors (ADR-blocked unless separately confirmed)
+
+| Package | Latest | Stay on (until confirmed) | Reason |
 | --- | --- | --- | --- |
-| `vitest` / `@vitest/coverage-v8` | 4.x / 3.2.6+ | **2.1.9** | Baseline + security patch only on 3.2.6+ |
+| `vitest` / `@vitest/coverage-v8` | 4.x | **3.2.7** (pinned #50) | Vitest **3.x** floor authorized by ADR-0029; **4.x** still deferred |
 | `vite` | 8.x | **6.4.3** | Vite 6 baseline |
 | `pinia` | 3.x | **2.3.1** | Pinia 2 baseline |
 | `vue-router` | 5.x | **4.6.4** | Vue Router 4 baseline |
@@ -101,12 +109,26 @@ Exception Handling metadata per [quality-gate-threshold-baseline.md](../architec
 
 ## Gate evidence (GREEN)
 
+### #49 (2026-07-13 — Vitest 2.1.9 era)
+
 ```powershell
 pnpm -C frontend lint        # ===LINT_OK===
 pnpm -C frontend type-check  # ===TYPECHECK_OK===
 pnpm -C frontend test        # Test Files 191 passed; Tests 1159 passed
                              # Coverage: stmts/lines 80.23%, branches 80.16%, funcs 64.61%
 pnpm -C frontend build       # vite v6.4.3; built in ~17.20s; ===BUILD_OK===
+```
+
+### #50 (2026-07-17 — Vitest 3.2.7; GHSA-5xrq-8626-4rwp CLOSED)
+
+```powershell
+pnpm -C frontend lint        # ===LINT_OK===
+pnpm -C frontend type-check  # ===TYPECHECK_OK===
+pnpm -C frontend test        # Test Files 251 passed; Tests 1539 passed
+                             # Coverage: stmts/lines 83.08%, branches 83.49%, funcs 61.43%
+pnpm -C frontend build       # vite v6.4.3; built in ~24.51s; ===BUILD_OK===
+pnpm -C frontend audit       # No known vulnerabilities found
+pnpm -C frontend audit --prod # No known vulnerabilities found
 ```
 
 ---
