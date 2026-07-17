@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 / #94 CE-U20 → Done. Sole-active delivery leaf: #95 CE-U21 (slice ce-u21-draft-anchor-concurrency; ISOLATED worktree D:/working/DGE-ce-u21-draft-anchor-concurrency). Umbrella is program registry only — not a delivery leaf. P3 parked. Leave #50 alone.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93/#94 Done. Sole-active delivery leaf #95 CE-U21 (single-lane serial §9.2). P3 parked (#77/#80/#96/#97). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 / #94 CE-U20 / #95 CE-U21 → Done. P2 continuum complete. No sole-active delivery leaf. Umbrella is program registry only — not a delivery leaf. P3 parked (#77/#80/#96/#97). Leave #50 alone. Do NOT activate P3.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93/#94/#95 Done. No sole-active delivery leaf (single-lane serial §9.2). P2 continuum complete with U21. P3 parked (#77/#80/#96/#97). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T07:55:00.000Z"
+        "updatedAt": "2026-07-17T00:47:00.000Z"
       },
       {
         "id": "54",
@@ -1304,8 +1304,8 @@
       {
         "id": "94",
         "title": "CE-U20: Clause create structured + list status",
-        "description": "DONE 2026-07-17. Slice ce-u20-clause-create-structured. MAIN merge b9327a11 / feature b4b0b420. Structured create dialog (ControlledStructuredContentEditor; no JSON textarea) + catalog Status column/filter. BE mvn verify + FE lint/type-check/test(1481)/build + E2E 7/7 + UIUX PASS Critical=0 + arch Critical=0 + Stage 5/10 DEPLOY_OK. Formal phase None. Not go-live. Do NOT activate CD-3. Leave #50 alone. P3 parked. #95 stays pending.",
-        "details": "Completed 2026-07-17 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: ce-u20-clause-create-structured. Worktree REMOVED. Merge b9327a11d14ca3242c722c1fb7c01d2c9692fc8c; feature b4b0b420cca39c9efe840e90ec50c6dc81dd91f3. BDD ready docs/behavior/ce-u20-clause-create-structured.md (BDD-CE-U20-CCS-001…010). Gates: BE mvn verify GREEN; FE lint/type-check/test(1481)/build GREEN (docs/plan/evidence/ce-u20-fe-be-gates/); Stage 5 DEPLOY_OK (docs/plan/evidence/ce-u20-stage5-deploy/); Stage 6 E2E 7/7 (frontend/e2e/evidence/CE-U20-manifest.md; docs/plan/evidence/ce-u20-stage6-e2e/); Stage 7 UIUX PASS Critical=0 (frontend/e2e/evidence/CE-U20-uiux-manifest.md); architecture Critical=0; Stage 10 DEPLOY_OK (docs/plan/evidence/ce-u20-stage10-deploy/). Formal phase None. Not go-live. Not CD-3. #95 pending for next deliver leaf. Leave #50 alone.",
+        "description": "DONE 2026-07-17. Slice ce-u20-clause-create-structured. MAIN merge b9327a11 / feature b4b0b420. Structured create dialog (ControlledStructuredContentEditor; no JSON textarea) + catalog Status column/filter. BE mvn verify + FE lint/type-check/test(1481)/build + E2E 7/7 + UIUX PASS Critical=0 + arch Critical=0 + Stage 5/10 DEPLOY_OK. Formal phase None. Not go-live. Do NOT activate CD-3. Leave #50 alone. P3 parked. Succeeded by #95 CE-U21 (now Done).",
+        "details": "Completed 2026-07-17 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: ce-u20-clause-create-structured. Worktree REMOVED. Merge b9327a11d14ca3242c722c1fb7c01d2c9692fc8c; feature b4b0b420cca39c9efe840e90ec50c6dc81dd91f3. BDD ready docs/behavior/ce-u20-clause-create-structured.md (BDD-CE-U20-CCS-001…010). Gates: BE mvn verify GREEN; FE lint/type-check/test(1481)/build GREEN (docs/plan/evidence/ce-u20-fe-be-gates/); Stage 5 DEPLOY_OK (docs/plan/evidence/ce-u20-stage5-deploy/); Stage 6 E2E 7/7 (frontend/e2e/evidence/CE-U20-manifest.md; docs/plan/evidence/ce-u20-stage6-e2e/); Stage 7 UIUX PASS Critical=0 (frontend/e2e/evidence/CE-U20-uiux-manifest.md); architecture Critical=0; Stage 10 DEPLOY_OK (docs/plan/evidence/ce-u20-stage10-deploy/). Formal phase None. Not go-live. Not CD-3. Succeeded by #95 CE-U21 (Done; P2 continuum complete). Leave #50 alone.",
         "testStrategy": "1. No JSON textarea create. 2. Status column. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
@@ -1318,16 +1318,16 @@
       {
         "id": "95",
         "title": "CE-U21: Draft key per anchor + concurrency hint",
-        "description": "IN PROGRESS 2026-07-17. Slice ce-u21-draft-anchor-concurrency. Sole-active delivery leaf (single-lane serial §9.2). Placement ISOLATED: worktree D:/working/DGE-ce-u21-draft-anchor-concurrency · branch feat/ce-u21-draft-anchor-concurrency · base origin/main (701b2b94). localDraft key+anchorId; optimistic lock conflict UX. P2·M. BDD in-progress (behavior-spec-author parallel). Formal phase None. Not go-live. Do NOT activate CD-3. Leave #50 alone. P3 parked.",
-        "details": "Activated 2026-07-17 (stage 2 plan-orchestrator). Slice id: ce-u21-draft-anchor-concurrency. Batch recommendation solo (member_task_ids: [95]). After U20 (#94 Done). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U21.",
+        "description": "DONE 2026-07-17. Slice ce-u21-draft-anchor-concurrency. Merge 8d8f6f6d; feature 292fbc35; worktree removed. localDraft key+anchorId; binding save 409 conflict UX. P2·M last leaf — P2 continuum complete. BDD ready. Formal phase None. Not go-live. Do NOT activate CD-3. Leave #50 alone. P3 parked.",
+        "details": "Completed 2026-07-17 (stage 12 post-task-doc-sync on MAIN after integration-merger). Slice id: ce-u21-draft-anchor-concurrency. Batch recommendation solo (member_task_ids: [95]) closed. Merge 8d8f6f6d6a2cd7e5b415baed5892eda26a41f2a3 / feature 292fbc351ce3d290fc784433645b2b55bc7d5d74. Gates: BE mvn verify GREEN; FE lint/type-check/test/build GREEN; Stage 5/10 DEPLOY_OK; E2E 4/4 CE-U21-manifest; UIUX Critical=0 CE-U21-uiux-manifest; architecture Critical=0. Formal phase remains None. Plan §4 CE-U21 Done. P2 continuum complete; no sole-active leaf; do not activate P3.",
         "testStrategy": "1. Draft keys per anchor. 2. Conflict hint. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "94"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T07:55:00.000Z"
+        "updatedAt": "2026-07-17T00:47:00.000Z"
       },
       {
         "id": "96",
