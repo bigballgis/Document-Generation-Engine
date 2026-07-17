@@ -5,10 +5,10 @@
 **编写日期:** 2026-07-17  
 **程序:** [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §4 CE-U17  
 **Slice:** `ce-u17-editor-shortcuts`  
-**Task Master:** **#96**  
+**Task Master:** **#96** → **Done** (MAIN merge `4fc2dbdb` / feature `d3293db1`)  
 **Formal phase:** **None**  
-**Placement:** ISOLATED `D:/working/DGE-ce-u17-editor-shortcuts` · `feat/ce-u17-editor-shortcuts`  
-**batch_recommendation:** **solo** `#96` `ce-u17-editor-shortcuts`  
+**Placement:** ISOLATED (worktree **REMOVED** after merge) · was `D:/working/DGE-ce-u17-editor-shortcuts` · `feat/ce-u17-editor-shortcuts`  
+**batch_recommendation:** **solo** `#96` `ce-u17-editor-shortcuts` **closed**  
 **依赖规格:** [LR-C6 global command palette](./lrp-c6-command-palette.md)（Ctrl/Cmd+K 壳级面板；本片扩展作者动作条目）；[LR-C3 editor undo/redo](./lrp-c3-editor-undo-redo.md)（Z/Y 不冲突）；[CE-U21 draft key + concurrency](./ce-u21-draft-anchor-concurrency.md)（Save 路径含乐观锁 UX，本片不改语义）  
 **完成声明约束:** 关闭「绑定编辑面无 Ctrl+S / Ctrl+P、命令面板无作者动作」缺口；**不**宣称 go-live；**不**激活 CD-3；**不**做 CE-U19 / CE-E03 / CE-G05 / CE-O02；**不**触碰 #50 Vitest 专项
 
