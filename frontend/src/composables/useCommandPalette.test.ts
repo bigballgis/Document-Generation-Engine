@@ -2,6 +2,10 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick, ref } from 'vue'
 import {
+  clearAuthoringEditorContext,
+  registerAuthoringEditorContext,
+} from '@/composables/authoringEditorContext'
+import {
   buildPaletteRouteItems,
   COMMAND_PALETTE_DEBOUNCE_MS,
   COMMAND_PALETTE_PAGE_SIZE,
@@ -58,6 +62,8 @@ function translate(key: string): string {
     'nav.items.users': 'Users',
     'nav.items.groups': 'Groups',
     'nav.items.apiPolicies': 'External services overview',
+    'commandPalette.actions.saveBinding': 'Save binding',
+    'commandPalette.actions.refreshPreview': 'Refresh preview',
   }
   return map[key] ?? key
 }
@@ -124,6 +130,7 @@ describe('useCommandPalette', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+    clearAuthoringEditorContext()
   })
 
   function createPalette(visibleRoutes: string[]) {
@@ -292,6 +299,36 @@ describe('useCommandPalette', () => {
     palette.handleGlobalKeydown(event)
     expect(prevent).toHaveBeenCalled()
     expect(palette.open.value).toBe(true)
+  })
+
+  it('BDD-CE-U17-EKS-003: lists author Actions and executes Save binding then closes', async () => {
+    const saveBinding = vi.fn()
+    const refreshPreview = vi.fn()
+    registerAuthoringEditorContext({
+      saveBinding,
+      refreshPreview,
+      canSave: () => true,
+      canRefresh: () => true,
+      isSaving: () => false,
+      isRefreshing: () => false,
+    })
+    const { palette, navigate } = createPalette([ROUTE_KEYS.dashboardHome])
+    palette.openPalette()
+    expect(palette.groups.value.map((g) => g.id)).toEqual(['actions', 'routes'])
+    const saveItem = palette.flatItems.value.find((i) => i.id === 'action:save-binding')
+    expect(saveItem?.title).toBe('Save binding')
+    expect(saveItem?.optionTestId).toBe('command-palette-action-save-binding')
+    await palette.activateItem(saveItem!)
+    expect(palette.open.value).toBe(false)
+    expect(saveBinding).toHaveBeenCalledOnce()
+    expect(navigate).not.toHaveBeenCalled()
+  })
+
+  it('BDD-CE-U17-EKS-005: omits author Actions outside edit context', () => {
+    const { palette } = createPalette([ROUTE_KEYS.dashboardHome])
+    palette.openPalette()
+    expect(palette.groups.value.map((g) => g.id)).toEqual(['routes'])
+    expect(palette.flatItems.value.some((i) => i.kind === 'action')).toBe(false)
   })
 })
 

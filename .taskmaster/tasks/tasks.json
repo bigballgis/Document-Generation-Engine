@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 / #94 CE-U20 / #95 CE-U21 → Done. P2 continuum complete. No sole-active delivery leaf. Umbrella is program registry only — not a delivery leaf. P3 parked (#77/#80/#96/#97). Leave #50 alone. Do NOT activate P3.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93/#94/#95 Done. No sole-active delivery leaf (single-lane serial §9.2). P2 continuum complete with U21. P3 parked (#77/#80/#96/#97). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 / #94 CE-U20 / #95 CE-U21 → Done. P2 continuum complete. P3 activated (user «继续»). Sole-active delivery leaf #96 CE-U17 (slice ce-u17-editor-shortcuts). Remaining P3 queued pending: #97 CE-U19 / #80 CE-E03 / #77 CE-G05. Umbrella is program registry only — not a delivery leaf. Leave #50 alone.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93/#94/#95 Done. P2 continuum complete with U21. P3 activated — sole-active delivery leaf #96 CE-U17 (single-lane serial §9.2); queued #97/#80/#77. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T00:47:00.000Z"
+        "updatedAt": "2026-07-17T01:32:00.000Z"
       },
       {
         "id": "54",
@@ -1332,16 +1332,16 @@
       {
         "id": "96",
         "title": "CE-U17: Editor keyboard shortcuts",
-        "description": "PENDING. Slice ce-u17-editor-shortcuts. Ctrl+S save bindings / Ctrl+P refresh preview; command palette actions. P3·S.",
-        "details": "P3 after U21 (#95). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U17.",
+        "description": "IN PROGRESS 2026-07-17. Slice ce-u17-editor-shortcuts. Ctrl+S save bindings / Ctrl+P refresh preview; command palette actions. P3·S. Sole-active delivery leaf (single-lane serial §9.2). Worktree D:/working/DGE-ce-u17-editor-shortcuts · feat/ce-u17-editor-shortcuts. BDD ready (docs/behavior/ce-u17-editor-shortcuts.md; BDD-CE-U17-EKS-001…012). Formal phase None. P3 activated (user «继续» after P2 Done).",
+        "details": "Activated 2026-07-17 as sole-active delivery leaf after P2 continuum complete (#90–#95 Done). Slice id: ce-u17-editor-shortcuts. Placement ISOLATED; worktree D:/working/DGE-ce-u17-editor-shortcuts · feat/ce-u17-editor-shortcuts. Batch recommendation solo (member_task_ids: [\"96\"]). BDD ready (ce-u17-editor-shortcuts.md; BDD-CE-U17-EKS-001…012); frontend_ui_in_scope=true. Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U17 In Progress.",
         "testStrategy": "1. Shortcuts work. 2. Palette entries. 3. E2E+UIUX.",
         "priority": "low",
         "dependencies": [
           "95"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00Z"
+        "updatedAt": "2026-07-17T01:32:00.000Z"
       },
       {
         "id": "97",
