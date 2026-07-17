@@ -2,11 +2,14 @@
 
 **Program ID:** `IBL`  
 **Created:** 2026-07-17  
-**Status:** **Not Started** — **PROPOSAL awaiting user confirmation**. Do **not** activate waves, flip Task Master, or claim Done until explicitly confirmed.  
+**Status:** **Registered in Task Master / Not Started** (waves **not** activated). User confirmed **2026-07-18** writing the IBL proposal into Task Master for later sessions. Do **not** activate Wave A (or any wave) as a delivery leaf from registration alone. Do **not** flip launch-readiness checklist **#3b** or claim go-live.  
 **Formal phase / program:** **None** (cross-cutting optimization backlog; same genre as LRP / SOR — **not** a new P-phase).  
 **North star:** Close the verified gaps between today’s Document Generation Platform and **international multinational bank financial-letter readiness** — fail-closed filling, ISO-correct amounts, high-fidelity Word/PDF trust, layout regression evidence, realistic CI/integration, and (only after ADR/user confirmation) multinational content models.  
 **Task ID prefix:** `IBL-*` (International Bank Letter readiness) — verified free of collision with `LR-*` / `CD-*` / `SOR-*` / `CQ-*` / `CE-*` / `OPT-*` / `COR-*` / `PRR-*`.  
+**Task Master:** Umbrella **#106** (registry only) + leaves **#107–#134** (28 tasks = A6+B7+C3+D5+E7). All IBL TM statuses **`pending`**; B7 + Wave E descriptions start with **BLOCKED**. See § Task Master ID map.  
 **Audit provenance:** Four-track (+ multinational template track) **read-only** deep audit, evidence spot-verified **2026-07-17**. Findings F1–F28 below are **confirmed symptoms** (code/docs evidence). Proposed remediations are **not** confirmed product requirements until activation + (where noted) ADR/user decision.
+
+**Queue policy (critical):** Host serial delivery queue remains **PRR #105 → #103 → #104** first. IBL tasks are **pending / deferred** for later sessions **after** PRR (or when the user explicitly redirects). Next IBL activation head after PRR = **IBL-A1** (#107) or a Wave A batch per Batch Recommendation at that time. Umbrella **#106** is **registry only** — **not** a sole-active delivery leaf.
 
 **Authoritative entry for lower-tier implementers:** Read this file first. Execute only `IBL-*` task IDs after wave activation. Do **not** invent a formal phase. Do **not** touch [launch-readiness-checklist.md](../operations/launch-readiness-checklist.md) from IBL work unless a task explicitly owns a checklist cross-link.
 
@@ -17,7 +20,7 @@
 | [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) | Sibling CDP (`CD-*`) — CD-2 Done; CD-3 Not Started; do not execute `CD-*` from IBL |
 | [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md) | Historical SOR inventory; IBL is the **2026-07-17** bank-letter readiness consolidation |
 | [core-excellence-program-2026-07.md](./core-excellence-program-2026-07.md) | Active delivery program CE (`CE-*` / Task Master); coordinate — do not fold IBL into an In Progress CE/PRR leaf |
-| [execution-sync-ledger.md](./execution-sync-ledger.md) | Gate-evidence mirror after activation; no ledger claims until work lands |
+| [execution-sync-ledger.md](./execution-sync-ledger.md) | Registration mirrored (TM #106–#134); gate-evidence after wave activation — no Done claims from registration alone |
 | [non-functional-requirements.md](../requirements/non-functional-requirements.md) | NFR SLOs remain **proposed — awaiting confirmation**; IBL-D3 feeds confirmation, never invents confirmed SLOs |
 | [ADR-0042](../adr/) (pagination / Word baseline — still **Proposed**) | IBL-B7 owns acceptance path; Word host is an external dependency |
 
@@ -28,7 +31,7 @@
 3. Behavior-changing tasks require BDD **`required`** (ready spec in `docs/behavior/`) before implementation; refactor/infra/docs tasks use **`not-applicable`**.
 4. TDD + green gates + post-task doc sync + post-task commit review before any task `Done`.
 5. **Confirmed facts vs pending questions:** §1 findings are evidence-grounded symptoms. §Pending decisions「待确认」items **must not** be scheduled as ordinary activatable work until user/PRD/ADR confirmation. Never promote a recommendation into a confirmed requirement.
-6. This document does **not** alter formal phase status, `.taskmaster/tasks/tasks.json`, or the launch-readiness checklist overall verdict.
+6. This document does **not** alter formal phase status or the launch-readiness checklist overall verdict. Task Master **is** registered (#106–#134, all `pending`); registration alone does **not** create a formal phase, activate a wave, or flip checklist **#3b**.
 7. Do not duplicate ownership of closed LRP/CDP/CE rows — reference and extend; never re-open Done waves without user direction.
 
 ---
@@ -44,7 +47,7 @@
 - **No non-specimen re-issue** until legal/compliance decides watermark policy (F6 specimen path stays until then).
 - **No licensed font procurement** (true Calibri etc.) from this program alone — licensing is external.
 - **No stack replacement** — Java 25 / Spring Boot 4 / Vue 3 / LibreOffice / PostgreSQL per accepted ADRs; new tools (veraPDF, Testcontainers, k6, …) enter only via dependency-policy verification + ADR where required.
-- **No production go-live claim** and **no checklist #3b flip** from IBL proposal authorship.
+- **No production go-live claim** and **no checklist #3b flip** from IBL authorship or Task Master registration alone.
 
 ### 0.2 What we ARE proposing (five waves)
 
@@ -56,7 +59,47 @@
 | **IBL-D** | Test & integration realism 「测试与集成真实性」 | H2/Flyway-off default verify; LO tests skip; no k6; thin legalhold/E2E subset | Testcontainers+Flyway lane; mandatory LO CI lane; k6 + SLO confirmation path; LO chaos; legalhold depth |
 | **IBL-E** | Multinational content model 「跨国内容模型」 | One body/locale; no jurisdiction engine; single approval track; UI-only brands; weak effectiveFrom/bulk; nesting governance gap; no RTL | **Blocked** on §Pending decisions — ADR-first then implement |
 
-**Task count:** **27** scheduled tasks (A1–A6, B1–B7, C1–C3, D1–D5, E1–E7) + deferred residuals F7/F8 (not scheduled — see §1 / §Open questions).
+**Task count:** **28** scheduled tasks (A1–A6 + B1–B7 + C1–C3 + D1–D5 + E1–E7) + deferred residuals F7/F8 (not scheduled — see §1 / §Open questions). Task Master leaves **#107–#134** map 1:1 (see § Task Master ID map).
+
+---
+
+## Task Master ID map 「Task Master 映射」
+
+Registered **2026-07-18** under `.taskmaster/tasks/tasks.json`. Program status = **Registered / Not Started**; waves **not** activated. TM status column below mirrors Task Master (`pending`); plan-layer wave tables still use `Not Started` / `Blocked` vocabulary.
+
+| IBL-* | TM id | Status |
+| --- | --- | --- |
+| umbrella (program registry) | **106** | pending (registry only — **not** a delivery leaf) |
+| IBL-A1 | **107** | pending |
+| IBL-A2 | **108** | pending |
+| IBL-A3 | **109** | pending |
+| IBL-A4 | **110** | pending |
+| IBL-A5 | **111** | pending |
+| IBL-A6 | **112** | pending |
+| IBL-B1 | **113** | pending |
+| IBL-B2 | **114** | pending |
+| IBL-B3 | **115** | pending |
+| IBL-B4 | **116** | pending |
+| IBL-B5 | **117** | pending |
+| IBL-B6 | **118** | pending |
+| IBL-B7 | **119** | pending (**BLOCKED** in description — Word host / ADR-0042) |
+| IBL-C1 | **120** | pending |
+| IBL-C2 | **121** | pending |
+| IBL-C3 | **122** | pending |
+| IBL-D1 | **123** | pending |
+| IBL-D2 | **124** | pending |
+| IBL-D3 | **125** | pending |
+| IBL-D4 | **126** | pending |
+| IBL-D5 | **127** | pending |
+| IBL-E1 | **128** | pending (**BLOCKED** in description — §Pending decisions) |
+| IBL-E2 | **129** | pending (**BLOCKED** in description — §Pending decisions) |
+| IBL-E3 | **130** | pending (**BLOCKED** in description — §Pending decisions) |
+| IBL-E4 | **131** | pending (**BLOCKED** in description — §Pending decisions) |
+| IBL-E5 | **132** | pending (**BLOCKED** in description — §Pending decisions) |
+| IBL-E6 | **133** | pending (**BLOCKED** in description — §Pending decisions) |
+| IBL-E7 | **134** | pending (**BLOCKED** in description — §Pending decisions) |
+
+**Queue note:** Do **not** reorder ahead of **PRR #105 → #103 → #104**. Do **not** treat #106 as sole-active. After PRR (or explicit user redirect), activate **IBL-A1** (#107) or Wave A batch via delivery-orchestrator Batch Recommendation — still one leaf at a time.
 
 ---
 
@@ -111,18 +154,18 @@ Verified **2026-07-17** (read-only). Implementers must re-verify paths before co
 
 1. Within IBL, only **one wave** may be `In Progress` at a time.
 2. **Recommended activation order (single-lane serial):** **IBL-A → IBL-B (B1–B6; B7 when Word host available) → IBL-C → IBL-D → IBL-E (only after pending decisions)**.
-3. Formal phase remains **None**. After user confirmation, promote work via Task Master / delivery-orchestrator — do not invent a P-phase here.
+3. Formal phase remains **None**. Task Master registration (#106–#134) is complete; **wave activation** still requires an explicit delivery session after PRR (or user redirect) via delivery-orchestrator — do not invent a P-phase here.
 4. Tasks marked **BDD: required** may not start implementation until `behavior-spec-author` publishes a `ready` spec.
 
-**Current wave:** **None** (program **Not Started** — proposal only).
+**Current wave:** **None** (program **Registered in Task Master / Not Started** — waves **not** activated).
 
 ```text
-Recommended serial order (after user confirmation):
-  IBL-A (P0 fill/contract)
-    → IBL-B core (B1–B6; B7 gated on Word)
-      → IBL-C (layout metrics + compare UI + locale goldens)
-        → IBL-D (Testcontainers / LO CI / k6 / chaos / legalhold)
-          → IBL-E (only if §Pending decisions resolve)
+Recommended serial order (after PRR queue + activation):
+  IBL-A (P0 fill/contract) — TM #107–#112; head IBL-A1 (#107)
+    → IBL-B core (B1–B6; B7 gated on Word) — TM #113–#119
+      → IBL-C (layout metrics + compare UI + locale goldens) — TM #120–#122
+        → IBL-D (Testcontainers / LO CI / k6 / chaos / legalhold) — TM #123–#127
+          → IBL-E (only if §Pending decisions resolve) — TM #128–#134
 ```
 
 ---
@@ -294,7 +337,7 @@ Kept separate from confirmed findings and from §Pending product-boundary decisi
 | **Q2** | Schedule **F8** timezone / as-of date semantics for `FORMAT_DATE` into IBL-A follow-on? | Medium; interacts with A2/A3 locale work |
 | **Q3** | Expand Docker Playwright smoke subset (9→N of 162) under IBL or CDP/CE? | Coordinate ownership; avoid double-own |
 | **Q4** | Company-approved artifacts for veraPDF, Testcontainers, k6 — intranet availability? | Dependency policy before IBL-B3/D1/D3 |
-| **Q5** | After IBL-A confirmation, activate via Task Master leaf(s) with Batch Recommendation `merge`/`solo` — which bundling? | Delivery-orchestrator stage −1 |
+| **Q5** | When activating IBL-A after PRR, Batch Recommendation `merge`/`solo` bundling for #107–#112? | Delivery-orchestrator stage −1; TM IDs already registered |
 
 ---
 
@@ -323,7 +366,7 @@ An IBL task is `Done` only when:
 
 ### 10.3 Program activation (human gate)
 
-Program moves from **Not Started** only when the user explicitly confirms activation (typically IBL-A first). Until then: **proposal only**.
+Task Master registration is **complete** (#106–#134). Waves remain **Not Started** until the user (or orchestrator under explicit redirect) activates delivery — typically **IBL-A** after the PRR serial queue (**#105 → #103 → #104**). Registration alone does **not** mark any wave `In Progress`, create a formal phase, or flip checklist **#3b**.
 
 ---
 
@@ -370,8 +413,9 @@ Program moves from **Not Started** only when the user explicitly confirms activa
 
 | Date | Change |
 | --- | --- |
-| 2026-07-17 | Program document created from 2026-07-17 deep audit. Waves IBL-A…E defined (**27** tasks). All activatable tasks **Not Started**; B7 + Wave E **Blocked**. Formal phase unchanged (**None**). Task Master untouched. Proposal awaiting user confirmation. |
+| 2026-07-18 | **Registered in Task Master** umbrella **#106** + leaves **#107–#134** (**28** tasks). Status → **Registered / Not Started** (waves **not** activated). PRR serial queue preserved (**#105 → #103 → #104** ahead of IBL). Task-count correction **27 → 28**. No checklist **#3b** flip; no go-live; no Wave A `In Progress`. |
+| 2026-07-17 | Program document created from 2026-07-17 deep audit. Waves IBL-A…E defined (scheduled task set later counted as **28**). All activatable tasks **Not Started**; B7 + Wave E **Blocked**. Formal phase unchanged (**None**). Task Master then untouched. Proposal awaiting user confirmation to write TM. |
 
 ---
 
-**Next action:** Await **user confirmation** to activate **IBL-A** (single-lane serial). Do **not** mark In Progress, create a formal phase, or mutate `.taskmaster/tasks/tasks.json` from this authorship alone.
+**Next action:** After PRR queue (**#105 → #103 → #104**) — or on explicit user redirect — activate **IBL-A** via delivery-orchestrator (head **IBL-A1** / #107, or Wave A batch per Batch Recommendation). Do **not** mark any IBL wave `In Progress` from this registration sync alone. Do **not** invent a formal P-phase. Do **not** flip checklist **#3b**.
