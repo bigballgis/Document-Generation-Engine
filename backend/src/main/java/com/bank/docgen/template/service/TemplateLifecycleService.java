@@ -43,6 +43,8 @@ public class TemplateLifecycleService {
     private final TemplateLifecycleVersionSupport versionSupport;
     private final TemplateLifecycleApprovalFlowSupport approvalFlow;
     private final GroupAccessService groupAccessService;
+    private final TemplateAnnualReviewSupport annualReviewSupport;
+    private final TemplateRepository templateRepository;
 
     public TemplateLifecycleService(
             TemplateService templateService,
@@ -65,10 +67,13 @@ public class TemplateLifecycleService {
             MasterDocumentRepository masterDocumentRepository,
             MasterRevisionLineRepository masterRevisionLineRepository,
             ObjectStoragePort objectStoragePort,
-            SelfApprovalGuard selfApprovalGuard
+            SelfApprovalGuard selfApprovalGuard,
+            TemplateAnnualReviewSupport annualReviewSupport
     ) {
         this.templateService = templateService;
         this.groupAccessService = groupAccessService;
+        this.annualReviewSupport = annualReviewSupport;
+        this.templateRepository = templateRepository;
         this.lifecycleImpactPreviewService = lifecycleImpactPreviewService;
         this.decisionFormService = decisionFormService;
         this.collaborationWorkItemWriter = collaborationWorkItemWriter;
@@ -109,7 +114,8 @@ public class TemplateLifecycleService {
                 masterRevisionLineRepository,
                 objectStoragePort,
                 objectMapper,
-                selfApprovalGuard
+                selfApprovalGuard,
+                annualReviewSupport
         );
     }
 
@@ -182,7 +188,9 @@ public class TemplateLifecycleService {
         TemplateEntity template = eligibility.requireRestoreEligibleTemplate(templateId, session);
         eligibility.requireStatus(template, TemplateLifecycleStatus.STOPPED);
         transitions.syncStoppedVersionsToPublished(templateId);
+        annualReviewSupport.seedOnEnterPublishedIfAbsent(template);
         transitions.transition(template, TemplateLifecycleStatus.PUBLISHED, LifecycleAction.RESTORE, null, request.reason(), session);
+        templateRepository.save(template);
         return templateService.toDetail(template);
     }
 

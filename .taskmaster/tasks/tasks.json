@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #80 CE-E03 → Done (merge f1f02554 / feature 86e4ff10). Sole-active cleared. Only remaining P3: #77 CE-G05 pending (do not auto-activate). Do NOT claim program Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3: #80 CE-E03 Done; sole-active cleared; only remaining P3 #77 CE-G05 pending (single-lane serial §9.2 — do not activate here). Do NOT claim program Done. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #80 CE-E03 → Done (merge f1f02554 / feature 86e4ff10). Sole-active = #77 CE-G05 (last remaining P3; full-stack FE+E2E). Do NOT claim program Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3: #80 CE-E03 Done; sole-active = #77 CE-G05 in-progress (single-lane serial §9.2; last P3 leaf). Do NOT claim program Done. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T05:46:00.000Z"
+        "updatedAt": "2026-07-17T07:00:00.000Z"
       },
       {
         "id": "54",
@@ -1064,16 +1064,16 @@
       {
         "id": "77",
         "title": "CE-G05: Template annual review + clause full-text search",
-        "description": "PENDING. Slice ce-g05-annual-review-fts. nextReviewDue todos; tsvector where-used on content_structure_json. P3·M. Only remaining P3 after #80 CE-E03 Done — queue head; sole-active cleared; do not activate until orchestrator starts #77.",
-        "details": "Soft after G04 (#75). Remains pending after #80 CE-E03 Done (merge f1f02554 / feature 86e4ff10). Sole-active cleared — do not mark in-progress in this sync. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G05.",
-        "testStrategy": "1. Due todos. 2. FTS works. 3. Gates green.",
+        "description": "IN PROGRESS 2026-07-17. Slice ce-g05-annual-review-fts. Sole-active (last remaining P3 after #80 CE-E03 Done). nextReviewDue + Dashboard due todos; PostgreSQL tsvector FULL_TEXT on content_structure_json + where-used. BDD ready (docs/behavior/ce-g05-annual-review-fts.md; BDD-CE-G05-001…019). frontend_ui_in_scope=true — E2E+UIUX mandatory. Worktree D:/working/DGE-ce-g05-annual-review-fts · feat/ce-g05-annual-review-fts. Formal phase None. Not go-live. Not CD-3.",
+        "details": "ACTIVATED 2026-07-17 as sole-active after #80 CE-E03 Done (merge f1f02554 / feature 86e4ff10). Soft after G04 (#75). Batch recommendation solo (member_task_ids: [\"77\"]; proposed_slice_id: ce-g05-annual-review-fts). BDD ready — nextReviewDue seed/complete API + annual-review-due-tasks list; clause searchMode FULL_TEXT + where-used; Dashboard Annual review due partition; FE clause body search. Gates before Done: mvn verify + frontend lint/type-check/test/build; E2E+UIUX; queued docker-deploy; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G05. Next: doc-keeper (API/domain/matrix) → backend-engineer → frontend-engineer.",
+        "testStrategy": "1. Due todos + complete annual review. 2. FTS FULL_TEXT + where-used. 3. FE E2E+UIUX. 4. Gates green.",
         "priority": "low",
         "dependencies": [
           "75"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T05:46:00.000Z"
+        "updatedAt": "2026-07-17T07:00:00.000Z"
       },
       {
         "id": "78",
@@ -1106,8 +1106,8 @@
       {
         "id": "80",
         "title": "CE-E03: Full-library export",
-        "description": "DONE 2026-07-17. Slice ce-e03-full-library-export. Full-library ZIP (template-library-export-v1-zip): root manifest + nested E01 v2 per-template bundles + deduped masters/clauses catalogs. P3·M. BDD ready (docs/behavior/ce-e03-full-library-export.md; BDD-CE-E03-001…017). API-first — FE/E2E N/A. Merge f1f02554 / feature 86e4ff10; worktree removed. Formal phase None. Not go-live. Not CD-3. Not CE-O02. Leave #50 alone. Sole-active cleared; next queue #77 CE-G05 only remaining P3 (do not auto-activate).",
-        "details": "COMPLETED 2026-07-17. Slice id: ce-e03-full-library-export. Status: done. MAIN merge f1f02554 / feature 86e4ff10; worktree DGE-ce-e03-full-library-export REMOVED. Batch recommendation solo (member_task_ids: [\"80\"]) closed. BDD ready; frontend_ui_in_scope=false (API-first, same as E01). Gates: mvn verify GREEN (1887 tests); architecture Critical=0; CQ Critical=0; Stage 10 DEPLOY_OK healthz 200; FE/E2E N/A. Evidence: POST /api/management/v1/library/export → template-library-export-v1-zip (root library-export-manifest.json + nested E01 v2 + deduped masters/clauses; assetKeyManifest keys only). Formal phase remains None. Umbrella #53 remains in-progress (program registry only — not program Done). Sole-active cleared. Next queue head #77 CE-G05 pending (only remaining P3) — do not activate in this sync. Do not activate CD-3. Do not claim go-live. Do not activate CE-O02. Leave #50 alone.",
+        "description": "DONE 2026-07-17. Slice ce-e03-full-library-export. Full-library ZIP (template-library-export-v1-zip): root manifest + nested E01 v2 per-template bundles + deduped masters/clauses catalogs. P3·M. BDD ready (docs/behavior/ce-e03-full-library-export.md; BDD-CE-E03-001…017). API-first — FE/E2E N/A. Merge f1f02554 / feature 86e4ff10; worktree removed. Formal phase None. Not go-live. Not CD-3. Not CE-O02. Leave #50 alone. Succeeded as sole-active by #77 CE-G05.",
+        "details": "COMPLETED 2026-07-17. Slice id: ce-e03-full-library-export. Status: done. MAIN merge f1f02554 / feature 86e4ff10; worktree DGE-ce-e03-full-library-export REMOVED. Batch recommendation solo (member_task_ids: [\"80\"]) closed. BDD ready; frontend_ui_in_scope=false (API-first, same as E01). Gates: mvn verify GREEN (1887 tests); architecture Critical=0; CQ Critical=0; Stage 10 DEPLOY_OK healthz 200; FE/E2E N/A. Evidence: POST /api/management/v1/library/export → template-library-export-v1-zip (root library-export-manifest.json + nested E01 v2 + deduped masters/clauses; assetKeyManifest keys only). Formal phase remains None. Umbrella #53 remains in-progress (program registry only — not program Done). Sole-active succeeded by #77 CE-G05 (activated). Do not activate CD-3. Do not claim go-live. Do not activate CE-O02. Leave #50 alone.",
         "testStrategy": "1. Bulk export ZIP + root manifest + nested E01 v2. 2. Authz/empty/limit/partial-success per BDD-CE-E03-001…016. 3. mvn verify GREEN. 4. FE/E2E N/A.",
         "priority": "low",
         "dependencies": [

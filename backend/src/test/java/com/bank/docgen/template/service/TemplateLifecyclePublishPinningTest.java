@@ -101,7 +101,8 @@ class TemplateLifecyclePublishPinningTest {
                 masterRevisionLineRepository,
                 objectStoragePort,
                 objectMapper,
-                new SelfApprovalGuard()
+                new SelfApprovalGuard(),
+                new TemplateAnnualReviewSupport(java.time.Clock.systemUTC())
         );
         publisher = new ManagementSessionClaims(
                 "10000009", "Publisher", "pub@example.com",
@@ -237,7 +238,8 @@ class TemplateLifecyclePublishPinningTest {
                 TEMPLATE_ID.toString(), null, "RETAIL", "Sample", null,
                 MASTER_ID.toString(), TemplateLifecycleStatus.PUBLISHED, null,
                 "1.0.0", null, 1, List.of(), List.of(), List.of(),
-                Instant.now(), Instant.now(), publisher.username(), null, true, null));
+                Instant.now(), Instant.now(), publisher.username(), null, true, null,
+                null));
     }
 
     private static String sha256Hex(byte[] bytes) throws Exception {

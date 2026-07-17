@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { ElMessage } from 'element-plus'
 import { getMaster } from '@/api/masters'
 import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
+import { useCapabilities } from '@/composables/useCapabilities'
+import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
+import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
+import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateDetail } from '@/types/template'
 
 const props = defineProps<{
@@ -13,7 +18,20 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const { masterDetailLink } = useEntityLinkTargets()
+const { authorTemplates } = useCapabilities()
+const { confirmAction } = useConfirmAction()
+const templatesStore = useTemplatesStore()
+const authorWorkflowStore = useAuthorWorkflowStore()
 const masterName = ref<string | null>(null)
+const completing = ref(false)
+
+const nextReviewDueLabel = computed(() => {
+  const due = props.template.nextReviewDue
+  if (!due) {
+    return t('templates.detail.nextReviewDueUnset')
+  }
+  return due
+})
 
 onMounted(() => {
   void loadMasterName()
@@ -27,10 +45,36 @@ async function loadMasterName() {
     masterName.value = null
   }
 }
+
+async function completeAnnualReview() {
+  const confirmed = await confirmAction({
+    titleKey: 'templates.detail.annualReview.confirmTitle',
+    messageKey: 'templates.detail.annualReview.confirmMessage',
+    type: 'warning',
+  })
+  if (!confirmed) {
+    return
+  }
+  completing.value = true
+  try {
+    await templatesStore.completeAnnualReview(props.template.id)
+    ElMessage.success(t('templates.detail.annualReview.success'))
+    if (authorTemplates.value) {
+      void authorWorkflowStore.fetchAnnualReviewDueTasks().catch(() => {
+        /* degrade — list may be stale until next dashboard load */
+      })
+    }
+  } catch {
+    const key = templatesStore.lastErrorMessageKey ?? 'templates.error.lifecycle'
+    ElMessage.error(t(key))
+  } finally {
+    completing.value = false
+  }
+}
 </script>
 
 <template>
-  <el-card shadow="never" class="section-card">
+  <el-card shadow="never" class="section-card" data-testid="template-overview-summary">
     <h2>{{ t('templates.detail.summaryTitle') }}</h2>
     <dl class="summary-grid">
       <div>
@@ -62,10 +106,29 @@ async function loadMasterName() {
         <dt>{{ t('templates.detail.updatedAt') }}</dt>
         <dd>{{ formatDateTime(template.updatedAt) }}</dd>
       </div>
+      <div data-testid="template-annual-review-due">
+        <dt>{{ t('templates.detail.nextReviewDue') }}</dt>
+        <dd data-testid="template-annual-review-due-value">{{ nextReviewDueLabel }}</dd>
+      </div>
     </dl>
     <p class="description">
       {{ template.description ?? t('templates.detail.noDescription') }}
     </p>
+    <div v-if="authorTemplates" class="annual-review-actions">
+      <el-button
+        type="primary"
+        data-testid="template-annual-review-complete"
+        :loading="completing"
+        :disabled="completing || templatesStore.submitting"
+        @click="completeAnnualReview"
+      >
+        {{
+          completing
+            ? t('templates.detail.annualReview.completing')
+            : t('templates.detail.annualReview.complete')
+        }}
+      </el-button>
+    </div>
   </el-card>
 </template>
 
@@ -100,5 +163,9 @@ async function loadMasterName() {
 .description {
   margin: 0;
   color: var(--text-muted);
+}
+
+.annual-review-actions {
+  margin-top: var(--space-4);
 }
 </style>

@@ -4,7 +4,9 @@ import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.template.api.AnnualReviewDueAuthorTaskView;
 import com.bank.docgen.template.api.OutdatedClauseReferenceAuthorTaskView;
+import com.bank.docgen.template.service.TemplateAnnualReviewService;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -18,13 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class TemplateAuthorWorkflowController {
 
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final TemplateAnnualReviewService annualReviewService;
     private final TraceIdProvider traceIdProvider;
 
     public TemplateAuthorWorkflowController(
             TemplateContentModuleReferenceService contentModuleReferenceService,
+            TemplateAnnualReviewService annualReviewService,
             TraceIdProvider traceIdProvider
     ) {
         this.contentModuleReferenceService = contentModuleReferenceService;
+        this.annualReviewService = annualReviewService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -37,6 +42,14 @@ public class TemplateAuthorWorkflowController {
                 request,
                 contentModuleReferenceService.listOutdatedClauseReferenceAuthorTasks(session)
         );
+    }
+
+    @GetMapping("/annual-review-due-tasks")
+    public SuccessEnvelope<List<AnnualReviewDueAuthorTaskView>> listAnnualReviewDueTasks(
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, annualReviewService.listDueTasks(session));
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

@@ -150,6 +150,18 @@ export function buildTaskPartitions(
         tasks: clauseTasks,
       })
     }
+
+    const annualReviewTasks = sortTasksNewestFirst(
+      tasks.filter((task) => task.kind === 'template-annual-review'),
+    )
+    if (annualReviewTasks.length > 0) {
+      partitions.push({
+        id: 'template-annual-review',
+        headingKey: 'dashboard.tasks.annualReviewDue.title',
+        kind: 'template-annual-review',
+        tasks: annualReviewTasks,
+      })
+    }
   }
 
   if (canDecideContentModuleReviews(context)) {

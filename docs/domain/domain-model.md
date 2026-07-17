@@ -14,6 +14,7 @@
 - [模板创作与渲染一阶原则审查](../product/authoring-rendering-first-principles-review.md)
 - [综合演示包扩展行为规格](../requirements/demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；P22）
 - [CE-G04 Legal hold 行为规格](../behavior/ce-g04-legal-hold.md)（BDD-CE-G04；#75）
+- [CE-G05 模板年检 + 条款正文全文检索](../behavior/ce-g05-annual-review-fts.md)（BDD-CE-G05；#77）
 
 ## 2. 核心领域对象
 
@@ -515,6 +516,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 发布前检查清单。
 - 审批摘要。
 - 关联的 API 管理配置。
+- **CE-G05：** 下一年度复核到期日 `nextReviewDue`（API camelCase；DB `next_review_due`，UTC 日历日 DATE；可空）。挂在 **template 行**（非单 release 行）——年检是模板治理周期，不是单版本生命周期态。
 
 已确认规则：
 
@@ -530,6 +532,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 模板编排人员负责配置锚点内容、模板变量、条件/循环规则。
 - 模板编排人员负责测试生成 DOCX/PDF、提交测试/审批、发布/停用模板。
 - 模板编排与 API 管理需要严格区分。AD Group 授权配置和 DOCX/PDF 动态加密配置不属于模板编排或模板提交功能，只在 API 管理中配置。
+- **CE-G05 年检：** 模板**首次**进入 `PUBLISHED` 且 `nextReviewDue` 为空时，播种为 `publishInstant` 的 UTC 日期 + 365 天；后续再发布**不**自动改写已有 `nextReviewDue`。存量迁移后可为 NULL，**不**强制回填。到期判定：`nextReviewDue != null` 且 `nextReviewDue <= todayUtc`（到期日当天入队）。完成年检经 `POST …/annual-review/complete` 滚动下一到期日（缺省完成日 UTC + 365；可显式未来日）；写管理审计 `TEMPLATE_ANNUAL_REVIEW_COMPLETED`。年检**不**阻断发布或 runtime 生成。`STOPPED` / `DEPRECATED` 仍可入队；逻辑删除不入队。到期待办经专用 author-workflow 列表投影到 Dashboard Tasks（**不**新建 collaboration `queue_type`）。规格：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。
 
 已确认包导航规则（BDD-TEMPLATE-PACKAGE-NAV-001，见 [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) § Template package hub）：
 
@@ -667,6 +670,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 条款或内容模块停用或废弃前的影响分析必须覆盖引用模板、引用发布版本、default 路由影响、近期调用摘要、是否需要停用模板或发布版本，以及可替代模块版本建议。
 - **CE-K08：** 法务元数据仅草稿版本可写；`effectiveFrom`/`effectiveTo` 皆非空时须 `effectiveFrom <= effectiveTo`；空 `effectiveTo` 表示无到期。内容模块目录 list 可按法务字段筛选（catalog filter version = 优先最新 `APPROVED`+`ACTIVE`，否则最新版本）。模板发布时，若任一引用版本满足 `effectiveTo != null && utcNow.isAfter(effectiveTo)`，发布门禁 `CONTENT_MODULE_EFFECTIVE_EXPIRED` 硬阻断；未来 `effectiveFrom` 不阻断；已锁定已发布版本运行期不因事后过期失败。规格：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)。
 - **CE-U20（目录摘要状态，2026-07-17）：** 管理目录 `ContentModuleSummaryView` 投影模块 **head 版本** 的 `reviewState`（必填）与 `lifecycleState`（可空）。Head 定义：该模块全部版本中 `updatedAt` 最大者；并列时取 `semanticVersion` 字典序更大者。目录状态列/徽章语义与详情版本表一致：若 head `lifecycleState` 为 `DEPRECATED` 或 `STOPPED` 则展示/筛选命中这些值，否则按 `reviewState`（`APPROVED` 且 lifecycle 为 `ACTIVE` 或 null/缺省）。`GET /content-modules` 可选 query `status`（`DRAFT` \| `SUBMITTED` \| `APPROVED` \| `STOPPED` \| `DEPRECATED`）对该展示状态做服务端精确过滤，与 search / groupCode / sort / CE-K08 legal filters **AND**；非法值 → 空页。此 head 选择规则与 CE-K08 catalog filter version **正交**。不改变审批/生命周期状态机。规格：[ce-u20-clause-create-structured.md](../behavior/ce-u20-clause-create-structured.md)。
+- **CE-G05 正文全文检索与 where-used（2026-07-17）：** 对 `content_module_version.content_structure_json` 维护 PostgreSQL `tsvector`（或 GENERATED 等价）+ GIN；写入/更新版本时同事务同步；配置 **`simple`**（中英混合信函，避免 english stemmer 误伤）。可检索文本从 JSON 抽取人类可读节点（须覆盖 `paragraph` / `text` / list item 文本；键名与纯结构标点可剥离）；抽取失败 → 该版本向量为空（不 500）；写版本成功则向量最终一致。目录 `searchMode=FULL_TEXT` 时对 **catalog filter version**（同 CE-K08：优先最新 `APPROVED`+`ACTIVE`，否则最新）正文向量匹配，与 CE-U20 `status` / legal filters **AND**；`NAME`（缺省）保持 LR-C5 ILIKE，不依赖 tsvector。where-used：授权范围内引用该模块的模板清单（只读；复用 `template_content_module_reference` 及发布锁定关系；**不**要求扫描全部 binding JSON；响应不含条款全文）。规格：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。
 
 #### 2.9.2.1 产品状态 ↔ 实现映射（P14-T01）
 
@@ -1057,6 +1061,7 @@ API 管理侧审计事件包括：
 - default 路径目标发布版本配置变更。
 - **CE-G06：** 按 invocation 受控再生终态 `INVOCATION_REGENERATED`（成功与失败；摘要含 sourceInvocationId、regenerationId、fingerprint、outcome、actor；禁止 variables 明文）。
 - **CE-G04：** `LEGAL_HOLD_CREATED` / `LEGAL_HOLD_RELEASED`（摘要含 hold id / external id、scopeType、status、templateId（若有）、invocationCount（若有）、reason、actorUsername；**禁止** variables、凭证、完整 invocation 参数体）。
+- **CE-G05：** `TEMPLATE_ANNUAL_REVIEW_COMPLETED`（摘要含 templateId/externalId、previousNextReviewDue、newNextReviewDue、actorUsername；**禁止** variables、凭证、条款全文）。
 
 API 调用审计至少记录：
 

@@ -1,6 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
-import ElementPlus from 'element-plus'
+import ElementPlus, { ElMessageBox } from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
@@ -8,11 +8,26 @@ import en from '@/i18n/locales/en'
 import * as mastersApi from '@/api/masters'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useSessionStore } from '@/stores/session'
+import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateDetail } from '@/types/template'
 
 vi.mock('@/api/masters', () => ({
   getMaster: vi.fn(),
 }))
+
+vi.mock('element-plus', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('element-plus')>()
+  return {
+    ...actual,
+    ElMessageBox: {
+      confirm: vi.fn(),
+    },
+    ElMessage: {
+      success: vi.fn(),
+      error: vi.fn(),
+    },
+  }
+})
 
 describe('TemplateDetailOverviewTab', () => {
   const template: TemplateDetail = {
@@ -22,8 +37,9 @@ describe('TemplateDetailOverviewTab', () => {
     name: 'Loan agreement',
     description: 'Retail loan pack',
     masterId: 'master-1',
-    lifecycleStatus: 'DRAFT',
-    releaseVersion: null,
+    lifecycleStatus: 'PUBLISHED',
+    releaseVersion: '1.0.0',
+    nextReviewDue: '2026-07-17',
     devVersionId: 'dev-1',
     devVersionNumber: 1,
     createdAt: '2026-06-23T09:00:00Z',
@@ -50,9 +66,11 @@ describe('TemplateDetailOverviewTab', () => {
       createdAt: '2026-06-23T08:00:00Z',
       updatedAt: '2026-06-23T09:00:00Z',
     })
+    vi.mocked(ElMessageBox.confirm).mockReset()
+    vi.mocked(ElMessageBox.confirm).mockResolvedValue('confirm' as never)
   })
 
-  function mountTab() {
+  function mountTab(overrides: Partial<TemplateDetail> = {}, roles: string[] = ['GLOBAL_ADMIN']) {
     const pinia = createPinia()
     setActivePinia(pinia)
     const sessionStore = useSessionStore()
@@ -63,18 +81,22 @@ describe('TemplateDetailOverviewTab', () => {
         displayName: 'Admin',
         email: 'admin@example.com',
         authSource: 'LOCAL',
-        roles: ['GLOBAL_ADMIN'],
+        roles,
         authorizedGroupCodes: ['*'],
         defaultRoute: ROUTE_KEYS.templateManagement,
         visibleRoutes: [ROUTE_KEYS.templateManagement, ROUTE_KEYS.masterManagement],
         expiresAt: new Date().toISOString(),
+        capabilities:
+          roles.includes('TEMPLATE_AUTHOR') || roles.includes('GLOBAL_ADMIN')
+            ? ({ authorTemplates: true } as never)
+            : ({ authorTemplates: false } as never),
       },
     })
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     return mount(TemplateDetailOverviewTab, {
       props: {
-        template,
+        template: { ...template, ...overrides },
         formatDateTime: (value: string) => value,
       },
       global: {
@@ -107,5 +129,55 @@ describe('TemplateDetailOverviewTab', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('master-1')
+  })
+
+  it('CE-G05: shows nextReviewDue and complete control for authors', async () => {
+    const wrapper = mountTab({}, ['TEMPLATE_AUTHOR'])
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="template-annual-review-due-value"]').text()).toBe(
+      '2026-07-17',
+    )
+    expect(wrapper.find('[data-testid="template-annual-review-complete"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="template-annual-review-complete"]').text()).toContain(
+      'Complete annual review',
+    )
+  })
+
+  it('CE-G05: shows unset label when nextReviewDue is null', async () => {
+    const wrapper = mountTab({ nextReviewDue: null }, ['TEMPLATE_AUTHOR'])
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="template-annual-review-due-value"]').text()).toBe(
+      'Not scheduled',
+    )
+  })
+
+  it('CE-G05: completes annual review after confirmation', async () => {
+    const wrapper = mountTab({}, ['TEMPLATE_AUTHOR'])
+    await flushPromises()
+
+    const templatesStore = useTemplatesStore()
+    const completeSpy = vi
+      .spyOn(templatesStore, 'completeAnnualReview')
+      .mockResolvedValue({
+        id: 'tpl-1',
+        externalId: 'TPL-001',
+        groupCode: 'RETAIL',
+        name: 'Loan agreement',
+        lifecycleStatus: 'PUBLISHED',
+        releaseVersion: '1.0.0',
+        releaseVersionCount: 1,
+        masterId: 'master-1',
+        updatedBy: 'admin',
+        updatedAt: '2026-07-17T12:00:00Z',
+        nextReviewDue: '2027-07-17',
+      })
+
+    await wrapper.get('[data-testid="template-annual-review-complete"]').trigger('click')
+    await flushPromises()
+
+    expect(ElMessageBox.confirm).toHaveBeenCalled()
+    expect(completeSpy).toHaveBeenCalledWith('tpl-1')
   })
 })

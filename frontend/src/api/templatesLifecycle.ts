@@ -2,6 +2,7 @@ import { unwrapEnvelope } from '@/api/envelope'
 import { http } from '@/api/http'
 import type { ApiEnvelope } from '@/types/session'
 import type {
+  CompleteTemplateAnnualReviewPayload,
   LifecycleCommentPayload,
   LifecycleDecisionPayload,
   LifecycleGovernancePayload,
@@ -9,6 +10,7 @@ import type {
   LifecycleImpactPreviewRequest,
   PublishTemplatePayload,
   TemplateDetail,
+  TemplateSummary,
 } from '@/types/template'
 
 export async function submitForTest(
@@ -129,6 +131,18 @@ export async function restoreTemplateVersion(
 ): Promise<TemplateDetail> {
   const response = await http.post<ApiEnvelope<TemplateDetail>>(
     `/templates/${templateId}/versions/${encodeURIComponent(releaseVersion)}/restore`,
+    payload,
+  )
+  return unwrapEnvelope(response.data)
+}
+
+/** CE-G05 — complete annual review and roll nextReviewDue. */
+export async function completeTemplateAnnualReview(
+  templateId: string,
+  payload: CompleteTemplateAnnualReviewPayload = {},
+): Promise<TemplateSummary> {
+  const response = await http.post<ApiEnvelope<TemplateSummary>>(
+    `/templates/${templateId}/annual-review/complete`,
     payload,
   )
   return unwrapEnvelope(response.data)

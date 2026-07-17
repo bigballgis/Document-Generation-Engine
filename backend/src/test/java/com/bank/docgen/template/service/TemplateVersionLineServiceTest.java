@@ -238,8 +238,8 @@ class TemplateVersionLineServiceTest {
                 "10000003",
                 null,
                 true,
-                null
-        );
+                null,
+                null);
 
         when(templateService.requireReadableTemplate(templateId, author)).thenReturn(template);
         when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "1.0.0"))
@@ -278,8 +278,8 @@ class TemplateVersionLineServiceTest {
                 "10000003",
                 null,
                 true,
-                null
-        );
+                null,
+                null);
 
         when(templateService.requireReadableTemplate(templateId, author)).thenReturn(template);
         when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "1.0.0"))

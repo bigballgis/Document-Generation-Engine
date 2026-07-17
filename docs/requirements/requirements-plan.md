@@ -303,7 +303,7 @@
 ## 已确认：审计
 
 - 模板侧需要审计：创建/编辑模板、提交测试、测试通过、测试不通过、提交审批、审批通过、审批不通过、发布、停用、恢复、废弃、版本停用、版本恢复、导出/导入、母版提交审核、母版审核通过、母版审核不通过、母版变更和母版影响分析。
-- API 管理侧需要审计：API 凭证创建、轮换、吊销、过期、到期提醒、凭证摘要查看、AD Group 授权配置变更、输出方式配置变更、批量上限配置变更、DOCX/PDF 动态加密配置变更、default 路径目标发布版本配置变更；**CE-G06：** 受控再生终态事件 `INVOCATION_REGENERATED`（成功/失败均写；含 sourceInvocationId / regenerationId / fingerprint / outcome / actor；禁止 variables 明文）。
+- API 管理侧需要审计：API 凭证创建、轮换、吊销、过期、到期提醒、凭证摘要查看、AD Group 授权配置变更、输出方式配置变更、批量上限配置变更、DOCX/PDF 动态加密配置变更、default 路径目标发布版本配置变更；**CE-G06：** 受控再生终态事件 `INVOCATION_REGENERATED`（成功/失败均写；含 sourceInvocationId / regenerationId / fingerprint / outcome / actor；禁止 variables 明文）；**CE-G05：** 年检完成事件 `TEMPLATE_ANNUAL_REVIEW_COMPLETED`（templateId/externalId、previousNextReviewDue、newNextReviewDue、actorUsername；禁止 variables / 凭证 / 条款全文）。
 - API 调用审计至少记录：调用时间、环境、访问账号、访问账号 AD Group、API 凭证/调用方、模板与发布版本、路由类型、default 路径解析后的目标发布版本、输出格式、成功/失败与错误原因、耗时、请求参数摘要、生成文件标识、`requestId`、`idempotencyKey` 或其摘要、幂等处理状态；批量调用还需记录 `batchId`、`items[].itemId` 或其摘要、失败项重试关联的 `originalBatchId` 或等效关联字段（CE-C05：字段出现且校验通过时**必须**持久化该关联）；如复用已过期 `idempotencyKey`，还需记录过期 key 复用审计字段；**CE-G06：** 成功解析 release 的生成行还须持久化 `release_bundle_snapshot_id` + `release_bundle_hash`（管理查询可返回；仍禁止 parameters 明文）。
 - API 调用和 API 管理配置变更审计采用标准摘要对象，字段基线包括 `auditId`、`eventType`、`eventAt`、操作者或系统主体摘要、API 凭证或指纹摘要、访问账号、环境、模板、发布版本、解析后发布版本、路由类型、`requestId`、`idempotencyKey` 摘要、幂等状态、`taskId`、`batchId`、`itemId`（或其安全摘要）、`contextSummary`、输出摘要、加密摘要、批量摘要、资源 ID、结果摘要、错误摘要、耗时和配置差异摘要。
 - API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 `changedAreas` 表达变更配置域；`changedAreas` 取值基线为 `AD_GROUP_AUTHORIZATION`、`OUTPUT_POLICY`、`BATCH_LIMIT`、`ENCRYPTION_CAPABILITY`、`DEFAULT_ROUTE_TARGET`、`INVOCATION_RETENTION`（2026-07-03 新增，包级调用记录与文档留存策略）。
@@ -472,6 +472,7 @@
 - 如果业务需要立即停止使用包含问题条款或内容模块的已发布模板，必须通过停用对应模板或发布版本来阻断生成和 API 调用。
 - 条款或内容模块停用或废弃前的影响分析必须覆盖引用模板、引用发布版本、default 路由影响、近期调用摘要、是否需要停用模板或发布版本，以及可替代模块版本建议。
 - **CE-K08（2026-07-15 确认 / BDD `ready`）：** 内容模块**版本**可选法务元数据：`jurisdiction`、`effectiveFrom`、`effectiveTo`、`legalReviewRef`（均可选；日期为 UTC `date-time`）。仅草稿可写；`effectiveFrom`/`effectiveTo` 皆非空时须 `effectiveFrom <= effectiveTo`。`GET /api/management/v1/content-modules` 支持按上述字段筛选（匹配 catalog filter version：优先最新 `APPROVED`+`ACTIVE`，否则最新版本）。模板发布门禁新增硬项 `CONTENT_MODULE_EFFECTIVE_EXPIRED`：任一引用版本 `effectiveTo != null && utcNow.isAfter(effectiveTo)` 则阻断发布；空 `effectiveTo` 或相等时刻不过期；未来 `effectiveFrom` 不阻断；已发布锁定版本运行期不因事后过期失败。规格：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md) `BDD-CE-K08-LM-001…015`。
+- **CE-G05（2026-07-17 确认 / BDD `ready`）：** 条款目录支持可选 `searchMode=FULL_TEXT`：对 catalog-filter 版本 `content_structure_json` 的 PostgreSQL tsvector（config `simple`）做正文全文检索；缺省 `NAME` 保持 LR-C5 ILIKE（不扫正文）。提供只读 `GET …/content-modules/{moduleId}/where-used`（授权范围内引用模板；无条款全文）。权限与 §5.1 目录浏览一致（无新 capability；`TEMPLATE_TESTER` 403）。完整 Given/When/Then：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md) `BDD-CE-G05-011…017`。
 
 ## 已确认：模板状态
 
@@ -479,6 +480,7 @@
 - v1 不新增发布前或发布后中间状态；发布前检查、生成预览、测试生成、渲染任务、阻断项和失败原因通过测试记录、预览记录、发布前检查清单、发布摘要和审计摘要表达，不升级为模板生命周期状态。
 - 待发布状态下发布前检查发现阻断项时，不新增发布失败状态；模板保持待发布但不得发布，发布前检查清单记录阻断项。若修复需要修改模板内容、依赖版本、测试数据集或渲染配置，必须回到草稿或创建新的开发版本，并重新执行测试、审批和发布流程。
 - 普通模板删除仅由全局管理员执行；分组管理员、模板编排人员及其他角色不能删除普通模板。
+- **CE-G05（2026-07-17 确认 / BDD `ready`）：** 模板行持久化可选 `nextReviewDue`（UTC 日历日）。首次进入 `PUBLISHED` 且字段为空时播种为发布日 UTC + 365 天；再发布不覆盖。到期（`<= todayUtc`）模板投影到 Dashboard Tasks 年检待办（专用 author-workflow 列表；**不**新建 collaboration `queue_type`）。具备 `authorTemplates` 的角色可完成年检并滚动下一到期日（缺省完成日 UTC + 365）；写审计 `TEMPLATE_ANNUAL_REVIEW_COMPLETED`。年检不阻断发布/runtime。无新 capability / 无独立年检治理路由。完整 Given/When/Then：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md) `BDD-CE-G05-001…010`、`018…019`。
 
 ## 已确认：模板测试与审批
 

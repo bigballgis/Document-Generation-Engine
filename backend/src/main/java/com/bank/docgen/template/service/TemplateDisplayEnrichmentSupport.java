@@ -41,7 +41,8 @@ final class TemplateDisplayEnrichmentSupport {
                         summary.masterId(),
                         summary.updatedBy(),
                         summary.updatedAt(),
-                        summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy())
+                        summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy()),
+                        summary.nextReviewDue()
                 ))
                 .toList();
     }

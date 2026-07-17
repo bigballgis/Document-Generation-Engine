@@ -81,6 +81,7 @@ const {
       <ContentModuleDetailWorkspace
         v-model="activeWorkspaceTab"
         :workspace-tabs="workspaceTabs"
+        :module-id="moduleId"
         :versions="versions"
         :review-history="reviewHistory"
         :preview-version="previewVersion"

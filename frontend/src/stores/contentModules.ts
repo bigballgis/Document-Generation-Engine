@@ -11,6 +11,7 @@ import { createContentModulesMutationActions } from '@/stores/createContentModul
 import type {
   ContentModuleDetail,
   ContentModuleLifecycleImpactSummary,
+  ContentModuleSearchMode,
   ContentModuleSummary,
   ContentModuleWorkflowTask,
 } from '@/types/contentModule'
@@ -39,6 +40,7 @@ export const useContentModulesStore = defineStore('contentModules', () => {
     size = moduleListSize.value,
     options: AbortableRequestOptions & {
       search?: string
+      searchMode?: ContentModuleSearchMode
       groupCode?: string
       status?: string
       sort?: string

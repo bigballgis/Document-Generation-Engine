@@ -132,7 +132,13 @@ export const apiErrorEn = {
       renderProfileAbsent: "The export bundle does not include a render profile snapshot.",
       renderProfilePresent: "The export bundle includes a render profile snapshot."
     },
-    computeExpressionInvalid: "The compute expression is invalid."
+    computeExpressionInvalid: "The compute expression is invalid.",
+    nextReviewDueInvalid: "The nextReviewDue value must be a valid calendar date."
+  },
+  library: {
+    exportEmpty: "No exportable templates were found for the requested library export scope.",
+    exportLimitExceeded: "The library export request exceeds the maximum of 500 templates.",
+    exportFailed: "The library export could not be completed."
   },
   variable: {
     computeFailed: "Variable compute evaluation failed."
@@ -264,7 +270,9 @@ export const apiErrorEn = {
     lifecycleStateTransitionDenied: "The content module version is not in a valid state for this lifecycle operation.",
     lifecycleRequestInvalid: "The content module lifecycle request is invalid.",
     impactConfirmationRequired: "Impact summary review and secondary confirmation are required for this lifecycle operation.",
-    invalidEffectiveRange: "effectiveFrom must be less than or equal to effectiveTo."
+    invalidEffectiveRange: "effectiveFrom must be less than or equal to effectiveTo.",
+    searchTooLong: "The search string must be at most 200 characters.",
+    searchModeInvalid: "The searchMode value is not supported."
   },
   collaboration: {
     accessDenied: "You do not have permission to view collaboration work items.",

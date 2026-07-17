@@ -321,6 +321,11 @@ export default {
         itemTitle: '升级引用的条款版本',
         description: '模板中存在固定于旧版已批准条款的引用，请在条款面板一键升 pin。',
       },
+      annualReviewDue: {
+        title: '年检到期',
+        itemTitle: '完成年检',
+        description: '该模板的下一复查日期已到期。打开模板概览完成年检。',
+      },
       contentModuleReview: {
         title: '待审标准条款',
         itemTitle: '审核标准条款',
@@ -800,8 +805,17 @@ export default {
       releaseVersion: '发布版本',
       noReleaseVersion: '未发布',
       updatedAt: '最后更新时间',
+      nextReviewDue: '下一年度复查到期日',
+      nextReviewDueUnset: '未安排',
       noDescription: '未提供描述。',
       groupLabel: '分组：{groupCode}',
+      annualReview: {
+        complete: '完成年检',
+        confirmTitle: '确认完成年检？',
+        confirmMessage: '将滚动下一复查到期日（默认：完成日 UTC + 365 天）。是否继续？',
+        success: '年检已完成。',
+        completing: '正在完成…',
+      },
     },
     packageHub: {
       backToList: '返回模板列表',
@@ -2551,6 +2565,13 @@ export default {
         '浏览授权分组内可复用的标准条款。可按分组或状态筛选，然后打开条款以管理版本与审批流程。',
       empty: '暂无标准条款。',
       emptyDescription: '创建模块以开始编写可复用条款内容。',
+      searchMode: {
+        label: '检索模式',
+        name: '名称 / 代码',
+        fullText: '正文全文',
+      },
+      searchPlaceholderName: '按名称、模块代码或分组搜索',
+      searchPlaceholderFullText: '按条款正文搜索',
       columns: {
         group: '分组',
         moduleCode: '模块代码',
@@ -2585,6 +2606,20 @@ export default {
       changeSummary: '变更摘要',
       commentSummary: '审核意见',
       actorLabel: '操作人 {username}',
+      whereUsed: {
+        title: '引用位置',
+        description: '授权分组内引用该条款的模板。',
+        empty: '暂无模板引用该条款。',
+        emptyDescription: '当模板固定或引用该模块时，将显示在此处。',
+        loadError: '无法加载引用模板列表。',
+        columns: {
+          name: '模板',
+          group: '分组',
+          status: '状态',
+          pinnedVersion: '固定版本',
+        },
+        pinnedVersionUnset: '—',
+      },
     },
     settings: {
       open: '设置',
@@ -2601,6 +2636,7 @@ export default {
         versions: '版本',
         content: '内容预览',
         lifecycle: '审批与发布',
+        whereUsed: '引用位置',
       },
       lifecycleHint: '使用上方操作按钮提交、审批、驳回或执行发布后变更。',
     },

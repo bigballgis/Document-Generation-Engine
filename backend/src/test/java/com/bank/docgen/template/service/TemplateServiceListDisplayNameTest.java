@@ -107,8 +107,8 @@ class TemplateServiceListDisplayNameTest {
                 UUID.randomUUID().toString(),
                 "10000003",
                 Instant.parse("2026-01-01T00:00:00Z"),
-                null
-        );
+                null,
+                null);
         when(groupAccessService.accessibleGroupCodes(session)).thenReturn(List.of("*"));
         when(templateRepository.searchCatalog(any(), eq(0), eq(20)))
                 .thenReturn(new CatalogQueryPage<>(List.of(entity), 1, 1));

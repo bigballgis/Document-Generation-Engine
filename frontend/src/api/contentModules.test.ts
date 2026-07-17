@@ -75,6 +75,71 @@ describe('contentModules API', () => {
     })
   })
 
+  it('CE-G05: forwards searchMode=FULL_TEXT when not NAME default', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [],
+          page: 0,
+          size: 20,
+          totalElements: 0,
+          totalPages: 0,
+        },
+      },
+    })
+
+    await contentModulesApi.listContentModules(0, 20, {
+      search: 'force majeure',
+      searchMode: 'FULL_TEXT',
+      sort: 'updatedAtDesc',
+    })
+
+    expect(http.get).toHaveBeenCalledWith('/content-modules', {
+      params: {
+        page: 0,
+        size: 20,
+        search: 'force majeure',
+        searchMode: 'FULL_TEXT',
+        sort: 'updatedAtDesc',
+      },
+      signal: undefined,
+    })
+  })
+
+  it('CE-G05: lists where-used templates for a module', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [
+            {
+              id: 'tpl-1',
+              externalId: 'TPL-1',
+              name: 'Loan Notice',
+              groupCode: 'RETAIL',
+              lifecycleStatus: 'PUBLISHED',
+              pinnedSemanticVersion: '1.0.0',
+            },
+          ],
+          page: 0,
+          size: 20,
+          totalElements: 1,
+          totalPages: 1,
+        },
+      },
+    })
+
+    const pageView = await contentModulesApi.listContentModuleWhereUsed('MOD-1', 0, 20)
+
+    expect(http.get).toHaveBeenCalledWith('/content-modules/MOD-1/where-used', {
+      params: { page: 0, size: 20 },
+      signal: undefined,
+    })
+    expect(pageView.content).toHaveLength(1)
+    expect(pageView.content[0]?.name).toBe('Loan Notice')
+  })
+
   it('CE-U20: forwards status query param to list endpoint', async () => {
     vi.mocked(http.get).mockResolvedValue({
       data: {

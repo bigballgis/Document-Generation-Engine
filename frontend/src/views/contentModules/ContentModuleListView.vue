@@ -20,6 +20,8 @@ const {
   currentPage,
   allModules,
   searchQuery,
+  searchMode,
+  searchPlaceholderKey,
   filters,
   activeSortKey,
   hasAnyActive,
@@ -61,6 +63,23 @@ const {
     <el-skeleton v-else-if="contentModulesStore.loadingList" :rows="6" animated />
 
     <template v-else-if="showCatalogChrome">
+      <div class="search-mode-row">
+        <el-select
+          v-model="searchMode"
+          class="search-mode-select"
+          data-testid="content-module-search-mode"
+          :aria-label="t('contentModules.list.searchMode.label')"
+        >
+          <el-option
+            value="NAME"
+            :label="t('contentModules.list.searchMode.name')"
+          />
+          <el-option
+            value="FULL_TEXT"
+            :label="t('contentModules.list.searchMode.fullText')"
+          />
+        </el-select>
+      </div>
       <CatalogFilterToolbar
         v-model:search-query="searchQuery"
         v-model:filter-values="filters"
@@ -69,6 +88,7 @@ const {
         :sort-options="catalogSortOptions"
         :active-filter-chips="activeFilterChips"
         :has-any-active="hasAnyActive"
+        :search-placeholder-key="searchPlaceholderKey"
         @clear="clearAll"
         @remove-chip="removeFilterChip"
       />
@@ -148,5 +168,13 @@ const {
 <style scoped lang="scss">
 .page-alert {
   margin-bottom: var(--space-4);
+}
+
+.search-mode-row {
+  margin-bottom: var(--space-3);
+}
+
+.search-mode-select {
+  width: 14rem;
 }
 </style>

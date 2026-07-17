@@ -2,6 +2,7 @@ import type { Ref } from 'vue'
 import * as templatesApi from '@/api/templates'
 import { resolveApiErrorMessageKey } from '@/api/http'
 import type {
+  CompleteTemplateAnnualReviewPayload,
   LifecycleCommentPayload,
   LifecycleDecisionPayload,
   LifecycleGovernancePayload,
@@ -10,7 +11,7 @@ import type {
   TemplateDetail,
   TemplateSummary,
 } from '@/types/template'
-import { applyUpdatedTemplate } from '@/stores/templatesStoreHelpers'
+import { applyAnnualReviewSummary, applyUpdatedTemplate } from '@/stores/templatesStoreHelpers'
 
 export function createTemplatesLifecycleActions(deps: {
   submitting: Ref<boolean>
@@ -100,6 +101,24 @@ export function createTemplatesLifecycleActions(deps: {
     )
   }
 
+  async function completeAnnualReview(
+    templateId: string,
+    payload: CompleteTemplateAnnualReviewPayload = {},
+  ): Promise<TemplateSummary> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      const summary = await templatesApi.completeTemplateAnnualReview(templateId, payload)
+      applyAnnualReviewSummary(selectedTemplate, templates, summary)
+      return summary
+    } catch (error) {
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.lifecycle')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
   return {
     submitForTest,
     recordTestDecision,
@@ -112,5 +131,6 @@ export function createTemplatesLifecycleActions(deps: {
     fetchLifecycleImpactPreview,
     deactivateTemplateVersion,
     restoreTemplateVersion,
+    completeAnnualReview,
   }
 }

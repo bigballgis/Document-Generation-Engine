@@ -23,6 +23,8 @@ export interface TemplateSummary {
   updatedBy: string
   updatedByDisplayName?: string | null
   updatedAt: string
+  /** CE-G05 — UTC calendar date; null when not seeded. */
+  nextReviewDue?: string | null
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management release version history). */
@@ -68,6 +70,24 @@ export type TemplateDetail = Omit<
   updatedByDisplayName?: string | null
   /** CE-U19 — present on published release GET when CE-K01 pin fields exist. */
   masterPin?: TemplateMasterPin | null
+  /** CE-G05 — UTC calendar date; null when not seeded (OpenAPI field pending codegen). */
+  nextReviewDue?: string | null
+}
+
+/** CE-G05 — Dashboard Tasks projection for annual review due. */
+export interface AnnualReviewDueAuthorTask {
+  templateId: string
+  externalId: string
+  groupCode: string
+  name: string
+  nextReviewDue: string
+  lifecycleStatus: TemplateLifecycleStatus
+  updatedAt: string
+}
+
+/** CE-G05 — optional body for POST …/annual-review/complete. */
+export interface CompleteTemplateAnnualReviewPayload {
+  nextReviewDue?: string
 }
 
 export type TemplateDevVersionCreated = Schema<'TemplateDevVersionCreatedView'> & {

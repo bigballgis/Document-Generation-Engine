@@ -114,6 +114,19 @@ No physical DELETE. Stable fail-closed keys:
 | Mixed / invalid scope payload | 422 | `REQUEST_BODY_INVALID` / validation | `api.error.validation.*` |
 | Template missing (TEMPLATE_WINDOW) | 404 | `TEMPLATE_NOT_FOUND`（既有） | 既有模板 not-found 键 |
 
+### Template annual review + clause full-text search (CE-G05)
+
+Management contracts for template `nextReviewDue`, annual-review due tasks, content-module `searchMode=FULL_TEXT`, and where-used (documented in [contract-outline.md](contract-outline.md) «模板年检与条款正文全文检索（CE-G05）」 and [openapi-v1.yaml](openapi-v1.yaml)). **No new capability bit.** Annual review requires `authorTemplates`; FTS/where-used reuse §5.1 catalog browse. Caller-facing runtime generate paths unchanged. Behavior SoT: [ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md).
+
+| Operation | Method / path |
+| --- | --- |
+| Due tasks | `GET /api/management/v1/author-workflow/annual-review-due-tasks` |
+| Complete review | `POST /api/management/v1/templates/{templateId}/annual-review/complete` |
+| Clause FTS | `GET /api/management/v1/content-modules?search=&searchMode=FULL_TEXT` |
+| Where-used | `GET /api/management/v1/content-modules/{moduleId}/where-used` |
+
+`TemplateSummaryView` / `TemplateDetailView` expose optional nullable `nextReviewDue` (`format: date`). Audit on successful complete: `TEMPLATE_ANNUAL_REVIEW_COMPLETED` (no variables / credentials / clause body).
+
 ### Template batch-test history sampleResults (CE-U18)
 
 Management batch-test history is a **management-API** contract (documented in [contract-outline.md](contract-outline.md) «批量测试历史 sampleResults（CE-U18）」 and [openapi-v1.yaml](openapi-v1.yaml)).

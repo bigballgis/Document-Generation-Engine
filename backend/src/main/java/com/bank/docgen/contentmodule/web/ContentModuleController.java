@@ -13,10 +13,12 @@ import com.bank.docgen.contentmodule.api.CreateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.api.UpdateContentModuleSharedGroupCodesRequest;
 import com.bank.docgen.contentmodule.api.UpdateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.api.ContentModuleLifecycleImpactSummaryView;
+import com.bank.docgen.contentmodule.api.ContentModuleWhereUsedTemplateView;
 import com.bank.docgen.contentmodule.service.ContentModuleLifecycleImpactService;
 import com.bank.docgen.contentmodule.service.ContentModuleLifecycleService;
 import com.bank.docgen.contentmodule.service.ContentModuleReviewService;
 import com.bank.docgen.contentmodule.service.ContentModuleService;
+import com.bank.docgen.contentmodule.service.ContentModuleWhereUsedService;
 import com.bank.docgen.contentmodule.service.ContentModuleWorkflowService;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
@@ -45,6 +47,7 @@ public class ContentModuleController {
     private final ContentModuleLifecycleService lifecycleService;
     private final ContentModuleLifecycleImpactService lifecycleImpactService;
     private final ContentModuleWorkflowService workflowService;
+    private final ContentModuleWhereUsedService whereUsedService;
     private final TraceIdProvider traceIdProvider;
 
     public ContentModuleController(
@@ -53,6 +56,7 @@ public class ContentModuleController {
             ContentModuleLifecycleService lifecycleService,
             ContentModuleLifecycleImpactService lifecycleImpactService,
             ContentModuleWorkflowService workflowService,
+            ContentModuleWhereUsedService whereUsedService,
             TraceIdProvider traceIdProvider
     ) {
         this.contentModuleService = contentModuleService;
@@ -60,6 +64,7 @@ public class ContentModuleController {
         this.lifecycleService = lifecycleService;
         this.lifecycleImpactService = lifecycleImpactService;
         this.workflowService = workflowService;
+        this.whereUsedService = whereUsedService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -68,6 +73,7 @@ public class ContentModuleController {
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String searchMode,
             @RequestParam(required = false) String groupCode,
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String status,
@@ -80,7 +86,7 @@ public class ContentModuleController {
     ) {
         return envelope(request, contentModuleService.list(
                 session, page, size, search, groupCode, sort,
-                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status, searchMode
         ));
     }
 
@@ -168,6 +174,17 @@ public class ContentModuleController {
             HttpServletRequest request
     ) {
         return envelope(request, lifecycleImpactService.previewImpact(moduleId, session));
+    }
+
+    @GetMapping("/{moduleId}/where-used")
+    public SuccessEnvelope<PageView<ContentModuleWhereUsedTemplateView>> listWhereUsed(
+            @PathVariable String moduleId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, whereUsedService.listWhereUsed(moduleId, page, size, session));
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

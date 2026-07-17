@@ -557,7 +557,7 @@ export interface paths {
         };
         /**
          * List content modules (server-side PageView)
-         * @description Lists non-deleted content modules as a standard `PageView` (LR-C5 / BDD-LRP-C5-CATALOG-001; CE-U20 / BDD-CE-U20-CCS). When `groupCode` is omitted, returns modules accessible to the caller across authorized groups (including shared modules). When `groupCode` is provided, exact-match filter intersected with session authorization (unauthorized group → empty page). Optional `search` is case-insensitive contains over `name` ∪ `moduleCode` ∪ `groupCode`. Optional `status` filters by the module **head version** display status (CE-U20; AND with search / groupCode / sort / CE-K08 legal filters). Default sort is group-first (`groupCodeAsc`: `groupCode ASC`, then `updatedAt DESC`). Pagination unit is **rows** (not group count). Each summary row projects head `reviewState` (required) and `lifecycleState` (optional). Requires catalog browse access per permission matrix §5.1. Breaking change vs pre-LR-C5 bare array: management UI upgrades in the same slice; no external runtime callers.
+         * @description Lists non-deleted content modules as a standard `PageView` (LR-C5 / BDD-LRP-C5-CATALOG-001; CE-U20 / BDD-CE-U20-CCS; CE-G05 / BDD-CE-G05-011…016). When `groupCode` is omitted, returns modules accessible to the caller across authorized groups (including shared modules). When `groupCode` is provided, exact-match filter intersected with session authorization (unauthorized group → empty page). Optional `search` behavior depends on `searchMode` (default `NAME`): `NAME` = case-insensitive contains over `name` ∪ `moduleCode` ∪ `groupCode` (LR-C5; does not scan body); `FULL_TEXT` = PostgreSQL tsvector match on the catalog-filter version `content_structure_json` searchable text (CE-K08 version selection: latest APPROVED+ACTIVE, else latest; config `simple`). Empty/blank `search` ignored in both modes. Optional `status` filters by the module **head version** display status (CE-U20; AND with search / groupCode / sort / CE-K08 legal filters). Default sort is group-first (`groupCodeAsc`) for `NAME`; for `FULL_TEXT` with a non-empty search, default ranking is `ts_rank` DESC then `updatedAt` DESC (G05-D4). Pagination unit is **rows** (not group count). Each summary row projects head `reviewState` (required) and `lifecycleState` (optional). `contentStructureJson` visibility unchanged (§5.1). Requires catalog browse access per permission matrix §5.1 (`TEMPLATE_TESTER` → 403). Breaking change vs pre-LR-C5 bare array: management UI upgrades in the same slice; no external runtime callers.
          */
         get: operations["listContentModules"];
         put?: never;
@@ -601,6 +601,26 @@ export interface paths {
          * @description Returns module header, versions (including optional rejectionReason), and reviewHistory timeline records for CE-U08 lifecycle display.
          */
         get: operations["getContentModule"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/content-modules/{moduleId}/where-used": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List templates that reference a content module (CE-G05)
+         * @description Returns a management `PageView` of template summaries that reference the given content module within the caller's authorized template visibility (CE-G05 / BDD-CE-G05-014…015). Reuses `template_content_module_reference` (and published lock relations); does not scan binding JSON. Does **not** return clause body text. Cross-group templates invisible to the caller are omitted (fail-closed). Empty references → 200 empty page. Requires the same catalog browse access as content-module get (§5.1); `TEMPLATE_TESTER` → 403. Behavior SoT: docs/behavior/ce-g05-annual-review-fts.md.
+         */
+        get: operations["listContentModuleWhereUsed"];
         put?: never;
         post?: never;
         delete?: never;
@@ -715,6 +735,26 @@ export interface paths {
          * @description Returns draft templates writable by the caller where at least one unlocked content-module reference is pinned to an older approved version than the module's latest referencable release (CE-U07).
          */
         get: operations["listOutdatedClauseReferenceAuthorTasks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/author-workflow/annual-review-due-tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List templates with annual review due (CE-G05)
+         * @description Returns templates visible and writable under `authorTemplates` where `nextReviewDue != null` and `nextReviewDue <= todayUtc` (UTC calendar date; due day inclusive) (CE-G05 / BDD-CE-G05-003…005,009). Does **not** create a collaboration `queue_type`. Aligns with CE-U07 outdated-clause author-task projection for Dashboard Tasks. Callers without `authorTemplates` → 403 (or empty invisible partition on FE). Behavior SoT: docs/behavior/ce-g05-annual-review-fts.md.
+         */
+        get: operations["listAnnualReviewDueAuthorTasks"];
         put?: never;
         post?: never;
         delete?: never;
@@ -881,6 +921,26 @@ export interface paths {
         get: operations["listTemplates"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates/{templateId}/annual-review/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete template annual review and roll nextReviewDue (CE-G05)
+         * @description Completes the template-level annual review governance cycle (CE-G05 / BDD-CE-G05-006…009). Optional body `nextReviewDue` (UTC calendar date); when omitted, sets `nextReviewDue` to completion-day UTC date + 365 days. Requires group-scoped template access **and** `authorTemplates` (same author-workflow boundary as CE-U07); others → 403. Soft-deleted / invisible templates → 404 (or non-leaking 403 per existing template API convention). Writes management audit `TEMPLATE_ANNUAL_REVIEW_COMPLETED` (templateId/externalId, previousNextReviewDue, newNextReviewDue, actorUsername; **no** variables / credentials / clause body). Does **not** block publish or runtime generation. Does **not** require a new capability bit. Behavior SoT: docs/behavior/ce-g05-annual-review-fts.md.
+         */
+        post: operations["completeTemplateAnnualReview"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1365,6 +1425,26 @@ export interface paths {
          * @description Transitions ACTIVE → RELEASED. No physical DELETE. Already RELEASED → 409 `LEGAL_HOLD_ALREADY_RELEASED`. Writes `LEGAL_HOLD_RELEASED` audit. GLOBAL_ADMIN only. Released holds stop retention exemption immediately.
          */
         post: operations["releaseLegalHold"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/library/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export authorized eligible templates as a full-library ZIP (CE-E03)
+         * @description Assembles a `template-library-export-v1-zip` attachment for the caller's authorized export-eligible templates (lifecycle `PENDING_RELEASE` | `PUBLISHED` | `STOPPED` | `DEPRECATED`, same as single-template export). ZIP fixed relative paths: `library-export-manifest.json`; `templates/{templateId}.zip` (each byte-equivalent to E01 `bundleVersion=2&format=zip`); deduped `masters/{masterFileHash}.docx`; deduped `clauses/{moduleCode}__{semanticVersion}.json`. Nested packs are always E01 v2; no library-embedded v1 mode. Asset binaries are never embedded (keys only in manifest `assetKeyManifest`). Permission boundary reuses permission-matrix section 5 **导出模板** exactly — no new permission code: `GLOBAL_ADMIN` (all), `GROUP_ADMIN` (authorized groups), `TEMPLATE_AUTHOR` (own templates only); per-template authorization filter; `TEMPLATE_TESTER` and other non-export roles → 403. Optional body filters: `groupId`, `templateIds` (max 500), `includeSkipped` (default true). Candidate resolution: non-empty `templateIds` → those IDs ∩ auth ∩ existence; else non-empty `groupId` → group ∩ auth; else all authorized. Eligible candidate count max 500 → else 422 `api.error.library.exportLimitExceeded`. Empty INCLUDED set → 422 `api.error.library.exportEmpty`. Partial success: HTTP 200 when `includedCount ≥ 1` (FAILED/SKIPPED recorded in manifest only). Unauthorized or unknown requested IDs are omitted from `templates[]` (`omittedUnauthorizedOrUnknownCount` only — no existence leak). Success (including partial) audits `LIBRARY_EXPORT` (batch id, counts, scope, actor; no clause full text, DOCX bytes, or variable values). No `Idempotency-Key` requirement (each call new `exportBatchId`). Library import and management UI are out of scope. Traceability: BDD-CE-E03-001…016; docs/behavior/ce-e03-full-library-export.md.
+         */
+        post: operations["exportLibraryTemplates"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3513,6 +3593,48 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        /** @description CE-G05 Dashboard Tasks projection item for template annual review due (`GET …/author-workflow/annual-review-due-tasks`). */
+        AnnualReviewDueAuthorTaskView: {
+            /** Format: uuid */
+            templateId: string;
+            externalId: string;
+            groupCode: string;
+            name: string;
+            /**
+             * Format: date
+             * @description UTC calendar date that is due (≤ todayUtc).
+             */
+            nextReviewDue: string;
+            lifecycleStatus: components["schemas"]["TemplateLifecycleStatus"];
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description CE-G05 complete-annual-review body. Omit `nextReviewDue` to roll to completion-day UTC date + 365 days. */
+        CompleteTemplateAnnualReviewRequest: {
+            /**
+             * Format: date
+             * @description Optional explicit next review UTC calendar date. Invalid format → 422 VALIDATION with stable messageKey; no success audit.
+             */
+            nextReviewDue?: string;
+        };
+        /** @description CE-G05 where-used row — authorized template that references the module. No clause body. */
+        ContentModuleWhereUsedTemplateView: {
+            /** Format: uuid */
+            id: string;
+            externalId: string;
+            name: string;
+            groupCode: string;
+            lifecycleStatus: components["schemas"]["TemplateLifecycleStatus"];
+            /** @description Pinned content-module semantic version when a lock/reference pin exists; null/omitted when not pinned. */
+            pinnedSemanticVersion?: string | null;
+        };
+        /** @description CE-G05 where-used list envelope for `GET /api/management/v1/content-modules/{moduleId}/where-used`. */
+        ContentModuleWhereUsedPageResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PageView"] & {
+                content: components["schemas"]["ContentModuleWhereUsedTemplateView"][];
+            };
+        };
         TemplateExportApiPolicySnapshot: {
             templateId: string;
             policyVersion: number;
@@ -3711,6 +3833,119 @@ export interface components {
             assetKey: string;
             assetClass: components["schemas"]["AssetLibraryAssetClass"];
         };
+        /** @description Optional filters for CE-E03 full-library export. Empty object or omitted body = all authorized export-eligible templates. Behavior SoT: docs/behavior/ce-e03-full-library-export.md (E03-C4, E03-C5, E03-C12). */
+        LibraryExportRequest: {
+            /**
+             * Format: uuid
+             * @description When `templateIds` is empty/absent, restrict candidates to this group ∩ caller authorization.
+             */
+            groupId?: string;
+            /** @description When non-empty, candidates are only these IDs ∩ auth ∩ existence (takes precedence over `groupId`). Max 500 items. */
+            templateIds?: string[];
+            /**
+             * @description When true (default), manifest `templates[]` lists SKIPPED rows. When false, SKIPPED rows may be omitted from `templates[]` while `counts.skippedCount` remains accurate.
+             * @default true
+             */
+            includeSkipped: boolean;
+        };
+        /**
+         * @description How the export candidate set was selected (E03-C5 / E03-C11).
+         * @enum {string}
+         */
+        LibraryExportScopeSelection: "ALL_AUTHORIZED" | "GROUP" | "TEMPLATE_IDS";
+        /**
+         * @description Per-template manifest result (E03-C6). Unauthorized/unknown requested IDs are never listed (count only via `omittedUnauthorizedOrUnknownCount`).
+         * @enum {string}
+         */
+        LibraryExportTemplateEntryStatus: "INCLUDED" | "SKIPPED" | "FAILED";
+        /** @description Non-sensitive actor summary in the library-export manifest (E03-C11). */
+        LibraryExportActorView: {
+            /** @description Authenticated user identifier (non-secret). */
+            userId: string;
+            /** @description Role summary for the exporting actor (non-secret). */
+            role?: string;
+        };
+        /** @description Non-sensitive scope echo in the library-export manifest (E03-C11). */
+        LibraryExportScopeView: {
+            selection: components["schemas"]["LibraryExportScopeSelection"];
+            /**
+             * Format: uuid
+             * @description Echo when selection is `GROUP` (or group filter applied).
+             */
+            groupId?: string | null;
+            /** @description Echo of requested `templateIds` when selection is `TEMPLATE_IDS`. */
+            templateIds?: string[] | null;
+        };
+        /** @description Aggregate counts in the library-export manifest (E03-C11). */
+        LibraryExportCountsView: {
+            includedCount: number;
+            skippedCount: number;
+            failedCount: number;
+            /** @description Count of requested templateIds that were unauthorized or unknown; IDs themselves are not listed (E03-C6). */
+            omittedUnauthorizedOrUnknownCount: number;
+            uniqueMasterCount: number;
+            uniqueClauseCount: number;
+            uniqueAssetKeyCount: number;
+        };
+        /** @description Manifest `templates[]` row (E03-C6). `FORBIDDEN_OMITTED` IDs are never represented here. */
+        LibraryExportTemplateEntryView: {
+            /** Format: uuid */
+            templateId: string;
+            status: components["schemas"]["LibraryExportTemplateEntryStatus"];
+            /** @description Present for SKIPPED / FAILED. Stable examples: `EXPORT_NOT_ELIGIBLE` (lifecycle not exportable); `PINNED_MASTER_UNAVAILABLE` (entry-level; messageKey reuse `api.error.rendering.pinnedMasterUnavailable`). */
+            reasonCode?: string;
+            /** @description Relative ZIP path for INCLUDED rows, e.g. `templates/{templateId}.zip`. */
+            path?: string;
+        };
+        /** @description Deduped master catalog row (E03-C8). */
+        LibraryExportMasterCatalogEntryView: {
+            /** @description Lowercase hex SHA-256 of the master DOCX bytes. */
+            masterFileHash: string;
+            /** Format: uuid */
+            masterRevisionId?: string | null;
+            revisionSequence?: number | null;
+            sourceTemplateIds: string[];
+            /** @description Relative ZIP path, e.g. `masters/{masterFileHash}.docx`. */
+            path: string;
+        };
+        /** @description Deduped clause catalog row (E03-C9). */
+        LibraryExportClauseCatalogEntryView: {
+            moduleCode: string;
+            semanticVersion: string;
+            /** Format: uuid */
+            sourceModuleId?: string | null;
+            sourceTemplateIds: string[];
+            /** @description Relative ZIP path `clauses/{moduleCode}__{semanticVersion}.json` (unsafe path characters percent-encoded or replaced with `_`; original keys retained on this row). */
+            path: string;
+        };
+        /** @description Root `library-export-manifest.json` for `template-library-export-v1-zip` (E03-C1, E03-C11). Must not contain secrets, credentials, test-data variable values, or asset binaries. */
+        LibraryExportManifestView: {
+            /**
+             * @description Library export format constant.
+             * @enum {string}
+             */
+            format: "template-library-export-v1-zip";
+            /** Format: uuid */
+            exportBatchId: string;
+            /**
+             * Format: date-time
+             * @description UTC ISO-8601 export timestamp.
+             */
+            exportedAt: string;
+            /**
+             * @description Nested per-template packs are always E01 v2.
+             * @enum {integer}
+             */
+            bundleVersion: 2;
+            actor: components["schemas"]["LibraryExportActorView"];
+            scope: components["schemas"]["LibraryExportScopeView"];
+            counts: components["schemas"]["LibraryExportCountsView"];
+            templates: components["schemas"]["LibraryExportTemplateEntryView"][];
+            masterCatalog: components["schemas"]["LibraryExportMasterCatalogEntryView"][];
+            clauseCatalog: components["schemas"]["LibraryExportClauseCatalogEntryView"][];
+            /** @description Union of asset keys from INCLUDED E01 v2 bundles (key + usage only; no binaries) (E03-C10). */
+            assetKeyManifest: components["schemas"]["TemplateExportAssetKeyManifestItemView"][];
+        };
         /** @description CE-E01 asset key inventory item (key only; no binary payload). */
         TemplateExportAssetKeyManifestItemView: {
             /** @description Object-storage or structured-content reference key. */
@@ -3835,6 +4070,16 @@ export interface components {
             updatedAt: string;
             /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
             updatedByDisplayName?: string | null;
+            /**
+             * Format: date
+             * @description CE-G05 — template-level next annual-review UTC calendar date (`template.next_review_due`). Null for legacy rows not yet seeded. Seeded on first transition into `PUBLISHED` when empty (publishInstant UTC date + 365 days); subsequent publishes do not overwrite. Not a release-row field.
+             */
+            nextReviewDue?: string | null;
+        };
+        /** @description Single-template summary envelope (CE-G05 annual-review complete and other summary-returning management operations). */
+        TemplateSummaryResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["TemplateSummaryView"];
         };
         /** @description LR-C5 catalog list envelope for `GET /api/management/v1/templates`. */
         TemplateSummaryPageResponse: {
@@ -3944,6 +4189,11 @@ export interface components {
             readOnly?: boolean;
             /** @description CE-U19 additive optional CE-K01 master revision pin for published release detail GET. Shape aligns with CE-E01 `TemplateExportMasterPinView` (`masterRevisionId`, `masterFileHash`, optional `revisionSequence` / `pinOrigin`). Null or omitted when the release is not pinned. Same contract as version-line detail `masterPin`. See docs/behavior/ce-u19-dependency-readonly-view.md (U19-D5). */
             masterPin?: components["schemas"]["TemplateExportMasterPinView"];
+            /**
+             * Format: date
+             * @description CE-G05 — same template-row annual-review field as `TemplateSummaryView.nextReviewDue` (not release-scoped).
+             */
+            nextReviewDue?: string | null;
         };
         TemplateImportResult: {
             importSummary: components["schemas"]["TemplateImportSummaryView"];
@@ -5442,9 +5692,11 @@ export interface operations {
                 size?: components["parameters"]["CatalogSizeQuery"];
                 /** @description Optional case-insensitive contains search. Empty/blank ignored. Field coverage is entity-specific (see operation description). Reusable by future LR-C6 command palette; this contract does not define a separate C6 palette API. */
                 search?: components["parameters"]["CatalogSearchQuery"];
+                /** @description CE-G05 — how `search` is applied. `NAME` (default) keeps LR-C5 ILIKE on name/moduleCode/groupCode. `FULL_TEXT` matches the catalog-filter version body tsvector (`@@` plainto_tsquery/websearch; config `simple`). AND with `status` / `groupCode` / CE-K08 legal filters. Search strings longer than 200 characters → 422 VALIDATION. Unknown values → 422 VALIDATION. */
+                searchMode?: "NAME" | "FULL_TEXT";
                 /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
                 groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
-                /** @description Whitelist sort key. Default `groupCodeAsc`. Unknown values fall back to `groupCodeAsc` (no 400). Content-modules also support `moduleCodeAsc`. */
+                /** @description Whitelist sort key. Default `groupCodeAsc` for `NAME` mode. Unknown values fall back to `groupCodeAsc` (no 400). Content-modules also support `moduleCodeAsc`. When `searchMode=FULL_TEXT` and `search` is non-empty, ranking defaults to ts_rank DESC then `updatedAt` DESC unless an explicit whitelist sort is supplied. */
                 sort?: "groupCodeAsc" | "updatedAtDesc" | "updatedAtAsc" | "nameAsc" | "moduleCodeAsc";
                 /** @description CE-U20 — optional exact match on the catalog **head version** display status (badge-aligned). Head version = max `updatedAt` among the module's versions; ties broken by lexicographically greater `semanticVersion`. Match rules: if head `lifecycleState` is `DEPRECATED` or `STOPPED`, only those values match; otherwise match `reviewState` (`APPROVED` matches when lifecycle is `ACTIVE` or null/absent). Unknown/illegal values → successful empty page (not 400). AND with `search` / `groupCode` / sort / CE-K08 legal filters. Distinct from CE-K08 catalog-filter-version selection (latest APPROVED+ACTIVE, else latest). */
                 status?: "DRAFT" | "SUBMITTED" | "APPROVED" | "STOPPED" | "DEPRECATED";
@@ -5561,6 +5813,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ContentModuleDetailResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listContentModuleWhereUsed: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+                page?: components["parameters"]["CatalogPageQuery"];
+                /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+                size?: components["parameters"]["CatalogSizeQuery"];
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                moduleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated where-used template summaries. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContentModuleWhereUsedPageResponse"];
                 };
             };
             401: components["responses"]["ErrorResponse"];
@@ -5767,6 +6053,35 @@ export interface operations {
                 };
             };
             401: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listAnnualReviewDueAuthorTasks: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Author workflow tasks for annual review due. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        metadata: components["schemas"]["Metadata"];
+                        result: components["schemas"]["AnnualReviewDueAuthorTaskView"][];
+                    };
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -6033,6 +6348,41 @@ export interface operations {
             };
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    completeTemplateAnnualReview: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                /** @description Internal template resource UUID (management path). */
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CompleteTemplateAnnualReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated template summary including new nextReviewDue. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateSummaryResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -6908,6 +7258,64 @@ export interface operations {
             };
             /** @description Already RELEASED (`LEGAL_HOLD_ALREADY_RELEASED` / `api.error.conflict.legalHoldAlreadyReleased`). */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    exportLibraryTemplates: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["LibraryExportRequest"];
+            };
+        };
+        responses: {
+            /** @description Full-library ZIP attachment (`template-library-export-v1-zip`). Not wrapped in the JSON success envelope. */
+            200: {
+                headers: {
+                    /** @description Attachment disposition for the library export ZIP. */
+                    "Content-Disposition"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": string;
+                };
+            };
+            /** @description Invalid body (e.g. non-UUID fields). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            /** @description Caller lacks export-template permission (matrix §5); same fail-closed boundary as single-template export. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Empty exportable set (`api.error.library.exportEmpty`) or limit exceeded (`api.error.library.exportLimitExceeded`, `templateIds` length or eligible candidates > 500). No ZIP body. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

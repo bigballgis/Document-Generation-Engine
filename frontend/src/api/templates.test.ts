@@ -111,6 +111,32 @@ describe('templates API', () => {
     expect(updated.lifecycleStatus).toBe('TESTING')
   })
 
+  it('CE-G05: completes template annual review', async () => {
+    vi.mocked(http.post).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          id: 'tpl-1',
+          externalId: 'TPL-1',
+          groupCode: 'RETAIL',
+          name: 'Loan Notice',
+          lifecycleStatus: 'PUBLISHED',
+          releaseVersion: '1.0.0',
+          releaseVersionCount: 1,
+          masterId: 'master-1',
+          updatedBy: 'author',
+          updatedAt: '2026-07-17T12:00:00Z',
+          nextReviewDue: '2027-07-17',
+        },
+      },
+    })
+
+    const summary = await templatesApi.completeTemplateAnnualReview('tpl-1', {})
+
+    expect(http.post).toHaveBeenCalledWith('/templates/tpl-1/annual-review/complete', {})
+    expect(summary.nextReviewDue).toBe('2027-07-17')
+  })
+
   it('starts test generation preview', async () => {
     vi.mocked(http.post).mockResolvedValue({
       data: {

@@ -68,7 +68,8 @@ public class TemplateViewMapper {
                 template.getMasterId().toString(),
                 template.getUpdatedBy(),
                 template.getUpdatedAt(),
-                null
+                null,
+                template.getNextReviewDue()
         );
     }
 
@@ -123,7 +124,8 @@ public class TemplateViewMapper {
                 readOnly ? version.getCreatedBy() : null,
                 null,
                 readOnly,
-                null
+                null,
+                template.getNextReviewDue()
         );
     }
 

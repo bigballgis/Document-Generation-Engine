@@ -126,7 +126,13 @@ export const apiErrorZhCn = {
       renderProfileAbsent: "导出包不包含渲染配置快照。",
       renderProfilePresent: "导出包包含渲染配置快照。"
     },
-    computeExpressionInvalid: "计算表达式无效。"
+    computeExpressionInvalid: "计算表达式无效。",
+    nextReviewDueInvalid: "nextReviewDue 必须是有效的日历日期。"
+  },
+  library: {
+    exportEmpty: "所请求的全库导出范围内未找到可导出的模板。",
+    exportLimitExceeded: "全库导出请求超过最多 500 个模板的上限。",
+    exportFailed: "全库导出未能完成。"
   },
   variable: {
     computeFailed: "变量计算求值失败。"
@@ -251,7 +257,9 @@ export const apiErrorZhCn = {
     lifecycleStateTransitionDenied: "当前标准条款版本状态不允许此生命周期操作。",
     lifecycleRequestInvalid: "标准条款生命周期请求无效。",
     impactConfirmationRequired: "执行此生命周期操作前，必须审阅影响摘要并进行二次确认。",
-    invalidEffectiveRange: "effectiveFrom 必须小于或等于 effectiveTo。"
+    invalidEffectiveRange: "effectiveFrom 必须小于或等于 effectiveTo。",
+    searchTooLong: "搜索字符串最多 200 个字符。",
+    searchModeInvalid: "不支持的 searchMode 值。"
   },
   collaboration: {
     accessDenied: "您无权查看协作待办事项。",

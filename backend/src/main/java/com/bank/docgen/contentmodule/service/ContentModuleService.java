@@ -32,6 +32,7 @@ public class ContentModuleService {
     private final GroupAccessService groupAccessService;
     private final ContentModuleAccessService accessSupport;
     private final ManagementAuditRecorder auditRecorder;
+    private final ContentModuleFullTextIndexWriter fullTextIndexWriter;
     private final ContentModuleCatalogSupport catalog;
 
     public ContentModuleService(
@@ -40,13 +41,15 @@ public class ContentModuleService {
             ContentModuleReviewRecordRepository reviewRecordRepository,
             GroupAccessService groupAccessService,
             ContentModuleAccessService accessSupport,
-            ManagementAuditRecorder auditRecorder
+            ManagementAuditRecorder auditRecorder,
+            ContentModuleFullTextIndexWriter fullTextIndexWriter
     ) {
         this.moduleRepository = moduleRepository;
         this.versionRepository = versionRepository;
         this.groupAccessService = groupAccessService;
         this.accessSupport = accessSupport;
         this.auditRecorder = auditRecorder;
+        this.fullTextIndexWriter = fullTextIndexWriter;
         this.catalog = new ContentModuleCatalogSupport(
                 moduleRepository,
                 versionRepository,
@@ -68,11 +71,32 @@ public class ContentModuleService {
             String legalReviewRef,
             Instant effectiveFrom,
             Instant effectiveTo,
-            String status
+            String status,
+            String searchMode
     ) {
         return catalog.list(
                 session, page, size, search, groupCode, sort,
-                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status, searchMode
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PageView<ContentModuleSummaryView> list(
+            ManagementSessionClaims session,
+            Integer page,
+            Integer size,
+            String search,
+            String groupCode,
+            String sort,
+            String jurisdiction,
+            String legalReviewRef,
+            Instant effectiveFrom,
+            Instant effectiveTo,
+            String status
+    ) {
+        return list(
+                session, page, size, search, groupCode, sort,
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status, null
         );
     }
 
@@ -160,6 +184,7 @@ public class ContentModuleService {
                 session.username()
         );
         versionRepository.save(version);
+        fullTextIndexWriter.refresh(version.getId(), version.getContentStructureJson());
 
         auditRecorder.recordContentModuleCreated(
                 moduleId,
@@ -198,6 +223,7 @@ public class ContentModuleService {
         );
         version.setLegalMetadata(jurisdiction, effectiveFrom, effectiveTo, legalReviewRef);
         versionRepository.save(version);
+        fullTextIndexWriter.refresh(version.getId(), version.getContentStructureJson());
         module.setUpdatedBy(session.username());
         moduleRepository.save(module);
 
@@ -239,6 +265,7 @@ public class ContentModuleService {
         version.setLegalMetadata(jurisdiction, effectiveFrom, effectiveTo, legalReviewRef);
         version.setUpdatedBy(session.username());
         versionRepository.save(version);
+        fullTextIndexWriter.refresh(version.getId(), version.getContentStructureJson());
         module.setUpdatedBy(session.username());
         moduleRepository.save(module);
 

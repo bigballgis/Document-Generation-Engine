@@ -16,12 +16,19 @@ interface CatalogToolbarSortOption {
   labelKey: string
 }
 
-const props = defineProps<{
-  filters: CatalogToolbarFilter[]
-  sortOptions: CatalogToolbarSortOption[]
-  activeFilterChips: CatalogFilterChip[]
-  hasAnyActive: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    filters: CatalogToolbarFilter[]
+    sortOptions: CatalogToolbarSortOption[]
+    activeFilterChips: CatalogFilterChip[]
+    hasAnyActive: boolean
+    /** Optional i18n key; defaults to table.searchPlaceholder. */
+    searchPlaceholderKey?: string
+  }>(),
+  {
+    searchPlaceholderKey: 'table.searchPlaceholder',
+  },
+)
 
 const searchQuery = defineModel<string>('searchQuery', { default: '' })
 const filterValues = defineModel<Record<string, string>>('filterValues', { required: true })
@@ -42,8 +49,9 @@ const { t } = useI18n()
         v-model="searchQuery"
         class="catalog-filter-toolbar__search"
         clearable
-        :placeholder="t('table.searchPlaceholder')"
-        :aria-label="t('table.searchPlaceholder')"
+        data-testid="catalog-filter-search"
+        :placeholder="t(props.searchPlaceholderKey)"
+        :aria-label="t(props.searchPlaceholderKey)"
         :prefix-icon="Search"
       />
 

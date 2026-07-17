@@ -14,6 +14,7 @@
 - [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
 - [LR-D1 行为规格](../behavior/lrp-d1-audit-retention.md)
 - [CE-G04 Legal hold 行为规格](../behavior/ce-g04-legal-hold.md)（BDD-CE-G04；#75 — retention 豁免叠加，不改 ADR-0040/0048 正文）
+- [CE-G05 模板年检 + 条款正文全文检索](../behavior/ce-g05-annual-review-fts.md)（BDD-CE-G05；#77 — 无新 capability；复用 `authorTemplates` / §5.1 目录浏览）
 
 ## 2. 权限设计原则
 
@@ -97,6 +98,7 @@
 | 导入模板 | 是 | 被授权组范围内 | 否 | 自己负责的模板 | 否 | 否 | 模板导入由管理员和模板编排人员执行；全局管理员可导入全部模板，分组管理员可导入被授权组范围内模板，模板编排人员可导入自己负责的模板；导入生产后从草稿阶段重新走流程；遇到已有相同模板 ID 时保留模板 ID 并创建新的开发版本，不重新生成模板 ID 或 API 地址。**CE-E01：** import dry-run 与提交导入共用本行权限；dry-run 不落业务库；无新权限码。 |
 | 删除模板 | 是 | 否 | 否 | 否 | 否 | 否 | 普通模板删除仅由全局管理员执行。 |
 | 更新模板基础信息 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 普通模板基础信息更新由全局管理员和分组管理员执行；全局管理员可更新全部普通模板基础信息，分组管理员可更新被授权组范围内普通模板基础信息。 |
+| 完成模板年检 / 查看年到期待办（CE-G05） | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | **无新 capability bit。** 复用 `authorTemplates`（与 CE-U07 作者工作流同级）：组范围模板访问 **且** 具备编排权。列表 `GET …/author-workflow/annual-review-due-tasks`；完成 `POST …/templates/{templateId}/annual-review/complete`。测试人员 / 审批人员默认不可见待办、不可 complete（403）。不新建独立治理路由或角色。行为：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。 |
 
 ### 5.1 条款或内容模块权限矩阵
 
@@ -119,6 +121,7 @@
 | 废弃模块或版本 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 废弃由管理员执行；执行前必须进行影响分析、二次确认并记录审计；影响分析必须覆盖引用模板、引用发布版本、default 路由影响、近期调用摘要、是否需要停用模板或发布版本，以及可替代模块版本建议。 |
 | 导出模块 | 是 | 被授权组范围内 | 所属或被授权组范围内 | 所属或被授权组范围内 | 否 | 否 | 导出范围不得越过角色、分组和对象访问范围；导出内容按敏感数据脱敏规则处理。 |
 | 查看模块审计 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 模块审计查看沿用后台审计查看边界；审计管理员可按审计权限查看全部审计记录。 |
+| 浏览目录 / 正文全文检索 / where-used（CE-G05） | 是 | 被授权组范围内 | 是 | 是 | 否 | 是 | **无新 capability bit。** 与条款目录 list/get 相同浏览边界：`GLOBAL_ADMIN` / `GROUP_ADMIN` / `MASTER_DESIGNER` / `TEMPLATE_AUTHOR` / `TEMPLATE_APPROVER` 可调用 `searchMode=FULL_TEXT` 与 `GET …/where-used`；`TEMPLATE_TESTER` **无**目录浏览 → **403**。跨组仅共享/授权可见模块；where-used **不得**返回调用方不可见模板。`contentStructureJson` 响应策略不变；where-used **不含**条款全文。行为：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。 |
 
 ## 6. API 权限矩阵
 
@@ -540,6 +543,15 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - 管理审计：`LEGAL_HOLD_CREATED` / `LEGAL_HOLD_RELEASED`；禁止 variables / 凭证 / 完整参数体。
 - **Out of scope：** GROUP_ADMIN 组范围 hold；eDiscovery 导出；CE-G05；go-live / CD-3。
 - 行为 SoT：[ce-g04-legal-hold.md](../behavior/ce-g04-legal-hold.md) `BDD-CE-G04-001…017`；领域：[domain-model.md](../domain/domain-model.md) §2.15.1；契约：[contract-outline.md](../api/contract-outline.md) «Legal hold 管理契约（CE-G04）」。
+
+**CE-G05 模板年检 + 条款正文 FTS（2026-07-17）：**
+
+- **无新 capability bit / 无新角色 / 无独立年检治理路由。**
+- **年检：** 完成与到期待办列表要求组范围模板访问 **且** `authorTemplates`（`GLOBAL_ADMIN` / `GROUP_ADMIN` / `MASTER_DESIGNER` / `TEMPLATE_AUTHOR`）；对齐 CE-U07。`TEMPLATE_TESTER` / `TEMPLATE_APPROVER`（默认无 `authorTemplates`）→ 待办不可见 / complete **403**。
+- **FTS / where-used：** 与 §5.1 条款目录 list/get 浏览边界相同（含 `TEMPLATE_APPROVER`；**不含** `TEMPLATE_TESTER`）。跨组 fail-closed；where-used 不得泄露不可见模板行。
+- 管理审计：`TEMPLATE_ANNUAL_REVIEW_COMPLETED`；禁止 variables / 凭证 / 条款全文。
+- **Out of scope：** CD-3；CE-O02；go-live；#50；协作新 `queue_type`；独立 `/governance/annual-review` 路由；中文分词插件；高亮 snippet 作为 Done 门槛。
+- 行为 SoT：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md) `BDD-CE-G05-001…019`；领域：[domain-model.md](../domain/domain-model.md) §2.7 / §2.9.2；契约：[contract-outline.md](../api/contract-outline.md) «模板年检与条款正文全文检索（CE-G05）」。
 
 ### 13.3 禁止路由访问（forbidden-route）行为基线
 

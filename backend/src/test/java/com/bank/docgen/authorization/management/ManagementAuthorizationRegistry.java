@@ -112,7 +112,8 @@ final class ManagementAuthorizationRegistry {
                             "com.bank.docgen.contentmodule.service.ContentModuleService",
                             "com.bank.docgen.contentmodule.service.ContentModuleReviewService",
                             "com.bank.docgen.contentmodule.service.ContentModuleLifecycleService",
-                            "com.bank.docgen.contentmodule.service.ContentModuleLifecycleImpactService"
+                            "com.bank.docgen.contentmodule.service.ContentModuleLifecycleImpactService",
+                            "com.bank.docgen.contentmodule.service.ContentModuleWhereUsedService"
                     )
             ),
             Map.entry(
@@ -169,7 +170,10 @@ final class ManagementAuthorizationRegistry {
             ),
             Map.entry(
                     "com.bank.docgen.template.web.TemplateAuthorWorkflowController",
-                    Set.of("com.bank.docgen.template.service.TemplateContentModuleReferenceService")
+                    Set.of(
+                            "com.bank.docgen.template.service.TemplateContentModuleReferenceService",
+                            "com.bank.docgen.template.service.TemplateAnnualReviewService"
+                    )
             ),
             Map.entry(
                     "com.bank.docgen.template.web.TemplateController",
@@ -178,7 +182,8 @@ final class ManagementAuthorizationRegistry {
                             "com.bank.docgen.template.service.TemplateDeleteService",
                             "com.bank.docgen.template.service.ChangeDiffService",
                             "com.bank.docgen.template.service.CoverageComputationService",
-                            "com.bank.docgen.template.service.PublishGateService"
+                            "com.bank.docgen.template.service.PublishGateService",
+                            "com.bank.docgen.template.service.TemplateAnnualReviewService"
                     )
             ),
             Map.entry(
@@ -322,11 +327,13 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.contentmodule.service.ContentModuleLifecycleService",
             "com.bank.docgen.contentmodule.service.ContentModuleReviewService",
             "com.bank.docgen.contentmodule.service.ContentModuleService",
+            "com.bank.docgen.contentmodule.service.ContentModuleWhereUsedService",
             "com.bank.docgen.library.service.AssetLibraryService",
             "com.bank.docgen.legalhold.service.LegalHoldService",
             "com.bank.docgen.master.service.MasterDocumentService",
             "com.bank.docgen.master.service.MasterImpactAnalysisService",
             "com.bank.docgen.master.service.MasterRevisionLineService",
+            "com.bank.docgen.template.service.TemplateAnnualReviewService",
             "com.bank.docgen.template.service.TemplateDeleteService",
             "com.bank.docgen.template.service.TemplateExportAccessService",
             "com.bank.docgen.template.service.TemplateLifecycleService",

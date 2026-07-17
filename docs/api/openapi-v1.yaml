@@ -1248,32 +1248,55 @@ paths:
       summary: List content modules (server-side PageView)
       description: >-
         Lists non-deleted content modules as a standard `PageView` (LR-C5 /
-        BDD-LRP-C5-CATALOG-001; CE-U20 / BDD-CE-U20-CCS). When `groupCode` is
-        omitted, returns modules accessible to the caller across authorized
-        groups (including shared modules). When `groupCode` is provided,
-        exact-match filter intersected with session authorization (unauthorized
-        group → empty page). Optional `search` is case-insensitive contains over
-        `name` ∪ `moduleCode` ∪ `groupCode`. Optional `status` filters by the
-        module **head version** display status (CE-U20; AND with search /
-        groupCode / sort / CE-K08 legal filters). Default sort is group-first
-        (`groupCodeAsc`: `groupCode ASC`, then `updatedAt DESC`). Pagination
-        unit is **rows** (not group count). Each summary row projects head
-        `reviewState` (required) and `lifecycleState` (optional). Requires
-        catalog browse access per permission matrix §5.1. Breaking change vs
-        pre-LR-C5 bare array: management UI upgrades in the same slice; no
-        external runtime callers.
+        BDD-LRP-C5-CATALOG-001; CE-U20 / BDD-CE-U20-CCS; CE-G05 /
+        BDD-CE-G05-011…016). When `groupCode` is omitted, returns modules
+        accessible to the caller across authorized groups (including shared
+        modules). When `groupCode` is provided, exact-match filter intersected
+        with session authorization (unauthorized group → empty page). Optional
+        `search` behavior depends on `searchMode` (default `NAME`): `NAME` =
+        case-insensitive contains over `name` ∪ `moduleCode` ∪ `groupCode`
+        (LR-C5; does not scan body); `FULL_TEXT` = PostgreSQL tsvector match on
+        the catalog-filter version `content_structure_json` searchable text
+        (CE-K08 version selection: latest APPROVED+ACTIVE, else latest;
+        config `simple`). Empty/blank `search` ignored in both modes. Optional
+        `status` filters by the module **head version** display status (CE-U20;
+        AND with search / groupCode / sort / CE-K08 legal filters). Default sort
+        is group-first (`groupCodeAsc`) for `NAME`; for `FULL_TEXT` with a
+        non-empty search, default ranking is `ts_rank` DESC then `updatedAt`
+        DESC (G05-D4). Pagination unit is **rows** (not group count). Each
+        summary row projects head `reviewState` (required) and `lifecycleState`
+        (optional). `contentStructureJson` visibility unchanged (§5.1). Requires
+        catalog browse access per permission matrix §5.1 (`TEMPLATE_TESTER` →
+        403). Breaking change vs pre-LR-C5 bare array: management UI upgrades in
+        the same slice; no external runtime callers.
       parameters:
         - $ref: '#/components/parameters/CatalogPageQuery'
         - $ref: '#/components/parameters/CatalogSizeQuery'
         - $ref: '#/components/parameters/CatalogSearchQuery'
+        - name: searchMode
+          in: query
+          required: false
+          description: >-
+            CE-G05 — how `search` is applied. `NAME` (default) keeps LR-C5 ILIKE
+            on name/moduleCode/groupCode. `FULL_TEXT` matches the catalog-filter
+            version body tsvector (`@@` plainto_tsquery/websearch; config
+            `simple`). AND with `status` / `groupCode` / CE-K08 legal filters.
+            Search strings longer than 200 characters → 422 VALIDATION.
+            Unknown values → 422 VALIDATION.
+          schema:
+            type: string
+            enum: [NAME, FULL_TEXT]
+            default: NAME
         - $ref: '#/components/parameters/CatalogGroupCodeQuery'
         - name: sort
           in: query
           required: false
           description: >-
-            Whitelist sort key. Default `groupCodeAsc`. Unknown values fall back
-            to `groupCodeAsc` (no 400). Content-modules also support
-            `moduleCodeAsc`.
+            Whitelist sort key. Default `groupCodeAsc` for `NAME` mode.
+            Unknown values fall back to `groupCodeAsc` (no 400). Content-modules
+            also support `moduleCodeAsc`. When `searchMode=FULL_TEXT` and
+            `search` is non-empty, ranking defaults to ts_rank DESC then
+            `updatedAt` DESC unless an explicit whitelist sort is supplied.
           schema:
             type: string
             enum: [groupCodeAsc, updatedAtDesc, updatedAtAsc, nameAsc, moduleCodeAsc]
@@ -1430,6 +1453,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ContentModuleDetailResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/content-modules/{moduleId}/where-used:
+    get:
+      tags: [Admin]
+      operationId: listContentModuleWhereUsed
+      summary: List templates that reference a content module (CE-G05)
+      description: >-
+        Returns a management `PageView` of template summaries that reference the
+        given content module within the caller's authorized template visibility
+        (CE-G05 / BDD-CE-G05-014…015). Reuses
+        `template_content_module_reference` (and published lock relations); does
+        not scan binding JSON. Does **not** return clause body text. Cross-group
+        templates invisible to the caller are omitted (fail-closed). Empty
+        references → 200 empty page. Requires the same catalog browse access as
+        content-module get (§5.1); `TEMPLATE_TESTER` → 403. Behavior SoT:
+        docs/behavior/ce-g05-annual-review-fts.md.
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/CatalogPageQuery'
+        - $ref: '#/components/parameters/CatalogSizeQuery'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Paginated where-used template summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleWhereUsedPageResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
@@ -1667,6 +1730,43 @@ paths:
                     items:
                       $ref: '#/components/schemas/OutdatedClauseReferenceAuthorTaskView'
         '401':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/author-workflow/annual-review-due-tasks:
+    get:
+      tags: [Admin]
+      operationId: listAnnualReviewDueAuthorTasks
+      summary: List templates with annual review due (CE-G05)
+      description: >-
+        Returns templates visible and writable under `authorTemplates` where
+        `nextReviewDue != null` and `nextReviewDue <= todayUtc` (UTC calendar
+        date; due day inclusive) (CE-G05 / BDD-CE-G05-003…005,009). Does **not**
+        create a collaboration `queue_type`. Aligns with CE-U07 outdated-clause
+        author-task projection for Dashboard Tasks. Callers without
+        `authorTemplates` → 403 (or empty invisible partition on FE). Behavior
+        SoT: docs/behavior/ce-g05-annual-review-fts.md.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Author workflow tasks for annual review due.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [metadata, result]
+                properties:
+                  metadata:
+                    $ref: '#/components/schemas/Metadata'
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AnnualReviewDueAuthorTaskView'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -1979,6 +2079,56 @@ paths:
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/annual-review/complete:
+    post:
+      tags: [Admin]
+      operationId: completeTemplateAnnualReview
+      summary: Complete template annual review and roll nextReviewDue (CE-G05)
+      description: >-
+        Completes the template-level annual review governance cycle (CE-G05 /
+        BDD-CE-G05-006…009). Optional body `nextReviewDue` (UTC calendar date);
+        when omitted, sets `nextReviewDue` to completion-day UTC date + 365 days.
+        Requires group-scoped template access **and** `authorTemplates` (same
+        author-workflow boundary as CE-U07); others → 403. Soft-deleted /
+        invisible templates → 404 (or non-leaking 403 per existing template API
+        convention). Writes management audit
+        `TEMPLATE_ANNUAL_REVIEW_COMPLETED` (templateId/externalId,
+        previousNextReviewDue, newNextReviewDue, actorUsername; **no** variables /
+        credentials / clause body). Does **not** block publish or runtime
+        generation. Does **not** require a new capability bit. Behavior SoT:
+        docs/behavior/ce-g05-annual-review-fts.md.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          description: Internal template resource UUID (management path).
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteTemplateAnnualReviewRequest'
+      responses:
+        '200':
+          description: Updated template summary including new nextReviewDue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSummaryResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -8671,6 +8821,91 @@ components:
         updatedAt:
           type: string
           format: date-time
+    AnnualReviewDueAuthorTaskView:
+      type: object
+      additionalProperties: false
+      description: >-
+        CE-G05 Dashboard Tasks projection item for template annual review due
+        (`GET …/author-workflow/annual-review-due-tasks`).
+      required: [templateId, externalId, groupCode, name, nextReviewDue, lifecycleStatus, updatedAt]
+      properties:
+        templateId:
+          type: string
+          format: uuid
+        externalId:
+          type: string
+        groupCode:
+          type: string
+        name:
+          type: string
+        nextReviewDue:
+          type: string
+          format: date
+          description: UTC calendar date that is due (≤ todayUtc).
+        lifecycleStatus:
+          $ref: '#/components/schemas/TemplateLifecycleStatus'
+        updatedAt:
+          type: string
+          format: date-time
+    CompleteTemplateAnnualReviewRequest:
+      type: object
+      additionalProperties: false
+      description: >-
+        CE-G05 complete-annual-review body. Omit `nextReviewDue` to roll to
+        completion-day UTC date + 365 days.
+      properties:
+        nextReviewDue:
+          type: string
+          format: date
+          description: >-
+            Optional explicit next review UTC calendar date. Invalid format →
+            422 VALIDATION with stable messageKey; no success audit.
+    ContentModuleWhereUsedTemplateView:
+      type: object
+      additionalProperties: false
+      description: >-
+        CE-G05 where-used row — authorized template that references the module.
+        No clause body.
+      required: [id, externalId, name, groupCode, lifecycleStatus]
+      properties:
+        id:
+          type: string
+          format: uuid
+        externalId:
+          type: string
+        name:
+          type: string
+        groupCode:
+          type: string
+        lifecycleStatus:
+          $ref: '#/components/schemas/TemplateLifecycleStatus'
+        pinnedSemanticVersion:
+          type: string
+          nullable: true
+          description: >-
+            Pinned content-module semantic version when a lock/reference pin
+            exists; null/omitted when not pinned.
+    ContentModuleWhereUsedPageResponse:
+      type: object
+      additionalProperties: false
+      description: >-
+        CE-G05 where-used list envelope for
+        `GET /api/management/v1/content-modules/{moduleId}/where-used`.
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageView'
+            - type: object
+              additionalProperties: false
+              required: [content]
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ContentModuleWhereUsedTemplateView'
     TemplateExportApiPolicySnapshot:
       type: object
       additionalProperties: false
@@ -9593,6 +9828,28 @@ components:
           description: >-
             Optional display label for updatedBy in format
             "displayName (username)"; falls back to username when user not found.
+        nextReviewDue:
+          type: string
+          format: date
+          nullable: true
+          description: >-
+            CE-G05 — template-level next annual-review UTC calendar date
+            (`template.next_review_due`). Null for legacy rows not yet seeded.
+            Seeded on first transition into `PUBLISHED` when empty
+            (publishInstant UTC date + 365 days); subsequent publishes do not
+            overwrite. Not a release-row field.
+    TemplateSummaryResponse:
+      type: object
+      additionalProperties: false
+      description: >-
+        Single-template summary envelope (CE-G05 annual-review complete and
+        other summary-returning management operations).
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/TemplateSummaryView'
     TemplateSummaryPageResponse:
       type: object
       additionalProperties: false
@@ -9881,6 +10138,13 @@ components:
             release is not pinned. Same contract as version-line detail
             `masterPin`. See docs/behavior/ce-u19-dependency-readonly-view.md
             (U19-D5).
+        nextReviewDue:
+          type: string
+          format: date
+          nullable: true
+          description: >-
+            CE-G05 — same template-row annual-review field as
+            `TemplateSummaryView.nextReviewDue` (not release-scoped).
     TemplateImportResult:
       type: object
       additionalProperties: false
