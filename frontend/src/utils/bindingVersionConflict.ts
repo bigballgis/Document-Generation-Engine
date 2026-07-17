@@ -1,5 +1,7 @@
 import { ElMessageBox } from 'element-plus'
 import { resolveApiError } from '@/api/errorEnvelope'
+import type { AnchorBinding } from '@/types/template'
+import type { MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
 
 export type BindingVersionConflictAction = 'reload' | 'keep' | 'dismiss'
 
@@ -41,4 +43,40 @@ export async function presentBindingVersionConflict(
     }
     return 'dismiss'
   }
+}
+
+export type ResolveBindingVersionConflictAndReloadDeps = {
+  t: (key: string) => string
+  fetchTemplate: () => Promise<unknown>
+  onUpdated: () => void
+  /** Read after fetchTemplate so store bindings reflect the refreshed template. */
+  editingAnchorId: () => string | null | undefined
+  editingRow: () => MasterAnchorBindingRow | null
+  storeBindings: () => AnchorBinding[] | undefined | null
+  reloadBindingFromServer: (row: MasterAnchorBindingRow | null) => void | Promise<void>
+}
+
+/**
+ * Shared CE-U21 Reload orchestration for Save path and dirty-guard Save path.
+ * Keep editing / dismiss leave local drafts and dirty state untouched.
+ */
+export async function resolveBindingVersionConflictAndReload(
+  deps: ResolveBindingVersionConflictAndReloadDeps,
+): Promise<BindingVersionConflictAction> {
+  const action = await presentBindingVersionConflict(deps.t)
+  if (action !== 'reload') {
+    return action
+  }
+  await deps.fetchTemplate()
+  deps.onUpdated()
+  const fromStore = deps.storeBindings()?.find(
+    (item) => item.anchorId === deps.editingAnchorId(),
+  )
+  const row = deps.editingRow()
+  if (fromStore && row) {
+    await deps.reloadBindingFromServer({ ...row, binding: fromStore })
+  } else {
+    await deps.reloadBindingFromServer(row)
+  }
+  return action
 }
