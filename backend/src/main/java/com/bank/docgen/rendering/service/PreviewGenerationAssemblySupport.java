@@ -10,10 +10,12 @@ import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocxSpecimenWatermarkStamper;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
+import com.bank.docgen.rendering.PaginationDeltaFidelitySupport;
 import com.bank.docgen.rendering.PdfSpecimenWatermarkStamper;
 import com.bank.docgen.rendering.api.FidelityWarningView;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.sharedkernel.document.RenderProfile;
+import com.bank.docgen.sharedkernel.document.fidelity.PaginationDeltaEvaluator;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
@@ -23,6 +25,7 @@ import com.bank.docgen.template.port.VariableComputePort;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +48,7 @@ final class PreviewGenerationAssemblySupport {
     private final RenderProfileService renderProfileService;
     private final FidelityValidationService fidelityValidationService;
     private final VariableComputePort variableComputePort;
+    private final PaginationDeltaFidelitySupport paginationDeltaFidelitySupport;
 
     PreviewGenerationAssemblySupport(
             AnchorBindingRepository anchorBindingRepository,
@@ -55,7 +59,8 @@ final class PreviewGenerationAssemblySupport {
             TemplateRenderContextPort renderContextPort,
             RenderProfileService renderProfileService,
             FidelityValidationService fidelityValidationService,
-            VariableComputePort variableComputePort
+            VariableComputePort variableComputePort,
+            PaginationDeltaFidelitySupport paginationDeltaFidelitySupport
     ) {
         this.anchorBindingRepository = anchorBindingRepository;
         this.masterDocumentRepository = masterDocumentRepository;
@@ -66,13 +71,15 @@ final class PreviewGenerationAssemblySupport {
         this.renderProfileService = renderProfileService;
         this.fidelityValidationService = fidelityValidationService;
         this.variableComputePort = variableComputePort;
+        this.paginationDeltaFidelitySupport = paginationDeltaFidelitySupport;
     }
 
     record AssembledPreview(
             String storageKey,
             String pdfStorageKey,
             List<FidelityWarningView> warnings,
-            List<AnchorBindingEntity> bindings
+            List<AnchorBindingEntity> bindings,
+            Integer pdfPageCount
     ) {
     }
 
@@ -134,12 +141,14 @@ final class PreviewGenerationAssemblySupport {
                 renderProfile
         );
         String pdfStorageKey = "previews/" + previewId + "/output.pdf";
+        Integer pdfPageCount;
         try (pdfArtifact) {
             byte[] pdfBytes;
             try (InputStream pdfStream = pdfArtifact.spooled().openInputStream()) {
                 pdfBytes = pdfStream.readAllBytes();
             }
             pdfBytes = PdfSpecimenWatermarkStamper.apply(pdfBytes);
+            pdfPageCount = paginationDeltaFidelitySupport.measurePdfPages(pdfBytes);
             objectStoragePort.put(
                     pdfStorageKey,
                     new ByteArrayInputStream(pdfBytes),
@@ -147,10 +156,17 @@ final class PreviewGenerationAssemblySupport {
                     pdfArtifact.contentType()
             );
         }
-        List<FidelityWarningView> warnings = fidelityValidationService.collectWarningsForVersion(
-                version.getId(),
-                template.masterId()
+        List<FidelityWarningView> warnings = new ArrayList<>(
+                fidelityValidationService.collectWarningsForVersion(
+                        version.getId(),
+                        template.masterId()
+                )
         );
-        return new AssembledPreview(storageKey, pdfStorageKey, warnings, bindings);
+        PaginationDeltaEvaluator.Evaluation paginationEval = paginationDeltaFidelitySupport.evaluate(
+                version.getAuthorWordPageCount(),
+                pdfPageCount
+        );
+        paginationDeltaFidelitySupport.warningIfNeeded(paginationEval).ifPresent(warnings::add);
+        return new AssembledPreview(storageKey, pdfStorageKey, warnings, bindings, pdfPageCount);
     }
 }

@@ -63,9 +63,12 @@ export type PublishGateCheckCode =
   | 'COVERAGE_THRESHOLDS'
   | 'API_POLICY'
   | 'CONTENT_MODULE_REFERENCES'
+  | 'CONTENT_MODULE_EFFECTIVE_EXPIRED'
   | 'UNSUPPORTED_STRUCTURED_NODES'
   | 'PASTE_CLEANING_BLOCKERS'
+  | 'PAGINATION_DELTA_BUDGET'
   | 'BLOCKER_STATUS'
+  | 'FIDELITY_WARNINGS_VIEWED'
 
 /** Not yet modeled in `openapi-v1.yaml` (management publish gate). */
 export interface PublishGateItem {

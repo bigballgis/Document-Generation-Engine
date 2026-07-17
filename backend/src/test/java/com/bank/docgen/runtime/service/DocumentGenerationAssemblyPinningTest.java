@@ -94,6 +94,10 @@ class DocumentGenerationAssemblyPinningTest {
                 renderProfileService,
                 versionFidelityWarningService,
                 variableComputeService,
+                new com.bank.docgen.rendering.PaginationDeltaFidelitySupport(
+                        new com.bank.docgen.infrastructure.config.DocgenRenderingProperties(),
+                        new com.bank.docgen.rendering.PdfPageCountReader()
+                ),
                 new GenerationMetrics(new SimpleMeterRegistry())
         );
         template = new TemplateEntity(TEMPLATE_ID, "TPL-001", "RETAIL", "Sample", null, MASTER_ID, "10000001");

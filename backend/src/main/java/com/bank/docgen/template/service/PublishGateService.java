@@ -2,6 +2,7 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
+import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import com.bank.docgen.template.port.PreviewEvidencePort;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.BindingValidationView;
@@ -48,7 +49,8 @@ public class PublishGateService {
             TemplateCurrentVersionResolver templateVersionSupport,
             AnchorBindingRepository anchorBindingRepository,
             NodeMatrixValidationService nodeMatrixValidationService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            DocgenRenderingProperties renderingProperties
     ) {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
@@ -64,7 +66,8 @@ public class PublishGateService {
                 contentModuleReferenceService,
                 anchorBindingRepository,
                 nodeMatrixValidationService,
-                objectMapper
+                objectMapper,
+                renderingProperties
         );
         this.checklist = new PublishGateChecklistSupport(checkItems);
     }

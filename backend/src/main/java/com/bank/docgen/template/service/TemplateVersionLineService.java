@@ -8,11 +8,13 @@ import com.bank.docgen.authorization.management.service.ManagementUserDisplaySer
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.template.api.AuthorWordPageCountView;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateDevVersionCreatedView;
 import com.bank.docgen.template.api.TemplateExportMasterPinView;
 import com.bank.docgen.template.api.TemplateVersionLineDetailView;
 import com.bank.docgen.template.api.TemplateVersionLineSummaryView;
+import com.bank.docgen.template.api.UpdateAuthorWordPageCountRequest;
 import com.bank.docgen.template.mapping.TemplateMasterPinMapper;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateEntity;
@@ -206,6 +208,42 @@ public class TemplateVersionLineService {
                 version,
                 session,
                 (entity, ignored) -> templateService.toDetail(entity)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public AuthorWordPageCountView getAuthorWordPageCount(UUID templateId, ManagementSessionClaims session) {
+        templateService.requireReadableTemplate(templateId, session);
+        TemplateVersionEntity version = templateCurrentVersionResolver.requireInFlightDevVersion(templateId);
+        return new AuthorWordPageCountView(
+                templateId.toString(),
+                version.getId().toString(),
+                version.getAuthorWordPageCount()
+        );
+    }
+
+    @Transactional
+    public AuthorWordPageCountView updateAuthorWordPageCount(
+            UUID templateId,
+            UpdateAuthorWordPageCountRequest request,
+            ManagementSessionClaims session
+    ) {
+        templateService.requireWritableTemplate(templateId, session);
+        TemplateVersionEntity version = templateCurrentVersionResolver.requireInFlightDevVersion(templateId);
+        if (!templateCurrentVersionResolver.isInFlight(version)) {
+            throw new TemplateGovernanceException(
+                    ApiErrorCodes.TEMPLATE_VERSION_IMMUTABLE,
+                    "api.error.template.versionImmutable",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+        Integer pageCount = request == null ? null : request.authorWordPageCount();
+        version.setAuthorWordPageCount(pageCount);
+        templateVersionRepository.save(version);
+        return new AuthorWordPageCountView(
+                templateId.toString(),
+                version.getId().toString(),
+                version.getAuthorWordPageCount()
         );
     }
 

@@ -3,6 +3,8 @@ package com.bank.docgen.template.service;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
+import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
+import com.bank.docgen.sharedkernel.document.fidelity.PaginationDeltaEvaluator;
 import com.bank.docgen.template.port.PreviewEvidencePort;
 import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.ChangeDiffView;
@@ -14,6 +16,7 @@ import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.PublishGateCheckCode;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
@@ -27,6 +30,7 @@ final class PublishGateCheckItemSupport {
     private final ApiPolicyRepository apiPolicyRepository;
     private final PreviewEvidencePort previewEvidencePort;
     private final VariableSchemaRepository variableSchemaRepository;
+    private final DocgenRenderingProperties renderingProperties;
     private final PublishGateCheckItemContentSupport contentItems;
 
     PublishGateCheckItemSupport(
@@ -37,12 +41,14 @@ final class PublishGateCheckItemSupport {
             TemplateContentModuleReferenceService contentModuleReferenceService,
             AnchorBindingRepository anchorBindingRepository,
             NodeMatrixValidationService nodeMatrixValidationService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            DocgenRenderingProperties renderingProperties
     ) {
         this.lifecycleRecordRepository = lifecycleRecordRepository;
         this.apiPolicyRepository = apiPolicyRepository;
         this.previewEvidencePort = previewEvidencePort;
         this.variableSchemaRepository = variableSchemaRepository;
+        this.renderingProperties = renderingProperties;
         this.contentItems = new PublishGateCheckItemContentSupport(
                 previewEvidencePort,
                 contentModuleReferenceService,
@@ -123,6 +129,37 @@ final class PublishGateCheckItemSupport {
                         ? "api.publishGate.fidelityWarningsViewed.ready"
                         : "api.publishGate.fidelityWarningsViewed.blocked",
                 "unviewedCount=" + unviewedCount
+        );
+    }
+
+    /**
+     * ADR-0042: blocks publish when |pdfPages − authorWordPageCount| &gt; 2×B.
+     * Skips (ready) when Word page count or measured PDF pages are unavailable.
+     */
+    PublishGateItemView paginationDeltaBudgetItem(UUID templateId, TemplateVersionEntity version) {
+        Integer authorWordPageCount = version.getAuthorWordPageCount();
+        Integer pdfPageCount = previewEvidencePort
+                .latestSuccessfulPdfPageCount(templateId, version.getId())
+                .orElse(null);
+        PaginationDeltaEvaluator.Evaluation evaluation = PaginationDeltaEvaluator.evaluate(
+                authorWordPageCount,
+                pdfPageCount,
+                renderingProperties.getPaginationDeltaBudgetPages()
+        );
+        boolean blocking = evaluation.isPublishBlocker();
+        String summary = "authorWordPageCount=" + authorWordPageCount
+                + ",pdfPages=" + pdfPageCount
+                + ",delta=" + evaluation.delta()
+                + ",budget=" + renderingProperties.getPaginationDeltaBudgetPages()
+                + ",outcome=" + evaluation.outcome();
+        return new PublishGateItemView(
+                PublishGateCheckCode.PAGINATION_DELTA_BUDGET,
+                !blocking,
+                blocking,
+                blocking
+                        ? "api.publishGate.paginationDeltaBudget.blocked"
+                        : "api.publishGate.paginationDeltaBudget.ready",
+                summary
         );
     }
 

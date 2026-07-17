@@ -14,6 +14,8 @@ public enum PublishGateCheckCode {
     CONTENT_MODULE_EFFECTIVE_EXPIRED,
     UNSUPPORTED_STRUCTURED_NODES,
     PASTE_CLEANING_BLOCKERS,
+    /** ADR-0042: |pdfPages - authorWordPageCount| exceeds 2× pagination delta budget. */
+    PAGINATION_DELTA_BUDGET,
     BLOCKER_STATUS,
     FIDELITY_WARNINGS_VIEWED
 }

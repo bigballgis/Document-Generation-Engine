@@ -97,7 +97,11 @@ class PreviewGenerationServiceListPreviewsTest {
                 renderProfileService,
                 fidelityValidationService,
                 fidelityWarningJsonSupport,
-                variableComputePort
+                variableComputePort,
+                new com.bank.docgen.rendering.PaginationDeltaFidelitySupport(
+                        new com.bank.docgen.infrastructure.config.DocgenRenderingProperties(),
+                        new com.bank.docgen.rendering.PdfPageCountReader()
+                )
         );
         templateId = UUID.randomUUID();
         session = new ManagementSessionClaims(

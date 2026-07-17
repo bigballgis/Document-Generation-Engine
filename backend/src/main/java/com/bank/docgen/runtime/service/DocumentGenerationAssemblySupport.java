@@ -10,9 +10,11 @@ import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocxAssemblyException;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
+import com.bank.docgen.rendering.PaginationDeltaFidelitySupport;
 import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.sharedkernel.document.RenderProfile;
+import com.bank.docgen.sharedkernel.document.fidelity.PaginationDeltaEvaluator;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
@@ -53,6 +55,7 @@ final class DocumentGenerationAssemblySupport {
     private final RenderProfileService renderProfileService;
     private final VersionFidelityWarningService versionFidelityWarningService;
     private final VariableComputeService variableComputeService;
+    private final PaginationDeltaFidelitySupport paginationDeltaFidelitySupport;
 
     DocumentGenerationAssemblySupport(
             TemplateVersionRepository templateVersionRepository,
@@ -65,7 +68,8 @@ final class DocumentGenerationAssemblySupport {
             TemplateContentModuleReferenceService contentModuleReferenceService,
             RenderProfileService renderProfileService,
             VersionFidelityWarningService versionFidelityWarningService,
-            VariableComputeService variableComputeService
+            VariableComputeService variableComputeService,
+            PaginationDeltaFidelitySupport paginationDeltaFidelitySupport
     ) {
         this.templateVersionRepository = templateVersionRepository;
         this.anchorBindingRepository = anchorBindingRepository;
@@ -78,6 +82,7 @@ final class DocumentGenerationAssemblySupport {
         this.renderProfileService = renderProfileService;
         this.versionFidelityWarningService = versionFidelityWarningService;
         this.variableComputeService = variableComputeService;
+        this.paginationDeltaFidelitySupport = paginationDeltaFidelitySupport;
     }
 
     DocumentGenerationEngine.GeneratedDocument generate(
@@ -146,18 +151,29 @@ final class DocumentGenerationAssemblySupport {
         try (artifact) {
             String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
             String storageKey = "generated/" + documentId + "/" + artifact.storageFileName();
+            byte[] artifactBytes;
             try (InputStream artifactStream = artifact.spooled().openInputStream()) {
-                objectStoragePort.put(
-                        storageKey,
-                        artifactStream,
-                        artifact.spooled().sizeBytes(),
-                        artifact.contentType()
-                );
+                artifactBytes = artifactStream.readAllBytes();
             }
+            objectStoragePort.put(
+                    storageKey,
+                    new java.io.ByteArrayInputStream(artifactBytes),
+                    artifactBytes.length,
+                    artifact.contentType()
+            );
             List<String> fidelityWarnings = new ArrayList<>(
                     versionFidelityWarningService.resolveWarningCodes(version, template.getMasterId())
             );
             fidelityWarnings.addAll(artifact.pipelineWarningCodes());
+            if ("PDF".equalsIgnoreCase(outputFormat)) {
+                Integer pdfPageCount = paginationDeltaFidelitySupport.measurePdfPages(artifactBytes);
+                PaginationDeltaEvaluator.Evaluation paginationEval = paginationDeltaFidelitySupport.evaluate(
+                        version.getAuthorWordPageCount(),
+                        pdfPageCount
+                );
+                paginationDeltaFidelitySupport.warningCodeIfNeeded(paginationEval)
+                        .ifPresent(fidelityWarnings::add);
+            }
             return new DocumentGenerationEngine.GeneratedDocument(
                     documentId,
                     storageKey,

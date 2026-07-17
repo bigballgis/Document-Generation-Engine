@@ -100,7 +100,11 @@ class PreviewSpecimenWatermarkAssemblyTest {
                 renderContextPort,
                 renderProfileService,
                 fidelityValidationService,
-                variableComputePort
+                variableComputePort,
+                new com.bank.docgen.rendering.PaginationDeltaFidelitySupport(
+                        new DocgenRenderingProperties(),
+                        new com.bank.docgen.rendering.PdfPageCountReader()
+                )
         );
         artifactSpoolService = new ArtifactSpoolService(new GeneratedArtifactSizeGuard(new DocgenRenderingProperties()));
     }

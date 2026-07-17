@@ -7,6 +7,7 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
+import com.bank.docgen.rendering.PaginationDeltaFidelitySupport;
 import com.bank.docgen.runtime.metrics.GenerationMetrics;
 import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
@@ -40,6 +41,7 @@ public class DocumentGenerationEngine {
             RenderProfileService renderProfileService,
             VersionFidelityWarningService versionFidelityWarningService,
             VariableComputeService variableComputeService,
+            PaginationDeltaFidelitySupport paginationDeltaFidelitySupport,
             GenerationMetrics generationMetrics
     ) {
         this.assembly = new DocumentGenerationAssemblySupport(
@@ -53,7 +55,8 @@ public class DocumentGenerationEngine {
                 contentModuleReferenceService,
                 renderProfileService,
                 versionFidelityWarningService,
-                variableComputeService
+                variableComputeService,
+                paginationDeltaFidelitySupport
         );
         this.generationMetrics = generationMetrics;
     }

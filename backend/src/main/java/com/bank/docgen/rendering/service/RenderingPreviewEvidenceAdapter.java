@@ -68,13 +68,23 @@ public class RenderingPreviewEvidenceAdapter implements PreviewEvidencePort {
 
     @Override
     public int countUnviewedFidelityWarnings(UUID templateId, UUID templateVersionId) {
-        Optional<PreviewRecordEntity> latestSuccessful = previewRecordRepository
-                .findByTemplateIdAndTemplateVersionIdAndStatus(templateId, templateVersionId, PreviewStatus.SUCCEEDED)
-                .stream()
-                .max(Comparator.comparing(PreviewRecordEntity::getCreatedAt));
-        return latestSuccessful
+        return latestSuccessfulPreview(templateId, templateVersionId)
                 .map(preview -> fidelityWarningJsonSupport.countUnviewed(
                         fidelityWarningJsonSupport.readWarnings(preview.getFidelityWarningsJson())))
                 .orElse(0);
+    }
+
+    @Override
+    public Optional<Integer> latestSuccessfulPdfPageCount(UUID templateId, UUID templateVersionId) {
+        return latestSuccessfulPreview(templateId, templateVersionId)
+                .map(PreviewRecordEntity::getPdfPageCount)
+                .filter(count -> count != null && count > 0);
+    }
+
+    private Optional<PreviewRecordEntity> latestSuccessfulPreview(UUID templateId, UUID templateVersionId) {
+        return previewRecordRepository
+                .findByTemplateIdAndTemplateVersionIdAndStatus(templateId, templateVersionId, PreviewStatus.SUCCEEDED)
+                .stream()
+                .max(Comparator.comparing(PreviewRecordEntity::getCreatedAt));
     }
 }

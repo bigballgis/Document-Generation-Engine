@@ -16,14 +16,17 @@ import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 /**
- * LR-A6 / CD-HARD-T03 / ADR-0043: post-assembly OOXML well-formedness gate.
+ * LR-A6 / CD-HARD-T03 / ADR-0043 Decision <strong>slice A</strong> (Accepted scope):
+ * post-assembly OOXML well-formedness gate (OPC open + Word XML parts).
  *
  * <p>Opens the DOCX via {@link OPCPackage} and parses Word XML parts
  * ({@code document.xml}, styles, numbering, headers, footers, and related {@code .xml} parts).
- * Malformed XML / unescaped-ampersand class defects fail closed.
+ * Malformed XML / unescaped-ampersand class defects fail closed
+ * ({@code OOXML_VALIDATION_FAILED} / HTTP 422 / {@code retryable=false}).
  *
- * <p>Residual: full ECMA-376 XSD schema validation is intentionally deferred; well-formedness
- * plus part walk is the verify Done line for this slice.
+ * <p><strong>Residual (slice B — not claimed by Accepted):</strong> full ECMA-376 XSD schema
+ * validation and LibreOffice 24+ headless open remain deferred. Do not interpret slice A
+ * Accepted as LO24-safe / full XSD complete.
  */
 @Component
 public class OoxmlOutputValidator {

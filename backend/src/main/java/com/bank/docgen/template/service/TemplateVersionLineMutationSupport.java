@@ -62,6 +62,7 @@ final class TemplateVersionLineMutationSupport {
         target.setRulesJson(source.getRulesJson());
         target.setRenderProfileVersion(source.getRenderProfileVersion());
         target.setRenderProfileJson(source.getRenderProfileJson());
+        target.setAuthorWordPageCount(source.getAuthorWordPageCount());
         templateVersionRepository.save(target);
 
         cloneSupport.copyVersionGraph(source, target);

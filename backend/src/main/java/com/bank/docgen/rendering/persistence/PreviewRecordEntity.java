@@ -39,6 +39,10 @@ public class PreviewRecordEntity {
     @Column(name = "pdf_artifact_storage_key", length = 512)
     private String pdfArtifactStorageKey;
 
+    /** ADR-0042: measured PDF page count after successful conversion (nullable if unreadable). */
+    @Column(name = "pdf_page_count")
+    private Integer pdfPageCount;
+
     @Column(name = "fidelity_warnings_json")
     private String fidelityWarningsJson;
 
@@ -170,11 +174,25 @@ public class PreviewRecordEntity {
     }
 
     public void markSucceeded(String artifactStorageKey, String pdfArtifactStorageKey, String fidelityWarningsJson) {
+        markSucceeded(artifactStorageKey, pdfArtifactStorageKey, fidelityWarningsJson, null);
+    }
+
+    public void markSucceeded(
+            String artifactStorageKey,
+            String pdfArtifactStorageKey,
+            String fidelityWarningsJson,
+            Integer pdfPageCount
+    ) {
         this.status = PreviewStatus.SUCCEEDED;
         this.artifactStorageKey = artifactStorageKey;
         this.pdfArtifactStorageKey = pdfArtifactStorageKey;
         this.fidelityWarningsJson = fidelityWarningsJson;
+        this.pdfPageCount = pdfPageCount;
         this.updatedAt = Instant.now();
+    }
+
+    public Integer getPdfPageCount() {
+        return pdfPageCount;
     }
 
     public void setPdfArtifactStorageKey(String pdfArtifactStorageKey) {

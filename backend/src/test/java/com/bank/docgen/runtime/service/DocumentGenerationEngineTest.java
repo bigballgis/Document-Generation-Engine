@@ -98,6 +98,10 @@ class DocumentGenerationEngineTest {
                 renderProfileService,
                 versionFidelityWarningService,
                 variableComputeService,
+                new com.bank.docgen.rendering.PaginationDeltaFidelitySupport(
+                        new com.bank.docgen.infrastructure.config.DocgenRenderingProperties(),
+                        new com.bank.docgen.rendering.PdfPageCountReader()
+                ),
                 generationMetrics
         );
         template = new TemplateEntity(
