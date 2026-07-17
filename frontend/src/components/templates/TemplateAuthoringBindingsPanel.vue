@@ -70,6 +70,7 @@ const {
   handlePasteAccepted,
   clearPendingPasteResidue,
   openEditPanel,
+  expectedUpdatedAt,
   backToList,
   handleSaveBinding,
   handlePreviewRefresh,
@@ -123,6 +124,7 @@ const lastPreview = computed(() => props.lastPreview ?? null)
       :variables="variables"
       :content-module-reference-keys="contentModuleReferenceKeys"
       :baseline-structured-content-json="editSnapshot?.structuredContentJson"
+      :server-updated-at="expectedUpdatedAt"
       :bindings="bindings"
       :last-preview="lastPreview"
       :preview-stale="previewStale"

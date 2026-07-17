@@ -1,8 +1,10 @@
 import { getCurrentScope, onScopeDispose, unref, type MaybeRef } from 'vue'
 import {
   buildStructuredDraftStorageKey,
+  clearClaimableLegacyStructuredDraft,
   clearStructuredDraft,
   readStructuredDraft,
+  readStructuredDraftForAnchor,
   shouldOfferDraftRecovery,
   writeStructuredDraft,
   type StructuredContentDraftPayload,
@@ -14,6 +16,8 @@ export interface UseStructuredContentLocalDraftOptions {
   userId: MaybeRef<string | null | undefined>
   templateId: MaybeRef<string | null | undefined>
   devVersionId: MaybeRef<string | null | undefined>
+  /** When set, draft key includes this anchor (CE-U21). Omit for CM / non-binding mounts. */
+  anchorId?: MaybeRef<string | null | undefined>
   readonly: MaybeRef<boolean>
   debounceMs?: number
   storage?: Storage
@@ -56,18 +60,55 @@ export function useStructuredContentLocalDraft(options: UseStructuredContentLoca
    */
   let writesSuppressed = false
 
-  function resolveKey(): string | null {
+  function resolveScope(): {
+    userId: string
+    templateId: string
+    devVersionId: string
+    anchorId: string | null
+  } | null {
     const userId = unref(options.userId)
     const templateId = unref(options.templateId)
     const devVersionId = unref(options.devVersionId)
     if (!userId || !templateId || !devVersionId) {
       return null
     }
-    return buildStructuredDraftStorageKey(userId, templateId, devVersionId)
+    const anchorId = unref(options.anchorId) ?? null
+    return { userId, templateId, devVersionId, anchorId }
+  }
+
+  function resolveKey(): string | null {
+    const scope = resolveScope()
+    if (!scope) {
+      return null
+    }
+    return buildStructuredDraftStorageKey(
+      scope.userId,
+      scope.templateId,
+      scope.devVersionId,
+      scope.anchorId,
+    )
   }
 
   function isWritable(): boolean {
     return !unref(options.readonly) && resolveKey() != null && storage != null
+  }
+
+  function migrateLegacyAfterWrite(scope: {
+    userId: string
+    templateId: string
+    devVersionId: string
+    anchorId: string | null
+  }): void {
+    if (!storage || !scope.anchorId) {
+      return
+    }
+    clearClaimableLegacyStructuredDraft(
+      storage,
+      scope.userId,
+      scope.templateId,
+      scope.devVersionId,
+      scope.anchorId,
+    )
   }
 
   function flushPending(expectedEpoch: number): void {
@@ -80,8 +121,9 @@ export function useStructuredContentLocalDraft(options: UseStructuredContentLoca
       pendingJson = null
       return
     }
+    const scope = resolveScope()
     const key = resolveKey()
-    if (!key) {
+    if (!scope || !key) {
       pendingJson = null
       return
     }
@@ -90,9 +132,10 @@ export function useStructuredContentLocalDraft(options: UseStructuredContentLoca
       structureJson: pendingJson,
       draftUpdatedAt: now(),
       serverUpdatedAt: pendingMeta.serverUpdatedAt ?? null,
-      anchorId: pendingMeta.anchorId ?? null,
+      anchorId: pendingMeta.anchorId ?? scope.anchorId,
     }
     writeStructuredDraft(storage, key, payload)
+    migrateLegacyAfterWrite(scope)
     pendingJson = null
   }
 
@@ -119,11 +162,23 @@ export function useStructuredContentLocalDraft(options: UseStructuredContentLoca
     if (!storage) {
       return null
     }
-    const key = resolveKey()
-    if (!key) {
+    const scope = resolveScope()
+    if (!scope) {
       return null
     }
-    return readStructuredDraft(storage, key)
+    if (scope.anchorId) {
+      return readStructuredDraftForAnchor(
+        storage,
+        scope.userId,
+        scope.templateId,
+        scope.devVersionId,
+        scope.anchorId,
+      )
+    }
+    return readStructuredDraft(
+      storage,
+      buildStructuredDraftStorageKey(scope.userId, scope.templateId, scope.devVersionId),
+    )
   }
 
   function clearDraft(clearOptions?: { suppressSubsequentWrites?: boolean }): void {
@@ -139,11 +194,13 @@ export function useStructuredContentLocalDraft(options: UseStructuredContentLoca
     if (!storage) {
       return
     }
+    const scope = resolveScope()
     const key = resolveKey()
-    if (!key) {
+    if (!scope || !key) {
       return
     }
     clearStructuredDraft(storage, key)
+    migrateLegacyAfterWrite(scope)
   }
 
   function allowWrites(): void {

@@ -66,7 +66,14 @@ const releaseDetail: TemplateDetail = {
   lifecycleStatus: 'PUBLISHED',
   approvalSubState: null,
   variables: [{ variableKey: 'customerName', variableType: 'TEXT', required: true }],
-  bindings: [{ anchorId: 'body', declaredContentType: 'TEXT', structuredContentJson: '{}' }],
+  bindings: [
+    {
+      anchorId: 'body',
+      declaredContentType: 'TEXT',
+      structuredContentJson: '{}',
+      updatedAt: '2026-06-23T10:00:00Z',
+    },
+  ],
   rules: [{ ruleId: 'rule-1', targetAnchorId: 'body', conditionExpression: 'true' }],
   createdAt: '2026-06-01T10:00:00Z',
   updatedAt: '2026-06-23T10:00:00Z',

@@ -1,0 +1,22 @@
+{
+  "slice": "ce-u21-draft-anchor-concurrency",
+  "taskId": "95",
+  "stage": 6,
+  "agent": "e2e-test-engineer",
+  "date": "2026-07-17",
+  "config": "frontend/playwright.docker.config.ts",
+  "frontendBaseUrl": "http://127.0.0.1:4173",
+  "backendBaseUrl": "http://127.0.0.1:8080",
+  "spec": "e2e/CE-U21-draft-anchor-concurrency.spec.ts",
+  "bddPrefix": "BDD-CE-U21-DAC",
+  "scenarios": ["DAC-001", "DAC-002", "DAC-005", "DAC-007", "DAC-008", "DAC-012"],
+  "result": "PASS",
+  "passed": 4,
+  "failed": 0,
+  "durationSeconds": 27.9,
+  "command": "$env:E2E_TARGET='docker'; $env:FRONTEND_PORT='4173'; pnpm exec playwright test e2e/CE-U21-draft-anchor-concurrency.spec.ts --config playwright.docker.config.ts --workers=1",
+  "manifest": "frontend/e2e/evidence/CE-U21-manifest.md",
+  "planEvidence": "docs/plan/evidence/ce-u21-stage6-e2e/",
+  "blockers": [],
+  "next": "stage-7-e2e-uiux-reviewer"
+}

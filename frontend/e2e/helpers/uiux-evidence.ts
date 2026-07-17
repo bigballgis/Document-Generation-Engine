@@ -1476,3 +1476,33 @@ export async function captureCeU20LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** CE-U21 per-anchor draft recovery + binding 409 conflict — 1920×1080 dual-brand evidence. */
+export const CE_U21_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-U21')
+export const CE_U21_SCREENSHOT_DIR = path.join(CE_U21_EVIDENCE_ROOT, 'screenshots')
+export const CE_U21_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensureCeU21EvidenceDirs(): void {
+  fs.mkdirSync(CE_U21_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceU21ScreenshotPath(filename: string): string {
+  return path.join(CE_U21_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeU21Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeU21EvidenceDirs()
+  const target = ceU21ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeU21LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeU21EvidenceDirs()
+  const target = ceU21ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

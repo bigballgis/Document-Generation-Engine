@@ -164,6 +164,7 @@ export function useTemplateAuthoringBindingsPanel(
     handlePasteAccepted: edit.handlePasteAccepted,
     clearPendingPasteResidue: edit.clearPendingPasteResidue,
     openEditPanel: edit.openEditPanel,
+    expectedUpdatedAt: edit.expectedUpdatedAt,
     backToList: edit.backToList,
     handleSaveBinding: edit.handleSaveBinding,
     handlePreviewRefresh: edit.handlePreviewRefresh,

@@ -347,7 +347,8 @@ class TemplateBindingConfigurationServiceTest {
                 AnchorContentType.TEXT,
                 MINIMAL_STRUCTURED_CONTENT,
                 blocked,
-                null
+                null,
+                saved.getUpdatedAt()
         );
 
         service.upsertBinding(masterId, version, blockedRequest);
@@ -403,7 +404,8 @@ class TemplateBindingConfigurationServiceTest {
                 AnchorContentType.TEXT,
                 MINIMAL_STRUCTURED_CONTENT,
                 null,
-                true
+                true,
+                existing.getUpdatedAt()
         );
         service.upsertBinding(masterId, version, clearRequest);
 

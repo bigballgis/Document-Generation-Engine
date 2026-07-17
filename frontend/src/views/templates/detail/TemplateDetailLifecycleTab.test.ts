@@ -58,6 +58,7 @@ describe('TemplateDetailLifecycleTab', () => {
             declaredContentType: 'TEXT',
             structuredContentJson: null,
             validationStatus: 'MISSING_ANCHOR',
+            updatedAt: '2026-07-17T10:00:00Z',
           },
         ],
         summary: {

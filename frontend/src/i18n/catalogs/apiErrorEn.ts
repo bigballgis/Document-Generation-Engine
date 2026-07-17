@@ -88,6 +88,10 @@ export const apiErrorEn = {
     structuredContentUnknownNodeType: "The structured content contains an unsupported node type.",
     structuredContentForbiddenConstruct: "The structured content contains a forbidden construct.",
     invalidPasteCleaningEvidence: "Paste-cleaning evidence could not be serialized.",
+    bindingVersionConflict:
+      "This binding was updated elsewhere. Reload the binding, then save again.",
+    bindingExpectedUpdatedAtRequired:
+      "expectedUpdatedAt is required when updating an existing anchor binding.",
     publishGateBlocked: "Publish is blocked until binding validation passes.",
     submitForApprovalGateBlocked: "Submit for approval is blocked until pre-release checks pass.",
     decisionReasonCategoryRequired: "A reason category is required for failed or rejected decisions.",

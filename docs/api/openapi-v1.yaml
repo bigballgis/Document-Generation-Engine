@@ -2345,6 +2345,59 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/bindings/{anchorId}:
+    put:
+      tags: [Admin]
+      operationId: upsertTemplateAnchorBinding
+      summary: Create or update an anchor binding on the in-flight dev version
+      description: >-
+        Upserts structured content for one master anchor on the mutable in-flight
+        development version. CE-U21: response `updatedAt` is the concurrency token.
+        Updates of an existing row require `expectedUpdatedAt` equal to the current
+        server `updatedAt` (millisecond Instant equality). First create may omit
+        `expectedUpdatedAt`. Stale token → `409 BINDING_VERSION_CONFLICT`
+        (`api.error.template.bindingVersionConflict`, category `CONFLICT`,
+        retryable=true). Missing token on update → `422 TEMPLATE_VALIDATION_FAILED`
+        (`api.error.template.bindingExpectedUpdatedAtRequired`).
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: anchorId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertAnchorBindingRequest'
+      responses:
+        '200':
+          description: Binding created or updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnchorBindingResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/templates/{templateId}/change-diff:
     get:
       tags: [Admin]
@@ -6456,6 +6509,16 @@ components:
           $ref: '#/components/schemas/Metadata'
         result:
           $ref: '#/components/schemas/TemplateDetailView'
+    AnchorBindingResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      description: Envelope for `PUT .../bindings/{anchorId}` (CE-U21).
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/TemplateExportAnchorBindingView'
     ChangeDiffDimensionCode:
       type: string
       enum: [CONTENT, ANCHORS, VARIABLES, RULES, CONTRACT_SUMMARY]
@@ -8387,7 +8450,7 @@ components:
     TemplateExportAnchorBindingView:
       type: object
       additionalProperties: false
-      required: [anchorId, declaredContentType]
+      required: [anchorId, declaredContentType, updatedAt]
       properties:
         id:
           type: string
@@ -8407,6 +8470,40 @@ components:
         validationStatus:
           type: string
           enum: [VALID, MISSING_ANCHOR, DUPLICATE_BINDING, INCOMPATIBLE_CONTENT_TYPE]
+        updatedAt:
+          type: string
+          format: date-time
+          description: >
+            CE-U21 — server concurrency token for this binding row (ISO-8601 Instant).
+            Clients must send the same value as `expectedUpdatedAt` on update Save.
+    UpsertAnchorBindingRequest:
+      type: object
+      additionalProperties: false
+      required: [anchorId, declaredContentType, structuredContentJson]
+      properties:
+        anchorId:
+          type: string
+          minLength: 1
+        declaredContentType:
+          $ref: '#/components/schemas/MasterAnchorContentType'
+        structuredContentJson:
+          type: string
+          minLength: 1
+        pasteCleaningEvidence:
+          $ref: '#/components/schemas/PasteCleaningEvidence'
+        clearPasteCleaningEvidence:
+          type: boolean
+          description: >
+            When true, clears persisted paste-cleaning residue (ops-paste-binding-seam S5).
+        expectedUpdatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: >
+            CE-U21 — required when updating an existing binding; must equal the row's
+            current `updatedAt` (millisecond Instant equality). Omit on first create.
+            Mismatch → 409 BINDING_VERSION_CONFLICT
+            (`api.error.template.bindingVersionConflict`). Missing on update → 422.
     TemplateExportCompositionRuleView:
       type: object
       additionalProperties: false

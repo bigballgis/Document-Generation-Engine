@@ -1,0 +1,24 @@
+{
+  "result": "DEPLOY_OK",
+  "when": "2026-07-17T08:27:29+08:00",
+  "slice": "ce-u21-draft-anchor-concurrency",
+  "task_ids": [
+    "95"
+  ],
+  "worktree": "D:/working/DGE-ce-u21-draft-anchor-concurrency",
+  "branch": "feat/ce-u21-draft-anchor-concurrency",
+  "head": "701b2b94",
+  "compose_project": "documentgenerationengine",
+  "frontend_port": 4173,
+  "backend_port": 8080,
+  "healthz_status": 200,
+  "healthz_body": "{\"status\":\"UP\"}",
+  "frontend_status": 200,
+  "backend_image_id": "sha256:08c2132d2f71bb9a97e19c666ff3ff90f1f5611cd260ca258fe5629f564d2165",
+  "frontend_image_id": "sha256:fc5b074e5fcb4d1d257d8d7917b4c0a4b0fcf2d03bb9c3f224b0bbd3eb0590f9",
+  "u21_fe_marker": "ControlledStructuredContentEditor-Duuk5yFe.css, ControlledStructuredContentEditor-sZqPC9LX.js, TemplateDevVersionEditorView-IcTLaRNX.css, TemplateDevVersionEditorView-nxHgwOp-.js, index-BDUeFUXj.css, index-C1o2l6Gl.js, zh-CN-CJPwySzZ.js",
+  "jwt_sync": "Copied MAIN .env (JWT_SECRET 64-char); appended KAFKA_IMAGE from .env.example (WT lacked .env)",
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"CE-U21 Stage 5 E2E stack prep #95\"",
+  "queue_status": "DEPLOY_QUEUE: idle (no lock) | Pending ticket files: 0",
+  "next": "6 e2e-test-engineer"
+}

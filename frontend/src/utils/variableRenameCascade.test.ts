@@ -19,6 +19,7 @@ function binding(partial: Partial<AnchorBinding> & Pick<AnchorBinding, 'anchorId
   return {
     declaredContentType: 'RICH_TEXT',
     structuredContentJson: null,
+    updatedAt: '2026-01-01T00:00:00Z',
     ...partial,
   }
 }

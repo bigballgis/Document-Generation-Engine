@@ -9,6 +9,7 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelopeFactory;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
+import com.bank.docgen.template.service.BindingVersionConflictException;
 import com.bank.docgen.template.service.TemplateAccessDeniedException;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
@@ -80,5 +81,25 @@ class TemplateExceptionAdviceTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
         assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.TEMPLATE_VALIDATION_FAILED);
         assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.template.bindingInvalid");
+    }
+
+    @Test
+    void bindingVersionConflictMapsToConflictEnvelope() {
+        // BDD-CE-U21-DAC-007 / U21-D8
+        when(messageResolver.resolve("api.error.template.bindingVersionConflict"))
+                .thenReturn("This binding was updated elsewhere. Reload before saving.");
+
+        ResponseEntity<ErrorEnvelope> response = advice.handleBindingVersionConflict(
+                request,
+                new BindingVersionConflictException()
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.BINDING_VERSION_CONFLICT);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.CONFLICT);
+        assertThat(response.getBody().error().messageKey())
+                .isEqualTo("api.error.template.bindingVersionConflict");
+        assertThat(response.getBody().error().retryable()).isTrue();
     }
 }

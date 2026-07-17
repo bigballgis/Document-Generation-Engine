@@ -31,6 +31,17 @@ public class ErrorEnvelopeFactory {
             String category,
             String messageKey
     ) {
+        return domainError(request, status, code, category, messageKey, false);
+    }
+
+    public ResponseEntity<ErrorEnvelope> domainError(
+            HttpServletRequest request,
+            HttpStatus status,
+            String code,
+            String category,
+            String messageKey,
+            boolean retryable
+    ) {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();
         ErrorDetail error = new ErrorDetail(
@@ -38,7 +49,7 @@ public class ErrorEnvelopeFactory {
                 category,
                 messageResolver.resolve(messageKey),
                 messageKey,
-                false,
+                retryable,
                 null
         );
         return ResponseEntity.status(status)

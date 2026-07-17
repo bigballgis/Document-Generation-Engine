@@ -74,7 +74,14 @@ function makeTemplate(overrides: Partial<TemplateDetail> = {}): TemplateDetail {
     devVersionId: 'dev-1',
     devVersionNumber: 1,
     variables: [],
-    bindings: [{ anchorId: 'a1', declaredContentType: 'TEXT', structuredContentJson: null }],
+    bindings: [
+      {
+        anchorId: 'a1',
+        declaredContentType: 'TEXT',
+        structuredContentJson: null,
+        updatedAt: '2026-06-23T10:00:00Z',
+      },
+    ],
     rules: [],
     createdAt: '2026-06-23T10:00:00Z',
     updatedAt: '2026-06-23T10:00:00Z',

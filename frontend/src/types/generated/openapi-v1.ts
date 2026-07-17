@@ -1027,6 +1027,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/templates/{templateId}/bindings/{anchorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Create or update an anchor binding on the in-flight dev version
+         * @description Upserts structured content for one master anchor on the mutable in-flight development version. CE-U21: response `updatedAt` is the concurrency token. Updates of an existing row require `expectedUpdatedAt` equal to the current server `updatedAt` (millisecond Instant equality). First create may omit `expectedUpdatedAt`. Stale token → `409 BINDING_VERSION_CONFLICT` (`api.error.template.bindingVersionConflict`, category `CONFLICT`, retryable=true). Missing token on update → `422 TEMPLATE_VALIDATION_FAILED` (`api.error.template.bindingExpectedUpdatedAtRequired`).
+         */
+        put: operations["upsertTemplateAnchorBinding"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/templates/{templateId}/change-diff": {
         parameters: {
             query?: never;
@@ -2650,6 +2670,11 @@ export interface components {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["TemplateDetailView"];
         };
+        /** @description Envelope for `PUT .../bindings/{anchorId}` (CE-U21). */
+        AnchorBindingResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["TemplateExportAnchorBindingView"];
+        };
         /** @enum {string} */
         ChangeDiffDimensionCode: "CONTENT" | "ANCHORS" | "VARIABLES" | "RULES" | "CONTRACT_SUMMARY";
         ChangeDiffModificationView: {
@@ -3431,6 +3456,27 @@ export interface components {
             pasteCleaningEvidence?: components["schemas"]["PasteCleaningEvidence"];
             /** @enum {string} */
             validationStatus?: "VALID" | "MISSING_ANCHOR" | "DUPLICATE_BINDING" | "INCOMPATIBLE_CONTENT_TYPE";
+            /**
+             * Format: date-time
+             * @description CE-U21 — server concurrency token for this binding row (ISO-8601 Instant). Clients must send the same value as `expectedUpdatedAt` on update Save.
+             *
+             */
+            updatedAt: string;
+        };
+        UpsertAnchorBindingRequest: {
+            anchorId: string;
+            declaredContentType: components["schemas"]["MasterAnchorContentType"];
+            structuredContentJson: string;
+            pasteCleaningEvidence?: components["schemas"]["PasteCleaningEvidence"];
+            /** @description When true, clears persisted paste-cleaning residue (ops-paste-binding-seam S5).
+             *      */
+            clearPasteCleaningEvidence?: boolean;
+            /**
+             * Format: date-time
+             * @description CE-U21 — required when updating an existing binding; must equal the row's current `updatedAt` (millisecond Instant equality). Omit on first create. Mismatch → 409 BINDING_VERSION_CONFLICT (`api.error.template.bindingVersionConflict`). Missing on update → 422.
+             *
+             */
+            expectedUpdatedAt?: string | null;
         };
         TemplateExportCompositionRuleView: {
             ruleId: string;
@@ -6236,6 +6282,42 @@ export interface operations {
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
             404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    upsertTemplateAnchorBinding: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+                anchorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertAnchorBindingRequest"];
+            };
+        };
+        responses: {
+            /** @description Binding created or updated. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnchorBindingResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            409: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };

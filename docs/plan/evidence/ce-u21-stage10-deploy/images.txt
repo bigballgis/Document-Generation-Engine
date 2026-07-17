@@ -1,0 +1,5 @@
+
+documentgenerationengine-docgen-backend:latest                                                          08c9f98ef82c   2026-07-17 08:26:07 +0800 CST   1.46GB
+documentgenerationengine-docgen-frontend:latest                                                         4757787c4e75   2026-07-17 08:25:59 +0800 CST   85.7MB
+
+
