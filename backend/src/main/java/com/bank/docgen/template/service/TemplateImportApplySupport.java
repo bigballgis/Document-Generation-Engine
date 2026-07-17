@@ -74,7 +74,7 @@ final class TemplateImportApplySupport {
             );
         }
         for (AnchorBindingView binding : bundle.bindings()) {
-            templateService.upsertBinding(
+            templateService.upsertBindingForImport(
                     templateId,
                     new UpsertAnchorBindingRequest(
                             binding.anchorId(),

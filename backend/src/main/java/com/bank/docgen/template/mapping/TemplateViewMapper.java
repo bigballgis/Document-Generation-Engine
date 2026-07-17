@@ -162,7 +162,8 @@ public class TemplateViewMapper {
                 entity.getDeclaredContentType().name(),
                 entity.getStructuredContentJson(),
                 entity.getValidationStatus(),
-                PasteCleaningEvidenceSupport.read(entity.getPasteCleaningEvidenceJson(), objectMapper)
+                PasteCleaningEvidenceSupport.read(entity.getPasteCleaningEvidenceJson(), objectMapper),
+                entity.getUpdatedAt()
         );
     }
 }

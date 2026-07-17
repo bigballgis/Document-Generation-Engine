@@ -24,6 +24,8 @@ const props = defineProps<{
   variables: VariableSchema[]
   contentModuleReferenceKeys: string[]
   baselineStructuredContentJson?: string
+  /** CE-U21 — concurrency token held for Save / draft meta (binding.updatedAt). */
+  serverUpdatedAt?: string | null
   bindings: AnchorBinding[]
   lastPreview: PreviewRecord | null
   previewStale: boolean
@@ -147,6 +149,7 @@ defineExpose({ markPristine })
               :template-id="templateId"
               :dev-version-id="draftDevVersionId"
               :anchor-id="editingAnchorId ?? undefined"
+              :server-updated-at="serverUpdatedAt ?? editingRow?.binding?.updatedAt ?? null"
               :variables="variables"
               :content-module-reference-keys="contentModuleReferenceKeys"
               :baseline="baselineStructuredContentJson"

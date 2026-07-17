@@ -45,12 +45,14 @@ export function useControlledStructuredContentEditor(
   const draftUserId = computed(() => sessionStore.session?.username ?? null)
   const draftTemplateId = computed(() => props.templateId ?? null)
   const draftDevVersionId = computed(() => props.devVersionId ?? null)
+  const draftAnchorId = computed(() => props.anchorId ?? null)
   const isReadonly = computed(() => props.readonly === true)
 
   const localDraft = useStructuredContentLocalDraft({
     userId: draftUserId,
     templateId: draftTemplateId,
     devVersionId: draftDevVersionId,
+    anchorId: draftAnchorId,
     readonly: isReadonly,
   })
 

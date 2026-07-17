@@ -17,6 +17,7 @@ describe('buildMasterAnchorBindingRows', () => {
         declaredContentType: 'TEXT',
         structuredContentJson: '{"nodes":[]}',
         validationStatus: 'VALID',
+        updatedAt: '2026-07-17T10:00:00Z',
       },
     ]
 
@@ -39,6 +40,7 @@ describe('buildMasterAnchorBindingRows', () => {
         anchorId: 'ORPHAN',
         declaredContentType: 'TEXT',
         structuredContentJson: '{"nodes":[]}',
+        updatedAt: '2026-07-17T10:00:00Z',
       },
     ]
 

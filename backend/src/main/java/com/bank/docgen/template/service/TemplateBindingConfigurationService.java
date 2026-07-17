@@ -106,6 +106,18 @@ public class TemplateBindingConfigurationService {
         return mutations.upsertBinding(masterId, version, request);
     }
 
+    /**
+     * Template import replace path — skips CE-U21 optimistic lock (system overwrite, not author Save).
+     */
+    @Transactional
+    public AnchorBindingView upsertBindingForImport(
+            UUID masterId,
+            TemplateVersionEntity version,
+            UpsertAnchorBindingRequest request
+    ) {
+        return mutations.upsertBinding(masterId, version, request, false);
+    }
+
     @Transactional
     public List<CompositionRuleView> saveRules(
             TemplateVersionEntity version,

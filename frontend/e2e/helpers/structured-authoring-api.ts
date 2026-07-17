@@ -1,5 +1,14 @@
 import type { APIRequestContext } from '@playwright/test'
-import { DEMO_GROUP_CODE, DEMO_MASTER_NAME, E2E_GROUP_ADMIN, E2E_TEMPLATE_AUTHOR } from './auth'
+import {
+  DEMO_GROUP_CODE,
+  DEMO_MASTER_NAME,
+  E2E_ADMIN,
+  E2E_CORP_TEMPLATE_AUTHOR,
+  E2E_GROUP_ADMIN,
+  E2E_TEMPLATE_AUTHOR,
+  FOL_GROUP_CODE,
+  FOL_MASTER_NAME,
+} from './auth'
 import { E2E_API_BASE_URL, findMasterByName } from './masters-api'
 
 interface ApiEnvelope<T> {
@@ -148,6 +157,8 @@ export interface AnchorBindingResult {
   declaredContentType: string
   structuredContentJson: string
   validationStatus: string
+  /** CE-U21 concurrency token (ISO-8601 Instant). */
+  updatedAt?: string
   pasteCleaningEvidence?: PasteCleaningEvidencePayload | null
 }
 
@@ -201,9 +212,12 @@ export async function upsertBindingViaApi(
   options?: {
     pasteCleaningEvidence?: PasteCleaningEvidencePayload | null
     clearPasteCleaningEvidence?: boolean
+    /** CE-U21 — required when updating an existing binding row. */
+    expectedUpdatedAt?: string | null
+    credentials?: { username: string; password: string }
   },
 ): Promise<AnchorBindingResult> {
-  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const authorToken = await apiLogin(request, options?.credentials ?? E2E_TEMPLATE_AUTHOR)
   const payload: Record<string, unknown> = {
     anchorId,
     declaredContentType: 'TEXT',
@@ -215,12 +229,92 @@ export async function upsertBindingViaApi(
   if (options?.clearPasteCleaningEvidence) {
     payload.clearPasteCleaningEvidence = true
   }
+  if (options?.expectedUpdatedAt) {
+    payload.expectedUpdatedAt = options.expectedUpdatedAt
+  }
   return authorizedPut<AnchorBindingResult>(
     request,
     authorToken,
     `/templates/${templateId}/bindings/${anchorId}`,
     payload,
   )
+}
+
+export async function getBindingUpdatedAtViaApi(
+  request: APIRequestContext,
+  templateId: string,
+  anchorId: string,
+  credentials: { username: string; password: string } = E2E_ADMIN,
+): Promise<string> {
+  const token = await apiLogin(request, credentials)
+  const response = await request.get(`${E2E_API_BASE_URL}/templates/${templateId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok()) {
+    throw new Error(`GET /templates/${templateId} failed (${response.status()}): ${await response.text()}`)
+  }
+  const body = (await response.json()) as ApiEnvelope<{
+    bindings: Array<{ anchorId: string; updatedAt?: string }>
+  }>
+  const binding = body.result.bindings.find((row) => row.anchorId === anchorId)
+  if (!binding?.updatedAt) {
+    throw new Error(`Binding ${anchorId} missing updatedAt on template ${templateId}`)
+  }
+  return binding.updatedAt
+}
+
+/**
+ * CORP FOL draft with two bound anchors — for CE-U21 per-anchor localDraft isolation (DAC-001/002/005).
+ */
+export async function prepareDualAnchorFolDraftTemplate(
+  request: APIRequestContext,
+): Promise<
+  StructuredAuthoringFixture & {
+    anchorA: string
+    anchorB: string
+  }
+> {
+  const corpToken = await apiLogin(request, E2E_CORP_TEMPLATE_AUTHOR)
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  const master = await findMasterByName(request, groupAdminToken, FOL_MASTER_NAME)
+  if (!master) {
+    throw new Error(
+      `FOL master "${FOL_MASTER_NAME}" was not found. Deploy with DOCGEN_IMPORT_FOL_DEMO=true.`,
+    )
+  }
+
+  const externalId = uniqueExternalId('E2E-CE-U21')
+  const name = `E2E CE-U21 Dual Anchor ${externalId}`
+  const created = await authorizedPost<{ id: string; externalId: string; lifecycleStatus: string }>(
+    request,
+    corpToken,
+    '/templates',
+    {
+      externalId,
+      groupCode: FOL_GROUP_CODE,
+      name,
+      description: 'CE-U21 per-anchor draft isolation Playwright fixture',
+      masterId: master.id,
+    },
+    201,
+  )
+
+  const anchorA = 'FOL_HEADER'
+  const anchorB = 'FOL_FACILITY_SUMMARY'
+  await upsertBindingViaApi(request, created.id, anchorA, CLEAN_STRUCTURED_CONTENT_JSON, {
+    credentials: E2E_CORP_TEMPLATE_AUTHOR,
+  })
+  await upsertBindingViaApi(request, created.id, anchorB, CLEAN_STRUCTURED_CONTENT_JSON, {
+    credentials: E2E_CORP_TEMPLATE_AUTHOR,
+  })
+
+  return {
+    templateId: created.id,
+    externalId: created.externalId,
+    name,
+    anchorA,
+    anchorB,
+  }
 }
 
 export async function fetchPublishGateViaApi(

@@ -5,6 +5,7 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelopeFactory;
+import com.bank.docgen.template.service.BindingVersionConflictException;
 import com.bank.docgen.template.service.TemplateAccessDeniedException;
 import com.bank.docgen.template.service.TemplateGovernanceException;
 import com.bank.docgen.template.service.TemplateImportDependenciesException;
@@ -77,6 +78,21 @@ public class TemplateExceptionAdvice {
                 ex.errorCode(),
                 ApiErrorCategories.TEMPLATE,
                 ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(BindingVersionConflictException.class)
+    public ResponseEntity<ErrorEnvelope> handleBindingVersionConflict(
+            HttpServletRequest request,
+            BindingVersionConflictException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.CONFLICT,
+                ApiErrorCodes.BINDING_VERSION_CONFLICT,
+                ApiErrorCategories.CONFLICT,
+                ex.messageKey(),
+                true
         );
     }
 

@@ -72,6 +72,23 @@ final class TemplateInFlightContentMutationSupport {
         return result;
     }
 
+    AnchorBindingView upsertBindingForImport(
+            UUID templateId,
+            UpsertAnchorBindingRequest request,
+            ManagementSessionClaims session
+    ) {
+        TemplateEntity template = access.requireWritable(templateId, session);
+        TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
+        access.assertDraft(template);
+        AnchorBindingView result = bindingConfigurationService.upsertBindingForImport(
+                template.getMasterId(),
+                version,
+                request
+        );
+        eventPublisher.publishEvent(new TemplateContentChangedEvent(eventSource, templateId));
+        return result;
+    }
+
     List<CompositionRuleView> saveRules(
             UUID templateId,
             List<CompositionRuleView> rules,

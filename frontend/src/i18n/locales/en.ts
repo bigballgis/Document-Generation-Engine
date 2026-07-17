@@ -1397,6 +1397,9 @@ export default {
       renameVariableLockedWarning:
         '{count} locked test data set(s) still use the previous key and were left unchanged.',
       saveBindingSuccess: 'Binding saved.',
+      bindingVersionConflict: 'Binding updated elsewhere',
+      bindingVersionConflictReload: 'Reload',
+      bindingVersionConflictKeepEditing: 'Keep editing',
       deleteVariableSuccess: 'Variable deleted.',
       confirmDeleteVariableTitle: 'Delete variable',
       confirmDeleteVariableMessage: 'Remove this variable from the template draft?',

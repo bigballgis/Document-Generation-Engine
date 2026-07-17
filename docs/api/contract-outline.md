@@ -290,6 +290,8 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 
 **CE-U20（BDD `ready`，2026-07-17；Task Master #94）：** `ContentModuleSummaryView` 增加 head 版本投影字段 `reviewState`（必填）与 `lifecycleState`（可选）；`GET /api/management/v1/content-modules` 增加可选 query `status`（`DRAFT` \| `SUBMITTED` \| `APPROVED` \| `STOPPED` \| `DEPRECATED`），按 **head 版本** 徽章语义服务端精确过滤，与 `search` / `groupCode` / sort / CE-K08 legal filters **AND**；非法 `status` → 成功空页（不 400）。Head 选择：`updatedAt` 最大，并列取 `semanticVersion` 字典序更大者。**不**改变 create 请求体（仍为 `CreateContentModuleRequest.contentStructureJson`）、**不**改变审批/生命周期状态机。行为 SoT：[ce-u20-clause-create-structured.md](../behavior/ce-u20-clause-create-structured.md)。正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。
 
+**CE-U21（BDD `ready`，2026-07-17；Task Master #95；BE 契约）：** `TemplateExportAnchorBindingView` / 管理面绑定视图增加必填 `updatedAt`（ISO-8601 Instant，并发令牌）。`PUT /api/management/v1/templates/{templateId}/bindings/{anchorId}` 请求体 `UpsertAnchorBindingRequest` 增加可选 `expectedUpdatedAt`：对**已存在**绑定的更新必须提供且与库中 `updatedAt` 毫秒语义相等；匹配成功写入并返回新 `updatedAt`；不匹配 → **409** `BINDING_VERSION_CONFLICT` / category `CONFLICT` / `messageKey=api.error.template.bindingVersionConflict` / `retryable=true`；缺失 → **422** `TEMPLATE_VALIDATION_FAILED` / `api.error.template.bindingExpectedUpdatedAtRequired`。首次创建可省略 `expectedUpdatedAt`。模板 import replace 走服务端内部旁路（非作者 Save）。行为 SoT：[ce-u21-draft-anchor-concurrency.md](../behavior/ce-u21-draft-anchor-concurrency.md)。正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。
+
 | 路由语义 | 用途 | 已确认规则 | 已确认路径 |
 | --- | --- | --- | --- |
 | 内容模块审批流转 | 对条款或内容模块版本执行提交、审批通过或审批不通过。 | 使用独立版本审批生命周期；审批前置条件和角色边界遵循权限矩阵与领域模型。 | `/api/{environment}/v1/admin/content-modules/{moduleId}/review/transition` |
@@ -399,6 +401,7 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 模板版本线列表 | 分页列出模板包下进行中 dev 行与已发布 release 行，供包 hub 导航。 | 含 `release_version IS NULL` 的当前 dev 行与全部已发布行；跨组 `403 ACCESS_DENIED`；排序为 dev 行优先、再按 dev 版本降序。 | `GET /api/management/v1/templates/{templateId}/version-lines?page=&size=` |
 | 模板版本线详情 | 只读查看指定版本线的变量、绑定与规则快照。 | 版本线须属于该模板；跨组 `403`。 | `GET /api/management/v1/templates/{templateId}/version-lines/{versionLineId}` |
 | 模板 dev 版本详情 | 获取指定 dev 行的编排详情（在途编辑）。 | 已发布 dev 行只读；变更返回 `403 TEMPLATE_VERSION_IMMUTABLE`。 | `GET /api/management/v1/templates/{templateId}/dev/{devVersionId}` |
+| 锚点绑定 upsert（CE-U21） | 在途 DRAFT/TESTING 创建或更新单锚点结构化绑定。 | 响应含必填 `updatedAt`；更新须带匹配的 `expectedUpdatedAt`；陈旧 → `409 BINDING_VERSION_CONFLICT`；缺令牌 → `422`。 | `PUT /api/management/v1/templates/{templateId}/bindings/{anchorId}` |
 | 模板 release 详情 | 获取已发布 release 只读快照。 | 按语义版本 `releaseVersion` 定位；未知版本 `404`。 | `GET /api/management/v1/templates/{templateId}/releases/{releaseVersion}` |
 | 克隆已发布 release | 从已发布 release 复制快照到新的 DRAFT dev 行（`max(dev_version_number)+1`）。 | 存在进行中 dev 行时 `409 TEMPLATE_DEV_LINE_IN_FLIGHT`；成功后模板包状态为 `DRAFT`；记录 lifecycle 审计。 | `POST /api/management/v1/templates/{templateId}/release-versions/{releaseVersion}/clone` |
 | 粘贴清洗（P18-T10 / ops-paste-binding-seam） | 编辑期将 Word/HTML 清洗为受控结构化 JSON + 非敏感摘要。 | SoT **ADR-0019**：script / iframe / **object** / **absolute** → `BLOCKED`（整次 `blocked=true`，无 cleaned JSON）。Accept 后绑定持久化非敏感 `pasteCleaningEvidence`；未解除阻断在 validate / `computeBindingStatus` / PublishGate **fail-closed**。**不**新增权限面（复用配置锚点内容）。行为：[ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md)；领域 §2.6.7。 | `POST /api/management/v1/templates/{templateId}/paste-clean`（管理面；OpenAPI 绑定/validate/export 已声明 `pasteCleaningEvidence`） |
@@ -1317,6 +1320,7 @@ Async task query response structure
 | `VALIDATION` | `VARIABLE_RULE_FAILED` | `api.error.validation.variableRuleFailed` | `false` | Variable does not satisfy a validation rule. |
 | `TEMPLATE_CONTRACT` | `TEMPLATE_CONTRACT_INVALID` | `api.error.templateContract.templateContractInvalid` | `false` | Template contract is invalid. |
 | `TEMPLATE_CONTRACT` | `TEMPLATE_ANCHOR_MISSING` | `api.error.templateContract.templateAnchorMissing` | `false` | Template anchor is missing. |
+| `CONFLICT` | `BINDING_VERSION_CONFLICT` | `api.error.template.bindingVersionConflict` | `true` | This binding was updated elsewhere. Reload the binding, then save again. |
 | `RENDERING` | `OOXML_VALIDATION_FAILED` | `api.error.rendering.ooxmlValidationFailed` | `false` | Generated document failed OOXML validation. |
 | `RENDERING` | `PINNED_MASTER_UNAVAILABLE` | `api.error.rendering.pinnedMasterUnavailable` | `false` | Pinned master revision is unavailable. |
 | `GENERATION` | `DOCX_GENERATION_FAILED` | `api.error.generation.docxGenerationFailed` | `true` | DOCX generation failed. |
@@ -1350,7 +1354,7 @@ Async task query response structure
 | 401 Unauthorized | `API_CREDENTIAL_REQUIRED`、`API_CREDENTIAL_INVALID`、`API_CREDENTIAL_EXPIRED`、`API_CREDENTIAL_REVOKED`、`ACCESS_ACCOUNT_REQUIRED`。 | API 凭证或访问账号认证失败。 |
 | 403 Forbidden | `AD_GROUP_NOT_AUTHORIZED`、`TEMPLATE_ACCESS_DENIED`、`SELF_APPROVAL_FORBIDDEN`、`EXCEPTION_INTERVENTION_NOT_ALLOWED`。 | 调用方已被识别，但未获得模板 API 访问授权，或管理端同人审批 / 例外干预被拒绝；消息不得泄露未授权资源细节。 |
 | 404 Not Found | `RELEASE_VERSION_NOT_FOUND`、`ASYNC_TASK_NOT_FOUND`、`DOCUMENT_NOT_FOUND`、`ORIGINAL_BATCH_NOT_FOUND`。 | 授权范围内请求的发布版本、任务、文档不存在，或批量重试血缘中的原批次在同凭证下不可见。 |
-| 409 Conflict | `RELEASE_VERSION_DISABLED`、`DEFAULT_ROUTE_NOT_CONFIGURED`、`DEFAULT_ROUTE_TARGET_UNAVAILABLE`、`TEMPLATE_DISABLED`、`TEMPLATE_DEPRECATED`、`IDEMPOTENCY_KEY_CONFLICT`、`IDEMPOTENCY_RETRY_NOT_ALLOWED`、`ASYNC_TASK_CANCELLATION_NOT_ALLOWED`。 | 请求与当前版本、模板、default 配置、幂等状态或异步任务当前状态冲突。 |
+| 409 Conflict | `RELEASE_VERSION_DISABLED`、`DEFAULT_ROUTE_NOT_CONFIGURED`、`DEFAULT_ROUTE_TARGET_UNAVAILABLE`、`TEMPLATE_DISABLED`、`TEMPLATE_DEPRECATED`、`IDEMPOTENCY_KEY_CONFLICT`、`IDEMPOTENCY_RETRY_NOT_ALLOWED`、`ASYNC_TASK_CANCELLATION_NOT_ALLOWED`、`BINDING_VERSION_CONFLICT`（CE-U21 锚点绑定乐观锁）。 | 请求与当前版本、模板、default 配置、幂等状态、异步任务或绑定并发令牌冲突。 |
 | 410 Gone | `DOWNLOAD_URL_EXPIRED`、`RESULT_RETENTION_EXPIRED`、`ASYNC_TASK_EXPIRED`。 | 资源曾可用，但下载地址、任务或结果已过期。 |
 | 422 Unprocessable Entity | `VARIABLE_REQUIRED`、`VARIABLE_TYPE_INVALID`、`VARIABLE_FORMAT_INVALID`、`VARIABLE_RULE_FAILED`、`OOXML_VALIDATION_FAILED`、`EXCEPTION_REASON_REQUIRED`、`EXCEPTION_SECONDARY_CONFIRM_REQUIRED`。 | 请求结构可解析，但模板变量、业务规则校验未通过，装配后 DOCX 未通过 OOXML 输出校验（fail-closed，不落库/不预览），或 CE-G01 例外干预字段缺失。 |
 | 500 Internal Server Error | `TEMPLATE_CONTRACT_INVALID`、`TEMPLATE_ANCHOR_MISSING`、`DOCX_GENERATION_FAILED`、`PDF_CONVERSION_FAILED`、`ENCRYPTION_FAILED`、`BATCH_PROCESSING_FAILED`。 | 平台处理、模板资产、生成、转换、加密或整批处理失败。 |

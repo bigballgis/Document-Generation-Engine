@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 → Done. Sole-active delivery leaf: #94 CE-U20 (slice ce-u20-clause-create-structured). §9.2 next after U20: #95 CE-U21 pending. Umbrella is program registry only — not a delivery leaf. P3 parked. Leave #50 alone.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93 Done. Sole-active delivery leaf #94 CE-U20 (single-lane serial §9.2). Serial next after U20: #95 U21 pending. P3 parked (#77/#80/#96/#97). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #69 CE-C04 / #70 CE-C05 / #88 CE-U06 / #62 CE-K06 / #63 CE-K08 / #74 CE-G03 / #89 CE-U13 / #71 CE-C06 / #76 CE-G06 / #78 CE-E01 / #79 CE-E02 / #81 CE-O01 / #75 CE-G04 / #90 CE-U14 / #91 CE-U15 / #92 CE-U16 / #93 CE-U18 / #94 CE-U20 → Done. Sole-active delivery leaf: #95 CE-U21 (slice ce-u21-draft-anchor-concurrency; ISOLATED worktree D:/working/DGE-ce-u21-draft-anchor-concurrency). Umbrella is program registry only — not a delivery leaf. P3 parked. Leave #50 alone.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#78/#79/#81/#88/#89/#90/#91/#92/#93/#94 Done. Sole-active delivery leaf #95 CE-U21 (single-lane serial §9.2). P3 parked (#77/#80/#96/#97). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T06:30:00.000Z"
+        "updatedAt": "2026-07-17T07:55:00.000Z"
       },
       {
         "id": "54",
@@ -1318,16 +1318,16 @@
       {
         "id": "95",
         "title": "CE-U21: Draft key per anchor + concurrency hint",
-        "description": "PENDING. Slice ce-u21-draft-anchor-concurrency. localDraft key+anchorId; optimistic lock conflict UX. P2·M.",
-        "details": "After U20 (#94). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U21.",
+        "description": "IN PROGRESS 2026-07-17. Slice ce-u21-draft-anchor-concurrency. Sole-active delivery leaf (single-lane serial §9.2). Placement ISOLATED: worktree D:/working/DGE-ce-u21-draft-anchor-concurrency · branch feat/ce-u21-draft-anchor-concurrency · base origin/main (701b2b94). localDraft key+anchorId; optimistic lock conflict UX. P2·M. BDD in-progress (behavior-spec-author parallel). Formal phase None. Not go-live. Do NOT activate CD-3. Leave #50 alone. P3 parked.",
+        "details": "Activated 2026-07-17 (stage 2 plan-orchestrator). Slice id: ce-u21-draft-anchor-concurrency. Batch recommendation solo (member_task_ids: [95]). After U20 (#94 Done). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U21.",
         "testStrategy": "1. Draft keys per anchor. 2. Conflict hint. 3. E2E+UIUX.",
         "priority": "medium",
         "dependencies": [
           "94"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00Z"
+        "updatedAt": "2026-07-17T07:55:00.000Z"
       },
       {
         "id": "96",
@@ -1360,13 +1360,13 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-17T06:30:00.000Z",
+      "lastModified": "2026-07-17T07:55:00.000Z",
       "taskCount": 97,
       "completedCount": 61,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-17T06:30:00.000Z"
+      "updated": "2026-07-17T07:55:00.000Z"
     }
   }
 }

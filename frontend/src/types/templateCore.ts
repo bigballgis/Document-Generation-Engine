@@ -100,7 +100,7 @@ export interface UpsertVariablePayload {
   piiCategory?: VariablePiiCategory | null
 }
 
-/** Not yet modeled in `openapi-v1.yaml` (management binding upsert). */
+/** Management binding upsert — aligns with OpenAPI `UpsertAnchorBindingRequest`. */
 export interface UpsertBindingPayload {
   anchorId: string
   declaredContentType: string
@@ -109,6 +109,11 @@ export interface UpsertBindingPayload {
   pasteCleaningEvidence?: PasteCleaningEvidence | null
   /** When true, clears persisted paste-cleaning residue (S5 clean rewrite). */
   clearPasteCleaningEvidence?: boolean
+  /**
+   * CE-U21 — concurrency token; required when updating an existing binding.
+   * Omit on first create. Stale value → 409 BINDING_VERSION_CONFLICT.
+   */
+  expectedUpdatedAt?: string | null
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management template create). */

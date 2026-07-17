@@ -84,6 +84,8 @@ export const apiErrorZhCn = {
     structuredContentUnknownNodeType: "结构化内容包含不支持的节点类型。",
     structuredContentForbiddenConstruct: "结构化内容包含禁止使用的结构。",
     invalidPasteCleaningEvidence: "粘贴清洗证据无法序列化。",
+    bindingVersionConflict: "此绑定已在其他处更新。请重新加载绑定后再保存。",
+    bindingExpectedUpdatedAtRequired: "更新已有锚点绑定时必须提供 expectedUpdatedAt。",
     publishGateBlocked: "绑定校验通过前无法发布。",
     submitForApprovalGateBlocked: "检查通过前无法提交审批。",
     decisionReasonCategoryRequired: "测试不通过或审批驳回时必须选择原因类别。",

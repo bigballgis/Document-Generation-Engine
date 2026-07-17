@@ -27,12 +27,19 @@ describe('templateBindingGateDisplay', () => {
   it('lists bindings with non-valid validation status', () => {
     expect(
       listInvalidBindings([
-        { anchorId: 'A1', declaredContentType: 'TEXT', structuredContentJson: null, validationStatus: 'VALID' },
+        {
+          anchorId: 'A1',
+          declaredContentType: 'TEXT',
+          structuredContentJson: null,
+          validationStatus: 'VALID',
+          updatedAt: '2026-07-17T10:00:00Z',
+        },
         {
           anchorId: 'A2',
           declaredContentType: 'TEXT',
           structuredContentJson: null,
           validationStatus: 'MISSING_ANCHOR',
+          updatedAt: '2026-07-17T10:00:00Z',
         },
       ]),
     ).toHaveLength(1)

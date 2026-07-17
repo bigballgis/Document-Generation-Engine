@@ -1,0 +1,28 @@
+{
+  "result": "DEPLOY_OK",
+  "when": "2026-07-17T08:44:22+08:00",
+  "slice": "ce-u21-draft-anchor-concurrency",
+  "task_ids": [
+    "95"
+  ],
+  "worktree": "D:/working/DGE-ce-u21-draft-anchor-concurrency",
+  "branch": "feat/ce-u21-draft-anchor-concurrency",
+  "head": "701b2b94",
+  "dirty_tip": true,
+  "product_source_drift_after_stage5": false,
+  "stage5_decision": "SkipBuild health recheck OK — HEAD unchanged (701b2b94); post-stage5 mtime only evidence/e2e/helpers; runtime images layer-cached; FE asset markers match stage5",
+  "compose_project": "documentgenerationengine",
+  "frontend_port": 4173,
+  "backend_port": 8080,
+  "healthz_status": 200,
+  "healthz_body": "{\"status\":\"UP\"}",
+  "frontend_status": 200,
+  "backend_image_id": "sha256:08c9f98ef82cacb0b79a66809272e153b499bdf612cd0227f6f22e56a13578e5",
+  "frontend_image_id": "sha256:4757787c4e75017bdc79a81aacc4f48cb75b720d24d75a6dc3bfabe7fdaef503",
+  "stage5_backend_image_id": "sha256:08c2132d2f71bb9a97e19c666ff3ff90f1f5611cd260ca258fe5629f564d2165",
+  "stage5_frontend_image_id": "sha256:fc5b074e5fcb4d1d257d8d7917b4c0a4b0fcf2d03bb9c3f224b0bbd3eb0590f9",
+  "u21_fe_marker": "ControlledStructuredContentEditor-Duuk5yFe.css, ControlledStructuredContentEditor-sZqPC9LX.js, TemplateDevVersionEditorView-IcTLaRNX.css, TemplateDevVersionEditorView-nxHgwOp-.js, index-BDUeFUXj.css, index-C1o2l6Gl.js, zh-CN-CJPwySzZ.js",
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\\\scripts\\\\docker-deploy-queue.ps1 -SkipBuild -Reason \"CE-U21 Stage 10 deploy evidence #95 SkipBuild (tip unchanged since stage5)\"",
+  "queue_status": "DEPLOY_QUEUE: idle (no lock)\r\nPending ticket files: 0",
+  "next": "11 integration-merger"
+}

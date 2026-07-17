@@ -19,6 +19,8 @@ import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -113,13 +115,29 @@ final class TemplateBindingMutationSupport {
             TemplateVersionEntity version,
             UpsertAnchorBindingRequest request
     ) {
+        return upsertBinding(masterId, version, request, true);
+    }
+
+    /**
+     * @param requireOptimisticLock when true (authoring Save), existing rows require a matching
+     *     {@code expectedUpdatedAt}; when false (template import replace), skip the token check.
+     */
+    AnchorBindingView upsertBinding(
+            UUID masterId,
+            TemplateVersionEntity version,
+            UpsertAnchorBindingRequest request,
+            boolean requireOptimisticLock
+    ) {
+        var existing = anchorBindingRepository.findByTemplateVersionIdAndAnchorId(version.getId(), request.anchorId());
+        if (existing.isPresent() && requireOptimisticLock) {
+            assertExpectedUpdatedAt(request.expectedUpdatedAt(), existing.get().getUpdatedAt());
+        }
         statusSupport.validateStructuredContent(request.structuredContentJson());
         MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)
                 .orElseThrow(MasterNotFoundException::new);
         Set<String> masterAnchors = new HashSet<>();
         master.getAnchors().forEach(anchor -> masterAnchors.add(anchor.getAnchorId()));
         Set<String> declaredVariableKeys = statusSupport.loadDeclaredVariableKeys(version.getId());
-        var existing = anchorBindingRepository.findByTemplateVersionIdAndAnchorId(version.getId(), request.anchorId());
         String existingEvidenceJson = existing.map(AnchorBindingEntity::getPasteCleaningEvidenceJson).orElse(null);
         String evidenceJson = PasteCleaningEvidenceSupport.resolveForUpsert(
                 existingEvidenceJson,
@@ -154,6 +172,23 @@ final class TemplateBindingMutationSupport {
         }
         anchorBindingRepository.save(entity);
         return templateViewMapper.toBindingView(entity);
+    }
+
+    private static void assertExpectedUpdatedAt(Instant expectedUpdatedAt, Instant currentUpdatedAt) {
+        if (expectedUpdatedAt == null) {
+            throw new TemplateValidationException("api.error.template.bindingExpectedUpdatedAtRequired");
+        }
+        if (!sameUpdatedAtMillis(expectedUpdatedAt, currentUpdatedAt)) {
+            throw new BindingVersionConflictException();
+        }
+    }
+
+    /** U21-P1 — normalize Instant comparison to millisecond precision. */
+    static boolean sameUpdatedAtMillis(Instant expected, Instant actual) {
+        if (expected == null || actual == null) {
+            return false;
+        }
+        return expected.truncatedTo(ChronoUnit.MILLIS).equals(actual.truncatedTo(ChronoUnit.MILLIS));
     }
 
     List<CompositionRuleView> saveRules(TemplateVersionEntity version, List<CompositionRuleView> rules) {

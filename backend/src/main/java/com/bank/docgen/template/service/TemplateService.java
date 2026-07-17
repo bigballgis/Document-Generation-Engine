@@ -144,6 +144,13 @@ public class TemplateService {
     }
 
     @Transactional
+    public AnchorBindingView upsertBindingForImport(
+            UUID templateId, UpsertAnchorBindingRequest request, ManagementSessionClaims session
+    ) {
+        return contentMutations.upsertBindingForImport(templateId, request, session);
+    }
+
+    @Transactional
     public List<CompositionRuleView> saveRules(
             UUID templateId, List<CompositionRuleView> rules, ManagementSessionClaims session
     ) {

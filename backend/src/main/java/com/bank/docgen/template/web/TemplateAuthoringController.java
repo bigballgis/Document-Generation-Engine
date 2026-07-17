@@ -105,7 +105,8 @@ public class TemplateAuthoringController {
                 body.declaredContentType(),
                 body.structuredContentJson(),
                 body.pasteCleaningEvidence(),
-                body.clearPasteCleaningEvidence()
+                body.clearPasteCleaningEvidence(),
+                body.expectedUpdatedAt()
         );
         return envelope(request, templateService.upsertBinding(templateId, normalized, session));
     }

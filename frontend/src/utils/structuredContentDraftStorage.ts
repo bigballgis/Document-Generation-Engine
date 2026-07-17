@@ -1,7 +1,11 @@
 /**
- * Local structured-content draft storage (LR-C2).
+ * Local structured-content draft storage (LR-C2 + CE-U21).
  *
- * Key format (C2-C3): `docgen.structuredDraft.v1:{userId}:{templateId}:{devVersionId}`
+ * Key formats:
+ * - Triple (no anchor / CM mounts): `docgen.structuredDraft.v1:{userId}:{templateId}:{devVersionId}`
+ * - Four-tuple (binding editor with anchorId):
+ *   `docgen.structuredDraft.v1:{userId}:{templateId}:{devVersionId}:{anchorId}`
+ *
  * Payload is a structure snapshot only — no undo history (C3 storage separation).
  */
 
@@ -22,8 +26,38 @@ export function buildStructuredDraftStorageKey(
   userId: string,
   templateId: string,
   devVersionId: string,
+  anchorId?: string | null,
 ): string {
-  return `${STRUCTURED_DRAFT_KEY_PREFIX}${userId}:${templateId}:${devVersionId}`
+  const base = `${STRUCTURED_DRAFT_KEY_PREFIX}${userId}:${templateId}:${devVersionId}`
+  if (anchorId) {
+    return `${base}:${anchorId}`
+  }
+  return base
+}
+
+/**
+ * Legacy LR-C2 triple key (no anchor segment). Used for one-time migration (U21-D4).
+ */
+export function buildLegacyStructuredDraftStorageKey(
+  userId: string,
+  templateId: string,
+  devVersionId: string,
+): string {
+  return buildStructuredDraftStorageKey(userId, templateId, devVersionId)
+}
+
+/** True when a legacy payload may be claimed by the given anchor (U21-D4). */
+export function isLegacyDraftClaimableByAnchor(
+  draft: StructuredContentDraftPayload | null,
+  currentAnchorId: string | null | undefined,
+): boolean {
+  if (!draft || !currentAnchorId) {
+    return false
+  }
+  if (!draft.anchorId) {
+    return true
+  }
+  return draft.anchorId === currentAnchorId
 }
 
 function isStructuredDraftStorageKey(key: string): boolean {
@@ -34,9 +68,9 @@ function parseStructuredDraftPayload(raw: string): StructuredContentDraftPayload
   try {
     const parsed = JSON.parse(raw) as Partial<StructuredContentDraftPayload>
     if (
-      parsed.schemaVersion !== STRUCTURED_DRAFT_SCHEMA_VERSION ||
-      typeof parsed.structureJson !== 'string' ||
-      typeof parsed.draftUpdatedAt !== 'string'
+      parsed.schemaVersion !== STRUCTURED_DRAFT_SCHEMA_VERSION
+      || typeof parsed.structureJson !== 'string'
+      || typeof parsed.draftUpdatedAt !== 'string'
     ) {
       return null
     }
@@ -70,6 +104,53 @@ export function readStructuredDraft(
   } catch {
     return null
   }
+}
+
+/**
+ * Read authoritative per-anchor draft, falling back to claimable legacy triple key (U21-D4).
+ */
+export function readStructuredDraftForAnchor(
+  storage: Storage,
+  userId: string,
+  templateId: string,
+  devVersionId: string,
+  anchorId: string | null | undefined,
+): StructuredContentDraftPayload | null {
+  const primaryKey = buildStructuredDraftStorageKey(userId, templateId, devVersionId, anchorId)
+  const primary = readStructuredDraft(storage, primaryKey)
+  if (primary) {
+    return primary
+  }
+  if (!anchorId) {
+    return null
+  }
+  const legacyKey = buildLegacyStructuredDraftStorageKey(userId, templateId, devVersionId)
+  const legacy = readStructuredDraft(storage, legacyKey)
+  if (!isLegacyDraftClaimableByAnchor(legacy, anchorId)) {
+    return null
+  }
+  return legacy
+}
+
+/**
+ * Delete legacy triple key when it is claimable by the current anchor (U21-D4 migration).
+ */
+export function clearClaimableLegacyStructuredDraft(
+  storage: Storage,
+  userId: string,
+  templateId: string,
+  devVersionId: string,
+  anchorId: string | null | undefined,
+): void {
+  if (!anchorId) {
+    return
+  }
+  const legacyKey = buildLegacyStructuredDraftStorageKey(userId, templateId, devVersionId)
+  const legacy = readStructuredDraft(storage, legacyKey)
+  if (!isLegacyDraftClaimableByAnchor(legacy, anchorId)) {
+    return
+  }
+  clearStructuredDraft(storage, legacyKey)
 }
 
 function listDraftEntries(
@@ -153,21 +234,25 @@ export function clearStructuredDraft(storage: Storage, key: string): void {
 }
 
 /**
- * C2-C9 / BDD-LRP-C2-004/005: clear **only** the exact draft key for the current
- * userId+templateId+devVersionId. Never sweep by templateId (would wipe other
- * users / other devVersionIds). No-op when any scope part is missing — do not
- * fall back to a templateId scan.
+ * C2-C9 / BDD-LRP-C2-004/005 / CE-U21-DAC-005: clear **only** the exact draft key for the
+ * current userId+templateId+devVersionId(+optional anchorId). Never sweep by templateId.
+ * When `anchorId` is set, also removes a claimable legacy triple key (U21-D4).
  */
 export function clearExactStructuredDraftOnSave(
   storage: Storage,
   userId: string | null | undefined,
   templateId: string | null | undefined,
   devVersionId: string | null | undefined,
+  anchorId?: string | null,
 ): void {
   if (!userId || !templateId || !devVersionId) {
     return
   }
-  clearStructuredDraft(storage, buildStructuredDraftStorageKey(userId, templateId, devVersionId))
+  clearStructuredDraft(
+    storage,
+    buildStructuredDraftStorageKey(userId, templateId, devVersionId, anchorId),
+  )
+  clearClaimableLegacyStructuredDraft(storage, userId, templateId, devVersionId, anchorId)
 }
 
 export function shouldOfferDraftRecovery(

@@ -1,4 +1,4 @@
-import { computed, watch, type Ref } from 'vue'
+import { computed, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDirtyGuard } from '@/composables/useDirtyGuard'
 import { useTemplateAuthoringBindingsPasteResidue } from '@/composables/useTemplateAuthoringBindingsPasteResidue'
@@ -14,6 +14,10 @@ import { useTemplatesStore } from '@/stores/templates'
 import type { MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
 import type { PasteCleaningEvidence, UpsertBindingPayload } from '@/types/template'
 import { createTemplateAuthoringBindingsEditHandlers } from '@/composables/createTemplateAuthoringBindingsEditHandlers'
+import {
+  isBindingVersionConflict,
+  presentBindingVersionConflict,
+} from '@/utils/bindingVersionConflict'
 
 export function useTemplateAuthoringBindingsEditActions(options: {
   props: TemplateAuthoringBindingsPanelProps
@@ -67,27 +71,31 @@ export function useTemplateAuthoringBindingsEditActions(options: {
   const templatesStore = useTemplatesStore()
   const sessionStore = useSessionStore()
 
-  const { openEditPanel, saveBindingDraft } = createTemplateAuthoringBindingsSaveFlow({
-    props,
-    structuredEditorRef,
-    panelMode,
-    editingAnchorId,
-    visibilityEnabled,
-    visibilityExpression,
-    editorDirty,
-    structureRevision,
-    previewSyncedRevision,
-    editSnapshot,
-    suppressStructureBump,
-    bindingForm,
-    pendingPasteEvidence,
-    pendingClearPasteEvidence,
-    draftDevVersionId,
-    sessionUsername: () => sessionStore.session?.username,
-    upsertBinding: (templateId, anchorId, payload) =>
-      templatesStore.upsertBinding(templateId, anchorId, payload),
-    saveRules: (templateId, rules) => templatesStore.saveRules(templateId, rules),
-  })
+  const expectedUpdatedAt = ref<string | null>(null)
+
+  const { openEditPanel, saveBindingDraft, reloadBindingFromServer } =
+    createTemplateAuthoringBindingsSaveFlow({
+      props,
+      structuredEditorRef,
+      panelMode,
+      editingAnchorId,
+      visibilityEnabled,
+      visibilityExpression,
+      editorDirty,
+      structureRevision,
+      previewSyncedRevision,
+      editSnapshot,
+      suppressStructureBump,
+      bindingForm,
+      pendingPasteEvidence,
+      pendingClearPasteEvidence,
+      draftDevVersionId,
+      expectedUpdatedAt,
+      sessionUsername: () => sessionStore.session?.username,
+      upsertBinding: (templateId, anchorId, payload) =>
+        templatesStore.upsertBinding(templateId, anchorId, payload),
+      saveRules: (templateId, rules) => templatesStore.saveRules(templateId, rules),
+    })
 
   const {
     dialogVisible: dirtyGuardDialogVisible,
@@ -104,7 +112,23 @@ export function useTemplateAuthoringBindingsEditActions(options: {
       try {
         await saveBindingDraft()
         return true
-      } catch {
+      } catch (error) {
+        if (isBindingVersionConflict(error)) {
+          const action = await presentBindingVersionConflict((key) => t(key))
+          if (action === 'reload') {
+            await templatesStore.fetchTemplate(props.templateId)
+            emit('updated')
+            const fromStore = templatesStore.selectedTemplate?.bindings.find(
+              (item) => item.anchorId === editingAnchorId.value,
+            )
+            const row = editingRow.value
+            if (fromStore && row) {
+              await reloadBindingFromServer({ ...row, binding: fromStore })
+            } else {
+              await reloadBindingFromServer(row)
+            }
+          }
+        }
         return false
       }
     },
@@ -136,6 +160,8 @@ export function useTemplateAuthoringBindingsEditActions(options: {
     localPreviewRefreshing,
     templatesStore,
     saveBindingDraft,
+    reloadBindingFromServer,
+    editingRow,
     dirtyGuardRequestLeave,
   })
 
@@ -161,6 +187,7 @@ export function useTemplateAuthoringBindingsEditActions(options: {
     handlePasteAccepted: paste.handlePasteAccepted,
     clearPendingPasteResidue: paste.clearPendingPasteResidue,
     openEditPanel,
+    expectedUpdatedAt,
     ...handlers,
   }
 }

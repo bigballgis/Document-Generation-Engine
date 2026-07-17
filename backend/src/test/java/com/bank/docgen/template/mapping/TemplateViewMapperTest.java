@@ -132,6 +132,7 @@ class TemplateViewMapperTest {
         assertThat(view.declaredContentType()).isEqualTo("TEXT");
         assertThat(view.structuredContentJson()).isEqualTo("{\"type\":\"paragraph\"}");
         assertThat(view.validationStatus()).isEqualTo(BindingValidationStatus.VALID);
+        assertThat(view.updatedAt()).isEqualTo(entity.getUpdatedAt());
     }
 
     @Test
