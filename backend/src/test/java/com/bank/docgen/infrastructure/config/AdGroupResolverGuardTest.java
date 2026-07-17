@@ -3,6 +3,7 @@ package com.bank.docgen.infrastructure.config;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.bank.docgen.apimgmt.service.AdGroupAuthorization;
 import com.bank.docgen.apimgmt.service.AdGroupResolverProperties;
 import com.bank.docgen.apimgmt.service.ConfigAdGroupResolver;
 import java.nio.file.Files;
@@ -145,11 +146,12 @@ class AdGroupResolverGuardTest {
                 .isEmpty();
         org.assertj.core.api.Assertions.assertThat(resolver.resolveGroups(null))
                 .isEmpty();
+        // BDD-PRR-B02-LDAP-SPI-002/003 — intersection via helper + resolveGroups (SPI), not filter→concrete.
         org.assertj.core.api.Assertions.assertThat(
-                resolver.isAuthorized("svc-caller", List.of("RETAIL_API"))
+                AdGroupAuthorization.isAuthorized(resolver, "svc-caller", List.of("RETAIL_API"))
         ).isTrue();
         org.assertj.core.api.Assertions.assertThat(
-                resolver.isAuthorized("unknown-account", List.of("RETAIL_API"))
+                AdGroupAuthorization.isAuthorized(resolver, "unknown-account", List.of("RETAIL_API"))
         ).isFalse();
     }
 
