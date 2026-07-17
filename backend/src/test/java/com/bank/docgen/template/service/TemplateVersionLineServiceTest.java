@@ -14,8 +14,12 @@ import com.bank.docgen.authorization.management.service.ManagementUserDisplaySer
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.TemplateDevVersionCreatedView;
+import com.bank.docgen.template.api.TemplateDetailView;
+import com.bank.docgen.template.api.TemplateExportMasterPinView;
+import com.bank.docgen.template.api.TemplateVersionLineDetailView;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.domain.TemplateVersionLineKind;
+import com.bank.docgen.template.mapping.TemplateMasterPinMapper;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
@@ -32,6 +36,7 @@ import com.bank.docgen.template.domain.BindingValidationStatus;
 import com.bank.docgen.template.domain.VariableType;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,6 +77,8 @@ class TemplateVersionLineServiceTest {
     private MessageResolver messageResolver;
     @Mock
     private ManagementUserDisplayService managementUserDisplayService;
+    @Mock
+    private TemplateMasterPinMapper templateMasterPinMapper;
 
     private TemplateVersionLineService service;
     private ManagementSessionClaims author;
@@ -94,7 +101,8 @@ class TemplateVersionLineServiceTest {
                 approvalSubStateResolver,
                 groupAccessService,
                 messageResolver,
-                managementUserDisplayService
+                managementUserDisplayService,
+                templateMasterPinMapper
         );
         author = new ManagementSessionClaims(
                 "10000003",
@@ -140,6 +148,149 @@ class TemplateVersionLineServiceTest {
         assertThat(page.content().get(0).lineKind()).isEqualTo(TemplateVersionLineKind.IN_FLIGHT);
         assertThat(page.content().get(1).lineKind()).isEqualTo(TemplateVersionLineKind.PUBLISHED);
         assertThat(page.content().get(1).releaseVersion()).isEqualTo("1.0.0");
+    }
+
+    @Test
+    void get_includesMasterPinWhenPublishedLineIsPinned() {
+        UUID versionId = UUID.randomUUID();
+        UUID revisionId = UUID.randomUUID();
+        String hash = "c".repeat(64);
+        TemplateVersionEntity published = publishedVersion(versionId, 1, "1.0.0");
+        published.setMasterRevisionId(revisionId);
+        published.setMasterFileHash(hash);
+        published.setPinMetadataJson("{\"pinOrigin\":\"PUBLISHED\"}");
+        TemplateExportMasterPinView pin = new TemplateExportMasterPinView(
+                revisionId.toString(), hash, 2, "PUBLISHED"
+        );
+
+        when(templateService.requireReadableTemplate(templateId, author)).thenReturn(template);
+        when(templateVersionRepository.findById(versionId)).thenReturn(Optional.of(published));
+        when(templateCurrentVersionResolver.isInFlight(published)).thenReturn(false);
+        when(templateCurrentVersionResolver.hasInFlightDevVersion(templateId)).thenReturn(false);
+        when(groupAccessService.canAuthorTemplates(author)).thenReturn(true);
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.empty());
+        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
+                .thenReturn(List.of());
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
+                .thenReturn(List.of());
+        when(templateViewMapper.loadRules(published)).thenReturn(List.of());
+        when(templateMasterPinMapper.toView(published)).thenReturn(pin);
+
+        TemplateVersionLineDetailView detail = service.get(templateId, versionId, author);
+
+        assertThat(detail.masterPin()).isEqualTo(pin);
+        assertThat(detail.masterPin().masterRevisionId()).isEqualTo(revisionId.toString());
+        assertThat(detail.masterPin().masterFileHash()).isEqualTo(hash);
+    }
+
+    @Test
+    void get_omitsMasterPinWhenInFlightUnpinned() {
+        UUID versionId = UUID.randomUUID();
+        TemplateVersionEntity inFlight = inFlightVersion(versionId, 2);
+
+        when(templateService.requireReadableTemplate(templateId, author)).thenReturn(template);
+        when(templateVersionRepository.findById(versionId)).thenReturn(Optional.of(inFlight));
+        when(templateCurrentVersionResolver.isInFlight(inFlight)).thenReturn(true);
+        when(templateCurrentVersionResolver.hasInFlightDevVersion(templateId)).thenReturn(true);
+        when(groupAccessService.canAuthorTemplates(author)).thenReturn(true);
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.empty());
+        when(approvalSubStateResolver.resolve(template)).thenReturn(null);
+        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
+                .thenReturn(List.of());
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
+                .thenReturn(List.of());
+        when(templateViewMapper.loadRules(inFlight)).thenReturn(List.of());
+        when(templateMasterPinMapper.toView(inFlight)).thenReturn(null);
+
+        TemplateVersionLineDetailView detail = service.get(templateId, versionId, author);
+
+        assertThat(detail.masterPin()).isNull();
+    }
+
+    @Test
+    void getReleaseDetail_includesMasterPinWhenPinned() {
+        UUID versionId = UUID.randomUUID();
+        UUID revisionId = UUID.randomUUID();
+        String hash = "d".repeat(64);
+        TemplateVersionEntity published = publishedVersion(versionId, 1, "1.0.0");
+        published.setMasterRevisionId(revisionId);
+        published.setMasterFileHash(hash);
+        TemplateExportMasterPinView pin = new TemplateExportMasterPinView(
+                revisionId.toString(), hash, 1, "PUBLISHED"
+        );
+        TemplateDetailView baseDetail = new TemplateDetailView(
+                templateId.toString(),
+                "TPL-001",
+                "RETAIL",
+                "Letter",
+                "Desc",
+                template.getMasterId().toString(),
+                TemplateLifecycleStatus.PUBLISHED,
+                null,
+                "1.0.0",
+                versionId.toString(),
+                1,
+                List.of(),
+                List.of(),
+                List.of(),
+                Instant.now(),
+                Instant.now(),
+                "10000003",
+                null,
+                true,
+                null
+        );
+
+        when(templateService.requireReadableTemplate(templateId, author)).thenReturn(template);
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "1.0.0"))
+                .thenReturn(Optional.of(published));
+        when(templateViewMapper.toDetailForVersion(template, published, true)).thenReturn(baseDetail);
+        when(templateMasterPinMapper.toView(published)).thenReturn(pin);
+        when(managementUserDisplayService.lookupDisplayNames(any())).thenReturn(Map.of("10000003", "Author"));
+
+        TemplateDetailView detail = service.getReleaseDetail(templateId, "1.0.0", author);
+
+        assertThat(detail.masterPin()).isEqualTo(pin);
+        assertThat(detail.readOnly()).isTrue();
+    }
+
+    @Test
+    void getReleaseDetail_omitsMasterPinWhenUnpinned() {
+        UUID versionId = UUID.randomUUID();
+        TemplateVersionEntity published = publishedVersion(versionId, 1, "1.0.0");
+        TemplateDetailView baseDetail = new TemplateDetailView(
+                templateId.toString(),
+                "TPL-001",
+                "RETAIL",
+                "Letter",
+                "Desc",
+                template.getMasterId().toString(),
+                TemplateLifecycleStatus.PUBLISHED,
+                null,
+                "1.0.0",
+                versionId.toString(),
+                1,
+                List.of(),
+                List.of(),
+                List.of(),
+                Instant.now(),
+                Instant.now(),
+                "10000003",
+                null,
+                true,
+                null
+        );
+
+        when(templateService.requireReadableTemplate(templateId, author)).thenReturn(template);
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "1.0.0"))
+                .thenReturn(Optional.of(published));
+        when(templateViewMapper.toDetailForVersion(template, published, true)).thenReturn(baseDetail);
+        when(templateMasterPinMapper.toView(published)).thenReturn(null);
+        when(managementUserDisplayService.lookupDisplayNames(any())).thenReturn(Map.of());
+
+        TemplateDetailView detail = service.getReleaseDetail(templateId, "1.0.0", author);
+
+        assertThat(detail.masterPin()).isNull();
     }
 
     @Test

@@ -114,6 +114,7 @@ export function useTemplatePackageHub() {
   const hubWorkspaceTabs = computed((): WorkspaceTabOption[] => {
     const tabs: WorkspaceTabOption[] = [
       { name: 'overview', labelKey: templateDetailTabLabelKey('overview') },
+      { name: 'dependencies', labelKey: 'templates.detail.tabs.dependencies' },
     ]
     if (showPolicyPanel.value) {
       tabs.push({ name: 'apiAccess', labelKey: templateDetailTabLabelKey('apiAccess') })

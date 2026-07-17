@@ -339,7 +339,6 @@ class TemplateLifecycleGovernanceServiceTest {
                 Instant.now(),
                 null,
                 null,
-                false
-        );
+                false, null);
     }
 }

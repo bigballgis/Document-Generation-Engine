@@ -103,6 +103,7 @@ describe('TemplatePackageHubView', () => {
     expect(wrapper.text()).toContain('Retail letter template')
     expect(wrapper.text()).toContain('Version lines')
     expect(wrapper.text()).toContain('Dev version 1')
+    expect(wrapper.text()).toContain('Dependencies')
   })
 
   it('does not render journey blocks or workflow banner', async () => {

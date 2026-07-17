@@ -79,8 +79,7 @@ class ApiDtoImmutabilityTest {
                 Instant.parse("2026-01-02T00:00:00Z"),
                 null,
                 null,
-                false
-        );
+                false, null);
 
         variableIds.add("var-2");
         assertThat(view.variables()).isEmpty();

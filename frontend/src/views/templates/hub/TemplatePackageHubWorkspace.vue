@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import TemplateVersionLinesPanel from '@/components/templates/TemplateVersionLinesPanel.vue'
 import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
+import TemplateDependenciesPanel from '@/views/templates/detail/TemplateDependenciesPanel.vue'
 import TemplateDetailApiAccessTab from '@/views/templates/detail/TemplateDetailApiAccessTab.vue'
 import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import type { WorkspaceTabOption } from '@/components/common/WorkspaceTabShell.vue'
@@ -75,6 +76,10 @@ defineExpose({
   <WorkspaceTabShell v-model="activeHubTab" :tabs="hubWorkspaceTabs">
     <template #overview>
       <TemplateDetailOverviewTab :template="template" :format-date-time="formatDateTime" />
+    </template>
+
+    <template #dependencies>
+      <TemplateDependenciesPanel :template="template" />
     </template>
 
     <template #apiAccess>

@@ -183,6 +183,7 @@ async function publishTemplateThroughLifecycle(
   await authorizedPost(request, approverToken, `/templates/${templateId}/lifecycle/approval-decision`, {
     decision: 'APPROVED',
     commentSummary: 'E2E approved',
+    fidelityViewedConfirmed: true,
     keyEvidenceConfirmed: true,
   })
 
@@ -199,6 +200,7 @@ async function publishTemplateThroughLifecycle(
 
   await authorizedPost(request, groupAdminToken, `/templates/${templateId}/lifecycle/publish`, {
     releaseVersion,
+    fidelityViewedConfirmed: true,
   })
 }
 

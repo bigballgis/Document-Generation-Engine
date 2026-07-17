@@ -44,12 +44,17 @@ export type TemplateVersionLineSummary = Omit<
   updatedByDisplayName?: string | null
 }
 
+/** CE-U19 / CE-E01 — optional CE-K01 master revision pin on release detail. */
+export type TemplateMasterPin = Schema<'TemplateExportMasterPinView'>
+
 export type TemplateVersionLineDetail = Omit<
   Schema<'TemplateVersionLineDetailView'>,
   'lifecycleStatus'
 > & {
   lifecycleStatus: TemplateLifecycleStatus
   updatedByDisplayName?: string | null
+  /** CE-U19 — optional pin when reading published version-line detail. */
+  masterPin?: TemplateMasterPin | null
 }
 
 export type TemplateDetail = Omit<
@@ -61,6 +66,8 @@ export type TemplateDetail = Omit<
   releaseVersion: string | null
   updatedBy?: string | null
   updatedByDisplayName?: string | null
+  /** CE-U19 — present on published release GET when CE-K01 pin fields exist. */
+  masterPin?: TemplateMasterPin | null
 }
 
 export type TemplateDevVersionCreated = Schema<'TemplateDevVersionCreatedView'> & {

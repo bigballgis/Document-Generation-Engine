@@ -8,7 +8,7 @@ import { useTemplatesStore } from '@/stores/templates'
 import { resolveLifecycleHubDeepLinkTarget } from '@/utils/templateJourneyWorkspaceLink'
 import type { TemplateDevWorkspaceTab } from '@/views/templates/templateDevWorkspaceTabs'
 
-const HUB_SECONDARY_TABS = ['overview', 'apiAccess'] as const
+const HUB_SECONDARY_TABS = ['overview', 'dependencies', 'apiAccess'] as const
 export type HubSecondaryTab = (typeof HUB_SECONDARY_TABS)[number]
 
 export interface UseTemplatePackageHubRoutingOptions {

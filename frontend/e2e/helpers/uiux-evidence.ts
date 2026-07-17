@@ -1477,6 +1477,36 @@ export async function captureCeU18LocatorScreenshot(
   return filename
 }
 
+/** CE-U19 Package Hub Dependencies tab (read-only) — 1920×1080 dual-brand evidence. */
+export const CE_U19_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-U19')
+export const CE_U19_SCREENSHOT_DIR = path.join(CE_U19_EVIDENCE_ROOT, 'screenshots')
+export const CE_U19_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensureCeU19EvidenceDirs(): void {
+  fs.mkdirSync(CE_U19_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceU19ScreenshotPath(filename: string): string {
+  return path.join(CE_U19_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeU19Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeU19EvidenceDirs()
+  const target = ceU19ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeU19LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeU19EvidenceDirs()
+  const target = ceU19ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
 /** CE-U20 clause create structured editor + catalog Status — 1920×1080 dual-brand evidence. */
 export const CE_U20_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-U20')
 export const CE_U20_SCREENSHOT_DIR = path.join(CE_U20_EVIDENCE_ROOT, 'screenshots')

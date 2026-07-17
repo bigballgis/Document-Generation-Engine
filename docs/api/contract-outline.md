@@ -399,15 +399,28 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 模板导入 / dry-run | 将 bundle 导入目标环境并从草稿重新走流程；或仅预检依赖。 | 提交后模板状态为 `DRAFT`；须重新执行测试→审批→发布；`masterId` 须为同 `groupCode` 下已批准母版；`dryRun=true` 不落库；导入动作记录审计并返回 `importBatchId`（dry-run 无 batch 业务写入）。 | `POST /api/management/v1/templates/import` |
 | 目录列表分页（LR-C5） | 管理端 Templates / Masters / Content-modules **包列表**服务端分页与筛选。 | 见下方「目录列表分页契约（LR-C5）」；完整行为 [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md)；正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。 | `GET /api/management/v1/templates` · `GET /api/management/v1/masters` · `GET /api/management/v1/content-modules` |
 | 模板版本线列表 | 分页列出模板包下进行中 dev 行与已发布 release 行，供包 hub 导航。 | 含 `release_version IS NULL` 的当前 dev 行与全部已发布行；跨组 `403 ACCESS_DENIED`；排序为 dev 行优先、再按 dev 版本降序。 | `GET /api/management/v1/templates/{templateId}/version-lines?page=&size=` |
-| 模板版本线详情 | 只读查看指定版本线的变量、绑定与规则快照。 | 版本线须属于该模板；跨组 `403`。 | `GET /api/management/v1/templates/{templateId}/version-lines/{versionLineId}` |
+| 模板版本线详情 | 只读查看指定版本线的变量、绑定与规则快照。 | 版本线须属于该模板；跨组 `403`。CE-U19：已发布且有钉扎时可含可选 `result.masterPin`（同 release 详情）。 | `GET /api/management/v1/templates/{templateId}/version-lines/{versionLineId}` |
 | 模板 dev 版本详情 | 获取指定 dev 行的编排详情（在途编辑）。 | 已发布 dev 行只读；变更返回 `403 TEMPLATE_VERSION_IMMUTABLE`。 | `GET /api/management/v1/templates/{templateId}/dev/{devVersionId}` |
 | 锚点绑定 upsert（CE-U21） | 在途 DRAFT/TESTING 创建或更新单锚点结构化绑定。 | 响应含必填 `updatedAt`；更新须带匹配的 `expectedUpdatedAt`；陈旧 → `409 BINDING_VERSION_CONFLICT`；缺令牌 → `422`。 | `PUT /api/management/v1/templates/{templateId}/bindings/{anchorId}` |
-| 模板 release 详情 | 获取已发布 release 只读快照。 | 按语义版本 `releaseVersion` 定位；未知版本 `404`。 | `GET /api/management/v1/templates/{templateId}/releases/{releaseVersion}` |
+| 模板 release 详情 | 获取已发布 release 只读快照。 | 按语义版本 `releaseVersion` 定位；未知版本 `404`。CE-U19：`result.masterPin` 可选（见下方「release `masterPin`（CE-U19）」）。 | `GET /api/management/v1/templates/{templateId}/releases/{releaseVersion}` |
+| release / version-line `masterPin`（CE-U19） | 管理读回 CE-K01 母版钉扎，供 Package Hub Dependencies 只读面。 | 加法可选字段；形状对齐 E01 `TemplateExportMasterPinView`；无新权限、无新聚合 API。 | 同上 release GET；必要时同 schema 的 `GET …/version-lines/{versionLineId}` |
 | 克隆已发布 release | 从已发布 release 复制快照到新的 DRAFT dev 行（`max(dev_version_number)+1`）。 | 存在进行中 dev 行时 `409 TEMPLATE_DEV_LINE_IN_FLIGHT`；成功后模板包状态为 `DRAFT`；记录 lifecycle 审计。 | `POST /api/management/v1/templates/{templateId}/release-versions/{releaseVersion}/clone` |
 | 粘贴清洗（P18-T10 / ops-paste-binding-seam） | 编辑期将 Word/HTML 清洗为受控结构化 JSON + 非敏感摘要。 | SoT **ADR-0019**：script / iframe / **object** / **absolute** → `BLOCKED`（整次 `blocked=true`，无 cleaned JSON）。Accept 后绑定持久化非敏感 `pasteCleaningEvidence`；未解除阻断在 validate / `computeBindingStatus` / PublishGate **fail-closed**。**不**新增权限面（复用配置锚点内容）。行为：[ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md)；领域 §2.6.7。 | `POST /api/management/v1/templates/{templateId}/paste-clean`（管理面；OpenAPI 绑定/validate/export 已声明 `pasteCleaningEvidence`） |
 | 变量 Schema PII 标签（CE-G03） | 变量 upsert/view 可选 `piiCategory`。 | 见下方「测试数据集 PII 治理（CE-G03）」；导出 bundle `variables[]` 携带该字段（OpenAPI `TemplateExportVariableSchemaView.piiCategory`）。 | 既有变量 Schema 管理路由（与配置模板变量同权） |
 | 测试数据集 PII 闸门（CE-G03） | create/update 触及 PII 标记字段非空值时强制 `piiHandling`。 | fail-closed；`SYNTHETIC` 或 `EXPLICIT_SENSITIVE`+审计；无新权限。行为：[ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。 | `POST/PUT /api/management/v1/templates/{templateId}/test-data-sets[/{testDataSetId}]` |
 | 批量测试历史钻取（CE-U18） | 管理端历史摘要暴露可消费的逐样本结果，供 Testing 历史展开与跳转。 | 见下方「批量测试历史 sampleResults（CE-U18）」；正式字段以 [OpenAPI v1](openapi-v1.yaml) `BatchTestRunSummaryView.sampleResults` 为准。 | `GET /api/management/v1/templates/{templateId}/batch-tests`（首选）；或同字段的 `GET .../batch-tests/{runId}` 详情（实现择一） |
+
+### release `masterPin`（CE-U19）
+
+管理面契约（**不**改变 caller-facing runtime generate；**不**新增 `/templates/{id}/dependencies` 聚合 API）。权威行为：[ce-u19-dependency-readonly-view.md](../behavior/ce-u19-dependency-readonly-view.md) **U19-D5**。正式 schema：[openapi-v1.yaml](openapi-v1.yaml) `TemplateVersionLineDetailView.masterPin` → 复用 `TemplateExportMasterPinView`。
+
+| 项 | 已确认 |
+| --- | --- |
+| 暴露面 | **首选** `GET /api/management/v1/templates/{templateId}/releases/{releaseVersion}` 的 `result.masterPin`；**允许**同字段出现在 `GET …/version-lines/{versionLineId}`（同一 `TemplateVersionLineDetailView`） |
+| 字段形状 | 与 CE-E01 导出 `masterPin` 对齐：`masterRevisionId`（UUID）、`masterFileHash`（SHA-256 小写 hex）、可选 `revisionSequence`、可选 `pinOrigin`（`PUBLISHED` \| `PINNED_RETROACTIVELY` \| `EXPORT_TIME`） |
+| 有无 pin | 行上存在 CE-K01 `master_revision_id` / `master_file_hash` 时填充；未钉扎（如 in-flight）→ `null` 或省略 |
+| 授权 | 沿用既有模板 release / version-line 读边界（与 Package Hub 相同）；**无**新权限位 |
+| 非目标 | 新建依赖聚合微服务或端点；CE-E01 导出 UI；改写 `TemplateDetailView` 列表摘要（本片不要求） |
 
 ### 批量测试历史 sampleResults（CE-U18）
 

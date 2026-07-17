@@ -54,7 +54,10 @@ class TemplateVersionLineControllerTest extends TemplateManagementWebTestSupport
                 .andExpect(jsonPath("$.result.releaseVersion").value("1.0.0"))
                 .andExpect(jsonPath("$.result.lineKind").value("PUBLISHED"))
                 .andExpect(jsonPath("$.result.variables[0].variableKey").value("customerName"))
-                .andExpect(jsonPath("$.result.bindings[0].anchorId").value("HEADER"));
+                .andExpect(jsonPath("$.result.bindings[0].anchorId").value("HEADER"))
+                .andExpect(jsonPath("$.result.masterPin.masterRevisionId").isNotEmpty())
+                .andExpect(jsonPath("$.result.masterPin.masterFileHash").isNotEmpty())
+                .andExpect(jsonPath("$.result.masterPin.pinOrigin").value("PUBLISHED"));
     }
 
     @Test
@@ -67,7 +70,22 @@ class TemplateVersionLineControllerTest extends TemplateManagementWebTestSupport
                 .andExpect(jsonPath("$.result.releaseVersion").value("1.0.0"))
                 .andExpect(jsonPath("$.result.readOnly").value(true))
                 .andExpect(jsonPath("$.result.variables[0].variableKey").value("customerName"))
-                .andExpect(jsonPath("$.result.bindings[0].anchorId").value("HEADER"));
+                .andExpect(jsonPath("$.result.bindings[0].anchorId").value("HEADER"))
+                .andExpect(jsonPath("$.result.masterPin.masterRevisionId").isNotEmpty())
+                .andExpect(jsonPath("$.result.masterPin.masterFileHash").isNotEmpty())
+                .andExpect(jsonPath("$.result.masterPin.pinOrigin").value("PUBLISHED"));
+    }
+
+    @Test
+    void getVersionLineDetailOmitsMasterPinForInFlightUnpinnedLine() throws Exception {
+        String templateId = createPublishedTemplate();
+        String clonedDevVersionId = cloneRelease(templateId, "1.0.0");
+
+        mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/version-lines/" + clonedDevVersionId)
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.lineKind").value("IN_FLIGHT"))
+                .andExpect(jsonPath("$.result.masterPin").value(org.hamcrest.Matchers.nullValue()));
     }
 
     @Test

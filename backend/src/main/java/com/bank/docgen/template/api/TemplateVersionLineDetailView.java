@@ -22,7 +22,8 @@ public record TemplateVersionLineDetailView(
         boolean cloneable,
         List<VariableSchemaView> variables,
         List<AnchorBindingView> bindings,
-        List<CompositionRuleView> rules
+        List<CompositionRuleView> rules,
+        TemplateExportMasterPinView masterPin
 ) {
     public TemplateVersionLineDetailView {
         variables = DefensiveCopies.copyList(variables);

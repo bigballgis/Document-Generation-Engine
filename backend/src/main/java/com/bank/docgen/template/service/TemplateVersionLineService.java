@@ -10,8 +10,10 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateDevVersionCreatedView;
+import com.bank.docgen.template.api.TemplateExportMasterPinView;
 import com.bank.docgen.template.api.TemplateVersionLineDetailView;
 import com.bank.docgen.template.api.TemplateVersionLineSummaryView;
+import com.bank.docgen.template.mapping.TemplateMasterPinMapper;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
@@ -38,6 +40,7 @@ public class TemplateVersionLineService {
     private final ApiPolicyRepository apiPolicyRepository;
     private final TemplateVersionLineViewSupport viewSupport;
     private final TemplateVersionLineMutationSupport mutations;
+    private final TemplateMasterPinMapper templateMasterPinMapper;
 
     public TemplateVersionLineService(
             TemplateService templateService,
@@ -53,7 +56,8 @@ public class TemplateVersionLineService {
             ApprovalSubStateResolver approvalSubStateResolver,
             GroupAccessService groupAccessService,
             MessageResolver messageResolver,
-            ManagementUserDisplayService managementUserDisplayService
+            ManagementUserDisplayService managementUserDisplayService,
+            TemplateMasterPinMapper templateMasterPinMapper
     ) {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
@@ -63,6 +67,7 @@ public class TemplateVersionLineService {
         this.templateViewMapper = templateViewMapper;
         this.groupAccessService = groupAccessService;
         this.apiPolicyRepository = apiPolicyRepository;
+        this.templateMasterPinMapper = templateMasterPinMapper;
         TemplateVersionLineCloneSupport cloneSupport = new TemplateVersionLineCloneSupport(
                 variableSchemaRepository,
                 anchorBindingRepository,
@@ -135,7 +140,8 @@ public class TemplateVersionLineService {
                 anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(version.getId()).stream()
                         .map(templateViewMapper::toBindingView)
                         .toList(),
-                templateViewMapper.loadRules(version)
+                templateViewMapper.loadRules(version),
+                templateMasterPinMapper.toView(version)
         );
     }
 
@@ -171,7 +177,8 @@ public class TemplateVersionLineService {
                 .orElseThrow(TemplateNotFoundException::new);
 
         TemplateDetailView detail = templateViewMapper.toDetailForVersion(template, version, true);
-        return viewSupport.overlayReleaseDetailUpdatedBy(detail, version);
+        TemplateExportMasterPinView masterPin = templateMasterPinMapper.toView(version);
+        return viewSupport.overlayReleaseDetailUpdatedBy(detail, version, masterPin);
     }
 
     @Transactional

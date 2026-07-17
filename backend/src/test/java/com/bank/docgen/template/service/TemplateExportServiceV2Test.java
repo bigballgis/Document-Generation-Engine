@@ -342,7 +342,8 @@ class TemplateExportServiceV2Test {
                 Instant.now(),
                 "test-user",
                 "Test User",
-                true
+                true,
+                null
         );
     }
 
@@ -372,7 +373,8 @@ class TemplateExportServiceV2Test {
                 Instant.now(),
                 "test-user",
                 "Test User",
-                true
+                true,
+                null
         );
     }
 
