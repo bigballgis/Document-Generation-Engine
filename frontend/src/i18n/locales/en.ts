@@ -331,6 +331,12 @@ export default {
         description:
           'One or more clause references are pinned to an older approved version. Bump pins on the template clause panel.',
       },
+      annualReviewDue: {
+        title: 'Annual review due',
+        itemTitle: 'Complete annual review',
+        description:
+          'This template’s next review date has been reached. Open the package overview to complete the annual review.',
+      },
       contentModuleReview: {
         title: 'Standard clauses to review',
         itemTitle: 'Review standard clause',
@@ -814,8 +820,18 @@ export default {
       releaseVersion: 'Release version',
       noReleaseVersion: 'Not published',
       updatedAt: 'Last updated',
+      nextReviewDue: 'Next annual review due',
+      nextReviewDueUnset: 'Not scheduled',
       noDescription: 'No description provided.',
       groupLabel: 'Group: {groupCode}',
+      annualReview: {
+        complete: 'Complete annual review',
+        confirmTitle: 'Complete annual review?',
+        confirmMessage:
+          'This rolls the next review due date forward (default: today UTC + 365 days). Continue?',
+        success: 'Annual review completed.',
+        completing: 'Completing…',
+      },
     },
     packageHub: {
       backToList: 'Back to templates',
@@ -2599,6 +2615,13 @@ export default {
         'Browse reusable standard clauses for your authorized groups. Filter by group or status, then open a clause to manage versions and review workflow.',
       empty: 'No standard clauses yet.',
       emptyDescription: 'Create a module to start authoring reusable clause content.',
+      searchMode: {
+        label: 'Search mode',
+        name: 'Name / code',
+        fullText: 'Full text (body)',
+      },
+      searchPlaceholderName: 'Search by name, module code, or group',
+      searchPlaceholderFullText: 'Search clause body text',
       columns: {
         group: 'Group',
         moduleCode: 'Module code',
@@ -2633,6 +2656,20 @@ export default {
       changeSummary: 'Change summary',
       commentSummary: 'Review comment',
       actorLabel: 'By {username}',
+      whereUsed: {
+        title: 'Where used',
+        description: 'Templates in your authorized groups that reference this clause.',
+        empty: 'No templates reference this clause.',
+        emptyDescription: 'When templates pin or reference this module, they appear here.',
+        loadError: 'Unable to load where-used templates.',
+        columns: {
+          name: 'Template',
+          group: 'Group',
+          status: 'Status',
+          pinnedVersion: 'Pinned version',
+        },
+        pinnedVersionUnset: '—',
+      },
     },
     settings: {
       open: 'Settings',
@@ -2650,6 +2687,7 @@ export default {
         versions: 'Versions',
         content: 'Content preview',
         lifecycle: 'Review & release',
+        whereUsed: 'Where used',
       },
       lifecycleHint: 'Use the action buttons above to submit, approve, reject, or apply post-approval changes.',
     },

@@ -6,6 +6,7 @@ import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.ChangeDiffView;
+import com.bank.docgen.template.api.CompleteTemplateAnnualReviewRequest;
 import com.bank.docgen.template.api.CoverageSummaryView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.LifecycleGovernanceRequest;
@@ -18,6 +19,7 @@ import com.bank.docgen.template.domain.PublishGatePhase;
 import com.bank.docgen.template.service.ChangeDiffService;
 import com.bank.docgen.template.service.CoverageComputationService;
 import com.bank.docgen.template.service.PublishGateService;
+import com.bank.docgen.template.service.TemplateAnnualReviewService;
 import com.bank.docgen.template.service.TemplateDeleteService;
 import com.bank.docgen.template.service.TemplateService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,6 +48,7 @@ public class TemplateController {
     private final CoverageComputationService coverageComputationService;
     private final ChangeDiffService changeDiffService;
     private final PublishGateService publishGateService;
+    private final TemplateAnnualReviewService annualReviewService;
     private final TraceIdProvider traceIdProvider;
 
     public TemplateController(
@@ -54,6 +57,7 @@ public class TemplateController {
             CoverageComputationService coverageComputationService,
             ChangeDiffService changeDiffService,
             PublishGateService publishGateService,
+            TemplateAnnualReviewService annualReviewService,
             TraceIdProvider traceIdProvider
     ) {
         this.templateService = templateService;
@@ -61,6 +65,7 @@ public class TemplateController {
         this.coverageComputationService = coverageComputationService;
         this.changeDiffService = changeDiffService;
         this.publishGateService = publishGateService;
+        this.annualReviewService = annualReviewService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -159,6 +164,16 @@ public class TemplateController {
             HttpServletRequest request
     ) {
         return envelope(request, templateService.updateMetadata(templateId, body, session));
+    }
+
+    @PostMapping("/{templateId}/annual-review/complete")
+    public SuccessEnvelope<TemplateSummaryView> completeAnnualReview(
+            @PathVariable UUID templateId,
+            @RequestBody(required = false) CompleteTemplateAnnualReviewRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, annualReviewService.complete(templateId, body, session));
     }
 
     @DeleteMapping("/{templateId}")

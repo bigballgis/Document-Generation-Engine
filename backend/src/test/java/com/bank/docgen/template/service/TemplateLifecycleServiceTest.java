@@ -108,7 +108,8 @@ class TemplateLifecycleServiceTest {
                 masterDocumentRepository,
                 masterRevisionLineRepository,
                 objectStoragePort,
-                new SelfApprovalGuard()
+                new SelfApprovalGuard(),
+                new TemplateAnnualReviewSupport(java.time.Clock.systemUTC())
         );
         author = new ManagementSessionClaims(
                 "10000003",
@@ -448,6 +449,7 @@ class TemplateLifecycleServiceTest {
                 Instant.now(),
                 null,
                 null,
-                false, null);
+                false, null,
+                null);
     }
 }

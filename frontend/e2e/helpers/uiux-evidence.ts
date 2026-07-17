@@ -1566,3 +1566,33 @@ export async function captureCeU21LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** CE-G05 annual review + clause FULL_TEXT / where-used — 1440×900 dual-brand evidence. */
+export const CE_G05_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-G05')
+export const CE_G05_SCREENSHOT_DIR = path.join(CE_G05_EVIDENCE_ROOT, 'screenshots')
+export const CE_G05_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureCeG05EvidenceDirs(): void {
+  fs.mkdirSync(CE_G05_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceG05ScreenshotPath(filename: string): string {
+  return path.join(CE_G05_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeG05Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeG05EvidenceDirs()
+  const target = ceG05ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeG05LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeG05EvidenceDirs()
+  const target = ceG05ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

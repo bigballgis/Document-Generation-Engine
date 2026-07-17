@@ -99,7 +99,8 @@ class TemplateSelfApprovalBlockTest {
                 masterDocumentRepository,
                 masterRevisionLineRepository,
                 objectStoragePort,
-                new SelfApprovalGuard()
+                new SelfApprovalGuard(),
+                new TemplateAnnualReviewSupport(java.time.Clock.systemUTC())
         );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(templateId, "TPL-001", "RETAIL", "Sample", null,
@@ -397,7 +398,8 @@ class TemplateSelfApprovalBlockTest {
                 templateId.toString(), "TPL-001", "RETAIL", "Sample", null,
                 UUID.randomUUID().toString(), TemplateLifecycleStatus.PENDING_RELEASE, null, null,
                 UUID.randomUUID().toString(), 1, List.of(), List.of(), List.of(),
-                Instant.now(), Instant.now(), null, null, false, null);
+                Instant.now(), Instant.now(), null, null, false, null,
+                null);
     }
 
     private ManagementSessionClaims session(String username, List<String> roles) {

@@ -5,6 +5,8 @@ import com.bank.docgen.audit.api.PolicyUpdateAuditDetail;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemTriggerType;
 import com.bank.docgen.legalhold.persistence.LegalHoldEntity;
+import com.bank.docgen.template.persistence.TemplateEntity;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -27,6 +29,7 @@ public class ManagementAuditRecorder {
     private final InvocationRegenerationAuditRecorder invocationRegenerationAuditRecorder;
     private final AssetLibraryAuditRecorder assetLibraryAuditRecorder;
     private final LegalHoldAuditRecorder legalHoldAuditRecorder;
+    private final TemplateAnnualReviewAuditRecorder templateAnnualReviewAuditRecorder;
 
     public ManagementAuditRecorder(
             ApiPolicyAuditRecorder apiPolicyAuditRecorder,
@@ -37,7 +40,8 @@ public class ManagementAuditRecorder {
             TestDataSetAuditRecorder testDataSetAuditRecorder,
             InvocationRegenerationAuditRecorder invocationRegenerationAuditRecorder,
             AssetLibraryAuditRecorder assetLibraryAuditRecorder,
-            LegalHoldAuditRecorder legalHoldAuditRecorder
+            LegalHoldAuditRecorder legalHoldAuditRecorder,
+            TemplateAnnualReviewAuditRecorder templateAnnualReviewAuditRecorder
     ) {
         this.apiPolicyAuditRecorder = apiPolicyAuditRecorder;
         this.identityAuditRecorder = identityAuditRecorder;
@@ -48,6 +52,7 @@ public class ManagementAuditRecorder {
         this.invocationRegenerationAuditRecorder = invocationRegenerationAuditRecorder;
         this.assetLibraryAuditRecorder = assetLibraryAuditRecorder;
         this.legalHoldAuditRecorder = legalHoldAuditRecorder;
+        this.templateAnnualReviewAuditRecorder = templateAnnualReviewAuditRecorder;
     }
 
     @Transactional
@@ -546,5 +551,22 @@ public class ManagementAuditRecorder {
             String actorSummary
     ) {
         legalHoldAuditRecorder.recordReleased(hold, actorUsername, actorSummary);
+    }
+
+    @Transactional
+    public void recordTemplateAnnualReviewCompleted(
+            TemplateEntity template,
+            LocalDate previousNextReviewDue,
+            LocalDate newNextReviewDue,
+            String actorUsername,
+            String actorSummary
+    ) {
+        templateAnnualReviewAuditRecorder.recordCompleted(
+                template,
+                previousNextReviewDue,
+                newNextReviewDue,
+                actorUsername,
+                actorSummary
+        );
     }
 }

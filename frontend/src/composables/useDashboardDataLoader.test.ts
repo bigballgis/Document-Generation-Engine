@@ -42,14 +42,19 @@ const capabilityRefs = {
 }
 
 const fetchOutdatedClauseReferenceTasks = vi.fn().mockResolvedValue(undefined)
+const fetchAnnualReviewDueTasks = vi.fn().mockResolvedValue(undefined)
 const fetchWorkflowTasks = vi.fn().mockResolvedValue(undefined)
 
 vi.mock('@/stores/authorWorkflow', () => ({
   useAuthorWorkflowStore: () => ({
     fetchOutdatedClauseReferenceTasks,
+    fetchAnnualReviewDueTasks,
     outdatedClauseTasks: ref([]),
     loadingOutdatedClauseTasks: ref(false),
     outdatedClauseTasksError: ref(false),
+    annualReviewDueTasks: ref([]),
+    loadingAnnualReviewDueTasks: ref(false),
+    annualReviewDueTasksError: ref(false),
   }),
 }))
 

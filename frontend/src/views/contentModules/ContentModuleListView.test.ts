@@ -106,11 +106,45 @@ describe('ContentModuleListView', () => {
     expect(contentModulesApi.listContentModules).toHaveBeenCalledWith(
       0,
       20,
-      expect.objectContaining({ sort: 'groupCodeAsc' }),
+      expect.objectContaining({ sort: 'groupCodeAsc', searchMode: 'NAME' }),
     )
     expect(wrapper.text()).toContain('Loan disclosure')
     expect(wrapper.text()).toContain('MOD-LOAN-DISCLOSURE')
     expect(wrapper.text()).toContain('RETAIL')
+    expect(wrapper.find('[data-testid="content-module-search-mode"]').exists()).toBe(true)
+  })
+
+  it('CE-G05: FULL_TEXT search mode is forwarded to list API', async () => {
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(
+      pageView([
+        summary({
+          moduleId: 'MOD-LOAN-DISCLOSURE',
+          name: 'Loan disclosure',
+          reviewState: 'DRAFT',
+        }),
+      ]),
+    )
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleListView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+    await flushPromises()
+
+    const modeSelect = wrapper.findComponent('[data-testid="content-module-search-mode"]')
+    await modeSelect.setValue('FULL_TEXT')
+    await flushPromises()
+    await flushPromises()
+
+    expect(contentModulesApi.listContentModules).toHaveBeenCalledWith(
+      0,
+      20,
+      expect.objectContaining({ searchMode: 'FULL_TEXT' }),
+    )
   })
 
   it('CCS-005: Status column renders ContentModuleStatusBadge labels', async () => {

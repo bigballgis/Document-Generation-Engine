@@ -3,6 +3,7 @@ package com.bank.docgen.template.api;
 import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import java.time.Instant;
+import java.time.LocalDate;
 
 public record TemplateSummaryView(
         String id,
@@ -16,6 +17,7 @@ public record TemplateSummaryView(
         String masterId,
         String updatedBy,
         Instant updatedAt,
-        String updatedByDisplayName
+        String updatedByDisplayName,
+        LocalDate nextReviewDue
 ) {
 }

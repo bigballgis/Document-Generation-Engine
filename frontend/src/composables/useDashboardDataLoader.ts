@@ -117,6 +117,11 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
           /* degrade to empty clause-outdated partition */
         }),
       )
+      jobs.push(
+        authorWorkflowStore.fetchAnnualReviewDueTasks().catch(() => {
+          /* degrade to empty annual-review partition */
+        }),
+      )
     }
     if (
       (authorContentModules.value || decideContentModuleReviews.value) &&
@@ -194,6 +199,9 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
     }
     void authorWorkflowStore.fetchOutdatedClauseReferenceTasks().catch(() => {
       /* degrade to empty clause-outdated partition */
+    })
+    void authorWorkflowStore.fetchAnnualReviewDueTasks().catch(() => {
+      /* degrade to empty annual-review partition */
     })
   }
 

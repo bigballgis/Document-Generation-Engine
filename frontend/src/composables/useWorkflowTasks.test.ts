@@ -271,6 +271,46 @@ describe('useWorkflowTasks', () => {
     expect(clausePartition?.headingKey).toBe('dashboard.tasks.clauseOutdatedBump.title')
   })
 
+  it('builds annual review due tasks for template authors (CE-G05)', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      ...sessionStore.session,
+      roles: ['TEMPLATE_AUTHOR'],
+      capabilities: authorCapabilities,
+    } as never
+
+    const authorWorkflowStore = useAuthorWorkflowStore()
+    authorWorkflowStore.annualReviewDueTasks = [
+      {
+        templateId: 'tpl-ar',
+        externalId: 'TPL-AR',
+        groupCode: 'RETAIL',
+        name: 'Annual Facility',
+        nextReviewDue: '2026-07-17',
+        lifecycleStatus: 'PUBLISHED',
+        updatedAt: '2026-07-10T10:00:00Z',
+      },
+    ]
+
+    const { tasks } = useWorkflowTasks()
+    const annualTask = tasks.value.find((task) => task.kind === 'template-annual-review')
+    expect(annualTask).toBeDefined()
+    expect(annualTask?.path).toBe('/templates/tpl-ar?tab=overview')
+    expect(annualTask?.summaryText).toBe('2026-07-17')
+
+    const scope = parseDashboardTaskScope({}, { reviewMasters: false, manageMasters: false })
+    const partitions = buildTaskPartitions(scope, tasks.value, {
+      roles: ['TEMPLATE_AUTHOR'],
+      capabilities: authorCapabilities,
+    })
+    const annualPartition = partitions.find(
+      (partition) => partition.kind === 'template-annual-review',
+    )
+    expect(annualPartition?.tasks).toHaveLength(1)
+    expect(annualPartition?.headingKey).toBe('dashboard.tasks.annualReviewDue.title')
+    expect(annualPartition?.id).toBe('template-annual-review')
+  })
+
   it('builds master rework tasks for rejected masters when upload is allowed', () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {

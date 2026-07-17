@@ -290,6 +290,8 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 
 **CE-U20（BDD `ready`，2026-07-17；Task Master #94）：** `ContentModuleSummaryView` 增加 head 版本投影字段 `reviewState`（必填）与 `lifecycleState`（可选）；`GET /api/management/v1/content-modules` 增加可选 query `status`（`DRAFT` \| `SUBMITTED` \| `APPROVED` \| `STOPPED` \| `DEPRECATED`），按 **head 版本** 徽章语义服务端精确过滤，与 `search` / `groupCode` / sort / CE-K08 legal filters **AND**；非法 `status` → 成功空页（不 400）。Head 选择：`updatedAt` 最大，并列取 `semanticVersion` 字典序更大者。**不**改变 create 请求体（仍为 `CreateContentModuleRequest.contentStructureJson`）、**不**改变审批/生命周期状态机。行为 SoT：[ce-u20-clause-create-structured.md](../behavior/ce-u20-clause-create-structured.md)。正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。
 
+**CE-G05（BDD `ready`，2026-07-17；Task Master #77）：** 条款目录 `GET /content-modules` 增加可选 `searchMode=NAME`（缺省，LR-C5 ILIKE）\| `FULL_TEXT`（catalog-filter 版本 `content_structure_json` 的 PostgreSQL tsvector；config `simple`）；与 `status` / `groupCode` / CE-K08 legal filters **AND**。新增只读 `GET /content-modules/{moduleId}/where-used`（授权范围内引用模板摘要；无条款全文）。模板年检见下方专节。行为 SoT：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。
+
 **CE-U21（BDD `ready`，2026-07-17；Task Master #95；BE 契约）：** `TemplateExportAnchorBindingView` / 管理面绑定视图增加必填 `updatedAt`（ISO-8601 Instant，并发令牌）。`PUT /api/management/v1/templates/{templateId}/bindings/{anchorId}` 请求体 `UpsertAnchorBindingRequest` 增加可选 `expectedUpdatedAt`：对**已存在**绑定的更新必须提供且与库中 `updatedAt` 毫秒语义相等；匹配成功写入并返回新 `updatedAt`；不匹配 → **409** `BINDING_VERSION_CONFLICT` / category `CONFLICT` / `messageKey=api.error.template.bindingVersionConflict` / `retryable=true`；缺失 → **422** `TEMPLATE_VALIDATION_FAILED` / `api.error.template.bindingExpectedUpdatedAtRequired`。首次创建可省略 `expectedUpdatedAt`。模板 import replace 走服务端内部旁路（非作者 Save）。行为 SoT：[ce-u21-draft-anchor-concurrency.md](../behavior/ce-u21-draft-anchor-concurrency.md)。正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。
 
 | 路由语义 | 用途 | 已确认规则 | 已确认路径 |
@@ -304,6 +306,8 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 - `ContentModuleVersionView.contentStructureJson`（[`ContentModuleVersionView`](openapi-v1.yaml)）：可选字段；仅当调用方具备结构查看权限（[权限矩阵 §5.1](../security/permission-matrix.md#51-条款或内容模块权限矩阵) — `GLOBAL_ADMIN`、`GROUP_ADMIN`、`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_APPROVER`）时在 list/detail 响应中返回；否则省略或为 `null`（fail-closed）。`TEMPLATE_TESTER` 无目录浏览权限（list/get 返回 `403`），不接收该字段。
 - `ContentModuleSummaryView.reviewState` / `lifecycleState`（[`ContentModuleSummaryView`](openapi-v1.yaml)；CE-U20）：目录 list 行投影自模块 **head 版本**（见上 CE-U20 注与 domain §2.9.2）。`reviewState` 必填；`lifecycleState` 可空。与详情版本表徽章语义一致（lifecycle `DEPRECATED`/`STOPPED` 优先于 review）。模块无版本为异常 fail-closed（正常 create 路径至少一版本）。
 - `GET /content-modules?status=`（CE-U20）：可选；枚举 `DRAFT` \| `SUBMITTED` \| `APPROVED` \| `STOPPED` \| `DEPRECATED`。匹配 head 展示状态；未知值 → 空页。与 CE-K08 legal query 的 **catalog filter version**（最新 `APPROVED`+`ACTIVE`，否则最新版本）选择规则正交，不得混用。
+- `GET /content-modules?searchMode=`（CE-G05）：可选；`NAME`（缺省）= LR-C5 ILIKE（`name` ∪ `moduleCode` ∪ `groupCode`）；`FULL_TEXT` = catalog-filter 版本正文 tsvector 匹配（版本选择同 CE-K08：最新 `APPROVED`+`ACTIVE`，否则最新）。空 `search` 忽略。`search` 长度 > 200 → `422` VALIDATION。非法 `searchMode` → `422` VALIDATION。`FULL_TEXT` 有非空 search 时默认按 `ts_rank` DESC、其次 `updatedAt` DESC。列表响应仍遵守 §5.1 `contentStructureJson` 可见性；**不**因 FTS 放宽结构字段。
+- `GET /content-modules/{moduleId}/where-used`（CE-G05）：分页可选；返回授权可见的引用模板摘要（`id`、`externalId`、`name`、`groupCode`、`lifecycleStatus`、可选 `pinnedSemanticVersion`）。复用 `template_content_module_reference`（及发布锁定关系）；**不**扫 binding JSON；**不含**条款全文。无引用 → 200 空页；无模块浏览权 → 403/404 惯例；不可见组模板不得出现。
 - `ContentModuleLifecycleImpactSummary.templateStopRequired` / `releaseStopRequired`（[`ContentModuleLifecycleImpactSummary`](openapi-v1.yaml)）：当存在引用且 blocking 条件成立时（近 7 日 runtime 生成调用 > 0 或 default 路由受影响）分别提示管理员需停用引用模板或发布版本以立即阻断生成；与权限矩阵 §5.1 停用/废弃影响分析要求一致。示例见 [`content-module-lifecycle-operation-request.json`](examples/content-module-lifecycle-operation-request.json)。
 
 ### 内容模块治理校验与错误语义确认
@@ -372,6 +376,46 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 已 RELEASED 再释放 | 409 | `CONFLICT` | `LEGAL_HOLD_ALREADY_RELEASED` | `api.error.conflict.legalHoldAlreadyReleased` |
 | 混合 scope / 校验失败 | 422 | `VALIDATION` | `REQUEST_BODY_INVALID` 等 | `api.error.validation.requestBodyInvalid` / `fieldRequired` / `fieldInvalid` / `fieldSizeInvalid` |
 
+## 模板年检与条款正文全文检索（CE-G05）
+
+**CE-G05（2026-07-17 确认 / BDD `ready`）：** 模板级 `nextReviewDue` + 年到期待办投影 + 条款正文 tsvector FTS + where-used。权威行为：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准。权限：[permission-matrix.md](../security/permission-matrix.md) §5 / §5.1 / §13.2 CE-G05。领域：[domain-model.md](../domain/domain-model.md) §2.7 / §2.9.2。
+
+**Confirmed — 年检路由与字段：**
+
+| 操作 | 方法 / 路径 | 说明 |
+| --- | --- | --- |
+| 到期待办列表 | `GET /api/management/v1/author-workflow/annual-review-due-tasks` | 授权 `authorTemplates` 可见模板；`nextReviewDue != null` 且 `nextReviewDue <= todayUtc`（到期日当天入队）；**不**新建 collaboration `queue_type`；对齐 CE-U07 作者待办投影 |
+| 完成年检 | `POST /api/management/v1/templates/{templateId}/annual-review/complete` | Body 可选 `{ "nextReviewDue": "YYYY-MM-DD" }`；缺省 = 完成日 UTC 日期 + 365 天；返回更新后的 `TemplateSummaryView`（含新 `nextReviewDue`） |
+| Summary / Detail 读回 | 既有模板 Summary / Detail | 可选可空 `nextReviewDue`（`format: date`）；挂在 **template 行**，非单 release |
+
+**Confirmed — 年检规则：**
+
+| 项 | 规则 |
+| --- | --- |
+| 播种 | 模板**首次**进入 `PUBLISHED` 且 `nextReviewDue` 为空 → `publishInstant` UTC 日期 + 365 天；后续再发布**不**覆盖已有值 |
+| 存量 | 迁移后可为 NULL；**不**强制回填；NULL 不入队 |
+| 生命周期 | `STOPPED` / `DEPRECATED` 仍可入队（治理提醒）；逻辑删除不入队；complete → 404 |
+| 授权 | 组范围访问 **且** `authorTemplates`；无新 capability；`TEMPLATE_TESTER`（默认无该权）→ 待办不可见 / complete **403** |
+| 审计 | 成功 complete → `TEMPLATE_ANNUAL_REVIEW_COMPLETED`（templateId/externalId、previousNextReviewDue、newNextReviewDue、actorUsername；禁 variables / 凭证 / 条款全文） |
+| 非目标 | 不阻断发布/runtime；无邮件/IM；无独立年检治理路由；不新建 collaboration `queue_type`；CD-3 / CE-O02 / go-live / #50 |
+
+**Confirmed — FTS / where-used（条款侧，字段语义见内容模块节）：**
+
+| 操作 | 方法 / 路径 | 说明 |
+| --- | --- | --- |
+| 正文检索 | `GET /api/management/v1/content-modules?search=&searchMode=FULL_TEXT` | `NAME` 缺省保持 LR-C5；`FULL_TEXT` 匹配 catalog-filter 版本正文 tsvector（config `simple`） |
+| Where-used | `GET /api/management/v1/content-modules/{moduleId}/where-used` | 授权范围内引用模板；无条款全文 |
+
+**Fail-closed messageKeys（English-first；management annual-review / FTS surface）：**
+
+| Condition | HTTP | category | 说明 |
+| --- | --- | --- | --- |
+| 无 `authorTemplates`（年检 list/complete） | 403 | `AUTHORIZATION` | 与既有 author-workflow 惯例一致 |
+| 模板不可见 / 已删（complete） | 404（或不泄露 403） | `NOT_FOUND` / `AUTHORIZATION` | 与既有模板 API 惯例一致 |
+| `nextReviewDue` 非法 | 422 | `VALIDATION` | 稳定 messageKey；不写成功审计 |
+| 无条款目录浏览权（FTS / where-used） | 403 | `AUTHORIZATION` | 同 §5.1 list/get；`TEMPLATE_TESTER` |
+| `search` > 200 或非法 `searchMode` | 422 | `VALIDATION` | 稳定 messageKey |
+
 ## 模板导出/导入契约
 
 已确认模板跨环境导出/导入接口与 [P14-T03](../plan/detail/P14-confirmed-large-domains.md) 行为一致，并经 **CE-E01** 扩展自包含 v2 + dry-run，以及 **CE-E03** 全库导出 ZIP。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准；本文档提供路由索引、bundle 语义、冲突策略与权限说明。权威行为：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)、[ce-e03-full-library-export.md](../behavior/ce-e03-full-library-export.md)。
@@ -419,7 +463,10 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 模板导出（ZIP） | 与 JSON 相同 bundle，封装为单文件 ZIP 附件；v2 另嵌母版 DOCX。 | v1：ZIP 内仅含 `template-export-bundle.json`；v2：另含 `artifacts/master.docx`；响应 `Content-Type: application/zip`；`Content-Disposition` 为 attachment。 | `GET /api/management/v1/templates/{templateId}/export?format=zip`（可选 `bundleVersion=2`） |
 | 全库导出（ZIP）（CE-E03） | 一次导出授权范围内（或筛选后）全部导出合格模板：根 manifest + 嵌套 E01 v2 per-template ZIP + 去重母版/条款目录。 | 格式 `template-library-export-v1-zip`；**权限同矩阵 §5 导出模板**（无新码）；空集/超限 422；部分成功允许；**不含**资产二进制；全库导入 out of scope。OpenAPI：`exportLibraryTemplates`。行为：[ce-e03-full-library-export.md](../behavior/ce-e03-full-library-export.md)。 | `POST /api/management/v1/library/export` |
 | 模板导入 / dry-run | 将 bundle 导入目标环境并从草稿重新走流程；或仅预检依赖。 | 提交后模板状态为 `DRAFT`；须重新执行测试→审批→发布；`masterId` 须为同 `groupCode` 下已批准母版；`dryRun=true` 不落库；导入动作记录审计并返回 `importBatchId`（dry-run 无 batch 业务写入）。 | `POST /api/management/v1/templates/import` |
-| 目录列表分页（LR-C5） | 管理端 Templates / Masters / Content-modules **包列表**服务端分页与筛选。 | 见下方「目录列表分页契约（LR-C5）」；完整行为 [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md)；正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。 | `GET /api/management/v1/templates` · `GET /api/management/v1/masters` · `GET /api/management/v1/content-modules` |
+| 目录列表分页（LR-C5） | 管理端 Templates / Masters / Content-modules **包列表**服务端分页与筛选。 | 见下方「目录列表分页契约（LR-C5）」；完整行为 [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md)；正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。CE-G05：content-modules 可选 `searchMode=FULL_TEXT`（见上专节）。 | `GET /api/management/v1/templates` · `GET /api/management/v1/masters` · `GET /api/management/v1/content-modules` |
+| 模板年到期待办（CE-G05） | Dashboard Tasks 年检分区数据源。 | 见「模板年检与条款正文全文检索（CE-G05）」；**不**新建 collaboration `queue_type`。 | `GET /api/management/v1/author-workflow/annual-review-due-tasks` |
+| 完成模板年检（CE-G05） | 滚动 `nextReviewDue` 并写审计。 | 可选 body 下一到期日；缺省 +365 UTC 日；需 `authorTemplates`。 | `POST /api/management/v1/templates/{templateId}/annual-review/complete` |
+| 条款 where-used（CE-G05） | 模块被哪些授权可见模板引用（只读）。 | 复用 reference 关系；无条款全文。 | `GET /api/management/v1/content-modules/{moduleId}/where-used` |
 | 模板版本线列表 | 分页列出模板包下进行中 dev 行与已发布 release 行，供包 hub 导航。 | 含 `release_version IS NULL` 的当前 dev 行与全部已发布行；跨组 `403 ACCESS_DENIED`；排序为 dev 行优先、再按 dev 版本降序。 | `GET /api/management/v1/templates/{templateId}/version-lines?page=&size=` |
 | 模板版本线详情 | 只读查看指定版本线的变量、绑定与规则快照。 | 版本线须属于该模板；跨组 `403`。CE-U19：已发布且有钉扎时可含可选 `result.masterPin`（同 release 详情）。 | `GET /api/management/v1/templates/{templateId}/version-lines/{versionLineId}` |
 | 模板 dev 版本详情 | 获取指定 dev 行的编排详情（在途编辑）。 | 已发布 dev 行只读；变更返回 `403 TEMPLATE_VERSION_IMMUTABLE`。 | `GET /api/management/v1/templates/{templateId}/dev/{devVersionId}` |

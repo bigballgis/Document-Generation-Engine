@@ -11,7 +11,7 @@ import { useContentModuleStatusFilterOptions } from '@/composables/useTableFilte
 import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { contentModuleDetailPath } from '@/routing/routeKeys'
 import { useContentModulesStore } from '@/stores/contentModules'
-import type { ContentModuleSummary } from '@/types/contentModule'
+import type { ContentModuleSearchMode, ContentModuleSummary } from '@/types/contentModule'
 import { contentModuleCatalogDisplayStatus } from '@/utils/contentModuleCatalogDisplayStatus'
 import { ElMessage } from 'element-plus'
 
@@ -27,6 +27,8 @@ export function useContentModuleListView() {
   const createDialogOpen = ref(false)
   const currentPage = ref(1)
   const listHydrated = ref(false)
+  /** CE-G05 — NAME (default) or FULL_TEXT body search. */
+  const searchMode = ref<ContentModuleSearchMode>('NAME')
 
   const allModules = computed(() => contentModulesStore.modules)
   const {
@@ -120,9 +122,16 @@ export function useContentModuleListView() {
       (contentModulesStore.moduleListTotalElements > 0 || hasAnyActive.value),
   )
 
+  const searchPlaceholderKey = computed(() =>
+    searchMode.value === 'FULL_TEXT'
+      ? 'contentModules.list.searchPlaceholderFullText'
+      : 'contentModules.list.searchPlaceholderName',
+  )
+
   function buildListQuery() {
     return {
       search: searchQuery.value.trim() || undefined,
+      searchMode: searchMode.value,
       groupCode: filters.groupCode?.trim() || undefined,
       status: filters.status?.trim() || undefined,
       sort: activeSortKey.value || 'groupCodeAsc',
@@ -162,7 +171,7 @@ export function useContentModuleListView() {
   })
 
   watch(
-    [searchQuery, filters, activeSortKey],
+    [searchQuery, searchMode, filters, activeSortKey],
     async () => {
       if (!listHydrated.value) {
         return
@@ -202,6 +211,8 @@ export function useContentModuleListView() {
     currentPage,
     allModules,
     searchQuery,
+    searchMode,
+    searchPlaceholderKey,
     filters,
     activeSortKey,
     hasAnyActive,

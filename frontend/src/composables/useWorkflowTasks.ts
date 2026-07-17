@@ -1,7 +1,13 @@
 import { computed } from 'vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { canViewCollaborationWorkItems } from '@/auth/roles'
-import { masterDetailPath, masterRevisionDetailPath, pathForRouteKey, ROUTE_KEYS } from '@/routing/routeKeys'
+import {
+  masterDetailPath,
+  masterRevisionDetailPath,
+  pathForRouteKey,
+  ROUTE_KEYS,
+  templatePackageHubPath,
+} from '@/routing/routeKeys'
 import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useContentModulesStore } from '@/stores/contentModules'
@@ -11,7 +17,10 @@ import { collaborationWorkItemToTask } from '@/utils/collaborationWorkItems'
 import { isMasterReworkState } from '@/utils/masterDesignerJourney'
 import type { MasterDocumentSummary, MasterReviewRecord } from '@/types/master'
 import type { ContentModuleWorkflowTask } from '@/types/contentModule'
-import type { OutdatedClauseReferenceAuthorTask } from '@/api/authorWorkflow'
+import type {
+  AnnualReviewDueAuthorTask,
+  OutdatedClauseReferenceAuthorTask,
+} from '@/api/authorWorkflow'
 import {
   sortTasksNewestFirst,
   type WorkflowTask,
@@ -77,6 +86,9 @@ export function useWorkflowTasks() {
     if (authorTemplates.value) {
       for (const task of authorWorkflowStore.outdatedClauseTasks) {
         items.push(clauseOutdatedBumpTask(task))
+      }
+      for (const task of authorWorkflowStore.annualReviewDueTasks) {
+        items.push(templateAnnualReviewTask(task))
       }
     }
 
@@ -173,6 +185,22 @@ function clauseOutdatedBumpTask(task: OutdatedClauseReferenceAuthorTask): Workfl
     source: 'template',
     templateId: task.templateId,
     summaryText: String(task.outdatedReferenceCount),
+    createdAt: task.updatedAt,
+  }
+}
+
+function templateAnnualReviewTask(task: AnnualReviewDueAuthorTask): WorkflowTask {
+  return {
+    id: `template-annual-review-${task.templateId}`,
+    kind: 'template-annual-review',
+    titleKey: 'dashboard.tasks.annualReviewDue.itemTitle',
+    descriptionKey: 'dashboard.tasks.annualReviewDue.description',
+    path: templatePackageHubPath(task.templateId, 'overview'),
+    groupCode: task.groupCode,
+    entityName: task.name,
+    source: 'template',
+    templateId: task.templateId,
+    summaryText: task.nextReviewDue,
     createdAt: task.updatedAt,
   }
 }

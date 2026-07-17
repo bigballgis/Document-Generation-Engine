@@ -171,8 +171,8 @@ class TemplateServiceCatalogPaginationTest {
                 UUID.randomUUID().toString(),
                 "10000003",
                 Instant.parse("2026-01-01T00:00:00Z"),
-                null
-        );
+                null,
+                null);
         when(groupAccessService.accessibleGroupCodes(globalAdmin)).thenReturn(List.of("*"));
         when(templateRepository.searchCatalog(any(), eq(1), eq(20)))
                 .thenReturn(new CatalogQueryPage<>(List.of(entity), 45, 3));

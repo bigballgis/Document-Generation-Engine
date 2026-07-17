@@ -5,6 +5,7 @@ import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 public record TemplateDetailView(
@@ -27,7 +28,8 @@ public record TemplateDetailView(
         String updatedBy,
         String updatedByDisplayName,
         boolean readOnly,
-        TemplateExportMasterPinView masterPin
+        TemplateExportMasterPinView masterPin,
+        LocalDate nextReviewDue
 ) {
     public TemplateDetailView {
         variables = DefensiveCopies.copyList(variables);

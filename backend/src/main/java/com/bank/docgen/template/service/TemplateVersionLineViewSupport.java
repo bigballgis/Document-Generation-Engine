@@ -119,7 +119,8 @@ final class TemplateVersionLineViewSupport {
                 updatedBy,
                 updatedByDisplayName,
                 detail.readOnly(),
-                masterPin
+                masterPin,
+                detail.nextReviewDue()
         );
     }
 

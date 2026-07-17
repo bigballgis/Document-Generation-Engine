@@ -48,7 +48,8 @@ class ManagementAuditRecorderTest {
                 new TestDataSetAuditRecorder(eventWriter),
                 new InvocationRegenerationAuditRecorder(eventWriter),
                 new AssetLibraryAuditRecorder(eventWriter),
-                new LegalHoldAuditRecorder(eventWriter)
+                new LegalHoldAuditRecorder(eventWriter),
+                new TemplateAnnualReviewAuditRecorder(eventWriter)
         );
     }
 

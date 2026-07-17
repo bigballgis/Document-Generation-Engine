@@ -10,6 +10,7 @@ import com.bank.docgen.contentmodule.api.ContentModuleReviewRecordView;
 import com.bank.docgen.contentmodule.api.ContentModuleSummaryView;
 import com.bank.docgen.contentmodule.api.ContentModuleVersionView;
 import com.bank.docgen.contentmodule.domain.ContentModuleCatalogDisplayStatus;
+import com.bank.docgen.contentmodule.domain.ContentModuleSearchMode;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepositoryCustom.ContentModuleCatalogFilter;
@@ -64,12 +65,38 @@ final class ContentModuleCatalogSupport {
             Instant effectiveTo,
             String status
     ) {
+        return list(
+                session, page, size, search, groupCode, sort,
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status, null
+        );
+    }
+
+    PageView<ContentModuleSummaryView> list(
+            ManagementSessionClaims session,
+            Integer page,
+            Integer size,
+            String search,
+            String groupCode,
+            String sort,
+            String jurisdiction,
+            String legalReviewRef,
+            Instant effectiveFrom,
+            Instant effectiveTo,
+            String status,
+            String searchMode
+    ) {
         assertCatalogBrowseAllowed(session);
         int safePage = CatalogPageSupport.normalizePage(page);
         int safeSize = CatalogPageSupport.normalizeSize(size);
         List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
         if (groupCodes.isEmpty()) {
             return new PageView<>(List.of(), safePage, safeSize, 0, 0);
+        }
+
+        ContentModuleSearchMode mode = parseSearchMode(searchMode);
+        String normalizedSearch = CatalogPageSupport.blankToNull(search);
+        if (normalizedSearch != null && normalizedSearch.length() > 200) {
+            throw new ContentModuleValidationException("api.error.contentModule.searchTooLong");
         }
 
         ContentModuleCatalogDisplayStatus statusFilter = parseDisplayStatus(status);
@@ -89,18 +116,22 @@ final class ContentModuleCatalogSupport {
         List<String> normalizedGroups = allGroups
                 ? List.of()
                 : groupCodes.stream().map(code -> code.trim().toUpperCase(Locale.ROOT)).toList();
-        CatalogSortKey sortKey = CatalogSortKey.parse(sort, CatalogSortKey.MODULE_CODE_ASC);
+        boolean fullTextActive = mode == ContentModuleSearchMode.FULL_TEXT && normalizedSearch != null;
+        CatalogSortKey sortKey = fullTextActive && (sort == null || sort.isBlank())
+                ? null
+                : CatalogSortKey.parse(sort, CatalogSortKey.MODULE_CODE_ASC);
         ContentModuleCatalogFilter filter = new ContentModuleCatalogFilter(
                 normalizedGroups,
                 allGroups,
                 groupFilter,
-                CatalogPageSupport.blankToNull(search),
+                normalizedSearch,
                 sortKey,
                 statusFilter,
                 ContentModuleLegalMetadataSupport.normalizeText(jurisdiction),
                 ContentModuleLegalMetadataSupport.normalizeText(legalReviewRef),
                 effectiveFrom,
-                effectiveTo
+                effectiveTo,
+                mode
         );
         CatalogQueryPage<ContentModuleEntity> modulePage =
                 moduleRepository.searchCatalog(filter, safePage, safeSize);
@@ -112,6 +143,17 @@ final class ContentModuleCatalogSupport {
                 modulePage.totalElements(),
                 modulePage.totalPages()
         );
+    }
+
+    private static ContentModuleSearchMode parseSearchMode(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return ContentModuleSearchMode.NAME;
+        }
+        try {
+            return ContentModuleSearchMode.valueOf(raw.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            throw new ContentModuleValidationException("api.error.contentModule.searchModeInvalid");
+        }
     }
 
     List<ContentModuleSummaryView> listByGroup(String groupCode, ManagementSessionClaims session) {

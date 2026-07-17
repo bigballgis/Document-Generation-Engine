@@ -48,7 +48,7 @@ export function useContentModuleDetailController() {
   )
 
   const workspaceTabs = computed(() =>
-    (['versions', 'content', 'lifecycle'] as const).map((name) => ({
+    (['versions', 'content', 'lifecycle', 'whereUsed'] as const).map((name) => ({
       name,
       labelKey: CONTENT_MODULE_WORKSPACE_TAB_LABEL_KEYS[name],
     })),

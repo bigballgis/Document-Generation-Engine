@@ -65,7 +65,8 @@ class ContentModuleCatalogStatusCeU20Test {
                 reviewRecordRepository,
                 groupAccessService,
                 accessSupport,
-                auditRecorder
+                auditRecorder,
+                org.mockito.Mockito.mock(com.bank.docgen.contentmodule.service.ContentModuleFullTextIndexWriter.class)
         );
         module = new ContentModuleEntity(
                 MODULE_ID,

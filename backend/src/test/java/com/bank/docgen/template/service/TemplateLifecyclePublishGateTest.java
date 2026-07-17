@@ -102,7 +102,8 @@ class TemplateLifecyclePublishGateTest {
                 masterDocumentRepository,
                 masterRevisionLineRepository,
                 objectStoragePort,
-                new SelfApprovalGuard()
+                new SelfApprovalGuard(),
+                new TemplateAnnualReviewSupport(java.time.Clock.systemUTC())
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",

@@ -110,7 +110,8 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 masterDocumentRepository,
                 masterRevisionLineRepository,
                 objectStoragePort,
-                new SelfApprovalGuard()
+                new SelfApprovalGuard(),
+                new TemplateAnnualReviewSupport(java.time.Clock.systemUTC())
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",
@@ -220,6 +221,7 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 Instant.now(),
                 null,
                 null,
-                false, null);
+                false, null,
+                null);
     }
 }

@@ -363,7 +363,8 @@ class TemplateImportServiceV2Test {
                 Instant.now(),
                 null,
                 null,
-                false, null);
+                false, null,
+                null);
     }
 
     private TemplateImportDependencyReportView greenReport() {

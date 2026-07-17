@@ -3,6 +3,7 @@ package com.bank.docgen.contentmodule.persistence;
 import com.bank.docgen.authorization.management.api.CatalogQueryPage;
 import com.bank.docgen.authorization.management.api.CatalogSortKey;
 import com.bank.docgen.contentmodule.domain.ContentModuleCatalogDisplayStatus;
+import com.bank.docgen.contentmodule.domain.ContentModuleSearchMode;
 import java.time.Instant;
 import java.util.List;
 
@@ -20,8 +21,15 @@ public interface ContentModuleRepositoryCustom {
             String jurisdiction,
             String legalReviewRef,
             Instant effectiveFrom,
-            Instant effectiveTo
+            Instant effectiveTo,
+            ContentModuleSearchMode searchMode
     ) {
+        public ContentModuleCatalogFilter {
+            if (searchMode == null) {
+                searchMode = ContentModuleSearchMode.NAME;
+            }
+        }
+
         public ContentModuleCatalogFilter(
                 List<String> accessibleGroupCodes,
                 boolean allGroups,
@@ -29,7 +37,29 @@ public interface ContentModuleRepositoryCustom {
                 String search,
                 CatalogSortKey sort
         ) {
-            this(accessibleGroupCodes, allGroups, groupCodeExact, search, sort, null, null, null, null, null);
+            this(
+                    accessibleGroupCodes, allGroups, groupCodeExact, search, sort,
+                    null, null, null, null, null, ContentModuleSearchMode.NAME
+            );
+        }
+
+        public ContentModuleCatalogFilter(
+                List<String> accessibleGroupCodes,
+                boolean allGroups,
+                String groupCodeExact,
+                String search,
+                CatalogSortKey sort,
+                ContentModuleCatalogDisplayStatus status,
+                String jurisdiction,
+                String legalReviewRef,
+                Instant effectiveFrom,
+                Instant effectiveTo
+        ) {
+            this(
+                    accessibleGroupCodes, allGroups, groupCodeExact, search, sort,
+                    status, jurisdiction, legalReviewRef, effectiveFrom, effectiveTo,
+                    ContentModuleSearchMode.NAME
+            );
         }
 
         public boolean hasLegalFilters() {
@@ -37,6 +67,12 @@ public interface ContentModuleRepositoryCustom {
                     || legalReviewRef != null
                     || effectiveFrom != null
                     || effectiveTo != null;
+        }
+
+        public boolean isFullTextSearch() {
+            return searchMode == ContentModuleSearchMode.FULL_TEXT
+                    && search != null
+                    && !search.isBlank();
         }
     }
 }

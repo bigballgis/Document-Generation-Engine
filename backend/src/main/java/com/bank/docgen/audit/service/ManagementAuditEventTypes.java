@@ -48,6 +48,8 @@ public final class ManagementAuditEventTypes {
     public static final String LEGAL_HOLD_CREATED = "LEGAL_HOLD_CREATED";
     /** CE-G04: legal hold released. */
     public static final String LEGAL_HOLD_RELEASED = "LEGAL_HOLD_RELEASED";
+    /** CE-G05: template annual review completed (nextReviewDue rolled). */
+    public static final String TEMPLATE_ANNUAL_REVIEW_COMPLETED = "TEMPLATE_ANNUAL_REVIEW_COMPLETED";
 
     private ManagementAuditEventTypes() {
     }

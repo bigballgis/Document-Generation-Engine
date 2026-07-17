@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -53,6 +54,10 @@ public class TemplateEntity {
 
     @Column(name = "deleted_at")
     private Instant deletedAt;
+
+    /** CE-G05 — template-level next annual-review UTC calendar date. */
+    @Column(name = "next_review_due")
+    private LocalDate nextReviewDue;
 
     protected TemplateEntity() {
     }
@@ -130,6 +135,14 @@ public class TemplateEntity {
 
     public Instant getDeletedAt() {
         return deletedAt;
+    }
+
+    public LocalDate getNextReviewDue() {
+        return nextReviewDue;
+    }
+
+    public void setNextReviewDue(LocalDate nextReviewDue) {
+        this.nextReviewDue = nextReviewDue;
     }
 
     public void setName(String name) {

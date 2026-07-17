@@ -5,12 +5,14 @@ import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
 
 vi.mock('@/api/authorWorkflow', () => ({
   listOutdatedClauseReferenceAuthorTasks: vi.fn(),
+  listAnnualReviewDueAuthorTasks: vi.fn(),
 }))
 
 describe('authorWorkflow store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.mocked(authorWorkflowApi.listOutdatedClauseReferenceAuthorTasks).mockReset()
+    vi.mocked(authorWorkflowApi.listAnnualReviewDueAuthorTasks).mockReset()
   })
 
   it('loads outdated clause reference tasks', async () => {
@@ -79,5 +81,50 @@ describe('authorWorkflow store', () => {
 
     expect(store.outdatedClauseTasks).toEqual([])
     expect(store.outdatedClauseTasksError).toBe(false)
+  })
+
+  it('loads annual review due tasks (CE-G05)', async () => {
+    vi.mocked(authorWorkflowApi.listAnnualReviewDueAuthorTasks).mockResolvedValue([
+      {
+        templateId: 'tpl-2',
+        externalId: 'TPL-2',
+        groupCode: 'RETAIL',
+        name: 'Facility Letter',
+        nextReviewDue: '2026-07-17',
+        lifecycleStatus: 'PUBLISHED',
+        updatedAt: '2026-07-10T10:00:00Z',
+      },
+    ])
+
+    const store = useAuthorWorkflowStore()
+    await store.fetchAnnualReviewDueTasks()
+
+    expect(authorWorkflowApi.listAnnualReviewDueAuthorTasks).toHaveBeenCalled()
+    expect(store.annualReviewDueTasks).toHaveLength(1)
+    expect(store.annualReviewDueTasksError).toBe(false)
+  })
+
+  it('clears annual review due tasks on fetch failure', async () => {
+    vi.mocked(authorWorkflowApi.listAnnualReviewDueAuthorTasks).mockRejectedValue(
+      new Error('network'),
+    )
+
+    const store = useAuthorWorkflowStore()
+    store.annualReviewDueTasks = [
+      {
+        templateId: 'tpl-old',
+        externalId: 'OLD',
+        groupCode: 'RETAIL',
+        name: 'Old',
+        nextReviewDue: '2026-01-01',
+        lifecycleStatus: 'PUBLISHED',
+        updatedAt: '2026-01-01T00:00:00Z',
+      },
+    ]
+
+    await store.fetchAnnualReviewDueTasks()
+
+    expect(store.annualReviewDueTasks).toEqual([])
+    expect(store.annualReviewDueTasksError).toBe(true)
   })
 })

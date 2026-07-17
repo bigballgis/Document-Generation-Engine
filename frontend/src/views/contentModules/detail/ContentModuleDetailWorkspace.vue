@@ -4,6 +4,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import ContentModuleStatusBadge from '@/components/contentModules/ContentModuleStatusBadge.vue'
+import ContentModuleWhereUsedPanel from '@/components/contentModules/ContentModuleWhereUsedPanel.vue'
 import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import type {
@@ -13,8 +14,9 @@ import type {
 } from '@/types/contentModule'
 import type { ContentModuleWorkspaceTab } from '@/views/contentModules/contentModuleWorkspaceTabs'
 
-defineProps<{
+const props = defineProps<{
   workspaceTabs: Array<{ name: ContentModuleWorkspaceTab; labelKey: string }>
+  moduleId: string
   versions: ContentModuleVersion[]
   reviewHistory: ContentModuleReviewRecord[]
   previewVersion: ContentModuleVersion | null
@@ -163,6 +165,10 @@ const { formatDateTime } = useLocaleFormatters()
         </el-timeline>
         <el-empty v-else :description="t('contentModules.detail.noReviewHistory')" />
       </el-card>
+    </template>
+
+    <template #whereUsed>
+      <ContentModuleWhereUsedPanel :module-id="props.moduleId" />
     </template>
   </WorkspaceTabShell>
 </template>

@@ -13,7 +13,9 @@ import type {
   ContentModuleLifecycleOperationResult,
   ContentModuleReviewTransitionPayload,
   ContentModuleReviewTransitionResult,
+  ContentModuleSearchMode,
   ContentModuleSummary,
+  ContentModuleWhereUsedTemplate,
   ContentModuleWorkflowTask,
   CreateContentModulePayload,
   CreateContentModuleVersionPayload,
@@ -24,6 +26,8 @@ import type {
 export type ContentModuleListQueryOptions = {
   signal?: AbortSignal
   search?: string
+  /** CE-G05 — default NAME (ILIKE); FULL_TEXT for body tsvector. */
+  searchMode?: ContentModuleSearchMode
   groupCode?: string
   /** CE-U20 — head display status filter (badge-aligned). */
   status?: string
@@ -47,6 +51,9 @@ export async function listContentModules(
   }
   if (options.search) {
     params.search = options.search
+  }
+  if (options.searchMode && options.searchMode !== 'NAME') {
+    params.searchMode = options.searchMode
   }
   if (options.status?.trim()) {
     params.status = options.status.trim()
@@ -148,6 +155,23 @@ export async function applyContentModuleLifecycleOperation(
   const response = await http.post<ApiEnvelope<ContentModuleLifecycleOperationResult>>(
     `/content-modules/${moduleId}/lifecycle/operation/apply`,
     payload,
+  )
+  return unwrapEnvelope(response.data)
+}
+
+/** CE-G05 — paginated templates that reference the module (authorized scope). */
+export async function listContentModuleWhereUsed(
+  moduleId: string,
+  page = 0,
+  size = 20,
+  options: { signal?: AbortSignal } = {},
+): Promise<PageView<ContentModuleWhereUsedTemplate>> {
+  const response = await http.get<ApiEnvelope<PageView<ContentModuleWhereUsedTemplate>>>(
+    `/content-modules/${moduleId}/where-used`,
+    {
+      params: { page, size },
+      signal: options.signal,
+    },
   )
   return unwrapEnvelope(response.data)
 }

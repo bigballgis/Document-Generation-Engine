@@ -60,6 +60,7 @@ final class TemplateLifecycleApprovalFlowSupport {
     private final ObjectStoragePort objectStoragePort;
     private final ObjectMapper objectMapper;
     private final SelfApprovalGuard selfApprovalGuard;
+    private final TemplateAnnualReviewSupport annualReviewSupport;
 
     TemplateLifecycleApprovalFlowSupport(
             TemplateService templateService,
@@ -80,7 +81,8 @@ final class TemplateLifecycleApprovalFlowSupport {
             MasterRevisionLineRepository masterRevisionLineRepository,
             ObjectStoragePort objectStoragePort,
             ObjectMapper objectMapper,
-            SelfApprovalGuard selfApprovalGuard
+            SelfApprovalGuard selfApprovalGuard,
+            TemplateAnnualReviewSupport annualReviewSupport
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -101,6 +103,7 @@ final class TemplateLifecycleApprovalFlowSupport {
         this.objectStoragePort = objectStoragePort;
         this.objectMapper = objectMapper;
         this.selfApprovalGuard = selfApprovalGuard;
+        this.annualReviewSupport = annualReviewSupport;
     }
 
     TemplateDetailView submitForApproval(
@@ -172,6 +175,7 @@ final class TemplateLifecycleApprovalFlowSupport {
         PinnedMasterSnapshot pinned = resolvePinnedMaster(template);
         template.setReleaseVersion(request.releaseVersion());
         template.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
+        annualReviewSupport.seedOnEnterPublishedIfAbsent(template);
         template.setUpdatedBy(session.username());
         templateRepository.save(template);
         TemplateVersionEntity version = eligibility.requireReleaseCandidateVersion(templateId);

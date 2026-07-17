@@ -104,7 +104,8 @@ class ExceptionInterventionTest {
                 masterDocumentRepository,
                 masterRevisionLineRepository,
                 objectStoragePort,
-                new SelfApprovalGuard()
+                new SelfApprovalGuard(),
+                new TemplateAnnualReviewSupport(java.time.Clock.systemUTC())
         );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(

@@ -20,7 +20,34 @@ export function toTemplateSummary(
     masterId: detail.masterId,
     updatedBy: existing?.updatedBy ?? '',
     updatedAt: detail.updatedAt,
+    nextReviewDue: detail.nextReviewDue ?? existing?.nextReviewDue ?? null,
   }
+}
+
+/** CE-G05 — merge annual-review complete summary into selected detail + catalog row. */
+export function applyAnnualReviewSummary(
+  selectedTemplate: Ref<TemplateDetail | null>,
+  templates: Ref<TemplateSummary[]>,
+  summary: TemplateSummary,
+) {
+  if (selectedTemplate.value?.id === summary.id) {
+    selectedTemplate.value = {
+      ...selectedTemplate.value,
+      nextReviewDue: summary.nextReviewDue ?? null,
+      updatedAt: summary.updatedAt,
+      lifecycleStatus: summary.lifecycleStatus,
+      name: summary.name,
+    }
+  }
+  templates.value = templates.value.map((item) =>
+    item.id === summary.id
+      ? {
+          ...item,
+          ...summary,
+          nextReviewDue: summary.nextReviewDue ?? null,
+        }
+      : item,
+  )
 }
 
 export function applyUpdatedTemplate(

@@ -60,6 +60,7 @@ export interface ApprovedContentModuleFixture {
 export interface PublishedTemplateWithReferenceFixture {
   templateId: string
   externalId: string
+  moduleId: string
   moduleCode: string
   referenceKey: string
   semanticVersion: string
@@ -446,13 +447,22 @@ export async function demoPendingReleaseTemplateDetailPath(
 
 export async function createApprovedContentModule(
   request: APIRequestContext,
-  options?: { moduleCode?: string; name?: string; semanticVersion?: string },
+  options?: {
+    moduleCode?: string
+    name?: string
+    semanticVersion?: string
+    /** Clause body JSON; default is a short E2E paragraph. */
+    contentStructureJson?: string
+  },
 ): Promise<ApprovedContentModuleFixture> {
   const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
   const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
   const moduleCode = options?.moduleCode ?? uniqueModuleCode('E2E-MOD')
   const name = options?.name ?? `E2E Content Module ${moduleCode}`
   const semanticVersion = options?.semanticVersion ?? '1.0.0'
+  const contentStructureJson =
+    options?.contentStructureJson ??
+    '{"blocks":[{"type":"paragraph","text":"E2E clause"}]}'
 
   const created = await authorizedPost<ContentModuleDetail>(
     request,
@@ -465,7 +475,7 @@ export async function createApprovedContentModule(
       description: 'Playwright P14-T01 fixture',
       sharedGroupCodes: [],
       semanticVersion,
-      contentStructureJson: '{"blocks":[{"type":"paragraph","text":"E2E clause"}]}',
+      contentStructureJson,
       changeDescription: 'Initial E2E draft',
     },
   )
@@ -797,6 +807,7 @@ export async function createAndApproveAdditionalContentModuleVersion(
   request: APIRequestContext,
   moduleId: string,
   semanticVersion: string,
+  options?: { contentStructureJson?: string },
 ): Promise<void> {
   const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
   const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
@@ -807,7 +818,9 @@ export async function createAndApproveAdditionalContentModuleVersion(
     `/content-modules/${moduleId}/versions`,
     {
       semanticVersion,
-      contentStructureJson: '{"blocks":[{"type":"paragraph","text":"E2E clause v2"}]}',
+      contentStructureJson:
+        options?.contentStructureJson ??
+        '{"blocks":[{"type":"paragraph","text":"E2E clause v2"}]}',
       changeDescription: `E2E version ${semanticVersion}`,
     },
   )
@@ -983,8 +996,10 @@ async function publishTemplateThroughLifecycle(
   })
 }
 
-export async function preparePublishedTemplateWithLockedReference(
+export async function preparePublishedTemplateReferencingModule(
   request: APIRequestContext,
+  module: ApprovedContentModuleFixture,
+  options?: { externalIdPrefix?: string; referenceKey?: string; name?: string },
 ): Promise<PublishedTemplateWithReferenceFixture> {
   const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
   const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
@@ -993,9 +1008,8 @@ export async function preparePublishedTemplateWithLockedReference(
     throw new Error(`Demo master "${DEMO_MASTER_NAME}" was not found`)
   }
 
-  const module = await createApprovedContentModule(request)
-  const externalId = uniqueModuleCode('E2E-CM-PUB')
-  const referenceKey = 'E2E_LOCKED_REF'
+  const externalId = uniqueModuleCode(options?.externalIdPrefix ?? 'E2E-CM-PUB')
+  const referenceKey = options?.referenceKey ?? 'E2E_LOCKED_REF'
   const releaseVersion = '1.0.0'
 
   const createdTemplate = await authorizedPost<{ id: string; externalId: string }>(
@@ -1005,7 +1019,7 @@ export async function preparePublishedTemplateWithLockedReference(
     {
       externalId,
       groupCode: DEMO_GROUP_CODE,
-      name: `E2E publish lock ${externalId}`,
+      name: options?.name ?? `E2E publish lock ${externalId}`,
       description: 'P14-T01 publish lock Playwright fixture',
       masterId: master.id,
     },
@@ -1025,10 +1039,18 @@ export async function preparePublishedTemplateWithLockedReference(
   return {
     templateId: createdTemplate.id,
     externalId,
+    moduleId: module.moduleId,
     moduleCode: module.moduleCode,
     referenceKey,
     semanticVersion: module.semanticVersion,
   }
+}
+
+export async function preparePublishedTemplateWithLockedReference(
+  request: APIRequestContext,
+): Promise<PublishedTemplateWithReferenceFixture> {
+  const module = await createApprovedContentModule(request)
+  return preparePublishedTemplateReferencingModule(request, module)
 }
 
 export async function attachReferenceToDemoTemplate(

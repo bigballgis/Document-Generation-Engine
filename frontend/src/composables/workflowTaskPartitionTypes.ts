@@ -21,6 +21,7 @@ export type WorkflowTaskKind =
   | 'template-rework'
   | 'template-escalation'
   | 'clause-outdated-bump'
+  | 'template-annual-review'
   | 'content-module-review'
   | 'content-module-rework'
 
@@ -71,6 +72,7 @@ type TaskPartitionKind =
   | 'master-review'
   | 'master-rework'
   | 'clause-outdated-bump'
+  | 'template-annual-review'
   | 'content-module-review'
   | 'content-module-rework'
 

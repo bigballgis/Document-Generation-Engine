@@ -110,7 +110,8 @@ class TemplateLifecycleGovernanceServiceTest {
                 masterDocumentRepository,
                 masterRevisionLineRepository,
                 objectStoragePort,
-                new SelfApprovalGuard()
+                new SelfApprovalGuard(),
+                new TemplateAnnualReviewSupport(java.time.Clock.systemUTC())
         );
         groupAdmin = session(List.of("GROUP_ADMIN"), List.of("RETAIL"));
         templateId = UUID.randomUUID();
@@ -339,6 +340,7 @@ class TemplateLifecycleGovernanceServiceTest {
                 Instant.now(),
                 null,
                 null,
-                false, null);
+                false, null,
+                null);
     }
 }

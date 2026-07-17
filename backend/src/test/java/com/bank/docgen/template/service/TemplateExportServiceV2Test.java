@@ -343,8 +343,8 @@ class TemplateExportServiceV2Test {
                 "test-user",
                 "Test User",
                 true,
-                null
-        );
+                null,
+                null);
     }
 
     private com.bank.docgen.template.api.TemplateDetailView detailWithImageBinding() {
@@ -374,8 +374,8 @@ class TemplateExportServiceV2Test {
                 "test-user",
                 "Test User",
                 true,
-                null
-        );
+                null,
+                null);
     }
 
     private ApiPolicyView policyView() {
