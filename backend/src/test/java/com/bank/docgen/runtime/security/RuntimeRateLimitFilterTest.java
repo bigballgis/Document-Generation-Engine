@@ -107,7 +107,7 @@ class RuntimeRateLimitFilterTest {
                 mock(com.bank.docgen.apimgmt.persistence.ApiPolicyRepository.class),
                 mock(com.bank.docgen.template.persistence.TemplateRepository.class),
                 mock(com.bank.docgen.sharedkernel.security.PasswordHashService.class),
-                mock(com.bank.docgen.apimgmt.service.ConfigAdGroupResolver.class),
+                mock(com.bank.docgen.apimgmt.service.AdGroupResolver.class),
                 mock(com.bank.docgen.apimgmt.service.TemplateAdGroupAuthorizationCache.class),
                 objectMapper,
                 traceIdProvider,

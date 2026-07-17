@@ -2,8 +2,7 @@ package com.bank.docgen.runtime.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,7 +12,7 @@ import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
-import com.bank.docgen.apimgmt.service.ConfigAdGroupResolver;
+import com.bank.docgen.apimgmt.service.AdGroupResolver;
 import com.bank.docgen.apimgmt.service.TemplateAdGroupAuthorizationCache;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
@@ -51,7 +50,7 @@ class ApiCredentialAuthenticationFilterTest {
     @Mock
     private PasswordHashService passwordHashService;
     @Mock
-    private ConfigAdGroupResolver adGroupResolver;
+    private AdGroupResolver adGroupResolver;
     @Mock
     private MessageResolver messageResolver;
     @Mock
@@ -133,7 +132,7 @@ class ApiCredentialAuthenticationFilterTest {
         when(passwordHashService.matches("secret", credential.getSecretHash())).thenReturn(true);
         when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(template));
         when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
-        when(adGroupResolver.isAuthorized(eq("svc-caller"), any())).thenReturn(false);
+        when(adGroupResolver.resolveGroups("svc-caller")).thenReturn(List.of("grp-other"));
 
         MockHttpServletRequest request = runtimeRequest("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -144,6 +143,7 @@ class ApiCredentialAuthenticationFilterTest {
         JsonNode body = objectMapper.readTree(response.getContentAsString());
         assertThat(body.get("error").get("code").asText()).isEqualTo(ApiErrorCodes.ACCESS_DENIED);
         assertThat(body.get("error").get("category").asText()).isEqualTo("AUTHORIZATION");
+        verify(adGroupResolver).resolveGroups("svc-caller");
     }
 
     @Test
@@ -156,7 +156,6 @@ class ApiCredentialAuthenticationFilterTest {
         when(passwordHashService.matches("secret", credential.getSecretHash())).thenReturn(true);
         when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(template));
         when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
-        when(adGroupResolver.isAuthorized("svc-caller", List.of("grp-a"))).thenReturn(true);
         when(adGroupResolver.resolveGroups("svc-caller")).thenReturn(List.of("grp-a"));
 
         MockHttpServletRequest request = runtimeRequest("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract");
@@ -166,6 +165,7 @@ class ApiCredentialAuthenticationFilterTest {
         filter.doFilterInternal(request, response, chain);
 
         verify(chain).doFilter(request, response);
+        verify(adGroupResolver, atLeastOnce()).resolveGroups("svc-caller");
     }
 
     @Test
@@ -178,7 +178,6 @@ class ApiCredentialAuthenticationFilterTest {
         when(passwordHashService.matches("secret", credential.getSecretHash())).thenReturn(true);
         when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(template));
         when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
-        when(adGroupResolver.isAuthorized("svc-caller", List.of("grp-a"))).thenReturn(true);
         when(adGroupResolver.resolveGroups("svc-caller")).thenReturn(List.of("grp-a"));
 
         MockHttpServletRequest request = runtimeRequest("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract");

@@ -6,7 +6,8 @@ import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
-import com.bank.docgen.apimgmt.service.ConfigAdGroupResolver;
+import com.bank.docgen.apimgmt.service.AdGroupAuthorization;
+import com.bank.docgen.apimgmt.service.AdGroupResolver;
 import com.bank.docgen.apimgmt.service.TemplateAdGroupAuthorizationCache;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
@@ -41,7 +42,7 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
     private final ApiPolicyRepository apiPolicyRepository;
     private final TemplateRepository templateRepository;
     private final PasswordHashService passwordHashService;
-    private final ConfigAdGroupResolver adGroupResolver;
+    private final AdGroupResolver adGroupResolver;
     private final TemplateAdGroupAuthorizationCache authorizationCache;
     private final ObjectMapper objectMapper;
     private final TraceIdProvider traceIdProvider;
@@ -52,7 +53,7 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
             ApiPolicyRepository apiPolicyRepository,
             TemplateRepository templateRepository,
             PasswordHashService passwordHashService,
-            ConfigAdGroupResolver adGroupResolver,
+            AdGroupResolver adGroupResolver,
             TemplateAdGroupAuthorizationCache authorizationCache,
             ObjectMapper objectMapper,
             TraceIdProvider traceIdProvider,
@@ -206,7 +207,8 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
                     authorizationCache.rememberAllowedGroups(template.getId(), groups);
                     return groups;
                 });
-        if (!adGroupResolver.isAuthorized(accessAccount, allowedGroups)) {
+        List<String> callerGroups = adGroupResolver.resolveGroups(accessAccount);
+        if (!AdGroupAuthorization.isAuthorized(callerGroups, allowedGroups)) {
             throw new RuntimeAuthenticationException(
                     ApiErrorCodes.ACCESS_DENIED,
                     "api.error.runtime.adGroupDenied"
@@ -218,7 +220,7 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
                 template.getId(),
                 template.getExternalId(),
                 accessAccount,
-                adGroupResolver.resolveGroups(accessAccount)
+                callerGroups
         );
     }
 
