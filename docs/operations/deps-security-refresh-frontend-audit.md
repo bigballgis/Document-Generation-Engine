@@ -79,7 +79,7 @@ Exception Handling metadata per [quality-gate-threshold-baseline.md](../architec
 | **Risk (historical)** | Was **dev-only** (Vitest UI server). Production Docker UI / prod deps were never affected. |
 | **Owner** | Frontend platform / Task Master **#50** (`fe-vitest-3-upgrade`) |
 | **Expiration date** | N/A — **CLOSED** |
-| **Cleanup task id** | Task Master **#50** — Vitest 3.2.6+ upgrade (**implemented** 2026-07-17; merge/doc-sync pending orchestrator) |
+| **Cleanup task id** | Task Master **#50** — Vitest 3.2.7 upgrade (**Done** 2026-07-17; MAIN merge `6c8fff7d`; worktree removed; stage 12 doc-sync) |
 
 ### Closeout evidence (2026-07-17)
 

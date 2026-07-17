@@ -38,6 +38,6 @@ Related in-repo hygiene (does **not** close the org SCA gate): Task Master **#49
 | SBOM generation | **Done** (2026-07-02) | — |
 | Submission bundle + runbook | **Done** (2026-07-02) | — |
 | Intranet SCA upload | — | **Pending owner** (M9-T02) |
-| Remediation + re-gates | **In-repo Done** — Task Master **#49** (merge `08c7d56`); SBOM regenerated; Vitest Critical exception → **#50** | Org triage still after upload; #49 does **not** mark M9-T02 Done |
+| Remediation + re-gates | **In-repo Done** — Task Master **#49** (merge `08c7d56`) + **#50** Vitest 3.2.7 (merge `6c8fff7d`; GHSA-5xrq-8626-4rwp **CLOSED**); SBOM regenerated | Org triage still after upload; #49/#50 do **not** mark M9-T02 Done |
 
 **M9-T02 is not Done** until intranet submission is recorded in [sca-execution-log.md](./sca-execution-log.md).

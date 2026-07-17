@@ -36,7 +36,7 @@ Restore online/intranet dependency scan execution and frontend audit loop.
 | --- | --- | --- | --- | --- | --- |
 | M9-T01 | P0 | Platform | Backend SBOM generation (CycloneDX) | `.\scripts\generate-sbom.ps1 -BackendOnly` → `artifacts/sbom/backend-cyclonedx.json` | Done (in-repo 2026-07-02) |
 | M9-T02 | P0 | Platform | Frontend SBOM + intranet SCA | Step 1 Done; org SCA Steps 2–4 pending — [m9-t02-closure-plan.md](./m9-t02-closure-plan.md); related in-repo remediation **Done** under Task Master **#49** (`deps-security-refresh`, merge `08c7d56`) without closing org gate | In Progress |
-| M9-T03 | P1 | Platform | Renew/close security exceptions with metadata | Owner + expiry on any residual; **#49** documented Vitest Critical exception (cleanup **#50**) using this metadata pattern without marking M9-T03 Done | Not Started |
+| M9-T03 | P1 | Platform | Renew/close security exceptions with metadata | Owner + expiry on any residual; **#49** Vitest Critical exception closed by **#50** (merge `6c8fff7d`; GHSA-5xrq-8626-4rwp **CLOSED**) using this metadata pattern — does **not** mark M9-T03 Done | Not Started |
 
 ## Gate commands (when implementation exists)
 

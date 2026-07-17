@@ -6,8 +6,8 @@
 | **bdd_readiness** | **`not-applicable`** |
 | **Recorded** | 2026-07-17 |
 | **Formal phase** | **None** (no sole-active; do **not** activate CD-3) |
-| **Task Master** | **#50** (pending → delivery leaf) |
-| **Placement** | **ISOLATED** — `D:/working/DGE-fe-vitest-3-upgrade` · `feat/fe-vitest-3-upgrade` · base `c140f2bc` |
+| **Task Master** | **#50** → **Done** (merge `6c8fff7d`) |
+| **Placement** | Was **ISOLATED** — `D:/working/DGE-fe-vitest-3-upgrade` · `feat/fe-vitest-3-upgrade` (worktree **removed** after merge) |
 | **Parent residual** | [deps-security-refresh](./deps-security-refresh.md) (#49) Critical exception [GHSA-5xrq-8626-4rwp](https://github.com/advisories/GHSA-5xrq-8626-4rwp) |
 | **Evidence / exception SoT** | [deps-security-refresh-frontend-audit.md](../operations/deps-security-refresh-frontend-audit.md) |
 

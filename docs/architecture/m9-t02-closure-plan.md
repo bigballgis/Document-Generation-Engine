@@ -23,7 +23,7 @@ Close frontend dependency security baseline: SBOM generation + intranet SCA + re
 | 1 | Generate frontend CycloneDX SBOM (script or CI job) | **Done** (2026-07-02) — `pnpm -C frontend sbom` / `.\scripts\generate-sbom.ps1` |
 | 1b | Generate backend CycloneDX SBOM | **Done** (2026-07-02) — `mvn -f backend/pom.xml -Psbom package -DskipTests` via same script |
 | 2 | Submit to approved intranet SCA | **Procedure ready** (2026-07-02) — [intranet-sca-submission-runbook.md](../../evidence/security/intranet-sca-submission-runbook.md) + `prepare-sca-submission-bundle.ps1`; **org upload pending owner** |
-| 3 | Remediate or exception-track high/critical | **In-repo Done (related)** — Task Master **#49** Done (2026-07-13; merge `08c7d56`); Vitest Critical exception → **#50** expires 2026-10-13; **does not** mark M9-T02 Done |
+| 3 | Remediate or exception-track high/critical | **In-repo Done (related)** — Task Master **#49** Done (2026-07-13; merge `08c7d56`) + **#50** Vitest 3.2.7 Done (2026-07-17; merge `6c8fff7d`; GHSA-5xrq-8626-4rwp **CLOSED**); **does not** mark M9-T02 Done |
 | 4 | Re-run `pnpm -C frontend lint/type-check/test/build` | **In-repo Done** after #49 — org SCA triage still pending after upload |
 
 ## Related

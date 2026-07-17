@@ -56,12 +56,12 @@ These decisions are accepted as the frontend application foundation. More specia
 | **Security floor** | `vitest` **≥3.2.6**; `@vitest/coverage-v8` aligned to the same **3.2.6+** line. Vitest **4.x** remains out of scope unless separately confirmed. |
 | **Scope of amendment** | Unit/component test runner major line only (**Vitest 2.x → 3.x** / floor **≥3.2.6**). Does **not** invent Vue / Vite / Pinia / vue-router / vue-i18n major jumps. Vue Test Utils + Playwright unchanged. |
 | **Implementation surface** | `frontend/package.json` + `frontend/pnpm-lock.yaml` (+ Vitest config/harness only as needed) owned by **frontend-engineer** (pipeline stage 4). This ADR records the **accepted target** baseline before/with that change. |
-| **Exception closeout** | [deps-security-refresh-frontend-audit.md](../../operations/deps-security-refresh-frontend-audit.md) — remediation **authorized**; final **CLOSED** stamp after pins land and `pnpm audit` clears the finding. |
+| **Exception closeout** | [deps-security-refresh-frontend-audit.md](../../operations/deps-security-refresh-frontend-audit.md) — **CLOSED** 2026-07-17 (Task Master **#50**; merge `6c8fff7d`; pins `vitest@3.2.7` + `@vitest/coverage-v8@3.2.7`; `pnpm audit` clean). |
 
 **Consequences of this amendment:**
 
 - Frontend unit/component tests run on the Vitest **3.x** major line; harness/config deltas may be required for green `pnpm -C frontend test`.
-- The #49 Critical exception for GHSA-5xrq-8626-4rwp is no longer ADR-blocked; cleanup task **#50** owns the pin bump and audit closeout.
+- The #49 Critical exception for GHSA-5xrq-8626-4rwp is no longer ADR-blocked; cleanup task **#50** delivered the pin bump and audit closeout (**Done**).
 - Advisory remains **dev-only** (Vitest UI server); production Docker UI and `audit --prod` posture unchanged by this tooling line alone.
 - Rollback path for the upgrade slice: restore Vitest **2.1.9** + matching coverage peer and re-open the exception metadata if needed.
 

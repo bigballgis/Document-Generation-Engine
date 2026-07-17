@@ -688,16 +688,16 @@
       {
         "id": "50",
         "title": "Frontend: Vitest 3.2.6+ upgrade (GHSA-5xrq-8626-4rwp cleanup)",
-        "description": "IN PROGRESS 2026-07-17. Slice fe-vitest-3-upgrade. Cleanup for deps-security-refresh (#49) Critical exception GHSA-5xrq-8626-4rwp. Upgrade vitest + @vitest/coverage-v8 from 2.1.9 to >=3.2.6. Exception expires 2026-10-13. Formal phase None. Sole-active delivery leaf (tooling; not CE). Do NOT activate CD-3. Do NOT claim go-live. Do NOT mark #53 Done.",
-        "details": "Activated 2026-07-17 via user «继续剩余任务». Slice id: fe-vitest-3-upgrade. Placement ISOLATED D:/working/DGE-fe-vitest-3-upgrade · feat/fe-vitest-3-upgrade · base c140f2bc. Batch recommendation solo (member_task_ids: [\"50\"]). BDD not-applicable (tooling). Scope: bump vitest / @vitest/coverage-v8 to >=3.2.6; adjust configs/tests as needed; clear pnpm audit Critical; refresh or close exception docs; keep frontend lint/type-check/test/build green. Evidence: docs/operations/deps-security-refresh-frontend-audit.md Exception section. Formal phase remains None. Umbrella #53 stays in-progress (registry only). Do NOT activate CD-3 / CE-O02 / go-live.",
+        "description": "DONE 2026-07-17. Slice fe-vitest-3-upgrade merged to main (6c8fff7d). vitest + @vitest/coverage-v8 2.1.9 → 3.2.7; GHSA-5xrq-8626-4rwp CLOSED; ADR-0029 Vitest 3.x floor ≥3.2.6. FE lint/type-check/test/build GREEN (251 files / 1539 tests); pnpm audit clean. BDD not-applicable. Formal phase None. Worktree removed. Do NOT activate CD-3. Do NOT claim go-live. Do NOT mark #53 Done.",
+        "details": "Completed 2026-07-17 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: fe-vitest-3-upgrade. Placement was ISOLATED D:/working/DGE-fe-vitest-3-upgrade · feat/fe-vitest-3-upgrade (removed). Merge ff 6c8fff7d2c729856ebbeb785861d357c65a773b8. Delivered: vitest@3.2.7 + @vitest/coverage-v8@3.2.7; ADR-0029 amended; exception CLOSED in deps-security-refresh-frontend-audit.md; quality-gate-threshold-baseline exception row closed. Gates: pnpm -C frontend lint/type-check/test/build GREEN (251/1539); pnpm audit clean; architecture PASS_WITH_NOTES GO; E2E/UIUX/deploy N/A tooling-only; CQ skipped. Formal phase remains None. Umbrella #53 stays in-progress (registry only). Do NOT activate CD-3 / CE-O02 / go-live.",
         "testStrategy": "1. ADR / user confirmation recorded before major bump. 2. vitest >= 3.2.6 and coverage peer aligned. 3. pnpm -C frontend audit shows GHSA-5xrq-8626-4rwp remediated (or exception closed). 4. pnpm -C frontend lint && type-check && test && build GREEN. 5. Exception row in deps-security-refresh-frontend-audit.md closed or renewed with new expiry. 6. Formal phase stays None unless plan-orchestrator activates otherwise.",
         "priority": "medium",
         "dependencies": [
           "49"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T10:32:00.000Z"
+        "updatedAt": "2026-07-17T10:54:00.000Z"
       },
       {
         "id": "51",
@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #77 CE-G05 → Done (merge c3f6a288 / feature 744b628a). P3 queue empty (#96/#97/#80/#77 all Done). Host sole-active delivery leaf is non-CE #50 (fe-vitest-3-upgrade) — #53 is registry only, NOT a delivery leaf. Do NOT claim program Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#77/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3 queue empty. Host sole-active is tooling #50 (slice fe-vitest-3-upgrade) — not a CE leaf; do NOT treat #53 as delivery leaf. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-17. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. Prior waves closed. #77 CE-G05 → Done (merge c3f6a288 / feature 744b628a). P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done (merge 6c8fff7d) — not a CE leaf. No sole-active delivery leaf. #53 is registry only, NOT a delivery leaf. Do NOT claim program Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. #62/#63/#69/#70/#71/#74/#75/#76/#77/#78/#79/#80/#81/#88/#89/#90/#91/#92/#93/#94/#95/#96/#97 Done. P2 continuum complete with U21. P3 queue empty. Tooling #50 Done (6c8fff7d) — not a CE leaf; do NOT treat #53 as delivery leaf. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-17T10:32:00.000Z"
+        "updatedAt": "2026-07-17T10:54:00.000Z"
       },
       {
         "id": "54",
