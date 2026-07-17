@@ -154,7 +154,8 @@ class AdGroupResolverGuardTest {
     }
 
     @Test
-    void prodComposeFileDocumentsLabOnlyConfigStubOverride() throws Exception {
+    void prodComposeFileDefaultsAdStubLabOverrideOff() throws Exception {
+        // BDD-PRR-B01-TPC-005 — claimed production must not default stub allow to true.
         Path compose = Path.of("..").resolve("docker-compose.prod.yml").toAbsolutePath().normalize();
         if (!Files.isRegularFile(compose)) {
             compose = Path.of("docker-compose.prod.yml").toAbsolutePath().normalize();
@@ -162,7 +163,22 @@ class AdGroupResolverGuardTest {
         String content = Files.readString(compose);
         org.assertj.core.api.Assertions.assertThat(content)
                 .contains("DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE")
+                .contains("DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB:-false")
+                .doesNotContain("DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB:-true")
                 .containsIgnoringCase("LAB ONLY");
+    }
+
+    @Test
+    void labComposeOverlayEnablesAdStubForLocalAcceptance() throws Exception {
+        Path lab = Path.of("..").resolve("docker-compose.lab.yml").toAbsolutePath().normalize();
+        if (!Files.isRegularFile(lab)) {
+            lab = Path.of("docker-compose.lab.yml").toAbsolutePath().normalize();
+        }
+        String content = Files.readString(lab);
+        org.assertj.core.api.Assertions.assertThat(content)
+                .containsIgnoringCase("LAB ONLY")
+                .contains("DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE")
+                .contains("DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB:-true");
     }
 
     private static MockEnvironment softDevEnvironment() {

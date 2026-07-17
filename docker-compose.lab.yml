@@ -1,0 +1,20 @@
+# LAB ONLY — local Docker acceptance / E2E overlay.
+# Usage (explicit; never claim as production):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.lab.yml --profile prod up -d
+#
+# Stacks on claimed-production defaults from docker-compose.prod.yml and re-enables
+# acceptance knobs (AD config stub, demo classpath). This is NOT enterprise AD/LDAP
+# and MUST NOT be used as a claimed production entry. Company LDAP coords remain UNKNOWN —
+# do not invent directory hosts.
+#
+# Prefer: .\scripts\docker-deploy.ps1 (includes this overlay for single-host acceptance).
+
+services:
+  docgen-backend:
+    environment:
+      # Soft environment label for local acceptance (prod Spring profile still active).
+      APP_ENVIRONMENT: ${LAB_APP_ENVIRONMENT:-dev}
+      # LAB ONLY — ConfigAdGroupResolver + YAML account-groups for E2E (ADR-0054).
+      DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE: ${DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB:-true}
+      # LAB ONLY — demo classpath image tier for local fixture paths.
+      DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED: ${DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED:-true}

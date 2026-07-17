@@ -46,7 +46,17 @@ Evidence is written to `artifacts/release-gate/<timestamp>/`.
 
 **KAFKA_IMAGE (any compose with `docgen-kafka`):** Export a full image reference before `docker compose config` / `up`. Compose uses `${KAFKA_IMAGE:?KAFKA_IMAGE must be set}` (**no** `:-bitnamilegacy…` silent default). Production / acceptance **must** use an operator-supplied **company-approved** registry coordinate shaped like `<company-registry>/<kafka-image>:<tag>` — the company registry hostname is **UNKNOWN** in-repo; **do not** invent a private registry hostname as a production fact. Local/dev may copy the Hub example from [`.env.example`](../../.env.example) (`bitnamilegacy/kafka:3.7`) — **LOCAL/DEV ONLY**, never a claimed production coordinate. Behavior SoT: [BDD-OPS-KAFKA-REGISTRY-001](../behavior/ops-kafka-company-registry.md). Checklist [#10](./launch-readiness-checklist.md) is **CONDITIONAL** — clearing the Hub-hardcode path alone is **not** go-live; overall checklist remains **NO-GO**.
 
-**AD Group resolver (acceptance / prod):** Do **not** silently run with `docgen.ad-group-resolver.type=config` (YAML `account-groups` stub) as production directory resolution. `AdGroupResolverGuard` refuses config stubs whenever the `prod` profile is active (even if `APP_ENVIRONMENT=dev`) **or** the process is outside soft `dev`/`local`/`test` — same honesty as JWT-C3. Unimplemented non-config types (`ldap` / `directory` / …) also fail closed (no invented LDAP client in-repo). **Local docker acceptance LAB ONLY:** `docker-compose.prod.yml` sets `DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE` from `${DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB:-true}` so E2E can keep using the config map; this is **not** enterprise AD. Claimed production must omit the override (or set `false`) and supply a real directory adapter when available — company LDAP coords remain **UNKNOWN**; **do not** invent hostnames. Local/dev/test (no `prod` profile) may keep `type=config` + demo `account-groups`. Behavior SoT: [BDD-OPS-AD-GROUP-STUB-001](../behavior/ops-ad-group-stub-close.md). Checklist [#5a](./launch-readiness-checklist.md) stays **NO-GO** until guard + evidence (docs-first ADR alone does **not** flip it) — overall checklist remains **NO-GO**.
+**True prod contract (claimed production vs LAB):** [BDD-PRR-B01-TPC](../behavior/prod-true-prod-contract.md) —
+`docker-compose.prod.yml` defaults are claimed-production shape (`SPRING_PROFILES_ACTIVE=prod` only,
+`APP_ENVIRONMENT=prod`, `ASYNC_TRANSPORT=kafka`, AD stub LAB default **false**, demo classpath default
+**false**). `ProductionAsyncTransportGuard` enforces kafka whenever the `prod` profile is active
+(aligned with JWT / AD guards — `prod,dev` no longer bypasses). **Local docker acceptance / E2E**
+must explicitly stack `docker-compose.lab.yml` (**LAB ONLY** — AD stub + demo classpath); that overlay
+is **not** a claimed production entry. Helm claimed production: `values-prod.yaml`
+(`springProfilesActive=prod`, `appEnvironment=prod`, `asyncTransport=kafka`). Checklist **#5a** stays
+**CONDITIONAL** (no invented LDAP coords) — overall checklist remains **NO-GO**; **not** a go-live claim.
+
+**AD Group resolver (acceptance / prod):** Do **not** silently run with `docgen.ad-group-resolver.type=config` (YAML `account-groups` stub) as production directory resolution. `AdGroupResolverGuard` refuses config stubs whenever the `prod` profile is active (even if `APP_ENVIRONMENT=dev`) **or** the process is outside soft `dev`/`local`/`test` — same honesty as JWT-C3. Unimplemented non-config types (`ldap` / `directory` / …) also fail closed (no invented LDAP client in-repo). **Local docker acceptance LAB ONLY:** stack `docker-compose.lab.yml` (or set `DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB=true`) so E2E can keep using the config map; this is **not** enterprise AD. Claimed production (`docker-compose.prod.yml` alone) defaults the override to **false** and fail-closes without a real directory adapter — company LDAP coords remain **UNKNOWN**; **do not** invent hostnames. Local/dev/test (no `prod` profile) may keep `type=config` + demo `account-groups`. Behavior SoT: [BDD-OPS-AD-GROUP-STUB-001](../behavior/ops-ad-group-stub-close.md) / [BDD-PRR-B01-TPC](../behavior/prod-true-prod-contract.md). Checklist [#5a](./launch-readiness-checklist.md) stays **CONDITIONAL** until real directory evidence — overall checklist remains **NO-GO**.
 
 ```powershell
 # Example — operator-generated secret (never commit; never reuse local-dev / prod-change-me placeholders)
@@ -56,21 +66,27 @@ $env:KAFKA_IMAGE = '<company-registry>/<kafka-image>:<tag>'
 # Local/dev only — may use the documented Hub example from .env.example (never claim as production)
 # $env:KAFKA_IMAGE = 'bitnamilegacy/kafka:3.7'
 # AD Group: do not silently use type=config on claimed production.
-# Local docker acceptance (LAB ONLY): compose defaults DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB=true
-# so E2E keeps ConfigAdGroupResolver — NOT enterprise AD. Claimed production: omit / set false
-# and supply a real directory adapter when available (coords UNKNOWN — do not invent hostnames).
+# Local docker acceptance (LAB ONLY): stack docker-compose.lab.yml (or set stub=true).
+# Claimed production: omit LAB overlay / leave stub false; supply a real directory adapter when available
+# (coords UNKNOWN — do not invent hostnames).
 # $env:DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB = 'true'   # LAB ONLY
 # $env:DOCGEN_AD_GROUP_RESOLVER_TYPE = '<directory-spi-type>'  # placeholder; not config
 ```
 
-Build backend JAR first, then start the prod compose profile:
+Build backend JAR first, then start the **claimed production** compose profile:
 
 ```powershell
 mvn -B -ntp -f backend/pom.xml package -DskipTests
 docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d --build
 ```
 
-Queued single-host acceptance deploy (preferred on this machine):
+Local acceptance / E2E (**LAB ONLY** — not claimed production):
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.lab.yml --profile prod up -d --build
+```
+
+Queued single-host acceptance deploy (preferred on this machine; includes LAB overlay via `docker-deploy.ps1`):
 
 ```powershell
 $env:JWT_SECRET = '<explicit-non-default-≥32-bytes>'
@@ -250,7 +266,7 @@ Expect `# HELP` lines for JVM and HTTP metrics. After LR-D3 instrumentation, als
 | --- | --- |
 | `JWT_SECRET` | Management JWT signing (**min 32 bytes**). **Must be explicitly provisioned** (env / `.env` / Secret Manager / cluster Secret) for acceptance/prod compose, queued Docker deploy, and prod-shaped scripts (e.g. `container-hardening-smoke.ps1`) — compose uses `${JWT_SECRET:?…}` (**no** `:-` default) and scripts must **not** silently fall back. Known insecure values (`local-dev-only-change-me-please-32bytes-min`, `prod-change-me-32-bytes-minimum-secret`) are **refused fail-closed** on acceptance/prod paths (logs must not print the secret). Local `dev`/`local`/`test` may use documented test secrets (see [`.env.example`](../../.env.example)). Behavior SoT: [BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md). Checklist [#9](./launch-readiness-checklist.md) is **GO** (merge `587cd9a`) — **overall checklist remains NO-GO**; **not** a go-live claim. |
 | `KAFKA_IMAGE` | Full Kafka container image reference for `docgen-kafka` (registry/repo/tag). **Required** for any compose file set that defines `docgen-kafka` (including prod overlay that `depends_on` it). Compose uses `${KAFKA_IMAGE:?KAFKA_IMAGE must be set}` (**no** `:-bitnamilegacy…` silent default; **no** hardcoded Hub image as the sole prod path). **Production / acceptance:** operator must supply a **company-approved** coordinate (`<company-registry>/<kafka-image>:<tag>`). Company registry hostname is **UNKNOWN** in this repository — **do not** invent a private registry hostname and treat it as production fact. **Local/dev only:** [`.env.example`](../../.env.example) may document `bitnamilegacy/kafka:3.7` as a non-production example — never claim it as the production coordinate. Behavior SoT: [BDD-OPS-KAFKA-REGISTRY-001](../behavior/ops-kafka-company-registry.md). Checklist [#10](./launch-readiness-checklist.md) is **CONDITIONAL** (path remediated; no company pull evidence → not GO) — **overall checklist remains NO-GO**; **not** a go-live claim. |
-| `docgen.ad-group-resolver.type` / `DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB` | AD Group resolution source. **`config` = local/dev/test only** (`ConfigAdGroupResolver` + `account-groups` YAML). **Acceptance / production:** `AdGroupResolverGuard` refuses `type=config` on `prod` profile (even if `APP_ENVIRONMENT=dev`) unless **LAB ONLY** override `docgen.ad-group-resolver.allow-config-stub-on-prod-profile=true` (compose: `DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE` / shorthand `DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB`). Unimplemented non-config types also fail closed. Claimed production must omit the lab override and supply a real directory adapter when available. Company LDAP/AD coordinates **UNKNOWN** — **do not** invent hostnames. Behavior SoT: [BDD-OPS-AD-GROUP-STUB-001](../behavior/ops-ad-group-stub-close.md) / [ADR-0054](../adr/authorization-security/0054-ad-group-resolver-production-boundary.md). Checklist [#5a](./launch-readiness-checklist.md) remains **NO-GO** until implement + evidence — **overall checklist remains NO-GO**; **not** a go-live claim. |
+| `docgen.ad-group-resolver.type` / `DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB` | AD Group resolution source. **`config` = local/dev/test only** (`ConfigAdGroupResolver` + `account-groups` YAML). **Claimed production** (`docker-compose.prod.yml`): stub LAB default **false**; `AdGroupResolverGuard` refuses `type=config` on `prod` profile unless **LAB ONLY** overlay/`true`. **Local acceptance:** stack `docker-compose.lab.yml`. Unimplemented non-config types also fail closed. Company LDAP/AD coordinates **UNKNOWN** — **do not** invent hostnames. Behavior SoT: [BDD-OPS-AD-GROUP-STUB-001](../behavior/ops-ad-group-stub-close.md) / [BDD-PRR-B01-TPC](../behavior/prod-true-prod-contract.md) / [ADR-0054](../adr/authorization-security/0054-ad-group-resolver-production-boundary.md). Checklist [#5a](./launch-readiness-checklist.md) remains **CONDITIONAL** until implement + evidence — **overall checklist remains NO-GO**; **not** a go-live claim. |
 | `POSTGRES_*` | Database connection |
 | `MINIO_*` | Object storage |
 | `APP_ENVIRONMENT` | Runtime environment label |
