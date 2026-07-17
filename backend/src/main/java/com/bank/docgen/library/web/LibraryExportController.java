@@ -29,14 +29,16 @@ public class LibraryExportController {
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletResponse response
     ) throws IOException {
-        LibraryExportService.LibraryExportZipArtifact artifact =
-                libraryExportService.exportLibrary(request, session);
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/zip");
-        response.setHeader(
-                HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + artifact.filename() + "\""
-        );
-        response.getOutputStream().write(artifact.content());
+        try (LibraryExportService.LibraryExportZipArtifact artifact =
+                libraryExportService.exportLibrary(request, session)) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/zip");
+            response.setHeader(
+                    HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + artifact.filename() + "\""
+            );
+            response.setContentLengthLong(artifact.contentLength());
+            artifact.transferTo(response.getOutputStream());
+        }
     }
 }
