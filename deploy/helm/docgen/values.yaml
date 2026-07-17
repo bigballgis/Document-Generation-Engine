@@ -94,9 +94,11 @@ frontend:
     minAvailable: 1
 
 # Non-sensitive runtime configuration (rendered into ConfigMap).
+# Chart baseline is NOT claimed production — use values-prod.yaml for prod/prod + kafka.
 config:
-  springProfilesActive: prod
+  springProfilesActive: dev
   appEnvironment: dev
+  asyncTransport: in-process
   storageProvider: minio
   storageBucket: docgen-artifacts
   seedDemoCatalog: false

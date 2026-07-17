@@ -8,6 +8,7 @@ metadata:
 data:
   SPRING_PROFILES_ACTIVE: {{ .Values.config.springProfilesActive | quote }}
   APP_ENVIRONMENT: {{ .Values.config.appEnvironment | quote }}
+  ASYNC_TRANSPORT: {{ .Values.config.asyncTransport | default "in-process" | quote }}
   POSTGRES_HOST: {{ required "externalServices.postgres.host is required" .Values.externalServices.postgres.host | quote }}
   POSTGRES_PORT: {{ .Values.externalServices.postgres.port | toString | quote }}
   POSTGRES_DB: {{ .Values.externalServices.postgres.database | quote }}

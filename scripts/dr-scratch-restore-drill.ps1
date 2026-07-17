@@ -125,7 +125,8 @@ function Write-Log([string]$Message) {
 Write-Log "Confirmation gate PASSED: $ConfirmPhrase (verifier=$Verifier); acceptanceProject=$AcceptanceProject"
 
 $composeBase = @("-p", $ScratchProject, "-f", "docker-compose.yml")
-$composeProd = $composeBase + @("-f", "docker-compose.prod.yml", "--profile", "prod")
+# Scratch drill uses LAB overlay (AD stub) — not a claimed production entry.
+$composeProd = $composeBase + @("-f", "docker-compose.prod.yml", "-f", "docker-compose.lab.yml", "--profile", "prod")
 
 # --- Stop acceptance (containers only; NEVER -v) ---
 if (-not $SkipAcceptanceStop) {
@@ -137,7 +138,7 @@ if (-not $SkipAcceptanceStop) {
     }
     # Also try compose stop if project known
     if ($AcceptanceProject) {
-        docker compose -p $AcceptanceProject -f docker-compose.yml -f docker-compose.prod.yml --profile prod stop 2>$null | Out-Null
+        docker compose -p $AcceptanceProject -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.lab.yml --profile prod stop 2>$null | Out-Null
     }
 }
 
@@ -421,7 +422,7 @@ docker volume rm "${ScratchProject}_docgen-minio-data" 2>$null | Out-Null
 if (-not $SkipAcceptanceRestart -and $AcceptanceProject) {
     Write-Log "Restarting prior acceptance project=$AcceptanceProject (SkipBuild path)"
     docker compose -p $AcceptanceProject -f docker-compose.yml up -d docgen-postgres docgen-redis docgen-minio docgen-kafka
-    docker compose -p $AcceptanceProject -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d --no-build docgen-backend docgen-frontend
+    docker compose -p $AcceptanceProject -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.lab.yml --profile prod up -d --no-build docgen-backend docgen-frontend
     Write-Log "Acceptance restart issued; verify /healthz externally if needed"
 } elseif (-not $SkipAcceptanceRestart) {
     Write-Log "No AcceptanceProject detected — operator should run .\scripts\docker-deploy-queue.ps1 -SkipBuild from MAIN"

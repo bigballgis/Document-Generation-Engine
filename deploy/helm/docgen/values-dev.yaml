@@ -13,7 +13,9 @@ frontend:
     tag: dev
 
 config:
+  springProfilesActive: dev
   appEnvironment: dev
+  asyncTransport: in-process
   seedDemoCatalog: true
 
 externalServices:

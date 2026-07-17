@@ -12,7 +12,7 @@ referenced via `ConfigMap` / `Secret` only — no in-cluster StatefulSets.
 | `values.yaml` | Base defaults (securityContext, resources, probes, config) |
 | `values-dev.yaml` | Dev overrides (single replica, demo seed, dev endpoints) |
 | `values-staging.yaml` | Staging overrides (Ingress + TLS; single backend replica per ADR-0044) |
-| `values-prod.yaml` | Production overrides (blue-green, stricter network egress; single backend replica per ADR-0044) |
+| `values-prod.yaml` | Claimed production overrides (`springProfilesActive=prod`, `appEnvironment=prod`, `asyncTransport=kafka`; blue-green; single backend replica per ADR-0044) |
 | `templates/` | Deployments, Services, Ingress, HPA, NetworkPolicy, ConfigMap, Secret refs |
 | `templates/_helpers.tpl` | Shared securityContext helpers |
 

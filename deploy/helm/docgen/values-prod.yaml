@@ -27,7 +27,10 @@ frontend:
       memory: 512Mi
 
 config:
+  # BDD-PRR-B01-TPC-010 — claimed production install: prod profile + prod environment + kafka.
+  springProfilesActive: prod
   appEnvironment: prod
+  asyncTransport: kafka
   seedDemoCatalog: false
 
 externalServices:

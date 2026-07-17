@@ -8,9 +8,11 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $RepoRoot
 
+# LAB overlay required for local acceptance (AD stub); claimed prod = prod.yml alone.
 $composeArgs = @(
     "-f", "docker-compose.yml",
     "-f", "docker-compose.prod.yml",
+    "-f", "docker-compose.lab.yml",
     "--profile", "prod"
 )
 

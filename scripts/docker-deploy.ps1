@@ -88,9 +88,12 @@ if ($kafkaImage -match '(?i)bitnamilegacy') {
 # Ensure compose substitution sees the resolved value even when only present in .env.
 $env:KAFKA_IMAGE = $kafkaImage
 
+# Local single-host acceptance = claimed-prod compose + explicit LAB overlay (BDD-PRR-B01-TPC).
+# docker-compose.prod.yml alone is claimed production (no AD stub / demo classpath defaults).
 $composeArgs = @(
     "-f", "docker-compose.yml",
     "-f", "docker-compose.prod.yml",
+    "-f", "docker-compose.lab.yml",
     "--profile", "prod"
 )
 

@@ -20,7 +20,10 @@ frontend:
     tag: staging
 
 config:
+  # Preserve pre-TPC staging guard surface (prod profile + non-dev environment).
+  springProfilesActive: prod
   appEnvironment: staging
+  asyncTransport: kafka
   seedDemoCatalog: false
 
 externalServices:
