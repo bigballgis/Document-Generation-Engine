@@ -4,6 +4,7 @@ import com.bank.docgen.library.service.AssetLibraryAccessDeniedException;
 import com.bank.docgen.library.service.AssetLibraryConflictException;
 import com.bank.docgen.library.service.AssetLibraryNotFoundException;
 import com.bank.docgen.library.service.AssetLibraryValidationException;
+import com.bank.docgen.library.service.LibraryExportValidationException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
@@ -68,6 +69,20 @@ public class AssetLibraryExceptionAdvice {
     public ResponseEntity<ErrorEnvelope> handleValidation(
             HttpServletRequest request,
             AssetLibraryValidationException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.errorCode(),
+                ApiErrorCategories.VALIDATION,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(LibraryExportValidationException.class)
+    public ResponseEntity<ErrorEnvelope> handleLibraryExportValidation(
+            HttpServletRequest request,
+            LibraryExportValidationException ex
     ) {
         return errorEnvelopeFactory.domainError(
                 request,

@@ -508,6 +508,29 @@ public class ManagementAuditRecorder {
     }
 
     @Transactional
+    public void recordLibraryExport(
+            String exportBatchId,
+            String scopeSelection,
+            int includedCount,
+            int skippedCount,
+            int failedCount,
+            int omittedUnauthorizedOrUnknownCount,
+            String actorUsername,
+            String actorSummary
+    ) {
+        templateTransferAuditRecorder.recordLibraryExport(
+                exportBatchId,
+                scopeSelection,
+                includedCount,
+                skippedCount,
+                failedCount,
+                omittedUnauthorizedOrUnknownCount,
+                actorUsername,
+                actorSummary
+        );
+    }
+
+    @Transactional
     public void recordLegalHoldCreated(
             LegalHoldEntity hold,
             String actorUsername,

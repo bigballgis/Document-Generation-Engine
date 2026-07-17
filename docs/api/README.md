@@ -146,3 +146,19 @@ Management asset catalog routes in [openapi-v1.yaml](openapi-v1.yaml) / [contrac
 | Not found (authorized admin) | 404 | `api.error.assetLibrary.assetNotFound` |
 
 Behavior SoT: [ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md). Permissions: [permission-matrix.md](../security/permission-matrix.md) §13.2.
+
+### Full-library export (CE-E03)
+
+Management full-library export in [openapi-v1.yaml](openapi-v1.yaml) (`exportLibraryTemplates`) / [contract-outline.md](contract-outline.md) «模板导出/导入契约» CE-E03:
+
+- `POST /api/management/v1/library/export` — optional JSON body (`groupId` / `templateIds` / `includeSkipped`); success `200` `application/zip` (`template-library-export-v1-zip`: root manifest + nested E01 v2 per-template ZIPs + deduped `masters/` / `clauses/`)
+
+Schemas: `LibraryExportRequest`, `LibraryExportManifestView`. **No** library-import path. **No** `Idempotency-Key` requirement. FE/E2E out of scope (API-first).
+
+| Condition | HTTP | `error.messageKey` |
+| --- | --- | --- |
+| No exportable INCLUDED templates | 422 | `api.error.library.exportEmpty` |
+| `templateIds` or eligible candidates > 500 | 422 | `api.error.library.exportLimitExceeded` |
+| Caller lacks matrix §5 export-template permission | 403 | `api.error.template.accessDenied` (same boundary as single-template export) |
+
+Permission reuse: [permission-matrix.md](../security/permission-matrix.md) §5「导出模板」— no new permission code. Behavior SoT: [ce-e03-full-library-export.md](../behavior/ce-e03-full-library-export.md).

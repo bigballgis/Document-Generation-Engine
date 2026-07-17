@@ -52,7 +52,7 @@ class ManagementOpenApiPathSanityTest {
         if (path.startsWith("/api/management/v1/content-modules")) {
             return java.util.Optional.of("com.bank.docgen.contentmodule");
         }
-        if (path.startsWith("/api/management/v1/library/assets")) {
+        if (path.startsWith("/api/management/v1/library/")) {
             return java.util.Optional.of("com.bank.docgen.library");
         }
         if (path.startsWith("/api/management/v1/legal-holds")) {

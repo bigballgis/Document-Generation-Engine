@@ -126,6 +126,13 @@ public final class ApiErrorCodes {
     /** CE-E02: catalog key not found for authorized admin. */
     public static final String ASSET_LIBRARY_ASSET_NOT_FOUND = "ASSET_LIBRARY_ASSET_NOT_FOUND";
 
+    /** CE-E03: full-library export produced no INCLUDED templates. */
+    public static final String LIBRARY_EXPORT_EMPTY = "LIBRARY_EXPORT_EMPTY";
+    /** CE-E03: templateIds length or eligible candidates exceed 500. */
+    public static final String LIBRARY_EXPORT_LIMIT_EXCEEDED = "LIBRARY_EXPORT_LIMIT_EXCEEDED";
+    /** CE-E03: full-library ZIP assembly or catalog serialization failed. */
+    public static final String LIBRARY_EXPORT_FAILED = "LIBRARY_EXPORT_FAILED";
+
     /** CE-G04: legal hold not found. */
     public static final String LEGAL_HOLD_NOT_FOUND = "LEGAL_HOLD_NOT_FOUND";
     /** CE-G04: release requested on already RELEASED hold. */
