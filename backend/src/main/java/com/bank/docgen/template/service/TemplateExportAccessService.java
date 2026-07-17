@@ -15,10 +15,23 @@ public class TemplateExportAccessService {
     }
 
     public void assertCanExport(TemplateEntity template, ManagementSessionClaims session) {
-        assertCanImportForGroup(template.getGroupCode(), session);
-        if (isTemplateAuthorOnly(session) && !session.username().equals(template.getCreatedBy())) {
+        if (!canExport(template, session)) {
             throw new TemplateAccessDeniedException();
         }
+    }
+
+    /** CE-E03: non-throwing per-template export authorization check. */
+    public boolean canExport(TemplateEntity template, ManagementSessionClaims session) {
+        if (!groupAccessService.canExportTemplates(session)) {
+            return false;
+        }
+        if (!groupAccessService.canAccessGroup(session, template.getGroupCode())) {
+            return false;
+        }
+        if (isTemplateAuthorOnly(session) && !session.username().equals(template.getCreatedBy())) {
+            return false;
+        }
+        return true;
     }
 
     public void assertCanImportForGroup(String groupCode, ManagementSessionClaims session) {

@@ -100,6 +100,21 @@ public class TemplateExportService {
         return new TemplateExportZipArtifact(buildZipFilename(built.bundle()), zipBytes);
     }
 
+    /**
+     * CE-E03: build an E01 v2 ZIP without recording {@code TEMPLATE_EXPORTED}
+     * (library batch audit owns {@code LIBRARY_EXPORT}).
+     */
+    @Transactional(readOnly = true)
+    public BuiltV2Export buildV2ExportWithoutAudit(UUID templateId, ManagementSessionClaims session) {
+        BuiltExport built = buildExport(templateId, session, 2);
+        byte[] zipBytes = zipBundleV2(built.bundle(), built.masterDocxBytes());
+        return new BuiltV2Export(built.bundle(), built.masterDocxBytes(), zipBytes);
+    }
+
+    public static boolean isExportEligible(TemplateLifecycleStatus status) {
+        return EXPORT_ELIGIBLE.contains(status);
+    }
+
     private BuiltExport buildExport(UUID templateId, ManagementSessionClaims session, int bundleVersion) {
         if (bundleVersion != 1 && bundleVersion != 2) {
             throw new TemplateValidationException("api.error.template.exportFormatUnsupported");
@@ -225,6 +240,21 @@ public class TemplateExportService {
     public record TemplateExportZipArtifact(String filename, byte[] content) {
         public TemplateExportZipArtifact {
             content = com.bank.docgen.sharedkernel.api.DefensiveCopies.copyBytes(content);
+        }
+    }
+
+    public record BuiltV2Export(
+            TemplateExportBundleView bundle,
+            byte[] masterDocxBytes,
+            byte[] zipBytes
+    ) {
+        public BuiltV2Export {
+            masterDocxBytes = masterDocxBytes == null
+                    ? new byte[0]
+                    : com.bank.docgen.sharedkernel.api.DefensiveCopies.copyBytes(masterDocxBytes);
+            zipBytes = zipBytes == null
+                    ? new byte[0]
+                    : com.bank.docgen.sharedkernel.api.DefensiveCopies.copyBytes(zipBytes);
         }
     }
 

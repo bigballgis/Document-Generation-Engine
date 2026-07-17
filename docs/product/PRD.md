@@ -772,6 +772,7 @@ v1 不新增发布前或发布后中间状态。发布前检查、生成预览�
 - 导入生产遇到已有相同模板 ID 时，保留模板 ID，并在目标环境创建新的开发版本；模板发布版本号在后续发布时再由模板编排人员或管理员选择。
 - 导入生产不重新生成模板 ID 或 API 地址；导入后的模板仍需从草稿重新经过测试、审批、待发布和发布流程后才可形成新的发布版本。
 - **CE-E01（2026-07-16）：** 跨环境晋级可使用自包含导出包 v2（ZIP 内嵌钉扎母版 DOCX + 条款正文快照 + render profile + 资产键清单）。母版指纹消费 CE-K01 发布钉扎（`master_revision_id` / `master_file_hash`）。导入前可 dry-run 获取依赖预检报告，避免导入后半残；提交导入事务化落地草稿。默认导出保持 v1 兼容；管理端 dry-run/导出 UI 本片不交付（API-first）。行为规格：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)；钉扎上游：[ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)。
+- **CE-E03（2026-07-17）：** 授权管理员/编排人员可一次导出授权范围内全部（或筛选后的）合格模板为全库 ZIP：根 manifest + 每个模板的 E01 v2 自包含包 + 去重母版/条款批量目录；资产仅列键。管理端全库导出 UI 与全库导入本片不交付（API-first）。行为规格：[ce-e03-full-library-export.md](../behavior/ce-e03-full-library-export.md)。
 - **CE-E02（2026-07-16）：** 管理端提供平台共享资产库（上传 / 列表 / 停用图片与签章资产）；键名约定固化且与渲染引用键一致；印章类（`SEAL`）上传需 `TEMPLATE_APPROVER` / 管理员；停用仅管理员；渲染侧 `StructuredContentImageResolver` 协议不变。行为规格：[ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md)；契约：[openapi-v1.yaml](../api/openapi-v1.yaml) `/api/management/v1/library/assets`。
 - **CE-O01（2026-07-16）：** 发布锁定 render profile 支持 PDF/A-2b 归档输出（`pdfArchivalProfile=PDF_A_2B`）；与 PDF 动态加密互斥；管理端 profile 编辑 UI 本片不交付。行为规格：[ce-o01-pdfa-output.md](../behavior/ce-o01-pdfa-output.md)；ADR：[0058-pdfa-2b-archival-output.md](../adr/rendering-authoring/0058-pdfa-2b-archival-output.md)。
 

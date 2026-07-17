@@ -21,7 +21,7 @@ tags:
   - name: Invocation
     description: Caller-scoped invocation record query and parameter backup.
   - name: Admin
-    description: API management, credential lifecycle administration, template lifecycle governance, template/master/content-module catalog list pagination (LR-C5 PageView), template export/import, master revision-line read paths, content-module governance, collaboration timeout configuration, and platform asset-library catalog (CE-E02 upload/list/disable).
+    description: API management, credential lifecycle administration, template lifecycle governance, template/master/content-module catalog list pagination (LR-C5 PageView), template export/import, full-library export (CE-E03), master revision-line read paths, content-module governance, collaboration timeout configuration, and platform asset-library catalog (CE-E02 upload/list/disable).
   - name: Collaboration
     description: Collaboration work-item queues and timeout threshold administration.
 security:
@@ -3166,6 +3166,93 @@ paths:
           description: >-
             Already RELEASED (`LEGAL_HOLD_ALREADY_RELEASED` /
             `api.error.conflict.legalHoldAlreadyReleased`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/library/export:
+    post:
+      tags: [Admin]
+      operationId: exportLibraryTemplates
+      summary: Export authorized eligible templates as a full-library ZIP (CE-E03)
+      description: >-
+        Assembles a `template-library-export-v1-zip` attachment for the caller's
+        authorized export-eligible templates (lifecycle `PENDING_RELEASE` |
+        `PUBLISHED` | `STOPPED` | `DEPRECATED`, same as single-template export).
+        ZIP fixed relative paths: `library-export-manifest.json`;
+        `templates/{templateId}.zip` (each byte-equivalent to E01
+        `bundleVersion=2&format=zip`); deduped `masters/{masterFileHash}.docx`;
+        deduped `clauses/{moduleCode}__{semanticVersion}.json`. Nested packs are
+        always E01 v2; no library-embedded v1 mode. Asset binaries are never
+        embedded (keys only in manifest `assetKeyManifest`). Permission boundary
+        reuses permission-matrix section 5 **导出模板** exactly — no new
+        permission code: `GLOBAL_ADMIN` (all), `GROUP_ADMIN` (authorized groups),
+        `TEMPLATE_AUTHOR` (own templates only); per-template authorization filter;
+        `TEMPLATE_TESTER` and other non-export roles → 403. Optional body
+        filters: `groupId`, `templateIds` (max 500), `includeSkipped` (default
+        true). Candidate resolution: non-empty `templateIds` → those IDs ∩
+        auth ∩ existence; else non-empty `groupId` → group ∩ auth; else all
+        authorized. Eligible candidate count max 500 → else 422
+        `api.error.library.exportLimitExceeded`. Empty INCLUDED set → 422
+        `api.error.library.exportEmpty`. Partial success: HTTP 200 when
+        `includedCount ≥ 1` (FAILED/SKIPPED recorded in manifest only).
+        Unauthorized or unknown requested IDs are omitted from `templates[]`
+        (`omittedUnauthorizedOrUnknownCount` only — no existence leak).
+        Success (including partial) audits `LIBRARY_EXPORT` (batch id, counts,
+        scope, actor; no clause full text, DOCX bytes, or variable values).
+        No `Idempotency-Key` requirement (each call new `exportBatchId`).
+        Library import and management UI are out of scope. Traceability:
+        BDD-CE-E03-001…016; docs/behavior/ce-e03-full-library-export.md.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibraryExportRequest'
+      responses:
+        '200':
+          description: >-
+            Full-library ZIP attachment (`template-library-export-v1-zip`).
+            Not wrapped in the JSON success envelope.
+          headers:
+            Content-Disposition:
+              description: Attachment disposition for the library export ZIP.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+              description: >-
+                ZIP with `library-export-manifest.json`, nested E01 v2
+                `templates/{templateId}.zip`, and deduped `masters/` /
+                `clauses/` catalogs. No asset binary tree.
+        '400':
+          description: Invalid body (e.g. non-UUID fields).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          description: >-
+            Caller lacks export-template permission (matrix §5); same fail-closed
+            boundary as single-template export.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: >-
+            Empty exportable set (`api.error.library.exportEmpty`) or limit
+            exceeded (`api.error.library.exportLimitExceeded`, `templateIds`
+            length or eligible candidates > 500). No ZIP body.
           content:
             application/json:
               schema:
@@ -8985,6 +9072,253 @@ components:
           pattern: '^[A-Za-z][A-Za-z0-9._-]{0,127}$'
         assetClass:
           $ref: '#/components/schemas/AssetLibraryAssetClass'
+    LibraryExportRequest:
+      type: object
+      additionalProperties: false
+      description: >-
+        Optional filters for CE-E03 full-library export. Empty object or omitted
+        body = all authorized export-eligible templates. Behavior SoT:
+        docs/behavior/ce-e03-full-library-export.md (E03-C4, E03-C5, E03-C12).
+      properties:
+        groupId:
+          type: string
+          format: uuid
+          description: >-
+            When `templateIds` is empty/absent, restrict candidates to this
+            group ∩ caller authorization.
+        templateIds:
+          type: array
+          description: >-
+            When non-empty, candidates are only these IDs ∩ auth ∩ existence
+            (takes precedence over `groupId`). Max 500 items.
+          maxItems: 500
+          items:
+            type: string
+            format: uuid
+        includeSkipped:
+          type: boolean
+          default: true
+          description: >-
+            When true (default), manifest `templates[]` lists SKIPPED rows.
+            When false, SKIPPED rows may be omitted from `templates[]` while
+            `counts.skippedCount` remains accurate.
+    LibraryExportScopeSelection:
+      type: string
+      description: How the export candidate set was selected (E03-C5 / E03-C11).
+      enum: [ALL_AUTHORIZED, GROUP, TEMPLATE_IDS]
+    LibraryExportTemplateEntryStatus:
+      type: string
+      description: >-
+        Per-template manifest result (E03-C6). Unauthorized/unknown requested
+        IDs are never listed (count only via
+        `omittedUnauthorizedOrUnknownCount`).
+      enum: [INCLUDED, SKIPPED, FAILED]
+    LibraryExportActorView:
+      type: object
+      additionalProperties: false
+      description: Non-sensitive actor summary in the library-export manifest (E03-C11).
+      required: [userId]
+      properties:
+        userId:
+          type: string
+          description: Authenticated user identifier (non-secret).
+        role:
+          type: string
+          description: Role summary for the exporting actor (non-secret).
+    LibraryExportScopeView:
+      type: object
+      additionalProperties: false
+      description: Non-sensitive scope echo in the library-export manifest (E03-C11).
+      required: [selection]
+      properties:
+        selection:
+          $ref: '#/components/schemas/LibraryExportScopeSelection'
+        groupId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Echo when selection is `GROUP` (or group filter applied).
+        templateIds:
+          type: array
+          nullable: true
+          description: Echo of requested `templateIds` when selection is `TEMPLATE_IDS`.
+          maxItems: 500
+          items:
+            type: string
+            format: uuid
+    LibraryExportCountsView:
+      type: object
+      additionalProperties: false
+      description: Aggregate counts in the library-export manifest (E03-C11).
+      required:
+        - includedCount
+        - skippedCount
+        - failedCount
+        - omittedUnauthorizedOrUnknownCount
+        - uniqueMasterCount
+        - uniqueClauseCount
+        - uniqueAssetKeyCount
+      properties:
+        includedCount:
+          type: integer
+          minimum: 0
+        skippedCount:
+          type: integer
+          minimum: 0
+        failedCount:
+          type: integer
+          minimum: 0
+        omittedUnauthorizedOrUnknownCount:
+          type: integer
+          minimum: 0
+          description: >-
+            Count of requested templateIds that were unauthorized or unknown;
+            IDs themselves are not listed (E03-C6).
+        uniqueMasterCount:
+          type: integer
+          minimum: 0
+        uniqueClauseCount:
+          type: integer
+          minimum: 0
+        uniqueAssetKeyCount:
+          type: integer
+          minimum: 0
+    LibraryExportTemplateEntryView:
+      type: object
+      additionalProperties: false
+      description: >-
+        Manifest `templates[]` row (E03-C6). `FORBIDDEN_OMITTED` IDs are never
+        represented here.
+      required: [templateId, status]
+      properties:
+        templateId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/LibraryExportTemplateEntryStatus'
+        reasonCode:
+          type: string
+          description: >-
+            Present for SKIPPED / FAILED. Stable examples:
+            `EXPORT_NOT_ELIGIBLE` (lifecycle not exportable);
+            `PINNED_MASTER_UNAVAILABLE` (entry-level; messageKey reuse
+            `api.error.rendering.pinnedMasterUnavailable`).
+        path:
+          type: string
+          description: >-
+            Relative ZIP path for INCLUDED rows, e.g.
+            `templates/{templateId}.zip`.
+    LibraryExportMasterCatalogEntryView:
+      type: object
+      additionalProperties: false
+      description: Deduped master catalog row (E03-C8).
+      required: [masterFileHash, sourceTemplateIds, path]
+      properties:
+        masterFileHash:
+          type: string
+          description: Lowercase hex SHA-256 of the master DOCX bytes.
+          pattern: '^[a-f0-9]{64}$'
+        masterRevisionId:
+          type: string
+          format: uuid
+          nullable: true
+        revisionSequence:
+          type: integer
+          nullable: true
+        sourceTemplateIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        path:
+          type: string
+          description: Relative ZIP path, e.g. `masters/{masterFileHash}.docx`.
+    LibraryExportClauseCatalogEntryView:
+      type: object
+      additionalProperties: false
+      description: Deduped clause catalog row (E03-C9).
+      required: [moduleCode, semanticVersion, sourceTemplateIds, path]
+      properties:
+        moduleCode:
+          type: string
+        semanticVersion:
+          type: string
+        sourceModuleId:
+          type: string
+          format: uuid
+          nullable: true
+        sourceTemplateIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        path:
+          type: string
+          description: >-
+            Relative ZIP path
+            `clauses/{moduleCode}__{semanticVersion}.json` (unsafe path
+            characters percent-encoded or replaced with `_`; original keys
+            retained on this row).
+    LibraryExportManifestView:
+      type: object
+      additionalProperties: false
+      description: >-
+        Root `library-export-manifest.json` for
+        `template-library-export-v1-zip` (E03-C1, E03-C11). Must not contain
+        secrets, credentials, test-data variable values, or asset binaries.
+      required:
+        - format
+        - exportBatchId
+        - exportedAt
+        - bundleVersion
+        - actor
+        - scope
+        - counts
+        - templates
+        - masterCatalog
+        - clauseCatalog
+        - assetKeyManifest
+      properties:
+        format:
+          type: string
+          description: Library export format constant.
+          enum: [template-library-export-v1-zip]
+        exportBatchId:
+          type: string
+          format: uuid
+        exportedAt:
+          type: string
+          format: date-time
+          description: UTC ISO-8601 export timestamp.
+        bundleVersion:
+          type: integer
+          enum: [2]
+          description: Nested per-template packs are always E01 v2.
+        actor:
+          $ref: '#/components/schemas/LibraryExportActorView'
+        scope:
+          $ref: '#/components/schemas/LibraryExportScopeView'
+        counts:
+          $ref: '#/components/schemas/LibraryExportCountsView'
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/LibraryExportTemplateEntryView'
+        masterCatalog:
+          type: array
+          items:
+            $ref: '#/components/schemas/LibraryExportMasterCatalogEntryView'
+        clauseCatalog:
+          type: array
+          items:
+            $ref: '#/components/schemas/LibraryExportClauseCatalogEntryView'
+        assetKeyManifest:
+          type: array
+          description: >-
+            Union of asset keys from INCLUDED E01 v2 bundles (key + usage only;
+            no binaries) (E03-C10).
+          items:
+            $ref: '#/components/schemas/TemplateExportAssetKeyManifestItemView'
     TemplateExportAssetKeyManifestItemView:
       type: object
       additionalProperties: false

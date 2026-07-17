@@ -1,5 +1,6 @@
 package com.bank.docgen.audit.service;
 
+import static com.bank.docgen.audit.service.ManagementAuditEventTypes.LIBRARY_EXPORT;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.TEMPLATE_EXPORTED;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.TEMPLATE_IMPORTED;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.TEMPLATE_IMPORT_DRY_RUN;
@@ -117,6 +118,47 @@ class TemplateTransferAuditRecorder {
                         "Template import dry-run: " + externalId
                                 + " ready=" + readyToCommit
                                 + " blocking=" + blockingCount
+                ),
+                eventWriter.writeJson(List.of())
+        );
+    }
+
+    @Transactional
+    void recordLibraryExport(
+            String exportBatchId,
+            String scopeSelection,
+            int includedCount,
+            int skippedCount,
+            int failedCount,
+            int omittedUnauthorizedOrUnknownCount,
+            String actorUsername,
+            String actorSummary
+    ) {
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("exportBatchId", exportBatchId);
+        details.put("scopeSelection", scopeSelection);
+        details.put("includedCount", includedCount);
+        details.put("skippedCount", skippedCount);
+        details.put("failedCount", failedCount);
+        details.put("omittedUnauthorizedOrUnknownCount", omittedUnauthorizedOrUnknownCount);
+        eventWriter.persist(
+                LIBRARY_EXPORT,
+                null,
+                null,
+                null,
+                null,
+                null,
+                eventWriter.writeJsonMap(details),
+                false,
+                null,
+                actorUsername,
+                actorSummary,
+                null,
+                eventWriter.truncate(
+                        "Library export batch=" + exportBatchId
+                                + " included=" + includedCount
+                                + " skipped=" + skippedCount
+                                + " failed=" + failedCount
                 ),
                 eventWriter.writeJson(List.of())
         );

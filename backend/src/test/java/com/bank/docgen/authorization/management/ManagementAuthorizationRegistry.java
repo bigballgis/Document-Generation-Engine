@@ -28,6 +28,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.collaboration.web.CollaborationWorkItemController",
             "com.bank.docgen.contentmodule.web.ContentModuleController",
             "com.bank.docgen.library.web.AssetLibraryController",
+            "com.bank.docgen.library.web.LibraryExportController",
             "com.bank.docgen.legalhold.web.LegalHoldController",
             "com.bank.docgen.master.web.MasterDocumentController",
             "com.bank.docgen.master.web.MasterRevisionLineController",
@@ -117,6 +118,10 @@ final class ManagementAuthorizationRegistry {
             Map.entry(
                     "com.bank.docgen.library.web.AssetLibraryController",
                     Set.of("com.bank.docgen.library.service.AssetLibraryService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.library.web.LibraryExportController",
+                    Set.of("com.bank.docgen.library.service.LibraryExportService")
             ),
             Map.entry(
                     "com.bank.docgen.legalhold.web.LegalHoldController",
@@ -262,6 +267,10 @@ final class ManagementAuthorizationRegistry {
             ),
             Map.entry(
                     "com.bank.docgen.template.service.TemplateExportService",
+                    "com.bank.docgen.template.service.TemplateExportAccessService"
+            ),
+            Map.entry(
+                    "com.bank.docgen.library.service.LibraryExportService",
                     "com.bank.docgen.template.service.TemplateExportAccessService"
             ),
             Map.entry(

@@ -1,5 +1,6 @@
 package com.bank.docgen.template.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -78,6 +79,19 @@ class TemplateExportAccessServiceTest {
         ManagementSessionClaims tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
 
         assertThatThrownBy(() -> support.assertCanImportForGroup("RETAIL", tester))
+                .isInstanceOf(TemplateAccessDeniedException.class);
+    }
+
+    @Test
+    void assertCanExport_matchesCanExport() {
+        TemplateEntity own = template("RETAIL", "10000003");
+        TemplateEntity other = template("RETAIL", "10000004");
+        ManagementSessionClaims author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+
+        assertThat(support.canExport(own, author)).isTrue();
+        assertThatCode(() -> support.assertCanExport(own, author)).doesNotThrowAnyException();
+        assertThat(support.canExport(other, author)).isFalse();
+        assertThatThrownBy(() -> support.assertCanExport(other, author))
                 .isInstanceOf(TemplateAccessDeniedException.class);
     }
 
