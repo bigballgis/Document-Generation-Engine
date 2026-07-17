@@ -16,6 +16,8 @@ import {
   filterPaletteRouteItems,
   moveHighlightIndex,
 } from '@/composables/commandPaletteHelpers'
+import { useAuthoringEditorContextRef } from '@/composables/authoringEditorContext'
+import { buildAuthoringPaletteActions } from '@/composables/buildAuthoringPaletteActions'
 import { useCommandPaletteCatalog } from '@/composables/useCommandPaletteCatalog'
 import { createCommandPaletteDerivedState } from '@/composables/createCommandPaletteDerivedState'
 
@@ -64,9 +66,18 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
     filterPaletteRouteItems(allRouteItems.value, query.value),
   )
 
+  const authoringContext = useAuthoringEditorContextRef()
+  const allActionItems = computed(() =>
+    buildAuthoringPaletteActions(authoringContext.value, options.translate),
+  )
+  const filteredActionItems = computed(() =>
+    filterPaletteRouteItems(allActionItems.value, query.value),
+  )
+
   const { groups, flatItems, hasAnyError, showNoMatch } = createCommandPaletteDerivedState({
     query,
     filteredRouteItems,
+    filteredActionItems,
     catalog,
     visibleRoutes: () => options.visibleRoutes.value,
   })
@@ -132,6 +143,10 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
 
   async function activateItem(item: PaletteItem) {
     closePalette()
+    if (item.kind === 'action') {
+      await item.execute?.()
+      return
+    }
     await options.navigate(item.target)
   }
 

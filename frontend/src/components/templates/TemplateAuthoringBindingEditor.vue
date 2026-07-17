@@ -61,7 +61,7 @@ defineExpose({ markPristine })
 </script>
 
 <template>
-  <div class="binding-editor">
+  <div class="binding-editor" data-testid="binding-editor">
     <div class="binding-editor__toolbar">
       <el-button @click="emit('back')">{{ t('common.back') }}</el-button>
       <div class="binding-editor__title">
@@ -70,7 +70,13 @@ defineExpose({ markPristine })
           {{ editingRow.displayLabel }}
         </span>
       </div>
-      <el-button type="primary" :loading="submitting" @click="emit('save')">
+      <el-button
+        type="primary"
+        :loading="submitting"
+        :title="t('templates.authoring.saveBindingShortcutHint')"
+        data-testid="binding-editor-save"
+        @click="emit('save')"
+      >
         {{ t('common.save') }}
       </el-button>
     </div>

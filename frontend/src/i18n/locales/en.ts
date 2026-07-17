@@ -14,10 +14,15 @@ export default {
     hint: '↑↓ to move · Enter to open · Esc to close',
     close: 'Close command palette',
     groups: {
+      actions: 'Actions',
       routes: 'Pages',
       templates: 'Templates',
       masters: 'Letterhead templates',
       contentModules: 'Standard clauses',
+    },
+    actions: {
+      saveBinding: 'Save binding',
+      refreshPreview: 'Refresh preview',
     },
     errors: {
       templates: 'Unable to search templates. Try again.',
@@ -1396,6 +1401,7 @@ export default {
       renameVariableSuccess: 'Variable renamed and references updated.',
       renameVariableLockedWarning:
         '{count} locked test data set(s) still use the previous key and were left unchanged.',
+      saveBindingShortcutHint: 'Save binding (Ctrl+S / ⌘S)',
       saveBindingSuccess: 'Binding saved.',
       bindingVersionConflict: 'Binding updated elsewhere',
       bindingVersionConflictReload: 'Reload',

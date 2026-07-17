@@ -54,7 +54,7 @@ function flatIndexForItem(item: PaletteItem, flatItems: PaletteItem[]): number {
           type="button"
           class="command-palette__option"
           role="option"
-          data-testid="command-palette-option"
+          :data-testid="item.optionTestId ?? 'command-palette-option'"
           :data-kind="item.kind"
           :aria-selected="flatIndexForItem(item, flatItems) === highlightIndex"
           :class="{

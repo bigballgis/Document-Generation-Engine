@@ -1,9 +1,12 @@
-import { computed, onMounted, ref, type Ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch, type Ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { getMaster } from '@/api/masters'
 import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
+import { registerAuthoringEditorContext } from '@/composables/authoringEditorContext'
+import { useCapabilities } from '@/composables/useCapabilities'
+import { useAuthoringEditorShortcuts } from '@/composables/useAuthoringEditorShortcuts'
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import {
   BINDING_CONTENT_TYPES,
@@ -35,6 +38,7 @@ export function useTemplateAuthoringBindingsPanel(
   const route = useRoute()
   const router = useRouter()
   const templatesStore = useTemplatesStore()
+  const { authorTemplates } = useCapabilities()
 
   const masterAnchors = ref<MasterAnchor[]>([])
   const loadingMaster = ref(false)
@@ -42,6 +46,33 @@ export function useTemplateAuthoringBindingsPanel(
   const validationResult = ref<BindingValidationResult | null>(null)
 
   const edit = useTemplateAuthoringBindingsEdit(props, emit, structuredEditorRef, masterAnchors)
+
+  // CE-U17 — Ctrl/Cmd+S / Ctrl/Cmd+P while Bindings panel is mounted; handlers only when editing.
+  useAuthoringEditorShortcuts()
+  let unregisterAuthoringContext: (() => void) | null = null
+  watch(
+    [() => edit.panelMode.value, authorTemplates],
+    ([mode]) => {
+      unregisterAuthoringContext?.()
+      unregisterAuthoringContext = null
+      if (mode !== 'edit') {
+        return
+      }
+      unregisterAuthoringContext = registerAuthoringEditorContext({
+        saveBinding: () => edit.handleSaveBinding(),
+        refreshPreview: () => edit.handlePreviewRefresh(),
+        canSave: () => authorTemplates.value,
+        canRefresh: () => true,
+        isSaving: () => templatesStore.submitting,
+        isRefreshing: () => edit.previewRefreshing.value,
+      })
+    },
+    { immediate: true },
+  )
+  onUnmounted(() => {
+    unregisterAuthoringContext?.()
+    unregisterAuthoringContext = null
+  })
 
   const contentModuleReferenceKeys = computed(() =>
     props.contentModuleReferences.map((reference) => reference.referenceKey),

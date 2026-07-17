@@ -10,22 +10,34 @@ type CatalogApi = ReturnType<typeof useCommandPaletteCatalog>
 export function createCommandPaletteDerivedState(options: {
   query: Ref<string>
   filteredRouteItems: Ref<PaletteItem[]>
+  /** CE-U17 — author Actions (empty when no bindings edit surface). */
+  filteredActionItems?: Ref<PaletteItem[]>
   catalog: CatalogApi
   visibleRoutes: () => readonly string[]
 }) {
   const { query, filteredRouteItems, catalog, visibleRoutes } = options
+  const filteredActionItems = options.filteredActionItems
 
   const groups = computed((): PaletteGroupView[] => {
     const trimmed = query.value.trim()
-    const result: PaletteGroupView[] = [
-      {
-        id: 'routes',
-        labelKey: 'commandPalette.groups.routes',
-        items: filteredRouteItems.value,
+    const result: PaletteGroupView[] = []
+    const actions = filteredActionItems?.value ?? []
+    if (actions.length > 0) {
+      result.push({
+        id: 'actions',
+        labelKey: 'commandPalette.groups.actions',
+        items: actions,
         errorMessageKey: null,
         loading: false,
-      },
-    ]
+      })
+    }
+    result.push({
+      id: 'routes',
+      labelKey: 'commandPalette.groups.routes',
+      items: filteredRouteItems.value,
+      errorMessageKey: null,
+      loading: false,
+    })
     if (trimmed) {
       if (canQueryCatalog(visibleRoutes(), ROUTE_KEYS.templateManagement)) {
         result.push({

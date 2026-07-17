@@ -7,7 +7,7 @@ export const COMMAND_PALETTE_PAGE_SIZE = 8
 /** Locked by BDD C6-C7 / Vitest. */
 export const COMMAND_PALETTE_DEBOUNCE_MS = 250
 
-export type PaletteItemKind = 'route' | 'template' | 'master' | 'content-module'
+export type PaletteItemKind = 'route' | 'template' | 'master' | 'content-module' | 'action'
 
 export interface PaletteNavTarget {
   path: string
@@ -21,10 +21,14 @@ export interface PaletteItem {
   title: string
   subtitle: string
   target: PaletteNavTarget
+  /** CE-U17 author actions — run instead of navigate when present. */
+  execute?: () => void | Promise<void>
+  /** Optional stable test id (e.g. command-palette-action-save-binding). */
+  optionTestId?: string
 }
 
 export interface PaletteGroupView {
-  id: 'routes' | 'templates' | 'masters' | 'content-modules'
+  id: 'actions' | 'routes' | 'templates' | 'masters' | 'content-modules'
   labelKey: string
   items: PaletteItem[]
   errorMessageKey: string | null

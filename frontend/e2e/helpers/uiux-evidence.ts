@@ -1265,6 +1265,36 @@ export async function captureCeU16LocatorScreenshot(
   return filename
 }
 
+/** CE-U17 editor shortcuts + command-palette Actions — 1920×1080 dual-brand evidence. */
+export const CE_U17_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-U17')
+export const CE_U17_SCREENSHOT_DIR = path.join(CE_U17_EVIDENCE_ROOT, 'screenshots')
+export const CE_U17_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensureCeU17EvidenceDirs(): void {
+  fs.mkdirSync(CE_U17_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceU17ScreenshotPath(filename: string): string {
+  return path.join(CE_U17_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeU17Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeU17EvidenceDirs()
+  const target = ceU17ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeU17LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeU17EvidenceDirs()
+  const target = ceU17ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
 /** CE-K05 master impact real — impact panel / replace confirm / revision diff @1440×900. */
 export const CE_K05_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-K05')
 export const CE_K05_SCREENSHOT_DIR = path.join(CE_K05_EVIDENCE_ROOT, 'screenshots')

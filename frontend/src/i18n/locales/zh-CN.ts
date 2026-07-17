@@ -14,10 +14,15 @@ export default {
     hint: '↑↓ 移动 · Enter 打开 · Esc 关闭',
     close: '关闭命令面板',
     groups: {
+      actions: '动作',
       routes: '页面',
       templates: '模板',
       masters: '信头模板',
       contentModules: '标准条款',
+    },
+    actions: {
+      saveBinding: '保存绑定',
+      refreshPreview: '刷新预览',
     },
     errors: {
       templates: '无法搜索模板，请重试。',
@@ -1511,6 +1516,7 @@ export default {
       saveVariableSuccess: '变量已保存。',
       renameVariableSuccess: '变量已重命名，相关引用已更新。',
       renameVariableLockedWarning: '有 {count} 个已锁定测试集仍使用旧键，未作修改。',
+      saveBindingShortcutHint: '保存绑定（Ctrl+S / ⌘S）',
       saveBindingSuccess: '绑定已保存。',
       bindingVersionConflict: '绑定已在其他处更新',
       bindingVersionConflictReload: '重新加载',
