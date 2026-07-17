@@ -97,6 +97,8 @@ Create an ADR when a decision affects future design or implementation, including
 | [0039-redisson-lock-evaluation.md](./technology-stack/0039-redisson-lock-evaluation.md) | Accepted | Redisson distributed lock evaluation — accepted single-instance risk; mandatory before multi-instance (COR-P05) |
 | [0040-api-package-access-and-invocation-retention.md](./api-management/0040-api-package-access-and-invocation-retention.md) | Accepted | Package-first API access surface, auto-materialize policy, invocation records, four-layer retention (2026-07-03) |
 | [0041-rendering-font-baseline.md](./rendering-authoring/0041-rendering-font-baseline.md) | Accepted | Rendering font baseline for DOCX→PDF conversion images — Debian jammy CJK + Carlito/Caladea (LR-A5; architecture-reviewer PASS_WITH_NOTES 2026-07-10) |
+| [0042-pagination-delta-budget.md](./rendering-authoring/0042-pagination-delta-budget.md) | Accepted (Path X residual) | Pagination delta ±1 metadata-gated enforcement; Word/delta **n/a** Path X (PRR-C01 #103 / merge `3513ab92`; checklist **#3b** **CONDITIONAL** ≠ GO) |
+| [0043-ooxml-output-validation-gate.md](./rendering-authoring/0043-ooxml-output-validation-gate.md) | Accepted (slice A) | OOXML OPC+XML well-formedness fail-closed; slice B XSD/LO24 residual honest (PRR-C01 #103 / BDD OOX-C4; merge `3513ab92`) |
 | [0044-deployment-topology-v1.md](./operations/0044-deployment-topology-v1.md) | Accepted | v1 deployment topology — single backend replica; backend HPA disabled until scale-out prerequisites met; refines ADR-0039 (LR-B1, 2026-07-04) |
 | [0046-frontend-openapi-typescript-codegen.md](./technology-stack/0046-frontend-openapi-typescript-codegen.md) | Accepted | Frontend OpenAPI TypeScript codegen (`openapi-typescript`) for management DTO types (SOR-K03) |
 | [0047-distributed-tracing-otlp-baseline.md](./operations/0047-distributed-tracing-otlp-baseline.md) | Accepted | Distributed tracing OTLP export and trace ID correlation baseline (SOR-A06) |
@@ -110,12 +112,12 @@ Create an ADR when a decision affects future design or implementation, including
 | [0058-pdfa-2b-archival-output.md](./rendering-authoring/0058-pdfa-2b-archival-output.md) | Accepted | PDF/A-2b archival via publish-locked `pdfArchivalProfile` (`NONE`\|`PDF_A_2B`); LO filter; mutex with encryption (CE-O01 / D6, 2026-07-16) |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
-### LR-A5 triad (0041 Accepted; 0042/0043 remain Proposed)
+### LR-A5 triad (0041/0042/0043 Accepted — 0042 Path X residual; 0043 slice B residual)
 
 | ADR | On-disk status | Note |
 | --- | --- | --- |
 | [0041-rendering-font-baseline.md](./rendering-authoring/0041-rendering-font-baseline.md) | **Accepted** | architecture-reviewer **PASS_WITH_NOTES** 2026-07-10 (slice `lrp-a5-adr-closeout`); also listed in Accepted table above. |
-| [0042-pagination-delta-budget.md](./rendering-authoring/0042-pagination-delta-budget.md) | **Proposed** | Docker PDF corpus measured (LR-A7); Word pages/delta **n/a** (`ms-word-unavailable-on-host`). **Accepted** blocked until Word-equipped host confirms ±1 budget — do not invent Word numbers. |
-| [0043-ooxml-output-validation-gate.md](./rendering-authoring/0043-ooxml-output-validation-gate.md) | **Proposed** | Slice A (OPC+XML well-formedness + runtime fail-closed) is the LR-A6 Done line; full ECMA-376 XSD + LO24 headless open **deferred** — do not Accept on well-formedness alone. |
+| [0042-pagination-delta-budget.md](./rendering-authoring/0042-pagination-delta-budget.md) | **Accepted** | PRR-C01 / Task Master **#103** (merge `3513ab92`). Metadata-gated enforcement landed; Path **X** Word n/a residual ([word-baseline-exemption.md](../evidence/prod-adr-0042-0043-closeout/word-baseline-exemption.md)). Checklist **#3b** → **CONDITIONAL** only (Path X ≠ GO). Do not invent Word numbers. |
+| [0043-ooxml-output-validation-gate.md](./rendering-authoring/0043-ooxml-output-validation-gate.md) | **Accepted** | PRR-C01 / **#103** — Accepted for Decision **slice A** only (OPC+XML well-formedness fail-closed); slice B (ECMA-376 XSD + LO24) **residual honest** (BDD OOX-C4). Do not read Accepted as LO24-safe / full XSD. |
 
 Use [0000-template.md](./0000-template.md) when creating new ADRs. Place new numbered ADRs in the directory matching their `topic` frontmatter.

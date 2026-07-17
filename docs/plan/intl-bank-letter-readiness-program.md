@@ -2,27 +2,27 @@
 
 **Program ID:** `IBL`  
 **Created:** 2026-07-17  
-**Status:** **Registered in Task Master / Not Started** (waves **not** activated). User confirmed **2026-07-18** writing the IBL proposal into Task Master for later sessions. Do **not** activate Wave A (or any wave) as a delivery leaf from registration alone. Do **not** flip launch-readiness checklist **#3b** or claim go-live.  
+**Status:** **Registered in Task Master / Not Started** (waves **not** activated). User confirmed **2026-07-18** writing the IBL proposal into Task Master for later sessions. Do **not** activate Wave A (or any wave) as a delivery leaf from registration alone. Checklist **#3b** is **CONDITIONAL** (PRR-C01 Path X; merge `3513ab92`) — do **not** flip **#3b GO** or claim go-live from IBL.  
 **Formal phase / program:** **None** (cross-cutting optimization backlog; same genre as LRP / SOR — **not** a new P-phase).  
 **North star:** Close the verified gaps between today’s Document Generation Platform and **international multinational bank financial-letter readiness** — fail-closed filling, ISO-correct amounts, high-fidelity Word/PDF trust, layout regression evidence, realistic CI/integration, and (only after ADR/user confirmation) multinational content models.  
 **Task ID prefix:** `IBL-*` (International Bank Letter readiness) — verified free of collision with `LR-*` / `CD-*` / `SOR-*` / `CQ-*` / `CE-*` / `OPT-*` / `COR-*` / `PRR-*`.  
 **Task Master:** Umbrella **#106** (registry only) + leaves **#107–#134** (28 tasks = A6+B7+C3+D5+E7). All IBL TM statuses **`pending`**; B7 + Wave E descriptions start with **BLOCKED**. See § Task Master ID map.  
 **Audit provenance:** Four-track (+ multinational template track) **read-only** deep audit, evidence spot-verified **2026-07-17**. Findings F1–F28 below are **confirmed symptoms** (code/docs evidence). Proposed remediations are **not** confirmed product requirements until activation + (where noted) ADR/user decision.
 
-**Queue policy (critical):** Host serial delivery queue: PRR **#105 Done** (`50448016`); remaining ahead of IBL = **#103 → #104** (both **pending**, not activated). IBL tasks are **pending / deferred** for later sessions **after** remaining PRR (or when the user explicitly redirects). Next IBL activation head after PRR = **IBL-A1** (#107) or a Wave A batch per Batch Recommendation at that time. Umbrella **#106** is **registry only** — **not** a sole-active delivery leaf.
+**Queue policy (critical):** Host serial delivery queue: PRR **#105 Done** (`50448016`); **#103 Done** (`3513ab92`); remaining ahead of IBL = **#104** (**pending**, not activated). IBL tasks are **pending / deferred** for later sessions **after** remaining PRR (or when the user explicitly redirects). Next IBL activation head after PRR = **IBL-A1** (#107) or a Wave A batch per Batch Recommendation at that time. Umbrella **#106** is **registry only** — **not** a sole-active delivery leaf.
 
 **Authoritative entry for lower-tier implementers:** Read this file first. Execute only `IBL-*` task IDs after wave activation. Do **not** invent a formal phase. Do **not** touch [launch-readiness-checklist.md](../operations/launch-readiness-checklist.md) from IBL work unless a task explicitly owns a checklist cross-link.
 
 | Sibling / related document | Relationship |
 | --- | --- |
 | [master-plan.md](./master-plan.md) | Formal phase accounting remains **None**; IBL never changes phase status |
-| [launch-readiness-program.md](./launch-readiness-program.md) | Sibling LRP (`LR-*`) — waves A–E **Done**; IBL inherits residuals (e.g. ADR-0042 Proposed, DEF-LRP-D6-001, Bucket4j/ADR-0039) without re-owning closed LR rows |
+| [launch-readiness-program.md](./launch-readiness-program.md) | Sibling LRP (`LR-*`) — waves A–E **Done**; IBL inherits residuals (e.g. ADR-0042 Accepted + Path X / Path E for #3b GO, DEF-LRP-D6-001, Bucket4j/ADR-0039) without re-owning closed LR rows |
 | [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) | Sibling CDP (`CD-*`) — CD-2 Done; CD-3 Not Started; do not execute `CD-*` from IBL |
 | [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md) | Historical SOR inventory; IBL is the **2026-07-17** bank-letter readiness consolidation |
 | [core-excellence-program-2026-07.md](./core-excellence-program-2026-07.md) | Active delivery program CE (`CE-*` / Task Master); coordinate — do not fold IBL into an In Progress CE/PRR leaf |
 | [execution-sync-ledger.md](./execution-sync-ledger.md) | Registration mirrored (TM #106–#134); gate-evidence after wave activation — no Done claims from registration alone |
 | [non-functional-requirements.md](../requirements/non-functional-requirements.md) | NFR SLOs remain **proposed — awaiting confirmation**; IBL-D3 feeds confirmation, never invents confirmed SLOs |
-| [ADR-0042](../adr/) (pagination / Word baseline — still **Proposed**) | IBL-B7 owns acceptance path; Word host is an external dependency |
+| [ADR-0042](../adr/rendering-authoring/0042-pagination-delta-budget.md) (pagination — **Accepted** + Path X residual) | IBL-B7 owns Path E Word measurement path toward checklist **#3b GO**; Word host is an external dependency |
 
 **Rules:**
 
@@ -31,7 +31,7 @@
 3. Behavior-changing tasks require BDD **`required`** (ready spec in `docs/behavior/`) before implementation; refactor/infra/docs tasks use **`not-applicable`**.
 4. TDD + green gates + post-task doc sync + post-task commit review before any task `Done`.
 5. **Confirmed facts vs pending questions:** §1 findings are evidence-grounded symptoms. §Pending decisions「待确认」items **must not** be scheduled as ordinary activatable work until user/PRD/ADR confirmation. Never promote a recommendation into a confirmed requirement.
-6. This document does **not** alter formal phase status or the launch-readiness checklist overall verdict. Task Master **is** registered (#106–#134, all `pending`); registration alone does **not** create a formal phase, activate a wave, or flip checklist **#3b**.
+6. This document does **not** alter formal phase status or the launch-readiness checklist overall verdict. Task Master **is** registered (#106–#134, all `pending`); registration alone does **not** create a formal phase, activate a wave, or flip checklist **#3b GO**.
 7. Do not duplicate ownership of closed LRP/CDP/CE rows — reference and extend; never re-open Done waves without user direction.
 
 ---
@@ -99,7 +99,7 @@ Registered **2026-07-18** under `.taskmaster/tasks/tasks.json`. Program status =
 | IBL-E6 | **133** | pending (**BLOCKED** in description — §Pending decisions) |
 | IBL-E7 | **134** | pending (**BLOCKED** in description — §Pending decisions) |
 
-**Queue note:** Do **not** reorder ahead of remaining PRR **#103 → #104** (**#105** already **Done**). Do **not** treat #106 as sole-active. After remaining PRR (or explicit user redirect), activate **IBL-A1** (#107) or Wave A batch via delivery-orchestrator Batch Recommendation — still one leaf at a time.
+**Queue note:** Do **not** reorder ahead of remaining PRR **#104** (**#103/#105** already **Done**). Do **not** treat #106 as sole-active. After remaining PRR (or explicit user redirect), activate **IBL-A1** (#107) or Wave A batch via delivery-orchestrator Batch Recommendation — still one leaf at a time.
 
 ---
 
@@ -118,7 +118,7 @@ Verified **2026-07-17** (read-only). Implementers must re-verify paths before co
 | **F7** | Bucket4j rate limit in-process only — multiplies under scale-out | `RuntimeRateLimitService`; ADR-0039 residual | **Medium** | **Deferred residual** (not scheduled; see §Open Q) |
 | **F8** | No timezone/as-of date semantics; `FORMAT_DATE` forces UTC via `java.util.Date` | `FORMAT_DATE` / date formatting path | **Medium** | **Deferred residual** (not scheduled; see §Open Q) |
 | **F9** | Direct-format whitelist permits lineSpacing/spacingBefore/After/indents, but writer only applies fontFamily/fontSize/textColor | `DirectFormatRules` vs `StructuredContentDocxStyleSupport.applyDirectFormatIfPresent` | **Critical** — authors trust false controls | **IBL-B1** |
-| **F10** | Word↔LibreOffice pagination trust unproven; ADR-0042 still Proposed; `paginationDeltaBudgetPages` unenforced; checklist #3b NO-GO | ADR-0042; pagination corpus; launch checklist #3b | **Critical** | **IBL-B7** (**Blocked** on Word host) |
+| **F10** | Word↔LibreOffice pagination trust still unproven (Path X); ADR-0042 **Accepted** with Word n/a residual + metadata-gated enforcement; checklist **#3b CONDITIONAL** (≠ GO) | ADR-0042; Path X exemption; Path E / Word host; launch checklist #3b | **Critical** (Path E residual) | **IBL-B7** (**Blocked** on Word host for Path E / #3b GO) |
 | **F11** | PDF conversion capacity — pool default 2, queue 0 fail-fast; LR-D6: 8/10 concurrent PDF sync failures | `DocgenRenderingProperties`; DEF-LRP-D6-001; `docs/plan/evidence/lrp-d6-load-smoke/` | **Critical** | **IBL-B2** |
 | **F12** | PDF/A-2b verification is `pdfaid` XMP metadata only — no veraPDF in verify | `PdfAidXmpAssertor` | **High** | **IBL-B3** |
 | **F13** | Golden theme `08-long-clause-limits` PLACEHOLDER — no overflow/truncation/page-break policy | Golden theme 08 | **High** | **IBL-B4** |
@@ -212,7 +212,7 @@ Recommended serial order (after PRR queue + activation):
 | IBL-B4 | rendering-engineer + doc-keeper | Long-clause overflow/truncation/page-break policy + activate golden theme `08` | — | **required** | F13 | **Not Started** |
 | IBL-B5 | rendering-engineer | Seal geometry validation (authorized area as real geometry, not boolean-only) | — | **required** | F14 | **Not Started** |
 | IBL-B6 | doc-keeper (+ rendering-engineer) | Deterministic legal-reproducibility freeze doc/ADR (LO version + font set + content-hash baselines) | — | not-applicable | F16 | **Not Started** |
-| IBL-B7 | rendering-engineer + doc-keeper | Word baseline measurement + ADR-0042 acceptance + `paginationDeltaBudgetPages` enforcement | **Blocked:** licensed MS Word host; ADR-0042 | not-applicable (measurement + ADR) / budget enforcement may need BDD if runtime gate | F10; checklist #3b | **Blocked** |
+| IBL-B7 | rendering-engineer + doc-keeper | Path E Word baseline measurement (promote checklist #3b CONDITIONAL → GO); ADR-0042 already Accepted (Path X) + enforcement landed under PRR-C01 | **Blocked:** licensed MS Word host for Path E | not-applicable (measurement) | F10; checklist #3b GO path | **Blocked** |
 
 ### Acceptance criteria (concise)
 
@@ -400,7 +400,7 @@ Task Master registration is **complete** (#106–#134; MAIN merge `9fc2bc97`). W
 | --- | --- |
 | 2026-07-17 four-track (+ template) read-only audit | §1 F1–F28 |
 | [launch-readiness-program.md](./launch-readiness-program.md) LR-D6 / DEF-LRP-D6-001 | **IBL-B2** |
-| ADR-0042 Proposed / checklist #3b | **IBL-B7** (Blocked on Word) |
+| ADR-0042 Accepted (Path X) / checklist #3b CONDITIONAL → Path E for GO | **IBL-B7** (Blocked on Word host) |
 | ADR-0039 / Bucket4j in-process | F7 deferred (Q1) |
 | ADR-0057 invocation retention | **IBL-A5** |
 | Golden corpus anti-pixel stance | **IBL-C1** + PD-2 |
@@ -414,8 +414,9 @@ Task Master registration is **complete** (#106–#134; MAIN merge `9fc2bc97`). W
 | Date | Change |
 | --- | --- |
 | 2026-07-18 | **Registered in Task Master** umbrella **#106** + leaves **#107–#134** (**28** tasks). Status → **Registered / Not Started** (waves **not** activated). MAIN merge `9fc2bc97`; worktree removed. PRR truth: **#105 Done**; remaining ahead of IBL **#103 → #104** (pending). Task-count correction **27 → 28**. No checklist **#3b** flip; no go-live; no Wave A `In Progress`. |
+| 2026-07-18 | PRR-C01 **#103 Done** (merge `3513ab92`); ADR-0042/0043 Accepted; checklist **#3b → CONDITIONAL** (Path X ≠ GO). Remaining ahead of IBL = **#104** only. F10/B7 residual = Path E Word host. No go-live; no IBL wave activation. |
 | 2026-07-17 | Program document created from 2026-07-17 deep audit. Waves IBL-A…E defined (scheduled task set later counted as **28**). All activatable tasks **Not Started**; B7 + Wave E **Blocked**. Formal phase unchanged (**None**). Task Master then untouched. Proposal awaiting user confirmation to write TM. |
 
 ---
 
-**Next action:** After remaining PRR (**#103 → #104**; **#105 Done**) — or on explicit user redirect — activate **IBL-A** via delivery-orchestrator (head **IBL-A1** / #107, or Wave A batch per Batch Recommendation). Do **not** mark any IBL wave `In Progress` from this registration sync alone. Do **not** invent a formal P-phase. Do **not** flip checklist **#3b**.
+**Next action:** After remaining PRR (**#104**; **#103/#105 Done**) — or on explicit user redirect — activate **IBL-A** via delivery-orchestrator (head **IBL-A1** / #107, or Wave A batch per Batch Recommendation). Do **not** mark any IBL wave `In Progress` from this registration sync alone. Do **not** invent a formal P-phase. Do **not** flip checklist **#3b GO**.

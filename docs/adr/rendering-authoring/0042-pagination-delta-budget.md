@@ -1,7 +1,7 @@
 ---
 id: ADR-0042
 title: Pagination delta budget for DOCX→PDF conversion
-status: Proposed
+status: Accepted
 date: 2026-07-05
 deciders: architecture, backend-engineer, doc-keeper
 related:
@@ -9,6 +9,8 @@ related:
   - docs/adr/rendering-authoring/0041-rendering-font-baseline.md
   - docs/plan/detail/CDP-industry-pitfall-registry.md
   - docs/plan/detail/LRP-A-rendering-trust-hardening.md
+  - docs/behavior/prod-adr-0042-0043-closeout.md
+  - docs/evidence/prod-adr-0042-0043-closeout/word-baseline-exemption.md
 ---
 
 # ADR-0042 — Pagination delta budget for DOCX→PDF conversion
@@ -34,7 +36,7 @@ Adopt a **pagination delta budget** of **±1 page** for bank correspondence temp
 
 1. Define the budget in `DocgenRenderingProperties` as `paginationDeltaBudgetPages = 1`.
 2. After DOCX→PDF conversion, compare the PDF page count against the author's declared
-   Word page count (stored in the template metadata).
+   Word page count (stored in the template metadata as `authorWordPageCount`).
 3. If `|pdfPages - wordPages| > budget`, emit a fidelity warning (not a blocker — the
    document is still usable, but the author should review).
 4. If `|pdfPages - wordPages| > 2 * budget`, emit a fidelity blocker — the template
@@ -44,9 +46,10 @@ Adopt a **pagination delta budget** of **±1 page** for bank correspondence temp
    annual-review) and record the baseline Word vs PDF page counts. The corpus is the
    regression test for layout drift.
 
-The budget is a **pending proposal** per the document-as-code constitution — it must be
-confirmed by the user before enforcement. Until then, the system logs the delta but does
-not block or warn.
+**Accepted (2026-07-18 — PRR-C01 / Task Master #103):** Runtime enforcement is
+**metadata-gated** (`PaginationDeltaEvaluator` + preview/runtime / PublishGate wiring):
+when `authorWordPageCount` is set, Decision items 3–4 apply; when unset, comparison is
+skipped (no invented Word counts). Docker PDF corpus remains the drift sentinel (LR-A7).
 
 ## Consequences
 
@@ -73,23 +76,27 @@ Docker PDF corpus measured on git SHA `9a40b48` (runtime `SYNC_STREAM` + host `p
 Required corpus aggregates: **max = 9** / **median = 8** Docker PDF pages. Word method =
 `ms-word-unavailable-on-host` — Word pages and deltas remain **n/a** (not fabricated).
 
-### Residual — Word-vs-LO delta (blocks Accepted)
+### Residual — Path X / Word n/a (Accepted with honesty)
 
-**This ADR stays `Proposed`.** Do **not** invent Word page counts or deltas.
+**This ADR is `Accepted` with an honest Word residual — not a Path E proof.**
 
-True Word-vs-LibreOffice page delta and any promotion to **Accepted** (or runtime
-warning/blocker enforcement of the ±1 budget) **require a Word-equipped host**:
+True Word-vs-LibreOffice page delta remains **unproven** on hosts without Microsoft Word.
+PRR-C01 closed via **Path X** durable exemption
+([word-baseline-exemption.md](../../evidence/prod-adr-0042-0043-closeout/word-baseline-exemption.md)):
 
-1. Open each corpus DOCX in Microsoft Word on that host and record authoring page counts.
-2. Compare against the Docker PDF pages already archived under
-   [docs/evidence/lrp-a7-pagination/](../../evidence/lrp-a7-pagination/) (and the
-   procedure in [pagination-delta-corpus.md](../../plan/pagination-delta-corpus.md)).
-3. Only then fill Word / Delta columns and consider Accepted + enforcement.
+1. Word / Delta columns stay **n/a** (`method=ms-word-unavailable-on-host`) — do **not**
+   invent numbers.
+2. Docker PDF baseline under [docs/evidence/lrp-a7-pagination/](../../evidence/lrp-a7-pagination/)
+   remains the drift sentinel (procedure:
+   [pagination-delta-corpus.md](../../plan/pagination-delta-corpus.md)).
+3. Runtime enforcement landed (metadata-gated) — checklist **#3b** may be **CONDITIONAL**
+   only; Path X **≠** checklist **#3b GO** and **≠** proven Word↔LO delta.
+4. Retest trigger: Word-equipped host → open a Path E measurement leaf (≥5 corpus letters),
+   fill Word/Delta columns, then consider promoting **#3b → GO**.
 
-LR-A7 closed the Docker PDF measurement gap with a documented exception; LR-A5 records
-this residual honestly and does **not** expand into MS Word measurement or LR-C9.
 Font baseline for conversion images is [ADR-0041](./0041-rendering-font-baseline.md)
 (**Accepted**; LR-A2 implemented; architecture-reviewer PASS_WITH_NOTES 2026-07-10).
+
 ## Alternatives considered
 
 - **Zero-tolerance (exact page match)** — rejected: impossible with OSS engines; would
@@ -104,3 +111,4 @@ Font baseline for conversion images is [ADR-0041](./0041-rendering-font-baseline
 - Pitfall: CD-PIT-02 (Word vs LibreOffice layout engine divergence).
 - LRP task: LR-A7 (pagination delta budget + corpus).
 - CDP task: CD-HARD-T04 (executed by LR-A7).
+- Closeout: PRR-C01 / Task Master **#103** (Path X + enforcement; merge `3513ab92`).

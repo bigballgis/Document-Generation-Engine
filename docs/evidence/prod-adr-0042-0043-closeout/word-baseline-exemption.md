@@ -18,7 +18,7 @@ the delivery host has no licensed Microsoft Word for Path E corpus measurement.
 | 2. Word / delta columns remain **n/a** (no fabricated numbers) | **Yes** — see [pagination-delta-corpus.md](../../plan/pagination-delta-corpus.md) and ADR-0042 residual table |
 | 3. Docker PDF baseline remains the drift sentinel (LR-A7) | **Yes** — [docs/evidence/lrp-a7-pagination/](../lrp-a7-pagination/) |
 | 4. Runtime enforcement metadata-gated (PAG-C7) | **Yes** — `PaginationDeltaEvaluator` + preview/runtime wiring; skip when `authorWordPageCount` unset |
-| 5. ADR-0042 / ADR-0043 Accepted with residuals (doc-sync) | **Pending** stage 12 `post-task-doc-sync` (not claimed in this Stage 4 implementer commit alone) |
+| 5. ADR-0042 / ADR-0043 Accepted with residuals (doc-sync) | **Yes** — stage 12 MAIN `post-task-doc-sync` after merge `3513ab92` (ADR-0042 Path X residual; ADR-0043 slice A Accepted / slice B residual) |
 | 6. Residual owner + retest trigger | Owner: rendering-engineer + doc-keeper; trigger: Word-equipped host available → open Path E measurement leaf (≥5 corpus letters) |
 | 7. Explicit non-claims | This exemption **≠ checklist #3b GO**; **≠** Word↔LO proven |
 
@@ -34,7 +34,7 @@ Slice A (OPC open + Word XML well-formedness fail-closed via `OoxmlOutputValidat
 ## #3b honesty
 
 Per BDD EVD-C3 / XR-C2: **do not** flip launch-readiness checklist **#3b → GO** from this exemption.
-Doc-sync may later mark **CONDITIONAL** only after ADR Accepted + enforcement evidence are synced on MAIN.
+Stage 12 MAIN doc-sync marked **#3b → CONDITIONAL** only (ADR Accepted + enforcement + Path X).
 Path E is required before **GO**.
 
 ## Links

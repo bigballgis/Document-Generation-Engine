@@ -1426,22 +1426,22 @@
       {
         "id": "103",
         "title": "PRR-C01: ADR-0042/0043 closeout (#3b)",
-        "description": "IN PROGRESS 2026-07-18 (sole-active ISOLATED resume). Wave C — ADR-0042/0043 rendering acceptance closeout tied to launch checklist #3b blocker. Path X durable exemption track. Slice prod-adr-0042-0043-closeout; worktree D:/working/DGE-prod-adr-0042-0043-closeout · feat/prod-adr-0042-0043-closeout. BDD ready docs/behavior/prod-adr-0042-0043-closeout.md (BDD-PRR-C01). frontend_ui_in_scope=false. Formal phase None. Not go-live. Do NOT flip checklist #3b in this activation (stays NO-GO until post-evidence doc-sync).",
-        "details": "ACTIVATED/RESUMED 2026-07-18 (plan-orchestrator stage 2). Sole-active NON-CE delivery leaf. Batch recommendation solo (member_task_ids: [\"103\"]). Placement ISOLATED resume (existing WIP). Serial queue: #102 Done → #105 Done (50448016) → this leaf in-progress → next #104 (not activated; vetoed from this batch). Scope: ADR-0042 enforcement + ADR-0043 Accept (slice A) + Path X durable exemption per BDD (Path E Word counts not invented). Formal phase remains None. Umbrella #53 registry only. IBL #106 registry-only pending on MAIN (not a delivery leaf; not activated). Do NOT claim go-live. Do NOT flip #3b GO. Do NOT activate CD-3.",
-        "testStrategy": "1. BDD-PRR-C01 ready (docs/behavior/prod-adr-0042-0043-closeout.md). 2. TDD for pagination delta enforcement + OOXML gate Accept path. 3. mvn -B -ntp -f backend/pom.xml verify GREEN. 4. FE/E2E N/A (frontend_ui_in_scope=false). 5. Path X durable exemption (preferred this leaf) OR Path E Word evidence — no invented Word page counts. 6. Do NOT flip #3b GO in activation or without post-evidence doc-sync; do NOT claim go-live.",
+        "description": "DONE 2026-07-18. PRR-C01 ADR-0042/0043 closeout → Done. MAIN merge 3513ab92; feature tip 7a1a1bb1; worktree REMOVED. Slice prod-adr-0042-0043-closeout. Path X durable exemption; ADR-0042 Accepted (enforcement + Word n/a residual); ADR-0043 Accepted slice A only (slice B residual). Checklist #3b → CONDITIONAL (Path X ≠ GO). BDD ready docs/behavior/prod-adr-0042-0043-closeout.md (BDD-PRR-C01). frontend_ui_in_scope=false. Formal phase None. Not go-live. Sole-active cleared; next queue head #104 (not activated).",
+        "details": "COMPLETED 2026-07-18 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: prod-adr-0042-0043-closeout. Batch recommendation solo (member_task_ids: [\"103\"]) closed. Merge SHA 3513ab92d8abbd719313d8c2c842887fe0ec65d9. Gates: mvn verify GREEN 1966/0/0/8; architecture PASS_WITH_NOTES Critical=0 merge_go=true; Stage 10 DEPLOY_OK Flyway V68 :8080/:4173 200; E2E/UIUX N/A. Evidence: PaginationDeltaEvaluator metadata-gated enforcement; Path X word-baseline-exemption.md; ADR-0042/0043 Accepted with honest residuals. Checklist #3b CONDITIONAL only (EVD-C3/XR-C2). Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO. Do NOT activate #104 or IBL waves from this sync.",
+        "testStrategy": "1. BDD-PRR-C01 ready (docs/behavior/prod-adr-0042-0043-closeout.md). 2. TDD for pagination delta enforcement + OOXML gate Accept path. 3. mvn -B -ntp -f backend/pom.xml verify GREEN (1966). 4. FE/E2E N/A (frontend_ui_in_scope=false). 5. Path X durable exemption — no invented Word page counts. 6. #3b CONDITIONAL only (not GO); do NOT claim go-live.",
         "priority": "high",
         "dependencies": [
           "105"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T02:00:00.000Z"
+        "updatedAt": "2026-07-18T03:15:00.000Z"
       },
       {
         "id": "104",
         "title": "PRR-D01: Ops hardening (ResilienceFailureMapper / actuator / nginx / dashboard / doc hygiene)",
-        "description": "PENDING (queued after #103 Wave C sole-active — not activated). Wave D — ResilienceFailureMapper, actuator exposure, nginx, dashboard, and doc hygiene hardening. Formal phase None. Not go-live. Do NOT flip checklist #3b.",
-        "details": "Serial queue after #103 PRR-C01 Wave C (full chain: #102 → #105 Done → #103 in-progress sole-active → this leaf). Do not activate while #103 is In Progress (single-lane serial). Scope: ops/reliability surfacing + doc hygiene. Formal phase None. Not go-live.",
+        "description": "PENDING (next queue head after #103 Done — not activated). Wave D — ResilienceFailureMapper, actuator exposure, nginx, dashboard, and doc hygiene hardening. Formal phase None. Not go-live. Checklist #3b is CONDITIONAL (Path X); do NOT flip #3b GO.",
+        "details": "Serial queue head after #103 PRR-C01 Done (3513ab92). Full chain: #102 → #105 Done → #103 Done → this leaf pending. Do not activate until delivery-orchestrator stage 0 for this leaf. Scope: ops/reliability surfacing + doc hygiene. Formal phase None. Not go-live. Do NOT activate IBL waves ahead of this leaf without user redirect.",
         "testStrategy": "TBD at activation — BDD if behavior-changing; mvn/pnpm gates; deploy evidence as required.",
         "priority": "medium",
         "dependencies": [
@@ -1449,7 +1449,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T02:00:00.000Z"
+        "updatedAt": "2026-07-18T03:15:00.000Z"
       },
       {
         "id": "105",
