@@ -16,7 +16,7 @@ import type { PasteCleaningEvidence, UpsertBindingPayload } from '@/types/templa
 import { createTemplateAuthoringBindingsEditHandlers } from '@/composables/createTemplateAuthoringBindingsEditHandlers'
 import {
   isBindingVersionConflict,
-  presentBindingVersionConflict,
+  resolveBindingVersionConflictAndReload,
 } from '@/utils/bindingVersionConflict'
 
 export function useTemplateAuthoringBindingsEditActions(options: {
@@ -114,20 +114,15 @@ export function useTemplateAuthoringBindingsEditActions(options: {
         return true
       } catch (error) {
         if (isBindingVersionConflict(error)) {
-          const action = await presentBindingVersionConflict((key) => t(key))
-          if (action === 'reload') {
-            await templatesStore.fetchTemplate(props.templateId)
-            emit('updated')
-            const fromStore = templatesStore.selectedTemplate?.bindings.find(
-              (item) => item.anchorId === editingAnchorId.value,
-            )
-            const row = editingRow.value
-            if (fromStore && row) {
-              await reloadBindingFromServer({ ...row, binding: fromStore })
-            } else {
-              await reloadBindingFromServer(row)
-            }
-          }
+          await resolveBindingVersionConflictAndReload({
+            t: (key) => t(key),
+            fetchTemplate: () => templatesStore.fetchTemplate(props.templateId),
+            onUpdated: () => emit('updated'),
+            editingAnchorId: () => editingAnchorId.value,
+            editingRow: () => editingRow.value,
+            storeBindings: () => templatesStore.selectedTemplate?.bindings,
+            reloadBindingFromServer,
+          })
         }
         return false
       }

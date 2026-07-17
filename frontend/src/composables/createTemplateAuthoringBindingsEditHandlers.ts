@@ -11,7 +11,7 @@ import type { useTemplatesStore } from '@/stores/templates'
 import type { MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
 import {
   isBindingVersionConflict,
-  presentBindingVersionConflict,
+  resolveBindingVersionConflictAndReload,
 } from '@/utils/bindingVersionConflict'
 import type { UpsertBindingPayload } from '@/types/template'
 
@@ -69,23 +69,16 @@ export function createTemplateAuthoringBindingsEditHandlers(deps: {
   }
 
   async function handleBindingVersionConflict(): Promise<void> {
-    const action = await presentBindingVersionConflict((key) => t(key))
-    if (action !== 'reload') {
-      // Keep editing — retain dirty state and local draft (U21-D9).
-      return
-    }
-    await templatesStore.fetchTemplate(props.templateId)
-    emit('updated')
-    // Parent refresh may be async via props; prefer store-selected bindings when present.
-    const fromStore = templatesStore.selectedTemplate?.bindings.find(
-      (item) => item.anchorId === editingAnchorId.value,
-    )
-    const row = editingRow.value
-    if (fromStore && row) {
-      await reloadBindingFromServer({ ...row, binding: fromStore })
-    } else {
-      await reloadBindingFromServer(row)
-    }
+    // Keep editing — retain dirty state and local draft (U21-D9).
+    await resolveBindingVersionConflictAndReload({
+      t: (key) => t(key),
+      fetchTemplate: () => templatesStore.fetchTemplate(props.templateId),
+      onUpdated: () => emit('updated'),
+      editingAnchorId: () => editingAnchorId.value,
+      editingRow: () => editingRow.value,
+      storeBindings: () => templatesStore.selectedTemplate?.bindings,
+      reloadBindingFromServer,
+    })
   }
 
   async function handleSaveBinding() {
