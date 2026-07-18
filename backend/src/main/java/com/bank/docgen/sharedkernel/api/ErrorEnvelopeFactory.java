@@ -1,6 +1,8 @@
 package com.bank.docgen.sharedkernel.api;
 
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.infrastructure.resilience.GenerationServiceUnavailableException;
+import com.bank.docgen.infrastructure.resilience.GenerationTimeoutException;
 import com.bank.docgen.rendering.PdfConversionCapacityExceededException;
 import com.bank.docgen.runtime.service.IdempotencyConflictException;
 import com.bank.docgen.runtime.service.IdempotencyDigestException;
@@ -197,6 +199,44 @@ public class ErrorEnvelopeFactory {
                 null
         );
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
+    }
+
+    public ResponseEntity<ErrorEnvelope> generationServiceUnavailable(
+            HttpServletRequest request,
+            GenerationServiceUnavailableException ex
+    ) {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        String messageKey = ex.messageKey();
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.GENERATION_SERVICE_UNAVAILABLE,
+                ApiErrorCategories.GENERATION,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                true,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
+    }
+
+    public ResponseEntity<ErrorEnvelope> generationTimeout(
+            HttpServletRequest request,
+            GenerationTimeoutException ex
+    ) {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        String messageKey = ex.messageKey();
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.GENERATION_TIMEOUT,
+                ApiErrorCategories.GENERATION,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                true,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 

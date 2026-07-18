@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.infrastructure.resilience.GenerationServiceUnavailableException;
+import com.bank.docgen.infrastructure.resilience.GenerationTimeoutException;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,6 +99,49 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.INTERNAL_ERROR);
         assertThat(response.getBody().error().retryable()).isTrue();
+    }
+
+    @Test
+    void generationServiceUnavailableMapsTo503Envelope() {
+        when(messageResolver.resolve("api.error.generation.generationServiceUnavailable"))
+                .thenReturn("Document generation service is temporarily unavailable.");
+
+        ResponseEntity<ErrorEnvelope> response = handler.handleGenerationServiceUnavailable(
+                request,
+                new GenerationServiceUnavailableException()
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.GENERATION_SERVICE_UNAVAILABLE);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.GENERATION);
+        assertThat(response.getBody().error().retryable()).isTrue();
+        assertThat(response.getBody().error().messageKey())
+                .isEqualTo("api.error.generation.generationServiceUnavailable");
+        assertThat(response.getBody().error().message())
+                .isEqualTo("Document generation service is temporarily unavailable.");
+        assertThat(response.getBody().error().code()).isNotEqualTo(ApiErrorCodes.TEMPLATE_VALIDATION_FAILED);
+        assertThat(response.getBody().error().message()).doesNotContain("CallNotPermitted");
+    }
+
+    @Test
+    void generationTimeoutMapsTo504Envelope() {
+        when(messageResolver.resolve("api.error.generation.generationTimeout"))
+                .thenReturn("Document generation timed out.");
+
+        ResponseEntity<ErrorEnvelope> response = handler.handleGenerationTimeout(
+                request,
+                new GenerationTimeoutException()
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.GENERATION_TIMEOUT);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.GENERATION);
+        assertThat(response.getBody().error().retryable()).isTrue();
+        assertThat(response.getBody().error().messageKey())
+                .isEqualTo("api.error.generation.generationTimeout");
+        assertThat(response.getBody().error().message()).doesNotContain("TimeoutException");
     }
 
     @Test

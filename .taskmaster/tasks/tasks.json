@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR #98+#99+#100+#101+#102+#105 → Done. Host sole-active delivery leaf = #103 PRR-C01 Path X (Wave C) ISOLATED resume — NOT under this umbrella. Next after #103: #104. IBL #106 registry-only pending (not a delivery leaf). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 + #102 + #105 Done outside this umbrella. Host sole-active = NON-CE #103 Wave C Path X (prod-adr-0042-0043-closeout; ISOLATED resume); next #104 (not activated). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR #98+#99+#100+#101+#102+#105+#103 → Done (#103 @ 6408c210). Host sole-active delivery leaf = NON-CE #104 PRR-D01a (D01A) Wave D SPLIT leaf (`prod-ops-resilience-pdf-pool`) — NOT #103; NOT under this umbrella. IBL #106 registry-only pending (not a delivery leaf; do NOT activate IBL). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 + #102 + #105 + #103 Done outside this umbrella (#103 Done @ 6408c210 / merge 3513ab92). Host sole-active = NON-CE #104 D01A only (ResilienceFailureMapper + PDF pool; Wave D bag SPLIT — residual actuator/nginx/dashboard/doc hygiene queued after D01A Done). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T02:00:00.000Z"
+        "updatedAt": "2026-07-18T04:15:00.000Z"
       },
       {
         "id": "54",
@@ -1426,8 +1426,8 @@
       {
         "id": "103",
         "title": "PRR-C01: ADR-0042/0043 closeout (#3b)",
-        "description": "DONE 2026-07-18. PRR-C01 ADR-0042/0043 closeout → Done. MAIN merge 3513ab92; feature tip 7a1a1bb1; worktree REMOVED. Slice prod-adr-0042-0043-closeout. Path X durable exemption; ADR-0042 Accepted (enforcement + Word n/a residual); ADR-0043 Accepted slice A only (slice B residual). Checklist #3b → CONDITIONAL (Path X ≠ GO). BDD ready docs/behavior/prod-adr-0042-0043-closeout.md (BDD-PRR-C01). frontend_ui_in_scope=false. Formal phase None. Not go-live. Sole-active cleared; next queue head #104 (not activated).",
-        "details": "COMPLETED 2026-07-18 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: prod-adr-0042-0043-closeout. Batch recommendation solo (member_task_ids: [\"103\"]) closed. Merge SHA 3513ab92d8abbd719313d8c2c842887fe0ec65d9. Gates: mvn verify GREEN 1966/0/0/8; architecture PASS_WITH_NOTES Critical=0 merge_go=true; Stage 10 DEPLOY_OK Flyway V68 :8080/:4173 200; E2E/UIUX N/A. Evidence: PaginationDeltaEvaluator metadata-gated enforcement; Path X word-baseline-exemption.md; ADR-0042/0043 Accepted with honest residuals. Checklist #3b CONDITIONAL only (EVD-C3/XR-C2). Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO. Do NOT activate #104 or IBL waves from this sync.",
+        "description": "DONE 2026-07-18. PRR-C01 ADR-0042/0043 closeout → Done. MAIN merge 3513ab92; doc-sync 6408c210; feature tip 7a1a1bb1; worktree REMOVED. Slice prod-adr-0042-0043-closeout. Path X durable exemption; ADR-0042 Accepted (enforcement + Word n/a residual); ADR-0043 Accepted slice A only (slice B residual). Checklist #3b → CONDITIONAL (Path X ≠ GO). BDD ready docs/behavior/prod-adr-0042-0043-closeout.md (BDD-PRR-C01). frontend_ui_in_scope=false. Formal phase None. Not go-live. Sole-active superseded by #104 D01A (do NOT regress #3b).",
+        "details": "COMPLETED 2026-07-18 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: prod-adr-0042-0043-closeout. Batch recommendation solo (member_task_ids: [\"103\"]) closed. Merge SHA 3513ab92d8abbd719313d8c2c842887fe0ec65d9; MAIN doc-sync commit 6408c210837c402bcd6531cd184b41e4f2567312. Gates: mvn verify GREEN 1966/0/0/8; architecture PASS_WITH_NOTES Critical=0 merge_go=true; Stage 10 DEPLOY_OK Flyway V68 :8080/:4173 200; E2E/UIUX N/A. Evidence: PaginationDeltaEvaluator metadata-gated enforcement; Path X word-baseline-exemption.md; ADR-0042/0043 Accepted with honest residuals. Checklist #3b CONDITIONAL only (EVD-C3/XR-C2). Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO. Sole-active now #104 D01A (activated separately).",
         "testStrategy": "1. BDD-PRR-C01 ready (docs/behavior/prod-adr-0042-0043-closeout.md). 2. TDD for pagination delta enforcement + OOXML gate Accept path. 3. mvn -B -ntp -f backend/pom.xml verify GREEN (1966). 4. FE/E2E N/A (frontend_ui_in_scope=false). 5. Path X durable exemption — no invented Word page counts. 6. #3b CONDITIONAL only (not GO); do NOT claim go-live.",
         "priority": "high",
         "dependencies": [
@@ -1435,21 +1435,21 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T03:15:00.000Z"
+        "updatedAt": "2026-07-18T04:15:00.000Z"
       },
       {
         "id": "104",
         "title": "PRR-D01: Ops hardening (ResilienceFailureMapper / actuator / nginx / dashboard / doc hygiene)",
-        "description": "PENDING (next queue head after #103 Done — not activated). Wave D — ResilienceFailureMapper, actuator exposure, nginx, dashboard, and doc hygiene hardening. Formal phase None. Not go-live. Checklist #3b is CONDITIONAL (Path X); do NOT flip #3b GO.",
-        "details": "Serial queue head after #103 PRR-C01 Done (3513ab92). Full chain: #102 → #105 Done → #103 Done → this leaf pending. Do not activate until delivery-orchestrator stage 0 for this leaf. Scope: ops/reliability surfacing + doc hygiene. Formal phase None. Not go-live. Do NOT activate IBL waves ahead of this leaf without user redirect.",
-        "testStrategy": "TBD at activation — BDD if behavior-changing; mvn/pnpm gates; deploy evidence as required.",
+        "description": "IN PROGRESS 2026-07-18 — sole-active delivery leaf = PRR-D01a (D01A). Wave D bag is SPLIT: this leaf only ResilienceFailureMapper stable taxonomy (503/504 not 422 TEMPLATE) + PDF conversion pool bounded/fail-closed (`prod-ops-resilience-pdf-pool` · `feat/prod-ops-resilience-pdf-pool` · worktree `D:/working/DGE-prod-ops-resilience-pdf-pool`). Batch recommendation **split** (`member_task_ids: [\"104\"]`; `proposed_slice_id: prod-ops-resilience-pdf-pool`). Remaining Wave D (actuator/CSP, nginx, dashboard, doc hygiene) stays queued after D01A Done — same TM #104 bag / follow-on serial leaves; do not invent extra TM ids; do NOT mark #104 Done on D01A alone. BDD ready docs/behavior/prod-ops-resilience-pdf-pool.md (BDD-PRR-D01A-*). Formal phase None. Not go-live. Checklist #3b stays CONDITIONAL (Path X; #103 @ 6408c210); do NOT flip #3b GO / #5a GO. Do NOT activate IBL.",
+        "details": "Activated 2026-07-18 stage 2 plan-orchestrator (D01A). Prior: #102 → #105 Done → #103 Done (merge 3513ab92; doc-sync 6408c210). This leaf scope ONLY (PRR-D01a): stable Resilience4j/timeout/bulkhead error taxonomy (ResilienceFailureMapper → 503/504 not 422 TEMPLATE) + PDF pool bounded + saturation fail-closed. OUT of this leaf (Wave D residual, queued): actuator exposure/CSP, nginx hardening, ops dashboard, doc hygiene. Placement ISOLATED. frontend_ui_in_scope=false. Formal phase None. Not go-live. Do NOT activate IBL waves. Do NOT flip #3b. Do NOT mark #104 Done until residual bag closed or explicitly re-scoped.",
+        "testStrategy": "1. BDD ready docs/behavior/prod-ops-resilience-pdf-pool.md (BDD-PRR-D01A-*). 2. TDD ResilienceFailureMapper + PDF pool bounds/fail-closed. 3. mvn -B -ntp -f backend/pom.xml verify GREEN. 4. FE/E2E N/A (frontend_ui_in_scope=false). 5. Deploy evidence once for D01A acceptance surface. 6. Do NOT mark #104 Done on D01A alone while Wave D residual remains; do NOT flip #3b/#5a; do NOT claim go-live.",
         "priority": "medium",
         "dependencies": [
           "103"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T03:15:00.000Z"
+        "updatedAt": "2026-07-18T04:15:00.000Z"
       },
       {
         "id": "105",
@@ -1468,20 +1468,20 @@
       {
         "id": "106",
         "title": "IBL: International Bank Letter Readiness Program (umbrella)",
-        "description": "REGISTRY ONLY — not a delivery leaf; program registered in Task Master; waves Not Started / not activated; Formal phase None; Not go-live; Do NOT flip checklist #3b; Plan: docs/plan/intl-bank-letter-readiness-program.md. Queue note: #105 Done; remaining PRR ahead = #103 → #104; next IBL activation head = IBL-A1 (or wave A batch per Batch Recommendation at activation time). Do NOT reorder remaining PRR queue. Status pending (registry only). MAIN merge 9fc2bc97.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs in docs/plan/intl-bank-letter-readiness-program.md. REGISTRY ONLY — not a delivery leaf. Waves A–E Not Started / not activated (B7 + Wave E blocked on external/pending decisions). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b. Do NOT activate while PRR #103/#104 remain ahead in the host serial queue (#105 Done).",
-        "testStrategy": "N/A 鈥?umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
+        "description": "REGISTRY ONLY — not a delivery leaf; program registered in Task Master; waves Not Started / not activated; Formal phase None; Not go-live; Do NOT flip checklist #3b (stays CONDITIONAL); Plan: docs/plan/intl-bank-letter-readiness-program.md. Queue note: #105/#103 Done (@6408c210); host sole-active = #104 D01A (prod-ops-resilience-pdf-pool; Wave D SPLIT) — do NOT activate IBL while #104 D01A / residual bag in flight; next IBL activation head = IBL-A1 (or wave A batch per Batch Recommendation at activation time). Status pending (registry only). MAIN merge 9fc2bc97.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs in docs/plan/intl-bank-letter-readiness-program.md. REGISTRY ONLY — not a delivery leaf. Waves A–E Not Started / not activated (B7 + Wave E blocked on external/pending decisions). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b. Do NOT activate while PRR #104 D01A is sole-active or Wave D residual remains (#103/#105 Done).",
+        "testStrategy": "N/A — umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:45:00.000Z"
+        "updatedAt": "2026-07-18T04:15:00.000Z"
       },
       {
         "id": "107",
         "title": "IBL-A1: Runtime required/type fail-closed variable enforcement",
-        "description": "PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated. Plan ID IBL-A1. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F1. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-A1. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: Generate missing required / wrong type/enum 鈫?4xx VARIABLE_VALIDATION_FAILED + field list; no silent blank in DOCX/PDF; publish/preview aligned or scoped in BDD. Gates: mvn -B -ntp -f backend/pom.xml verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated.",
+        "description": "PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated. Plan ID IBL-A1. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F1. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "IBL-A1. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: Generate missing required / wrong type/enum 鈫?4xx VARIABLE_VALIDATION_FAILED + field list; no silent blank in DOCX/PDF; publish/preview aligned or scoped in BDD. Gates: mvn -B -ntp -f backend/pom.xml verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated.",
         "testStrategy": "BDD ready + regression for required/type/enum; mvn -B -ntp -f backend/pom.xml verify GREEN; no silent blank DOCX/PDF.",
         "priority": "high",
         "dependencies": [],
@@ -1492,8 +1492,8 @@
       {
         "id": "108",
         "title": "IBL-A2: ISO-currency FORMAT_AMOUNT",
-        "description": "PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated. Plan ID IBL-A2. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F2. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-A2. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: FORMAT_AMOUNT with ISO currency (e.g. EUR + en-US) renders EUR 鈥?not locale-default $; multi-currency unit tests; OpenAPI/docs note currency argument. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated.",
+        "description": "PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated. Plan ID IBL-A2. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F2. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "IBL-A2. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: FORMAT_AMOUNT with ISO currency (e.g. EUR + en-US) renders EUR 鈥?not locale-default $; multi-currency unit tests; OpenAPI/docs note currency argument. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated.",
         "testStrategy": "BDD + unit tests multi-currency pairs; FORMAT_AMOUNT uses ISO code+amount+locale; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [],
@@ -1504,8 +1504,8 @@
       {
         "id": "109",
         "title": "IBL-A3: International amount-in-words + en locale",
-        "description": "PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated. Plan ID IBL-A3. Owner: backend-engineer. BDD: required. Depends: A2 (#108) recommended. Maps F3. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-A3. Owner specialist: backend-engineer. BDD: required. Depends: A2 (#108) recommended. Acceptance: Amount-in-words supports at least en + USD (extensible); CNY/zh remains correct; default locale documented. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated.",
+        "description": "PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated. Plan ID IBL-A3. Owner: backend-engineer. BDD: required. Depends: A2 (#108) recommended. Maps F3. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "IBL-A3. Owner specialist: backend-engineer. BDD: required. Depends: A2 (#108) recommended. Acceptance: Amount-in-words supports at least en + USD (extensible); CNY/zh remains correct; default locale documented. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated.",
         "testStrategy": "BDD + tests for en/USD amount-in-words; CNY/zh regression; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [
@@ -1518,8 +1518,8 @@
       {
         "id": "110",
         "title": "IBL-A4: /contract per-field schemas + breaking-change gate",
-        "description": "PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated. Plan ID IBL-A4. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F4. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-A4. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: /contract returns per-field variable schemas; consumer contract tests fail on breaking renames; OpenAPI synced. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated.",
+        "description": "PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated. Plan ID IBL-A4. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F4. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "IBL-A4. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: /contract returns per-field variable schemas; consumer contract tests fail on breaking renames; OpenAPI synced. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated.",
         "testStrategy": "BDD + consumer contract tests for schema/placeholder breaks; OpenAPI sync; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [],
@@ -1530,8 +1530,8 @@
       {
         "id": "111",
         "title": "IBL-A5: PII-category retention redaction",
-        "description": "PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated. Plan ID IBL-A5. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F5; ADR-0057. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-A5. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: Retained invocation parameters redact/exclude per VariablePiiCategory; regenerate works for non-redacted fields; audit/tests prove PII not stored clear where forbidden. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated.",
+        "description": "PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated. Plan ID IBL-A5. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F5; ADR-0057. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "IBL-A5. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: Retained invocation parameters redact/exclude per VariablePiiCategory; regenerate works for non-redacted fields; audit/tests prove PII not stored clear where forbidden. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated.",
         "testStrategy": "BDD + retention redaction tests per VariablePiiCategory; regenerate non-redacted path; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [],
@@ -1542,8 +1542,8 @@
       {
         "id": "112",
         "title": "IBL-A6: Regenerate locale replay fix (SPECIMEN unchanged)",
-        "description": "PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated. Plan ID IBL-A6. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F6 locale only; SPECIMEN watermark unchanged until PD-6. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-A6. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: Regenerate uses original invocation locale (not null鈫抏ngine default); SPECIMEN watermark unchanged unless PD-6 confirmed; locale-sensitive amount/date regression. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#103→#104; #105 Done); not activated.",
+        "description": "PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated. Plan ID IBL-A6. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F6 locale only; SPECIMEN watermark unchanged until PD-6. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "IBL-A6. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: Regenerate uses original invocation locale (not null鈫抏ngine default); SPECIMEN watermark unchanged unless PD-6 confirmed; locale-sensitive amount/date regression. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated.",
         "testStrategy": "BDD + locale replay regression; SPECIMEN unchanged; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [],

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.context.properties.bind.Bindable;
@@ -67,6 +68,27 @@ class DocgenRenderingPropertiesBindingTest {
             assertThat(executor.getCorePoolSize()).isEqualTo(4);
             assertThat(executor.getMaxPoolSize()).isEqualTo(4);
             assertThat(ReflectionTestUtils.getField(executor, "queueCapacity")).isEqualTo(0);
+            assertThat(executor.getThreadPoolExecutor().getRejectedExecutionHandler())
+                    .isInstanceOf(ThreadPoolExecutor.AbortPolicy.class);
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    /** BDD-PRR-D01A-008/009: default pool stays bounded fail-fast (size=2, queue=0, AbortPolicy). */
+    @Test
+    void defaultPdfConversionExecutorIsBoundedFailFast() {
+        DocgenRenderingProperties renderingProperties = new DocgenRenderingProperties();
+
+        ThreadPoolTaskExecutor executor =
+                new PdfConversionExecutorConfig().pdfConversionExecutor(renderingProperties);
+        try {
+            assertThat(executor.getCorePoolSize()).isEqualTo(2);
+            assertThat(executor.getMaxPoolSize()).isEqualTo(2);
+            assertThat(ReflectionTestUtils.getField(executor, "queueCapacity")).isEqualTo(0);
+            assertThat(executor.getThreadPoolExecutor().getQueue().remainingCapacity()).isEqualTo(0);
+            assertThat(executor.getThreadPoolExecutor().getRejectedExecutionHandler())
+                    .isInstanceOf(ThreadPoolExecutor.AbortPolicy.class);
         } finally {
             executor.shutdown();
         }

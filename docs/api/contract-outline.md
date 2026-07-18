@@ -1411,6 +1411,7 @@ Async task query response structure
 | `RENDERING` | `PINNED_MASTER_UNAVAILABLE` | `api.error.rendering.pinnedMasterUnavailable` | `false` | Pinned master revision is unavailable. |
 | `GENERATION` | `DOCX_GENERATION_FAILED` | `api.error.generation.docxGenerationFailed` | `true` | DOCX generation failed. |
 | `GENERATION` | `PDF_CONVERSION_FAILED` | `api.error.generation.pdfConversionFailed` | `true` | PDF conversion failed. |
+| `GENERATION` | `PDF_CONVERSION_CAPACITY_EXCEEDED` | `api.error.generation.pdfConversionCapacityExceeded` | `true` | PDF conversion pool saturated; retry later (HTTP 503). |
 | `GENERATION` | `PDF_ARCHIVAL_ENCRYPTION_MUTEX` | `api.error.generation.pdfArchivalEncryptionMutex` | `false` | PDF/A archival profile cannot be combined with encryption (CE-O01). |
 | `GENERATION` | `GENERATION_TIMEOUT` | `api.error.generation.generationTimeout` | `true` | Document generation timed out. |
 | `GENERATION` | `GENERATION_SERVICE_UNAVAILABLE` | `api.error.generation.generationServiceUnavailable` | `true` | Document generation service is temporarily unavailable. |
@@ -1444,7 +1445,7 @@ Async task query response structure
 | 410 Gone | `DOWNLOAD_URL_EXPIRED`、`RESULT_RETENTION_EXPIRED`、`ASYNC_TASK_EXPIRED`。 | 资源曾可用，但下载地址、任务或结果已过期。 |
 | 422 Unprocessable Entity | `VARIABLE_REQUIRED`、`VARIABLE_TYPE_INVALID`、`VARIABLE_FORMAT_INVALID`、`VARIABLE_RULE_FAILED`、`OOXML_VALIDATION_FAILED`、`EXCEPTION_REASON_REQUIRED`、`EXCEPTION_SECONDARY_CONFIRM_REQUIRED`。 | 请求结构可解析，但模板变量、业务规则校验未通过，装配后 DOCX 未通过 OOXML 输出校验（fail-closed，不落库/不预览），或 CE-G01 例外干预字段缺失。 |
 | 500 Internal Server Error | `TEMPLATE_CONTRACT_INVALID`、`TEMPLATE_ANCHOR_MISSING`、`DOCX_GENERATION_FAILED`、`PDF_CONVERSION_FAILED`、`ENCRYPTION_FAILED`、`BATCH_PROCESSING_FAILED`。 | 平台处理、模板资产、生成、转换、加密或整批处理失败。 |
-| 503 Service Unavailable | `AD_GROUP_RESOLUTION_FAILED`、`IDEMPOTENCY_STORE_UNAVAILABLE`、`GENERATION_SERVICE_UNAVAILABLE`。 | 权限依赖、幂等存储或生成服务临时不可用。 |
+| 503 Service Unavailable | `AD_GROUP_RESOLUTION_FAILED`、`IDEMPOTENCY_STORE_UNAVAILABLE`、`GENERATION_SERVICE_UNAVAILABLE`、`PDF_CONVERSION_CAPACITY_EXCEEDED`。 | 权限依赖、幂等存储、生成服务临时不可用，或 PDF 转换池饱和。 |
 | 504 Gateway Timeout | `GENERATION_TIMEOUT`。 | 文档生成超时。 |
 
 ## 统一错误响应确认

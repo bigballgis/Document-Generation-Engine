@@ -78,6 +78,10 @@ public final class ApiErrorCodes {
     public static final String INVOCATION_RECORD_EXPIRED = "INVOCATION_RECORD_EXPIRED";
     public static final String INVOCATION_VIEW_INVALID = "INVOCATION_VIEW_INVALID";
     public static final String PDF_CONVERSION_CAPACITY_EXCEEDED = "PDF_CONVERSION_CAPACITY_EXCEEDED";
+    /** PRR-D01a / DEF-LRP-D6-001: circuit open / bulkhead full / unknown resilience failure. */
+    public static final String GENERATION_SERVICE_UNAVAILABLE = "GENERATION_SERVICE_UNAVAILABLE";
+    /** PRR-D01a: resilience / mapped generation timeout. */
+    public static final String GENERATION_TIMEOUT = "GENERATION_TIMEOUT";
     /** LR-A6 / ADR-0043: assembled DOCX failed OOXML well-formedness validation. */
     public static final String OOXML_VALIDATION_FAILED = "OOXML_VALIDATION_FAILED";
     /** LR-C7: collaboration notification mark-read fail-closed (invisible / missing). */

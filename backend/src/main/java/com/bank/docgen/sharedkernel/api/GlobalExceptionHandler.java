@@ -1,6 +1,8 @@
 package com.bank.docgen.sharedkernel.api;
 
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.infrastructure.resilience.GenerationServiceUnavailableException;
+import com.bank.docgen.infrastructure.resilience.GenerationTimeoutException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -142,6 +144,24 @@ public class GlobalExceptionHandler {
                 ex.category(),
                 ex.messageKey()
         );
+    }
+
+    /** PRR-D01a / DEF-LRP-D6-001: CB open / bulkhead full → 503, not TEMPLATE_VALIDATION_FAILED. */
+    @ExceptionHandler(GenerationServiceUnavailableException.class)
+    public ResponseEntity<ErrorEnvelope> handleGenerationServiceUnavailable(
+            HttpServletRequest request,
+            GenerationServiceUnavailableException ex
+    ) {
+        return errorEnvelopeFactory.generationServiceUnavailable(request, ex);
+    }
+
+    /** PRR-D01a: resilience / mapped timeout → 504 GENERATION_TIMEOUT. */
+    @ExceptionHandler(GenerationTimeoutException.class)
+    public ResponseEntity<ErrorEnvelope> handleGenerationTimeout(
+            HttpServletRequest request,
+            GenerationTimeoutException ex
+    ) {
+        return errorEnvelopeFactory.generationTimeout(request, ex);
     }
 
     @ExceptionHandler(Exception.class)
