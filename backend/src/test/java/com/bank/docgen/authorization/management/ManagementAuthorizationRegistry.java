@@ -27,6 +27,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.collaboration.web.CollaborationNotificationController",
             "com.bank.docgen.collaboration.web.CollaborationWorkItemController",
             "com.bank.docgen.contentmodule.web.ContentModuleController",
+            "com.bank.docgen.dashboard.web.DashboardSummaryController",
             "com.bank.docgen.library.web.AssetLibraryController",
             "com.bank.docgen.library.web.LibraryExportController",
             "com.bank.docgen.legalhold.web.LegalHoldController",
@@ -116,6 +117,10 @@ final class ManagementAuthorizationRegistry {
                             "com.bank.docgen.contentmodule.service.ContentModuleLifecycleImpactService",
                             "com.bank.docgen.contentmodule.service.ContentModuleWhereUsedService"
                     )
+            ),
+            Map.entry(
+                    "com.bank.docgen.dashboard.web.DashboardSummaryController",
+                    Set.of("com.bank.docgen.dashboard.service.DashboardSummaryService")
             ),
             Map.entry(
                     "com.bank.docgen.library.web.AssetLibraryController",
@@ -333,6 +338,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.contentmodule.service.ContentModuleReviewService",
             "com.bank.docgen.contentmodule.service.ContentModuleService",
             "com.bank.docgen.contentmodule.service.ContentModuleWhereUsedService",
+            "com.bank.docgen.dashboard.service.DashboardSummaryService",
             "com.bank.docgen.library.service.AssetLibraryService",
             "com.bank.docgen.legalhold.service.LegalHoldService",
             "com.bank.docgen.master.service.MasterDocumentService",

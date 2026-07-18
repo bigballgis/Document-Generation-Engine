@@ -1596,3 +1596,33 @@ export async function captureCeG05LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** PRR-D01c / #136 Dashboard Overview summary API — 1920×1080 dual-brand evidence. */
+export const PRR_D01C_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'PRR-D01C')
+export const PRR_D01C_SCREENSHOT_DIR = path.join(PRR_D01C_EVIDENCE_ROOT, 'screenshots')
+export const PRR_D01C_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensurePrrD01cEvidenceDirs(): void {
+  fs.mkdirSync(PRR_D01C_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function prrD01cScreenshotPath(filename: string): string {
+  return path.join(PRR_D01C_SCREENSHOT_DIR, filename)
+}
+
+export async function capturePrrD01cScreenshot(page: Page, filename: string): Promise<string> {
+  ensurePrrD01cEvidenceDirs()
+  const target = prrD01cScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function capturePrrD01cLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensurePrrD01cEvidenceDirs()
+  const target = prrD01cScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

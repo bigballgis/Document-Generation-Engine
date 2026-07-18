@@ -1,8 +1,7 @@
 import { computed, type Ref } from 'vue'
 import { pathForRouteKey, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
-import { useMastersStore } from '@/stores/masters'
-import { useTemplatesStore } from '@/stores/templates'
+import { DASHBOARD_ZERO_SUMMARY, useDashboardStore } from '@/stores/dashboard'
 import { useWorkflowTasks } from '@/composables/useWorkflowTasks'
 
 export interface DashboardStatCard {
@@ -30,26 +29,14 @@ const TEMPLATE_STAT_KEYS = new Set([
 const API_POLICY_STAT_KEYS = new Set(['externalServicesAlerts'])
 
 export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) {
-  const mastersStore = useMastersStore()
-  const templatesStore = useTemplatesStore()
+  const dashboardStore = useDashboardStore()
   const apiPolicyStore = useApiPolicyStore()
   const { tasks } = useWorkflowTasks()
 
   const stats = computed<DashboardStatCard[]>(() => {
     const routes = Array.isArray(visibleRoutes) ? visibleRoutes : visibleRoutes.value
     const allowed = new Set(routes)
-    const masters = mastersStore.masters
-    const templates = templatesStore.templates
-
-    const pendingMasterReviews = masters.filter((item) => item.status === 'PENDING_REVIEW').length
-    const masterVersionsInProgress = masters.filter(
-      (item) => item.status === 'DRAFT' || item.status === 'REJECTED',
-    ).length
-    const templateVersionsInWorkflow = templates.filter((item) =>
-      ['DRAFT', 'TESTING', 'APPROVAL', 'PENDING_RELEASE'].includes(item.lifecycleStatus),
-    ).length
-    const publishedVersions = templates.filter((item) => item.lifecycleStatus === 'PUBLISHED').length
-    const stoppedVersions = templates.filter((item) => item.lifecycleStatus === 'STOPPED').length
+    const summary = dashboardStore.summary ?? DASHBOARD_ZERO_SUMMARY
 
     const allStats: DashboardStatCard[] = [
       {
@@ -62,7 +49,7 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
       },
       {
         key: 'masterPendingReview',
-        count: pendingMasterReviews,
+        count: summary.masterPendingReview,
         titleKey: 'dashboard.stats.masterPendingReview.title',
         descriptionKey: 'dashboard.stats.masterPendingReview.description',
         actionKey: 'dashboard.stats.masterPendingReview.action',
@@ -70,7 +57,7 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
       },
       {
         key: 'masterVersionsInProgress',
-        count: masterVersionsInProgress,
+        count: summary.masterVersionsInProgress,
         titleKey: 'dashboard.stats.masterVersionsInProgress.title',
         descriptionKey: 'dashboard.stats.masterVersionsInProgress.description',
         actionKey: 'dashboard.stats.masterVersionsInProgress.action',
@@ -78,7 +65,7 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
       },
       {
         key: 'templateVersionsInWorkflow',
-        count: templateVersionsInWorkflow,
+        count: summary.templateVersionsInWorkflow,
         titleKey: 'dashboard.stats.templateVersionsInWorkflow.title',
         descriptionKey: 'dashboard.stats.templateVersionsInWorkflow.description',
         actionKey: 'dashboard.stats.templateVersionsInWorkflow.action',
@@ -86,7 +73,7 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
       },
       {
         key: 'publishedVersions',
-        count: publishedVersions,
+        count: summary.publishedVersions,
         titleKey: 'dashboard.stats.publishedVersions.title',
         descriptionKey: 'dashboard.stats.publishedVersions.description',
         actionKey: 'dashboard.stats.publishedVersions.action',
@@ -94,7 +81,7 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
       },
       {
         key: 'stoppedVersions',
-        count: stoppedVersions,
+        count: summary.stoppedVersions,
         titleKey: 'dashboard.stats.stoppedVersions.title',
         descriptionKey: 'dashboard.stats.stoppedVersions.description',
         actionKey: 'dashboard.stats.stoppedVersions.action',
@@ -102,7 +89,7 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
       },
       {
         key: 'catalogMasters',
-        count: mastersStore.masterListTotalElements,
+        count: summary.catalogMasters,
         titleKey: 'dashboard.stats.catalogMasters.title',
         descriptionKey: 'dashboard.stats.catalogMasters.description',
         actionKey: 'dashboard.stats.catalogMasters.action',
@@ -110,7 +97,7 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
       },
       {
         key: 'catalogTemplates',
-        count: templatesStore.templateListTotalElements,
+        count: summary.catalogTemplates,
         titleKey: 'dashboard.stats.catalogTemplates.title',
         descriptionKey: 'dashboard.stats.catalogTemplates.description',
         actionKey: 'dashboard.stats.catalogTemplates.action',

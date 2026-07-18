@@ -2,8 +2,8 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import DashboardView from '@/views/dashboard/DashboardView.vue'
-import { useTemplatesStore } from '@/stores/templates'
 import { useCollaborationStore } from '@/stores/collaboration'
+import { useDashboardStore } from '@/stores/dashboard'
 import {
   globalAdminJourneySteps,
   masterDesignerJourneySteps,
@@ -22,6 +22,7 @@ import {
   resetDashboardRoute,
   routeRef,
   setWorkItems,
+  stubDashboardSummary,
   stubMasters,
   stubSession,
   stubTemplates,
@@ -57,11 +58,11 @@ describe('DashboardView', () => {
     setActivePinia(createPinia())
     resetDashboardRoute()
     stubSession('admin')
+    stubDashboardSummary()
   })
 
-  it('shows recoverable error panel when template fetch fails without hiding tasks section', async () => {
-    const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchAllTemplates').mockRejectedValue(new Error('network'))
+  it('shows recoverable error panel when dashboard summary fails without hiding tasks section', async () => {
+    stubDashboardSummary('reject')
 
     const wrapper = mount(DashboardView, {
       global: {
@@ -87,9 +88,9 @@ describe('DashboardView', () => {
   })
 
   it('retries loading after error panel retry', async () => {
-    const templatesStore = useTemplatesStore()
+    const dashboardStore = useDashboardStore()
     const fetchSpy = vi
-      .spyOn(templatesStore, 'fetchAllTemplates')
+      .spyOn(dashboardStore, 'fetchSummary')
       .mockRejectedValueOnce(new Error('network'))
       .mockResolvedValueOnce(undefined)
 

@@ -217,6 +217,11 @@ export default {
     title: '我的任务',
     description: '进行中的信函模板待办，以及母版与模板目录快照。',
     loadError: '无法加载任务列表。',
+    summary: {
+      error: {
+        load: '无法加载仪表盘汇总统计。',
+      },
+    },
     tabs: {
       overview: '概况',
       workflow: '工作流程',

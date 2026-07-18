@@ -8,12 +8,15 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import com.bank.docgen.master.domain.MasterDocumentStatus;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MasterDocumentRepositoryImpl implements MasterDocumentRepositoryCustom {
 
@@ -40,6 +43,32 @@ public class MasterDocumentRepositoryImpl implements MasterDocumentRepositoryCus
         typedQuery.setMaxResults(size);
         List<MasterDocumentEntity> content = typedQuery.getResultList();
         return new CatalogQueryPage<>(content, totalElements, CatalogPageSupport.totalPages(totalElements, size));
+    }
+
+    @Override
+    public Map<MasterDocumentStatus, Long> countGroupedByStatus(
+            List<String> accessibleGroupCodes,
+            boolean allGroups
+    ) {
+        if (!allGroups && (accessibleGroupCodes == null || accessibleGroupCodes.isEmpty())) {
+            return Map.of();
+        }
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
+        Root<MasterDocumentEntity> root = query.from(MasterDocumentEntity.class);
+        query.multiselect(root.get("status"), cb.count(root));
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.isNull(root.get("deletedAt")));
+        if (!allGroups) {
+            predicates.add(root.get("groupCode").in(accessibleGroupCodes));
+        }
+        query.where(predicates.toArray(Predicate[]::new));
+        query.groupBy(root.get("status"));
+        Map<MasterDocumentStatus, Long> counts = new EnumMap<>(MasterDocumentStatus.class);
+        for (Object[] row : entityManager.createQuery(query).getResultList()) {
+            counts.put((MasterDocumentStatus) row[0], (Long) row[1]);
+        }
+        return counts;
     }
 
     private Predicate[] buildPredicates(

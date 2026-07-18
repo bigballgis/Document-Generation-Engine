@@ -145,6 +145,62 @@ describe('masters store', () => {
     expect(store.masterListTotalElements).toBe(125)
   })
 
+  it('fetchDashboardWorkflowMasters collects status-filtered candidates only', async () => {
+    vi.mocked(mastersApi.listAllMasters).mockImplementation(async (options = {}) => {
+      if (options.status === 'PENDING_REVIEW') {
+        return {
+          content: [
+            {
+              id: 'master-pending',
+              groupCode: 'RETAIL',
+              name: 'Pending letterhead',
+              status: 'PENDING_REVIEW',
+              originalFilename: 'pending.docx',
+              anchorCount: 1,
+              updatedBy: '10000001',
+              updatedAt: '2026-06-23T10:00:00Z',
+            },
+          ],
+          totalElements: 1,
+          truncated: false,
+        }
+      }
+      if (options.status === 'DRAFT') {
+        return {
+          content: [
+            {
+              id: 'master-draft',
+              groupCode: 'RETAIL',
+              name: 'Draft letterhead',
+              status: 'DRAFT',
+              originalFilename: 'draft.docx',
+              anchorCount: 1,
+              updatedBy: '10000001',
+              updatedAt: '2026-06-23T10:00:00Z',
+            },
+          ],
+          totalElements: 1,
+          truncated: false,
+        }
+      }
+      return { content: [], totalElements: 0, truncated: false }
+    })
+
+    const store = useMastersStore()
+    await store.fetchDashboardWorkflowMasters({
+      includePendingReview: true,
+      includeDraftOrRejected: true,
+    })
+
+    expect(mastersApi.listAllMasters).toHaveBeenCalledWith({ status: 'PENDING_REVIEW' })
+    expect(mastersApi.listAllMasters).toHaveBeenCalledWith({ status: 'DRAFT' })
+    expect(mastersApi.listAllMasters).toHaveBeenCalledWith({ status: 'REJECTED' })
+    expect(store.masters.map((master) => master.id).sort()).toEqual([
+      'master-draft',
+      'master-pending',
+    ])
+  })
+
   it('updates list and detail after submit review', async () => {
     vi.mocked(mastersApi.submitMasterReview).mockResolvedValue({
       ...sampleDetail,

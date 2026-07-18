@@ -21,7 +21,7 @@ tags:
   - name: Invocation
     description: Caller-scoped invocation record query and parameter backup.
   - name: Admin
-    description: API management, credential lifecycle administration, template lifecycle governance, template/master/content-module catalog list pagination (LR-C5 PageView), template export/import, full-library export (CE-E03), master revision-line read paths, content-module governance, collaboration timeout configuration, and platform asset-library catalog (CE-E02 upload/list/disable).
+    description: API management, credential lifecycle administration, template lifecycle governance, template/master/content-module catalog list pagination (LR-C5 PageView), Dashboard Overview summary aggregates (PRR-D01c), template export/import, full-library export (CE-E03), master revision-line read paths, content-module governance, collaboration timeout configuration, and platform asset-library catalog (CE-E02 upload/list/disable).
   - name: Collaboration
     description: Collaboration work-item queues and timeout threshold administration.
 security:
@@ -3651,6 +3651,33 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/dashboard/summary:
+    get:
+      tags: [Admin]
+      operationId: getDashboardSummary
+      summary: Dashboard Overview bucket counts (PRR-D01c)
+      description: >-
+        Returns authorized-group aggregate counts for Dashboard Overview stats
+        cards (BDD-PRR-D01C-002 / D01C-C1 / D01C-C2): masterPendingReview,
+        masterVersionsInProgress (DRAFT ∪ REJECTED), templateVersionsInWorkflow
+        (DRAFT ∪ TESTING ∪ APPROVAL ∪ PENDING_RELEASE), publishedVersions,
+        stoppedVersions, catalogMasters, catalogTemplates. Counts only — not a
+        paginated catalog and not a substitute for collaboration/workflow task
+        inboxes. Unauthenticated callers receive 401. Empty group authorization
+        yields zeros (fail-closed; no cross-group leakage).
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Dashboard summary counts returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummaryResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/masters:
     get:
       tags: [Admin]
@@ -5908,6 +5935,68 @@ components:
           $ref: '#/components/schemas/Metadata'
         result:
           $ref: '#/components/schemas/ApiAccessReadinessSummaryView'
+    DashboardSummaryView:
+      type: object
+      additionalProperties: false
+      description: >-
+        Authorized-group Dashboard Overview bucket counts (PRR-D01c). Integers
+        are ≥ 0. Route visibility filtering of which cards to show remains a
+        client concern.
+      required:
+        - masterPendingReview
+        - masterVersionsInProgress
+        - templateVersionsInWorkflow
+        - publishedVersions
+        - stoppedVersions
+        - catalogMasters
+        - catalogTemplates
+      properties:
+        masterPendingReview:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Masters with status PENDING_REVIEW in authorized groups.
+        masterVersionsInProgress:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Masters with status DRAFT or REJECTED in authorized groups.
+        templateVersionsInWorkflow:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Templates with lifecycleStatus DRAFT, TESTING, APPROVAL, or
+            PENDING_RELEASE in authorized groups.
+        publishedVersions:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Templates with lifecycleStatus PUBLISHED in authorized groups.
+        stoppedVersions:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Templates with lifecycleStatus STOPPED in authorized groups.
+        catalogMasters:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Total non-deleted masters in authorized groups.
+        catalogTemplates:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Total non-deleted templates in authorized groups.
+    DashboardSummaryResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/DashboardSummaryView'
     CredentialSummary:
       type: object
       additionalProperties: false
@@ -7022,7 +7111,7 @@ components:
         result:
           $ref: '#/components/schemas/AuthorWordPageCountView'
         error:
-          $ref: '#/components/schemas/ApiError'
+          $ref: '#/components/schemas/ErrorDetail'
     PublishGateChecklistResponse:
       type: object
       additionalProperties: false
