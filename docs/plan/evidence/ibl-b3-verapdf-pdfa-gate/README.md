@@ -1,6 +1,6 @@
 # IBL-B3 / #115 — Stage 10 deploy evidence
 
-Queued Docker acceptance deploy for tip `c81054b0` (veraPDF PDF/A-2b machine gate / test-scope tooling).
+Queued Docker acceptance deploy for tip `c81054b0` (veraPDF PDF/A-2b machine gate / test-scope tooling). MAIN merge `3710811a` (includes `c81054b0` + this evidence `e0102ddb`).
 
 | Item | Value |
 | --- | --- |

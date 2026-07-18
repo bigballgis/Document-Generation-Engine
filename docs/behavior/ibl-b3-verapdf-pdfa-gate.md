@@ -9,7 +9,7 @@
 | **Finding** | **F12** (PDF/A verification is XMP/`pdfaid` metadata-only today) |
 | **Task Master** | **#115** |
 | **Formal phase** | **None** (do **not** invent a P-phase; do **not** claim IBL program Done) |
-| **Placement** | **ISOLATED** — `D:/working/DGE-ibl-b3-verapdf-pdfa-gate` · `feat/ibl-b3-verapdf-pdfa-gate` |
+| **Placement** | **MERGED** — MAIN `3710811a` (includes `c81054b0` + `e0102ddb`); worktree removed; prior ISOLATED `D:/working/DGE-ibl-b3-verapdf-pdfa-gate` · `feat/ibl-b3-verapdf-pdfa-gate` |
 | **Frontend UI** | **`frontend_ui_in_scope=false`** — no management UI / Playwright E2E / UIUX |
 
 ---
