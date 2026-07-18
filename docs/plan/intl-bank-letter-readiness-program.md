@@ -2,14 +2,14 @@
 
 **Program ID:** `IBL`  
 **Created:** 2026-07-17  
-**Status:** **Wave IBL-A In Progress** (A1–A5 **Done**; A6 **In Progress** — do **not** mark Wave A or program Done). Program registered **2026-07-18**; A1 closed **2026-07-18** (MAIN merge `f0a2b6fe`); A2 closed **2026-07-18** (MAIN merge `e3000479`); A3 closed **2026-07-18** (MAIN merge `779b1979`); A4 closed **2026-07-18** (MAIN merge `ddf6601c`); A5 closed **2026-07-18** (MAIN merge `e5217a80`). Checklist **#3b** is **CONDITIONAL** (PRR-C01 Path X; merge `3513ab92`) — do **not** flip **#3b GO** or claim go-live from IBL.  
+**Status:** **Wave IBL-A Done** (A1–A6 **Done** — A6 closed **2026-07-19**, MAIN tip `5cacff2a`). Program remains **registered** (not program Done). Wave **IBL-B** **Not Started**. Program registered **2026-07-18**; A1 closed **2026-07-18** (MAIN merge `f0a2b6fe`); A2 closed **2026-07-18** (MAIN merge `e3000479`); A3 closed **2026-07-18** (MAIN merge `779b1979`); A4 closed **2026-07-18** (MAIN merge `ddf6601c`); A5 closed **2026-07-18** (MAIN merge `e5217a80`); A6 closed **2026-07-19** (MAIN tip `5cacff2a` FF). Checklist **#3b** is **CONDITIONAL** (PRR-C01 Path X; merge `3513ab92`) — do **not** flip **#3b GO** or claim go-live from IBL.  
 **Formal phase / program:** **None** (cross-cutting optimization backlog; same genre as LRP / SOR — **not** a new P-phase).  
 **North star:** Close the verified gaps between today’s Document Generation Platform and **international multinational bank financial-letter readiness** — fail-closed filling, ISO-correct amounts, high-fidelity Word/PDF trust, layout regression evidence, realistic CI/integration, and (only after ADR/user confirmation) multinational content models.  
 **Task ID prefix:** `IBL-*` (International Bank Letter readiness) — verified free of collision with `LR-*` / `CD-*` / `SOR-*` / `CQ-*` / `CE-*` / `OPT-*` / `COR-*` / `PRR-*`.  
-**Task Master:** Umbrella **#106** (registry only, **`pending`**) + leaves **#107–#134** (28 tasks = A6+B7+C3+D5+E7). **#107** IBL-A1 → **`done`**; **#108** IBL-A2 → **`done`**; **#109** IBL-A3 → **`done`**; **#110** IBL-A4 → **`done`**; **#111** IBL-A5 → **`done`**; **#112** IBL-A6 → **`in-progress`** (sole-active); **#113–#134** remain **`pending`** (B7 + Wave E descriptions start with **BLOCKED**). See § Task Master ID map.  
+**Task Master:** Umbrella **#106** (registry only, **`pending`**) + leaves **#107–#134** (28 tasks = A6+B7+C3+D5+E7). **#107–#112** IBL-A1–A6 → **`done`**; **#113–#134** remain **`pending`** (B7 + Wave E descriptions start with **BLOCKED**). See § Task Master ID map.  
 **Audit provenance:** Four-track (+ multinational template track) **read-only** deep audit, evidence spot-verified **2026-07-17**. Findings F1–F28 below are **confirmed symptoms** (code/docs evidence). Proposed remediations are **not** confirmed product requirements until activation + (where noted) ADR/user decision.
 
-**Queue policy (critical):** Host serial delivery queue: PRR **#105 Done** (`50448016`); **#103 Done** (`3513ab92` / `6408c210`); **#104** PRR-D01a (**D01A**) → **Done** (`f1f79d14`); **#135** PRR-D01b → **Done** (`6e776232` / `1ada6b41`); **#136** PRR-D01c → **Done** (`a872c15b` / `8c52ee67`; Wave D residuals **D01A+#135+#136** closed); **#137** PRR-P2 audit hygiene → **Done** (`baaf16cc` / `09cf85ce`); **#107** IBL-A1 → **Done** (`f0a2b6fe` / `4bda5f2d`; worktree removed); **#108** IBL-A2 → **Done** (`e3000479` / `89584242`; worktree removed); **#109** IBL-A3 → **Done** (`779b1979` / `f09326ca`; worktree removed); **#110** IBL-A4 → **Done** (`ddf6601c` / `6edb41cd`; worktree removed); **#111** IBL-A5 → **Done** (`e5217a80` / `99e8c1a7`; worktree removed; A5 local Done may be unpushed `79ef82b3`). **Sole-active:** **#112** IBL-A6 (`ibl-a6-regenerate-locale-replay`). Umbrella **#106** is **registry only** — **not** a sole-active delivery leaf. Waves B–E stay **Not Started** / **Blocked** until next serial activation.
+**Queue policy (critical):** Host serial delivery queue: PRR **#105 Done** (`50448016`); **#103 Done** (`3513ab92` / `6408c210`); **#104** PRR-D01a (**D01A**) → **Done** (`f1f79d14`); **#135** PRR-D01b → **Done** (`6e776232` / `1ada6b41`); **#136** PRR-D01c → **Done** (`a872c15b` / `8c52ee67`; Wave D residuals **D01A+#135+#136** closed); **#137** PRR-P2 audit hygiene → **Done** (`baaf16cc` / `09cf85ce`); **#107** IBL-A1 → **Done** (`f0a2b6fe` / `4bda5f2d`; worktree removed); **#108** IBL-A2 → **Done** (`e3000479` / `89584242`; worktree removed); **#109** IBL-A3 → **Done** (`779b1979` / `f09326ca`; worktree removed); **#110** IBL-A4 → **Done** (`ddf6601c` / `6edb41cd`; worktree removed); **#111** IBL-A5 → **Done** (`e5217a80` / `99e8c1a7`; worktree removed); **#112** IBL-A6 → **Done** (`5cacff2a` FF; worktree removed). **Sole-active cleared** (no delivery leaf). **Next queue (not activated):** **#113** IBL-B1. Umbrella **#106** is **registry only** — **not** a sole-active delivery leaf. Wave **IBL-A** → **Done**; Waves B–E stay **Not Started** / **Blocked** until next serial activation.
 
 **Authoritative entry for lower-tier implementers:** Read this file first. Execute only `IBL-*` task IDs after wave activation. Do **not** invent a formal phase. Do **not** touch [launch-readiness-checklist.md](../operations/launch-readiness-checklist.md) from IBL work unless a task explicitly owns a checklist cross-link.
 
@@ -20,7 +20,7 @@
 | [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) | Sibling CDP (`CD-*`) — CD-2 Done; CD-3 Not Started; do not execute `CD-*` from IBL |
 | [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md) | Historical SOR inventory; IBL is the **2026-07-17** bank-letter readiness consolidation |
 | [core-excellence-program-2026-07.md](./core-excellence-program-2026-07.md) | Active delivery program CE (`CE-*` / Task Master); coordinate — do not fold IBL into an In Progress CE/PRR leaf |
-| [execution-sync-ledger.md](./execution-sync-ledger.md) | **#112** IBL-A6 → **In Progress** (sole-active; `ibl-a6-regenerate-locale-replay`); **#111** IBL-A5 → **Done** (`e5217a80` / `99e8c1a7`); **#110** IBL-A4 → **Done** (`ddf6601c` / `6edb41cd`); **#109** IBL-A3 → **Done** (`779b1979` / `f09326ca`); **#108** IBL-A2 → **Done** (`e3000479` / `89584242`); **#107** IBL-A1 → **Done** (`f0a2b6fe` / `4bda5f2d`); Wave IBL-A In Progress (A1–A5 Done; A6 In Progress) |
+| [execution-sync-ledger.md](./execution-sync-ledger.md) | **#112** IBL-A6 → **Done** (`5cacff2a`); Wave IBL-A → **Done** (A1–A6); sole-active cleared; next **#113** not activated |
 | [non-functional-requirements.md](../requirements/non-functional-requirements.md) | NFR SLOs remain **proposed — awaiting confirmation**; IBL-D3 feeds confirmation, never invents confirmed SLOs |
 | [ADR-0042](../adr/rendering-authoring/0042-pagination-delta-budget.md) (pagination — **Accepted** + Path X residual) | IBL-B7 owns Path E Word measurement path toward checklist **#3b GO**; Word host is an external dependency |
 
@@ -31,7 +31,7 @@
 3. Behavior-changing tasks require BDD **`required`** (ready spec in `docs/behavior/`) before implementation; refactor/infra/docs tasks use **`not-applicable`**.
 4. TDD + green gates + post-task doc sync + post-task commit review before any task `Done`.
 5. **Confirmed facts vs pending questions:** §1 findings are evidence-grounded symptoms. §Pending decisions「待确认」items **must not** be scheduled as ordinary activatable work until user/PRD/ADR confirmation. Never promote a recommendation into a confirmed requirement.
-6. This document does **not** alter formal phase status or the launch-readiness checklist overall verdict. Task Master **is** registered (#106–#134, all `pending`); registration alone does **not** create a formal phase, activate a wave, or flip checklist **#3b GO**.
+6. This document does **not** alter formal phase status or the launch-readiness checklist overall verdict. Task Master **is** registered (#106–#134; Wave A leaves **#107–#112** `done`; remaining leaves mostly `pending` / Wave E **BLOCKED**); registration alone does **not** create a formal phase, activate a wave, or flip checklist **#3b GO**.
 7. Do not duplicate ownership of closed LRP/CDP/CE rows — reference and extend; never re-open Done waves without user direction.
 
 ---
@@ -65,7 +65,7 @@
 
 ## Task Master ID map 「Task Master 映射」
 
-Registered **2026-07-18** under `.taskmaster/tasks/tasks.json`. Program status = **Wave IBL-A In Progress** (A1–A5 **Done**; A6 **In Progress**). TM status column below mirrors Task Master; plan-layer wave tables use `Not Started` / `In Progress` / `Blocked` / `Done` vocabulary.
+Registered **2026-07-18** under `.taskmaster/tasks/tasks.json`. Program status = **Wave IBL-A Done** (A1–A6 **Done**). TM status column below mirrors Task Master; plan-layer wave tables use `Not Started` / `In Progress` / `Blocked` / `Done` vocabulary.
 
 | IBL-* | TM id | Status |
 | --- | --- | --- |
@@ -75,7 +75,7 @@ Registered **2026-07-18** under `.taskmaster/tasks/tasks.json`. Program status =
 | IBL-A3 | **109** | **done** |
 | IBL-A4 | **110** | **done** |
 | IBL-A5 | **111** | **done** |
-| IBL-A6 | **112** | **in-progress** (sole-active) |
+| IBL-A6 | **112** | **done** |
 | IBL-B1 | **113** | pending |
 | IBL-B2 | **114** | pending |
 | IBL-B3 | **115** | pending |
@@ -99,7 +99,7 @@ Registered **2026-07-18** under `.taskmaster/tasks/tasks.json`. Program status =
 | IBL-E6 | **133** | pending (**BLOCKED** in description — §Pending decisions) |
 | IBL-E7 | **134** | pending (**BLOCKED** in description — §Pending decisions) |
 
-**Queue note:** Wave D residuals **D01A+#135+#136** closed (**#136** Done `a872c15b` / `8c52ee67`; **#135** `6e776232` / `1ada6b41`; **#104** `f1f79d14`; **#103/#105** Done). Audit P2 **#137** → **Done** (`baaf16cc` / `09cf85ce`). **#107** IBL-A1 → **Done** (`f0a2b6fe` / `4bda5f2d`). **#108** IBL-A2 → **Done** (`e3000479` / `89584242`). **#109** IBL-A3 → **Done** (`779b1979` / `f09326ca`). **#110** IBL-A4 → **Done** (`ddf6601c` / `6edb41cd`). **#111** IBL-A5 → **Done** (`e5217a80` / `99e8c1a7`). **Sole-active:** **#112** IBL-A6. Do **not** treat #106 as sole-active. Later waves stay pending.
+**Queue note:** Wave D residuals **D01A+#135+#136** closed (**#136** Done `a872c15b` / `8c52ee67`; **#135** `6e776232` / `1ada6b41`; **#104** `f1f79d14`; **#103/#105** Done). Audit P2 **#137** → **Done** (`baaf16cc` / `09cf85ce`). **#107** IBL-A1 → **Done** (`f0a2b6fe` / `4bda5f2d`). **#108** IBL-A2 → **Done** (`e3000479` / `89584242`). **#109** IBL-A3 → **Done** (`779b1979` / `f09326ca`). **#110** IBL-A4 → **Done** (`ddf6601c` / `6edb41cd`). **#111** IBL-A5 → **Done** (`e5217a80` / `99e8c1a7`). **#112** IBL-A6 → **Done** (`5cacff2a`). Wave **IBL-A** → **Done**. **Sole-active cleared**. **Next (not activated):** **#113** IBL-B1. Do **not** treat #106 as sole-active. Later waves stay pending.
 
 ---
 
@@ -114,7 +114,7 @@ Verified **2026-07-17** (read-only). Implementers must re-verify paths before co
 | **F3** | Amount-in-words only Chinese CNY (`SpellAmountCn`); engine default locale `zh-CN` | `SpellAmountCn`; `ComputeDslLimits.DEFAULT_LOCALE` | **Critical** — no “USD One Thousand Only” | **IBL-A3** |
 | **F4** | `/contract` API publishes hardcoded schema names, not per-field variable schemas; no consumer contract tests; placeholder renames lack API compatibility gate | `ContractAssemblyService` | **High** — consumer break risk | **IBL-A4** |
 | **F5** | Retained invocation parameters store full variables (ADR-0057); `VariablePiiCategory` not applied as retention redaction | Invocation retention path; `VariablePiiCategory` | **High** — PII at rest | **IBL-A5** |
-| **F6** | Regenerate is SPECIMEN-watermarked and replays with `locale=null` — not faithful re-issue; original locale lost | `InvocationRegenerationService` | **Medium** — locale loss (**specimen policy** is §Pending) | **IBL-A6** (locale); watermark → §Pending |
+| **F6** | Regenerate is SPECIMEN-watermarked and (pre-A6) replayed with `locale=null` — locale loss closed by **IBL-A6**; SPECIMEN / true re-issue still §Pending | `InvocationRegenerationService` / `InvocationRegenerationAssemblySupport` | **Medium** — watermark (**specimen policy** is §Pending) | **IBL-A6** locale **Done**; watermark → §Pending / PD-6 |
 | **F7** | Bucket4j rate limit in-process only — multiplies under scale-out | `RuntimeRateLimitService`; ADR-0039 residual | **Medium** | **Deferred residual** (not scheduled; see §Open Q) |
 | **F8** | No timezone/as-of date semantics; `FORMAT_DATE` forces UTC via `java.util.Date` | `FORMAT_DATE` / date formatting path | **Medium** | **Deferred residual** (not scheduled; see §Open Q) |
 | **F9** | Direct-format whitelist permits lineSpacing/spacingBefore/After/indents, but writer only applies fontFamily/fontSize/textColor | `DirectFormatRules` vs `StructuredContentDocxStyleSupport.applyDirectFormatIfPresent` | **Critical** — authors trust false controls | **IBL-B1** |
@@ -154,21 +154,21 @@ Verified **2026-07-17** (read-only). Implementers must re-verify paths before co
 
 1. Within IBL, only **one wave** may be `In Progress` at a time.
 2. **Recommended activation order (single-lane serial):** **IBL-A → IBL-B (B1–B6; B7 when Word host available) → IBL-C → IBL-D → IBL-E (only after pending decisions)**.
-3. Formal phase remains **None**. Task Master registration (#106–#134) is complete; **Wave IBL-A** remains **In Progress** (A1–A5 **Done**; A6 **In Progress**) — do not invent a P-phase here.
+3. Formal phase remains **None**. Task Master registration (#106–#134) is complete; **Wave IBL-A** → **Done** (A1–A6); Wave **IBL-B** **Not Started** — do not invent a P-phase here.
 4. Tasks marked **BDD: required** may not start implementation until `behavior-spec-author` publishes a `ready` spec.
 
-**Current wave:** **IBL-A** (`In Progress` — A1–A5 **Done**; A6 **In Progress**; **sole-active #112**).
+**Current wave:** none In Progress (Wave **IBL-A** → **Done**; Wave **IBL-B** **Not Started**; **sole-active cleared**).
 
 ```text
-Sole-active: #112 IBL-A6 (ibl-a6-regenerate-locale-replay)
-Next after A6 closes: IBL-B core (#113–#118; B7 gated) → IBL-C → IBL-D → IBL-E (pending decisions)
+Sole-active: (cleared)
+Next queue (not activated): #113 IBL-B1 → IBL-B core (#113–#118; B7 gated) → IBL-C → IBL-D → IBL-E (pending decisions)
 ```
 
 ---
 
 ## 3. Wave IBL-A — Filling correctness & consumer contract 「填充正确性与消费者契约」
 
-**Wave status:** **In Progress** (A1–A5 **Done**; A6 **In Progress** — do **not** mark Wave A Done until A1–A6 complete)  
+**Wave status:** **Done** (A1–A6 **Done** — exit gate met; does **not** imply go-live or IBL program Done)  
 **Goal:** Runtime filling is fail-closed and internationally correct; consumers get truthful contracts; retained variables respect PII categories; regenerate replays the original locale (specimen watermark policy unchanged until §Pending).
 
 | ID | Owner | Title | Depends | BDD | Maps | Status |
@@ -178,7 +178,7 @@ Next after A6 closes: IBL-B core (#113–#118; B7 gated) → IBL-C → IBL-D →
 | IBL-A3 | backend-engineer | International amount-in-words framework + `en` locale (extensible beyond CNY) | A2 recommended | **required** (`ready`) | F3 | **Done** |
 | IBL-A4 | backend-engineer | `/contract` per-field variable schemas + breaking-change gate + consumer contract tests | — | **required** (`ready`) | F4 | **Done** |
 | IBL-A5 | backend-engineer | PII-category-driven retention redaction on stored invocation variables | — | **required** (`ready`) | F5; ADR-0057 | **Done** |
-| IBL-A6 | backend-engineer | Regenerate locale replay fix (`locale` preserved; no silent `null`) | — | **required** (`ready`) | F6 (locale only) | **In Progress** |
+| IBL-A6 | backend-engineer | Regenerate locale replay fix (`locale` preserved; no silent `null`) | — | **required** (`ready`) | F6 (locale only) | **Done** |
 
 ### Acceptance criteria (concise)
 
@@ -362,7 +362,7 @@ An IBL task is `Done` only when:
 
 ### 10.3 Program activation (human gate)
 
-Task Master registration is **complete** (#106–#134; MAIN merge `9fc2bc97`). **Wave IBL-A** remains **In Progress** — **IBL-A1 / #107** → **Done** (merge `f0a2b6fe`; Batch Recommendation **solo** closed); **IBL-A2 / #108** → **Done** (merge `e3000479` / tip `89584242`; Batch Recommendation **solo** closed); **IBL-A3 / #109** → **Done** (merge `779b1979` / tip `f09326ca`; Batch Recommendation **solo** closed); **IBL-A4 / #110** → **Done** (merge `ddf6601c` / tip `6edb41cd`; Batch Recommendation **solo** closed); **IBL-A5 / #111** → **Done** (merge `e5217a80` / tip `99e8c1a7`; Batch Recommendation **solo** closed); **IBL-A6 / #112** → **In Progress** (sole-active; Batch Recommendation **solo**; slice `ibl-a6-regenerate-locale-replay`). Formal phase remains **None**. Activating A6 does **not** flip checklist **#3b** / **#5a**, claim go-live, or mark Wave A Done.
+Task Master registration is **complete** (#106–#134; MAIN merge `9fc2bc97`). **Wave IBL-A** → **Done** — **IBL-A1…A6 / #107–#112** → **Done** (A6 tip `5cacff2a`; Batch Recommendation **solo** closed). Sole-active cleared. **Next queue (not activated):** **#113** IBL-B1. Formal phase remains **None**. Completing Wave A does **not** flip checklist **#3b** / **#5a**, claim go-live, or mark IBL program Done.
 
 ---
 
@@ -409,6 +409,7 @@ Task Master registration is **complete** (#106–#134; MAIN merge `9fc2bc97`). *
 
 | Date | Change |
 | --- | --- |
+| 2026-07-19 | **IBL-A6 / #112 → Done** — MAIN tip `5cacff2a` (FF `feat/ibl-a6-regenerate-locale-replay`); worktree removed. Regenerate locale replay from retained `contextSummary.locale`; SPECIMEN unchanged (PD-6 out). Gates: `mvn verify` **2079**/0/0/8 GREEN (CLI exclude `AsyncBatchTaskKafkaDltIntegrationTest` only — NOT in pom); arch **PASS_WITH_NOTES** Critical=0; Stage 10 **DEPLOY_OK** `healthz`/4173 200. Wave **IBL-A** → **Done** (A1–A6). Sole-active cleared. **#106** registry-only **pending**. Next queue (not activated): **#113** IBL-B1. Formal phase **None**. Do **not** flip **#3b/#5a GO**. Do **not** claim go-live. Do **not** mark IBL program Done. |
 | 2026-07-19 | **Activated IBL-A6 / #112** — Task Master **#112** → **in-progress** (sole-active); Wave **IBL-A** stays **In Progress** (A1–A5 Done; A6 In Progress). Slice `ibl-a6-regenerate-locale-replay`; ISOLATED `D:/working/DGE-ibl-a6-regenerate-locale-replay` · `feat/ibl-a6-regenerate-locale-replay`. BDD **ready** [ibl-a6-regenerate-locale-replay.md](../behavior/ibl-a6-regenerate-locale-replay.md) (**BDD-IBL-A6-001…011**); `frontend_ui_in_scope=false`. Batch **solo** (`member_task_ids: ["112"]`). **#107–#111** remain **done**. **#106** stays registry-only **pending**. Formal phase **None**. Note: A5 local Done may be unpushed (`79ef82b3`). Do **not** flip **#3b/#5a GO**. Do **not** claim go-live. Do **not** mark Wave A / IBL program Done. Skip heavy doc-keeper unless OpenAPI must change — ready for **backend-engineer**. |
 | 2026-07-18 | **IBL-A5 / #111 → Done** — MAIN merge `e5217a80` / feature tip `99e8c1a7`; worktree removed. PII-category retention redaction (`InvocationRetentionVariableRedactor` / `InvocationParameterSanitizer`; ADR-0057 Amendment). Gates: `mvn verify` **2070**/0/0/8 GREEN (CLI exclude `AsyncBatchTaskKafkaDltIntegrationTest` only — NOT in pom); arch **PASS_WITH_NOTES** Critical=0; Stage 10 **DEPLOY_OK** `healthz` 200. Residuals: Kafka DLT IT suite-order hang; historical PII not backfilled; encryption-at-rest deferred. Wave **IBL-A** stays **In Progress** (A1–A5 Done; A6 Not Started). Sole-active cleared. **#106** registry-only **pending**. Next queue (not activated): **#112** IBL-A6. Formal phase **None**. Do **not** flip **#3b/#5a GO**. Do **not** claim go-live. Do **not** mark Wave A / IBL program Done. |
 | 2026-07-18 | **IBL-A5 / #111 stage 3 docs-first** — ADR-0057 formal **Amendment 2026-07-18** (PII retention redaction; Accepted Decision preserved); sync permission-matrix §11, domain-model, data-storage-view, contract-outline, api/README, ADR-0040 Amendment. Ready for **backend-engineer**. Do **not** flip **#3b/#5a GO**. |
@@ -436,4 +437,4 @@ Task Master registration is **complete** (#106–#134; MAIN merge `9fc2bc97`). *
 
 ---
 
-**Next action:** Sole-active **#112** IBL-A6 (`ibl-a6-regenerate-locale-replay`) — hand off to **backend-engineer**. Do **not** invent a formal P-phase. Do **not** flip checklist **#3b GO** / **#5a GO**. Do **not** mark Wave A or IBL program Done.
+**Next action:** Sole-active cleared. **Next queue (not activated):** **#113** IBL-B1. Do **not** invent a formal P-phase. Do **not** flip checklist **#3b GO** / **#5a GO**. Do **not** claim go-live or IBL program Done.
