@@ -15,7 +15,9 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -30,15 +32,18 @@ final class ContractAssemblyViewSupport {
     private final MessageResolver messageResolver;
     private final ObjectMapper objectMapper;
     private final TemplateVersionRepository templateVersionRepository;
+    private final VariableSchemaRepository variableSchemaRepository;
 
     ContractAssemblyViewSupport(
             MessageResolver messageResolver,
             ObjectMapper objectMapper,
-            TemplateVersionRepository templateVersionRepository
+            TemplateVersionRepository templateVersionRepository,
+            VariableSchemaRepository variableSchemaRepository
     ) {
         this.messageResolver = messageResolver;
         this.objectMapper = objectMapper;
         this.templateVersionRepository = templateVersionRepository;
+        this.variableSchemaRepository = variableSchemaRepository;
     }
 
     List<String> runtimePaths(TemplateEntity template, String environment) {
@@ -56,7 +61,11 @@ final class ContractAssemblyViewSupport {
         );
     }
 
-    List<CallableVersionView> buildCallableVersions(TemplateEntity template, String environment) {
+    List<CallableVersionView> buildCallableVersions(
+            TemplateEntity template,
+            String environment,
+            boolean includeVariables
+    ) {
         if (template.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED) {
             return List.of();
         }
@@ -65,13 +74,26 @@ final class ContractAssemblyViewSupport {
                 .filter(version -> version.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED
                         && version.getReleaseVersion() != null
                         && !version.getReleaseVersion().isBlank())
-                .map(version -> new CallableVersionView(
-                        version.getReleaseVersion(),
-                        base + version.getReleaseVersion() + "/generate",
-                        Boolean.FALSE,
-                        null
-                ))
+                .map(version -> toCallableVersion(version, base, includeVariables))
                 .toList();
+    }
+
+    private CallableVersionView toCallableVersion(
+            TemplateVersionEntity version,
+            String base,
+            boolean includeVariables
+    ) {
+        return new CallableVersionView(
+                version.getReleaseVersion(),
+                base + version.getReleaseVersion() + "/generate",
+                Boolean.FALSE,
+                null,
+                includeVariables
+                        ? ContractVariableSchemaProjector.project(
+                                variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(version.getId())
+                        )
+                        : null
+        );
     }
 
     DefaultRouteSummaryView buildDefaultRoute(

@@ -10,6 +10,7 @@ import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +27,8 @@ class ContractAssemblyServiceRoutesSummaryTest {
     private MessageResolver messageResolver;
     @Mock
     private TemplateVersionRepository templateVersionRepository;
+    @Mock
+    private VariableSchemaRepository variableSchemaRepository;
 
     private ContractAssemblyService service;
     private UUID templateId;
@@ -34,7 +37,12 @@ class ContractAssemblyServiceRoutesSummaryTest {
 
     @BeforeEach
     void setUp() {
-        service = new ContractAssemblyService(messageResolver, new ObjectMapper(), templateVersionRepository);
+        service = new ContractAssemblyService(
+                messageResolver,
+                new ObjectMapper(),
+                templateVersionRepository,
+                variableSchemaRepository
+        );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(
                 templateId,

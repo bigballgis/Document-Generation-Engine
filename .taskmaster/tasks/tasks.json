@@ -1518,14 +1518,14 @@
       {
         "id": "110",
         "title": "IBL-A4: /contract per-field schemas + breaking-change gate",
-        "description": "PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated. Plan ID IBL-A4. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F4. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-A4. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: /contract returns per-field variable schemas; consumer contract tests fail on breaking renames; OpenAPI synced. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated.",
+        "description": "IN PROGRESS 2026-07-18 — sole-active. Slice ibl-a4-contract-field-schemas. ISOLATED D:/working/DGE-ibl-a4-contract-field-schemas · feat/ibl-a4-contract-field-schemas. BDD ready: docs/behavior/ibl-a4-contract-field-schemas.md (BDD-IBL-A4-001…011). Batch solo (member_task_ids:[\"110\"]). Wave IBL-A In Progress (A1–A3 Done; A4 In Progress; A5–A6 Not Started). #106 registry-only pending. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "ACTIVATED 2026-07-18. Owner: backend-engineer. BDD: ready — docs/behavior/ibl-a4-contract-field-schemas.md (BDD-IBL-A4-001…011); frontend_ui_in_scope=false. Placement ISOLATED. Acceptance: /contract returns per-field variable schemas; consumer contract tests fail on breaking renames; OpenAPI synced. Gates: backend verify. Wave IBL-A remains In Progress — do NOT mark Wave A or IBL program Done. #107/#108/#109 remain done. #106 remains registry-only pending. A5–A6 (#111–#112) stay pending. Do NOT flip #3b/#5a GO. Do NOT claim go-live.",
         "testStrategy": "BDD + consumer contract tests for schema/placeholder breaks; OpenAPI sync; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:45:00Z"
+        "updatedAt": "2026-07-18T13:18:19.000Z"
       },
       {
         "id": "111",
