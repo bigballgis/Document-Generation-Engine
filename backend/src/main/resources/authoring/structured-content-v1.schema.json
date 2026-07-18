@@ -11,6 +11,23 @@
       "type": "string",
       "const": "1.0"
     },
+    "authorizedSealAreas": {
+      "type": "array",
+      "description": "IBL-B5 root catalog of axis-aligned authorized seal zones (pt, page-local).",
+      "items": {
+        "type": "object",
+        "required": ["id", "pageIndex", "xPt", "yPt", "widthPt", "heightPt"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "pageIndex": { "type": "integer", "minimum": 0 },
+          "xPt": { "type": "number", "minimum": 0 },
+          "yPt": { "type": "number", "minimum": 0 },
+          "widthPt": { "type": "number", "exclusiveMinimum": 0 },
+          "heightPt": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      }
+    },
     "nodes": {
       "type": "array",
       "items": { "$ref": "#/$defs/node" }

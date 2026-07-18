@@ -1,0 +1,26 @@
+{
+  "status": "DEPLOY_OK",
+  "timestamp_utc": "20260718T220534Z",
+  "slice": "IBL-B5",
+  "task": 117,
+  "tip": "d74594054080cd58360032ee944477f554a57418",
+  "tip_short": "d7459405",
+  "tip_subject": "feat(authoring): validate seal placement against authorized area geometry",
+  "command": "docker-deploy-queue.ps1 -ForceRebuild",
+  "compose_project": "documentgenerationengine",
+  "healthz": {
+    "body": "{\"status\":\"UP\"}",
+    "http": 200
+  },
+  "ui_4173": "200",
+  "backend_image": "sha256:af0225960ce78157eb3282689a22fb5f8f44e28107c7b707e8a5f937935c94f7",
+  "frontend_image": "sha256:82adc33444d7b98e61e1be977e5ab0368a619cfe127620657968fbf03d9f596e",
+  "backend_inspect": "sha256:af0225960ce78157eb3282689a22fb5f8f44e28107c7b707e8a5f937935c94f7|2026-07-18T22:04:19.793324412Z|healthy",
+  "frontend_inspect": "sha256:82adc33444d7b98e61e1be977e5ab0368a619cfe127620657968fbf03d9f596e|2026-07-18T22:04:57.820711993Z|healthy",
+  "frontend_ui_in_scope": false,
+  "e2e": "N/A",
+  "go_live": false,
+  "word_baselines_invented": false,
+  "soffice_version": "LibreOffice 7.3.7.2 30(Build:2)",
+  "evidence_dir": "docs/plan/evidence/ibl-b5-seal-geometry"
+}

@@ -221,18 +221,7 @@ public class RuntimeFidelityWarningMapper {
                 "region=table",
                 "A table component failed schema validation.",
                 "Correct the table component definition before republishing.");
-        put(catalog, "SEAL_OUTSIDE_AUTHORIZED_AREA",
-                "sealOutsideAuthorizedArea",
-                "Seal placement is outside the authorized area.",
-                "region=seal",
-                "A seal reference was placed outside the authorized region.",
-                "Move the seal into the authorized area before republishing.");
-        put(catalog, "SEAL_SCALING_NOT_ALLOWED",
-                "sealScalingNotAllowed",
-                "Seal references must not use image scaling.",
-                "region=seal",
-                "Seal scaling was requested but is not allowed.",
-                "Remove seal scaling before republishing.");
+        putSealCatalogEntries(catalog);
         put(catalog, "MISSING_REFERENCE_KEY",
                 "missingReferenceKey",
                 "A reference node is missing its reference key.",
@@ -252,6 +241,39 @@ public class RuntimeFidelityWarningMapper {
                 "A cross-reference pointed to a missing number target.",
                 "Repair the cross-reference before republishing.");
         return Map.copyOf(catalog);
+    }
+
+    private static void putSealCatalogEntries(Map<String, CatalogEntry> catalog) {
+        put(catalog, "SEAL_OUTSIDE_AUTHORIZED_AREA",
+                "sealOutsideAuthorizedArea",
+                "Seal placement is outside the authorized area.",
+                "region=seal",
+                "A seal reference was placed outside the authorized region.",
+                "Move the seal into the authorized area before republishing.");
+        put(catalog, "SEAL_AUTHORIZED_AREA_UNKNOWN",
+                "sealAuthorizedAreaUnknown",
+                "Seal placement references an unknown authorized area.",
+                "region=seal",
+                "A seal reference used an authorizedAreaId that is not declared.",
+                "Declare the area in authorizedSealAreas or correct authorizedAreaId.");
+        put(catalog, "SEAL_AUTHORIZED_AREA_INVALID",
+                "sealAuthorizedAreaInvalid",
+                "The authorized seal area definition is invalid.",
+                "region=seal",
+                "An authorized seal area entry failed geometry or uniqueness validation.",
+                "Correct authorizedSealAreas geometry and ensure unique ids.");
+        put(catalog, "SEAL_PLACEMENT_GEOMETRY_INVALID",
+                "sealPlacementGeometryInvalid",
+                "Seal placement geometry is missing or invalid.",
+                "region=seal",
+                "A seal placement lacked valid sealBox geometry in page-local pt.",
+                "Provide sealBox xPt/yPt (optional width/height, default 48pt).");
+        put(catalog, "SEAL_SCALING_NOT_ALLOWED",
+                "sealScalingNotAllowed",
+                "Seal references must not use image scaling.",
+                "region=seal",
+                "Seal scaling was requested but is not allowed.",
+                "Remove seal scaling before republishing.");
     }
 
     private static void put(
