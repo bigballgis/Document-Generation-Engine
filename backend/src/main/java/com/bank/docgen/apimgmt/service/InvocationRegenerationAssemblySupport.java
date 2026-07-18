@@ -107,10 +107,12 @@ public class InvocationRegenerationAssemblySupport {
         assertBundleHashMatches(masterBytes, invocation.getReleaseBundleHash());
 
         Map<String, Object> variables = extractVariables(invocation.getParametersStorage());
+        // IBL-A6: replay retained contextSummary.locale (null when absent/blank → engine default).
+        String localeTag = extractLocaleTag(invocation.getParametersStorage());
         Map<String, Object> resolvedVariables = variableComputeService.applyCompute(
                 version.getId(),
                 variables,
-                null
+                localeTag
         );
         List<AnchorBindingEntity> bindings = anchorBindingRepository
                 .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
@@ -245,6 +247,27 @@ public class InvocationRegenerationAssemblySupport {
                 ApiErrorCategories.GENERATION,
                 "api.error.audit.releaseBundleSnapshotUnavailable"
         );
+    }
+
+    /**
+     * IBL-A6 / A6-C1: locale for compute replay from retained {@code contextSummary.locale}.
+     * Blank or missing → {@code null} (engine default; A6-C4 / A6-C6).
+     */
+    String extractLocaleTag(String parametersStorage) {
+        try {
+            JsonNode root = objectMapper.readTree(parametersStorage == null ? "{}" : parametersStorage);
+            JsonNode localeNode = root.path("contextSummary").path("locale");
+            if (localeNode.isMissingNode() || localeNode.isNull() || !localeNode.isTextual()) {
+                return null;
+            }
+            String locale = localeNode.asText();
+            if (locale == null || locale.isBlank()) {
+                return null;
+            }
+            return locale.trim();
+        } catch (IOException | RuntimeException ignored) {
+            return null;
+        }
     }
 
     private Map<String, Object> replayVariables(JsonNode variablesNode) {

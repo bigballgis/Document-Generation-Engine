@@ -142,6 +142,8 @@ public class InvocationParameterSanitizer {
         payload.put("output", output);
         var encryption = item.encryption() != null ? item.encryption() : request.encryption();
         payload.put("encryption", sanitizeEncryption(encryption, output.format()));
+        // IBL-A6 / A6-C3: BATCH_ITEM rows must retain parent batch contextSummary (incl. locale).
+        putContextSummary(payload, request.context());
         return writeJson(payload);
     }
 

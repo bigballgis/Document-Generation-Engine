@@ -276,6 +276,62 @@ class InvocationParameterSanitizerTest {
     }
 
     @Test
+    void bddIblA6_007_sanitizeBatchItemWritesContextSummaryLocale() throws Exception {
+        BatchGenerateRequestBody request = new BatchGenerateRequestBody(
+                new OutputOptionsView("DOCX", "SYNC_STREAM"),
+                List.of(new BatchGenerateRequestBody.BatchGenerateItemBody(
+                        "item-1",
+                        Map.of("principal", 1234.56),
+                        null,
+                        null
+                )),
+                null,
+                "req-batch-locale",
+                "idem-batch-locale",
+                null,
+                new ContextView("LOS", "BATCH", null, null, null, "en-US")
+        );
+
+        JsonNode root = objectMapper.readTree(sanitizer.sanitizeBatchItem(
+                request.items().get(0),
+                request,
+                "1.0.0",
+                Map.of("principal", VariablePiiCategory.NONE)
+        ));
+
+        assertThat(root.get("contextSummary").get("locale").asText()).isEqualTo("en-US");
+        assertThat(root.get("contextSummary").get("channel").asText()).isEqualTo("BATCH");
+        assertThat(root.get("variables").get("principal").asDouble()).isEqualTo(1234.56);
+    }
+
+    @Test
+    void bddIblA6_007_sanitizeBatchItemOmitsContextSummaryWhenContextAbsent() throws Exception {
+        BatchGenerateRequestBody request = new BatchGenerateRequestBody(
+                new OutputOptionsView("DOCX", "SYNC_STREAM"),
+                List.of(new BatchGenerateRequestBody.BatchGenerateItemBody(
+                        "item-1",
+                        Map.of("principal", 100),
+                        null,
+                        null
+                )),
+                null,
+                "req-batch-no-ctx",
+                "idem-batch-no-ctx",
+                null,
+                null
+        );
+
+        JsonNode root = objectMapper.readTree(sanitizer.sanitizeBatchItem(
+                request.items().get(0),
+                request,
+                "1.0.0",
+                Map.of("principal", VariablePiiCategory.NONE)
+        ));
+
+        assertThat(root.has("contextSummary")).isFalse();
+    }
+
+    @Test
     void bddIblA5_010_passwordStripAndPiiRedactionTogether() throws Exception {
         GenerateRequestBody request = new GenerateRequestBody(
                 new OutputOptionsView("PDF", "SYNC_STREAM"),

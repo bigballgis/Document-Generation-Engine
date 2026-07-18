@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active cleared. Prior NON-CE #111 IBL-A5 Done (e5217a80/99e8c1a7). Prior NON-CE #110 IBL-A4 Done (ddf6601c/6edb41cd). Prior #109 IBL-A3 Done (779b1979/f09326ca). Prior #108 IBL-A2 Done (e3000479/89584242). Prior #107 IBL-A1 Done. IBL #106 registry-only pending (not a delivery leaf). Next IBL queue #112 not activated. #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active cleared (2026-07-18; Wave IBL-A In Progress; A1–A5 Done; A6 Not Started; next #112 not activated). Prior NON-CE #111 IBL-A5 Done. Prior NON-CE #110 IBL-A4 Done. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active NON-CE #112 IBL-A6 in-progress (ibl-a6-regenerate-locale-replay). Prior NON-CE #111 IBL-A5 Done (e5217a80/99e8c1a7). Prior NON-CE #110 IBL-A4 Done (ddf6601c/6edb41cd). Prior #109 IBL-A3 Done (779b1979/f09326ca). Prior #108 IBL-A2 Done (e3000479/89584242). Prior #107 IBL-A1 Done. IBL #106 registry-only pending (not a delivery leaf). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active NON-CE #112 IBL-A6 in-progress (2026-07-19; Wave IBL-A In Progress; A1–A5 Done; A6 In Progress; slice ibl-a6-regenerate-locale-replay). Prior NON-CE #111 IBL-A5 Done. Prior NON-CE #110 IBL-A4 Done. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T14:20:00.000Z"
+        "updatedAt": "2026-07-19T00:34:00.000Z"
       },
       {
         "id": "54",
@@ -1468,14 +1468,14 @@
       {
         "id": "106",
         "title": "IBL: International Bank Letter Readiness Program (umbrella)",
-        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A In Progress; #107 IBL-A1 Done; #108 IBL-A2 Done; #109 IBL-A3 Done (779b1979/f09326ca); #110 IBL-A4 Done (ddf6601c/6edb41cd); #111 IBL-A5 Done (e5217a80/99e8c1a7); sole-active cleared; next #112 IBL-A6 not activated; A6/B–E not activated as delivery. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a (stay CONDITIONAL). Plan: docs/plan/intl-bank-letter-readiness-program.md. MAIN register merge 9fc2bc97.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active cleared (Wave IBL-A In Progress; A1–A5 Done; A6 Not Started; next #112 not activated). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO.",
+        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A In Progress; #107 IBL-A1 Done; #108 IBL-A2 Done; #109 IBL-A3 Done (779b1979/f09326ca); #110 IBL-A4 Done (ddf6601c/6edb41cd); #111 IBL-A5 Done (e5217a80/99e8c1a7); sole-active #112 IBL-A6 in-progress (ibl-a6-regenerate-locale-replay); A6 In Progress; B–E not activated as delivery. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a (stay CONDITIONAL). Plan: docs/plan/intl-bank-letter-readiness-program.md. MAIN register merge 9fc2bc97.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active = #112 IBL-A6 in-progress (Wave IBL-A In Progress; A1–A5 Done; A6 In Progress; slice ibl-a6-regenerate-locale-replay). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT mark Wave A / IBL program Done.",
         "testStrategy": "N/A — umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T14:20:00.000Z"
+        "updatedAt": "2026-07-19T00:34:00.000Z"
       },
       {
         "id": "107",
@@ -1530,26 +1530,26 @@
       {
         "id": "111",
         "title": "IBL-A5: PII-category retention redaction",
-        "description": "DONE 2026-07-18. IBL-A5 PII-category retention redaction. MAIN merge e5217a80 / feature tip 99e8c1a7; worktree REMOVED. Slice ibl-a5-pii-retention-redaction. BDD ready: docs/behavior/ibl-a5-pii-retention-redaction.md (BDD-IBL-A5-001…011). Batch solo closed. Wave IBL-A stays In Progress (A1–A5 Done; A6 Not Started). Sole-active cleared. #106 registry-only pending. Next queue #112 IBL-A6 (not activated). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Residuals: Kafka DLT IT suite-order hang (CLI exclude only); historical PII rows not backfilled; encryption-at-rest deferred. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "COMPLETED 2026-07-18. Owner: backend-engineer. Delivered: InvocationRetentionVariableRedactor / InvocationParameterSanitizer — piiCategory≠NONE must not store clear; NONE retainable; regenerate replays non-redacted fields; ADR-0057 Amendment 2026-07-18. Gates: mvn verify GREEN 2070/0/0/8 (temporary CLI exclude AsyncBatchTaskKafkaDltIntegrationTest only — NOT in pom; alone GREEN); architecture PASS_WITH_NOTES Critical=0 merge_go=true; Stage 10 DEPLOY_OK healthz 200; E2E/UIUX N/A (frontend_ui_in_scope=false). Wave IBL-A remains In Progress — do NOT mark Wave A or IBL program Done. #107/#108/#109/#110 remain done. #106 remains registry-only pending. A6 (#112) stays pending (not activated). Do NOT flip #3b/#5a GO. Do NOT claim go-live.",
+        "description": "DONE 2026-07-18. IBL-A5 PII-category retention redaction. MAIN merge e5217a80 / feature tip 99e8c1a7; worktree REMOVED. Slice ibl-a5-pii-retention-redaction. BDD ready: docs/behavior/ibl-a5-pii-retention-redaction.md (BDD-IBL-A5-001…011). Batch solo closed. Wave IBL-A stays In Progress (A1–A5 Done; A6 later In Progress as #112). #106 registry-only pending. Superseded queue: #112 IBL-A6 now sole-active (2026-07-19). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Residuals: Kafka DLT IT suite-order hang (CLI exclude only); historical PII rows not backfilled; encryption-at-rest deferred. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "COMPLETED 2026-07-18. Owner: backend-engineer. Delivered: InvocationRetentionVariableRedactor / InvocationParameterSanitizer — piiCategory≠NONE must not store clear; NONE retainable; regenerate replays non-redacted fields; ADR-0057 Amendment 2026-07-18. Gates: mvn verify GREEN 2070/0/0/8 (temporary CLI exclude AsyncBatchTaskKafkaDltIntegrationTest only — NOT in pom; alone GREEN); architecture PASS_WITH_NOTES Critical=0 merge_go=true; Stage 10 DEPLOY_OK healthz 200; E2E/UIUX N/A (frontend_ui_in_scope=false). Wave IBL-A remains In Progress — do NOT mark Wave A or IBL program Done. #107/#108/#109/#110 remain done. #106 remains registry-only pending. #112 IBL-A6 activated sole-active 2026-07-19 (supersedes post-A5 cleared sole-active). Do NOT flip #3b/#5a GO. Do NOT claim go-live.",
         "testStrategy": "BDD + retention redaction tests per VariablePiiCategory; regenerate non-redacted path; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T15:47:00.000Z"
+        "updatedAt": "2026-07-19T00:34:00.000Z"
       },
       {
         "id": "112",
         "title": "IBL-A6: Regenerate locale replay fix (SPECIMEN unchanged)",
-        "description": "PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated. Plan ID IBL-A6. Owner: backend-engineer. BDD: required. Depends: 鈥? Maps F6 locale only; SPECIMEN watermark unchanged until PD-6. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-A6. Owner specialist: backend-engineer. BDD: required. Depends: 鈥? Acceptance: Regenerate uses original invocation locale (not null鈫抏ngine default); SPECIMEN watermark unchanged unless PD-6 confirmed; locale-sensitive amount/date regression. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated.",
-        "testStrategy": "BDD + locale replay regression; SPECIMEN unchanged; mvn verify GREEN.",
+        "description": "IN PROGRESS 2026-07-19. IBL-A6 regenerate locale replay (SPECIMEN unchanged). Slice ibl-a6-regenerate-locale-replay. Sole-active NON-CE delivery leaf. ISOLATED worktree D:/working/DGE-ibl-a6-regenerate-locale-replay · feat/ibl-a6-regenerate-locale-replay. BDD ready: docs/behavior/ibl-a6-regenerate-locale-replay.md (BDD-IBL-A6-001…011); frontend_ui_in_scope=false. Batch solo (member_task_ids: [\"112\"]). Wave IBL-A stays In Progress (A1–A5 Done; A6 In Progress). #106 registry-only pending. #107–#111 remain done. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Do NOT mark Wave A / IBL program Done. Note: A5 local Done may be unpushed (79ef82b3). Owner: backend-engineer. Skip heavy doc-keeper unless OpenAPI must change. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "IBL-A6 sole-active. Owner: backend-engineer. BDD ready (docs/behavior/ibl-a6-regenerate-locale-replay.md; BDD-IBL-A6-001…011). Acceptance: regenerate applyCompute uses original invocation locale from parameters_storage.contextSummary.locale (no hard-coded null when retained non-empty); BATCH_ITEM write path retains contextSummary; absent locale → faithful engine default; SPECIMEN watermark unchanged (PD-6 out); locale-sensitive FORMAT_AMOUNT/FORMAT_DATE/SPELL regression. Gates: mvn verify. frontend_ui_in_scope=false; E2E/UIUX N/A. Formal phase None. Not go-live. Do NOT flip #3b/#5a. Do NOT mark Wave A Done. Batch solo. Worktree: D:/working/DGE-ibl-a6-regenerate-locale-replay · feat/ibl-a6-regenerate-locale-replay.",
+        "testStrategy": "BDD-IBL-A6-001…011 + locale replay regression; SPECIMEN unchanged; BATCH_ITEM contextSummary write; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:45:00Z"
+        "updatedAt": "2026-07-19T00:34:00.000Z"
       },
       {
         "id": "113",
