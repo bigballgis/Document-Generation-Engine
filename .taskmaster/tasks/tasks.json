@@ -1480,14 +1480,14 @@
       {
         "id": "107",
         "title": "IBL-A1: Runtime required/type fail-closed variable enforcement",
-        "description": "IN PROGRESS 2026-07-18. Sole-active delivery leaf IBL-A1. Slice ibl-a1-variable-validation; placement ISOLATED; worktree D:/working/DGE-ibl-a1-variable-validation · feat/ibl-a1-variable-validation. BDD ready: docs/behavior/ibl-a1-variable-validation.md (BDD-IBL-A1-001…008). Batch solo (member_task_ids:[\"107\"]; vetoes A2/A3 + umbrella #106). Wave IBL-A In Progress (A1 only). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Owner: backend-engineer. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-A1 activated sole-active. Owner: backend-engineer. BDD ready (preview aligned; publish scoped out of generate-body validation). Acceptance: Generate missing required / wrong type/enum → 422 VARIABLE_VALIDATION_FAILED + fieldErrors; no silent blank DOCX/PDF; preview same fail-closed; OpenAPI/ApiErrorCodes/contract-outline sync for new code. Gates: mvn -B -ntp -f backend/pom.xml verify + queued docker as required. Formal phase None. #106 remains registry-only pending. A2–A6 (#108–#112) stay pending. Do NOT flip #3b/#5a GO. Do NOT claim go-live. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "description": "DONE 2026-07-18. IBL-A1 runtime/preview fail-closed VARIABLE_VALIDATION_FAILED. MAIN merge f0a2b6fe / feature tip 4bda5f2d; worktree REMOVED; origin/main pushed. Slice ibl-a1-variable-validation. BDD ready: docs/behavior/ibl-a1-variable-validation.md (BDD-IBL-A1-001…008). Batch solo closed. Wave IBL-A stays In Progress (A1 Done; A2–A6 Not Started). Sole-active cleared. #106 registry-only pending. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Residuals: regenerate unhooked (R1); IRC no fieldErrors (R3). Next queue (not activated): IBL-A2 #108. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "COMPLETED 2026-07-18. Owner: backend-engineer. Delivered: generate/preview missing required / wrong type/enum → 422 VARIABLE_VALIDATION_FAILED + fieldErrors; no silent blank DOCX/PDF; publish scoped out of generate-body validation. Gates: mvn verify GREEN 2014/0/0/8; architecture PASS_WITH_NOTES Critical=0 merge_go=yes; Stage 10 DEPLOY_OK 2026-07-18T19:35:46+08:00 :8080/:4173 200; E2E/UIUX N/A (frontend_ui_in_scope=false). Wave IBL-A remains In Progress — do NOT mark Wave A or IBL program Done. #106 remains registry-only pending. A2–A6 (#108–#112) stay pending. Do NOT flip #3b/#5a GO. Do NOT claim go-live.",
         "testStrategy": "BDD ready + regression for required/type/enum; mvn -B -ntp -f backend/pom.xml verify GREEN; no silent blank DOCX/PDF.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T10:47:00.000Z"
+        "updatedAt": "2026-07-18T11:41:00.000Z"
       },
       {
         "id": "108",
