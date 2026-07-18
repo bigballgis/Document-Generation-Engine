@@ -1,0 +1,28 @@
+{
+  "slice": "prod-dashboard-summary-api",
+  "task": "PRR-D01c #136",
+  "bdd": [
+    "BDD-PRR-D01C-001",
+    "BDD-PRR-D01C-010"
+  ],
+  "capturedAt": "2026-07-18T05:54:29.229Z",
+  "summaryUrls": [
+    "http://127.0.0.1:4173/api/management/v1/dashboard/summary"
+  ],
+  "mastersListUrls": [
+    "http://127.0.0.1:4173/api/management/v1/masters?page=0&size=100&status=PENDING_REVIEW",
+    "http://127.0.0.1:4173/api/management/v1/masters?page=0&size=100&status=DRAFT",
+    "http://127.0.0.1:4173/api/management/v1/masters?page=0&size=100&status=REJECTED"
+  ],
+  "templatesListUrls": [],
+  "unboundedCatalogListUrls": [],
+  "summaryBuckets": {
+    "masterPendingReview": 6,
+    "masterVersionsInProgress": 11,
+    "templateVersionsInWorkflow": 502,
+    "publishedVersions": 13,
+    "stoppedVersions": 0,
+    "catalogMasters": 45,
+    "catalogTemplates": 515
+  }
+}
