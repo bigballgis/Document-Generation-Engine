@@ -19,8 +19,9 @@ public class ProductionMultiInstanceGuard {
     @EventListener(ApplicationReadyEvent.class)
     void logMultiInstanceConstraints() {
         LOG.warn(
-                "Multi-instance: enable RUNTIME_RATE_LIMIT_DISTRIBUTED before >1 replica; "
-                        + "SSE progress requires sticky sessions until Redis pub/sub registry lands (ADR-0044)."
+                "ADR-0044 honesty: v1 is single serving replica; runtime rate-limit is process-local "
+                        + "(RUNTIME_RATE_LIMIT_DISTRIBUTED defaults false — not multi-instance complete); "
+                        + "SSE progress requires sticky sessions until Redis pub/sub registry lands."
         );
     }
 }

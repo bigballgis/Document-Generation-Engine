@@ -183,6 +183,20 @@ Negative / accepted risks:
 - Scaling out without completing the prerequisites table reintroduces the CD-PIT-14
   defect class — treat the table as a hard gate in deployment checklists.
 
+### Honesty residual (PRR-D01b / 2026-07-18) — not a new Decision
+
+The Accepted Decision core above is unchanged: **v1 launches with a single serving
+backend replica**. Readers must also treat the following as **open residuals**, not as
+delivered multi-instance correctness:
+
+| Residual | Current authority | Not complete until |
+| --- | --- | --- |
+| SSE progress | Process-local `SseEmitterRegistry`; sticky sessions required across pods | Redis pub/sub relay **or** sticky routing proven at every ingress hop |
+| Runtime rate-limit | Process-local Bucket4j; `RUNTIME_RATE_LIMIT_DISTRIBUTED` defaults **`false`** in `application-prod.yml` | Shared Redis limiter (ADR-0031) enabled and verified on the traffic path |
+| Multi-instance overall | **Incomplete** — single-replica topology is the v1 gate | Prerequisites table rows 1–5 closed |
+
+Companion SOR-S07 note [0044-multi-instance-correctness-baseline.md](./0044-multi-instance-correctness-baseline.md): Decision §1 «distributed default in prod» wording is **aspirational / residual** — do **not** read Accepted there as Redis rate-limit delivered. Ops: [runbook § Multi-instance residuals](../../operations/runbook.md#multi-instance-residuals-adr-0044). Behavior SoT: [prod-ops-security-hardening.md](../../behavior/prod-ops-security-hardening.md) (D01B-C9).
+
 Branch directives for Wave LR-B tasks:
 
 - **LR-B2** — **recommended low-cost insurance under the Docker Compose
@@ -235,6 +249,9 @@ The table above is the **original LR-B2 verification record** and is **not** rew
 - [ADR 0030: Operational Platform Baseline](./0030-operational-platform-baseline.md) — blue-green + autoscaling baseline
 - [ADR 0031: API Platform Hardening Baseline](../api/0031-api-platform-hardening-baseline.md) — Redis centralized rate-limit counters (deferred for v1 by this ADR; required on scale-out)
 - [ADR 0033: Async Messaging and Task Retry Baseline](../async-processing/0033-async-messaging-and-task-retry-baseline.md) — Kafka transport baseline
+- [0044 multi-instance correctness baseline (honesty residual)](./0044-multi-instance-correctness-baseline.md) — SOR-S07 companion; Accepted ≠ complete
+- [PRR-D01b behavior — ADR-0044 honesty](../../behavior/prod-ops-security-hardening.md) — D01B-C9 / BDD-PRR-D01B-010…011
+- [Operations runbook — multi-instance residuals](../../operations/runbook.md#multi-instance-residuals-adr-0044)
 - [Launch Readiness Program](../../plan/launch-readiness-program.md) — §1 findings 3/4/5
 - [LRP Wave LR-B detail](../../plan/detail/LRP-B-runtime-scaleout-session.md) — LR-B1/B2/B3/B4/B5 task sheets
 - `deploy/helm/docgen/values*.yaml`, `deploy/helm/docgen/README.md`, `docker-compose.prod.yml` — synced in the same change set

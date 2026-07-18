@@ -11,7 +11,9 @@
 Version-control Micrometer scrape expectations, Prometheus alert rules, and Grafana
 dashboard JSON so observability is reviewable and reproducible. The application stack
 exposes `/actuator/prometheus`; a separate Prometheus/Grafana/Alertmanager deployment
-scrapes and evaluates rules. **No vendor APM** is adopted or documented as required.
+scrapes and evaluates rules. **PRR-D01b:** claimed-prod scrape uses **HTTP Basic**
+(env/secrets) — see [runbook § Observability](../../docs/operations/runbook.md#observability)
+and comments in `prometheus-scrape.yaml`. **No vendor APM** is adopted or documented as required.
 
 ## Folder layout (implementer contract)
 
@@ -19,7 +21,7 @@ scrapes and evaluates rules. **No vendor APM** is adopted or documented as requi
 | --- | --- | --- |
 | `README.md` (this file) | Index + **draft** threshold table + runbook annotation map | doc-keeper (docs-first) |
 | `prometheus-alerts.yaml` | Prometheus rule groups (`draft: "true"` until NFR confirmation) | backend / deploy engineer |
-| `prometheus-scrape.yaml` | **Reference-only** example scrape job (`job_name: docgen-backend`) — valid YAML comments, no credentials; not mounted by compose | backend / deploy engineer |
+| `prometheus-scrape.yaml` | **Reference-only** example scrape job (`job_name: docgen-backend`) — comments document **HTTP Basic** scrape (PRR-D01b); placeholder `basic_auth` commented; not mounted by compose; **no** committed passwords | backend / deploy engineer |
 | `grafana/docgen-ops-overview.json` | Importable dashboard (generation, PDF pool, SSE, rate-limit, DLT) | backend / deploy engineer |
 | `grafana/README.md` | Dashboard import notes | backend / deploy engineer |
 

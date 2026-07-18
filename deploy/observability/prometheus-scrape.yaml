@@ -1,10 +1,23 @@
 # Example Prometheus scrape — REFERENCE ONLY (not mounted by compose).
-# No credentials. Pair with prometheus-alerts.yaml.
-# Alert DocgenBackendDown expects job="docgen-backend".
+# Pair with prometheus-alerts.yaml. Alert DocgenBackendDown expects job="docgen-backend".
+#
+# PRR-D01b / BDD-PRR-D01B-006 — scrape auth model (honest):
+# - Application layer: HTTP Basic on /actuator/prometheus and /actuator/metrics
+#   (claimed-prod / acceptance-hardening; docgen.actuator.scrape-auth-enabled=true).
+# - Credentials from env/secrets only:
+#     DOCGEN_ACTUATOR_SCRAPE_USERNAME
+#     DOCGEN_ACTUATOR_SCRAPE_PASSWORD
+#   No default password in image or repository. Empty credentials => fail-closed 401.
+# - NetworkPolicy / internal-only scrape is defense-in-depth only — it does NOT replace
+#   application Basic auth. Company IdP / OAuth / mTLS are out of scope for this leaf.
+# - Public probes remain GET /healthz and GET /readyz (anonymous).
 scrape_configs:
   - job_name: docgen-backend
     metrics_path: /actuator/prometheus
     scrape_interval: 15s
+    basic_auth:
+      username: "${DOCGEN_ACTUATOR_SCRAPE_USERNAME}"
+      password: "${DOCGEN_ACTUATOR_SCRAPE_PASSWORD}"
     static_configs:
       - targets:
           - localhost:8080

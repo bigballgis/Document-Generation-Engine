@@ -59,6 +59,9 @@ services:
       # Temporary LR-D3 scrape-smoke only — force low RPM so one 429 is observable without a 120-request flood.
       RUNTIME_RATE_LIMIT_RPM: ${RUNTIME_RATE_LIMIT_RPM:-120}
       RUNTIME_RATE_LIMIT_BURST: ${RUNTIME_RATE_LIMIT_BURST:-120}
+      # PRR-D01b: actuator scrape HTTP Basic (no image default). Empty => fail-closed 401 on metrics/prometheus.
+      DOCGEN_ACTUATOR_SCRAPE_USERNAME: ${DOCGEN_ACTUATOR_SCRAPE_USERNAME:-}
+      DOCGEN_ACTUATOR_SCRAPE_PASSWORD: ${DOCGEN_ACTUATOR_SCRAPE_PASSWORD:-}
       HOME: /tmp
       LIBREOFFICE_CONVERSION_MODE: cli
       # LR-B8: MaxRAMPercentage caps the heap at 75% of mem_limit (~1.15G of 1536m),

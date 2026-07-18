@@ -697,7 +697,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T10:54:00.000Z"
+        "updatedAt": "2026-07-17T10:54:00Z"
       },
       {
         "id": "51",
@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR #98+#99+#100+#101+#102+#105+#103+#104(D01A) → Done (#104 tip f1f79d14). Host sole-active cleared — NOT under this umbrella. Next queue (not activated): Wave D residuals (actuator/nginx/dashboard/hygiene) + IRC FailedSyncInvocationErrorMapper. IBL #106 registry-only pending (not a delivery leaf; do NOT activate IBL). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 + #102 + #105 + #103 + #104 D01A Done outside this umbrella (#104 tip f1f79d14; Wave D bag NOT product-complete — residuals queued). Host sole-active cleared. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR #98+#99+#100+#101+#102+#105+#103+#104(D01A) → Done (#104 tip f1f79d14). Host sole-active = NON-CE #135 PRR-D01b (prod-ops-security-hardening) — NOT under this umbrella. IBL #106 registry-only pending (not a delivery leaf; do NOT activate IBL while #135 ahead). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 + #102 + #105 + #103 + #104 D01A Done outside this umbrella (#104 tip f1f79d14). Host sole-active = #135 PRR-D01b (Wave D residual; dashboard FE vetoed). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T02:50:00.000Z"
+        "updatedAt": "2026-07-18T03:15:00.000Z"
       },
       {
         "id": "54",
@@ -1045,7 +1045,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T14:00:00.000Z"
+        "updatedAt": "2026-07-16T14:00:00Z"
       },
       {
         "id": "76",
@@ -1073,7 +1073,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T08:53:00.000Z"
+        "updatedAt": "2026-07-17T08:53:00Z"
       },
       {
         "id": "78",
@@ -1115,7 +1115,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T05:46:00.000Z"
+        "updatedAt": "2026-07-17T05:46:00Z"
       },
       {
         "id": "81",
@@ -1257,7 +1257,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-16T16:10:00.000Z"
+        "updatedAt": "2026-07-16T16:10:00Z"
       },
       {
         "id": "91",
@@ -1271,7 +1271,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T07:15:00.000Z"
+        "updatedAt": "2026-07-17T07:15:00Z"
       },
       {
         "id": "92",
@@ -1285,7 +1285,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T20:55:00.000Z"
+        "updatedAt": "2026-07-17T20:55:00Z"
       },
       {
         "id": "93",
@@ -1299,7 +1299,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T22:25:00.000Z"
+        "updatedAt": "2026-07-17T22:25:00Z"
       },
       {
         "id": "94",
@@ -1313,7 +1313,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T23:50:00.000Z"
+        "updatedAt": "2026-07-17T23:50:00Z"
       },
       {
         "id": "95",
@@ -1327,7 +1327,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T00:47:00.000Z"
+        "updatedAt": "2026-07-17T00:47:00Z"
       },
       {
         "id": "96",
@@ -1341,7 +1341,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T03:20:00.000Z"
+        "updatedAt": "2026-07-17T03:20:00Z"
       },
       {
         "id": "97",
@@ -1355,7 +1355,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T05:30:00.000Z"
+        "updatedAt": "2026-07-17T05:30:00Z"
       },
       {
         "id": "98",
@@ -1367,7 +1367,7 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T15:15:00.000Z"
+        "updatedAt": "2026-07-17T15:15:00Z"
       },
       {
         "id": "99",
@@ -1379,7 +1379,7 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T15:15:00.000Z"
+        "updatedAt": "2026-07-17T15:15:00Z"
       },
       {
         "id": "100",
@@ -1391,7 +1391,7 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T15:15:00.000Z"
+        "updatedAt": "2026-07-17T15:15:00Z"
       },
       {
         "id": "101",
@@ -1407,7 +1407,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-17T16:10:00.000Z"
+        "updatedAt": "2026-07-17T16:10:00Z"
       },
       {
         "id": "102",
@@ -1421,7 +1421,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:45:00.000Z"
+        "updatedAt": "2026-07-18T01:45:00Z"
       },
       {
         "id": "103",
@@ -1435,13 +1435,13 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T04:15:00.000Z"
+        "updatedAt": "2026-07-18T04:15:00Z"
       },
       {
         "id": "104",
         "title": "PRR-D01: Ops hardening (ResilienceFailureMapper / actuator / nginx / dashboard / doc hygiene)",
-        "description": "DONE 2026-07-18 (D01A delivered scope only). PRR-D01a ResilienceFailureMapper 503/504 taxonomy + PDF pool capacity → Done. MAIN tip f1f79d14; worktree REMOVED. Slice prod-ops-resilience-pdf-pool. Wave D SPLIT leaf closed — NOT full Wave D bag product-complete. BDD ready docs/behavior/prod-ops-resilience-pdf-pool.md (BDD-PRR-D01A-*). frontend_ui_in_scope=false. Formal phase None. Not go-live. Checklist #3b stays CONDITIONAL (Path X ≠ GO); #5a stays CONDITIONAL. Sole-active cleared. Next queue (not activated): Wave D residuals (actuator/nginx CSP/dashboard summary API/ADR-0044 doc hygiene) + queued IRC FailedSyncInvocationErrorMapper residual.",
-        "details": "COMPLETED 2026-07-18 (stage 12 MAIN post-task-doc-sync after stage 11 FF merge). Slice id: prod-ops-resilience-pdf-pool. Batch recommendation split (member_task_ids: [\"104\"]; proposed_slice_id: prod-ops-resilience-pdf-pool) closed for D01A only. Merge/tip SHA f1f79d14. Gates: mvn verify GREEN 1975/0/0/8; architecture PASS_WITH_NOTES Critical=0 merge_go=true; Stage 10 DEPLOY_OK :8080/:4173 200 (backend image sha256:c7ca0bc41516c2500b41383e6bc028d21625dc6cc4ac9951b330714837f74b2f); E2E/UIUX N/A. Evidence: ResilienceFailureMapper → GENERATION_SERVICE_UNAVAILABLE (503) / GENERATION_TIMEOUT (504) not TEMPLATE_VALIDATION_FAILED; PDF conversion pool bounded + saturation fail-closed (PDF_CONVERSION_CAPACITY_EXCEEDED). Wave D OUT unfinished — next serial queue head (not activated; no new TM id yet): actuator exposure, nginx CSP, dashboard summary API, ADR-0044 honesty/doc hygiene; plus IRC FailedSyncInvocationErrorMapper residual (queued, not expanded this leaf). Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO. Do NOT mark #5a GO. Do NOT claim full Wave D bag Done.",
+        "description": "DONE 2026-07-18 (D01A delivered scope only). PRR-D01a ResilienceFailureMapper 503/504 taxonomy + PDF pool capacity → Done. MAIN tip f1f79d14; worktree REMOVED. Slice prod-ops-resilience-pdf-pool. Wave D SPLIT leaf closed — NOT full Wave D bag product-complete. BDD ready docs/behavior/prod-ops-resilience-pdf-pool.md (BDD-PRR-D01A-*). frontend_ui_in_scope=false. Formal phase None. Not go-live. Checklist #3b stays CONDITIONAL (Path X ≠ GO); #5a stays CONDITIONAL. Sole-active superseded by #135 PRR-D01b (prod-ops-security-hardening).",
+        "details": "COMPLETED 2026-07-18 (stage 12 MAIN post-task-doc-sync after stage 11 FF merge). Slice id: prod-ops-resilience-pdf-pool. Batch recommendation split (member_task_ids: [\"104\"]; proposed_slice_id: prod-ops-resilience-pdf-pool) closed for D01A only. Merge/tip SHA f1f79d14. Gates: mvn verify GREEN 1975/0/0/8; architecture PASS_WITH_NOTES Critical=0 merge_go=true; Stage 10 DEPLOY_OK :8080/:4173 200 (backend image sha256:c7ca0bc41516c2500b41383e6bc028d21625dc6cc4ac9951b330714837f74b2f); E2E/UIUX N/A. Evidence: ResilienceFailureMapper → GENERATION_SERVICE_UNAVAILABLE (503) / GENERATION_TIMEOUT (504) not TEMPLATE_VALIDATION_FAILED; PDF conversion pool bounded + saturation fail-closed (PDF_CONVERSION_CAPACITY_EXCEEDED). Wave D OUT unfinished — next serial sole-active #135 PRR-D01b (actuator/nginx CSP/ADR-0044 honesty + FailedSyncInvocationErrorMapper; dashboard FE vetoed). Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO. Do NOT mark #5a GO. Do NOT claim full Wave D bag Done.",
         "testStrategy": "1. BDD-PRR-D01A ready (docs/behavior/prod-ops-resilience-pdf-pool.md). 2. TDD ResilienceFailureMapper + PDF pool capacity evidence. 3. mvn -B -ntp -f backend/pom.xml verify GREEN (1975). 4. FE/E2E N/A (frontend_ui_in_scope=false). 5. Stage 10 DEPLOY_OK. 6. D01A Done ≠ Wave D bag Done; residuals remain queued; do NOT flip #3b/#5a; do NOT claim go-live.",
         "priority": "medium",
         "dependencies": [
@@ -1449,7 +1449,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T02:50:00.000Z"
+        "updatedAt": "2026-07-18T03:15:00.000Z"
       },
       {
         "id": "105",
@@ -1463,19 +1463,19 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:41:00.000Z"
+        "updatedAt": "2026-07-18T01:41:00Z"
       },
       {
         "id": "106",
         "title": "IBL: International Bank Letter Readiness Program (umbrella)",
-        "description": "REGISTRY ONLY — not a delivery leaf; program registered in Task Master; waves Not Started / not activated; Formal phase None; Not go-live; Do NOT flip checklist #3b (stays CONDITIONAL); Plan: docs/plan/intl-bank-letter-readiness-program.md. Queue note: #105/#103/#104(D01A) Done (tip f1f79d14); host sole-active cleared; next PRR queue = Wave D residuals (actuator/nginx/dashboard/hygiene; not activated) — do NOT activate IBL while Wave D residuals remain ahead (unless user redirect); next IBL activation head = IBL-A1 (or wave A batch per Batch Recommendation at activation time). Status pending (registry only). MAIN merge 9fc2bc97.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs in docs/plan/intl-bank-letter-readiness-program.md. REGISTRY ONLY — not a delivery leaf. Waves A–E Not Started / not activated (B7 + Wave E blocked on external/pending decisions). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b. Do NOT activate while Wave D residuals remain ahead in the host serial queue (#104 D01A Done; bag OUT unfinished).",
+        "description": "REGISTRY ONLY — not a delivery leaf; program registered in Task Master; waves Not Started / not activated; Formal phase None; Not go-live; Do NOT flip checklist #3b (stays CONDITIONAL); Plan: docs/plan/intl-bank-letter-readiness-program.md. Queue note: #105/#103/#104(D01A) Done (tip f1f79d14); host sole-active = #135 PRR-D01b (prod-ops-security-hardening) — do NOT activate IBL while #135 / Wave D residuals remain ahead (unless user redirect); next IBL activation head = IBL-A1 (#107). Status pending (registry only). MAIN merge 9fc2bc97.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs in docs/plan/intl-bank-letter-readiness-program.md. REGISTRY ONLY — not a delivery leaf. Waves A–E Not Started / not activated (B7 + Wave E blocked on external/pending decisions). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b. Do NOT activate while #135 PRR-D01b (Wave D residual) remains ahead in the host serial queue (#104 D01A Done; bag OUT unfinished).",
         "testStrategy": "N/A — umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T02:50:00.000Z"
+        "updatedAt": "2026-07-18T03:15:00.000Z"
       },
       {
         "id": "107",
@@ -1487,7 +1487,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:45:00.000Z"
+        "updatedAt": "2026-07-18T01:45:00Z"
       },
       {
         "id": "108",
@@ -1499,7 +1499,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:45:00.000Z"
+        "updatedAt": "2026-07-18T01:45:00Z"
       },
       {
         "id": "109",
@@ -1513,7 +1513,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:45:00.000Z"
+        "updatedAt": "2026-07-18T01:45:00Z"
       },
       {
         "id": "110",
@@ -1525,7 +1525,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:45:00.000Z"
+        "updatedAt": "2026-07-18T01:45:00Z"
       },
       {
         "id": "111",
@@ -1537,7 +1537,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:45:00.000Z"
+        "updatedAt": "2026-07-18T01:45:00Z"
       },
       {
         "id": "112",
@@ -1549,7 +1549,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:45:00.000Z"
+        "updatedAt": "2026-07-18T01:45:00Z"
       },
       {
         "id": "113",
@@ -1563,7 +1563,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "114",
@@ -1577,7 +1577,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "115",
@@ -1591,7 +1591,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "116",
@@ -1605,7 +1605,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "117",
@@ -1619,7 +1619,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "118",
@@ -1633,7 +1633,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "119",
@@ -1645,7 +1645,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "120",
@@ -1660,7 +1660,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "121",
@@ -1674,7 +1674,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "122",
@@ -1689,7 +1689,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "123",
@@ -1703,7 +1703,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "124",
@@ -1717,7 +1717,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "125",
@@ -1731,7 +1731,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "126",
@@ -1745,7 +1745,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "127",
@@ -1759,7 +1759,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "128",
@@ -1771,7 +1771,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "129",
@@ -1783,7 +1783,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "130",
@@ -1795,7 +1795,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "131",
@@ -1807,7 +1807,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "132",
@@ -1822,7 +1822,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "133",
@@ -1834,7 +1834,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
       },
       {
         "id": "134",
@@ -1846,18 +1846,32 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00.000Z"
+        "updatedAt": "2026-07-18T01:25:00Z"
+      },
+      {
+        "id": "135",
+        "title": "PRR-D01b: Ops security hardening",
+        "description": "IN PROGRESS 2026-07-18 (sole-active). PRR-D01b Wave D residual leaf after #104 D01A Done. Slice prod-ops-security-hardening. Scope: tighten actuator metrics/prometheus auth (not world-open); nginx CSP/security headers; ADR-0044 honesty for distributed dead config; map GenerationServiceUnavailable/Timeout/PdfCapacity in FailedSyncInvocationErrorMapper. Dashboard FE+E2E vetoed. frontend_ui_in_scope=false. BDD blocked (stage 1 will author). Formal phase None. Not go-live. Do NOT flip checklist #3b GO / #5a GO (both stay CONDITIONAL). Do NOT claim full Wave D bag Done.",
+        "details": "ACTIVATED 2026-07-18 (stage 2 plan-orchestrator). Slice id: prod-ops-security-hardening. Placement ISOLATED; worktree D:/working/DGE-prod-ops-security-hardening / feat/prod-ops-security-hardening; base MAIN dc28642b. Batch recommendation split (member_task_ids: [\"135\"]; proposed_slice_id: prod-ops-security-hardening; vetoes: dashboard FE+E2E, IBL). Shared acceptance: ops security + IRC error mapping. Evidence amortization: verify+deploy. On-red peel IRC or nginx. Prior #104 D01A Done (tip f1f79d14; ResilienceFailureMapper + PDF pool only). BDD readiness blocked until behavior-spec-author. Umbrella #53 registry only. #106 IBL stays pending (do NOT activate while this leaf ahead). Formal phase remains None. Do NOT mark Done here. Do NOT flip #3b/#5a GO. Do NOT claim go-live.",
+        "testStrategy": "1. BDD-PRR-D01B ready (docs/behavior/prod-ops-security-hardening.md) before TDD. 2. TDD actuator metrics/prometheus auth (not world-open) + nginx CSP/security headers + ADR-0044 honesty + FailedSyncInvocationErrorMapper maps GenerationServiceUnavailable/Timeout/PdfCapacity. 3. mvn -B -ntp -f backend/pom.xml verify GREEN. 4. FE/E2E N/A (frontend_ui_in_scope=false; dashboard FE vetoed). 5. Stage 10 DEPLOY_OK queued. 6. Do NOT flip #3b/#5a GO; do NOT claim go-live; do NOT claim full Wave D bag Done.",
+        "priority": "high",
+        "dependencies": [
+          "104"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-18T03:15:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-18T02:05:00.000Z",
-      "taskCount": 134,
+      "lastModified": "2026-07-18T03:15:00.000Z",
+      "taskCount": 135,
       "completedCount": 102,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-18T02:05:00.000Z"
+      "updated": "2026-07-18T03:15:00.000Z"
     }
   }
 }
