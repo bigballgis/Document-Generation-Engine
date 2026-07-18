@@ -3,12 +3,15 @@ package com.bank.docgen.rendering;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.bank.docgen.rendering.RenderingOperationException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -163,7 +166,7 @@ class PdfConversionOffloadSupportTest {
             }
         });
         awaitActiveWorker(executor);
-        java.util.concurrent.atomic.AtomicInteger rejections = new java.util.concurrent.atomic.AtomicInteger();
+        AtomicInteger rejections = new AtomicInteger();
 
         assertThatThrownBy(() -> PdfConversionOffloadSupport.executeOffloaded(
                 executor,
@@ -175,10 +178,76 @@ class PdfConversionOffloadSupportTest {
         assertThat(rejections.get()).isEqualTo(1);
     }
 
+    /**
+     * BDD-IBL-B2-003: with pool=2 and queue=2, two more sync conversions queue instead of
+     * rejecting; the fifth fails immediately with capacity exceeded + rejection callback.
+     */
+    @Test
+    void absorbsBurstIntoBoundedQueueThenRejectsWhenFull() throws Exception {
+        executor = boundedExecutor(2, 2);
+        Semaphore releaseWorkers = new Semaphore(0);
+        AtomicInteger rejections = new AtomicInteger();
+
+        for (int i = 0; i < 2; i++) {
+            executor.execute(() -> {
+                try {
+                    releaseWorkers.acquire();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+        }
+        awaitActiveCount(executor, 2);
+
+        CountDownLatch callersEntered = new CountDownLatch(2);
+        List<CompletableFuture<byte[]>> queuedCalls = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            queuedCalls.add(CompletableFuture.supplyAsync(() -> {
+                callersEntered.countDown();
+                return PdfConversionOffloadSupport.executeOffloaded(
+                        executor,
+                        30,
+                        () -> {
+                            try {
+                                releaseWorkers.acquire();
+                            } catch (InterruptedException ex) {
+                                Thread.currentThread().interrupt();
+                            }
+                            return new byte[]{1};
+                        },
+                        rejections::incrementAndGet
+                );
+            }));
+        }
+
+        assertThat(callersEntered.await(2, TimeUnit.SECONDS)).isTrue();
+        awaitQueueSize(executor, 2);
+        assertThat(rejections.get()).isZero();
+        assertThat(executor.getThreadPoolExecutor().getQueue().remainingCapacity()).isZero();
+
+        assertThatThrownBy(() -> PdfConversionOffloadSupport.executeOffloaded(
+                executor,
+                5,
+                () -> new byte[]{1},
+                rejections::incrementAndGet
+        ))
+                .isInstanceOf(PdfConversionCapacityExceededException.class);
+        assertThat(rejections.get()).isEqualTo(1);
+
+        releaseWorkers.release(4);
+        for (CompletableFuture<byte[]> call : queuedCalls) {
+            assertThat(call.get(5, TimeUnit.SECONDS)).containsExactly(1);
+        }
+    }
+
     private void awaitActiveWorker(ThreadPoolTaskExecutor taskExecutor) {
+        awaitActiveCount(taskExecutor, 1);
+    }
+
+    private void awaitActiveCount(ThreadPoolTaskExecutor taskExecutor, int expected) {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
         while (System.nanoTime() < deadline) {
-            if (taskExecutor.getThreadPoolExecutor().getActiveCount() > 0) {
+            if (taskExecutor.getThreadPoolExecutor().getActiveCount() >= expected) {
                 return;
             }
             try {
@@ -190,11 +259,33 @@ class PdfConversionOffloadSupportTest {
         }
     }
 
+    private void awaitQueueSize(ThreadPoolTaskExecutor taskExecutor, int expected) {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.nanoTime() < deadline) {
+            if (taskExecutor.getThreadPoolExecutor().getQueue().size() >= expected) {
+                return;
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+        assertThat(taskExecutor.getThreadPoolExecutor().getQueue().size())
+                .as("expected queue size >= %s", expected)
+                .isGreaterThanOrEqualTo(expected);
+    }
+
     private ThreadPoolTaskExecutor boundedExecutor(int poolSize) {
+        return boundedExecutor(poolSize, 0);
+    }
+
+    private ThreadPoolTaskExecutor boundedExecutor(int poolSize, int queueCapacity) {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(poolSize);
         taskExecutor.setMaxPoolSize(poolSize);
-        taskExecutor.setQueueCapacity(0);
+        taskExecutor.setQueueCapacity(queueCapacity);
         taskExecutor.setThreadNamePrefix("pdf-conversion-test-");
         taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         taskExecutor.initialize();

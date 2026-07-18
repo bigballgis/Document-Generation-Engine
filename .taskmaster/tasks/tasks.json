@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active cleared (prior NON-CE #113 IBL-B1 Done a33da272/44237c99; Wave IBL-B In Progress B1 Done; next #114 not activated). Prior NON-CE #112 IBL-A6 Done (5cacff2a; Wave IBL-A Done). Prior NON-CE #111 IBL-A5 Done (e5217a80/99e8c1a7). Prior NON-CE #110 IBL-A4 Done (ddf6601c/6edb41cd). Prior #109 IBL-A3 Done (779b1979/f09326ca). Prior #108 IBL-A2 Done (e3000479/89584242). Prior #107 IBL-A1 Done. IBL #106 registry-only pending (not a delivery leaf). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active cleared after #113 IBL-B1 Done (a33da272/44237c99; Wave IBL-B In Progress B1 Done; next #114 not activated). Prior NON-CE #112 IBL-A6 Done. Prior NON-CE #111 IBL-A5 Done. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active = NON-CE #114 IBL-B2 (in-progress; slice ibl-b2-pdf-conversion-capacity; Wave IBL-B In Progress B1 Done + B2 In Progress; Wave IBL-A Done). Prior NON-CE #113 IBL-B1 Done (a33da272/44237c99). Prior NON-CE #112 IBL-A6 Done (5cacff2a; Wave IBL-A Done). Prior NON-CE #111 IBL-A5 Done (e5217a80/99e8c1a7). Prior NON-CE #110 IBL-A4 Done (ddf6601c/6edb41cd). Prior #109 IBL-A3 Done (779b1979/f09326ca). Prior #108 IBL-A2 Done (e3000479/89584242). Prior #107 IBL-A1 Done. IBL #106 registry-only pending (not a delivery leaf). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active = NON-CE #114 IBL-B2 (in-progress; Wave IBL-B In Progress; B1 Done; Wave IBL-A Done). Prior NON-CE #113 IBL-B1 Done (a33da272/44237c99). Prior NON-CE #112 IBL-A6 Done. Prior NON-CE #111 IBL-A5 Done. Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-19T03:00:00.000Z"
+        "updatedAt": "2026-07-19T03:05:00.000Z"
       },
       {
         "id": "54",
@@ -1468,14 +1468,14 @@
       {
         "id": "106",
         "title": "IBL: International Bank Letter Readiness Program (umbrella)",
-        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A Done (A1–A6); #107–#112 Done (A6 tip 5cacff2a); Wave IBL-B In Progress (#113 IBL-B1 Done a33da272 / 44237c99; B2+ pending; sole-active cleared; next #114 not activated); Wave C–E Not Started / Blocked. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a (stay CONDITIONAL). Plan: docs/plan/intl-bank-letter-readiness-program.md. MAIN register merge 9fc2bc97.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active cleared after #113 IBL-B1 Done (Wave IBL-B In Progress; Wave IBL-A remains Done; next queue #114 IBL-B2 not activated). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim IBL program Done.",
+        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A Done (A1–A6); #107–#112 Done (A6 tip 5cacff2a); Wave IBL-B In Progress (#113 IBL-B1 Done a33da272 / 44237c99; #114 IBL-B2 sole-active in-progress; B3–B6 pending; B7 Blocked); Wave C–E Not Started / Blocked. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a (stay CONDITIONAL). Plan: docs/plan/intl-bank-letter-readiness-program.md. MAIN register merge 9fc2bc97.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active = #114 IBL-B2 (Wave IBL-B In Progress; B1 Done; Wave IBL-A remains Done). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim IBL program Done.",
         "testStrategy": "N/A — umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-19T03:00:00.000Z"
+        "updatedAt": "2026-07-19T03:05:00.000Z"
       },
       {
         "id": "107",
@@ -1537,7 +1537,7 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T00:34:00.000Z"
+        "updatedAt": "2026-07-19T00:34:00Z"
       },
       {
         "id": "112",
@@ -1549,13 +1549,13 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T02:00:00.000Z"
+        "updatedAt": "2026-07-19T02:00:00Z"
       },
       {
         "id": "113",
         "title": "IBL-B1: Apply direct-format paragraph spacing/indents",
-        "description": "DONE 2026-07-19. IBL-B1 direct-format paragraph spacing/indents (F9 closed). MAIN merge a33da272 (includes feature tip 44237c99; prior main d14a1507); worktree REMOVED. Slice ibl-b1-direct-format-spacing. BDD ready: docs/behavior/ibl-b1-direct-format-spacing.md (BDD-IBL-B1-001–011); Apply path via POI (child inline Critical fix in 44237c99). Batch solo closed. Wave IBL-B stays In Progress (B1 Done; B2–B6 Not Started; B7 Blocked). Wave IBL-A remains Done. Sole-active cleared. #106 registry-only pending. Next queue #114 IBL-B2 (not activated). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim IBL program Done. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "COMPLETED 2026-07-19. Owner: rendering-engineer. Delivered: whitelist↔writer gap closed — lineSpacing/spacingBefore/spacingAfter/indents applied in DOCX (POI); no silent ignore; child inline paragraph DF spacing fix (B1-C3) in 44237c99. Gates: mvn verify GREEN (2092+ tests) on feature before merge; architecture PASS_WITH_NOTES merge_go=true after Critical fix; Stage 10 ForceRebuild @ 44237c99 healthz UP (worktree evidence path docs/plan/evidence/ibl-b1-stage10-deploy not retained on MAIN after merge — facts restated in ledger; no Word baselines invented); E2E/UIUX N/A (frontend_ui_in_scope=false). Wave IBL-B stays In Progress (B1 Done; B2+ pending; B7 Blocked). #107–#112 remain done. #106 remains registry-only pending. Next #114 not activated. Do NOT flip #3b/#5a GO. Do NOT claim go-live. Do NOT mark Wave B / IBL program Done.",
+        "description": "DONE 2026-07-19. IBL-B1 direct-format paragraph spacing/indents (F9 closed). MAIN merge a33da272 (includes feature tip 44237c99; prior main d14a1507); worktree REMOVED. Slice ibl-b1-direct-format-spacing. BDD ready: docs/behavior/ibl-b1-direct-format-spacing.md (BDD-IBL-B1-001–011); Apply path via POI (child inline Critical fix in 44237c99). Batch solo closed. Wave IBL-B stays In Progress (B1 Done; B2 In Progress as #114 sole-active; B3–B6 Not Started; B7 Blocked). Wave IBL-A remains Done. #106 registry-only pending. Superseded queue: #114 IBL-B2 now sole-active (2026-07-19). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim IBL program Done. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "COMPLETED 2026-07-19. Owner: rendering-engineer. Delivered: whitelist↔writer gap closed — lineSpacing/spacingBefore/spacingAfter/indents applied in DOCX (POI); no silent ignore; child inline paragraph DF spacing fix (B1-C3) in 44237c99. Gates: mvn verify GREEN (2092+ tests) on feature before merge; architecture PASS_WITH_NOTES merge_go=true after Critical fix; Stage 10 ForceRebuild @ 44237c99 healthz UP (worktree evidence path docs/plan/evidence/ibl-b1-stage10-deploy not retained on MAIN after merge — facts restated in ledger; no Word baselines invented); E2E/UIUX N/A (frontend_ui_in_scope=false). Wave IBL-B stays In Progress (B1 Done; #114 IBL-B2 activated sole-active 2026-07-19). #107–#112 remain done. #106 remains registry-only pending. Do NOT flip #3b/#5a GO. Do NOT claim go-live. Do NOT mark Wave B / IBL program Done.",
         "testStrategy": "BDD-IBL-B1-001–011 + POI assertions for spacing/indents (pt→twips; lineSpacing multiple); illegal values fail-closed; child inline paragraph DF spacing regression; mvn verify GREEN (2092+).",
         "priority": "high",
         "dependencies": [
@@ -1563,21 +1563,21 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T03:00:00.000Z"
+        "updatedAt": "2026-07-19T03:05:00.000Z"
       },
       {
         "id": "114",
         "title": "IBL-B2: PDF conversion capacity plan (close DEF-LRP-D6-001)",
-        "description": "PENDING (not activated). Plan ID IBL-B2. Owner: rendering-engineer + backend-engineer + build-deploy-agent. BDD: required. Depends: 鈥?(soft: after Wave A). Maps F11; DEF-LRP-D6-001. Wave B 鈥?pending; activate after Wave A (recommended serial). Do NOT activate while PRR queue ahead. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-B2. Owner specialist: rendering-engineer + backend-engineer + build-deploy-agent. BDD: required. Depends: 鈥?(soft: after Wave A). Acceptance: Capacity plan (pool/queue/async); sync path no longer LR-D6-class 8/10 failures under agreed smoke; metrics; DEF-LRP-D6-001 closed or superseded with evidence. Gates: backend verify + queued Docker deploy smoke as required. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "description": "IN PROGRESS 2026-07-19 (sole-active). IBL-B2 PDF conversion capacity plan (F11; close/supersede DEF-LRP-D6-001). Slice ibl-b2-pdf-conversion-capacity. Placement ISOLATED: D:/working/DGE-ibl-b2-pdf-conversion-capacity · feat/ibl-b2-pdf-conversion-capacity. Batch solo (member_task_ids:[\"114\"]; vetoes B3 veraPDF / B4 long-clause / B7 Word). Owners: rendering-engineer + backend-engineer + build-deploy-agent. BDD: required — blocked until stage 1 (not ready). Wave IBL-B stays In Progress (B1 Done; B2 In Progress; B3–B6 Not Started; B7 Blocked). Wave IBL-A remains Done. #113 remains done. #106 registry-only pending. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim Wave B / IBL program Done. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "ACTIVATED 2026-07-19 stage 2 plan-orchestrator. Sole-active NON-CE delivery leaf. Acceptance (not Done yet): Capacity plan (pool/queue/async); sync path no longer LR-D6-class 8/10 failures under agreed smoke; metrics for queue/reject; DEF-LRP-D6-001 closed or superseded with evidence. Gates: backend verify + queued Docker deploy smoke. BDD readiness blocked until stage 1 behavior-spec-author. frontend_ui_in_scope=false expected (E2E/UIUX N/A unless stage 1 says otherwise). Do NOT activate B3/B4/B7. Do NOT flip #3b/#5a GO. Do NOT claim go-live. Formal phase None.",
         "testStrategy": "BDD for capacity behavior; load smoke evidence; DEF-LRP-D6-001 triage closed/superseded; mvn verify + docker-deploy-queue as required.",
         "priority": "high",
         "dependencies": [
           "106"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00Z"
+        "updatedAt": "2026-07-19T03:05:00.000Z"
       },
       {
         "id": "115",

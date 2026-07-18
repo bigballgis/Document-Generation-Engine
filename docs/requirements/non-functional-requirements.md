@@ -122,9 +122,9 @@ remain `draft: true` until confirmation here.
 
 | 属性 | 环境变量 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `conversion-pool-size` | `PDF_CONVERSION_POOL_SIZE` | `2` | PDF 转换 bounded pool 大小（core=max） |
+| `conversion-pool-size` | `PDF_CONVERSION_POOL_SIZE` | `4` | PDF 转换 bounded pool 大小（core=max）；**IBL-B2** 修订（原 D01A/F4 默认 `2`） |
 | `conversion-timeout-seconds` | `PDF_CONVERSION_TIMEOUT_SECONDS` | `120` | 单次转换超时（秒） |
-| `conversion-queue-capacity` | `PDF_CONVERSION_QUEUE_CAPACITY` | `0` | 队列容量；`0` = fail-fast（SOR-P03） |
+| `conversion-queue-capacity` | `PDF_CONVERSION_QUEUE_CAPACITY` | `8` | 有界队列；饱和仍 AbortPolicy fail-closed（SOR-P03）；**IBL-B2** 修订（原默认 `0` fail-fast）。运维可设回 `0`。**不是** confirmed 并发 SLO — 见 [pdf-conversion-capacity-plan.md](../operations/pdf-conversion-capacity-plan.md) |
 | `pagination-delta-budget-pages` | `PAGINATION_DELTA_BUDGET_PAGES` | `1` | 分页 delta 提案预算（页）；**pending ADR-0042** |
 
 ### 分页语料表（P23 demo masters — LR-A7 测量基线）
