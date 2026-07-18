@@ -40,4 +40,6 @@
 | Pre-cleanup (`knip-report.txt`) | **31** | **51** |
 | Post-cleanup (`knip-after-cleanup.txt`) | **0** | **51** (deferred) |
 
-**FE commit:** on `feat/prod-audit-p2-hygiene` — message `refactor(frontend): merge template components folder and trim knip exports (#137)`
+**FE commit:** `09cf85ce` — `refactor(frontend): merge template components folder and trim knip exports (#137)`  
+**BE commit:** `49b4d9e1` — `fix(template): remove unused listAll catalog helpers`  
+**MAIN merge:** `baaf16cc` — Task Master **#137** **Done** (stage 12 doc-sync; sole-active cleared)

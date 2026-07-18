@@ -6,8 +6,8 @@
 | **bdd_readiness** | **`not-applicable`** |
 | **Recorded** | 2026-07-18 |
 | **Formal phase** | **None** (do **not** activate IBL) |
-| **Task Master** | **#137** **in-progress** (sole-active; activated 2026-07-18 stage 2 plan-orchestrator — **not Done yet**) |
-| **Placement** | ISOLATED `D:/working/DGE-prod-audit-p2-hygiene` · `feat/prod-audit-p2-hygiene` (stage 0) |
+| **Task Master** | **#137** **Done** (MAIN merge `baaf16cc` / feature tip `09cf85ce`; stage 12 doc-sync 2026-07-18) |
+| **Placement** | Was ISOLATED `D:/working/DGE-prod-audit-p2-hygiene` · `feat/prod-audit-p2-hygiene` (**removed** after merge) |
 | **Analogous** | [slim-knip-scan](./slim-knip-scan.md) · [cursor-scaffold-hygiene](./cursor-scaffold-hygiene.md) |
 
 ---
@@ -34,10 +34,11 @@ This slice is **engineering hygiene only** — dead-code removal, import-path co
 | Merge `components/template` → `components/templates` | Single folder; rewrite `@/components/template/...` imports | No — path hygiene |
 | Knip unused exports | High-confidence cleanup only (no mass-delete of ambiguous exports/types) | No — tooling hygiene |
 
-### Readiness-time call-site facts (MAIN, 2026-07-18)
+### Delivered facts (MAIN, 2026-07-18)
 
-- Backend `.listAll(` production usage: only `TemplateService.listAll` → `catalogSupport.listAll` — **no** `@RestController` / other service callers.
-- Frontend still has a singular `components/template/` tree (batch/preview progress panels) alongside plural `components/templates/` — merge target is the plural tree.
+- Backend dead `TemplateService.listAll` / `TemplateCatalogSupport.listAll` **removed** (`49b4d9e1`).
+- Frontend singular `components/template/` **merged** into `components/templates/` with import rewrites (`09cf85ce`).
+- Knip unused **exports** **31→0** (exported types deferred; see [evidence](../evidence/prod-audit-p2-hygiene/README.md)).
 
 ---
 
@@ -75,11 +76,11 @@ This slice is **engineering hygiene only** — dead-code removal, import-path co
 | --- | --- |
 | This doc | Owning BDD readiness record (`not-applicable`) |
 | [slim-knip-scan.md](./slim-knip-scan.md) | Prior Knip tooling / Wave-1 orphan delete pattern |
-| Task Master **#137** | Sole-active leaf (`in-progress`; plan-orchestrator stage 2) |
+| Task Master **#137** | **Done** (merge `baaf16cc` / tip `09cf85ce`; sole-active cleared) |
 | Launch checklist | Unchanged — this slice is not a go-live closer |
 
 ```
 bdd_readiness: not-applicable
-task_ids: [137]  # prod-audit-p2-hygiene in-progress sole-active; do not activate IBL
+task_ids: [137]  # prod-audit-p2-hygiene Done; sole-active cleared; next IBL #107 not activated
 owning_doc: docs/behavior/prod-audit-p2-hygiene.md
 ```
