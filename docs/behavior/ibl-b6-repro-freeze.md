@@ -41,7 +41,7 @@ Analogous readiness: [ibl-b3-verapdf-pdfa-gate.md](./ibl-b3-verapdf-pdfa-gate.md
 | **Index** | Reachable from `docs/README.md` (+ ops/ADR as chosen by doc-keeper) |
 | **Gates** | Docs review (architecture-reviewer as needed) — no product UI journey |
 
-### Authored freeze (2026-07-19 — #118 still In Progress)
+### Authored freeze (2026-07-19 — #118 **Done**)
 
 | Artifact | Status |
 | --- | --- |
@@ -49,7 +49,7 @@ Analogous readiness: [ibl-b3-verapdf-pdfa-gate.md](./ibl-b3-verapdf-pdfa-gate.md
 | [legal-reproducibility-freeze.md](../operations/legal-reproducibility-freeze.md) | Ops runbook |
 | Indexes | `docs/README.md`, ADR index, golden-corpus README, domain-model cross-link |
 
-Leaf **#118** remains **in-progress** until architecture docs gate + pipeline closeout.
+Leaf **#118** → **Done** (MAIN merge `8722f4f1` / `8e8c62e6`; arch **PASS_WITH_NOTES** `merge_go=true`; docs-only; deploy/FE/E2E N/A). Wave **IBL-B** stays **In Progress** (B1–B6 Done; B7 Blocked). Sole-active cleared. Next queue (not activated): **#120** IBL-C1.
 
 ---
 
