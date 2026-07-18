@@ -7,20 +7,21 @@
 | **Slice (opened)** | `lrp-d6-load-smoke` / Task Master #37 / LR-D6 |
 | **Observed** | 2026-07-11T17:43:35Z harness run (`latest-summary.json`); reconfirmed 2026-07-12 with 10× parallel PDF probes |
 | **Evidence (historical)** | Scenario A: n=20 success=12 errorRate=0.4; **8× PDF** HTTP 422 `TEMPLATE_VALIDATION_FAILED`; **DOCX all succeeded**; poolRejections=0 |
-| **Status** | **SUPERSEDED** (2026-07-19) — see disposition below |
-| **Superseding slice** | IBL-B2 / Task Master **#114** (`ibl-b2-pdf-conversion-capacity`) |
+| **Status** | **CLOSED** (2026-07-19) — see disposition below |
+| **Closing slice** | IBL-B2 / Task Master **#114** (`ibl-b2-pdf-conversion-capacity`) |
+| **Closing evidence** | [ibl-b2-pdf-capacity/latest-summary.json](../ibl-b2-pdf-capacity/latest-summary.json) |
 
 ---
 
-## Disposition (IBL-B2 / 2026-07-19)
+## Disposition (IBL-B2 / 2026-07-19) — CLOSED
 
 | Concern | Closure |
 | --- | --- |
 | **Mislabelled taxonomy** (CB/timeout → `TEMPLATE_VALIDATION_FAILED`) | **Closed** by PRR-D01A / #104 — map to `GENERATION_SERVICE_UNAVAILABLE` / `GENERATION_TIMEOUT`; pool saturation → `PDF_CONVERSION_CAPACITY_EXCEEDED` ([prod-ops-resilience-pdf-pool.md](../../../behavior/prod-ops-resilience-pdf-pool.md)) |
-| **Sync capacity under LR-D6-class concurrency** (default pool=2 / queue=0 fail-fast surface) | **Remediated in code** by IBL-B2 — product defaults **pool=4 / queue=8** (bounded absorb, still AbortPolicy); capacity plan [pdf-conversion-capacity-plan.md](../../../operations/pdf-conversion-capacity-plan.md); unit absorb/reject tests GREEN |
-| **Agreed smoke confirmation** (PDF failures &lt; 8; no Abort storm) | **Residual** → Stage 5/10 queued Docker smoke + evidence under [ibl-b2-pdf-capacity/](../ibl-b2-pdf-capacity/). Until that smoke lands, do **not** claim DEF **CLOSED**; status remains **SUPERSEDED** with residual owned by #114 deploy gate (chaos/failover depth → IBL-D4) |
+| **Sync capacity under LR-D6-class concurrency** (default pool=2 / queue=0 fail-fast surface) | **Closed** by IBL-B2 — product defaults **pool=4 / queue=8** (bounded absorb, AbortPolicy); capacity plan [pdf-conversion-capacity-plan.md](../../../operations/pdf-conversion-capacity-plan.md) |
+| **Agreed smoke confirmation** (PDF failures &lt; 8; no Abort storm) | **Closed** — Stage 5/10 queued Docker smoke on tip `36a9821c`: Scenario A n=20 success=**20** errors=**0**; PDF failures **0** (&lt; 8); `poolRejectionCount`=**0**; no `TEMPLATE_VALIDATION_FAILED` samples. Evidence: [ibl-b2-pdf-capacity/](../ibl-b2-pdf-capacity/) |
 
-**Not go-live.** Do **not** flip checklist **#3b** / **#5a**. Do **not** invent confirmed NFR SLOs.
+**Not go-live.** Do **not** flip checklist **#3b** / **#5a**. Do **not** invent confirmed NFR SLOs. Chaos/failover depth (if needed) remains IBL-D4 — **not** a residual of this DEF.
 
 ---
 
@@ -46,15 +47,25 @@ Separately, fail-fast pool defaults (2/0) left little sync absorption headroom f
 
 ---
 
-## Classification (historical)
+## Closing facts (IBL-B2 smoke, 2026-07-18T19:37:40Z)
+
+1. **Scenario A:** n=20 alternating DOCX/PDF; success=20; errorCount=0; poolRejectionCount=0.
+2. **PDF failure count:** **0** (hard bar was &lt; 8).
+3. **DOCX:** all succeeded (no regression).
+4. **Taxonomy:** no `TEMPLATE_VALIDATION_FAILED` / capacity-mask samples in this run.
+5. **Latency observed (not SLO):** p95≈41205 ms / p99≈41209 ms under concurrent mix — recorded only; not confirmed NFR.
+
+---
+
+## Classification (historical → closed)
 
 | Hypothesis | Verdict |
 | --- | --- |
 | LR-A1 profile isolation regression | **Unlikely** — DOCX sync and management preview paths work; failure is PDF concurrency + resilience mapping |
-| LR-B3 SSE hardening regression | **No** — Scenario B zero drops |
+| LR-B3 SSE hardening regression | **No** — Scenario B zero drops (historical) |
 | FOL variables / UTF-8 BOM / template seed schema | **Unlikely primary** — DOCX uses the same variables body; single PDF succeeds |
 | Concurrent PDF conversion + Resilience4j CB/timeout → mislabeled `TEMPLATE_VALIDATION_FAILED` | **Primary (taxonomy)** — closed by D01A |
-| Sync pool/queue too small for agreed smoke | **Primary (capacity)** — remediated by IBL-B2 defaults 4/8; smoke residual pending |
+| Sync pool/queue too small for agreed smoke | **Primary (capacity)** — closed by IBL-B2 defaults 4/8 + smoke evidence |
 
 ---
 
