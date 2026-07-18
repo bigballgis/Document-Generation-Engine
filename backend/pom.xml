@@ -36,7 +36,12 @@
         <shedlock.version>7.7.0</shedlock.version>
         <resilience4j.version>2.4.0</resilience4j.version>
         <pdfbox.version>3.0.8</pdfbox.version>
+        <!-- IBL-B3 / F12: veraPDF Greenfield (Jakarta) — Maven Central verified 2026-07-19. -->
+        <verapdf.version>1.30.2</verapdf.version>
         <bouncycastle.version>1.85</bouncycastle.version>
+        <!-- veraPDF gate: required by default on verify; local may set skip + required=false. -->
+        <docgen.verapdf.required>true</docgen.verapdf.required>
+        <docgen.verapdf.skip>false</docgen.verapdf.skip>
         <zxing.version>3.5.3</zxing.version>
         <archunit.version>1.4.2</archunit.version>
         <!-- Quality gates (OPT-B). gate.fail toggles ratchet measure vs enforce. -->
@@ -184,6 +189,13 @@
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
             <version>${pdfbox.version}</version>
+        </dependency>
+        <!-- IBL-B3: PDF/A-2b machine validation in test/verify (not runtime classpath). -->
+        <dependency>
+            <groupId>org.verapdf</groupId>
+            <artifactId>validation-model-jakarta</artifactId>
+            <version>${verapdf.version}</version>
+            <scope>test</scope>
         </dependency>
         <!-- CE-K06b: QR / barcode PNG generation for qrBarcodeRef writer -->
         <dependency>
@@ -441,6 +453,11 @@
                     <reuseForks>true</reuseForks>
                     <forkCount>${surefire.forkCount}</forkCount>
                     <argLine>${surefire.argLine} ${argLine}</argLine>
+                    <systemPropertyVariables>
+                        <!-- IBL-B3: veraPDF PDF/A gate — CI must keep required=true and skip=false -->
+                        <docgen.verapdf.required>${docgen.verapdf.required}</docgen.verapdf.required>
+                        <docgen.verapdf.skip>${docgen.verapdf.skip}</docgen.verapdf.skip>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
@@ -475,6 +492,22 @@
     </build>
 
     <profiles>
+        <!--
+          IBL-B3 / F12: veraPDF PDF/A-2b machine gate (active by default on plain mvn verify).
+          Local optional skip (never CI):
+            mvn -Pdev-fast test -Ddocgen.verapdf.skip=true -Ddocgen.verapdf.required=false
+          Dedicated lane (explicit): mvn -B -ntp -f backend/pom.xml -Pverapdf-pdfa verify
+        -->
+        <profile>
+            <id>verapdf-pdfa</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <docgen.verapdf.required>true</docgen.verapdf.required>
+                <docgen.verapdf.skip>false</docgen.verapdf.skip>
+            </properties>
+        </profile>
         <profile>
             <id>dev-fast</id>
             <properties>

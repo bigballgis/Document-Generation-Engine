@@ -11,7 +11,13 @@ Regression fixtures for DOCX keypath + PDF text assertions (no pixel/visual comp
 | `chinese-uppercase-amount` | ACTIVE | CE-K03 |
 | `specimen-watermark` | ACTIVE | CE-G02 |
 | `encrypted-pdf` | ACTIVE | CE-K07 sample |
-| `pdfa-2b` | ACTIVE | CE-O01 (lightweight pdfaid XMP) |
+| `pdfa-2b` | ACTIVE | CE-O01 (lightweight pdfaid XMP on SYNTHETIC PDF) |
 | `long-clause-limits` | PLACEHOLDER | follow-on |
 
 Harness: `com.bank.docgen.rendering.goldencorpus` (executed by `mvn verify`).
+
+**IBL-B3 / F12:** Machine PDF/A-2b validation is **veraPDF** via
+`VeraPdfPdfA2bAssertor` + fixtures under `src/test/resources/pdfa-fixtures/` (not XMP-only).
+See [verapdf-pdfa-verify-gate.md](../../../../../docs/operations/verapdf-pdfa-verify-gate.md)
+and [ADR-0059](../../../../../docs/adr/rendering-authoring/0059-verapdf-pdfa-verify-gate.md).
+Optional JSON flag `requireVeraPdf` on real (non-SYNTHETIC) PDF packages.
