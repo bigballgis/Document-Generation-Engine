@@ -91,9 +91,12 @@ final class StructuredContentDocxExpandSupport {
             }
             listSupport.applyListFormatting(current, ordered);
             if ("paragraph".equals(item.path("type").asText(""))) {
-                inlineSupport.writeInlineChildren(item, current);
+                JsonNode itemDirectFormat = item.get("directFormat");
+                styles.applyParagraphDirectFormat(current, itemDirectFormat);
+                inlineSupport.writeInlineChildren(item, current, itemDirectFormat);
             } else {
-                inlineSupport.writeInlineNode(item, current, false, false, false);
+                styles.applyParagraphDirectFormat(current, item.get("directFormat"));
+                inlineSupport.writeInlineNode(item, current, false, false, false, item.get("directFormat"));
             }
             current = null;
         }
@@ -112,12 +115,13 @@ final class StructuredContentDocxExpandSupport {
     }
 
     void writeSectionHeading(JsonNode node, XWPFParagraph paragraph) {
+        JsonNode directFormat = node.get("directFormat");
         String prefix = StructuredContentDocxCursorSupport.resolveNumberingPrefix(
                 node, numberingCounters, MAX_NUMBERING_LEVELS);
         if (!prefix.isBlank()) {
-            styles.writeRunText(paragraph, prefix + " ", true, false, false);
+            styles.writeRunText(paragraph, prefix + " ", true, false, false, directFormat);
         }
-        inlineSupport.writeInlineChildren(node, paragraph);
+        inlineSupport.writeInlineChildren(node, paragraph, directFormat);
     }
 
     void writeInlineOrBlockChildren(JsonNode node, XWPFParagraph paragraph) {

@@ -34,15 +34,44 @@ final class StructuredContentDocxInlineSupport {
             boolean italic,
             boolean underline
     ) {
+        writeInlineNode(node, paragraph, bold, italic, underline, null);
+    }
+
+    void writeInlineNode(
+            JsonNode node,
+            XWPFParagraph paragraph,
+            boolean bold,
+            boolean italic,
+            boolean underline,
+            JsonNode paragraphDirectFormat
+    ) {
         String type = node.path("type").asText("");
+        JsonNode runDirectFormat = StructuredContentDocxStyleSupport.resolveRunDirectFormat(
+                node.get("directFormat"),
+                paragraphDirectFormat
+        );
         if ("text".equals(type) || "textRun".equals(type)) {
-            styles.writeRunText(paragraph, node.path("value").asText(""), bold, italic, underline);
+            styles.writeRunText(
+                    paragraph,
+                    node.path("value").asText(""),
+                    bold,
+                    italic,
+                    underline,
+                    runDirectFormat
+            );
             return;
         }
         if ("variable".equals(type)) {
             String key = node.path("key").asText("");
             Object value = variables.get(key);
-            styles.writeRunText(paragraph, value == null ? "" : String.valueOf(value), bold, italic, underline);
+            styles.writeRunText(
+                    paragraph,
+                    value == null ? "" : String.valueOf(value),
+                    bold,
+                    italic,
+                    underline,
+                    runDirectFormat
+            );
             return;
         }
         if ("lineBreak".equals(type)) {
@@ -53,11 +82,18 @@ final class StructuredContentDocxInlineSupport {
         }
         if ("emphasis".equals(type)) {
             StructuredContentDocxStyleSupport.EmphasisStyle emphasisStyle = styles.resolveEmphasis(node);
-            writeInlineChildrenWithStyle(node, paragraph, emphasisStyle.bold(), emphasisStyle.italic(), underline);
+            writeInlineChildrenWithStyle(
+                    node,
+                    paragraph,
+                    emphasisStyle.bold(),
+                    emphasisStyle.italic(),
+                    underline,
+                    paragraphDirectFormat
+            );
             return;
         }
         if ("underline".equals(type)) {
-            writeInlineChildrenWithStyle(node, paragraph, bold, italic, true);
+            writeInlineChildrenWithStyle(node, paragraph, bold, italic, true, paragraphDirectFormat);
             return;
         }
         if ("styleRef".equals(type)) {
@@ -79,12 +115,16 @@ final class StructuredContentDocxInlineSupport {
     }
 
     void writeInlineChildren(JsonNode node, XWPFParagraph paragraph) {
+        writeInlineChildren(node, paragraph, node.get("directFormat"));
+    }
+
+    void writeInlineChildren(JsonNode node, XWPFParagraph paragraph, JsonNode paragraphDirectFormat) {
         JsonNode children = node.path("children");
         if (!children.isArray()) {
             return;
         }
         for (JsonNode child : children) {
-            writeInlineNode(child, paragraph, false, false, false);
+            writeInlineNode(child, paragraph, false, false, false, paragraphDirectFormat);
         }
     }
 
@@ -95,12 +135,23 @@ final class StructuredContentDocxInlineSupport {
             boolean italic,
             boolean underline
     ) {
+        writeInlineChildrenWithStyle(node, paragraph, bold, italic, underline, null);
+    }
+
+    void writeInlineChildrenWithStyle(
+            JsonNode node,
+            XWPFParagraph paragraph,
+            boolean bold,
+            boolean italic,
+            boolean underline,
+            JsonNode paragraphDirectFormat
+    ) {
         JsonNode children = node.path("children");
         if (!children.isArray()) {
             return;
         }
         for (JsonNode child : children) {
-            writeInlineNode(child, paragraph, bold, italic, underline);
+            writeInlineNode(child, paragraph, bold, italic, underline, paragraphDirectFormat);
         }
     }
 

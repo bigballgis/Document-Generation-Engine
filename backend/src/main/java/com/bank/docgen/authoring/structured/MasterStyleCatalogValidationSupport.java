@@ -20,6 +20,14 @@ import org.springframework.core.io.ClassPathResource;
  */
 final class MasterStyleCatalogValidationSupport {
 
+    private static final Set<String> NON_NEGATIVE_NUMBER_KEYS = Set.of(
+            "spacingBefore",
+            "spacingAfter",
+            "firstLineIndent",
+            "leftIndent",
+            "rightIndent"
+    );
+
     private final ObjectMapper objectMapper;
 
     MasterStyleCatalogValidationSupport(ObjectMapper objectMapper) {
@@ -104,13 +112,21 @@ final class MasterStyleCatalogValidationSupport {
             String location,
             List<StructuredContentFidelityIssue> blockers
     ) {
-        if (directFormat == null || directFormat.isNull() || !directFormat.isObject()) {
+        if (directFormat == null || directFormat.isNull()) {
+            return;
+        }
+        if (!directFormat.isObject()) {
+            blockers.add(invalidValueIssue(
+                    location,
+                    "Direct format must be a JSON object at " + location + "."
+            ));
             return;
         }
         Iterator<Map.Entry<String, JsonNode>> fields = directFormat.fields();
         while (fields.hasNext()) {
             Map.Entry<String, JsonNode> field = fields.next();
             String fieldName = field.getKey();
+            JsonNode value = field.getValue();
             if (DirectFormatRules.GLOBAL_LAYOUT.contains(fieldName)) {
                 blockers.add(styleIssue(
                         FidelityWarningCode.DIRECT_FORMAT_GLOBAL_LAYOUT,
@@ -119,7 +135,9 @@ final class MasterStyleCatalogValidationSupport {
                         "Direct format field '" + sanitize(fieldName) + "' modifies global layout at " + location + ".",
                         "Remove global layout direct formatting; use master layout controls instead."
                 ));
-            } else if (!DirectFormatRules.WHITELIST.contains(fieldName)) {
+                continue;
+            }
+            if (!DirectFormatRules.WHITELIST.contains(fieldName)) {
                 blockers.add(styleIssue(
                         FidelityWarningCode.DIRECT_FORMAT_OUT_OF_WHITELIST,
                         MasterStyleCatalogService.MESSAGE_KEY_DIRECT_FORMAT_OUT_OF_WHITELIST,
@@ -128,8 +146,76 @@ final class MasterStyleCatalogValidationSupport {
                                 + "' is outside the v1 whitelist at " + location + ".",
                         "Use only whitelisted direct format fields (font, size, color, spacing, indents)."
                 ));
+                continue;
+            }
+            validateWhitelistValue(fieldName, value, location, blockers);
+        }
+    }
+
+    private void validateWhitelistValue(
+            String fieldName,
+            JsonNode value,
+            String location,
+            List<StructuredContentFidelityIssue> blockers
+    ) {
+        if (value == null || value.isNull()) {
+            return;
+        }
+        if (NON_NEGATIVE_NUMBER_KEYS.contains(fieldName)) {
+            if (!isFiniteNumber(value) || value.asDouble() < 0.0d) {
+                blockers.add(invalidValueIssue(
+                        location,
+                        "Direct format field '" + sanitize(fieldName)
+                                + "' must be a non-negative number (pt) at " + location + "."
+                ));
+            }
+            return;
+        }
+        if ("lineSpacing".equals(fieldName)) {
+            if (!isFiniteNumber(value) || value.asDouble() <= 0.0d) {
+                blockers.add(invalidValueIssue(
+                        location,
+                        "Direct format field 'lineSpacing' must be a positive number at " + location + "."
+                ));
+            }
+            return;
+        }
+        if ("fontSize".equals(fieldName)) {
+            if (!value.isIntegralNumber() || value.asInt() <= 0) {
+                blockers.add(invalidValueIssue(
+                        location,
+                        "Direct format field 'fontSize' must be a positive integer (pt) at " + location + "."
+                ));
+            }
+            return;
+        }
+        if ("fontFamily".equals(fieldName) || "textColor".equals(fieldName)) {
+            if (!value.isTextual() || value.asText("").trim().isEmpty()) {
+                blockers.add(invalidValueIssue(
+                        location,
+                        "Direct format field '" + sanitize(fieldName)
+                                + "' must be a non-empty string at " + location + "."
+                ));
             }
         }
+    }
+
+    private boolean isFiniteNumber(JsonNode value) {
+        if (value == null || !value.isNumber()) {
+            return false;
+        }
+        double number = value.asDouble();
+        return !Double.isNaN(number) && !Double.isInfinite(number);
+    }
+
+    private StructuredContentFidelityIssue invalidValueIssue(String location, String detectionSummary) {
+        return styleIssue(
+                FidelityWarningCode.DIRECT_FORMAT_INVALID_VALUE,
+                MasterStyleCatalogService.MESSAGE_KEY_DIRECT_FORMAT_INVALID_VALUE,
+                location,
+                detectionSummary,
+                "Correct or remove the invalid direct format value before republishing."
+        );
     }
 
     private StructuredContentFidelityIssue styleIssue(

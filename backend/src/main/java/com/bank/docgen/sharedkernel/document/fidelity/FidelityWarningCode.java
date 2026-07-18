@@ -17,6 +17,8 @@ public enum FidelityWarningCode {
     INAPPLICABLE_STYLE,
     DIRECT_FORMAT_OUT_OF_WHITELIST,
     DIRECT_FORMAT_GLOBAL_LAYOUT,
+    /** IBL-B1: whitelisted directFormat key present with illegal type/range. */
+    DIRECT_FORMAT_INVALID_VALUE,
     NESTED_TABLE,
     UNRELIABLE_TABLE_LAYOUT,
     INVALID_TABLE_COMPONENT,
