@@ -96,6 +96,11 @@ public final class ApiErrorCodes {
     public static final String EXCEPTION_SECONDARY_CONFIRM_REQUIRED = "EXCEPTION_SECONDARY_CONFIRM_REQUIRED";
     /** CE-K03: whitelist compute DSL evaluation failed (fail-closed). */
     public static final String VARIABLE_COMPUTE_FAILED = "VARIABLE_COMPUTE_FAILED";
+    /**
+     * IBL-A1: aggregated VariableSchema validation failure (required / type / enum / unknown field).
+     * HTTP 422; details in {@code fieldErrors[]}.
+     */
+    public static final String VARIABLE_VALIDATION_FAILED = "VARIABLE_VALIDATION_FAILED";
 
     /** CE-C04 / ADR-0009: credential past persisted expires_at. */
     public static final String API_CREDENTIAL_EXPIRED = "API_CREDENTIAL_EXPIRED";

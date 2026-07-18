@@ -210,6 +210,14 @@ public class RuntimeExceptionAdvice {
         );
     }
 
+    @ExceptionHandler(com.bank.docgen.sharedkernel.document.variable.VariableValidationException.class)
+    public ResponseEntity<ErrorEnvelope> handleVariableValidationFailed(
+            HttpServletRequest request,
+            com.bank.docgen.sharedkernel.document.variable.VariableValidationException ex
+    ) {
+        return errorEnvelopeFactory.variableValidationFailed(request, ex);
+    }
+
     @ExceptionHandler(com.bank.docgen.sharedkernel.document.compute.VariableComputeException.class)
     public ResponseEntity<ErrorEnvelope> handleVariableComputeFailed(
             HttpServletRequest request,

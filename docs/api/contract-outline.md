@@ -765,6 +765,7 @@ Batch generate document request draft
 - 正式 API 契约 Schema 采用 OpenAPI 3.1 YAML 维护；Markdown 文档负责解释、索引、决策背景和示例说明。
 - OpenAPI 契约应覆盖请求、响应、错误、批量明细、异步任务、下载地址、API 管理配置展示和枚举定义。
 - 发布版本锁定的模板变量 Schema 是 `variables` 的校验依据；模板变量 Schema 属于发布版本 API 契约的一部分。
+- **IBL-A1：** runtime generate / batch item 与管理 preview 装配在 compute/assemble **之前**对可录入变量执行 fail-closed required/type/enum（及未知 key）校验；失败 → **422** `VARIABLE_VALIDATION_FAILED` + 非空 `fieldErrors[]`，不得静默 blank 或产出成功 DOCX/PDF。详见 [ibl-a1-variable-validation.md](../behavior/ibl-a1-variable-validation.md)。
 - v1 请求采用严格字段校验，契约 Schema 之外的未知字段返回 `400 REQUEST_BODY_INVALID`，字段级原因使用 `UNKNOWN_FIELD`。
 - 模板标识和发布版本号只通过路径表达，请求体重复传入 `templateId` 或 `releaseVersion` 也按未知或不允许字段处理。
 - v1 兼容变更应优先采用向后兼容的新增可选字段、枚举扩展或说明增强；破坏性字段重命名、必填字段新增或语义变更需要新的 API 版本或单独兼容策略确认。
@@ -1417,7 +1418,10 @@ Async task query response structure
 | `VALIDATION` | `VARIABLE_TYPE_INVALID` | `api.error.validation.variableTypeInvalid` | `false` | Variable type is invalid. |
 | `VALIDATION` | `VARIABLE_FORMAT_INVALID` | `api.error.validation.variableFormatInvalid` | `false` | Variable format is invalid. |
 | `VALIDATION` | `VARIABLE_RULE_FAILED` | `api.error.validation.variableRuleFailed` | `false` | Variable does not satisfy a validation rule. |
+| `VALIDATION` | `VARIABLE_VALIDATION_FAILED` | `api.error.validation.variableValidationFailed` | `false` | One or more template variables failed VariableSchema validation (required / type / enum / unknown field). |
 | `TEMPLATE_CONTRACT` | `TEMPLATE_CONTRACT_INVALID` | `api.error.templateContract.templateContractInvalid` | `false` | Template contract is invalid. |
+
+**IBL-A1（2026-07-18；Task Master #107）：** runtime `generate` / `batch-generate`（逐 item）与管理 preview 装配路径对目标版本 `VariableSchema` 的 fail-closed 校验，权威顶层码为 **`VARIABLE_VALIDATION_FAILED`**（HTTP **422**，`category=VALIDATION`，`retryable=false`，非空 `fieldErrors[]`；`fieldErrors[].reason` ∈ `REQUIRED` \| `INVALID_TYPE` \| `INVALID_FORMAT` \| `ENUM_NOT_ALLOWED` \| `UNKNOWN_FIELD`）。既有 `VARIABLE_REQUIRED` / `VARIABLE_TYPE_INVALID` / `VARIABLE_FORMAT_INVALID` / `VARIABLE_RULE_FAILED` **保留在枚举中（兼容文档）**；本叶 runtime/preview **不以**它们作为多字段聚合响应的顶层码。`variables == null` 仍走既有 `VARIABLES_REQUIRED`。Publish **不**校验 generate body。CE-U03 测试集保存路径顶层码可不迁移。实现须同步 `ApiErrorCodes` + `messages_en.properties`。行为 SoT：[ibl-a1-variable-validation.md](../behavior/ibl-a1-variable-validation.md)（BDD-IBL-A1-001…008）。
 | `TEMPLATE_CONTRACT` | `TEMPLATE_ANCHOR_MISSING` | `api.error.templateContract.templateAnchorMissing` | `false` | Template anchor is missing. |
 | `CONFLICT` | `BINDING_VERSION_CONFLICT` | `api.error.template.bindingVersionConflict` | `true` | This binding was updated elsewhere. Reload the binding, then save again. |
 | `RENDERING` | `OOXML_VALIDATION_FAILED` | `api.error.rendering.ooxmlValidationFailed` | `false` | Generated document failed OOXML validation. |
@@ -1456,7 +1460,7 @@ Async task query response structure
 | 404 Not Found | `RELEASE_VERSION_NOT_FOUND`、`ASYNC_TASK_NOT_FOUND`、`DOCUMENT_NOT_FOUND`、`ORIGINAL_BATCH_NOT_FOUND`。 | 授权范围内请求的发布版本、任务、文档不存在，或批量重试血缘中的原批次在同凭证下不可见。 |
 | 409 Conflict | `RELEASE_VERSION_DISABLED`、`DEFAULT_ROUTE_NOT_CONFIGURED`、`DEFAULT_ROUTE_TARGET_UNAVAILABLE`、`TEMPLATE_DISABLED`、`TEMPLATE_DEPRECATED`、`IDEMPOTENCY_KEY_CONFLICT`、`IDEMPOTENCY_RETRY_NOT_ALLOWED`、`ASYNC_TASK_CANCELLATION_NOT_ALLOWED`、`BINDING_VERSION_CONFLICT`（CE-U21 锚点绑定乐观锁）。 | 请求与当前版本、模板、default 配置、幂等状态、异步任务或绑定并发令牌冲突。 |
 | 410 Gone | `DOWNLOAD_URL_EXPIRED`、`RESULT_RETENTION_EXPIRED`、`ASYNC_TASK_EXPIRED`。 | 资源曾可用，但下载地址、任务或结果已过期。 |
-| 422 Unprocessable Entity | `VARIABLE_REQUIRED`、`VARIABLE_TYPE_INVALID`、`VARIABLE_FORMAT_INVALID`、`VARIABLE_RULE_FAILED`、`OOXML_VALIDATION_FAILED`、`EXCEPTION_REASON_REQUIRED`、`EXCEPTION_SECONDARY_CONFIRM_REQUIRED`。 | 请求结构可解析，但模板变量、业务规则校验未通过，装配后 DOCX 未通过 OOXML 输出校验（fail-closed，不落库/不预览），或 CE-G01 例外干预字段缺失。 |
+| 422 Unprocessable Entity | `VARIABLE_VALIDATION_FAILED`（IBL-A1 runtime/preview VariableSchema 聚合校验）、`VARIABLE_REQUIRED`、`VARIABLE_TYPE_INVALID`、`VARIABLE_FORMAT_INVALID`、`VARIABLE_RULE_FAILED`、`OOXML_VALIDATION_FAILED`、`EXCEPTION_REASON_REQUIRED`、`EXCEPTION_SECONDARY_CONFIRM_REQUIRED`。 | 请求结构可解析，但模板变量、业务规则校验未通过，装配后 DOCX 未通过 OOXML 输出校验（fail-closed，不落库/不预览），或 CE-G01 例外干预字段缺失。 |
 | 500 Internal Server Error | `TEMPLATE_CONTRACT_INVALID`、`TEMPLATE_ANCHOR_MISSING`、`DOCX_GENERATION_FAILED`、`PDF_CONVERSION_FAILED`、`ENCRYPTION_FAILED`、`BATCH_PROCESSING_FAILED`。 | 平台处理、模板资产、生成、转换、加密或整批处理失败。 |
 | 503 Service Unavailable | `AD_GROUP_RESOLUTION_FAILED`、`IDEMPOTENCY_STORE_UNAVAILABLE`、`GENERATION_SERVICE_UNAVAILABLE`、`PDF_CONVERSION_CAPACITY_EXCEEDED`。 | 权限依赖、幂等存储、生成服务临时不可用，或 PDF 转换池饱和。 |
 | 504 Gateway Timeout | `GENERATION_TIMEOUT`。 | 文档生成超时。 |
@@ -1570,6 +1574,43 @@ HTTP/1.1 422 Unprocessable Entity
 		"auditId": "AUD-20250115-0002",
 		"traceId": "TRC-1be0a2",
 		"requestId": "REQ-20250115-0002",
+		"templateId": "TPL-LOAN-NOTICE",
+		"routeType": "EXPLICIT_VERSION",
+		"resolvedReleaseVersion": "1.0.0"
+	}
+}
+```
+
+### VariableSchema 校验失败示例（IBL-A1）
+
+确认基线：runtime generate / preview 装配路径对发布版本 `VariableSchema` 的 fail-closed 校验使用聚合顶层码 `VARIABLE_VALIDATION_FAILED`；多字段失败仍只有一个顶层 `error.code`，细节在 `fieldErrors[]`。
+
+```text
+HTTP/1.1 422 Unprocessable Entity
+{
+	"error": {
+		"code": "VARIABLE_VALIDATION_FAILED",
+		"category": "VALIDATION",
+		"message": "One or more template variables failed validation.",
+		"messageKey": "api.error.validation.variableValidationFailed",
+		"retryable": false,
+		"fieldErrors": [
+			{
+				"field": "variables.customerName",
+				"reason": "REQUIRED",
+				"message": "Required variable is missing."
+			},
+			{
+				"field": "variables.letterType",
+				"reason": "ENUM_NOT_ALLOWED",
+				"message": "Variable value is not in the allowed enumeration."
+			}
+		]
+	},
+	"metadata": {
+		"auditId": "AUD-20260718-0001",
+		"traceId": "TRC-ibl-a1",
+		"requestId": "REQ-20260718-0001",
 		"templateId": "TPL-LOAN-NOTICE",
 		"routeType": "EXPLICIT_VERSION",
 		"resolvedReleaseVersion": "1.0.0"
@@ -1924,16 +1965,16 @@ HTTP/1.1 200 OK
 						"permissions": ["ALLOW_PRINT"]
 					},
 					"error": {
-						"code": "VARIABLE_REQUIRED",
+						"code": "VARIABLE_VALIDATION_FAILED",
 						"category": "VALIDATION",
-						"message": "Required variable is missing.",
-						"messageKey": "api.error.validation.variableRequired",
+						"message": "One or more template variables failed validation.",
+						"messageKey": "api.error.validation.variableValidationFailed",
 						"retryable": false,
 						"fieldErrors": [
 							{
 								"field": "items[1].variables.customerName",
 								"reason": "REQUIRED",
-								"message": "Customer name is required."
+								"message": "Required variable is missing."
 							}
 						]
 					}

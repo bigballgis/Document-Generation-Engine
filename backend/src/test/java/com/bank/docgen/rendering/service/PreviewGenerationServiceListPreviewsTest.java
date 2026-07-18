@@ -98,6 +98,7 @@ class PreviewGenerationServiceListPreviewsTest {
                 fidelityValidationService,
                 fidelityWarningJsonSupport,
                 variableComputePort,
+                org.mockito.Mockito.mock(com.bank.docgen.template.port.VariableSchemaValidationPort.class),
                 new com.bank.docgen.rendering.PaginationDeltaFidelitySupport(
                         new com.bank.docgen.infrastructure.config.DocgenRenderingProperties(),
                         new com.bank.docgen.rendering.PdfPageCountReader()

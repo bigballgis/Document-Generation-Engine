@@ -15,6 +15,7 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.document.compute.VariableComputeException;
 import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.sharedkernel.document.variable.VariableValidationException;
 
 /**
  * Maps runtime sync-generate failures to the same unified error envelope fields returned
@@ -72,6 +73,15 @@ final class FailedSyncInvocationErrorMapper {
             return envelope(
                     ApiErrorCodes.ENCRYPTION_FAILED,
                     ApiErrorCategories.ENCRYPTION,
+                    ex.messageKey(),
+                    false,
+                    messageResolver
+            );
+        }
+        if (throwable instanceof VariableValidationException ex) {
+            return envelope(
+                    ApiErrorCodes.VARIABLE_VALIDATION_FAILED,
+                    ApiErrorCategories.VALIDATION,
                     ex.messageKey(),
                     false,
                     messageResolver

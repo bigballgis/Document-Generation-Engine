@@ -21,6 +21,7 @@ import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.port.VariableSchemaValidationPort;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.VariableComputeService;
@@ -55,6 +56,7 @@ final class DocumentGenerationAssemblySupport {
     private final RenderProfileService renderProfileService;
     private final VersionFidelityWarningService versionFidelityWarningService;
     private final VariableComputeService variableComputeService;
+    private final VariableSchemaValidationPort variableSchemaValidationPort;
     private final PaginationDeltaFidelitySupport paginationDeltaFidelitySupport;
 
     DocumentGenerationAssemblySupport(
@@ -69,6 +71,7 @@ final class DocumentGenerationAssemblySupport {
             RenderProfileService renderProfileService,
             VersionFidelityWarningService versionFidelityWarningService,
             VariableComputeService variableComputeService,
+            VariableSchemaValidationPort variableSchemaValidationPort,
             PaginationDeltaFidelitySupport paginationDeltaFidelitySupport
     ) {
         this.templateVersionRepository = templateVersionRepository;
@@ -82,6 +85,7 @@ final class DocumentGenerationAssemblySupport {
         this.renderProfileService = renderProfileService;
         this.versionFidelityWarningService = versionFidelityWarningService;
         this.variableComputeService = variableComputeService;
+        this.variableSchemaValidationPort = variableSchemaValidationPort;
         this.paginationDeltaFidelitySupport = paginationDeltaFidelitySupport;
     }
 
@@ -108,6 +112,8 @@ final class DocumentGenerationAssemblySupport {
         TemplateVersionEntity version = templateVersionRepository
                 .findByTemplateIdAndReleaseVersion(template.getId(), releaseVersion)
                 .orElseThrow(TemplateNotFoundException::new);
+        // IBL-A1: fail-closed VariableSchema validation before compute/assemble (no silent blank).
+        variableSchemaValidationPort.validateForAssembly(version.getId(), variables);
         // CE-K03: evaluate compute expressions before DOCX assembly (fail-closed).
         Map<String, Object> resolvedVariables = variableComputeService.applyCompute(
                 version.getId(),

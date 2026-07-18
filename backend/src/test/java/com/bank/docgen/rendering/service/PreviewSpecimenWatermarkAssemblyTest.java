@@ -77,6 +77,8 @@ class PreviewSpecimenWatermarkAssemblyTest {
     private FidelityValidationService fidelityValidationService;
     @Mock
     private VariableComputePort variableComputePort;
+    @Mock
+    private com.bank.docgen.template.port.VariableSchemaValidationPort variableSchemaValidationPort;
 
     private PreviewGenerationAssemblySupport assembly;
     private ArtifactSpoolService artifactSpoolService;
@@ -101,6 +103,7 @@ class PreviewSpecimenWatermarkAssemblyTest {
                 renderProfileService,
                 fidelityValidationService,
                 variableComputePort,
+                variableSchemaValidationPort,
                 new com.bank.docgen.rendering.PaginationDeltaFidelitySupport(
                         new DocgenRenderingProperties(),
                         new com.bank.docgen.rendering.PdfPageCountReader()

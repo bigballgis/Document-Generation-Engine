@@ -117,6 +117,15 @@ paths:
       tags: [Generation]
       operationId: generateDocumentByVersion
       summary: Generate a document by explicit release version
+      description: >-
+        IBL-A1: Before compute/assemble, `variables` are fail-closed validated
+        against the target release VariableSchema (required / type / enum;
+        unknown keys rejected). Failures return HTTP 422 with
+        `error.code=VARIABLE_VALIDATION_FAILED`, `category=VALIDATION`,
+        `retryable=false`, and non-empty `fieldErrors[]`
+        (`reason` ∈ REQUIRED | INVALID_TYPE | INVALID_FORMAT | ENUM_NOT_ALLOWED |
+        UNKNOWN_FIELD). No successful DOCX/PDF on failure.
+        Behavior: docs/behavior/ibl-a1-variable-validation.md.
       parameters:
         - $ref: '#/components/parameters/Environment'
         - $ref: '#/components/parameters/TemplateId'
@@ -195,6 +204,10 @@ paths:
       tags: [Generation]
       operationId: generateDocumentByDefaultRoute
       summary: Generate a document through the default route
+      description: >-
+        IBL-A1: Same fail-closed VariableSchema validation as explicit-version
+        generate. Failures → 422 `VARIABLE_VALIDATION_FAILED` + `fieldErrors[]`.
+        Behavior: docs/behavior/ibl-a1-variable-validation.md.
       parameters:
         - $ref: '#/components/parameters/Environment'
         - $ref: '#/components/parameters/TemplateId'
@@ -272,6 +285,12 @@ paths:
       tags: [Generation]
       operationId: batchGenerateByVersion
       summary: Batch generate documents by explicit release version
+      description: >-
+        IBL-A1: Each item's `variables` are fail-closed validated against the
+        target release VariableSchema before assemble. A failing item must not
+        be `SUCCEEDED` and must not write a successful artifact; item error
+        semantics use `VARIABLE_VALIDATION_FAILED` + field list (same shape as
+        sync generate). Behavior: docs/behavior/ibl-a1-variable-validation.md.
       parameters:
         - $ref: '#/components/parameters/Environment'
         - $ref: '#/components/parameters/TemplateId'
@@ -319,6 +338,11 @@ paths:
       tags: [Generation]
       operationId: batchGenerateByDefaultRoute
       summary: Batch generate documents through the default route
+      description: >-
+        IBL-A1: Same per-item fail-closed VariableSchema validation as
+        explicit-version batch-generate. Item failures →
+        `VARIABLE_VALIDATION_FAILED` + field list.
+        Behavior: docs/behavior/ibl-a1-variable-validation.md.
       parameters:
         - $ref: '#/components/parameters/Environment'
         - $ref: '#/components/parameters/TemplateId'
@@ -10875,6 +10899,7 @@ components:
         - VARIABLE_TYPE_INVALID
         - VARIABLE_FORMAT_INVALID
         - VARIABLE_RULE_FAILED
+        - VARIABLE_VALIDATION_FAILED
         - TEMPLATE_CONTRACT_INVALID
         - TEMPLATE_ANCHOR_MISSING
         - DOCX_GENERATION_FAILED
