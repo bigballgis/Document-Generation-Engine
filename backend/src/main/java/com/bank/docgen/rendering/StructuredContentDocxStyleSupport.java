@@ -2,9 +2,11 @@ package com.bank.docgen.rendering;
 
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import org.apache.poi.xwpf.usermodel.LineSpacingRule;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -14,8 +16,13 @@ import org.apache.poi.xwpf.usermodel.XWPFRun;
  *
  * <p>CE-K02: does not hard-code Calibri/10pt when the master catalog has docDefaults; system
  * baseline is applied only as fail-closed fallback and recorded as {@code MASTER_STYLE_FALLBACK}.
+ *
+ * <p>IBL-B1: whitelisted paragraph spacing/indents are applied on {@link XWPFParagraph}; run
+ * whitelist keys remain on {@link XWPFRun}.
  */
 final class StructuredContentDocxStyleSupport {
+
+    private static final double TWIPS_PER_POINT = 20.0;
 
     private final MasterStyleCatalog styleCatalog;
     private final List<String> fidelityWarningCodes = new ArrayList<>();
@@ -56,6 +63,53 @@ final class StructuredContentDocxStyleSupport {
         };
     }
 
+    /**
+     * Applies whitelisted paragraph spacing/indent keys from {@code directFormat} (pt → twips;
+     * {@code lineSpacing} as AUTO multiple). Absent keys are left unset so style/master inherit.
+     */
+    void applyParagraphDirectFormat(XWPFParagraph paragraph, JsonNode directFormat) {
+        if (paragraph == null || directFormat == null || !directFormat.isObject()) {
+            return;
+        }
+        if (directFormat.hasNonNull("spacingBefore")) {
+            paragraph.setSpacingBefore(pointsToTwips(directFormat.get("spacingBefore").asDouble()));
+        }
+        if (directFormat.hasNonNull("spacingAfter")) {
+            paragraph.setSpacingAfter(pointsToTwips(directFormat.get("spacingAfter").asDouble()));
+        }
+        if (directFormat.hasNonNull("lineSpacing")) {
+            paragraph.setSpacingBetween(directFormat.get("lineSpacing").asDouble(), LineSpacingRule.AUTO);
+        }
+        if (directFormat.hasNonNull("leftIndent")) {
+            paragraph.setIndentationLeft(pointsToTwips(directFormat.get("leftIndent").asDouble()));
+        }
+        if (directFormat.hasNonNull("rightIndent")) {
+            paragraph.setIndentationRight(pointsToTwips(directFormat.get("rightIndent").asDouble()));
+        }
+        if (directFormat.hasNonNull("firstLineIndent")) {
+            paragraph.setIndentationFirstLine(pointsToTwips(directFormat.get("firstLineIndent").asDouble()));
+        }
+    }
+
+    /**
+     * Merges child and enclosing-paragraph {@code directFormat} for run styling: child keys
+     * override paragraph keys. Only run whitelist keys ({@code fontFamily}/{@code fontSize}/
+     * {@code textColor}) are consumed by {@link #applyDirectFormatIfPresent}; paragraph
+     * spacing/indent keys in the merge are ignored here and must be applied separately via
+     * {@link #applyParagraphDirectFormat} on the enclosing {@link XWPFParagraph} (B1-C3).
+     */
+    static JsonNode resolveRunDirectFormat(JsonNode nodeDirectFormat, JsonNode paragraphDirectFormat) {
+        if (nodeDirectFormat != null && nodeDirectFormat.isObject()) {
+            if (paragraphDirectFormat == null || !paragraphDirectFormat.isObject()) {
+                return nodeDirectFormat;
+            }
+            ObjectNode merged = ((ObjectNode) paragraphDirectFormat).deepCopy();
+            nodeDirectFormat.fields().forEachRemaining(entry -> merged.set(entry.getKey(), entry.getValue()));
+            return merged;
+        }
+        return paragraphDirectFormat;
+    }
+
     void writeRunText(
             XWPFParagraph paragraph,
             String text,
@@ -63,18 +117,7 @@ final class StructuredContentDocxStyleSupport {
             boolean italic,
             boolean underline
     ) {
-        if (text == null || text.isEmpty()) {
-            return;
-        }
-        XWPFRun run = paragraph.createRun();
-        applyDefaultRunStyle(run);
-        applyDirectFormatIfPresent(run, null);
-        run.setBold(bold);
-        run.setItalic(italic);
-        if (underline) {
-            run.setUnderline(UnderlinePatterns.SINGLE);
-        }
-        run.setText(text);
+        writeRunText(paragraph, text, bold, italic, underline, null);
     }
 
     void writeRunText(
@@ -147,6 +190,10 @@ final class StructuredContentDocxStyleSupport {
                 run.setColor(color);
             }
         }
+    }
+
+    private static int pointsToTwips(double points) {
+        return (int) Math.round(points * TWIPS_PER_POINT);
     }
 
     private void emitMasterStyleFallbackOnce() {

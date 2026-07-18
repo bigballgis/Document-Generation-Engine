@@ -76,25 +76,37 @@ final class StructuredContentDocxBlockDispatchSupport {
         }
         if ("sectionHeading".equals(type)) {
             styles.applyParagraphStyle(paragraph, styles.resolveStyleRef(node, "Heading1"));
+            styles.applyParagraphDirectFormat(paragraph, node.get("directFormat"));
             writeSectionHeading.accept(node, paragraph);
             return;
         }
         if ("paragraph".equals(type)) {
+            JsonNode directFormat = node.get("directFormat");
             JsonNode legacyText = node.get("text");
             if (legacyText != null && legacyText.isTextual()) {
                 styles.applyParagraphStyle(paragraph, styles.resolveStyleRef(node, "BodyText"));
-                styles.writeRunText(paragraph, legacyText.asText(""), false, false, false);
+                styles.applyParagraphDirectFormat(paragraph, directFormat);
+                styles.writeRunText(paragraph, legacyText.asText(""), false, false, false, directFormat);
                 return;
             }
             styles.applyParagraphStyle(paragraph, styles.resolveStyleRef(node, "BodyText"));
-            inlineSupport.writeInlineChildren(node, paragraph);
+            styles.applyParagraphDirectFormat(paragraph, directFormat);
+            inlineSupport.writeInlineChildren(node, paragraph, directFormat);
             return;
         }
         if ("text".equals(type) || "textRun".equals(type)) {
             styles.applyParagraphStyle(paragraph, styles.resolveStyleRef(node, "BodyText"));
-            styles.writeRunText(paragraph, node.path("value").asText(""), false, false, false);
+            styles.applyParagraphDirectFormat(paragraph, node.get("directFormat"));
+            styles.writeRunText(
+                    paragraph,
+                    node.path("value").asText(""),
+                    false,
+                    false,
+                    false,
+                    node.get("directFormat")
+            );
             return;
         }
-        inlineSupport.writeInlineChildren(node, paragraph);
+        inlineSupport.writeInlineChildren(node, paragraph, node.get("directFormat"));
     }
 }

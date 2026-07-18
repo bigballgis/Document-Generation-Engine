@@ -38,6 +38,8 @@ public class MasterStyleCatalogService {
             "generation.warning.fidelity.directFormatOutOfWhitelist";
     public static final String MESSAGE_KEY_DIRECT_FORMAT_GLOBAL_LAYOUT =
             "generation.warning.fidelity.directFormatGlobalLayout";
+    public static final String MESSAGE_KEY_DIRECT_FORMAT_INVALID_VALUE =
+            "generation.warning.fidelity.directFormatInvalidValue";
     public static final String MESSAGE_KEY_MASTER_STYLE_FALLBACK =
             "generation.warning.fidelity.masterStyleFallback";
 

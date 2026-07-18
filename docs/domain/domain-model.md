@@ -373,7 +373,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **渲染继承链：** `styleRef` → 母版默认段落样式 → 母版 `docDefaults` → **仅当完全无 docDefaults** 时系统基线 Calibri/10pt/#000000 并产生 `MASTER_STYLE_FALLBACK` warning（与 `CONTROLLED_STYLE_FALLBACK` 并存、不合并）。结构化/明文锚点写入路径不得在母版已有 docDefaults 时硬编码 Calibri 覆盖。
 
-**有限直接格式白名单：** `fontFamily`、`fontSize`、`textColor`、`lineSpacing`、`spacingBefore`、`spacingAfter`、`firstLineIndent`、`leftIndent`、`rightIndent`。白名单外字段 → `DIRECT_FORMAT_OUT_OF_WHITELIST`；页边距/页眉页脚/纸张/分栏等全局版式字段 → `DIRECT_FORMAT_GLOBAL_LAYOUT`。
+**有限直接格式白名单：** `fontFamily`、`fontSize`、`textColor`、`lineSpacing`、`spacingBefore`、`spacingAfter`、`firstLineIndent`、`leftIndent`、`rightIndent`。白名单外字段 → `DIRECT_FORMAT_OUT_OF_WHITELIST`；页边距/页眉页脚/纸张/分栏等全局版式字段 → `DIRECT_FORMAT_GLOBAL_LAYOUT`。**渲染诚实性（IBL-B1 / F9）：** 白名单段落间距/缩进须经结构化 DOCX writer 实际写入（Apache POI）；禁止静默忽略。单位与验收见 [ibl-b1-direct-format-spacing.md](../behavior/ibl-b1-direct-format-spacing.md)。
 
 #### 2.6.4 结构化表格组件 Structured table component（P18-T04 + CE-K06a）
 

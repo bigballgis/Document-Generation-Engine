@@ -100,4 +100,97 @@ class MasterStyleCatalogServiceTest {
         assertThat(result.blockers().getFirst().messageKey())
                 .isEqualTo(MasterStyleCatalogService.MESSAGE_KEY_DIRECT_FORMAT_GLOBAL_LAYOUT);
     }
+
+    @Test
+    void directFormat_negativeSpacing_isBlocker() {
+        String json = """
+                {
+                  "nodes": [
+                    {
+                      "type": "paragraph",
+                      "directFormat": { "spacingBefore": -1 },
+                      "children": []
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result =
+                service.validate(json, service.loadForMaster(UUID.randomUUID()));
+
+        assertThat(result.blockers()).isNotEmpty();
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.DIRECT_FORMAT_INVALID_VALUE);
+        assertThat(result.blockers().getFirst().messageKey())
+                .isEqualTo(MasterStyleCatalogService.MESSAGE_KEY_DIRECT_FORMAT_INVALID_VALUE);
+    }
+
+    @Test
+    void directFormat_nonNumericSpacing_isBlocker() {
+        String json = """
+                {
+                  "nodes": [
+                    {
+                      "type": "paragraph",
+                      "directFormat": { "spacingAfter": "twelve" },
+                      "children": []
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result =
+                service.validate(json, service.loadForMaster(UUID.randomUUID()));
+
+        assertThat(result.blockers()).isNotEmpty();
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.DIRECT_FORMAT_INVALID_VALUE);
+    }
+
+    @Test
+    void directFormat_nonPositiveLineSpacing_isBlocker() {
+        String json = """
+                {
+                  "nodes": [
+                    {
+                      "type": "paragraph",
+                      "directFormat": { "lineSpacing": 0 },
+                      "children": []
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result =
+                service.validate(json, service.loadForMaster(UUID.randomUUID()));
+
+        assertThat(result.blockers()).isNotEmpty();
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.DIRECT_FORMAT_INVALID_VALUE);
+    }
+
+    @Test
+    void directFormat_validWhitelistSpacing_isAccepted() {
+        String json = """
+                {
+                  "nodes": [
+                    {
+                      "type": "paragraph",
+                      "styleRef": "BodyText",
+                      "directFormat": {
+                        "spacingBefore": 12,
+                        "spacingAfter": 6,
+                        "lineSpacing": 1.5,
+                        "leftIndent": 24,
+                        "firstLineIndent": 12,
+                        "rightIndent": 0
+                      },
+                      "children": [{ "type": "textRun", "value": "ok" }]
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result =
+                service.validate(json, service.loadForMaster(UUID.randomUUID()));
+
+        assertThat(result.blockers()).isEmpty();
+    }
 }

@@ -197,6 +197,12 @@ public class RuntimeFidelityWarningMapper {
                 "region=direct-format",
                 "Direct formatting attempted a global layout change.",
                 "Remove global layout direct formatting before republishing.");
+        put(catalog, "DIRECT_FORMAT_INVALID_VALUE",
+                "directFormatInvalidValue",
+                "Direct formatting contains an invalid value for a whitelisted field.",
+                "region=direct-format",
+                "A whitelisted direct format field had an illegal type or range.",
+                "Correct or remove the invalid direct format value before republishing.");
         put(catalog, "NESTED_TABLE",
                 "nestedTable",
                 "Nested tables are not supported in v1 table components.",
