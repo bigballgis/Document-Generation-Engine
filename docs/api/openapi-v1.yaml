@@ -2240,8 +2240,16 @@ paths:
         whitelist DSL syntax, length/nesting bounds, and that `${path}` roots
         exist in `knownVariableKeys`. Returns `valid`/`message` in the success
         envelope (does not throw for invalid expressions). Does not evaluate
-        sample data or produce a document. Traceability: BDD-CE-K03-024…025;
-        ADR-0056.
+        sample data or produce a document.
+
+        Whitelist `FORMAT_AMOUNT` forms (IBL-A2): `FORMAT_AMOUNT(value)` keeps
+        locale-default currency; optional `FORMAT_AMOUNT(value, currencyCode)`
+        takes an ISO 4217 alphabetic code (e.g. `EUR`) — not a locale tag.
+        Number/grouping localization still follows request `context.locale`
+        (default `zh-CN`). Blank/invalid currency on the binary form fails
+        evaluation as `VARIABLE_COMPUTE_FAILED` (see evaluate). Behavior SoT:
+        docs/behavior/ibl-a2-format-amount-currency.md (BDD-IBL-A2-001…010).
+        Traceability: BDD-CE-K03-024…025; ADR-0056; IBL-A2.
       parameters:
         - name: templateId
           in: path
@@ -2285,7 +2293,15 @@ paths:
         returns a non-sensitive result summary. Failures surface as
         `VARIABLE_COMPUTE_FAILED` (422) with `variableKey` + `expressionSummary`
         — never as a successful document. Does not assemble DOCX/PDF.
-        Traceability: BDD-CE-K03-026…027; ADR-0056.
+
+        Whitelist `FORMAT_AMOUNT` forms (IBL-A2): unary `FORMAT_AMOUNT(value)`
+        uses locale-default currency; binary `FORMAT_AMOUNT(value, currencyCode)`
+        uses ISO 4217 alphabetic currency while locale formatting still follows
+        optional `locale` / `context.locale`. Missing, blank, or invalid
+        `currencyCode` → `VARIABLE_COMPUTE_FAILED` (no silent locale-default
+        fallback). Second argument is never a locale tag. Behavior SoT:
+        docs/behavior/ibl-a2-format-amount-currency.md (BDD-IBL-A2-001…010).
+        Traceability: BDD-CE-K03-026…027; ADR-0056; IBL-A2.
       parameters:
         - name: templateId
           in: path
@@ -7778,6 +7794,8 @@ components:
       description: >-
         CE-K03 author-time compute expression validation payload
         (`POST …/compute-expressions/validate`).
+        IBL-A2: `FORMAT_AMOUNT(value)` or `FORMAT_AMOUNT(value, currencyCode)`
+        (ISO 4217); see docs/behavior/ibl-a2-format-amount-currency.md.
       properties:
         variableKey:
           type: string
@@ -7785,7 +7803,11 @@ components:
           maxLength: 128
         expression:
           type: string
-          description: Whitelist compute DSL expression to validate.
+          description: >-
+            Whitelist compute DSL expression to validate.
+            `FORMAT_AMOUNT(value)` (locale-default currency) or
+            `FORMAT_AMOUNT(value, currencyCode)` with ISO 4217 alphabetic code
+            (IBL-A2); second arg is not a locale tag.
           minLength: 1
           maxLength: 2048
         knownVariableKeys:
@@ -7823,6 +7845,9 @@ components:
       description: >-
         CE-K03 author-time sample evaluation payload
         (`POST …/compute-expressions/evaluate`).
+        IBL-A2: binary `FORMAT_AMOUNT` optional ISO 4217 currency; invalid/blank
+        currency → `VARIABLE_COMPUTE_FAILED`. Behavior:
+        docs/behavior/ibl-a2-format-amount-currency.md.
       properties:
         variableKey:
           type: string
@@ -7830,7 +7855,11 @@ components:
           maxLength: 128
         expression:
           type: string
-          description: Whitelist compute DSL expression to evaluate.
+          description: >-
+            Whitelist compute DSL expression to evaluate.
+            Examples: `FORMAT_AMOUNT(${principal})` (locale-default currency);
+            `FORMAT_AMOUNT(${principal}, 'EUR')` (ISO 4217 + locale formatting).
+            Invalid/blank currency on binary form → `VARIABLE_COMPUTE_FAILED`.
           minLength: 1
           maxLength: 2048
         sampleVariables:
@@ -7841,7 +7870,11 @@ components:
             secrets; values are author-supplied fixtures only.
         locale:
           type: string
-          description: Optional BCP-47 locale tag (default zh-CN for FORMAT_* / SPELL_AMOUNT).
+          description: >-
+            Optional BCP-47 locale tag (default zh-CN for FORMAT_* / SPELL_AMOUNT).
+            Controls number/grouping localization for `FORMAT_AMOUNT`; currency
+            identity on the binary form comes from the ISO 4217 argument, not
+            from this field (IBL-A2).
           maxLength: 32
     ComputeExpressionEvaluateView:
       type: object

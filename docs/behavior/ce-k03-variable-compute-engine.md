@@ -75,7 +75,7 @@
 | | `COUNT(collection)` — 元素个数；空 → `0`。`COUNT` 亦可对 FILTER 结果计数。 | |
 | | `AVG(collection)` — 算术平均；空集合 → 失败（不可定义）。非数值 → 失败。 | |
 | | `FILTER(collection, fieldPath, op, literal)` — 从对象列表过滤；`op` ∈ {`EQ`,`NE`,`GT`,`GE`,`LT`,`LE`,`IS_NULL`,`IS_NOT_NULL`}；`fieldPath` 为相对字段路径（点分，无 `${}`）；`IS_NULL`/`IS_NOT_NULL` 忽略 literal。结果为列表，可供 SUM/COUNT/AVG。 | |
-| | `FORMAT_AMOUNT(value)` — 按 locale 格式化为金额展示字符串（默认币种展示规则由 locale 决定；本片不引入多币种参数）。 | |
+| | `FORMAT_AMOUNT(value)` — 按 locale 格式化为金额展示字符串（默认币种展示规则由 locale 决定；本片不引入多币种参数）。**超集：** 国际函件 ISO 币种二元形态见 [IBL-A2](./ibl-a2-format-amount-currency.md) `FORMAT_AMOUNT(value, currencyCode)`。 | |
 | | `FORMAT_DATE(value)` — 按 locale 格式化为日期展示字符串；输入为 ISO 日期/日期时间或平台 DATE 类型。 | |
 | | `SPELL_AMOUNT(value)` — 人民币中文大写字符串（见 K03-C12）。 | |
 | **K03-C11** | **Locale：** `FORMAT_AMOUNT` / `FORMAT_DATE` 读取生成请求 `context.locale`（CE-C01 白名单）。缺失、null、空白 → 默认 **`zh-CN`**。非法 locale 标签（CE-C01 已拦类型；若通过但无法解析）→ 回退 `zh-CN` **或** fail-closed 为 `VARIABLE_COMPUTE_FAILED`——本片选定：**无法解析则回退 zh-CN**（与「默认 zh-CN」一致，避免仅为 locale 标签失败整单；审计摘要仍保留原始 locale 字符串）。`SPELL_AMOUNT` **固定人民币中文大写**，不随 locale 切换语言。 | 计划卡；CE-C01 S-3 |
