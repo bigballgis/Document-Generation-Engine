@@ -19,11 +19,10 @@ import type { MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
 import type { BindingValidationResult, PreviewRecord } from '@/types/template'
 import type { MasterAnchor } from '@/types/master'
 
-export {
-  BINDING_CONTENT_TYPES,
-  type BindingPanelMode,
-  type StructuredBindingEditorExpose,
-  type TemplateAuthoringBindingsPanelProps,
+export type {
+  BindingPanelMode,
+  StructuredBindingEditorExpose,
+  TemplateAuthoringBindingsPanelProps,
 } from '@/composables/templateAuthoringBindingsTypes'
 
 export function useTemplateAuthoringBindingsPanel(

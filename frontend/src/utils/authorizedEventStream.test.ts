@@ -73,8 +73,8 @@ describe('connectAuthorizedEventStream', () => {
 
   it('removes token query strings and EventSource usage from progress dialogs', () => {
     for (const relativePath of [
-      '../components/template/BatchTestProgressDialog.vue',
-      '../components/template/PreviewProgressDialog.vue',
+      '../components/templates/BatchTestProgressDialog.vue',
+      '../components/templates/PreviewProgressDialog.vue',
     ]) {
       const source = readFileSync(new URL(relativePath, import.meta.url), 'utf8')
 

@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR #98+#99+#100+#101+#102+#105+#103+#104(D01A)+#135(D01B) → Done (#135 merge 6e776232 / tip 1ada6b41). Host sole-active cleared — next queue (not activated): dashboard summary API. IBL #106 registry-only pending (not a delivery leaf; do NOT activate IBL while dashboard residual ahead). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A (#98+#99+#100) + #101 + #102 + #105 + #103 + #104 D01A + #135 D01B Done outside this umbrella (#135 merge 6e776232 / tip 1ada6b41). Host sole-active cleared; next queue = dashboard summary API (not activated). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c → Done; sole-active = #137 PRR-P2. Host sole-active delivery leaf = #137 PRR-P2 audit hygiene (NOT this umbrella). IBL #106 registry-only pending (not a delivery leaf; do NOT activate IBL while #137 ahead). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals (#98–#105, #103, #104 D01A, #135 D01B, #136 D01c) Done outside this umbrella. Host sole-active = #137 PRR-P2 audit hygiene (activated 2026-07-18). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T04:00:00.000Z"
+        "updatedAt": "2026-07-18T06:40:00.000Z"
       },
       {
         "id": "54",
@@ -1865,8 +1865,8 @@
       {
         "id": "136",
         "title": "PRR-D01c: Dashboard summary API (stop fetchAll on first paint)",
-        "description": "DONE 2026-07-18 — MAIN merge a872c15b / feature tip 8c52ee67; worktree REMOVED. Slice prod-dashboard-summary-api. Wave D residual SPLIT leaf closed (D01A+#135+#136 audit residuals closed). GET /dashboard/summary + Overview stops fetchAllMasters/fetchAllTemplates on first paint. frontend_ui_in_scope=true; E2E 3 passed + UIUX PASS Critical=0. Sole-active cleared. Formal phase None. Not go-live. Do NOT flip checklist #3b GO / #5a GO. Next queue (not activated): IBL #106/#107.",
-        "details": "COMPLETED 2026-07-18 (stage 12 post-task-doc-sync on MAIN after integration-merger). Slice id: prod-dashboard-summary-api. Batch recommendation split (member_task_ids: [\"136\"]; proposed_slice_id: prod-dashboard-summary-api) closed. BDD ready (docs/behavior/prod-dashboard-summary-api.md). Gates: BE mvn verify GREEN (f3dc3004); FE lint/type-check/test/build GREEN (dafa1a81); E2E functional 3 passed (7b13036c); UIUX PASS Critical=0 (8c52ee67); arch PASS_WITH_NOTES merge_go=true; Stage 10 DEPLOY_OK; permission-matrix (0a022104). Status done. Sole-active cleared. Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO / #5a GO. Next queue head (not activated): IBL #106 registry + #107 IBL-A1.",
+        "description": "DONE 2026-07-18 — MAIN merge a872c15b / feature tip 8c52ee67; worktree REMOVED. Slice prod-dashboard-summary-api. Wave D residual SPLIT leaf closed (D01A+#135+#136 audit residuals closed). GET /dashboard/summary + Overview stops fetchAllMasters/fetchAllTemplates on first paint. frontend_ui_in_scope=true; E2E 3 passed + UIUX PASS Critical=0. Sole-active superseded by #137 PRR-P2 audit hygiene. Formal phase None. Not go-live. Do NOT flip checklist #3b GO / #5a GO. IBL #106/#107 remain pending (not activated).",
+        "details": "COMPLETED 2026-07-18 (stage 12 post-task-doc-sync on MAIN after integration-merger). Slice id: prod-dashboard-summary-api. Batch recommendation split (member_task_ids: [\"136\"]; proposed_slice_id: prod-dashboard-summary-api) closed. BDD ready (docs/behavior/prod-dashboard-summary-api.md). Gates: BE mvn verify GREEN (f3dc3004); FE lint/type-check/test/build GREEN (dafa1a81); E2E functional 3 passed (7b13036c); UIUX PASS Critical=0 (8c52ee67); arch PASS_WITH_NOTES merge_go=true; Stage 10 DEPLOY_OK; permission-matrix (0a022104). Status done. Sole-active superseded by #137 (2026-07-18). Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO / #5a GO. IBL #106 registry + #107 IBL-A1 stay pending behind #137.",
         "testStrategy": "1. BDD-PRR-D01C ready (docs/behavior/prod-dashboard-summary-api.md). 2. TDD bounded summary API + FE first-paint no fetchAll*. 3. mvn verify + pnpm lint/type-check/test/build GREEN. 4. E2E mandatory + UIUX PASS. 5. Stage 5/10 DEPLOY_OK. 6. Do NOT flip #3b/#5a GO; do NOT claim go-live.",
         "priority": "high",
         "dependencies": [
@@ -1874,18 +1874,32 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T06:20:00.000Z"
+        "updatedAt": "2026-07-18T06:40:00.000Z"
+      },
+      {
+        "id": "137",
+        "title": "PRR-P2: Audit hygiene (dead-code / folder / Knip)",
+        "description": "IN PROGRESS 2026-07-18. Sole-active NON-CE delivery leaf. Slice prod-audit-p2-hygiene. Placement ISOLATED D:/working/DGE-prod-audit-p2-hygiene · feat/prod-audit-p2-hygiene (base MAIN 4382ae6c). Batch recommendation solo (member_task_ids: [\"137\"]; vetoes: IBL, MinIO/WAL). P2 audit quick-wins after Wave D: delete unused TemplateService.listAll (+ TemplateCatalogSupport.listAll); move frontend/src/components/template/* into components/templates/ and fix imports; knip unused-export cleanup (high-confidence only — not heroic zero). BDD not-applicable (docs/behavior/prod-audit-p2-hygiene.md). Formal phase None. Not go-live. Do NOT flip checklist #3b GO / #5a GO. Do NOT activate IBL (#106/#107 stay pending). Push residual: MAIN may be ahead of origin/main (observed ahead 7; fetch/push network-blocked at activation).",
+        "details": "ACTIVATED 2026-07-18 (stage 2 plan-orchestrator). Slice id: prod-audit-p2-hygiene. Batch recommendation solo (member_task_ids: [\"137\"]; proposed_slice_id: prod-audit-p2-hygiene; vetoes_applied: [\"IBL\",\"MinIO/WAL\"]; on_red_split_hint: BE vs FE peel). Status in-progress — sole-active delivery leaf (umbrella #53 remains in-progress registry only, NOT a delivery leaf). Scope: (1) remove dead TemplateService.listAll + TemplateCatalogSupport.listAll (no controller callers); (2) merge singular components/template → plural components/templates + import rewrites; (3) knip high-confidence unused exports only. BDD readiness: not-applicable — hygiene/dead-code (owning doc docs/behavior/prod-audit-p2-hygiene.md). frontend_ui_in_scope=path-hygiene (no product journey change; E2E only if gates require smoke). Formal phase remains None. Not Done yet. Do NOT claim go-live. Do NOT flip #3b GO / #5a GO. Do NOT activate IBL while this leaf is In Progress. Evidence amortization: mvn verify + pnpm gates + queued deploy.",
+        "testStrategy": "1. BDD not-applicable confirmed (docs/behavior/prod-audit-p2-hygiene.md). 2. Remove listAll dead methods — no OpenAPI/controller regression; mvn verify GREEN. 3. Move components/template → components/templates + rewrite imports — pnpm lint/type-check/test/build GREEN. 4. Knip high-confidence unused-export cleanup only (ambiguous symbols left). 5. Stage 5/10 DEPLOY_OK when acceptance surface requires. 6. Do NOT flip #3b/#5a GO; do NOT claim go-live; do NOT activate IBL; do NOT mark Done until merge + MAIN doc-sync.",
+        "priority": "medium",
+        "dependencies": [
+          "136"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-18T06:40:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-18T06:20:00.000Z",
-      "taskCount": 136,
+      "lastModified": "2026-07-18T06:40:00.000Z",
+      "taskCount": 137,
       "completedCount": 106,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-18T06:20:00.000Z"
+      "updated": "2026-07-18T06:40:00.000Z"
     }
   }
 }

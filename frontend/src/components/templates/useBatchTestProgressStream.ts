@@ -11,7 +11,7 @@ import {
   resetBatchTestProgressState,
   type BatchPhase,
   type BatchSampleResult,
-} from '@/components/template/batchTestProgressStreamHandlers'
+} from '@/components/templates/batchTestProgressStreamHandlers'
 
 export type { BatchSampleResult }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { usePreviewProgressStream } from '@/components/template/usePreviewProgressStream'
+import { usePreviewProgressStream } from '@/components/templates/usePreviewProgressStream'
 
 const props = defineProps<{
   modelValue: boolean

@@ -98,11 +98,6 @@ public class TemplateService {
     }
 
     @Transactional(readOnly = true)
-    public List<TemplateSummaryView> listAll(ManagementSessionClaims session) {
-        return catalogSupport.listAll(session);
-    }
-
-    @Transactional(readOnly = true)
     public TemplateDetailView get(UUID templateId, ManagementSessionClaims session) {
         return templateViewMapper.toDetail(requireReadableTemplate(templateId, session));
     }

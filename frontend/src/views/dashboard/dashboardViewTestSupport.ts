@@ -10,7 +10,7 @@ import { DASHBOARD_ZERO_SUMMARY, useDashboardStore } from '@/stores/dashboard'
 import type { DashboardSummaryView } from '@/api/dashboard'
 import type { ManagementCapabilities } from '@/types/session'
 
-export const BASE_CAPABILITIES: ManagementCapabilities = {
+const BASE_CAPABILITIES: ManagementCapabilities = {
   manageMasters: false,
   reviewMasters: false,
   authorTemplates: false,
@@ -42,7 +42,7 @@ export const routeRef = ref({
   query: {} as Record<string, string>,
 })
 
-export const journeyTimelineStub = {
+const journeyTimelineStub = {
   name: 'RoleJourneyTimeline',
   props: ['steps', 'currentStepIndex', 'guidanceKey', 'titleKey'],
   template:
@@ -74,7 +74,7 @@ export function mountDashboard(extraStubs: Record<string, unknown> = {}) {
   })
 }
 
-export function mountDashboardWorkflowTab(extraStubs: Record<string, unknown> = {}) {
+function mountDashboardWorkflowTab(extraStubs: Record<string, unknown> = {}) {
   routeRef.value.query = { tab: 'workflow' }
   return mountDashboard(extraStubs)
 }
@@ -326,7 +326,7 @@ export function workItemFixture(overrides: Record<string, unknown> = {}) {
   }
 }
 
-export function journeyStub(wrapper: VueWrapper) {
+function journeyStub(wrapper: VueWrapper) {
   return wrapper.find('.journey-timeline-stub')
 }
 

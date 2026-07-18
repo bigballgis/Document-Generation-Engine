@@ -27,13 +27,6 @@ export async function listLegalHolds(
   return unwrapEnvelope(response.data)
 }
 
-export async function getLegalHold(id: string): Promise<LegalHoldView> {
-  const response = await http.get<ApiEnvelope<LegalHoldView>>(
-    `/legal-holds/${encodeURIComponent(id)}`,
-  )
-  return unwrapEnvelope(response.data)
-}
-
 export async function createLegalHold(payload: CreateLegalHoldPayload): Promise<LegalHoldView> {
   const response = await http.post<ApiEnvelope<LegalHoldView>>('/legal-holds', payload)
   return unwrapEnvelope(response.data)

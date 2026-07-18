@@ -1,6 +1,6 @@
 import { computed, type Ref } from 'vue'
 import type { PaletteGroupView } from '@/composables/commandPaletteTypes'
-import { canQueryCatalog, filterPaletteRouteItems } from '@/composables/commandPaletteHelpers'
+import { canQueryCatalog } from '@/composables/commandPaletteHelpers'
 import type { useCommandPaletteCatalog } from '@/composables/useCommandPaletteCatalog'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import type { PaletteItem } from '@/composables/commandPaletteTypes'
@@ -96,5 +96,3 @@ export function createCommandPaletteDerivedState(options: {
 
   return { groups, flatItems, hasAnyError, showNoMatch }
 }
-
-export { filterPaletteRouteItems }

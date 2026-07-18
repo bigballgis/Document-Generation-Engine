@@ -14,7 +14,6 @@ vi.mock('@/api/legalHolds', () => ({
   listLegalHolds: vi.fn(),
   createLegalHold: vi.fn(),
   releaseLegalHold: vi.fn(),
-  getLegalHold: vi.fn(),
 }))
 
 vi.mock('@/composables/useConfirmAction', () => ({

@@ -2,7 +2,7 @@ import type { TemplateLifecycleStatus } from '@/types/template'
 
 export type WorkflowFilterKey = 'awaitingTest' | 'awaitingApproval' | 'awaitingPublish'
 
-export const WORKFLOW_CHIP_QUERY: Record<
+const WORKFLOW_CHIP_QUERY: Record<
   WorkflowFilterKey,
   { lifecycleStatus: TemplateLifecycleStatus; approvalSubState?: string }
 > = {

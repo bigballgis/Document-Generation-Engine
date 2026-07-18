@@ -2,7 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import PreviewProgressDialog from '@/components/template/PreviewProgressDialog.vue'
+import BatchTestProgressDialog from '@/components/templates/BatchTestProgressDialog.vue'
 import { connectAuthorizedEventStream } from '@/utils/authorizedEventStream'
 import en from '@/i18n/locales/en'
 
@@ -30,7 +30,7 @@ function makeI18n() {
   return createI18n({ legacy: false, locale: 'en', messages: { en } })
 }
 
-describe('PreviewProgressDialog', () => {
+describe('BatchTestProgressDialog', () => {
   beforeEach(() => {
     streamRequests.length = 0
     closeMocks.length = 0
@@ -53,13 +53,13 @@ describe('PreviewProgressDialog', () => {
 
   it('does not connect SSE when dialog is closed', async () => {
     const i18n = makeI18n()
-    mount(PreviewProgressDialog, {
+    mount(BatchTestProgressDialog, {
       props: {
         modelValue: false,
         templateId: 'tpl-1',
-        previewId: 'prev-1',
-        streamUrl: '/api/management/v1/templates/tpl-1/previews/prev-1/progress-stream',
-        dataSetName: 'DS-001',
+        runId: 'run-1',
+        streamUrl: '/api/management/v1/templates/tpl-1/batch-tests/run-1/progress-stream',
+        dataSetCount: 3,
       },
       global: { plugins: [i18n, ElementPlus] },
       attachTo: document.body,
@@ -68,15 +68,15 @@ describe('PreviewProgressDialog', () => {
     expect(streamRequests).toHaveLength(0)
   })
 
-  it('connects SSE and shows progress stage when dialog opens', async () => {
+  it('shows progress dialog with sample count when opened', async () => {
     const i18n = makeI18n()
-    const wrapper = mount(PreviewProgressDialog, {
+    const wrapper = mount(BatchTestProgressDialog, {
       props: {
         modelValue: true,
         templateId: 'tpl-1',
-        previewId: 'prev-1',
-        streamUrl: '/api/management/v1/templates/tpl-1/previews/prev-1/progress-stream',
-        dataSetName: 'DS-001',
+        runId: 'run-1',
+        streamUrl: '/api/management/v1/templates/tpl-1/batch-tests/run-1/progress-stream',
+        dataSetCount: 3,
       },
       global: { plugins: [i18n, ElementPlus] },
       attachTo: document.body,
@@ -87,87 +87,106 @@ describe('PreviewProgressDialog', () => {
     expect(streamRequests[0]?.url).toContain('progress-stream')
     expect(streamRequests[0]?.url).not.toContain('token=')
     expect(streamRequests[0]?.token).toBe('test-token')
-
-    // Emit progress event
-    emitStreamEvent(0, 'progress', {
-      stage: 'GENERATING_DOCX',
-      percent: 40,
-      message: 'Generating document',
-    })
-    await wrapper.vm.$nextTick()
-
-    expect(document.body.textContent).toContain('40')
+    expect(document.body.textContent).toContain('0 / 3')
 
     wrapper.unmount()
   })
 
-  it('shows download buttons and countdown on completed event', async () => {
+  it('updates progress list as sample_done events arrive', async () => {
     const i18n = makeI18n()
-    const futureExpiry = new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString()
-
-    const wrapper = mount(PreviewProgressDialog, {
+    const wrapper = mount(BatchTestProgressDialog, {
       props: {
         modelValue: true,
         templateId: 'tpl-1',
-        previewId: 'prev-1',
-        streamUrl: '/api/management/v1/templates/tpl-1/previews/prev-1/progress-stream',
-        dataSetName: 'DS-001',
+        runId: 'run-1',
+        streamUrl: '/api/management/v1/templates/tpl-1/batch-tests/run-1/progress-stream',
+        dataSetCount: 3,
       },
       global: { plugins: [i18n, ElementPlus] },
       attachTo: document.body,
     })
     await flushPromises()
 
-    emitStreamEvent(0, 'completed', {
-      previewId: 'prev-1',
-      docxDownloadUrl: 'http://example.com/docx',
-      pdfDownloadUrl: 'http://example.com/pdf',
-      expiresAt: futureExpiry,
+    emitStreamEvent(0, 'sample_done', {
+      sampleIndex: 1,
+      success: true,
+      dataSetExternalId: 'TDS-001',
     })
     await wrapper.vm.$nextTick()
 
-    expect(document.body.textContent).toContain('Download DOCX')
-    expect(document.body.textContent).toContain('Download PDF')
+    expect(document.body.textContent).toContain('TDS-001')
+    expect(document.body.textContent).toContain('1 / 3')
 
     wrapper.unmount()
   })
 
-  it('shows error message and retry button on failed event', async () => {
+  it('shows summary and emits completed on batch_completed', async () => {
     const i18n = makeI18n()
-    const wrapper = mount(PreviewProgressDialog, {
+    const wrapper = mount(BatchTestProgressDialog, {
       props: {
         modelValue: true,
         templateId: 'tpl-1',
-        previewId: 'prev-1',
-        streamUrl: '/api/management/v1/templates/tpl-1/previews/prev-1/progress-stream',
-        dataSetName: 'DS-001',
+        runId: 'run-1',
+        streamUrl: '/api/management/v1/templates/tpl-1/batch-tests/run-1/progress-stream',
+        dataSetCount: 3,
       },
       global: { plugins: [i18n, ElementPlus] },
       attachTo: document.body,
     })
     await flushPromises()
 
-    emitStreamEvent(0, 'failed', {
-      error: 'Render engine failed',
-      retryable: true,
+    emitStreamEvent(0, 'batch_completed', {
+      runId: 'run-1',
+      successCount: 2,
+      failedCount: 1,
+      anchorCoveragePct: 85.0,
+      variableCoveragePct: 90.0,
+      sampleCoveragePct: 100.0,
+      gatePassed: false,
     })
     await wrapper.vm.$nextTick()
 
-    expect(document.body.textContent).toContain('Render engine failed')
-    expect(document.body.textContent).toContain('Retry')
+    expect(document.body.textContent).toContain('2 succeeded')
+    expect(document.body.textContent).toContain('1 failed')
+    expect(wrapper.emitted('completed')).toBeTruthy()
 
     wrapper.unmount()
   })
 
-  it('closes SSE on dialog close', async () => {
+  it('shows error on batch_failed event', async () => {
     const i18n = makeI18n()
-    const wrapper = mount(PreviewProgressDialog, {
+    const wrapper = mount(BatchTestProgressDialog, {
       props: {
         modelValue: true,
         templateId: 'tpl-1',
-        previewId: 'prev-1',
-        streamUrl: '/api/management/v1/templates/tpl-1/previews/prev-1/progress-stream',
-        dataSetName: 'DS-001',
+        runId: 'run-1',
+        streamUrl: '/api/management/v1/templates/tpl-1/batch-tests/run-1/progress-stream',
+        dataSetCount: 3,
+      },
+      global: { plugins: [i18n, ElementPlus] },
+      attachTo: document.body,
+    })
+    await flushPromises()
+
+    emitStreamEvent(0, 'batch_failed', {
+      error: 'Internal batch error',
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(document.body.textContent).toContain('Internal batch error')
+
+    wrapper.unmount()
+  })
+
+  it('closes SSE when dialog is closed', async () => {
+    const i18n = makeI18n()
+    const wrapper = mount(BatchTestProgressDialog, {
+      props: {
+        modelValue: true,
+        templateId: 'tpl-1',
+        runId: 'run-1',
+        streamUrl: '/api/management/v1/templates/tpl-1/batch-tests/run-1/progress-stream',
+        dataSetCount: 3,
       },
       global: { plugins: [i18n, ElementPlus] },
       attachTo: document.body,
@@ -180,35 +199,6 @@ describe('PreviewProgressDialog', () => {
     await flushPromises()
 
     expect(closeMocks[0]).toHaveBeenCalled()
-
-    wrapper.unmount()
-  })
-
-  it('emits retry event when retry button clicked', async () => {
-    const i18n = makeI18n()
-    const wrapper = mount(PreviewProgressDialog, {
-      props: {
-        modelValue: true,
-        templateId: 'tpl-1',
-        previewId: 'prev-1',
-        streamUrl: '/api/management/v1/templates/tpl-1/previews/prev-1/progress-stream',
-        dataSetName: 'DS-001',
-      },
-      global: { plugins: [i18n, ElementPlus] },
-      attachTo: document.body,
-    })
-    await flushPromises()
-
-    emitStreamEvent(0, 'failed', { error: 'Failed', retryable: true })
-    await wrapper.vm.$nextTick()
-
-    const retryBtn = document.querySelector('[data-testid="retry-btn"]')
-    if (retryBtn) {
-      ;(retryBtn as HTMLElement).click()
-    }
-    await flushPromises()
-
-    expect(wrapper.emitted('retry')).toBeTruthy()
 
     wrapper.unmount()
   })

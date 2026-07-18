@@ -1,7 +1,7 @@
 import type { VariableSchema } from '@/types/template'
 
 /** CE-G03 variable PII categories (UPPER_SNAKE_CASE). */
-export const VARIABLE_PII_CATEGORIES = [
+const VARIABLE_PII_CATEGORIES = [
   'NONE',
   'PERSONAL_NAME',
   'GOVERNMENT_ID',

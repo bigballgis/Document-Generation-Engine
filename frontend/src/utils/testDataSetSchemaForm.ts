@@ -5,7 +5,7 @@ import type { ApiFieldError } from '@/types/session'
 export const ADVANCED_JSON_VAR_THRESHOLD = 12
 
 /** Expand Advanced JSON when serialized payload ≥ this size in bytes (U03-C7). */
-export const ADVANCED_JSON_SIZE_THRESHOLD = 2048
+const ADVANCED_JSON_SIZE_THRESHOLD = 2048
 
 export type SchemaFieldErrorReason =
   | 'REQUIRED'

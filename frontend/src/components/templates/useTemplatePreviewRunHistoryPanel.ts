@@ -7,7 +7,7 @@ import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { downloadBlobExport } from '@/utils/downloadExport'
 import type { PreviewRunSummary } from '@/types/template'
 
-export function useTemplatePreviewRunHistoryPanel(options: {
+function useTemplatePreviewRunHistoryPanel(options: {
   templateId: Ref<string>
   refreshToken: Ref<number | undefined>
   selectedPreviewId: Ref<string | null>

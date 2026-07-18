@@ -46,7 +46,6 @@ export {
 
 export {
   canManageAssetLibrary,
-  canAccessAssetLibraryManagement,
   canUploadImageOrOtherAsset,
   canUploadSealAsset,
   canUploadAnyLibraryAsset,
@@ -54,10 +53,7 @@ export {
   isAssetLibraryTesterOnly,
 } from '@/auth/roleCapabilitiesAssetLibrary'
 
-export {
-  canManageLegalHold,
-  canAccessLegalHoldAdministration,
-} from '@/auth/roleCapabilitiesLegalHold'
+export { canManageLegalHold } from '@/auth/roleCapabilitiesLegalHold'
 
 import type { CapabilityContext } from '@/auth/roleCapabilityCore'
 

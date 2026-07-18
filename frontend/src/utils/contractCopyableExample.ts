@@ -4,7 +4,7 @@ import type { TestDataSet } from '@/types/templatePreview'
 /** Fixed placeholders — never embed real secrets (U12-C3). */
 export const ACCESS_TOKEN_PLACEHOLDER = '<ACCESS_TOKEN>'
 export const IDEMPOTENCY_KEY_PLACEHOLDER = '<IDEMPOTENCY_KEY>'
-export const REQUEST_ID_PLACEHOLDER = '<REQUEST_ID>'
+const REQUEST_ID_PLACEHOLDER = '<REQUEST_ID>'
 
 export type GenerateExamplePayload = {
   output: { format: string; mode: string }
@@ -88,11 +88,11 @@ export function buildGeneratePayload(
   }
 }
 
-export function formatPayloadJson(payload: GenerateExamplePayload): string {
+function formatPayloadJson(payload: GenerateExamplePayload): string {
   return `${JSON.stringify(payload, null, 2)}\n`
 }
 
-export function buildSyncGenerateCurl(generateUrl: string, payloadJson: string): string {
+function buildSyncGenerateCurl(generateUrl: string, payloadJson: string): string {
   const body = payloadJson.trimEnd()
   return [
     `curl -X POST '${generateUrl}' \\`,
