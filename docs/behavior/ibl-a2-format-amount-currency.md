@@ -131,7 +131,7 @@ batch_recommendation:
 | ID | 陈述 | 状态 |
 | --- | --- | --- |
 | **A2-N1** | 强制所有既有一元表达式迁移为二元 | **非确认** — 一元兼容（A2-C6） |
-| **A2-N2** | `SPELL_AMOUNT` 多币种 / en 大写 | **非确认** — IBL-A3 |
+| **A2-N2** | `SPELL_AMOUNT` 多币种 / en 大写 | **非确认（本叶）** — 已移交 [IBL-A3](./ibl-a3-amount-in-words.md)（BDD **ready**） |
 | **A2-N3** | 数字币种码（ISO 4217 numeric） | **非确认** — 本叶仅字母码 |
 | **A2-N4** | 作者面板专用币种下拉 UI | **非确认** — FE OOS |
 | **A2-N5** | 第二参传入 locale 标签（如 `en-US`）作为合法形态 | **非确认** — **明确拒绝**（A2-C2）；若传入非 ISO 币种串则按 A2-C8 失败 |

@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * CNY Chinese uppercase amount (SPELL_AMOUNT) — fixed language, not locale-switched.
+ * CNY Chinese uppercase amount — used by unary {@code SPELL_AMOUNT(value)} (always,
+ * locale-independent) and by registered binary pair {@code (zh, CNY)} (IBL-A3).
  */
 final class SpellAmountCn {
 
