@@ -97,7 +97,7 @@ $env:KAFKA_IMAGE = '<company-registry>/<kafka-image>:<tag>'
 - Backend liveness: `http://localhost:8080/healthz`
 - Backend readiness: `http://localhost:8080/readyz` (Postgres `SELECT 1` only — see **Readiness scope** below)
 - Frontend liveness/readiness: `http://localhost:4173/healthz` and `http://localhost:4173/readyz`
-- Prometheus metrics (prod profile): `http://localhost:8080/actuator/prometheus`
+- Prometheus metrics (prod / claimed-prod path): `http://localhost:8080/actuator/prometheus` — **HTTP Basic required** after PRR-D01b hardening (see [Observability](#observability)); probes stay on `/healthz` / `/readyz` (anonymous)
 
 Compose prod profile enables backend and frontend health checks with `service_healthy` gating (SOR-O05).
 
@@ -132,17 +132,39 @@ See [deploy/k8s-health-probes.md](../../deploy/k8s-health-probes.md) for probe w
 
 - **Structured logs:** `prod` Spring profile emits JSON logs via Logstash encoder (`logback-spring.xml`).
 - **Trace propagation:** `X-Trace-Id` request header is echoed on responses and bound to MDC `traceId` for log correlation.
-- **Metrics:** Actuator exposes `health`, `info`, `metrics`, and `prometheus` in prod profile. Management security permits unauthenticated scrape of `/actuator/prometheus` for in-cluster collectors (SOR-O01).
+- **Metrics scrape auth (PRR-D01b / D01B-C1–C2):** On **claimed-prod** and **acceptance-hardening** paths, `GET /actuator/prometheus` and `GET /actuator/metrics` (**including** `/actuator/metrics/**`) **must not** be anonymously open. Scrape uses **HTTP Basic** with username/password from **env / secrets** (no usable default password in image or repo). Anonymous scrape → **401**. Public probes remain `/healthz` and `/readyz` (and existing `/actuator/health` probe semantics if still permitAll — metrics/prometheus are the hardening surface). NetworkPolicy / private scrape networks are **defense-in-depth only** — not a substitute for app-level auth. Behavior SoT: [prod-ops-security-hardening.md](../behavior/prod-ops-security-hardening.md). Env keys: `DOCGEN_ACTUATOR_SCRAPE_USERNAME` / `DOCGEN_ACTUATOR_SCRAPE_PASSWORD` (prod profile enables scrape auth by default).
+- **Frontend nginx security headers (PRR-D01b / D01B-C6):** Docker acceptance / prod compose frontend edge (`frontend/nginx.conf`) emits CSP + standard security headers (`Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`) per ADR-0031 intent. HSTS not required on plain HTTP acceptance. See BDD D01B-007…009.
 - **Alert rules as code (LR-D3):** Versioned Prometheus rules live under [`deploy/observability/`](../../deploy/observability/README.md). Each rule must carry a `runbook` annotation pointing at a section below. **Thresholds are draft / proposed only** — see [Draft alert thresholds](#draft-alert-thresholds-lrd3--not-confirmed-slos); do **not** treat firings as SLA breaches until NFR confirmation ([NFR §待确认 LR-D5](../requirements/non-functional-requirements.md#lr-d5-nfr-数值提案proposed--awaiting-confirmation)).
-- **Kubernetes:** When `observability.serviceMonitor.enabled=true`, Helm renders a Prometheus Operator `ServiceMonitor` scraping `/actuator/prometheus`. Optional `PrometheusRule` alerts on pod restarts and elevated 5xx rates (see `deploy/helm/docgen/templates/`). No vendor APM is required or assumed.
+- **Kubernetes:** When `observability.serviceMonitor.enabled=true`, Helm renders a Prometheus Operator `ServiceMonitor` scraping `/actuator/prometheus`. After PRR-D01b, collectors must supply Basic credentials (or equivalent) consistent with app auth — do **not** document anonymous scrape as the prod model. Optional `PrometheusRule` alerts on pod restarts and elevated 5xx rates (see `deploy/helm/docgen/templates/`). No vendor APM is required or assumed.
 
 ### Verify Prometheus scrape (local prod compose)
 
+After PRR-D01b hardening, use Basic credentials from operator-provisioned env/secrets (**never** commit real passwords):
+
 ```bash
-curl -sf http://localhost:8080/actuator/prometheus | head
+# Anonymous — expect HTTP 401 (no metric body)
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/actuator/prometheus
+
+# Authenticated scrape — expect 200 + Prometheus text
+curl -sf -u "$DOCGEN_ACTUATOR_SCRAPE_USERNAME:$DOCGEN_ACTUATOR_SCRAPE_PASSWORD" \
+  http://localhost:8080/actuator/prometheus | head
 ```
 
-Expect `# HELP` lines for JVM and HTTP metrics. After LR-D3 instrumentation, also expect non-zero samples for generation / PDF pool / SSE / 429 / DLT series when those paths have been exercised.
+Expect `# HELP` lines for JVM and HTTP metrics. After LR-D3 instrumentation, also expect non-zero samples for generation / PDF pool / SSE / 429 / DLT series when those paths have been exercised. Reference scrape job comments: [`deploy/observability/prometheus-scrape.yaml`](../../deploy/observability/prometheus-scrape.yaml).
+
+<a id="multi-instance-residuals-adr-0044"></a>
+
+### Multi-instance residuals (ADR-0044)
+
+**v1 authority:** single serving backend replica — [ADR-0044 deployment topology](../adr/operations/0044-deployment-topology-v1.md). **Do not** claim multi-instance correctness complete.
+
+| Residual | Ops implication |
+| --- | --- |
+| Sticky SSE | Progress SSE is process-local; multi-pod needs sticky sessions at ingress **or** Redis pub/sub relay (not in v1) |
+| Process-local rate-limit | Bucket4j in-process; `RUNTIME_RATE_LIMIT_DISTRIBUTED` defaults **false** — distributed switch/config is residual, not delivered |
+| Scale-out gate | Prerequisites table in topology ADR (schedulers mutex, SSE, shared limiter, Kafka async, Redisson) before replicas > 1 / HPA |
+
+Companion honesty note: [0044-multi-instance-correctness-baseline.md](../adr/operations/0044-multi-instance-correctness-baseline.md). Behavior: [prod-ops-security-hardening.md](../behavior/prod-ops-security-hardening.md) (D01B-C9).
 
 <a id="draft-alert-thresholds-lrd3--not-confirmed-slos"></a>
 

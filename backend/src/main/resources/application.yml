@@ -40,6 +40,11 @@ spring:
 
 docgen:
   environment: ${APP_ENVIRONMENT:dev}
+  # PRR-D01b: scrape Basic off by default for local/dev; prod profile enables (D01B-C5).
+  actuator:
+    scrape-auth-enabled: ${DOCGEN_ACTUATOR_SCRAPE_AUTH_ENABLED:false}
+    scrape-username: ${DOCGEN_ACTUATOR_SCRAPE_USERNAME:}
+    scrape-password: ${DOCGEN_ACTUATOR_SCRAPE_PASSWORD:}
   runtime:
     rate-limit:
       enabled: ${RUNTIME_RATE_LIMIT_ENABLED:true}

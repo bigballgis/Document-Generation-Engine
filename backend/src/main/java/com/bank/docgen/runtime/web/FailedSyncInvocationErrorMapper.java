@@ -1,7 +1,10 @@
 package com.bank.docgen.runtime.web;
 
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.infrastructure.resilience.GenerationServiceUnavailableException;
+import com.bank.docgen.infrastructure.resilience.GenerationTimeoutException;
 import com.bank.docgen.rendering.EncryptionFailedException;
+import com.bank.docgen.rendering.PdfConversionCapacityExceededException;
 import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.runtime.domain.InvocationErrorEnvelope;
 import com.bank.docgen.runtime.service.OriginalBatchIdFormatException;
@@ -109,6 +112,51 @@ final class FailedSyncInvocationErrorMapper {
                     false,
                     messageResolver
             );
+        }
+        InvocationErrorEnvelope generationEnvelope = mapGenerationTaxonomy(throwable, messageResolver);
+        if (generationEnvelope != null) {
+            return generationEnvelope;
+        }
+        return null;
+    }
+
+    /**
+     * PRR-D01b: align IRC persistence with D01A HTTP taxonomy (walk cause chain).
+     */
+    private static InvocationErrorEnvelope mapGenerationTaxonomy(
+            Throwable throwable,
+            MessageResolver messageResolver
+    ) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof GenerationServiceUnavailableException ex) {
+                return envelope(
+                        ApiErrorCodes.GENERATION_SERVICE_UNAVAILABLE,
+                        ApiErrorCategories.GENERATION,
+                        ex.messageKey(),
+                        true,
+                        messageResolver
+                );
+            }
+            if (current instanceof GenerationTimeoutException ex) {
+                return envelope(
+                        ApiErrorCodes.GENERATION_TIMEOUT,
+                        ApiErrorCategories.GENERATION,
+                        ex.messageKey(),
+                        true,
+                        messageResolver
+                );
+            }
+            if (current instanceof PdfConversionCapacityExceededException ex) {
+                return envelope(
+                        ApiErrorCodes.PDF_CONVERSION_CAPACITY_EXCEEDED,
+                        ApiErrorCategories.GENERATION,
+                        ex.messageKey(),
+                        true,
+                        messageResolver
+                );
+            }
+            current = current.getCause();
         }
         return null;
     }

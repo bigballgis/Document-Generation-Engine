@@ -11,8 +11,16 @@ spring:
       max-lifetime: ${HIKARI_MAX_LIFETIME_MS:1800000}
 
 docgen:
+  # PRR-D01b: claimed-prod / acceptance-hardening — metrics/prometheus require HTTP Basic.
+  # Credentials from env/secrets only; empty username/password => fail-closed 401 (no image default).
+  actuator:
+    scrape-auth-enabled: ${DOCGEN_ACTUATOR_SCRAPE_AUTH_ENABLED:true}
+    scrape-username: ${DOCGEN_ACTUATOR_SCRAPE_USERNAME:}
+    scrape-password: ${DOCGEN_ACTUATOR_SCRAPE_PASSWORD:}
   runtime:
     rate-limit:
+      # Process-local Bucket4j remains authoritative for v1 (ADR-0044 honesty).
+      # Redis distributed limiter is deferred — default false; not multi-instance complete.
       distributed: ${RUNTIME_RATE_LIMIT_DISTRIBUTED:false}
   multi-instance:
     sse-sticky-sessions-required: true
