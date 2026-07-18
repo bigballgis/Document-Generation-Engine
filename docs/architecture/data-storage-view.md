@@ -101,7 +101,13 @@ Constraints (confirmed):
 - Management list/detail/CSV, management audit, logs, exports, and contract examples must **not** expose variables (HIST C6).
 - Column / application encryption-at-rest for this column is **deferred** (pending KMS; align ADR-0045) — **not** a CE-G06 Done gate.
 
-Authority: [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md). Behavior: [ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md) **G06-C21**.
+**Amendment (2026-07-18, IBL-A5):** Cleartext retention is further narrowed by version `VariableSchema.piiCategory`:
+
+- **May store clear:** keys with `piiCategory = NONE` (or unset default).
+- **Must not store clear:** keys with `piiCategory ≠ NONE` (`PERSONAL_NAME`, `GOVERNMENT_ID`, `FINANCIAL_ACCOUNT`, `CONTACT`, `ADDRESS`, `OTHER_SENSITIVE`) and unknown/unclassified keys (fail-closed sensitive default) — omit and/or stable non-clear sentinel; optional `redactedVariableKeys` (keys only).
+- Regenerate replays non-redacted retained fields; redacted keys assemble as not provided. Encryption-at-rest remains deferred. Do **not** flip checklist **#3b** / **#5a**.
+
+Authority: [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md) (incl. Amendment 2026-07-18). Behavior: [ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md) **G06-C21**; [ibl-a5-pii-retention-redaction.md](../behavior/ibl-a5-pii-retention-redaction.md).
 
 ## Pending Questions
 

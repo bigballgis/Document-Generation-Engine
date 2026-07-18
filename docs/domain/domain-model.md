@@ -842,7 +842,7 @@ Template Collaboration Work Item 用于站内待办和状态提示，不是 Temp
 
 - 每次运行时生成（含 batch/async）写入 **单表** `api_invocation_record`。
 - `invocationKind`：`SINGLE` | `BATCH_ROOT` | `BATCH_ITEM` | `ASYNC_TASK`。
-- 调用方仅可查 **本 credential** 记录；详情含完整 parameters（encryption 密码 **不** 持久化）。
+- 调用方仅可查 **本 credential** 记录；详情含**脱敏后** parameters（encryption 密码 **不** 持久化；`piiCategory ≠ NONE` / 未知 key 明文不落库，见 ADR-0057 Amendment / IBL-A5）。
 - 查询视图：`logical`（batch 聚合 ROOT）| `flat`（SINGLE + BATCH_ITEM，不含 ROOT）。
 - 运行时路径：`GET …/invocations`（`view=logical|flat`，可选 `requestId`）；`GET …/invocations/{invocationId}`。
 - 与 `RuntimeGenerationAuditEvent` 并存：审计摘要合规；invocation 产品化查询/备份。
@@ -1173,7 +1173,7 @@ Legal Hold 是平台级诉讼/内控冻结实体：在调用记录留存清理�
 
 **CE-G03 澄清（2026-07-15）：** 「模板测试数据敏感值」禁明文的适用范围为日志、审计摘要、契约示例、导出、发布证据与未授权展示。授权维护者在 Template Test Data Set 存储中的变量值是测试资产本体，须经 `SYNTHETIC` 或 `EXPLICIT_SENSITIVE` 闸门（见 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md) G03-C14/C22）；不修订 ADR-0020 正文。
 
-**CE-G06 / ADR-0057（2026-07-16）：** `api_invocation_record.parameters_storage` 在调用记录留存窗口内可持久化已消毒模板变量（加密密码仍禁），供调用方查询与受控再生内部重放。管理端/审计/日志/导出仍禁 variables 明文。列级 encryption-at-rest 暂缓。权威：[ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)；行为：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。
+**CE-G06 / ADR-0057（2026-07-16；IBL-A5 Amendment 2026-07-18）：** `api_invocation_record.parameters_storage` 在调用记录留存窗口内可持久化已消毒且按 PII 分类收窄后的模板变量：明文仅允许 `piiCategory = NONE`（或缺省等价）；`≠ NONE` 与未知 key 禁止明文落库。加密密码仍禁。供调用方查询与受控再生内部重放（再生重放非脱敏字段；脱敏字段按未提供装配）。管理端/审计/日志/导出仍禁 variables 明文。列级 encryption-at-rest 暂缓。权威：[ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)；行为：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)、[ibl-a5-pii-retention-redaction.md](../behavior/ibl-a5-pii-retention-redaction.md)。
 
 允许以摘要或指纹表达的内容包括 API 凭证标识或指纹摘要、`idempotencyKey` 摘要、请求语义 hash、`variablesHash`、`itemsHash`、加密策略摘要、AD Group 授权摘要、下载地址脱敏值、`contextSummary`、`fidelityWarnings` 非敏感摘要、`policyVersion`、`changedAreas` 和配置差异摘要。
 

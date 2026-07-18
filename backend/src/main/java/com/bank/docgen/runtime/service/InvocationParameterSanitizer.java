@@ -6,6 +6,10 @@ import com.bank.docgen.runtime.api.EncryptionSummaryView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.sharedkernel.security.VariableHashSupport;
+import com.bank.docgen.template.domain.VariablePiiCategory;
+import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.persistence.VariableSchemaEntity;
+import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,32 +18,77 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
 public class InvocationParameterSanitizer {
 
     private final ObjectMapper objectMapper;
+    private final TemplateVersionRepository templateVersionRepository;
+    private final VariableSchemaRepository variableSchemaRepository;
 
-    public InvocationParameterSanitizer(ObjectMapper objectMapper) {
+    public InvocationParameterSanitizer(
+            ObjectMapper objectMapper,
+            TemplateVersionRepository templateVersionRepository,
+            VariableSchemaRepository variableSchemaRepository
+    ) {
         this.objectMapper = objectMapper;
+        this.templateVersionRepository = templateVersionRepository;
+        this.variableSchemaRepository = variableSchemaRepository;
     }
 
-    public String sanitizeSingleRequest(GenerateRequestBody request, String resolvedReleaseVersion) {
+    public String sanitizeSingleRequest(
+            GenerateRequestBody request,
+            String resolvedReleaseVersion,
+            UUID templateId
+    ) {
+        return sanitizeSingleRequest(
+                request,
+                resolvedReleaseVersion,
+                loadPiiCategories(templateId, resolvedReleaseVersion)
+        );
+    }
+
+    /**
+     * Package-visible overload for unit tests with an explicit schema category map.
+     */
+    String sanitizeSingleRequest(
+            GenerateRequestBody request,
+            String resolvedReleaseVersion,
+            Map<String, VariablePiiCategory> piiCategories
+    ) {
+        Map<String, Object> originalVariables = request.variables() == null ? Map.of() : request.variables();
+        InvocationRetentionVariableRedactor.Result redaction =
+                InvocationRetentionVariableRedactor.redact(originalVariables, piiCategories);
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("releaseVersion", resolvedReleaseVersion);
-        // CE-G06 / ADR-0057: retention-scoped exception — sanitized variables may persist for
-        // caller reconciliation and server-internal regenerate replay. Passwords remain stripped;
+        // IBL-A5 / ADR-0057: retain cleartext only for piiCategory=NONE; strip passwords;
         // management APIs / audit / logs never return this payload (HIST C6 / ADR-0020 display ban).
-        payload.put("variables", request.variables() == null ? Map.of() : request.variables());
-        payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, request.variables()));
+        putRedactedVariables(payload, originalVariables, redaction);
         payload.put("output", request.output());
         payload.put("encryption", sanitizeEncryption(request.encryption(), request.output().format()));
         putContextSummary(payload, request.context());
         return writeJson(payload);
     }
 
-    public String sanitizeBatchRequest(BatchGenerateRequestBody request, String resolvedReleaseVersion) {
+    public String sanitizeBatchRequest(
+            BatchGenerateRequestBody request,
+            String resolvedReleaseVersion,
+            UUID templateId
+    ) {
+        return sanitizeBatchRequest(
+                request,
+                resolvedReleaseVersion,
+                loadPiiCategories(templateId, resolvedReleaseVersion)
+        );
+    }
+
+    String sanitizeBatchRequest(
+            BatchGenerateRequestBody request,
+            String resolvedReleaseVersion,
+            Map<String, VariablePiiCategory> piiCategories
+    ) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("releaseVersion", resolvedReleaseVersion);
         payload.put("output", request.output());
@@ -50,8 +99,10 @@ public class InvocationParameterSanitizer {
         // CE-G06 / ADR-0057: single-item async ASYNC_TASK rows can regenerate from top-level variables.
         if (request.items().size() == 1) {
             Map<String, Object> variables = request.items().get(0).variables();
-            payload.put("variables", variables == null ? Map.of() : variables);
-            payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, variables));
+            Map<String, Object> original = variables == null ? Map.of() : variables;
+            InvocationRetentionVariableRedactor.Result redaction =
+                    InvocationRetentionVariableRedactor.redact(original, piiCategories);
+            putRedactedVariables(payload, original, redaction);
         }
         putContextSummary(payload, request.context());
         if (request.originalBatchId() != null && !request.originalBatchId().isBlank()) {
@@ -63,14 +114,30 @@ public class InvocationParameterSanitizer {
     public String sanitizeBatchItem(
             BatchGenerateRequestBody.BatchGenerateItemBody item,
             BatchGenerateRequestBody request,
-            String resolvedReleaseVersion
+            String resolvedReleaseVersion,
+            UUID templateId
+    ) {
+        return sanitizeBatchItem(
+                item,
+                request,
+                resolvedReleaseVersion,
+                loadPiiCategories(templateId, resolvedReleaseVersion)
+        );
+    }
+
+    String sanitizeBatchItem(
+            BatchGenerateRequestBody.BatchGenerateItemBody item,
+            BatchGenerateRequestBody request,
+            String resolvedReleaseVersion,
+            Map<String, VariablePiiCategory> piiCategories
     ) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("releaseVersion", resolvedReleaseVersion);
         payload.put("itemId", item.itemId());
-        Map<String, Object> variables = item.variables() == null ? Map.of() : item.variables();
-        payload.put("variables", variables);
-        payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, item.variables()));
+        Map<String, Object> original = item.variables() == null ? Map.of() : item.variables();
+        InvocationRetentionVariableRedactor.Result redaction =
+                InvocationRetentionVariableRedactor.redact(original, piiCategories);
+        putRedactedVariables(payload, original, redaction);
         var output = item.output() != null ? item.output() : request.output();
         payload.put("output", output);
         var encryption = item.encryption() != null ? item.encryption() : request.encryption();
@@ -88,6 +155,37 @@ public class InvocationParameterSanitizer {
             return objectMapper.writeValueAsString(root);
         } catch (JsonProcessingException ex) {
             return parametersJson;
+        }
+    }
+
+    Map<String, VariablePiiCategory> loadPiiCategories(UUID templateId, String resolvedReleaseVersion) {
+        if (templateId == null || resolvedReleaseVersion == null || resolvedReleaseVersion.isBlank()) {
+            return Map.of();
+        }
+        return templateVersionRepository
+                .findByTemplateIdAndReleaseVersion(templateId, resolvedReleaseVersion.trim())
+                .map(version -> {
+                    List<VariableSchemaEntity> schema = variableSchemaRepository
+                            .findByTemplateVersionIdOrderByVariableKeyAsc(version.getId());
+                    Map<String, VariablePiiCategory> categories = new LinkedHashMap<>();
+                    for (VariableSchemaEntity field : schema) {
+                        categories.put(field.getVariableKey(), field.getPiiCategory());
+                    }
+                    return Map.<String, VariablePiiCategory>copyOf(categories);
+                })
+                .orElse(Map.of());
+    }
+
+    private void putRedactedVariables(
+            Map<String, Object> payload,
+            Map<String, Object> originalVariables,
+            InvocationRetentionVariableRedactor.Result redaction
+    ) {
+        payload.put("variables", redaction.variables());
+        payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, originalVariables));
+        if (!redaction.redactedVariableKeys().isEmpty()) {
+            payload.put("redactedVariableKeys", redaction.redactedVariableKeys());
+            payload.put("redactedPiiCategories", redaction.redactedPiiCategories());
         }
     }
 

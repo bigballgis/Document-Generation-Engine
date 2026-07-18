@@ -398,10 +398,10 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - 敏感数据分级处理基线为禁止明文持久化/展示、允许摘要或指纹、授权响应例外。
 - 禁止明文持久化或展示的内容包括 API 凭证 secret、DOCX/PDF 加密密码、模板变量原值、模板测试数据敏感值、完整请求体、完整下载地址、完整 AD Group 成员、未授权组详情、历史密文、敏感配置明文、内部渲染诊断明文和未授权生成文档内容；保真警告不得包含模板变量原值、粘贴原文、客户数据、完整请求体或生成文档敏感内容。
 - **CE-G03：** 测试数据集存储中的授权测试值（经 `SYNTHETIC` / `EXPLICIT_SENSITIVE`）不视为对维护者的「未授权展示」；审计/契约/导出仍禁明文。见 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。
-- **CE-G06 / ADR-0057（2026-07-16）：** `api_invocation_record.parameters_storage` **允许**在调用记录留存窗口内持久化**已消毒**的模板变量原值（加密密码仍禁止落库），用途仅限：(1) 调用方 reconciliation（ADR-0040）；(2) 受控再生内部重放。留存 TTL = 调用记录 retention；行清理时一并销毁。**管理端列表/详情/CSV、管理审计、日志、导出、契约示例仍禁止**返回或展示 variables / 密码明文（HIST C6 **不**放宽）。列级/应用层 encryption-at-rest **暂缓**（对齐 ADR-0045；待 KMS）。权威决策：[ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)；行为：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。
+- **CE-G06 / ADR-0057（2026-07-16；IBL-A5 Amendment 2026-07-18）：** `api_invocation_record.parameters_storage` 在调用记录留存窗口内可持久化**已消毒且按 PII 分类收窄后**的模板变量，用途仅限：(1) 调用方 reconciliation（ADR-0040）；(2) 受控再生内部重放。**明文留存仅覆盖**版本 `VariableSchema.piiCategory = NONE`（或缺省等价）的字段；`piiCategory ≠ NONE` 与未知/未分类 key **禁止**明文落库（省略或稳定哨兵；可选 `redactedVariableKeys` 仅键名）。加密密码仍禁止落库。留存 TTL = 调用记录 retention；行清理时一并销毁。**管理端列表/详情/CSV、管理审计、日志、导出、契约示例仍禁止**返回或展示 variables / 密码明文（HIST C6 **不**放宽）。列级/应用层 encryption-at-rest **暂缓**（对齐 ADR-0045；待 KMS）。权威决策：[ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md) Amendment 2026-07-18；行为：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)、[ibl-a5-pii-retention-redaction.md](../behavior/ibl-a5-pii-retention-redaction.md)。
 - 允许以摘要或指纹表达的内容包括 API 凭证标识或指纹摘要、`idempotencyKey` 摘要、请求语义 hash、`variablesHash`、`itemsHash`、加密策略摘要、AD Group 授权摘要、下载地址脱敏值、`contextSummary`、`fidelityWarnings` 非敏感摘要、`policyVersion`、`changedAreas` 和配置差异摘要。
-- 授权响应例外仅限已确认安全场景：API 凭证创建或轮换时 secret 明文只展示一次；授权 API 响应可返回可用 `download.url`；同步文件流和下载取文件可在授权通过后返回生成文档内容；`task.queryPath` 只是相对查询路径，不授予额外访问能力；调用方 invocation 详情可按 ADR-0040/0057 返回已消毒 parameters；**管理端** invocation API 仍不得返回 variables。
-- 脱敏规则适用于日志、审计、管理界面、API 契约展示、契约示例、错误响应、导出文件和支持排查材料；未知或未分类字段默认按敏感处理。
+- 授权响应例外仅限已确认安全场景：API 凭证创建或轮换时 secret 明文只展示一次；授权 API 响应可返回可用 `download.url`；同步文件流和下载取文件可在授权通过后返回生成文档内容；`task.queryPath` 只是相对查询路径，不授予额外访问能力；调用方 invocation 详情可按 ADR-0040/0057（含 IBL-A5 收窄）返回**脱敏后** parameters（无禁止类明文）；**管理端** invocation API 仍不得返回 variables。
+- 脱敏规则适用于日志、审计、管理界面、API 契约展示、契约示例、错误响应、导出文件和支持排查材料；未知或未分类字段默认按敏感处理（含 `parameters_storage` 写路径）。
 
 ## 12. 待确认权限设计议题
 
@@ -538,8 +538,15 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 
 - **无新 capability bit。** 再生授权复用管理员矩阵 + `readAudit` 可见边界：`GLOBAL_ADMIN`、同组 `GROUP_ADMIN`、模板可见范围内 `AUDIT_ADMIN`。
 - `TEMPLATE_AUTHOR` / `TEMPLATE_TESTER` / `TEMPLATE_APPROVER` / `MASTER_DESIGNER` / 调用方 **禁止** regenerate（403 fail-closed）。
-- 再生**内部**可读 `parametersStorage`（ADR-0057 授权的留存例外）；响应、审计、管理 UI **仍禁止** variables / 加密密码明文（HIST C6 不放宽）。见 §11 ADR-0057 条。
+- 再生**内部**可读 `parametersStorage`（ADR-0057 授权的留存例外，含 IBL-A5 收窄后形态）；响应、审计、管理 UI **仍禁止** variables / 加密密码明文（HIST C6 不放宽）。见 §11 ADR-0057 条。
 - 行为 SoT：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)；ADR：[0057-invocation-parameters-retention-for-regenerate.md](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)。
+
+**IBL-A5 PII 留存脱敏（2026-07-18）：**
+
+- **无新角色 / 无新 capability bit。** 写路径按版本 `piiCategory` 收窄 ADR-0057 Store；再生权限矩阵不变。
+- 禁止类明文不落库；调用方 detail 仅见脱敏后 parameters；管理端仍禁 parameters（HIST C6）。
+- 不翻转 checklist **#3b** / **#5a**；encryption-at-rest 仍 deferred。
+- 行为 SoT：[ibl-a5-pii-retention-redaction.md](../behavior/ibl-a5-pii-retention-redaction.md)；见 §11 ADR-0057 Amendment。
 
 **CE-G04 Legal hold（2026-07-16）：**
 

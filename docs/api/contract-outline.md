@@ -151,7 +151,7 @@ API 契约查看和可调用版本列表必须按当前授权视角返回结果�
 
 **CE-G03 澄清（2026-07-15）：** 「模板测试数据敏感值」禁明文面 = 日志、审计摘要、契约示例、导出、发布证据与未授权展示。授权维护者经 `SYNTHETIC` / `EXPLICIT_SENSITIVE` 闸门后写入 Template Test Data Set 存储的变量值是测试资产本体（见 [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md) G03-C14/C22；[data-storage-view.md](../architecture/data-storage-view.md)）。不修订 ADR-0020 正文。运行时调用方 generate API **不**新增入参 PII 扫描。
 
-**CE-G06 / ADR-0057（2026-07-16）：** `api_invocation_record.parameters_storage` 允许在调用记录留存窗口内持久化已消毒模板变量（加密密码仍禁），供调用方 reconciliation 与受控再生内部重放；管理端/审计/日志/导出仍禁明文；列级 encryption-at-rest 暂缓。权威：[ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)。
+**CE-G06 / ADR-0057（2026-07-16；IBL-A5 Amendment 2026-07-18）：** `api_invocation_record.parameters_storage` 允许在调用记录留存窗口内持久化已消毒且按 PII 分类收窄后的模板变量：明文仅 `piiCategory = NONE`；`≠ NONE` 与未知 key 禁止明文；加密密码仍禁。供调用方 reconciliation 与受控再生内部重放（再生重放非脱敏字段）。管理端/审计/日志/导出仍禁明文；列级 encryption-at-rest 暂缓。权威：[ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)；行为：[ibl-a5-pii-retention-redaction.md](../behavior/ibl-a5-pii-retention-redaction.md)。
 
 允许以摘要或指纹表达的内容包括 API 凭证标识或指纹摘要、`idempotencyKey` 摘要、请求语义 hash、`variablesHash`、`itemsHash`、加密策略摘要、AD Group 授权摘要、下载地址脱敏值、`contextSummary`、`fidelityWarnings` 非敏感摘要、`policyVersion`、`changedAreas` 和配置差异摘要。
 
@@ -1144,6 +1144,7 @@ Asynchronous accepted response draft
 ### 参数存储与详情
 
 - 详情 `parameters` 返回调用时 sanitized JSON（variables、output、encryption 元数据等）。
+- **IBL-A5 / ADR-0057 Amendment：** 持久化与调用方详情中的 `variables` **不得**含 `piiCategory ≠ NONE` 或未知 key 的调用方明文；`NONE` 字段可保留明文；可选 `redactedVariableKeys`（仅键名）。行为：[ibl-a5-pii-retention-redaction.md](../behavior/ibl-a5-pii-retention-redaction.md)。
 - **禁止** 持久化或返回 `openPassword` / `ownerPassword`；`encryption.enabled` 与 permissions 摘要可返回。
 - `IDEMPOTENCY_REPLAYED` **不**新建 invocation；列表/详情通过原记录的 `idempotencyKey` 或 `requestId` 解析。
 
@@ -1202,7 +1203,7 @@ Asynchronous accepted response draft
 | 水印 | 复用 CE-G02 DOCX 眉脚 + PDF 对角 `SPECIMEN`；失败 fail-closed，不落无水印成功件 |
 | 加密 | 再生件一律不加密；`encryptionReapplied=false` |
 | 审计 | 终态必写 `INVOCATION_REGENERATED`（成功/失败）；**禁止** variables / 密码明文 |
-| 参数留存 | 内部重放读 `parameters_storage`；授权依据 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)；管理端响应仍禁 variables |
+| 参数留存 | 内部重放读 `parameters_storage`（IBL-A5 脱敏后形态：非脱敏字段可重放；脱敏字段按未提供）；授权依据 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md) Amendment 2026-07-18；管理端响应仍禁 variables；**不**因 PII 脱敏本身拒绝再生 |
 | 边界 | **不**新建调用方 runtime SUCCESS 记录；**不**消耗调用方幂等键；**不**要求 regenerate `idempotencyKey` |
 | FE | 再生 CTA / E2E/UIUX **out of scope** |
 | 过期 | `record_expires_at` 已过 → **410**（契约钉死；与 BDD Q2 默认一致） |
