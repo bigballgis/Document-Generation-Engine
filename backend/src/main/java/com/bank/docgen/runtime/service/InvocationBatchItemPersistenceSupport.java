@@ -113,7 +113,12 @@ final class InvocationBatchItemPersistenceSupport {
                     item.output().mode(),
                     item.status(),
                     null,
-                    parameterSanitizer.sanitizeBatchItem(itemBody, request, resolvedReleaseVersion),
+                    parameterSanitizer.sanitizeBatchItem(
+                            itemBody,
+                            request,
+                            resolvedReleaseVersion,
+                            template.getId()
+                    ),
                     item.documentId(),
                     null,
                     artifactSaved,

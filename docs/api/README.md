@@ -80,6 +80,12 @@ Behavior SoT: [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md). Stor
 
 Management regenerate-by-invocation is a **management-API** contract (documented in [contract-outline.md](contract-outline.md) «审计可复现受控再生（CE-G06）」 and [openapi-v1.yaml](openapi-v1.yaml) `regenerateTemplateManagementInvocation`). Caller-facing generate paths stay watermark-free. FE regenerate CTA is out of scope. Sanitized `parameters_storage` retention for replay is authorized by [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md); management APIs still must not expose variables.
 
+### PII-category retention redaction (IBL-A5)
+
+Retention write path (same `parameters_storage` column) **must** redact/exclude clear values when version `VariableSchema.piiCategory ≠ NONE` or the key is unknown; `NONE` may remain clear (passwords still stripped). Caller-facing invocation detail returns the post-redaction parameters; regenerate replays non-redacted fields and does not fail solely due to PII redaction. No new OpenAPI error codes for this leaf. Encryption-at-rest remains deferred. Do **not** flip checklist **#3b** / **#5a**.
+
+Authority: [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md) Amendment 2026-07-18. Behavior SoT: [ibl-a5-pii-retention-redaction.md](../behavior/ibl-a5-pii-retention-redaction.md). Contract notes: [contract-outline.md](contract-outline.md) «参数存储与详情» / CE-G06 regenerate «参数留存».
+
 Stable English-first fail-closed keys (implement in `messages_en.properties`):
 
 | Condition | HTTP | `error.messageKey` |

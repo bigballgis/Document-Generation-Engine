@@ -12,6 +12,7 @@ import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.rendering.PdfSpecimenWatermarkStamper;
 import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordEntity;
+import com.bank.docgen.runtime.service.InvocationRetentionVariableRedactor;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
@@ -227,21 +228,13 @@ public class InvocationRegenerationAssemblySupport {
         try {
             JsonNode root = objectMapper.readTree(parametersStorage == null ? "{}" : parametersStorage);
             if (root.hasNonNull("variables") && root.get("variables").isObject()) {
-                return objectMapper.convertValue(
-                        root.get("variables"),
-                        new TypeReference<LinkedHashMap<String, Object>>() {
-                        }
-                );
+                return replayVariables(root.get("variables"));
             }
             JsonNode items = root.get("items");
             if (items != null && items.isArray() && items.size() == 1
                     && items.get(0).hasNonNull("variables")
                     && items.get(0).get("variables").isObject()) {
-                return objectMapper.convertValue(
-                        items.get(0).get("variables"),
-                        new TypeReference<LinkedHashMap<String, Object>>() {
-                        }
-                );
+                return replayVariables(items.get(0).get("variables"));
             }
         } catch (IOException | RuntimeException ignored) {
             // fall through to fail-closed
@@ -252,6 +245,16 @@ public class InvocationRegenerationAssemblySupport {
                 ApiErrorCategories.GENERATION,
                 "api.error.audit.releaseBundleSnapshotUnavailable"
         );
+    }
+
+    private Map<String, Object> replayVariables(JsonNode variablesNode) {
+        Map<String, Object> retained = objectMapper.convertValue(
+                variablesNode,
+                new TypeReference<LinkedHashMap<String, Object>>() {
+                }
+        );
+        // IBL-A5: drop redaction sentinels / nulls so regenerate does not require PII cleartext.
+        return new LinkedHashMap<>(InvocationRetentionVariableRedactor.toReplayVariables(retained));
     }
 
     private InvocationRegenerationException pinnedMasterUnavailable() {

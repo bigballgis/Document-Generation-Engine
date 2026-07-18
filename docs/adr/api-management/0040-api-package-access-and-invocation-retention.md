@@ -77,6 +77,12 @@ Callers also need durable **invocation records** (parameters + optional artifact
 - ADR **0005** **15-minute** download URL TTL is unchanged; when `saveGeneratedDocuments=true` and artifact TTL exceeds idempotency TTL, re-download after idempotency expiry uses invocation/document retention rules (not a new generation).
 - ADR **0016** `changedAreas` baseline gains **`INVOCATION_RETENTION`**; primary navigation amends to package hub tab as the default entry.
 
+## Amendment — 2026-07-18 (align ADR-0057 PII retention redaction; IBL-A5)
+
+**Prior decision (Sensitive-data basis bullet, 2026-07-16):** sanitized template variable persistence in `parameters_storage` is an authorized retention-scoped exception for caller reconciliation and CE-G06 regenerate.
+
+**Amended alignment:** That exception is **narrowed by** [ADR-0057](../authorization-security/0057-invocation-parameters-retention-for-regenerate.md) Amendment 2026-07-18 — cleartext variable values may be retained **only** for `piiCategory = NONE` (schema default); `piiCategory ≠ NONE` and unknown keys must redact/exclude. Password strip, invocation TTL, management non-exposure, and encryption-at-rest deferral are unchanged. Behavior: [ibl-a5-pii-retention-redaction.md](../../behavior/ibl-a5-pii-retention-redaction.md). Does **not** flip checklist **#3b** / **#5a**.
+
 ## Consequences
 
 - Publish gate logic must materialize policy **before** «policy must exist» checks (see BDD R1).

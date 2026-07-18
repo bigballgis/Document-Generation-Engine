@@ -25,7 +25,13 @@ import com.bank.docgen.runtime.persistence.ApiInvocationRecordRepository;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import com.bank.docgen.template.domain.VariablePiiCategory;
+import com.bank.docgen.template.domain.VariableType;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
+import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.persistence.VariableSchemaEntity;
+import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
@@ -45,6 +51,7 @@ class InvocationRecordServiceTest {
 
     private static final UUID TEMPLATE_ID = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static final UUID CREDENTIAL_ID = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+    private static final UUID VERSION_ID = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
 
     @Mock
     private ApiInvocationRecordRepository repository;
@@ -52,6 +59,10 @@ class InvocationRecordServiceTest {
     private IdempotencyService idempotencyService;
     @Mock
     private ReleaseBundleFingerprintSupport fingerprintSupport;
+    @Mock
+    private TemplateVersionRepository templateVersionRepository;
+    @Mock
+    private VariableSchemaRepository variableSchemaRepository;
 
     @Captor
     private ArgumentCaptor<ApiInvocationRecordEntity> savedRecords;
@@ -65,11 +76,32 @@ class InvocationRecordServiceTest {
     void setUp() {
         service = new InvocationRecordService(
                 repository,
-                new InvocationParameterSanitizer(new ObjectMapper()),
+                new InvocationParameterSanitizer(
+                        new ObjectMapper(),
+                        templateVersionRepository,
+                        variableSchemaRepository
+                ),
                 idempotencyService,
                 fingerprintSupport
         );
         lenient().when(fingerprintSupport.resolve(any(), any())).thenReturn(Optional.empty());
+        TemplateVersionEntity version = new TemplateVersionEntity(VERSION_ID, TEMPLATE_ID, "U0000001");
+        version.setReleaseVersion("1.0.0");
+        lenient().when(templateVersionRepository.findByTemplateIdAndReleaseVersion(eq(TEMPLATE_ID), any()))
+                .thenReturn(Optional.of(version));
+        lenient().when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(VERSION_ID))
+                .thenReturn(List.of(new VariableSchemaEntity(
+                        UUID.randomUUID(),
+                        VERSION_ID,
+                        "name",
+                        VariableType.TEXT,
+                        false,
+                        null,
+                        null,
+                        null,
+                        null,
+                        VariablePiiCategory.NONE
+                )));
         template = new TemplateEntity(
                 TEMPLATE_ID,
                 "TPL-001",
