@@ -30,6 +30,7 @@ import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.port.VariableSchemaValidationPort;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.VariableComputeService;
 import java.io.ByteArrayInputStream;
@@ -74,6 +75,8 @@ class DocumentGenerationEngineTest {
     private VersionFidelityWarningService versionFidelityWarningService;
     @Mock
     private VariableComputeService variableComputeService;
+    @Mock
+    private VariableSchemaValidationPort variableSchemaValidationPort;
 
     private GenerationMetrics generationMetrics;
     private DocumentGenerationEngine engine;
@@ -98,6 +101,7 @@ class DocumentGenerationEngineTest {
                 renderProfileService,
                 versionFidelityWarningService,
                 variableComputeService,
+                variableSchemaValidationPort,
                 new com.bank.docgen.rendering.PaginationDeltaFidelitySupport(
                         new com.bank.docgen.infrastructure.config.DocgenRenderingProperties(),
                         new com.bank.docgen.rendering.PdfPageCountReader()
@@ -175,7 +179,7 @@ class DocumentGenerationEngineTest {
         DocumentGenerationEngine.GeneratedDocument generated = engine.generate(
                 template,
                 "1.0.0",
-                java.util.Map.of("customerName", "Alice"),
+                java.util.Map.of(),
                 "DOCX",
                 new EncryptionOptionsView(false, null, null, null)
         );
@@ -248,7 +252,7 @@ class DocumentGenerationEngineTest {
         DocumentGenerationEngine.GeneratedDocument generated = engine.generate(
                 template,
                 "1.0.0",
-                java.util.Map.of("customerName", "Alice"),
+                java.util.Map.of(),
                 "DOCX",
                 new EncryptionOptionsView(false, null, null, null)
         );
@@ -298,7 +302,7 @@ class DocumentGenerationEngineTest {
         assertThatThrownBy(() -> engine.generate(
                 template,
                 "1.0.0",
-                java.util.Map.of("customerName", "Alice"),
+                java.util.Map.of(),
                 "DOCX",
                 new EncryptionOptionsView(false, null, null, null)
         ))

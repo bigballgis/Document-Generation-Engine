@@ -17,6 +17,7 @@ import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.sharedkernel.document.variable.VariableValidationException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -164,6 +165,18 @@ public class BatchExecutionService {
     }
 
     private ErrorDetail toItemError(RuntimeException ex) {
+        VariableValidationException validationFailed = findVariableValidation(ex);
+        if (validationFailed != null) {
+            String messageKey = validationFailed.messageKey();
+            return new ErrorDetail(
+                    ApiErrorCodes.VARIABLE_VALIDATION_FAILED,
+                    ApiErrorCategories.VALIDATION,
+                    messageResolver.resolve(messageKey),
+                    messageKey,
+                    false,
+                    validationFailed.fieldErrors()
+            );
+        }
         VariableComputeException compute = findVariableCompute(ex);
         if (compute != null) {
             String messageKey = compute.messageKey();
@@ -197,6 +210,17 @@ public class BatchExecutionService {
                 false,
                 null
         );
+    }
+
+    private static VariableValidationException findVariableValidation(Throwable ex) {
+        Throwable current = ex;
+        while (current != null) {
+            if (current instanceof VariableValidationException validation) {
+                return validation;
+            }
+            current = current.getCause();
+        }
+        return null;
     }
 
     private static VariableComputeException findVariableCompute(Throwable ex) {

@@ -14,6 +14,7 @@ import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.port.VariableSchemaValidationPort;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.VariableComputeService;
 import com.bank.docgen.template.service.VersionFidelityWarningService;
@@ -41,6 +42,7 @@ public class DocumentGenerationEngine {
             RenderProfileService renderProfileService,
             VersionFidelityWarningService versionFidelityWarningService,
             VariableComputeService variableComputeService,
+            VariableSchemaValidationPort variableSchemaValidationPort,
             PaginationDeltaFidelitySupport paginationDeltaFidelitySupport,
             GenerationMetrics generationMetrics
     ) {
@@ -56,6 +58,7 @@ public class DocumentGenerationEngine {
                 renderProfileService,
                 versionFidelityWarningService,
                 variableComputeService,
+                variableSchemaValidationPort,
                 paginationDeltaFidelitySupport
         );
         this.generationMetrics = generationMetrics;

@@ -160,6 +160,16 @@ Management asset catalog routes in [openapi-v1.yaml](openapi-v1.yaml) / [contrac
 
 Behavior SoT: [ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md). Permissions: [permission-matrix.md](../security/permission-matrix.md) §13.2.
 
+### Runtime fail-closed variable validation (IBL-A1)
+
+Caller-facing runtime generate / batch-generate and management preview assemble apply fail-closed `VariableSchema` validation (required / type / enum; unknown keys rejected) **before** compute/assemble. Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `ErrorCode` includes `VARIABLE_VALIDATION_FAILED`. Companion: [contract-outline.md](contract-outline.md) error catalog + IBL-A1 note.
+
+| Condition | HTTP | `error.code` | `error.category` | `error.messageKey` | `retryable` |
+| --- | --- | --- | --- | --- | --- |
+| Missing required / wrong type / wrong enum / unknown field (one or many) | 422 | `VARIABLE_VALIDATION_FAILED` | `VALIDATION` | `api.error.validation.variableValidationFailed` | `false` |
+
+Envelope reuses existing `error.fieldErrors[]` (`field` / `reason` / `message`); `reason` ∈ `REQUIRED` \| `INVALID_TYPE` \| `INVALID_FORMAT` \| `ENUM_NOT_ALLOWED` \| `UNKNOWN_FIELD`. Legacy single-field codes `VARIABLE_REQUIRED` / `VARIABLE_TYPE_INVALID` / `VARIABLE_FORMAT_INVALID` / `VARIABLE_RULE_FAILED` remain in the enum for catalog compatibility; **runtime/preview schema validation uses the aggregate code**. Publish does **not** validate generate body. CE-U03 test-data-set top-level code migration is out of scope. Implement in `ApiErrorCodes` + `messages_en.properties` (backend). Behavior SoT: [ibl-a1-variable-validation.md](../behavior/ibl-a1-variable-validation.md)（BDD-IBL-A1-001…008）. Formal phase **None**; **not** go-live.
+
 ### Full-library export (CE-E03)
 
 Management full-library export in [openapi-v1.yaml](openapi-v1.yaml) (`exportLibraryTemplates`) / [contract-outline.md](contract-outline.md) «模板导出/导入契约» CE-E03:

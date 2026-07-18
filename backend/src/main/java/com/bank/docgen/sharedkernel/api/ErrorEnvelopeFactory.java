@@ -240,6 +240,25 @@ public class ErrorEnvelopeFactory {
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 
+    public ResponseEntity<ErrorEnvelope> variableValidationFailed(
+            HttpServletRequest request,
+            com.bank.docgen.sharedkernel.document.variable.VariableValidationException ex
+    ) {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        String messageKey = ex.messageKey();
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.VARIABLE_VALIDATION_FAILED,
+                ApiErrorCategories.VALIDATION,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                false,
+                ex.fieldErrors()
+        );
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
+    }
+
     public ResponseEntity<ErrorEnvelope> variableComputeFailed(
             HttpServletRequest request,
             com.bank.docgen.sharedkernel.document.compute.VariableComputeException ex

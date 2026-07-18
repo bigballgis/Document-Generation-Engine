@@ -124,6 +124,9 @@ public class RenderingExceptionAdvice {
             PreviewGenerationException ex
     ) {
         Throwable cause = ex.getCause();
+        if (cause instanceof com.bank.docgen.sharedkernel.document.variable.VariableValidationException validationEx) {
+            return errorEnvelopeFactory.variableValidationFailed(request, validationEx);
+        }
         if (cause instanceof com.bank.docgen.sharedkernel.document.compute.VariableComputeException computeEx) {
             return errorEnvelopeFactory.variableComputeFailed(request, computeEx);
         }
@@ -142,6 +145,14 @@ public class RenderingExceptionAdvice {
                 ApiErrorCodes.RENDERING_FAILED,
                 ex.messageKey()
         );
+    }
+
+    @ExceptionHandler(com.bank.docgen.sharedkernel.document.variable.VariableValidationException.class)
+    public ResponseEntity<ErrorEnvelope> handleVariableValidationFailed(
+            HttpServletRequest request,
+            com.bank.docgen.sharedkernel.document.variable.VariableValidationException ex
+    ) {
+        return errorEnvelopeFactory.variableValidationFailed(request, ex);
     }
 
     @ExceptionHandler(com.bank.docgen.sharedkernel.document.compute.VariableComputeException.class)

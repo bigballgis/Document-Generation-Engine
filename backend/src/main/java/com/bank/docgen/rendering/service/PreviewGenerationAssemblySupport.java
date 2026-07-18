@@ -22,6 +22,7 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.port.RenderableTemplateSnapshot;
 import com.bank.docgen.template.port.TemplateRenderContextPort;
 import com.bank.docgen.template.port.VariableComputePort;
+import com.bank.docgen.template.port.VariableSchemaValidationPort;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +49,7 @@ final class PreviewGenerationAssemblySupport {
     private final RenderProfileService renderProfileService;
     private final FidelityValidationService fidelityValidationService;
     private final VariableComputePort variableComputePort;
+    private final VariableSchemaValidationPort variableSchemaValidationPort;
     private final PaginationDeltaFidelitySupport paginationDeltaFidelitySupport;
 
     PreviewGenerationAssemblySupport(
@@ -60,6 +62,7 @@ final class PreviewGenerationAssemblySupport {
             RenderProfileService renderProfileService,
             FidelityValidationService fidelityValidationService,
             VariableComputePort variableComputePort,
+            VariableSchemaValidationPort variableSchemaValidationPort,
             PaginationDeltaFidelitySupport paginationDeltaFidelitySupport
     ) {
         this.anchorBindingRepository = anchorBindingRepository;
@@ -71,6 +74,7 @@ final class PreviewGenerationAssemblySupport {
         this.renderProfileService = renderProfileService;
         this.fidelityValidationService = fidelityValidationService;
         this.variableComputePort = variableComputePort;
+        this.variableSchemaValidationPort = variableSchemaValidationPort;
         this.paginationDeltaFidelitySupport = paginationDeltaFidelitySupport;
     }
 
@@ -99,6 +103,8 @@ final class PreviewGenerationAssemblySupport {
             Map<String, Object> variables,
             String localeTag
     ) throws IOException {
+        // IBL-A1: preview aligned with runtime — fail-closed before compute/assemble.
+        variableSchemaValidationPort.validateForAssembly(version.getId(), variables);
         MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.masterId())
                 .orElseThrow(MasterNotFoundException::new);
         Map<String, Object> resolvedVariables = variableComputePort.applyCompute(

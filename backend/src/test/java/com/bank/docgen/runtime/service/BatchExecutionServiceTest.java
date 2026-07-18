@@ -18,9 +18,11 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.sharedkernel.api.ErrorDetail;
+import com.bank.docgen.sharedkernel.api.FieldError;
 import com.bank.docgen.sharedkernel.document.compute.VariableComputeException;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.sharedkernel.document.variable.VariableValidationException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -169,6 +171,40 @@ class BatchExecutionServiceTest {
                 });
 
         verify(idempotencyService, never()).registerDownloadableDocument(any(), anyString(), anyString());
+    }
+
+    @Test
+    void bddIblA1_007_batchItemVariableValidationFailed_keepsOtherItemSucceeded() {
+        when(messageResolver.resolve(VariableValidationException.MESSAGE_KEY))
+                .thenReturn("One or more template variables failed validation.");
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
+                .thenReturn(generated("DOC-1"))
+                .thenThrow(new VariableValidationException(List.of(
+                        new FieldError("customerName", "REQUIRED", "Field is required.")
+                )));
+
+        BatchExecutionService.BatchExecutionOutcome outcome = service.execute(
+                template,
+                "1.0.0",
+                request,
+                "BATCH-IBL-A1",
+                true
+        );
+
+        assertThat(outcome.taskStatus()).isEqualTo(TaskStatus.PARTIAL_SUCCEEDED);
+        BatchResultItemView ok = outcome.batchResult().items().get(0);
+        BatchResultItemView failed = outcome.batchResult().items().get(1);
+        assertThat(ok.status()).isEqualTo("SUCCEEDED");
+        assertThat(ok.documentId()).isEqualTo("DOC-1");
+        assertThat(failed.status()).isEqualTo("FAILED");
+        assertThat(failed.documentId()).isNull();
+        assertThat(failed.error().code()).isEqualTo(ApiErrorCodes.VARIABLE_VALIDATION_FAILED);
+        assertThat(failed.error().category()).isEqualTo(ApiErrorCategories.VALIDATION);
+        assertThat(failed.error().messageKey()).isEqualTo(VariableValidationException.MESSAGE_KEY);
+        assertThat(failed.error().fieldErrors()).anySatisfy(error -> {
+            assertThat(error.field()).isEqualTo("customerName");
+            assertThat(error.reason()).isEqualTo("REQUIRED");
+        });
     }
 
     @Test
