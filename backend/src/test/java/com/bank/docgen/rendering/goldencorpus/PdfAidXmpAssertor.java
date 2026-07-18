@@ -5,8 +5,11 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
- * Lightweight PDF/A-2b identifier check via pdfaid XMP (CE-O01). Chosen over veraPDF so
- * {@code mvn verify} stays self-contained without an external veraPDF CLI/library.
+ * Lightweight PDF/A-2b identifier check via pdfaid XMP (CE-O01).
+ *
+ * <p>Kept as a cheap golden-corpus / synthetic-path check. Machine conformance for F12 /
+ * IBL-B3 is owned by {@link VeraPdfPdfA2bAssertor} (veraPDF) — this assertor must not be
+ * the only PDF/A gate in verify.
  */
 public final class PdfAidXmpAssertor {
 

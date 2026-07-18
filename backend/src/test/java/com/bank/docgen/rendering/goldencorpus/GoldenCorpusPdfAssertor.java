@@ -16,6 +16,12 @@ public final class GoldenCorpusPdfAssertor {
         if (assertionRoot.path("requirePdfA2b").asBoolean(false)) {
             PdfAidXmpAssertor.assertPdfA2bIdentifier(pdfBytes);
         }
+        // IBL-B3: opt-in machine gate for LIBREOFFICE (or other real) PDF/A artifacts.
+        // SYNTHETIC packages keep requirePdfA2b + XMP only; use requireVeraPdf on real PDFs.
+        if (assertionRoot.path("requireVeraPdf").asBoolean(false)
+                && VeraPdfPdfA2bAssertor.shouldValidateOrFailIfRequired()) {
+            VeraPdfPdfA2bAssertor.assertPdfA2b(pdfBytes);
+        }
         applyTextAssertions(extractText(pdfBytes, null), assertionRoot);
     }
 

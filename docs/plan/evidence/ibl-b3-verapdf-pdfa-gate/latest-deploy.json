@@ -1,0 +1,21 @@
+{
+  "status": "DEPLOY_OK",
+  "timestamp_utc": "20260718T202428Z",
+  "slice": "IBL-B3",
+  "task": 115,
+  "tip": "c81054b09c393ad5bb468380616ae49bb7c1465f",
+  "tip_short": "c81054b0",
+  "command": "docker-deploy-queue.ps1 -ForceRebuild",
+  "compose_project": "documentgenerationengine",
+  "healthz": {
+    "body": "{\"status\":\"UP\"}",
+    "http": 200
+  },
+  "ui_4173": "FAIL: 由于目标计算机积极拒绝，无法连接。 (localhost:4173)",
+  "ui_5173": "200",
+  "backend_image": "sha256:dc26c439279d89b40490b4ca8e64ac8b3fdca79fc47927fe66f891cc796a6898",
+  "frontend_image": "sha256:ac5df2fe2e195a0f3a14a8f0143d2dfe955126ceca92271cce8147f08746a4a7",
+  "frontend_ui_in_scope": false,
+  "e2e": "N/A",
+  "go_live": false
+}
