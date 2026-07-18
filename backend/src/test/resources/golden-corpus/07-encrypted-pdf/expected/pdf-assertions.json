@@ -2,6 +2,16 @@
   "deferred": false,
   "requireEncrypted": true,
   "assertions": [
-    {"type": "TEXT_CONTAINS", "substring": "Encrypted sample body"}
+    {"type": "TEXT_CONTAINS", "substring": "Encrypted sample body"},
+    {"type": "PAGE_COUNT", "equals": 1},
+    {
+      "type": "TEXT_POSITION",
+      "substring": "Encrypted",
+      "pageIndex": 0,
+      "xMin": 40.0,
+      "xMax": 520.0,
+      "yMin": 40.0,
+      "yMax": 200.0
+    }
   ]
 }
