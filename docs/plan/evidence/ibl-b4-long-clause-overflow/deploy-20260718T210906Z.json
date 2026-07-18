@@ -1,0 +1,33 @@
+{
+  "status": "DEPLOY_OK",
+  "timestamp_utc": "20260718T210906Z",
+  "slice": "IBL-B4",
+  "task": 116,
+  "tip": "d6b389d17102b5f6a6006ce95d2c08b28cb130b6",
+  "tip_short": "d6b389d1",
+  "tip_subject": "feat(rendering): activate IBL-B4 long-clause overflow golden theme 08",
+  "command": "docker-deploy-queue.ps1 -ForceRebuild",
+  "compose_project": "documentgenerationengine",
+  "healthz": {
+    "body": "{\"status\":\"UP\"}",
+    "http": 200
+  },
+  "ui_4173": "200",
+  "backend_image": "sha256:9e373b00ab62ff453d1ede1f2bf4aa74e31d61869b00d20fd0aec1c55952200c",
+  "frontend_image": "sha256:6728efd48ce70f15be0bfe53a53b9a1a4436aa42a905065045aee7c3d4a2e451",
+  "backend_inspect": "sha256:9e373b00ab62ff453d1ede1f2bf4aa74e31d61869b00d20fd0aec1c55952200c|2026-07-18T21:07:51.422387091Z|healthy",
+  "frontend_inspect": "sha256:6728efd48ce70f15be0bfe53a53b9a1a4436aa42a905065045aee7c3d4a2e451|2026-07-18T21:07:53.319014585Z|healthy",
+  "frontend_ui_in_scope": false,
+  "e2e": "N/A",
+  "go_live": false,
+  "word_baselines_invented": false,
+  "lo_smoke": {
+    "soffice_in_docker": true,
+    "status": "SKIPPED",
+    "page_count_captured": false,
+    "soffice_version": "LibreOffice 7.3.7.2 30(Build:2)",
+    "docker_cp_blocked_readonly_rootfs": true,
+    "host_soffice": false
+  },
+  "evidence_dir": "docs/plan/evidence/ibl-b4-long-clause-overflow"
+}

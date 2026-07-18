@@ -1,0 +1,1 @@
+documentgenerationengine-docgen-frontend:latest 6728efd48ce7 sha256:6728efd48ce70f15be0bfe53a53b9a1a4436aa42a905065045aee7c3d4a2e451 14 hours ago
