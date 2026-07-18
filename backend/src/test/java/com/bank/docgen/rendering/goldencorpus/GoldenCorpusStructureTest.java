@@ -58,7 +58,11 @@ class GoldenCorpusStructureTest {
 
     @Test
     void placeholderMissingSkeletonFileFails(@TempDir Path tempDir) throws Exception {
+        // Use a remaining PLACEHOLDER theme if any; otherwise force maturity for layout gate.
         Path packageDir = copyPackageToTemp("long-clause-limits", tempDir);
+        Path manifestPath = packageDir.resolve("manifest.json");
+        String manifest = Files.readString(manifestPath).replace("\"ACTIVE\"", "\"PLACEHOLDER\"");
+        Files.writeString(manifestPath, manifest);
         Files.delete(packageDir.resolve("input/template.json"));
 
         GoldenCorpusPackage loaded = scanner.loadPackage(packageDir);
@@ -90,10 +94,11 @@ class GoldenCorpusStructureTest {
                 "cross-page-table",
                 "qr-barcode",
                 "attachment-list",
-                "pdfa-2b"
+                "pdfa-2b",
+                "long-clause-limits"
         );
-        assertThat(placeholders).contains("long-clause-limits");
         assertThat(placeholders).doesNotContain(
+                "long-clause-limits",
                 "cross-page-table",
                 "specimen-watermark",
                 "dual-font-master",
