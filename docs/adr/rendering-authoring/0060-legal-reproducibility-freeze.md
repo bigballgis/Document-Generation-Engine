@@ -19,6 +19,7 @@ related:
   - docs/adr/rendering-authoring/0019-structured-authoring-and-rendering-boundary.md
   - docs/operations/legal-reproducibility-freeze.md
   - docs/behavior/ibl-b6-repro-freeze.md
+  - docs/behavior/ibl-c1-layout-metric-pdf.md
   - docs/plan/intl-bank-letter-readiness-program.md
   - backend/Dockerfile
   - backend/Dockerfile.packaged
@@ -115,10 +116,11 @@ out of images. This ADR does **not** amend ADR-0041 decision text.
 4. **Compare:** Re-render under the same freeze; recompute SHA-256; require exact match.
    Mismatch → fail the legal/repro check and investigate LO/font/input drift — do **not**
    silently refresh baselines.
-5. **Relation to golden corpus:** Day-to-day `mvn verify` stays XPath + PDF text (+ veraPDF
-   where required). Content-hash is an **overlay procedure** for legal freeze evidence and
-   optional future harness flags — it does **not** authorize `PIXEL_*` asserts and does
-   **not** invent Word baselines (OUT **IBL-B7**).
+5. **Relation to golden corpus:** Day-to-day `mvn verify` stays XPath + PDF text +
+   non-pixel layout metrics (`PAGE_COUNT` / `TEXT_POSITION` via PDFBox — **IBL-C1** / **F17**)
+   (+ veraPDF where required). Content-hash is an **overlay procedure** for legal freeze
+   evidence and optional future harness flags — it does **not** authorize `PIXEL_*` asserts
+   and does **not** invent Word baselines (OUT **IBL-B7**).
 6. **PDF/A:** When the artifact is archival (`pdfArchivalProfile=PDF_A_2B`), content-hash
    complements — it does not replace — [ADR-0058](./0058-pdfa-2b-archival-output.md) /
    [ADR-0059](./0059-verapdf-pdfa-verify-gate.md) machine validation.
@@ -149,7 +151,8 @@ out of images. This ADR does **not** amend ADR-0041 decision text.
 
 - Ops freeze runbook: [legal-reproducibility-freeze.md](../../operations/legal-reproducibility-freeze.md)
 - Behavior readiness (BDD N/A): [ibl-b6-repro-freeze.md](../../behavior/ibl-b6-repro-freeze.md)
+- Layout-metric day-to-day (BDD N/A; **not** pixel): [ibl-c1-layout-metric-pdf.md](../../behavior/ibl-c1-layout-metric-pdf.md) — `PAGE_COUNT` / `TEXT_POSITION` under this freeze; `PIXEL_*` still rejected
 - Font baseline: [ADR-0041](./0041-rendering-font-baseline.md)
 - Pagination / Word residual: [ADR-0042](./0042-pagination-delta-budget.md)
 - Golden corpus: [backend/.../golden-corpus/README.md](../../../backend/src/test/resources/golden-corpus/README.md)
-- IBL program F16 / IBL-B6: [intl-bank-letter-readiness-program.md](../../plan/intl-bank-letter-readiness-program.md)
+- IBL program F16 / IBL-B6 (+ F17 / IBL-C1 layout-metric): [intl-bank-letter-readiness-program.md](../../plan/intl-bank-letter-readiness-program.md)

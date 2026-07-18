@@ -756,7 +756,7 @@ PRD §6.4.2 与 [P14-T01](../plan/detail/P14-confirmed-large-domains.md) 使用�
 - v1 表格组件采用结构化表格组件模型，支持列 schema、表头、跨页重复表头、循环行、简单合计/页脚和受控列宽；嵌套表、浮动表、绝对定位表、无法稳定跨页的合并单元格或无法保持关键金额/条款可读性的表格均阻断发布。
 - v1 签章/盖章仅确认受控占位和印章/签名图片资产，不包含密码学电子签名、电子印章或验签能力；签章/盖章必须位于授权区域内，不得重叠、裁切、越界或在 DOCX/PDF 中不可见，否则阻断发布。
 - PDF 转换验收采用语义保真优先基线；不得出现缺页、异常空白页、内容裁切、关键内容丢失、签章/盖章不可见、二维码/条码不可读、关键表格不可读或附件引用丢失。低风险视觉差异按已确认警告项处理。
-- **法律可复现冻结（IBL-B6 / F16 / ADR-0060，2026-07-19）：** 确定性法律基线须记录转换镜像内的 LibreOffice 版本（`soffice --version` + `libreoffice-core`/`libreoffice-writer` 包版本）、[ADR-0041](../adr/rendering-authoring/0041-rendering-font-baseline.md) 字体集，并按 [ADR-0060](../adr/rendering-authoring/0060-legal-reproducibility-freeze.md) / ops [legal-reproducibility-freeze.md](../operations/legal-reproducibility-freeze.md) 对 PDF（可选 DOCX）做 SHA-256 content-hash 基线生产/比对。日常金标仍为 DOCX XPath + PDF 文本抽取（禁 `PIXEL_*`）；**不**在此发明 Word 基线（OUT IBL-B7）。
+- **法律可复现冻结（IBL-B6 / F16 / ADR-0060，2026-07-19）：** 确定性法律基线须记录转换镜像内的 LibreOffice 版本（`soffice --version` + `libreoffice-core`/`libreoffice-writer` 包版本）、[ADR-0041](../adr/rendering-authoring/0041-rendering-font-baseline.md) 字体集，并按 [ADR-0060](../adr/rendering-authoring/0060-legal-reproducibility-freeze.md) / ops [legal-reproducibility-freeze.md](../operations/legal-reproducibility-freeze.md) 对 PDF（可选 DOCX）做 SHA-256 content-hash 基线生产/比对。日常金标为 DOCX XPath + PDF 文本抽取 + 非像素 layout-metric（`PAGE_COUNT`/`TEXT_POSITION`，IBL-C1 / F17；禁 `PIXEL_*`）；**不**在此发明 Word 基线（OUT IBL-B7）。
 - 编号、表格、签章/盖章和 PDF 转换验收结果必须进入测试生成记录、审批材料、发布前检查清单、发布摘要和审计摘要；发布前检查存在阻断项时不得发布。
 - 已发布模板运行期生成对外只返回生成成功警告或生成失败错误；API 契约和响应不得暴露内部渲染诊断明文、模板变量原值、客户数据或完整生成内容。
 - v1 结构化富文本和片段编辑能力仅用于文档生成主线，包括模板正文、结构化文档片段、条款或内容模块，以及已确认的受控表格、图片、二维码/条码、签章/盖章和附件清单节点。

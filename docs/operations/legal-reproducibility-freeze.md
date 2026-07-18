@@ -109,8 +109,10 @@ Preferred locations:
   into hash checks
 
 **Do not** add baseline PDF binaries to `backend/src/test/resources/golden-corpus/` under
-this leaf. Day-to-day golden harness remains DOCX XPath + PDF text (+ veraPDF when
-required) — see [golden-corpus README](../../backend/src/test/resources/golden-corpus/README.md).
+this leaf. Day-to-day golden harness remains DOCX XPath + PDF text + non-pixel layout
+metrics (`PAGE_COUNT` / `TEXT_POSITION` — IBL-C1 / F17; still no `PIXEL_*`) (+ veraPDF when
+required) — see [golden-corpus README](../../backend/src/test/resources/golden-corpus/README.md)
+and [ADR-0060](../adr/rendering-authoring/0060-legal-reproducibility-freeze.md) Relation note.
 
 ### 3.3 Compare
 

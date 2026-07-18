@@ -9,7 +9,8 @@
 | **Finding** | **F17** (Golden corpus = DOCX XML/XPath + PDF text-extract only; `PIXEL_*` rejected; zero baseline PDF binaries; no layout regression) |
 | **Task Master** | **#120** |
 | **Formal phase** | **None** (do **not** invent a P-phase; do **not** claim IBL program Done) |
-| **Placement** | **ISOLATED** — `D:/working/DGE-ibl-c1-layout-metric-pdf` · `feat/ibl-c1-layout-metric-pdf` |
+| **Status** | **Done** — MAIN merge `55909dd2` (`d2492fc4` + `5d89b606`); worktree removed |
+| **Placement (historical)** | **ISOLATED** — `D:/working/DGE-ibl-c1-layout-metric-pdf` · `feat/ibl-c1-layout-metric-pdf` |
 | **Frontend UI** | **`frontend_ui_in_scope=false`** — no management UI / Playwright E2E / UIUX |
 
 ---
