@@ -7,6 +7,10 @@ For Kubernetes rollout specifics see [deploy/README.md](../../deploy/README.md) 
 **Launch readiness (LR-E2):** evidence-linked go/no-go rows live in
 [launch-readiness-checklist.md](./launch-readiness-checklist.md) — **not** a production go-live claim.
 Related: [backup-restore-runbook.md](./backup-restore-runbook.md) (LR-D2 drill).
+**Legal reproducibility freeze (IBL-B6 / F16):** LO version record + ADR-0041 fonts +
+SHA-256 content-hash baselines — [legal-reproducibility-freeze.md](./legal-reproducibility-freeze.md)
+/ [ADR-0060](../adr/rendering-authoring/0060-legal-reproducibility-freeze.md) — **not** Word
+baselines; does **not** flip checklist **#3b** / **#5a**.
 **JWT_SECRET:** [BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md) — explicit
 provision for acceptance/prod; checklist [#9](./launch-readiness-checklist.md) is **GO**
 (merge `587cd9a`) — overall checklist remains **NO-GO**; **not** a go-live claim.

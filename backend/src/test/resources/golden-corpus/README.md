@@ -21,3 +21,10 @@ Harness: `com.bank.docgen.rendering.goldencorpus` (executed by `mvn verify`).
 See [verapdf-pdfa-verify-gate.md](../../../../../docs/operations/verapdf-pdfa-verify-gate.md)
 and [ADR-0059](../../../../../docs/adr/rendering-authoring/0059-verapdf-pdfa-verify-gate.md).
 Optional JSON flag `requireVeraPdf` on real (non-SYNTHETIC) PDF packages.
+
+**IBL-B6 / F16 (legal reproducibility freeze):** Day-to-day harness stays XPath + PDF text
+(no `PIXEL_*`, no Word baselines). SHA-256 **content-hash** baseline procedure for legal
+cuts is governed by [ADR-0060](../../../../../docs/adr/rendering-authoring/0060-legal-reproducibility-freeze.md)
+and ops [legal-reproducibility-freeze.md](../../../../../docs/operations/legal-reproducibility-freeze.md)
+— overlay evidence under `docs/plan/evidence/…/content-hash-baselines/`; do **not** invent
+baseline PDF binaries here without a future leaf that opts a theme into hash checks.
