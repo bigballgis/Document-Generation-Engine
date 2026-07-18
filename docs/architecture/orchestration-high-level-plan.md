@@ -62,7 +62,7 @@ model, permissions, API docs, and ADRs.
 
 - Exactly **one** epic may be `Active = Yes` (status `In Progress`).
 - **Current active epic:** none — MVP epics re-earned Done.
-- **In-flight (non-epic):** **IBL** Wave **IBL-A In Progress** (A1 **#107 Done** merge `f0a2b6fe` / tip `4bda5f2d`; A2–A6 Not Started; **sole-active cleared**; next queue **#108** not activated; [intl-bank-letter-readiness-program.md](../plan/intl-bank-letter-readiness-program.md)); **CDP** Wave CD-2 **Done** (2026-07-11 — T01–T13; CD-3 Not Started — recommend only; [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** Done; **LRP** planned waves A–E **Done** ([launch-readiness-program.md](../plan/launch-readiness-program.md); checklist **CONDITIONAL** — **not** go-live; Word Path E / XSD/LO24 residuals deferred).
+- **In-flight (non-epic):** **IBL** Wave **IBL-A In Progress** (A1 **#107 Done** merge `f0a2b6fe` / tip `4bda5f2d`; A2 **#108 Done** merge `e3000479` / tip `89584242`; A3–A6 Not Started; **sole-active cleared**; next queue **#109** not activated; [intl-bank-letter-readiness-program.md](../plan/intl-bank-letter-readiness-program.md)); **CDP** Wave CD-2 **Done** (2026-07-11 — T01–T13; CD-3 Not Started — recommend only; [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** Done; **LRP** planned waves A–E **Done** ([launch-readiness-program.md](../plan/launch-readiness-program.md); checklist **CONDITIONAL** — **not** go-live; Word Path E / XSD/LO24 residuals deferred).
 
 ## Recommended activation sequence
 

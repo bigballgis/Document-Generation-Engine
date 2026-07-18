@@ -730,8 +730,8 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active = NON-CE #108 IBL-A2 (ibl-a2-format-amount-currency). Prior #107 IBL-A1 Done. IBL #106 registry-only pending (not a delivery leaf). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active = #108 IBL-A2 (2026-07-18; Wave IBL-A In Progress; A1 Done). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-18. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active cleared. Prior NON-CE #108 IBL-A2 Done (e3000479/89584242). Prior #107 IBL-A1 Done. Next queue #109 IBL-A3 (not activated). IBL #106 registry-only pending (not a delivery leaf). #53 remains registry only, NOT a delivery leaf. Do NOT claim program Done. Do NOT flip checklist #3b (stays CONDITIONAL).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active cleared after #108 IBL-A2 Done (2026-07-18; Wave IBL-A In Progress; A1+A2 Done). Do NOT claim program Done (CE-O02 deferred per D5). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
@@ -1468,20 +1468,20 @@
       {
         "id": "106",
         "title": "IBL: International Bank Letter Readiness Program (umbrella)",
-        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A In Progress; #107 IBL-A1 Done; host sole-active = #108 IBL-A2; A3–A6/B–E not activated as delivery. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a (stay CONDITIONAL). Plan: docs/plan/intl-bank-letter-readiness-program.md. MAIN register merge 9fc2bc97.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Sole-active delivery leaf = #108 IBL-A2 (Wave IBL-A In Progress; A1 Done). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO.",
+        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A In Progress; #107 IBL-A1 Done; #108 IBL-A2 Done; sole-active cleared; next queue #109 IBL-A3 (not activated); A3–A6/B–E not activated as delivery. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a (stay CONDITIONAL). Plan: docs/plan/intl-bank-letter-readiness-program.md. MAIN register merge 9fc2bc97.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Sole-active cleared after #108 IBL-A2 Done (Wave IBL-A In Progress; A1+A2 Done). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO.",
         "testStrategy": "N/A — umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T11:56:00.000Z"
+        "updatedAt": "2026-07-18T12:20:00.000Z"
       },
       {
         "id": "107",
         "title": "IBL-A1: Runtime required/type fail-closed variable enforcement",
-        "description": "DONE 2026-07-18. IBL-A1 runtime/preview fail-closed VARIABLE_VALIDATION_FAILED. MAIN merge f0a2b6fe / feature tip 4bda5f2d; worktree REMOVED; origin/main pushed. Slice ibl-a1-variable-validation. BDD ready: docs/behavior/ibl-a1-variable-validation.md (BDD-IBL-A1-001…008). Batch solo closed. Wave IBL-A stays In Progress. Succeeded as sole-active by #108 IBL-A2. #106 registry-only pending. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Residuals: regenerate unhooked (R1); IRC no fieldErrors (R3). Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "COMPLETED 2026-07-18. Owner: backend-engineer. Delivered: generate/preview missing required / wrong type/enum → 422 VARIABLE_VALIDATION_FAILED + fieldErrors; no silent blank DOCX/PDF; publish scoped out of generate-body validation. Gates: mvn verify GREEN 2014/0/0/8; architecture PASS_WITH_NOTES Critical=0 merge_go=yes; Stage 10 DEPLOY_OK 2026-07-18T19:35:46+08:00 :8080/:4173 200; E2E/UIUX N/A (frontend_ui_in_scope=false). Wave IBL-A remains In Progress — do NOT mark Wave A or IBL program Done. #106 remains registry-only pending. A2 activated as #108; A3–A6 (#109–#112) stay pending. Do NOT flip #3b/#5a GO. Do NOT claim go-live.",
+        "description": "DONE 2026-07-18. IBL-A1 runtime/preview fail-closed VARIABLE_VALIDATION_FAILED. MAIN merge f0a2b6fe / feature tip 4bda5f2d; worktree REMOVED; origin/main pushed. Slice ibl-a1-variable-validation. BDD ready: docs/behavior/ibl-a1-variable-validation.md (BDD-IBL-A1-001…008). Batch solo closed. Wave IBL-A stays In Progress. #108 IBL-A2 also Done. #106 registry-only pending. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Residuals: regenerate unhooked (R1); IRC no fieldErrors (R3). Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "COMPLETED 2026-07-18. Owner: backend-engineer. Delivered: generate/preview missing required / wrong type/enum → 422 VARIABLE_VALIDATION_FAILED + fieldErrors; no silent blank DOCX/PDF; publish scoped out of generate-body validation. Gates: mvn verify GREEN 2014/0/0/8; architecture PASS_WITH_NOTES Critical=0 merge_go=yes; Stage 10 DEPLOY_OK 2026-07-18T19:35:46+08:00 :8080/:4173 200; E2E/UIUX N/A (frontend_ui_in_scope=false). Wave IBL-A remains In Progress — do NOT mark Wave A or IBL program Done. #106 remains registry-only pending. A2 Done as #108; A3–A6 (#109–#112) stay pending. Do NOT flip #3b/#5a GO. Do NOT claim go-live.",
         "testStrategy": "BDD ready + regression for required/type/enum; mvn -B -ntp -f backend/pom.xml verify GREEN; no silent blank DOCX/PDF.",
         "priority": "high",
         "dependencies": [],
@@ -1492,20 +1492,20 @@
       {
         "id": "108",
         "title": "IBL-A2: ISO-currency FORMAT_AMOUNT",
-        "description": "IN PROGRESS 2026-07-18 — sole-active delivery leaf. Slice ibl-a2-format-amount-currency. Placement ISOLATED D:/working/DGE-ibl-a2-format-amount-currency · feat/ibl-a2-format-amount-currency. BDD ready: docs/behavior/ibl-a2-format-amount-currency.md (BDD-IBL-A2-001…010). Batch solo (member_task_ids: [\"108\"]). Wave IBL-A stays In Progress (A1 #107 Done; A2 In Progress; A3–A6 Not Started). #106 registry-only pending. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. frontend_ui_in_scope=false. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "ACTIVATED 2026-07-18 (stage 2 plan-orchestrator). Owner: backend-engineer. Acceptance: FORMAT_AMOUNT(value, iso4217) + context.locale — EUR+en-US ≠ locale-default $; USD/CNY cross; unary locale-default compatible; missing/illegal currency → VARIABLE_COMPUTE_FAILED; OpenAPI/ADR-0056 currency argument. Gates: mvn -B -ntp -f backend/pom.xml verify. E2E/UIUX N/A (frontend_ui_in_scope=false). Wave IBL-A remains In Progress — do NOT mark Wave A or IBL program Done. #107 remains done. #106 remains registry-only pending. A3–A6 (#109–#112) stay pending. Do NOT flip #3b/#5a GO. Do NOT claim go-live.",
+        "description": "DONE 2026-07-18. IBL-A2 ISO-currency FORMAT_AMOUNT. MAIN merge e3000479 / feature tip 89584242; worktree REMOVED. Slice ibl-a2-format-amount-currency. BDD ready: docs/behavior/ibl-a2-format-amount-currency.md (BDD-IBL-A2-001…010). Batch solo closed. Wave IBL-A stays In Progress (A1+A2 Done; A3–A6 Not Started). Sole-active cleared. #106 registry-only pending. Next queue #109 IBL-A3 (not activated). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Residuals: ADR-0056 formal Amendment deferred; MAIN may be ahead of origin/main. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "COMPLETED 2026-07-18. Owner: backend-engineer. Delivered: FORMAT_AMOUNT(value, iso4217) + context.locale — EUR+en-US ≠ locale-default $; USD/CNY cross; unary locale-default compatible; missing/illegal currency → VARIABLE_COMPUTE_FAILED; OpenAPI/docs/ADR-0056 currency argument noted. Gates: mvn verify GREEN 2025/0/0/8; architecture PASS_WITH_NOTES Critical=0 merge_go=yes; Stage 10 DEPLOY_OK healthz 200; E2E/UIUX N/A (frontend_ui_in_scope=false). Wave IBL-A remains In Progress — do NOT mark Wave A or IBL program Done. #107 remains done. #106 remains registry-only pending. A3–A6 (#109–#112) stay pending. Do NOT flip #3b/#5a GO. Do NOT claim go-live.",
         "testStrategy": "BDD + unit tests multi-currency pairs; FORMAT_AMOUNT uses ISO code+amount+locale; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T11:56:00.000Z"
+        "updatedAt": "2026-07-18T12:20:00.000Z"
       },
       {
         "id": "109",
         "title": "IBL-A3: International amount-in-words + en locale",
-        "description": "PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated. Plan ID IBL-A3. Owner: backend-engineer. BDD: required. Depends: A2 (#108) recommended. Maps F3. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-A3. Owner specialist: backend-engineer. BDD: required. Depends: A2 (#108) recommended. Acceptance: Amount-in-words supports at least en + USD (extensible); CNY/zh remains correct; default locale documented. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING 鈥?next IBL wave after remaining PRR (#104 Wave D bag / D01A; #103/#105 Done); not activated.",
+        "description": "PENDING — next queue head after #108 IBL-A2 Done; not activated. Plan ID IBL-A3. Owner: backend-engineer. BDD: required. Depends: A2 (#108) recommended. Maps F3. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "IBL-A3. Owner specialist: backend-engineer. BDD: required. Depends: A2 (#108) recommended. Acceptance: Amount-in-words supports at least en + USD (extensible); CNY/zh remains correct; default locale documented. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md. PENDING — next serial queue head after #108 Done; not activated.",
         "testStrategy": "BDD + tests for en/USD amount-in-words; CNY/zh regression; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [
