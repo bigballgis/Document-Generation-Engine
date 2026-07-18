@@ -1865,27 +1865,27 @@
       {
         "id": "136",
         "title": "PRR-D01c: Dashboard summary API (stop fetchAll on first paint)",
-        "description": "IN PROGRESS 2026-07-18 — sole-active NON-CE Wave D residual leaf after #135 D01B Done. Slice prod-dashboard-summary-api. Placement ISOLATED; worktree D:/working/DGE-prod-dashboard-summary-api · feat/prod-dashboard-summary-api. Batch recommendation split (member_task_ids: [\"136\"]; proposed_slice_id: prod-dashboard-summary-api; vetoes: IBL). Behavior: Dashboard first paint must NOT call fetchAllMasters/fetchAllTemplates; use bounded summary/count API or existing pageable aggregates. frontend_ui_in_scope=true; E2E mandatory. BDD: docs/behavior/prod-dashboard-summary-api.md present (file marks ready — confirm/own via behavior-spec-author). Formal phase None. Not go-live. Do NOT flip checklist #3b GO / #5a GO. Do NOT claim full Wave D bag Done. IBL stays pending.",
-        "details": "ACTIVATED 2026-07-18 (stage 2 plan-orchestrator). Slice id: prod-dashboard-summary-api. Depends on #135 (done). Batch recommendation split (member_task_ids: [\"136\"]; proposed_slice_id: prod-dashboard-summary-api; rationale: FE Wave D residual after #135; vetoes_applied: [\"IBL\"]; evidence_amortization: FE gates+E2E+deploy; on_red_split_hint: BE vs FE peel). Scope: replace unbounded fetchAllMasters/fetchAllTemplates on dashboard first paint with bounded summary/count API or pageable aggregates; FE consumers + E2E. Owners: backend-engineer + frontend-engineer after BDD confirmed ready. Status in-progress (sole-active delivery leaf) — NOT Done. Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO / #5a GO. Do NOT activate IBL while this leaf is In Progress. Next pipeline stage: behavior-spec-author (stage 1 confirm) then engineers.",
-        "testStrategy": "1. BDD-PRR-D01C ready (docs/behavior/prod-dashboard-summary-api.md) — confirm via behavior-spec-author. 2. TDD bounded summary/count (or pageable aggregates) + FE first-paint no fetchAll*. 3. mvn verify + pnpm lint/type-check/test/build GREEN. 4. E2E mandatory (frontend_ui_in_scope=true) + UIUX. 5. Stage 5/10 DEPLOY_OK. 6. Do NOT flip #3b/#5a GO; do NOT claim go-live; do NOT claim full Wave D bag Done.",
+        "description": "DONE 2026-07-18 — MAIN merge a872c15b / feature tip 8c52ee67; worktree REMOVED. Slice prod-dashboard-summary-api. Wave D residual SPLIT leaf closed (D01A+#135+#136 audit residuals closed). GET /dashboard/summary + Overview stops fetchAllMasters/fetchAllTemplates on first paint. frontend_ui_in_scope=true; E2E 3 passed + UIUX PASS Critical=0. Sole-active cleared. Formal phase None. Not go-live. Do NOT flip checklist #3b GO / #5a GO. Next queue (not activated): IBL #106/#107.",
+        "details": "COMPLETED 2026-07-18 (stage 12 post-task-doc-sync on MAIN after integration-merger). Slice id: prod-dashboard-summary-api. Batch recommendation split (member_task_ids: [\"136\"]; proposed_slice_id: prod-dashboard-summary-api) closed. BDD ready (docs/behavior/prod-dashboard-summary-api.md). Gates: BE mvn verify GREEN (f3dc3004); FE lint/type-check/test/build GREEN (dafa1a81); E2E functional 3 passed (7b13036c); UIUX PASS Critical=0 (8c52ee67); arch PASS_WITH_NOTES merge_go=true; Stage 10 DEPLOY_OK; permission-matrix (0a022104). Status done. Sole-active cleared. Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO / #5a GO. Next queue head (not activated): IBL #106 registry + #107 IBL-A1.",
+        "testStrategy": "1. BDD-PRR-D01C ready (docs/behavior/prod-dashboard-summary-api.md). 2. TDD bounded summary API + FE first-paint no fetchAll*. 3. mvn verify + pnpm lint/type-check/test/build GREEN. 4. E2E mandatory + UIUX PASS. 5. Stage 5/10 DEPLOY_OK. 6. Do NOT flip #3b/#5a GO; do NOT claim go-live.",
         "priority": "high",
         "dependencies": [
           "135"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T04:10:00.000Z"
+        "updatedAt": "2026-07-18T06:20:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-18T04:10:00.000Z",
+      "lastModified": "2026-07-18T06:20:00.000Z",
       "taskCount": 136,
-      "completedCount": 105,
+      "completedCount": 106,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-18T04:10:00.000Z"
+      "updated": "2026-07-18T06:20:00.000Z"
     }
   }
 }
