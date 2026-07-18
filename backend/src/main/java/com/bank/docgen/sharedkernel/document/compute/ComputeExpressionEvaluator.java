@@ -89,7 +89,7 @@ final class ComputeExpressionEvaluator {
             case "FILTER" -> evalFilter(call.args());
             case "FORMAT_AMOUNT" -> evalFormatAmount(call.args());
             case "FORMAT_DATE" -> evalFormatDate(requireOne(call));
-            case "SPELL_AMOUNT" -> evalSpellAmount(requireOne(call));
+            case "SPELL_AMOUNT" -> evalSpellAmount(call.args());
             default -> fail("Unknown function '" + call.name() + "'");
         };
     }
@@ -200,7 +200,7 @@ final class ComputeExpressionEvaluator {
             return format.format(amount);
         }
         // IBL-A2 binary: ISO currency identity + locale number/currency formatting.
-        Currency currency = resolveIsoCurrency(evaluate(args.get(1)));
+        Currency currency = resolveIsoCurrency(evaluate(args.get(1)), "FORMAT_AMOUNT");
         format.setCurrency(currency);
         int fractionDigits = currency.getDefaultFractionDigits();
         if (fractionDigits < 0) {
@@ -211,19 +211,19 @@ final class ComputeExpressionEvaluator {
         return format.format(amount);
     }
 
-    private Currency resolveIsoCurrency(Object currencyValue) {
+    private Currency resolveIsoCurrency(Object currencyValue, String function) {
         if (currencyValue == null) {
-            fail("FORMAT_AMOUNT currency is null");
+            fail(function + " currency is null");
         }
         String code = String.valueOf(currencyValue).trim();
         if (code.isEmpty()) {
-            fail("FORMAT_AMOUNT currency is blank");
+            fail(function + " currency is blank");
         }
         String normalized = code.toUpperCase(Locale.ROOT);
         try {
             return Currency.getInstance(normalized);
         } catch (IllegalArgumentException ex) {
-            fail("FORMAT_AMOUNT currency '" + normalized + "' is not a valid ISO 4217 code");
+            fail(function + " currency '" + normalized + "' is not a valid ISO 4217 code");
             return null;
         }
     }
@@ -238,13 +238,26 @@ final class ComputeExpressionEvaluator {
         return formatter.format(date);
     }
 
-    private String evalSpellAmount(ComputeAst.Expr valueExpr) {
-        Object value = evaluate(valueExpr);
+    private String evalSpellAmount(List<ComputeAst.Expr> args) {
+        if (args.size() != 1 && args.size() != 2) {
+            fail("SPELL_AMOUNT requires 1 or 2 arguments");
+        }
+        Object value = evaluate(args.getFirst());
         if (value == null) {
             fail("SPELL_AMOUNT value is null");
         }
         try {
-            return SpellAmountCn.spell(toNumber(value, "SPELL_AMOUNT"));
+            BigDecimal amount = toNumber(value, "SPELL_AMOUNT");
+            if (args.size() == 1) {
+                // IBL-A3 unary: always CNY Chinese uppercase — locale-independent (A3-C4).
+                return SpellAmountCn.spell(amount);
+            }
+            Currency currency = resolveIsoCurrency(evaluate(args.get(1)), "SPELL_AMOUNT");
+            String language = locale.getLanguage();
+            if (language == null || language.isBlank()) {
+                language = "zh";
+            }
+            return SpellAmountSpellerRegistry.require(language, currency.getCurrencyCode()).spell(amount);
         } catch (IllegalArgumentException | ArithmeticException ex) {
             fail("SPELL_AMOUNT rejected: " + ex.getMessage());
             return null;

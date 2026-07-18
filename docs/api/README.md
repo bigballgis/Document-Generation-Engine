@@ -176,6 +176,12 @@ Whitelist compute DSL `FORMAT_AMOUNT` accepts an optional second argument: ISO 4
 
 Formal schema notes: [openapi-v1.yaml](openapi-v1.yaml) `validateComputeExpression` / `evaluateComputeExpression` (+ request `expression` / `locale` descriptions). Companion: [contract-outline.md](contract-outline.md) Schema 规则 IBL-A2 bullet + error catalog note. Behavior SoT: [ibl-a2-format-amount-currency.md](../behavior/ibl-a2-format-amount-currency.md)（BDD-IBL-A2-001…010）. Formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
 
+### International amount-in-words `SPELL_AMOUNT` (IBL-A3)
+
+Whitelist compute DSL `SPELL_AMOUNT` accepts an optional second argument: ISO 4217 alphabetic currency code. Unary `SPELL_AMOUNT(value)` is **always** CNY Chinese uppercase (locale-independent; CE-K03 / golden compatible). Binary `SPELL_AMOUNT(value, currencyCode)` sets currency identity from the ISO code while spelling **language** follows the primary language of `context.locale` (evaluate API optional `locale`). This leaf requires at least `(en, USD)` and `(zh, CNY)`. Unsupported (language, currency) pair, missing/blank/invalid currency, or arity ∉ {1,2} → existing **`VARIABLE_COMPUTE_FAILED`** (422; no silent wrong-language fallback). Second argument is **not** a locale tag. Default locale `zh-CN` means binary USD needs an explicit `en` / `en-US` locale.
+
+Formal schema notes: [openapi-v1.yaml](openapi-v1.yaml) `validateComputeExpression` / `evaluateComputeExpression` (+ request `expression` / `locale` descriptions). Companion: [contract-outline.md](contract-outline.md) Schema 规则 IBL-A3 bullet + error catalog note. ADR: [ADR-0056](../adr/rendering-authoring/0056-whitelist-variable-compute-dsl-bounds.md) Amendment (SPELL_AMOUNT ISO + locale language). Behavior SoT: [ibl-a3-amount-in-words.md](../behavior/ibl-a3-amount-in-words.md)（BDD-IBL-A3-001…012）. Formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
+
 ### Full-library export (CE-E03)
 
 Management full-library export in [openapi-v1.yaml](openapi-v1.yaml) (`exportLibraryTemplates`) / [contract-outline.md](contract-outline.md) «模板导出/导入契约» CE-E03:
