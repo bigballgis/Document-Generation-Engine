@@ -1,0 +1,7 @@
+NAME              IMAGE                                      COMMAND                   SERVICE           CREATED              STATUS                        PORTS
+docgen-backend    documentgenerationengine-docgen-backend    "java -jar app.jar"       docgen-backend    About a minute ago   Up About a minute (healthy)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+docgen-frontend   documentgenerationengine-docgen-frontend   "/docker-entrypoint-鈥?   docgen-frontend   About a minute ago   Up 37 seconds (healthy)       0.0.0.0:4173->8080/tcp, [::]:4173->8080/tcp
+docgen-kafka      bitnamilegacy/kafka:3.7                    "/opt/bitnami/script鈥?   docgen-kafka      19 hours ago         Up 19 hours (healthy)         0.0.0.0:9092->9092/tcp, [::]:9092->9092/tcp
+docgen-minio      minio/minio:RELEASE.2024-12-18T13-15-44Z   "/usr/bin/docker-ent鈥?   docgen-minio      19 hours ago         Up 19 hours (healthy)         0.0.0.0:9000-9001->9000-9001/tcp, [::]:9000-9001->9000-9001/tcp
+docgen-postgres   postgres:16-alpine                         "docker-entrypoint.s鈥?   docgen-postgres   19 hours ago         Up 19 hours (healthy)         0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+docgen-redis      redis:7-alpine                             "docker-entrypoint.s鈥?   docgen-redis      19 hours ago         Up 19 hours (healthy)         0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
