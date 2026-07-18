@@ -555,7 +555,7 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 路径 | `GET /api/management/v1/dashboard/summary` |
 | 响应 | 统一 envelope；`result` = `DashboardSummaryView` |
 | 字段 | `masterPendingReview` · `masterVersionsInProgress`（DRAFT∪REJECTED）· `templateVersionsInWorkflow`（DRAFT∪TESTING∪APPROVAL∪PENDING_RELEASE）· `publishedVersions` · `stoppedVersions` · `catalogMasters` · `catalogTemplates`（均为整数 ≥ 0） |
-| 授权 | 与 catalog list 相同的会话组范围；无组 → 全 0；未认证 → 401；不泄露他组 |
+| 授权 | 与 catalog list 相同的会话组范围（**无新 capability；非 object-scope**）；无组 → 全 0；未认证 → 401；不泄露他组。矩阵：[permission-matrix.md](../security/permission-matrix.md) §13.1.3 |
 | 非目标 | `pendingActions` / `externalServicesAlerts`（继续既有 tasks / alerts API）；图表时间序列；废弃全局 `fetchAll*` 符号 |
 
 ### 目录列表分页契约（LR-C5）

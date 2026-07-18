@@ -15,6 +15,7 @@
 - [LR-D1 行为规格](../behavior/lrp-d1-audit-retention.md)
 - [CE-G04 Legal hold 行为规格](../behavior/ce-g04-legal-hold.md)（BDD-CE-G04；#75 — retention 豁免叠加，不改 ADR-0040/0048 正文）
 - [CE-G05 模板年检 + 条款正文全文检索](../behavior/ce-g05-annual-review-fts.md)（BDD-CE-G05；#77 — 无新 capability；复用 `authorTemplates` / §5.1 目录浏览）
+- [PRR-D01c Dashboard summary API](../behavior/prod-dashboard-summary-api.md)（BDD-PRR-D01C；#136 — 无新 capability；会话认证 + catalog 同款 group-scope；§13.1.3）
 
 ## 2. 权限设计原则
 
@@ -486,6 +487,12 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - 编排人员走到 `PENDING_RELEASE` 显示"等待组长确认上线"，无发布主按钮（COR-T07 重申）。
 - **实现说明（2026-06-30）：** 全部 6 种协作触发均已发射工作项，决策/发布路径写入 `RESOLVED` 关闭环 — **P21-T02**（TEST 路径 + REMEDIATION 发射）、**P21-T07**（APPROVAL / PENDING_RELEASE / publish 路径）。行为型入口由真实队列支撑，非空壳。
 
+### 13.1.3 Dashboard Overview 汇总 API（PRR-D01c）
+
+| 操作 | 全局管理员 | 分组管理员 | 母版设计人员 | 模板编排人员 | 测试人员 | 审批人员 | 说明 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 查看 Dashboard Overview 汇总计数 | 是 | 被授权组范围内 | 是 | 是 | 是 | 是 | **`GET /api/management/v1/dashboard/summary`（OpenAPI `getDashboardSummary`）。无新 capability bit；非 object-scope。** 复用管理会话认证 + 与 catalog list（LR-C5）相同的 group-access：计数仅含会话可访问组内母版/模板分桶与目录总数；无组授权 → 全 0（fail-closed，不泄露他组）；未认证 → 401。UI 统计卡仍受 §13.1 `visibleRoutes` 过滤（无母版/模板路由则不展示对应卡）；本端点**不**替代 collaboration / workflow inbox，**不**授予额外编辑/判定/发布权。行为：[prod-dashboard-summary-api.md](../behavior/prod-dashboard-summary-api.md)（BDD-PRR-D01C / D01C-C4）；契约：[contract-outline.md](../api/contract-outline.md) «Dashboard summary 契约（PRR-D01c）»。**非** go-live；不翻转 checklist **#3b** / **#5a**。 |
+
 ### 13.2 会话 capabilities（后端下发）
 
 | capability | 角色 |
@@ -552,6 +559,12 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - 管理审计：`TEMPLATE_ANNUAL_REVIEW_COMPLETED`；禁止 variables / 凭证 / 条款全文。
 - **Out of scope：** CD-3；CE-O02；go-live；#50；协作新 `queue_type`；独立 `/governance/annual-review` 路由；中文分词插件；高亮 snippet 作为 Done 门槛。
 - 行为 SoT：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md) `BDD-CE-G05-001…019`；领域：[domain-model.md](../domain/domain-model.md) §2.7 / §2.9.2；契约：[contract-outline.md](../api/contract-outline.md) «模板年检与条款正文全文检索（CE-G05）」。
+
+**PRR-D01c Dashboard summary（2026-07-18）：**
+
+- **无新 capability bit / 无新角色 / 非 object-scope。** `GET /api/management/v1/dashboard/summary` 仅要求已认证管理会话；组范围与 catalog list 一致（§13.1.3）。
+- 空组 → 零计数；跨组 fail-closed；未认证 → 401。不授予额外编辑/判定/发布权；不替代 collaboration / workflow inbox。
+- 行为 SoT：[prod-dashboard-summary-api.md](../behavior/prod-dashboard-summary-api.md)；OpenAPI `getDashboardSummary`；契约：[contract-outline.md](../api/contract-outline.md) «Dashboard summary 契约（PRR-D01c）»。
 
 ### 13.3 禁止路由访问（forbidden-route）行为基线
 
