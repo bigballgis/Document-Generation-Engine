@@ -23,6 +23,12 @@ public enum FidelityWarningCode {
     UNRELIABLE_TABLE_LAYOUT,
     INVALID_TABLE_COMPONENT,
     SEAL_OUTSIDE_AUTHORIZED_AREA,
+    /** IBL-B5: placement.authorizedAreaId not found in root authorizedSealAreas. */
+    SEAL_AUTHORIZED_AREA_UNKNOWN,
+    /** IBL-B5: authorized area catalog entry invalid (geometry/duplicate id). */
+    SEAL_AUTHORIZED_AREA_INVALID,
+    /** IBL-B5: placement present but sealBox geometry missing/illegal. */
+    SEAL_PLACEMENT_GEOMETRY_INVALID,
     SEAL_SCALING_NOT_ALLOWED,
     MISSING_REFERENCE_KEY,
     DUPLICATE_NUMBER,

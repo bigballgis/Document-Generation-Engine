@@ -1610,16 +1610,16 @@
       {
         "id": "117",
         "title": "IBL-B5: Seal geometry validation",
-        "description": "PENDING (not activated). Plan ID IBL-B5. Owner: rendering-engineer. BDD: required. Depends: 鈥?(soft: after Wave A). Maps F14. Wave B 鈥?pending; activate after Wave A (recommended serial). Do NOT activate while PRR queue ahead. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-B5. Owner specialist: rendering-engineer. BDD: required. Depends: 鈥?(soft: after Wave A). Acceptance: Seal refs validated against geometric authorized area; out-of-area 鈫?fail-closed; in/out fixtures. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "description": "IN PROGRESS (sole-active 2026-07-19). Plan ID IBL-B5. Slice ibl-b5-seal-geometry. Owner: rendering-engineer. BDD: required — blocked until stage 1. Placement ISOLATED; worktree D:/working/DGE-ibl-b5-seal-geometry · feat/ibl-b5-seal-geometry (base fc16d508). Batch solo (member_task_ids: [\"117\"]; vetoes B6 freeze, B7 Word). Maps F14 — seal geometry validation (authorized area as real geometry, not boolean-only). Wave IBL-B stays In Progress (B1–B4 Done; B5 In Progress; B6 Not Started; B7 Blocked). Wave IBL-A remains Done. #106 registry-only pending. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a. OUT B6/B7. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "ACTIVATED 2026-07-19 Stage 2. Slice id: ibl-b5-seal-geometry. Status: in-progress (sole-active NON-CE delivery leaf). Placement ISOLATED; worktree D:/working/DGE-ibl-b5-seal-geometry · feat/ibl-b5-seal-geometry (base MAIN fc16d508). Batch recommendation solo (member_task_ids: [\"117\"]; proposed_slice_id: ibl-b5-seal-geometry; vetoes_applied: B6 freeze, B7 Word; evidence_amortization: verify (+ deploy if required)). BDD required — blocked until stage 1 (behavior-spec-author). Owner: rendering-engineer. Scope F14: Seal refs validated against geometric authorized area; out-of-area fail-closed; in/out fixtures. Gates: backend verify. frontend_ui_in_scope=false expected. Wave IBL-B stays In Progress (B1–B4 Done; B5 In Progress; B6 Not Started; B7 Blocked). Wave IBL-A remains Done. #113–#116 remain done. #106 registry-only pending. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim go-live. Do NOT mark Wave B / IBL program Done. OUT B6/B7. Next: behavior-spec-author (stage 1). Plan: docs/plan/intl-bank-letter-readiness-program.md.",
         "testStrategy": "BDD + geometry fixtures in/out of authorized area; fail-closed errors; mvn verify GREEN.",
         "priority": "high",
         "dependencies": [
           "106"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00Z"
+        "updatedAt": "2026-07-19T05:26:00.000Z"
       },
       {
         "id": "118",
