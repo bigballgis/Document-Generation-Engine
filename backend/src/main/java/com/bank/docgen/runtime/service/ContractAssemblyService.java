@@ -9,6 +9,7 @@ import com.bank.docgen.runtime.api.RuntimeCredentialSummaryView;
 import com.bank.docgen.runtime.domain.ContractViewAudience;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,15 @@ public class ContractAssemblyService {
     public ContractAssemblyService(
             MessageResolver messageResolver,
             ObjectMapper objectMapper,
-            TemplateVersionRepository templateVersionRepository
+            TemplateVersionRepository templateVersionRepository,
+            VariableSchemaRepository variableSchemaRepository
     ) {
-        this.views = new ContractAssemblyViewSupport(messageResolver, objectMapper, templateVersionRepository);
+        this.views = new ContractAssemblyViewSupport(
+                messageResolver,
+                objectMapper,
+                templateVersionRepository,
+                variableSchemaRepository
+        );
     }
 
     public ContractResultView assemble(
@@ -38,7 +45,7 @@ public class ContractAssemblyService {
                 views.runtimePaths(template, environment),
                 views.buildDefaultRoute(template, policy, environment, audience),
                 views.toPolicySummary(policy, credentialSummary, audience),
-                views.buildCallableVersions(template, environment),
+                views.buildCallableVersions(template, environment, true),
                 List.of("GenerateRequest", "BatchGenerateRequest", "OutputOptions", "EncryptionOptions"),
                 views.standardErrorCodes(),
                 List.of("generate-sync-docx", "batch-generate-sync", "batch-generate-async")
@@ -46,7 +53,7 @@ public class ContractAssemblyService {
     }
 
     public List<CallableVersionView> listCallableVersions(TemplateEntity template, String environment) {
-        return views.buildCallableVersions(template, environment);
+        return views.buildCallableVersions(template, environment, false);
     }
 
     public DefaultRouteSummaryView summarizeDefaultRoute(

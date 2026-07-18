@@ -13,6 +13,7 @@ import com.bank.docgen.runtime.domain.ContractViewAudience;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
@@ -30,6 +31,8 @@ class ContractAssemblyServicePolicyViewTest {
     private MessageResolver messageResolver;
     @Mock
     private TemplateVersionRepository templateVersionRepository;
+    @Mock
+    private VariableSchemaRepository variableSchemaRepository;
 
     private ContractAssemblyService service;
     private TemplateEntity template;
@@ -38,7 +41,12 @@ class ContractAssemblyServicePolicyViewTest {
 
     @BeforeEach
     void setUp() {
-        service = new ContractAssemblyService(messageResolver, new ObjectMapper(), templateVersionRepository);
+        service = new ContractAssemblyService(
+                messageResolver,
+                new ObjectMapper(),
+                templateVersionRepository,
+                variableSchemaRepository
+        );
         template = new TemplateEntity(
                 UUID.randomUUID(),
                 "TPL-001",

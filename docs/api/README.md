@@ -182,6 +182,16 @@ Whitelist compute DSL `SPELL_AMOUNT` accepts an optional second argument: ISO 42
 
 Formal schema notes: [openapi-v1.yaml](openapi-v1.yaml) `validateComputeExpression` / `evaluateComputeExpression` (+ request `expression` / `locale` descriptions). Companion: [contract-outline.md](contract-outline.md) Schema 规则 IBL-A3 bullet + error catalog note. ADR: [ADR-0056](../adr/rendering-authoring/0056-whitelist-variable-compute-dsl-bounds.md) Amendment (SPELL_AMOUNT ISO + locale language). Behavior SoT: [ibl-a3-amount-in-words.md](../behavior/ibl-a3-amount-in-words.md)（BDD-IBL-A3-001…012）. Formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
 
+### `/contract` per-field variable schemas + consumer breaking gate (IBL-A4)
+
+Runtime `GET /api/{environment}/v1/templates/{templateId}/contract` and management `GET /api/management/v1/templates/{templateId}/api/contract` (same assembly) expose **per-field** VariableSchema under each `callableVersions[]` item as `variables[]` (`ContractVariableSchemaView`: `variableKey`, `variableType`, `required`, `computed`, `piiCategory`, `enumValues` when ENUM, optional `description`). Sorted by `variableKey` ascending. Never returns internal `id`, `defaultValue` plaintext, or `computeExpression` plaintext.
+
+Top-level `result.schemas: string[]` remains an **envelope type-name index** (at least `GenerateRequest` / `BatchGenerateRequest` / `OutputOptions` / `EncryptionOptions`) — **not** field schemas. Do **not** clear or replace it.
+
+**Consumer contract breaking-change gate (CI):** repository consumer contract tests (compat classifier + golden/fixture) run under `mvn -B -ntp -f backend/pom.xml verify`. **BREAKING → FAIL:** key remove/rename, `variableType` change, `required` false→true, ENUM shrink, enterable→computed. **NON_BREAKING → PASS:** additive optional field, ENUM widen, description-only, `required` true→false, `piiCategory` change. This is **not** a publish-API hard block.
+
+Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `getTemplateApiContract` / `CallableVersion.variables` / `ContractVariableSchemaView`. Companion: [contract-outline.md](contract-outline.md) IBL-A4 bullets + «消费者契约 breaking-change 闸门（IBL-A4）». Example: [examples/contract-response.json](examples/contract-response.json). Behavior SoT: [ibl-a4-contract-field-schemas.md](../behavior/ibl-a4-contract-field-schemas.md)（BDD-IBL-A4-001…011）. `frontend_ui_in_scope=false`. Formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
+
 ### Full-library export (CE-E03)
 
 Management full-library export in [openapi-v1.yaml](openapi-v1.yaml) (`exportLibraryTemplates`) / [contract-outline.md](contract-outline.md) «模板导出/导入契约» CE-E03:

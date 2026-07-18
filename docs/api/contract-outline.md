@@ -47,7 +47,8 @@ Field names, capability breakdown, error-code names, and response structure are 
 - 异步任务取消路径为 `POST /api/{environment}/v1/templates/{templateId}/tasks/{taskId}/cancel`。
 - 下载地址取文件路径为 `/api/{environment}/v1/documents/{documentId}/download`；下载时仍需要通过 `documentId` 关联模板并执行模板级二次授权。
 - API 契约查看路径为 `GET /api/{environment}/v1/templates/{templateId}/contract`。
-- 可调用版本列表路径为 `GET /api/{environment}/v1/templates/{templateId}/versions`；该接口返回当前授权视角下可调用的发布版本列表，不作为后台版本管理列表。
+- 管理面同装配契约路径为 `GET /api/management/v1/templates/{templateId}/api/contract`（query `environment`）；与 runtime `/contract` 共用装配，均含 `callableVersions[].variables`（IBL-A4）。
+- 可调用版本列表路径为 `GET /api/{environment}/v1/templates/{templateId}/versions`；该接口返回当前授权视角下可调用的发布版本列表，不作为后台版本管理列表；字段级 Schema 以 `/contract` 为权威（列表可不附带完整 `variables[]`）。
 - **调用记录**（2026-07-03）：`GET /api/{environment}/v1/templates/{templateId}/invocations`（`view=logical|flat`，可选 `requestId`）；`GET …/invocations/{invocationId}`。
 - API v1 请求头字段确认为 `X-Api-Credential-Id`、`X-Api-Credential-Secret`、`X-Access-Account`；可选追踪请求头为 `X-Trace-Id`。
 - `X-Trace-Id` 传入时平台沿用该值作为响应和审计中的 `traceId`；未传入时由平台生成 `traceId`。
@@ -71,6 +72,7 @@ Field names, capability breakdown, error-code names, and response structure are 
 - 发布版本继续锁定模板内容、变量、规则和发布版本契约；API 管理配置作为调用侧策略独立维护，不要求重新发布模板。
 - 可调用版本列表从模板下发布版本生成；模板停用或废弃时所有发布版本不可调用，单个发布版本停用时仅该版本不可调用；模板或发布版本恢复后，恢复对象重新进入可调用候选范围，但仍受模板状态、发布版本状态和模板级 API 管理配置约束。
 - 可调用版本列表项（`CallableVersion`）可包含可选展示字段 `deprecated`（boolean）与 `sunsetAt`（date-time）；对当前可调用的发布版本通常为 `deprecated=false`（或省略）且省略 `sunsetAt`。这些字段仅用于契约/发现展示，不得借此把已停用或已永久废弃版本纳入可调用集（ADR-0003 / ADR-0017 展示边界；CE-C04）。
+- **IBL-A4：** `/contract`（runtime + management）在每个 `callableVersions[]` 元素上返回 `variables[]` 逐字段 Schema 投影（至少 `variableKey` / `variableType` / `required` / `computed` / `piiCategory`；`ENUM` 时非空 `enumValues` string[]；可选 `description`）。按 `variableKey` 字典序升序。不返回内部 `id`、`defaultValue` 明文或 `computeExpression` 原文。顶层 `result.schemas: string[]` **保留**为信封 OpenAPI 类型名索引（至少含 `GenerateRequest` / `BatchGenerateRequest` / `OutputOptions` / `EncryptionOptions`），不得清空或伪装为字段 Schema。行为 SoT：[ibl-a4-contract-field-schemas.md](../behavior/ibl-a4-contract-field-schemas.md)（BDD-IBL-A4-001…011）。**不**翻转 checklist #3b/#5a；**不**宣称 go-live。
 - 模板发布后需要生成接口地址、请求参数 Schema、响应 Schema、字段校验规则、示例请求/响应、错误码说明、契约版本对比和可调用版本列表。
 - API 支持 DOCX/PDF 输出、同步文件流、同步下载地址、异步任务返回任务 ID、批量生成。
 - 同步文件流响应中，文件内容放在响应体，核心元数据通过响应头承载。
@@ -176,8 +178,8 @@ API 契约查看和可调用版本列表必须按当前授权视角返回结果�
 
 | 契约能力 | 主要用途 | 当前状态 |
 | --- | --- | --- |
-| 查看 API 契约信息 | 让管理员、模板编排人员和被授权 API 调用方查看模板 API 契约、请求/响应结构、错误码和示例。 | 路径、查看权限、default 路径展示字段、契约响应范围已确认。 |
-| 查看可调用版本列表 | 返回授权模板下当前可调用的发布版本列表。 | 路径、可调用版本规则和列表用途已确认。 |
+| 查看 API 契约信息 | 让管理员、模板编排人员和被授权 API 调用方查看模板 API 契约、请求/响应结构、错误码和示例。 | 路径、查看权限、default 路径展示字段、契约响应范围已确认；IBL-A4 起含 `callableVersions[].variables` 逐字段 Schema。 |
+| 查看可调用版本列表 | 返回授权模板下当前可调用的发布版本列表。 | 路径、可调用版本规则和列表用途已确认；字段级契约以 `/contract` 为权威。 |
 | 查看内容模块治理契约 | 让管理员查看内容模块审批和生命周期管理接口的请求/响应结构、错误码和示例。 | 内容模块治理路径已随 OpenAPI v1 维护；查看范围沿用管理员契约可见性。 |
 | 单笔生成 | 基于模板、发布版本和请求参数生成一份 DOCX/PDF。 | 路径命名、请求字段命名、响应 envelope 和 Schema 载体已确认；正式 OpenAPI v1 Schema 和示例已输出，后续随契约变更维护。 |
 | 批量生成 | 基于同一模板和发布版本提交多笔生成请求。 | 独立 `batch-generate` 路径、默认上限、失败策略、`itemId` 必填唯一、重复 `itemId` 处理、同步失败明细、异步失败项重试策略、字段命名和全量明细返回已确认。 |
@@ -201,8 +203,9 @@ API 路径统一采用 `/api/{environment}/v1` 前缀。`{environment}` 用于�
 | 异步任务查询 | 调用方查询异步任务状态、结果和错误明细。 | 查询路径挂在模板下，便于执行模板级授权。 | `/api/{environment}/v1/templates/{templateId}/tasks/{taskId}` |
 | 异步任务取消 | 调用方取消未完成且未过期的异步任务。 | 取消路径挂在任务下，执行与任务查询相同的模板级授权；取消成功终态为 `CANCELLED`。 | `/api/{environment}/v1/templates/{templateId}/tasks/{taskId}/cancel` |
 | 下载地址取文件 | 调用方使用返回的下载地址获取生成文件。 | 下载路径以文档为资源；下载时通过 `documentId` 关联模板并执行模板级二次授权。 | `/api/{environment}/v1/documents/{documentId}/download` |
-| API 契约查看 | 调用方查看当前授权模板的契约摘要、路径、策略、错误码和示例索引。 | 返回契约摘要，不内嵌完整 OpenAPI YAML。 | `/api/{environment}/v1/templates/{templateId}/contract` |
-| 可调用版本列表 | 调用方查看当前授权视角下可调用的发布版本列表。 | 返回可调用发布版本，不作为后台版本管理列表。 | `/api/{environment}/v1/templates/{templateId}/versions` |
+| API 契约查看 | 调用方查看当前授权模板的契约摘要、路径、策略、错误码、信封 `schemas` 索引与逐字段 `variables`。 | 返回契约摘要，不内嵌完整 OpenAPI YAML；每可调用版本含 `variables[]`（IBL-A4）。 | `/api/{environment}/v1/templates/{templateId}/contract` |
+| 管理面 API 契约查看 | 管理会话查看同装配契约（可含既有 policy/defaultRoute 明细）。 | 与 runtime 同装配；`variables[]` 对 admin 与 runtime 均可见（非凭证、非变量原值）。 | `/api/management/v1/templates/{templateId}/api/contract` |
+| 可调用版本列表 | 调用方查看当前授权视角下可调用的发布版本列表。 | 返回可调用发布版本，不作为后台版本管理列表；可不附带完整 `variables[]`。 | `/api/{environment}/v1/templates/{templateId}/versions` |
 | 调用记录列表 | 调用方分页查询本凭证在模板下的调用历史。 | `view=logical`（默认）或 `view=flat`；可选 `requestId`；不含其他 credential 记录。 | `/api/{environment}/v1/templates/{templateId}/invocations` |
 | 调用记录详情 | 调用方查看单条调用详情与 sanitized 参数。 | `invocationId` 前缀 `INV-`；encryption 密码不返回；跨 credential 403。 | `/api/{environment}/v1/templates/{templateId}/invocations/{invocationId}` |
 
@@ -234,6 +237,9 @@ Download generated document
 
 View API contract summary
 /api/{environment}/v1/templates/{templateId}/contract
+
+View API contract summary (management assembly)
+/api/management/v1/templates/{templateId}/api/contract
 
 List callable release versions
 /api/{environment}/v1/templates/{templateId}/versions
@@ -768,9 +774,24 @@ Batch generate document request draft
 - **IBL-A1：** runtime generate / batch item 与管理 preview 装配在 compute/assemble **之前**对可录入变量执行 fail-closed required/type/enum（及未知 key）校验；失败 → **422** `VARIABLE_VALIDATION_FAILED` + 非空 `fieldErrors[]`，不得静默 blank 或产出成功 DOCX/PDF。详见 [ibl-a1-variable-validation.md](../behavior/ibl-a1-variable-validation.md)。
 - **IBL-A2：** 白名单 `FORMAT_AMOUNT` 支持一元 `FORMAT_AMOUNT(value)`（locale 默认币种，CE-K03 兼容）与可选二元 `FORMAT_AMOUNT(value, currencyCode)`（ISO 4217 字母码；数字/分组本地化仍跟 `context.locale`）。第二参**不是** locale 标签。二元形态下缺失/空白/非法币种 → **422** `VARIABLE_COMPUTE_FAILED`（既有码；不静默回退 locale 默认币种）。OpenAPI：`validateComputeExpression` / `evaluateComputeExpression` 及相关 schema description。行为 SoT：[ibl-a2-format-amount-currency.md](../behavior/ibl-a2-format-amount-currency.md)（BDD-IBL-A2-001…010）。**不**翻转 checklist #3b/#5a；**不**宣称 go-live。
 - **IBL-A3：** 白名单 `SPELL_AMOUNT` 支持一元 `SPELL_AMOUNT(value)`（**始终** CNY 中文大写，与 `context.locale` 语言无关，CE-K03 / 金标兼容）与可选二元 `SPELL_AMOUNT(value, currencyCode)`（ISO 4217 字母码；拼写语言 = `context.locale` 的 primary language）。本叶至少支持 `(en, USD)` 与 `(zh, CNY)`。第二参**不是** locale 标签。未支持 (language, currency) pair、缺失/空白/非法币种、或 arity ∉ {1,2} → **422** `VARIABLE_COMPUTE_FAILED`（既有码；禁止静默错语言回退）。OpenAPI：同上 compute validate/evaluate schema description。行为 SoT：[ibl-a3-amount-in-words.md](../behavior/ibl-a3-amount-in-words.md)（BDD-IBL-A3-001…012）。**不**翻转 checklist #3b/#5a；**不**宣称 go-live。
+- **IBL-A4：** `/contract` 暴露发布版本锁定的逐字段变量 Schema（`callableVersions[].variables` → OpenAPI `ContractVariableSchemaView`）。顶层 `schemas: string[]` 仍为信封类型名索引。字段级契约兼容闸门见下方「消费者契约 breaking-change 闸门（IBL-A4）」。行为 SoT：[ibl-a4-contract-field-schemas.md](../behavior/ibl-a4-contract-field-schemas.md)（BDD-IBL-A4-001…011）。**不**翻转 checklist #3b/#5a；**不**宣称 go-live。
 - v1 请求采用严格字段校验，契约 Schema 之外的未知字段返回 `400 REQUEST_BODY_INVALID`，字段级原因使用 `UNKNOWN_FIELD`。
 - 模板标识和发布版本号只通过路径表达，请求体重复传入 `templateId` 或 `releaseVersion` 也按未知或不允许字段处理。
 - v1 兼容变更应优先采用向后兼容的新增可选字段、枚举扩展或说明增强；破坏性字段重命名、必填字段新增或语义变更需要新的 API 版本或单独兼容策略确认。
+
+### 消费者契约 breaking-change 闸门（IBL-A4）
+
+确认基线（Task Master **#110**；**非** publish API 硬阻断）：
+
+| 项 | 确认规则 |
+| --- | --- |
+| 闸门形态 | 仓库内 **consumer contract tests**（兼容性分类器 + golden/fixture 基线），随 `mvn -B -ntp -f backend/pom.xml verify`（CI）执行。Publish 路径**不**因本叶新增「禁止 rename」硬检查项。 |
+| 比较范围 | 版本级 `variables[]` 语义指纹（`variableKey` / `variableType` / `required` / enum 允许集 / `computed`），**不是**整份 `ContractResponse`（paths / policyVersion 等噪声可忽略）。 |
+| **BREAKING → 测试 FAIL** | (a) 删除已有 `variableKey`；(b) rename（旧 key 消失）；(c) `variableType` 变更；(d) `required`: `false` → `true`；(e) `ENUM` 允许集收缩；(f) `computed`: `false` → `true`。 |
+| **NON_BREAKING → 测试 PASS** | (a) 新增 `required=false` 且 `computed=false` 字段；(b) `ENUM` 仅增值；(c) 仅 `description` 变化；(d) `required`: `true` → `false`；(e) `piiCategory` 变化（本叶闸门**不**因此失败）。 |
+| 非确认 | Pact/第三方 broker 强制；publish 硬阻断 rename；顶层重复 `variableSchemas` 平行字段。 |
+
+OpenAPI：`CallableVersion.variables` / `ContractVariableSchemaView`；示例：[contract-response.json](examples/contract-response.json)。行为 SoT：[ibl-a4-contract-field-schemas.md](../behavior/ibl-a4-contract-field-schemas.md)（BDD-IBL-A4-006…009）。
 
 ## 标识编码规则确认
 

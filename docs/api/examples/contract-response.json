@@ -53,15 +53,71 @@
       {
         "releaseVersion": "1.0.0",
         "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.0.0/generate",
-        "deprecated": false
+        "deprecated": false,
+        "variables": [
+          {
+            "variableKey": "amountInWords",
+            "variableType": "COMPUTED",
+            "required": false,
+            "computed": true,
+            "piiCategory": "NONE",
+            "description": "Computed amount in words; callers must not submit this key."
+          },
+          {
+            "variableKey": "customerName",
+            "variableType": "TEXT",
+            "required": true,
+            "computed": false,
+            "piiCategory": "PERSONAL_NAME"
+          },
+          {
+            "variableKey": "idNumber",
+            "variableType": "TEXT",
+            "required": true,
+            "computed": false,
+            "piiCategory": "GOVERNMENT_ID"
+          },
+          {
+            "variableKey": "letterType",
+            "variableType": "ENUM",
+            "required": true,
+            "computed": false,
+            "piiCategory": "NONE",
+            "enumValues": ["OFFER", "REMINDER"]
+          },
+          {
+            "variableKey": "principalAmount",
+            "variableType": "AMOUNT",
+            "required": true,
+            "computed": false,
+            "piiCategory": "NONE"
+          }
+        ]
       },
       {
         "releaseVersion": "1.1.0",
         "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.1.0/generate",
-        "deprecated": false
+        "deprecated": false,
+        "variables": [
+          {
+            "variableKey": "customerName",
+            "variableType": "TEXT",
+            "required": true,
+            "computed": false,
+            "piiCategory": "PERSONAL_NAME"
+          },
+          {
+            "variableKey": "letterType",
+            "variableType": "ENUM",
+            "required": true,
+            "computed": false,
+            "piiCategory": "NONE",
+            "enumValues": ["OFFER", "REMINDER", "NOTICE"]
+          }
+        ]
       }
     ],
-    "schemas": ["GenerateRequest", "BatchGenerateRequest", "FidelityWarning", "ErrorEnvelope"],
+    "schemas": ["GenerateRequest", "BatchGenerateRequest", "OutputOptions", "EncryptionOptions"],
     "errorCodes": [
       {
         "category": "AUTHENTICATION",
