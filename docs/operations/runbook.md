@@ -229,7 +229,7 @@ Companion honesty note: [0044-multi-instance-correctness-baseline.md](../adr/ope
 2. Compare to D6 baseline: Scenario A **poolRejections=0** under n=20 mixed sync — non-zero rejections are a **new** capacity signal, not explained by that smoke alone.
 3. Check `PDF_CONVERSION_POOL_SIZE`, `PDF_CONVERSION_QUEUE_CAPACITY`, and LibreOffice process health.
 
-**Mitigate:** Lower ingress concurrency; increase pool only with measured evidence; fail-fast is intentional when queue capacity is 0.
+**Mitigate:** Lower ingress concurrency; increase pool only with measured evidence. Product defaults are bounded absorb (**pool=4 / queue=8** per [pdf-conversion-capacity-plan.md](./pdf-conversion-capacity-plan.md)); fail-fast (`queue=0`) remains available via env when intentional.
 
 **Escalate when:** Rejections persist with healthy LibreOffice and rising user-facing `serviceUnavailable`.
 

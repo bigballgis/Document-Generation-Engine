@@ -27,11 +27,11 @@ class DocgenRenderingPropertiesBindingTest {
 
         assertThat(properties).isNotNull();
         assertThat(properties.getProperty("docgen.rendering.conversion-pool-size"))
-                .isEqualTo("${PDF_CONVERSION_POOL_SIZE:2}");
+                .isEqualTo("${PDF_CONVERSION_POOL_SIZE:4}");
         assertThat(properties.getProperty("docgen.rendering.conversion-timeout-seconds"))
                 .isEqualTo("${PDF_CONVERSION_TIMEOUT_SECONDS:120}");
         assertThat(properties.getProperty("docgen.rendering.conversion-queue-capacity"))
-                .isEqualTo("${PDF_CONVERSION_QUEUE_CAPACITY:0}");
+                .isEqualTo("${PDF_CONVERSION_QUEUE_CAPACITY:8}");
         assertThat(properties.getProperty("docgen.rendering.pagination-delta-budget-pages"))
                 .isEqualTo("${PAGINATION_DELTA_BUDGET_PAGES:1}");
         assertThat(properties.getProperty("docgen.rendering.ooxml-validation-enabled"))
@@ -75,18 +75,21 @@ class DocgenRenderingPropertiesBindingTest {
         }
     }
 
-    /** BDD-PRR-D01A-008/009: default pool stays bounded fail-fast (size=2, queue=0, AbortPolicy). */
+    /**
+     * BDD-IBL-B2-002 / B2-C2: product default is bounded absorb (pool=4, queue=8, AbortPolicy).
+     * Revises prior D01A-C9 / F4-C5 fail-fast 2/0 defaults; still forbids unbounded queues.
+     */
     @Test
-    void defaultPdfConversionExecutorIsBoundedFailFast() {
+    void defaultPdfConversionExecutorIsBoundedAbsorb() {
         DocgenRenderingProperties renderingProperties = new DocgenRenderingProperties();
 
         ThreadPoolTaskExecutor executor =
                 new PdfConversionExecutorConfig().pdfConversionExecutor(renderingProperties);
         try {
-            assertThat(executor.getCorePoolSize()).isEqualTo(2);
-            assertThat(executor.getMaxPoolSize()).isEqualTo(2);
-            assertThat(ReflectionTestUtils.getField(executor, "queueCapacity")).isEqualTo(0);
-            assertThat(executor.getThreadPoolExecutor().getQueue().remainingCapacity()).isEqualTo(0);
+            assertThat(executor.getCorePoolSize()).isEqualTo(4);
+            assertThat(executor.getMaxPoolSize()).isEqualTo(4);
+            assertThat(ReflectionTestUtils.getField(executor, "queueCapacity")).isEqualTo(8);
+            assertThat(executor.getThreadPoolExecutor().getQueue().remainingCapacity()).isEqualTo(8);
             assertThat(executor.getThreadPoolExecutor().getRejectedExecutionHandler())
                     .isInstanceOf(ThreadPoolExecutor.AbortPolicy.class);
         } finally {
@@ -104,12 +107,12 @@ class DocgenRenderingPropertiesBindingTest {
     }
 
     @Test
-    void renderingPropertiesDefaultsMatchCorP02AndSorP03() {
+    void renderingPropertiesDefaultsMatchIblB2CapacityPlan() {
         DocgenRenderingProperties properties = new DocgenRenderingProperties();
 
-        assertThat(properties.getConversionPoolSize()).isEqualTo(2);
+        assertThat(properties.getConversionPoolSize()).isEqualTo(4);
         assertThat(properties.getConversionTimeoutSeconds()).isEqualTo(120);
-        assertThat(properties.getConversionQueueCapacity()).isEqualTo(0);
+        assertThat(properties.getConversionQueueCapacity()).isEqualTo(8);
         assertThat(properties.getPaginationDeltaBudgetPages()).isEqualTo(1);
         assertThat(properties.isOoxmlValidationEnabled()).isTrue();
     }

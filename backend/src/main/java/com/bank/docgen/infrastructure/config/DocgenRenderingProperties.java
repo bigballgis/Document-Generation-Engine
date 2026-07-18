@@ -18,14 +18,18 @@ public class DocgenRenderingProperties {
 
     private int conversionTimeoutSeconds = 120;
 
-    private int conversionPoolSize = 2;
+    /**
+     * IBL-B2 / B2-C2: default pool size for single-host bounded absorb (revises prior
+     * D01A/F4 fail-fast default of 2). Ops may lower via {@code PDF_CONVERSION_POOL_SIZE}.
+     */
+    private int conversionPoolSize = 4;
 
     /**
-     * Bounded queue for PDF conversion tasks. Default {@code 0} isolates sync capacity to
-     * {@link #conversionPoolSize} workers — saturated requests fail fast (SOR-P03) instead of
-     * blocking servlet threads behind a deep queue.
+     * Bounded queue for PDF conversion tasks. Default {@code 8} absorbs short sync bursts
+     * (IBL-B2 / B2-C2; revises prior D01A/F4 fail-fast default of {@code 0}). Saturated
+     * requests still fail closed via AbortPolicy (SOR-P03) — never unbounded.
      */
-    private int conversionQueueCapacity = 0;
+    private int conversionQueueCapacity = 8;
 
     /** Maximum generated artifact size (DOCX/PDF bytes) before persistence (SOR-P02). */
     private long maxGeneratedArtifactBytes = 52_428_800L;

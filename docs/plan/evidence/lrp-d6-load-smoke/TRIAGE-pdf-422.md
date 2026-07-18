@@ -4,56 +4,65 @@
 | --- | --- |
 | **Defect id** | `DEF-LRP-D6-001` |
 | **Title** | Concurrent FOL sync PDF rejected as `TEMPLATE_VALIDATION_FAILED` (`api.error.generation.serviceUnavailable`) |
-| **Slice** | `lrp-d6-load-smoke` / Task Master #37 / LR-D6 |
+| **Slice (opened)** | `lrp-d6-load-smoke` / Task Master #37 / LR-D6 |
 | **Observed** | 2026-07-11T17:43:35Z harness run (`latest-summary.json`); reconfirmed 2026-07-12 with 10× parallel PDF probes |
-| **Evidence** | Scenario A: n=20 success=12 errorRate=0.4; **8× PDF** HTTP 422 `TEMPLATE_VALIDATION_FAILED`; **DOCX all succeeded**; poolRejections=0 |
+| **Evidence (historical)** | Scenario A: n=20 success=12 errorRate=0.4; **8× PDF** HTTP 422 `TEMPLATE_VALIDATION_FAILED`; **DOCX all succeeded**; poolRejections=0 |
+| **Status** | **SUPERSEDED** (2026-07-19) — see disposition below |
+| **Superseding slice** | IBL-B2 / Task Master **#114** (`ibl-b2-pdf-conversion-capacity`) |
 
 ---
 
-## One-line cause
+## Disposition (IBL-B2 / 2026-07-19)
 
-Under concurrent sync PDF load, Resilience4j open-circuit / timeout paths map to `TemplateValidationException("api.error.generation.serviceUnavailable")`, which the API surfaces as **`TEMPLATE_VALIDATION_FAILED`** — not a FOL variable/schema validation failure.
+| Concern | Closure |
+| --- | --- |
+| **Mislabelled taxonomy** (CB/timeout → `TEMPLATE_VALIDATION_FAILED`) | **Closed** by PRR-D01A / #104 — map to `GENERATION_SERVICE_UNAVAILABLE` / `GENERATION_TIMEOUT`; pool saturation → `PDF_CONVERSION_CAPACITY_EXCEEDED` ([prod-ops-resilience-pdf-pool.md](../../../behavior/prod-ops-resilience-pdf-pool.md)) |
+| **Sync capacity under LR-D6-class concurrency** (default pool=2 / queue=0 fail-fast surface) | **Remediated in code** by IBL-B2 — product defaults **pool=4 / queue=8** (bounded absorb, still AbortPolicy); capacity plan [pdf-conversion-capacity-plan.md](../../../operations/pdf-conversion-capacity-plan.md); unit absorb/reject tests GREEN |
+| **Agreed smoke confirmation** (PDF failures &lt; 8; no Abort storm) | **Residual** → Stage 5/10 queued Docker smoke + evidence under [ibl-b2-pdf-capacity/](../ibl-b2-pdf-capacity/). Until that smoke lands, do **not** claim DEF **CLOSED**; status remains **SUPERSEDED** with residual owned by #114 deploy gate (chaos/failover depth → IBL-D4) |
+
+**Not go-live.** Do **not** flip checklist **#3b** / **#5a**. Do **not** invent confirmed NFR SLOs.
 
 ---
 
-## Facts
+## One-line cause (historical)
+
+Under concurrent sync PDF load, Resilience4j open-circuit / timeout paths mapped to
+`TemplateValidationException("api.error.generation.serviceUnavailable")`, which the API
+surfaced as **`TEMPLATE_VALIDATION_FAILED`** — not a FOL variable/schema validation failure.
+Separately, fail-fast pool defaults (2/0) left little sync absorption headroom for ≥10 concurrent PDF.
+
+---
+
+## Facts (historical LR-D6)
 
 1. **Format skew:** Alternating DOCX/PDF (10 each). All DOCX OK; PDF failures only. Single-shot PDF against the same stack returns **200** (~370KB).
-2. **Envelope (reproduced):**
+2. **Envelope (reproduced at open):**
    - `error.code` = `TEMPLATE_VALIDATION_FAILED`
    - `error.messageKey` = `api.error.generation.serviceUnavailable`
    - `error.message` = `The generation service is temporarily unavailable.`
-3. **Mapper:** `com.bank.docgen.infrastructure.resilience.ResilienceFailureMapper` converts `CallNotPermittedException` / `TimeoutException` (and unmatched causes) into `TemplateValidationException("api.error.generation.serviceUnavailable")`, which `TemplateExceptionAdvice` always emits as code `TEMPLATE_VALIDATION_FAILED`.
-4. **Not capacity-pool 503:** Same wave sometimes also saw `PDF_CONVERSION_CAPACITY_EXCEEDED` (earlier run); the named 8× case had **poolRejections=0** and the serviceUnavailable taxonomy above.
+3. **Mapper (pre-D01A):** `ResilienceFailureMapper` converted `CallNotPermittedException` / `TimeoutException` into `TemplateValidationException`, which advice always emitted as `TEMPLATE_VALIDATION_FAILED`.
+4. **Not capacity-pool 503 in the named 8× case:** That wave had **poolRejections=0** and the serviceUnavailable taxonomy above (capacity Abort was a separate earlier signature).
 5. **Scenario B:** 5/5 SSE terminals — **PASS** (not an LR-B3 silent-drop regression).
 
 ---
 
-## Classification
+## Classification (historical)
 
 | Hypothesis | Verdict |
 | --- | --- |
 | LR-A1 profile isolation regression | **Unlikely** — DOCX sync and management preview paths work; failure is PDF concurrency + resilience mapping |
 | LR-B3 SSE hardening regression | **No** — Scenario B zero drops |
-| FOL variables / UTF-8 BOM / template seed schema | **Unlikely primary** — DOCX uses the same variables body; single PDF succeeds; BOM was a deploy workaround for parse, not this 422 |
-| Concurrent PDF conversion + Resilience4j CB/timeout → mislabeled `TEMPLATE_VALIDATION_FAILED` | **Primary** |
-
----
-
-## Recommended follow-up (do **not** patch inside D6 to green the smoke)
-
-| Owner | Action |
-| --- | --- |
-| `backend-engineer` (infrastructure / resilience) | Revisit `ResilienceFailureMapper`: map CB/timeout to a dedicated generation unavailable code (not `TEMPLATE_VALIDATION_FAILED`) so load smoke and ops can triage correctly |
-| `rendering-engineer` | Review LibreOffice / PDF conversion pool + CB thresholds under ≥10 concurrent PDF; separate capacity exceeded vs CB open |
-| LR-D5 / ops (pending only) | Treat measured p95/p99 and this concurrent-PDF rejection rate as **proposed** NFR inputs — do not promote as confirmed SLO |
-
-**D6 stance:** Record observed reality; accept Scenario A with **named defect triage** per plan acceptance (`errorRate 0` **or** every failure triaged). Do **not** tune product thresholds or weaken CB to make the harness green.
+| FOL variables / UTF-8 BOM / template seed schema | **Unlikely primary** — DOCX uses the same variables body; single PDF succeeds |
+| Concurrent PDF conversion + Resilience4j CB/timeout → mislabeled `TEMPLATE_VALIDATION_FAILED` | **Primary (taxonomy)** — closed by D01A |
+| Sync pool/queue too small for agreed smoke | **Primary (capacity)** — remediated by IBL-B2 defaults 4/8; smoke residual pending |
 
 ---
 
 ## Links
 
+- Capacity plan: `docs/operations/pdf-conversion-capacity-plan.md`
+- B2 evidence: `docs/plan/evidence/ibl-b2-pdf-capacity/`
+- BDD: `docs/behavior/ibl-b2-pdf-conversion-capacity.md`
 - Harness: `backend/src/test/java/com/bank/docgen/runtime/loadsmoke/`
 - Mapper: `backend/src/main/java/com/bank/docgen/infrastructure/resilience/ResilienceFailureMapper.java`
-- Plan: `docs/plan/detail/LRP-D-ops-observability.md` §LR-D6
+- Historical plan: `docs/plan/detail/LRP-D-ops-observability.md` §LR-D6
