@@ -466,6 +466,7 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 全库导出（ZIP）（CE-E03） | 一次导出授权范围内（或筛选后）全部导出合格模板：根 manifest + 嵌套 E01 v2 per-template ZIP + 去重母版/条款目录。 | 格式 `template-library-export-v1-zip`；**权限同矩阵 §5 导出模板**（无新码）；空集/超限 422；部分成功允许；**不含**资产二进制；全库导入 out of scope。OpenAPI：`exportLibraryTemplates`。行为：[ce-e03-full-library-export.md](../behavior/ce-e03-full-library-export.md)。 | `POST /api/management/v1/library/export` |
 | 模板导入 / dry-run | 将 bundle 导入目标环境并从草稿重新走流程；或仅预检依赖。 | 提交后模板状态为 `DRAFT`；须重新执行测试→审批→发布；`masterId` 须为同 `groupCode` 下已批准母版；`dryRun=true` 不落库；导入动作记录审计并返回 `importBatchId`（dry-run 无 batch 业务写入）。 | `POST /api/management/v1/templates/import` |
 | 目录列表分页（LR-C5） | 管理端 Templates / Masters / Content-modules **包列表**服务端分页与筛选。 | 见下方「目录列表分页契约（LR-C5）」；完整行为 [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md)；正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。CE-G05：content-modules 可选 `searchMode=FULL_TEXT`（见上专节）。 | `GET /api/management/v1/templates` · `GET /api/management/v1/masters` · `GET /api/management/v1/content-modules` |
+| Dashboard Overview 汇总（PRR-D01c） | 首屏统计卡授权组范围内分桶计数 + 目录总数；**禁止**以 fetch-all 为权威源。 | 见下方「Dashboard summary 契约（PRR-D01c）」；行为 [prod-dashboard-summary-api.md](../behavior/prod-dashboard-summary-api.md)；OpenAPI `getDashboardSummary`。 | `GET /api/management/v1/dashboard/summary` |
 | 模板年到期待办（CE-G05） | Dashboard Tasks 年检分区数据源。 | 见「模板年检与条款正文全文检索（CE-G05）」；**不**新建 collaboration `queue_type`。 | `GET /api/management/v1/author-workflow/annual-review-due-tasks` |
 | 完成模板年检（CE-G05） | 滚动 `nextReviewDue` 并写审计。 | 可选 body 下一到期日；缺省 +365 UTC 日；需 `authorTemplates`。 | `POST /api/management/v1/templates/{templateId}/annual-review/complete` |
 | 条款 where-used（CE-G05） | 模块被哪些授权可见模板引用（只读）。 | 复用 reference 关系；无条款全文。 | `GET /api/management/v1/content-modules/{moduleId}/where-used` |
@@ -544,6 +545,18 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 非法 `piiCategory` | 422 | `VALIDATION` | `api.error.template.piiCategoryInvalid` | The variable `piiCategory` value is not supported. |
 
 可选 `fieldErrors` 可指向 `piiHandling` / `piiConfirmReason` / `secondaryConfirmed` / 变量路径。`EXPLICIT_SENSITIVE` 成功须写耐久管理审计（建议 `eventType=TEMPLATE_TEST_DATA_PII_EXPLICIT_CONFIRM`）：含 keys、categories、reason、`variablesHash`；**禁止**变量明文。审计写失败 → 整笔回滚（不得出现「已存敏感值但无审计」）。
+
+### Dashboard summary 契约（PRR-D01c）
+
+已确认 Dashboard Overview 统计卡权威源为服务端聚合（BDD-PRR-D01C；OpenAPI `getDashboardSummary`）。**不是** catalog `PageView`；**不是** collaboration / workflow inbox。
+
+| 项 | 已确认规则 |
+| --- | --- |
+| 路径 | `GET /api/management/v1/dashboard/summary` |
+| 响应 | 统一 envelope；`result` = `DashboardSummaryView` |
+| 字段 | `masterPendingReview` · `masterVersionsInProgress`（DRAFT∪REJECTED）· `templateVersionsInWorkflow`（DRAFT∪TESTING∪APPROVAL∪PENDING_RELEASE）· `publishedVersions` · `stoppedVersions` · `catalogMasters` · `catalogTemplates`（均为整数 ≥ 0） |
+| 授权 | 与 catalog list 相同的会话组范围；无组 → 全 0；未认证 → 401；不泄露他组 |
+| 非目标 | `pendingActions` / `externalServicesAlerts`（继续既有 tasks / alerts API）；图表时间序列；废弃全局 `fetchAll*` 符号 |
 
 ### 目录列表分页契约（LR-C5）
 

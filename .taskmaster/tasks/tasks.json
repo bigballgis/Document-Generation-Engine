@@ -1468,14 +1468,14 @@
       {
         "id": "106",
         "title": "IBL: International Bank Letter Readiness Program (umbrella)",
-        "description": "REGISTRY ONLY — not a delivery leaf; program registered in Task Master; waves Not Started / not activated; Formal phase None; Not go-live; Do NOT flip checklist #3b (stays CONDITIONAL); Plan: docs/plan/intl-bank-letter-readiness-program.md. Queue note: #105/#103/#104(D01A)/#135(D01B) Done (merge 6e776232 / tip 1ada6b41); host sole-active cleared — next PRR residual = dashboard summary API (not activated) — do NOT activate IBL while dashboard residual remains ahead (unless user redirect); next IBL activation head = IBL-A1 (#107). Status pending (registry only). MAIN merge 9fc2bc97.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs in docs/plan/intl-bank-letter-readiness-program.md. REGISTRY ONLY — not a delivery leaf. Waves A–E Not Started / not activated (B7 + Wave E blocked on external/pending decisions). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b. Do NOT activate while dashboard Wave D residual remains ahead (#135 D01B Done; #104 D01A Done; bag OUT unfinished).",
+        "description": "REGISTRY ONLY — not a delivery leaf; program registered in Task Master; waves Not Started / not activated; Formal phase None; Not go-live; Do NOT flip checklist #3b (stays CONDITIONAL); Plan: docs/plan/intl-bank-letter-readiness-program.md. Queue note: #105/#103/#104(D01A)/#135(D01B) Done; host sole-active = #136 PRR-D01c dashboard summary API — do NOT activate IBL while #136 remains In Progress (unless user redirect); next IBL activation head = IBL-A1 (#107). Status pending (registry only). MAIN merge 9fc2bc97.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs in docs/plan/intl-bank-letter-readiness-program.md. REGISTRY ONLY — not a delivery leaf. Waves A–E Not Started / not activated (B7 + Wave E blocked on external/pending decisions). Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b. Do NOT activate while #136 PRR-D01c (dashboard summary API) remains sole-active (#135 D01B Done; #104 D01A Done; bag OUT unfinished).",
         "testStrategy": "N/A — umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T04:00:00.000Z"
+        "updatedAt": "2026-07-18T04:10:00.000Z"
       },
       {
         "id": "107",
@@ -1851,8 +1851,8 @@
       {
         "id": "135",
         "title": "PRR-D01b: Ops security hardening",
-        "description": "DONE 2026-07-18. PRR-D01b Wave D residual leaf → Done. MAIN merge 6e776232 / feature tip 1ada6b41; worktree REMOVED. Slice prod-ops-security-hardening. Actuator metrics/prometheus HTTP Basic scrape (anonymous 401); nginx CSP/security headers; ADR-0044 honesty; FailedSyncInvocationErrorMapper maps GenerationServiceUnavailable/Timeout/PdfCapacity. BDD ready docs/behavior/prod-ops-security-hardening.md (BDD-PRR-D01B-*). frontend_ui_in_scope=false. Formal phase None. Not go-live. Checklist #3b/#5a stay CONDITIONAL. Sole-active cleared. NOT full Wave D bag — next queue (not activated): dashboard summary API.",
-        "details": "COMPLETED 2026-07-18 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: prod-ops-security-hardening. Batch recommendation split (member_task_ids: [\"135\"]; proposed_slice_id: prod-ops-security-hardening; vetoes: dashboard FE) closed. Merge SHA 6e776232; feature tip 1ada6b41. Gates: mvn verify GREEN 1988; architecture PASS_WITH_NOTES Critical=0 merge_go=true; Stage 10 DEPLOY_OK healthz/4173 200; anonymous prometheus/metrics 401; backend image sha256:c6e01cc7…. E2E/UIUX N/A. Evidence: actuator Basic scrape; nginx CSP/headers; ADR-0044 honesty; FailedSyncInvocationErrorMapper IRC taxonomy. Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO / #5a GO. Do NOT claim full Wave D bag Done. Next queue (not activated): dashboard summary API.",
+        "description": "DONE 2026-07-18. PRR-D01b Wave D residual leaf → Done. MAIN merge 6e776232 / feature tip 1ada6b41; worktree REMOVED. Slice prod-ops-security-hardening. Actuator metrics/prometheus HTTP Basic scrape (anonymous 401); nginx CSP/security headers; ADR-0044 honesty; FailedSyncInvocationErrorMapper maps GenerationServiceUnavailable/Timeout/PdfCapacity. BDD ready docs/behavior/prod-ops-security-hardening.md (BDD-PRR-D01B-*). frontend_ui_in_scope=false. Formal phase None. Not go-live. Checklist #3b/#5a stay CONDITIONAL. Sole-active superseded by #136 PRR-D01c (dashboard summary API). NOT full Wave D bag.",
+        "details": "COMPLETED 2026-07-18 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: prod-ops-security-hardening. Batch recommendation split (member_task_ids: [\"135\"]; proposed_slice_id: prod-ops-security-hardening; vetoes: dashboard FE) closed. Merge SHA 6e776232; feature tip 1ada6b41. Gates: mvn verify GREEN 1988; architecture PASS_WITH_NOTES Critical=0 merge_go=true; Stage 10 DEPLOY_OK healthz/4173 200; anonymous prometheus/metrics 401; backend image sha256:c6e01cc7…. E2E/UIUX N/A. Evidence: actuator Basic scrape; nginx CSP/headers; ADR-0044 honesty; FailedSyncInvocationErrorMapper IRC taxonomy. Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO / #5a GO. Do NOT claim full Wave D bag Done. Sole-active now #136 PRR-D01c (activated separately).",
         "testStrategy": "1. BDD-PRR-D01B ready (docs/behavior/prod-ops-security-hardening.md). 2. TDD actuator Basic scrape + nginx CSP/headers + ADR-0044 honesty + FailedSyncInvocationErrorMapper. 3. mvn -B -ntp -f backend/pom.xml verify GREEN (1988). 4. FE/E2E N/A (frontend_ui_in_scope=false; dashboard FE vetoed). 5. Stage 10 DEPLOY_OK (anonymous prometheus/metrics 401). 6. Do NOT flip #3b/#5a GO; do NOT claim go-live; do NOT claim full Wave D bag Done.",
         "priority": "high",
         "dependencies": [
@@ -1861,17 +1861,31 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-18T04:00:00.000Z"
+      },
+      {
+        "id": "136",
+        "title": "PRR-D01c: Dashboard summary API (stop fetchAll on first paint)",
+        "description": "IN PROGRESS 2026-07-18 — sole-active NON-CE Wave D residual leaf after #135 D01B Done. Slice prod-dashboard-summary-api. Placement ISOLATED; worktree D:/working/DGE-prod-dashboard-summary-api · feat/prod-dashboard-summary-api. Batch recommendation split (member_task_ids: [\"136\"]; proposed_slice_id: prod-dashboard-summary-api; vetoes: IBL). Behavior: Dashboard first paint must NOT call fetchAllMasters/fetchAllTemplates; use bounded summary/count API or existing pageable aggregates. frontend_ui_in_scope=true; E2E mandatory. BDD: docs/behavior/prod-dashboard-summary-api.md present (file marks ready — confirm/own via behavior-spec-author). Formal phase None. Not go-live. Do NOT flip checklist #3b GO / #5a GO. Do NOT claim full Wave D bag Done. IBL stays pending.",
+        "details": "ACTIVATED 2026-07-18 (stage 2 plan-orchestrator). Slice id: prod-dashboard-summary-api. Depends on #135 (done). Batch recommendation split (member_task_ids: [\"136\"]; proposed_slice_id: prod-dashboard-summary-api; rationale: FE Wave D residual after #135; vetoes_applied: [\"IBL\"]; evidence_amortization: FE gates+E2E+deploy; on_red_split_hint: BE vs FE peel). Scope: replace unbounded fetchAllMasters/fetchAllTemplates on dashboard first paint with bounded summary/count API or pageable aggregates; FE consumers + E2E. Owners: backend-engineer + frontend-engineer after BDD confirmed ready. Status in-progress (sole-active delivery leaf) — NOT Done. Formal phase remains None. Umbrella #53 registry only. Do NOT claim go-live. Do NOT flip #3b GO / #5a GO. Do NOT activate IBL while this leaf is In Progress. Next pipeline stage: behavior-spec-author (stage 1 confirm) then engineers.",
+        "testStrategy": "1. BDD-PRR-D01C ready (docs/behavior/prod-dashboard-summary-api.md) — confirm via behavior-spec-author. 2. TDD bounded summary/count (or pageable aggregates) + FE first-paint no fetchAll*. 3. mvn verify + pnpm lint/type-check/test/build GREEN. 4. E2E mandatory (frontend_ui_in_scope=true) + UIUX. 5. Stage 5/10 DEPLOY_OK. 6. Do NOT flip #3b/#5a GO; do NOT claim go-live; do NOT claim full Wave D bag Done.",
+        "priority": "high",
+        "dependencies": [
+          "135"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-18T04:10:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-18T04:00:00.000Z",
-      "taskCount": 135,
+      "lastModified": "2026-07-18T04:10:00.000Z",
+      "taskCount": 136,
       "completedCount": 105,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-18T04:00:00.000Z"
+      "updated": "2026-07-18T04:10:00.000Z"
     }
   }
 }

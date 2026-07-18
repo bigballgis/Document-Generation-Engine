@@ -16,8 +16,10 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 public class TemplateRepositoryImpl implements TemplateRepositoryCustom {
@@ -45,6 +47,32 @@ public class TemplateRepositoryImpl implements TemplateRepositoryCustom {
         typedQuery.setMaxResults(size);
         List<TemplateEntity> content = typedQuery.getResultList();
         return new CatalogQueryPage<>(content, totalElements, CatalogPageSupport.totalPages(totalElements, size));
+    }
+
+    @Override
+    public Map<TemplateLifecycleStatus, Long> countGroupedByLifecycleStatus(
+            List<String> accessibleGroupCodes,
+            boolean allGroups
+    ) {
+        if (!allGroups && (accessibleGroupCodes == null || accessibleGroupCodes.isEmpty())) {
+            return Map.of();
+        }
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
+        Root<TemplateEntity> root = query.from(TemplateEntity.class);
+        query.multiselect(root.get("lifecycleStatus"), cb.count(root));
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.isNull(root.get("deletedAt")));
+        if (!allGroups) {
+            predicates.add(root.get("groupCode").in(accessibleGroupCodes));
+        }
+        query.where(predicates.toArray(Predicate[]::new));
+        query.groupBy(root.get("lifecycleStatus"));
+        Map<TemplateLifecycleStatus, Long> counts = new EnumMap<>(TemplateLifecycleStatus.class);
+        for (Object[] row : entityManager.createQuery(query).getResultList()) {
+            counts.put((TemplateLifecycleStatus) row[0], (Long) row[1]);
+        }
+        return counts;
     }
 
     private Predicate[] buildPredicates(

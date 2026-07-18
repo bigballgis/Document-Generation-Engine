@@ -1087,6 +1087,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/templates/{templateId}/dev-version/author-word-page-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get author-declared Microsoft Word page count for the in-flight DEV version
+         * @description ADR-0042 / BDD-PRR-C01-008. Returns the optional `authorWordPageCount` used for Word↔PDF pagination delta enforcement. Never fabricates a value from LibreOffice or Docker PDF page counts.
+         */
+        get: operations["getAuthorWordPageCount"];
+        /**
+         * Set or clear author-declared Microsoft Word page count on the in-flight DEV version
+         * @description ADR-0042 / BDD-PRR-C01-008. Sets a positive integer Word authoring page count, or clears it with `null` (skips pagination delta enforcement). Does not accept PDF page counts as a substitute.
+         */
+        put: operations["putAuthorWordPageCount"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/templates/{templateId}/bindings/{anchorId}": {
         parameters: {
             query?: never;
@@ -1489,6 +1513,26 @@ export interface paths {
          * @description Marks catalog row DISABLED and deletes resolvable MinIO object key(s) so `StructuredContentImageResolver` fail-closes with existing IMAGE_ASSET_NOT_FOUND / SEAL_ASSET_NOT_FOUND. Admin-only (GLOBAL_ADMIN / GROUP_ADMIN). Unauthorized callers receive 403 without existence leakage. Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-013…014). Disable of an already-DISABLED key is idempotent HTTP 200 (catalog remains DISABLED; resolvable objects re-checked for deletion).
          */
         post: operations["disableLibraryAsset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/dashboard/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dashboard Overview bucket counts (PRR-D01c)
+         * @description Returns authorized-group aggregate counts for Dashboard Overview stats cards (BDD-PRR-D01C-002 / D01C-C1 / D01C-C2): masterPendingReview, masterVersionsInProgress (DRAFT ∪ REJECTED), templateVersionsInWorkflow (DRAFT ∪ TESTING ∪ APPROVAL ∪ PENDING_RELEASE), publishedVersions, stoppedVersions, catalogMasters, catalogTemplates. Counts only — not a paginated catalog and not a substitute for collaboration/workflow task inboxes. Unauthenticated callers receive 401. Empty group authorization yields zeros (fail-closed; no cross-group leakage).
+         */
+        get: operations["getDashboardSummary"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2342,6 +2386,48 @@ export interface components {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["ApiAccessReadinessSummaryView"];
         };
+        /** @description Authorized-group Dashboard Overview bucket counts (PRR-D01c). Integers are ≥ 0. Route visibility filtering of which cards to show remains a client concern. */
+        DashboardSummaryView: {
+            /**
+             * Format: int64
+             * @description Masters with status PENDING_REVIEW in authorized groups.
+             */
+            masterPendingReview: number;
+            /**
+             * Format: int64
+             * @description Masters with status DRAFT or REJECTED in authorized groups.
+             */
+            masterVersionsInProgress: number;
+            /**
+             * Format: int64
+             * @description Templates with lifecycleStatus DRAFT, TESTING, APPROVAL, or PENDING_RELEASE in authorized groups.
+             */
+            templateVersionsInWorkflow: number;
+            /**
+             * Format: int64
+             * @description Templates with lifecycleStatus PUBLISHED in authorized groups.
+             */
+            publishedVersions: number;
+            /**
+             * Format: int64
+             * @description Templates with lifecycleStatus STOPPED in authorized groups.
+             */
+            stoppedVersions: number;
+            /**
+             * Format: int64
+             * @description Total non-deleted masters in authorized groups.
+             */
+            catalogMasters: number;
+            /**
+             * Format: int64
+             * @description Total non-deleted templates in authorized groups.
+             */
+            catalogTemplates: number;
+        };
+        DashboardSummaryResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["DashboardSummaryView"];
+        };
         /** @description Non-sensitive API credential summary for contract and management views. `status` is the effective lifecycle status (including EXPIRING_SOON). `expiresAt` is the persisted credential expiry (ISO 8601 with timezone offset); it must not be synthesized solely from createdAt + 180 days. */
         CredentialSummary: {
             credentialId?: string;
@@ -2807,6 +2893,22 @@ export interface components {
             ready: boolean;
             blockerCount: number;
             items: components["schemas"]["PublishGateItemView"][];
+        };
+        UpdateAuthorWordPageCountRequest: {
+            /** @description Microsoft Word authoring page count. Null clears the declaration (pagination delta enforcement skips). Never set from LO/PDF pages. */
+            authorWordPageCount?: number | null;
+        };
+        AuthorWordPageCountView: {
+            /** Format: uuid */
+            templateId: string;
+            /** Format: uuid */
+            devVersionId: string;
+            authorWordPageCount?: number | null;
+        };
+        AuthorWordPageCountResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["AuthorWordPageCountView"];
+            error?: components["schemas"]["ErrorDetail"];
         };
         PublishGateChecklistResponse: {
             metadata: components["schemas"]["Metadata"];
@@ -4419,7 +4521,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "RENDERING" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED";
     };
     responses: {
         /** @description Async task accepted. */
@@ -6639,6 +6741,69 @@ export interface operations {
             default: components["responses"]["ErrorResponse"];
         };
     };
+    getAuthorWordPageCount: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Author Word page count view. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthorWordPageCountResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    putAuthorWordPageCount: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAuthorWordPageCountRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated author Word page count view. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthorWordPageCountResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
     upsertTemplateAnchorBinding: {
         parameters: {
             query?: never;
@@ -7452,6 +7617,31 @@ export interface operations {
                 };
             };
             409: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getDashboardSummary: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Dashboard summary counts returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardSummaryResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };
