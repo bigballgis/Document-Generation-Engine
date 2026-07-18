@@ -11,7 +11,7 @@ import { toCompositionRuleInput } from '@/utils/mergeAnchorVisibilityRule'
 import { payloadTouchesPiiFields } from '@/utils/testDataSetPii'
 
 /** Matches compute / condition `${path}` identifier roots (CE-K03 / F3). */
-export const VARIABLE_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_.-]*$/
+const VARIABLE_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_.-]*$/
 
 export interface VariableRenameImpact {
   bindingAnchorCount: number
@@ -71,7 +71,7 @@ export function replaceVariableRefsInExpression(
   return result
 }
 
-export function expressionReferencesVariable(expression: string | null | undefined, key: string): boolean {
+function expressionReferencesVariable(expression: string | null | undefined, key: string): boolean {
   if (!expression) {
     return false
   }

@@ -5,10 +5,6 @@ export const STRUCTURED_CONTENT_MAX_NEST_DEPTH = 3
 
 export type NodePath = number[]
 
-export function nodeDepthAtPath(path: NodePath): number {
-  return path.length
-}
-
 /** Whether a container at `parentPath` may receive another nested block child. */
 export function canAddNestedBlockChildren(parentPath: NodePath): boolean {
   return parentPath.length + 1 < STRUCTURED_CONTENT_MAX_NEST_DEPTH
@@ -135,7 +131,7 @@ export function isNestedContainerType(type: string): boolean {
   return type === 'conditionBlock' || type === 'loopBlock'
 }
 
-export function parentPathOf(path: NodePath): NodePath | null {
+function parentPathOf(path: NodePath): NodePath | null {
   return path.length <= 1 ? null : path.slice(0, -1)
 }
 
@@ -152,18 +148,6 @@ export function areSiblingPaths(left: NodePath, right: NodePath): boolean {
     return false
   }
   return pathKey(leftParent) === pathKey(rightParent)
-}
-
-export function siblingCountAtPath(
-  document: StructuredContentDocument,
-  path: NodePath,
-): number {
-  const parentPath = parentPathOf(path)
-  if (parentPath === null) {
-    return document.nodes.length
-  }
-  const parent = getNodeAtPath(document, parentPath)
-  return parent?.children?.length ?? 0
 }
 
 export function reorderBlockAtPath(

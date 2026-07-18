@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { useBatchTestProgressStream } from '@/components/template/useBatchTestProgressStream'
+import { useBatchTestProgressStream } from '@/components/templates/useBatchTestProgressStream'
 
 const props = defineProps<{
   modelValue: boolean

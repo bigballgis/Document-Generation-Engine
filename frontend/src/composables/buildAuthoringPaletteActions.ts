@@ -3,7 +3,7 @@ import type { PaletteItem } from '@/composables/commandPaletteTypes'
 
 export type ShortcutPlatform = 'mac' | 'other'
 
-export function detectShortcutPlatform(
+function detectShortcutPlatform(
   userAgent: string = typeof navigator !== 'undefined' ? navigator.userAgent : '',
   platform: string = typeof navigator !== 'undefined' ? navigator.platform : '',
 ): ShortcutPlatform {

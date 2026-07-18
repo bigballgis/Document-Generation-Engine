@@ -10,7 +10,7 @@ import {
   failPreviewProgressStream,
   handlePreviewProgressEvent,
   type PreviewProgressPhase,
-} from '@/components/template/previewProgressStreamHandlers'
+} from '@/components/templates/previewProgressStreamHandlers'
 
 export interface UsePreviewProgressStreamOptions {
   modelValue: () => boolean

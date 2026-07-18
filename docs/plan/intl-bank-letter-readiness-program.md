@@ -9,7 +9,7 @@
 **Task Master:** Umbrella **#106** (registry only) + leaves **#107–#134** (28 tasks = A6+B7+C3+D5+E7). All IBL TM statuses **`pending`**; B7 + Wave E descriptions start with **BLOCKED**. See § Task Master ID map.  
 **Audit provenance:** Four-track (+ multinational template track) **read-only** deep audit, evidence spot-verified **2026-07-17**. Findings F1–F28 below are **confirmed symptoms** (code/docs evidence). Proposed remediations are **not** confirmed product requirements until activation + (where noted) ADR/user decision.
 
-**Queue policy (critical):** Host serial delivery queue: PRR **#105 Done** (`50448016`); **#103 Done** (`3513ab92` / `6408c210`); **#104** PRR-D01a (**D01A**) → **Done** (`f1f79d14`); **#135** PRR-D01b → **Done** (`6e776232` / `1ada6b41`); **#136** PRR-D01c → **Done** (`a872c15b` / `8c52ee67`; Wave D residuals **D01A+#135+#136** closed). **Host sole-active:** **cleared** (no delivery leaf). IBL tasks remain **pending / deferred** — **not** activated. **Next queue head (not activated):** **IBL-A1** (#107) or a Wave A batch per Batch Recommendation. Umbrella **#106** is **registry only** — **not** a sole-active delivery leaf. Do **not** activate IBL without delivery-orchestrator / explicit user redirect.
+**Queue policy (critical):** Host serial delivery queue: PRR **#105 Done** (`50448016`); **#103 Done** (`3513ab92` / `6408c210`); **#104** PRR-D01a (**D01A**) → **Done** (`f1f79d14`); **#135** PRR-D01b → **Done** (`6e776232` / `1ada6b41`); **#136** PRR-D01c → **Done** (`a872c15b` / `8c52ee67`; Wave D residuals **D01A+#135+#136** closed). **Host sole-active:** **#137** PRR-P2 audit hygiene (`prod-audit-p2-hygiene`; IBL **vetoed** for this leaf). IBL tasks remain **pending / deferred** — **not** activated. **IBL next queue head (not activated):** **IBL-A1** (#107) or a Wave A batch per Batch Recommendation **after #137**. Umbrella **#106** is **registry only** — **not** a sole-active delivery leaf. Do **not** activate IBL without delivery-orchestrator / explicit user redirect.
 
 **Authoritative entry for lower-tier implementers:** Read this file first. Execute only `IBL-*` task IDs after wave activation. Do **not** invent a formal phase. Do **not** touch [launch-readiness-checklist.md](../operations/launch-readiness-checklist.md) from IBL work unless a task explicitly owns a checklist cross-link.
 
@@ -99,7 +99,7 @@ Registered **2026-07-18** under `.taskmaster/tasks/tasks.json`. Program status =
 | IBL-E6 | **133** | pending (**BLOCKED** in description — §Pending decisions) |
 | IBL-E7 | **134** | pending (**BLOCKED** in description — §Pending decisions) |
 
-**Queue note:** Wave D residuals **D01A+#135+#136** closed (**#136** Done `a872c15b` / `8c52ee67`; **#135** `6e776232` / `1ada6b41`; **#104** `f1f79d14`; **#103/#105** Done). **Sole-active cleared.** Do **not** treat #106 as sole-active. **Next (not activated):** activate **IBL-A1** (#107) or Wave A batch via delivery-orchestrator Batch Recommendation — still one leaf at a time.
+**Queue note:** Wave D residuals **D01A+#135+#136** closed (**#136** Done `a872c15b` / `8c52ee67`; **#135** `6e776232` / `1ada6b41`; **#104** `f1f79d14`; **#103/#105** Done). **Sole-active = #137** PRR-P2 audit hygiene (IBL vetoed). Do **not** treat #106 as sole-active. **IBL next (not activated):** activate **IBL-A1** (#107) or Wave A batch via delivery-orchestrator Batch Recommendation **after #137** — still one leaf at a time.
 
 ---
 
@@ -421,8 +421,9 @@ Task Master registration is **complete** (#106–#134; MAIN merge `9fc2bc97`). W
 | 2026-07-18 | PRR **#135** D01B → **Done** (merge `6e776232` / tip `1ada6b41`; stage 12 doc-sync). Wave D residual SPLIT closed — actuator/nginx/IRC/ADR-0044; dashboard residual unfinished. Sole-active cleared. IBL still deferred. Do **not** flip **#3b GO**. |
 | 2026-07-18 | PRR **#136** D01C activated sole-active (`prod-dashboard-summary-api`; stage 2 plan-orchestrator). IBL stays **pending** / not activated. Do **not** flip **#3b GO**. |
 | 2026-07-18 | PRR **#136** D01C → **Done** (merge `a872c15b` / tip `8c52ee67`; stage 12 doc-sync). Wave D residuals **D01A+#135+#136** closed. Sole-active cleared. IBL still **pending** / not activated. Do **not** flip **#3b GO**. |
+| 2026-07-18 | PRR **#137** P2 audit hygiene activated sole-active (`prod-audit-p2-hygiene`; stage 2 plan-orchestrator; IBL **vetoed**). IBL stays **pending** / not activated. Do **not** flip **#3b GO**. |
 | 2026-07-17 | Program document created from 2026-07-17 deep audit. Waves IBL-A…E defined (scheduled task set later counted as **28**). All activatable tasks **Not Started**; B7 + Wave E **Blocked**. Formal phase unchanged (**None**). Task Master then untouched. Proposal awaiting user confirmation to write TM. |
 
 ---
 
-**Next action:** Activate **IBL-A** via delivery-orchestrator (head **IBL-A1** / #107, or Wave A batch per Batch Recommendation) — **not** activated yet (sole-active cleared after **#136** Done `a872c15b` / `8c52ee67`). Do **not** invent a formal P-phase. Do **not** flip checklist **#3b GO**.
+**Next action:** After **#137** PRR-P2 closes — activate **IBL-A** via delivery-orchestrator (head **IBL-A1** / #107, or Wave A batch per Batch Recommendation) — **not** activated yet (host sole-active = **#137**). Do **not** invent a formal P-phase. Do **not** flip checklist **#3b GO**.

@@ -26,10 +26,9 @@ import {
 } from '@/utils/structuredContentNodes'
 import type { StructuredContentDraftPayload } from '@/utils/structuredContentDraftStorage'
 
-export {
-  STRUCTURED_BLOCK_NODE_TYPES,
-  type ControlledStructuredContentEditorEmit,
-  type ControlledStructuredContentEditorProps,
+export type {
+  ControlledStructuredContentEditorEmit,
+  ControlledStructuredContentEditorProps,
 } from '@/composables/controlledStructuredContentEditorTypes'
 
 export function useControlledStructuredContentEditor(

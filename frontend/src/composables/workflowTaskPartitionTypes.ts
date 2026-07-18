@@ -47,7 +47,7 @@ export interface WorkflowTask {
   createdAt?: string
 }
 
-export const COLLABORATION_QUEUES: readonly CollaborationWorkItemQueue[] = [
+const COLLABORATION_QUEUES: readonly CollaborationWorkItemQueue[] = [
   'TEST',
   'APPROVAL',
   'REMEDIATION',
@@ -84,7 +84,7 @@ export interface TaskPartition {
   tasks: WorkflowTask[]
 }
 
-export function canSeeBehaviorRemediation(context: CapabilityContext): boolean {
+function canSeeBehaviorRemediation(context: CapabilityContext): boolean {
   const hasEligibleRole = context.roles.some((role) =>
     (
       [

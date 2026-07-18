@@ -1,0 +1,66 @@
+
+> docgen-frontend@0.1.0 knip D:\working\DGE-prod-audit-p2-hygiene\frontend
+> knip
+
+Unused exported types (51)
+RotatedCredential                          apiPolicyApi  type       src/api/apiPolicy.ts:2:15                           
+ClauseAuthoringPanelApi                                  type       鈥onents/templates/useClauseAuthoringPanel.ts:147:13
+ClauseAuthoringDialogState                               type       鈥onents/templates/useClauseAuthoringPanel.ts:149:13
+PaletteItemKind                                          type       src/composables/commandPaletteTypes.ts:10:13        
+PaletteNavTarget                                         interface  src/composables/commandPaletteTypes.ts:12:18        
+ReadonlyStringList                                       type       src/composables/commandPaletteTypes.ts:38:13        
+CapabilitiesRef                                          type       src/composables/commandPaletteTypes.ts:39:13        
+PaletteItemKind                                          type       src/composables/useCommandPalette.ts:29:8           
+PaletteNavTarget                                         type       src/composables/useCommandPalette.ts:30:8           
+ControlledStructuredContentCatalogOptions                type       鈥ControlledStructuredContentCatalogOptions.ts:69:13
+StyleOptionsRef                                          type       鈥ControlledStructuredContentCatalogOptions.ts:73:13
+BindingPanelMode                                         type       鈥posables/useTemplateAuthoringBindingsPanel.ts:23:3
+DashboardTaskScope                                       type       src/composables/useWorkflowTasks.ts:38:3            
+BehaviorNavItemSpec                                      type       src/navigation/navStructure.ts:16:3                 
+ApiPolicyRotatedCredential                               interface  src/stores/apiPolicyStoreTypes.ts:8:18              
+ApiAccessAlert                                           type       src/stores/apiPolicyStoreTypes.ts:36:15             
+VersionLinesCache                                        interface  src/stores/templatePanelDataTypes.ts:15:18          
+TemplateListFetchOptions                                 type       src/stores/templates.ts:15:15                       
+AuditReadActorRole                                       type       src/types/audit.ts:3:13                             
+ContentModuleReviewSnapshot                              type       src/types/contentModule.ts:35:13                    
+ContentModuleLifecycleSnapshot                           type       src/types/contentModule.ts:44:13                    
+CallerContractErrorCode                                  interface  src/types/contract.ts:1:18                          
+CallerContractVersion                                    interface  src/types/contract.ts:9:18                          
+CallerContractDefaultRoute                               interface  src/types/contract.ts:14:18                         
+CallerContractPolicy                                     interface  src/types/contract.ts:23:18                         
+LegalHoldStatusFilter                                    type       src/types/legalHold.ts:33:13                        
+LibraryAssetStatus                                       type       src/types/libraryAsset.ts:2:13                      
+MasterRenamedAnchor                                      interface  src/types/master.ts:56:18                           
+MasterAnchorSetDelta                                     interface  src/types/master.ts:61:18                           
+components                                               type       src/types/openapi.ts:3:15                           
+operations                                               type       src/types/openapi.ts:3:27                           
+paths                                                    type       src/types/openapi.ts:3:39                           
+OpenApiSchemaName                                        type       src/types/openapi.ts:5:13                           
+ManagementInvocationAuditLinkHint                        interface  src/types/templateApiAccess.ts:45:18                
+TemplateVersionLineDetail                                type       src/types/templateCore.ts:52:13                     
+VariablePiiCategory                                      type       src/types/templateCore.ts:98:13                     
+TemplateExportMetadata                                   type       src/types/templateExport.ts:6:13                    
+TemplateImportSummary                                    type       src/types/templateExport.ts:21:13                   
+PublishGateCheckCode                                     type       src/types/templateLifecycle.ts:55:13                
+PublishGateItem                                          interface  src/types/templateLifecycle.ts:74:18                
+UpsertGlobalRiskPromptConfigPayload                      interface  src/types/templateLifecycle.ts:100:18               
+RuleValidationStatus                                     type       src/types/templatePreview.ts:100:13                 
+RuleValidationItem                                       type       src/types/templatePreview.ts:104:13                 
+RuleValidationSummary                                    type       src/types/templatePreview.ts:106:13                 
+TestDataSetPiiHandling                                   type       src/types/templatePreview.ts:204:13                 
+BatchTestHistorySampleResult                             interface  src/types/templatePreview.ts:250:18                 
+TemplateAuthorJourneyContext                             type       鈥tils/resolveTemplateAuthorDashboardJourney.ts:10:8
+SchemaFieldErrorReason                                   type       src/utils/testDataSetSchemaForm.ts:10:13            
+RenamedBinding                                           interface  src/utils/variableRenameCascade.ts:29:18            
+PublishBumpOption                                        type       鈥es/detail/templateDetailDevWorkspaceProps.ts:12:13
+PublishBumpOption                                        type       鈥?detail/templateDetailLegacyWorkspaceProps.ts:10:13
+Configuration hints (8)
+src/auto-imports.d.ts          knip.json  Remove from ignore              
+src/components.d.ts            knip.json  Remove from ignore              
+vite.shared.ts                 knip.json  Remove redundant project pattern
+vite.config.ts                 knip.json  Remove redundant project pattern
+vitest.config.ts               knip.json  Remove redundant project pattern
+playwright.config.ts           knip.json  Remove redundant project pattern
+playwright.docker.config.ts    knip.json  Remove redundant project pattern
+eslint.config.js               knip.json  Remove redundant project pattern
+鈥塃LIFECYCLE鈥?Command failed with exit code 1.

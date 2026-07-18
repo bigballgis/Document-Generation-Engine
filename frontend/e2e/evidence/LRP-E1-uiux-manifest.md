@@ -86,5 +86,5 @@ _None._
 - Functional E2E + SSE timestamps: `frontend/e2e/LRP-E1-sse-incremental-progress.spec.ts`, [`LRP-E1-sse-manifest.md`](./LRP-E1-sse-manifest.md)
 - UIUX capture: `frontend/e2e/LRP-E1-uiux-evidence.spec.ts`
 - Upstream visual: [`CDP-E2E-T08-uiux-manifest.md`](./CDP-E2E-T08-uiux-manifest.md)
-- Component: `frontend/src/components/template/PreviewProgressDialog.vue` (unchanged)
+- Component: `frontend/src/components/templates/PreviewProgressDialog.vue` (unchanged)
 - OA design: `.cursor/skills/frontend-oa-design/SKILL.md`

@@ -38,7 +38,7 @@ export function buildStructuredDraftStorageKey(
 /**
  * Legacy LR-C2 triple key (no anchor segment). Used for one-time migration (U21-D4).
  */
-export function buildLegacyStructuredDraftStorageKey(
+function buildLegacyStructuredDraftStorageKey(
   userId: string,
   templateId: string,
   devVersionId: string,
@@ -47,7 +47,7 @@ export function buildLegacyStructuredDraftStorageKey(
 }
 
 /** True when a legacy payload may be claimed by the given anchor (U21-D4). */
-export function isLegacyDraftClaimableByAnchor(
+function isLegacyDraftClaimableByAnchor(
   draft: StructuredContentDraftPayload | null,
   currentAnchorId: string | null | undefined,
 ): boolean {
