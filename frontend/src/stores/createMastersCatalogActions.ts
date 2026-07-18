@@ -75,7 +75,7 @@ export function createMastersCatalogActions(deps: {
     }
   }
 
-  /** Full catalog merge for dashboard / import pickers (not list-view paging). */
+  /** Full catalog merge for import pickers (not list-view paging; not Dashboard Overview). */
   async function fetchAllMasters(
     options: AbortableRequestOptions & {
       search?: string
@@ -96,6 +96,59 @@ export function createMastersCatalogActions(deps: {
         collected.totalElements === 0
           ? 0
           : Math.max(1, Math.ceil(collected.totalElements / 100))
+    } catch (error) {
+      handleStoreListFailure(
+        error,
+        'masters.error.loadList',
+        lastErrorMessageKey,
+        lastListErrorRetryable,
+        { useStoreResolver: true },
+      )
+    } finally {
+      loadingList.value = false
+    }
+  }
+
+  /**
+   * Status-filtered multi-page collect for Dashboard master workflow todos / journeys
+   * (PRR-D01c D01C-C6). Candidate sets are far smaller than the full catalog.
+   */
+  async function fetchDashboardWorkflowMasters(
+    options: AbortableRequestOptions & {
+      includePendingReview?: boolean
+      includeDraftOrRejected?: boolean
+    } = {},
+  ): Promise<void> {
+    const statuses: string[] = []
+    if (options.includePendingReview) {
+      statuses.push('PENDING_REVIEW')
+    }
+    if (options.includeDraftOrRejected) {
+      statuses.push('DRAFT', 'REJECTED')
+    }
+    if (statuses.length === 0) {
+      masters.value = []
+      return
+    }
+
+    loadingList.value = true
+    clearStoreListError(lastErrorMessageKey, lastListErrorRetryable)
+    try {
+      const pages = await Promise.all(
+        statuses.map((status) =>
+          mastersApi.listAllMasters({
+            status,
+            signal: options.signal,
+          }),
+        ),
+      )
+      const byId = new Map<string, MasterDocumentSummary>()
+      for (const page of pages) {
+        for (const master of page.content) {
+          byId.set(master.id, master)
+        }
+      }
+      masters.value = [...byId.values()]
     } catch (error) {
       handleStoreListFailure(
         error,
@@ -154,6 +207,7 @@ export function createMastersCatalogActions(deps: {
   return {
     fetchMasters,
     fetchAllMasters,
+    fetchDashboardWorkflowMasters,
     fetchMaster,
     uploadMaster,
     ...mutationActions,

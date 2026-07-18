@@ -28,6 +28,8 @@ export const apiErrorZhCn = {
   generation: {
     internalError: "发生内部错误。",
     serviceUnavailable: "生成服务暂时不可用。",
+    generationServiceUnavailable: "文档生成服务暂时不可用。",
+    generationTimeout: "文档生成超时。",
     pdfConversionFailed: "PDF 转换失败。",
     pdfConversionCapacityExceeded: "PDF 转换容量暂时已满，请稍后重试。",
     pdfArchivalEncryptionMutex: "PDF/A 归档输出不能与加密同时使用。",

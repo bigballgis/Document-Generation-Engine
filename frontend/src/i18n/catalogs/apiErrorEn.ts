@@ -28,6 +28,8 @@ export const apiErrorEn = {
   generation: {
     internalError: "An internal error occurred.",
     serviceUnavailable: "The generation service is temporarily unavailable.",
+    generationServiceUnavailable: "Document generation service is temporarily unavailable.",
+    generationTimeout: "Document generation timed out.",
     pdfConversionFailed: "PDF conversion failed.",
     pdfConversionCapacityExceeded: "PDF conversion capacity is temporarily exceeded; retry later.",
     pdfArchivalEncryptionMutex: "PDF/A archival output cannot be combined with encryption.",

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as collaborationApi from '@/api/collaboration'
 import { useDashboardDataLoader } from '@/composables/useDashboardDataLoader'
 import { useCollaborationStore } from '@/stores/collaboration'
+import { useDashboardStore } from '@/stores/dashboard'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
@@ -155,13 +156,16 @@ describe('useDashboardDataLoader', () => {
     vi.spyOn(sessionStore, 'hasRole').mockReturnValue(false)
   }
 
-  it('loads all templates (not default page size) and collaboration work items on mount', async () => {
+  it('loads dashboard summary without fetchAll templates/masters on Overview mount (PRR-D01c)', async () => {
     setupSession()
 
+    const dashboardStore = useDashboardStore()
+    const fetchSummarySpy = vi.spyOn(dashboardStore, 'fetchSummary').mockResolvedValue(undefined)
+
     const templatesStore = useTemplatesStore()
-    const fetchAllTemplatesSpy = vi
-      .spyOn(templatesStore, 'fetchAllTemplates')
-      .mockResolvedValue(undefined)
+    const fetchAllTemplatesSpy = vi.spyOn(templatesStore, 'fetchAllTemplates')
+    const mastersStore = useMastersStore()
+    const fetchAllMastersSpy = vi.spyOn(mastersStore, 'fetchAllMasters')
 
     const collaborationStore = useCollaborationStore()
     const fetchWorkItemsSpy = vi.spyOn(collaborationStore, 'fetchWorkItems').mockResolvedValue(undefined)
@@ -169,15 +173,17 @@ describe('useDashboardDataLoader', () => {
     mountDataLoaderHarness()
     await flushPromises()
 
-    expect(fetchAllTemplatesSpy).toHaveBeenCalled()
+    expect(fetchSummarySpy).toHaveBeenCalled()
+    expect(fetchAllTemplatesSpy).not.toHaveBeenCalled()
+    expect(fetchAllMastersSpy).not.toHaveBeenCalled()
     expect(fetchWorkItemsSpy).toHaveBeenCalledWith(undefined)
   })
 
-  it('marks templates load error without throwing', async () => {
+  it('marks summary load error without throwing and hides stats section', async () => {
     setupSession()
 
-    const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchAllTemplates').mockRejectedValue(new Error('network'))
+    const dashboardStore = useDashboardStore()
+    vi.spyOn(dashboardStore, 'fetchSummary').mockRejectedValue(new Error('network'))
 
     const dataLoader = mountDataLoaderHarness()
     await flushPromises()
@@ -192,8 +198,8 @@ describe('useDashboardDataLoader', () => {
     isOverviewTab.value = false
     isTaskTab.value = true
 
-    const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
+    const dashboardStore = useDashboardStore()
+    vi.spyOn(dashboardStore, 'fetchSummary').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     const fetchWorkItemsSpy = vi.spyOn(collaborationStore, 'fetchWorkItems').mockResolvedValue(undefined)
@@ -215,8 +221,11 @@ describe('useDashboardDataLoader', () => {
     const sessionStore = useSessionStore()
     vi.spyOn(sessionStore, 'canAccessRoute').mockReturnValue(true)
 
-    const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
+    const dashboardStore = useDashboardStore()
+    vi.spyOn(dashboardStore, 'fetchSummary').mockResolvedValue(undefined)
+
+    const mastersStore = useMastersStore()
+    vi.spyOn(mastersStore, 'fetchDashboardWorkflowMasters').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     const fetchWorkItemsSpy = vi.spyOn(collaborationStore, 'fetchWorkItems')
@@ -227,7 +236,7 @@ describe('useDashboardDataLoader', () => {
     expect(fetchWorkItemsSpy).not.toHaveBeenCalled()
   })
 
-  it('enriches master review history for master designer after full masters load', async () => {
+  it('loads bounded master workflow candidates for master designer (not fetchAll)', async () => {
     setupSession({ manageMasters: true })
     primaryClusterOneRole.value = 'MASTER_DESIGNER'
     isOverviewTab.value = true
@@ -238,8 +247,14 @@ describe('useDashboardDataLoader', () => {
       (routeKey: string) => routeKey === 'route.master-management',
     )
 
+    const dashboardStore = useDashboardStore()
+    vi.spyOn(dashboardStore, 'fetchSummary').mockResolvedValue(undefined)
+
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchAllMasters').mockResolvedValue(undefined)
+    const workflowSpy = vi
+      .spyOn(mastersStore, 'fetchDashboardWorkflowMasters')
+      .mockResolvedValue(undefined)
+    const fetchAllSpy = vi.spyOn(mastersStore, 'fetchAllMasters')
     const enrichSpy = vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
     const deepLinkSpy = vi
       .spyOn(mastersStore, 'enrichCurrentRevisionLineIdsForWorkflow')
@@ -248,6 +263,11 @@ describe('useDashboardDataLoader', () => {
     mountDataLoaderHarness()
     await flushPromises()
 
+    expect(workflowSpy).toHaveBeenCalledWith({
+      includePendingReview: true,
+      includeDraftOrRejected: true,
+    })
+    expect(fetchAllSpy).not.toHaveBeenCalled()
     expect(enrichSpy).toHaveBeenCalled()
     expect(deepLinkSpy).toHaveBeenCalled()
   })
@@ -264,8 +284,11 @@ describe('useDashboardDataLoader', () => {
       (routeKey: string) => routeKey === 'route.master-management',
     )
 
+    const dashboardStore = useDashboardStore()
+    vi.spyOn(dashboardStore, 'fetchSummary').mockResolvedValue(undefined)
+
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchAllMasters').mockResolvedValue(undefined)
+    vi.spyOn(mastersStore, 'fetchDashboardWorkflowMasters').mockResolvedValue(undefined)
     const deepLinkSpy = vi
       .spyOn(mastersStore, 'enrichCurrentRevisionLineIdsForWorkflow')
       .mockResolvedValue(undefined)
@@ -317,8 +340,8 @@ describe('useDashboardDataLoader', () => {
     isOverviewTab.value = false
     isTaskTab.value = true
 
-    const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
+    const dashboardStore = useDashboardStore()
+    vi.spyOn(dashboardStore, 'fetchSummary').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     vi.spyOn(collaborationStore, 'fetchWorkItems').mockImplementation(async () => {
@@ -338,8 +361,8 @@ describe('useDashboardDataLoader', () => {
     isOverviewTab.value = false
     isTaskTab.value = true
 
-    const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
+    const dashboardStore = useDashboardStore()
+    vi.spyOn(dashboardStore, 'fetchSummary').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     const fetchWorkItemsSpy = vi

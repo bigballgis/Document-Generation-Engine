@@ -6,6 +6,8 @@ import { useTemplatesStore } from '@/stores/templates'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useSessionStore } from '@/stores/session'
 import { useMastersStore } from '@/stores/masters'
+import { DASHBOARD_ZERO_SUMMARY, useDashboardStore } from '@/stores/dashboard'
+import type { DashboardSummaryView } from '@/api/dashboard'
 import type { ManagementCapabilities } from '@/types/session'
 
 export const BASE_CAPABILITIES: ManagementCapabilities = {
@@ -214,18 +216,33 @@ export function stubSession(
   return sessionStore
 }
 
-export function stubTemplates(templates: unknown[] | 'empty' | 'resolved' = 'resolved') {
-  const templatesStore = useTemplatesStore()
-  if (templates === 'resolved') {
-    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
-  } else if (templates === 'empty') {
-    vi.spyOn(templatesStore, 'fetchAllTemplates').mockImplementation(async () => {
-      templatesStore.templates = []
+export function stubDashboardSummary(
+  summary: Partial<DashboardSummaryView> | 'reject' | 'resolved' = 'resolved',
+) {
+  const dashboardStore = useDashboardStore()
+  if (summary === 'reject') {
+    vi.spyOn(dashboardStore, 'fetchSummary').mockRejectedValue(new Error('network'))
+  } else if (summary === 'resolved') {
+    vi.spyOn(dashboardStore, 'fetchSummary').mockImplementation(async () => {
+      dashboardStore.summary = { ...DASHBOARD_ZERO_SUMMARY }
     })
   } else {
-    vi.spyOn(templatesStore, 'fetchAllTemplates').mockImplementation(async () => {
-      templatesStore.templates = templates as never
+    vi.spyOn(dashboardStore, 'fetchSummary').mockImplementation(async () => {
+      dashboardStore.summary = { ...DASHBOARD_ZERO_SUMMARY, ...summary }
     })
+  }
+  return dashboardStore
+}
+
+export function stubTemplates(templates: unknown[] | 'empty' | 'resolved' = 'resolved') {
+  stubDashboardSummary()
+  const templatesStore = useTemplatesStore()
+  if (templates === 'resolved') {
+    // Overview stats come from summary; leave templates empty unless a test seeds rows.
+  } else if (templates === 'empty') {
+    templatesStore.templates = []
+  } else {
+    templatesStore.templates = templates as never
   }
   vi.spyOn(templatesStore, 'enrichDevVersionIdsForWorkflow').mockResolvedValue(undefined)
   return templatesStore
@@ -235,17 +252,20 @@ export function stubMasters(
   masters: unknown[] | 'resolved' = 'resolved',
   options: { enrich?: boolean; reviewHistory?: (masterId: string) => unknown } = {},
 ) {
+  stubDashboardSummary()
   const mastersStore = useMastersStore()
   if (masters === 'resolved') {
-    vi.spyOn(mastersStore, 'fetchAllMasters').mockResolvedValue(undefined)
+    vi.spyOn(mastersStore, 'fetchDashboardWorkflowMasters').mockResolvedValue(undefined)
   } else {
-    vi.spyOn(mastersStore, 'fetchAllMasters').mockImplementation(async () => {
+    mastersStore.masters = masters as never
+    vi.spyOn(mastersStore, 'fetchDashboardWorkflowMasters').mockImplementation(async () => {
       mastersStore.masters = masters as never
     })
   }
   if (options.enrich !== false) {
     vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
   }
+  vi.spyOn(mastersStore, 'enrichCurrentRevisionLineIdsForWorkflow').mockResolvedValue(undefined)
   if (options.reviewHistory) {
     vi.spyOn(mastersStore, 'getDraftReviewHistory').mockImplementation(
       options.reviewHistory as never,

@@ -222,6 +222,11 @@ export default {
     description:
       'Workflow to-dos for in-flight letter templates, plus a snapshot of your letterheads and templates.',
     loadError: 'Unable to load your task list.',
+    summary: {
+      error: {
+        load: 'Unable to load dashboard summary statistics.',
+      },
+    },
     tabs: {
       overview: 'Overview',
       workflow: 'Workflow',

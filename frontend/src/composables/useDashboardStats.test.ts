@@ -4,8 +4,7 @@ import { ref } from 'vue'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
-import { useMastersStore } from '@/stores/masters'
-import { useTemplatesStore } from '@/stores/templates'
+import { useDashboardStore } from '@/stores/dashboard'
 
 describe('useDashboardStats', () => {
   beforeEach(() => {
@@ -21,44 +20,26 @@ describe('useDashboardStats', () => {
     expect(stats.value.some((stat) => stat.key === 'catalogMasters')).toBe(false)
   })
 
-  it('uses totalElements for catalog counts when page content is a partial slice', () => {
-    const mastersStore = useMastersStore()
-    mastersStore.$patch({
-      masters: [
-        {
-          id: 'master-1',
-          groupCode: 'RETAIL',
-          name: 'Retail letterhead',
-          status: 'DRAFT',
-          originalFilename: 'letterhead.docx',
-          anchorCount: 1,
-          updatedAt: '2026-06-23T10:00:00Z',
-        },
-      ],
-      masterListTotalElements: 42,
-    })
-    const templatesStore = useTemplatesStore()
-    templatesStore.$patch({
-      templates: [
-        {
-          id: 'tpl-1',
-          externalId: 'TPL-1',
-          name: 'Demo',
-          groupCode: 'RETAIL',
-          lifecycleStatus: 'DRAFT',
-          releaseVersion: null,
-          releaseVersionCount: 0,
-          masterId: 'master-1',
-          updatedBy: '10000001',
-          updatedAt: '2026-06-23T10:00:00Z',
-        },
-      ],
-      templateListTotalElements: 87,
-    })
+  it('reads Overview bucket counts from dashboard summary (not catalog rows)', () => {
+    const dashboardStore = useDashboardStore()
+    dashboardStore.summary = {
+      masterPendingReview: 2,
+      masterVersionsInProgress: 3,
+      templateVersionsInWorkflow: 4,
+      publishedVersions: 5,
+      stoppedVersions: 1,
+      catalogMasters: 42,
+      catalogTemplates: 87,
+    }
 
     const visibleRoutes = ref([ROUTE_KEYS.masterManagement, ROUTE_KEYS.templateManagement])
     const { stats } = useDashboardStats(visibleRoutes)
 
+    expect(stats.value.find((stat) => stat.key === 'masterPendingReview')?.count).toBe(2)
+    expect(stats.value.find((stat) => stat.key === 'masterVersionsInProgress')?.count).toBe(3)
+    expect(stats.value.find((stat) => stat.key === 'templateVersionsInWorkflow')?.count).toBe(4)
+    expect(stats.value.find((stat) => stat.key === 'publishedVersions')?.count).toBe(5)
+    expect(stats.value.find((stat) => stat.key === 'stoppedVersions')?.count).toBe(1)
     expect(stats.value.find((stat) => stat.key === 'catalogMasters')?.count).toBe(42)
     expect(stats.value.find((stat) => stat.key === 'catalogTemplates')?.count).toBe(87)
   })

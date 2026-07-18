@@ -8,6 +8,7 @@ import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useContentModulesStore } from '@/stores/contentModules'
+import { useDashboardStore } from '@/stores/dashboard'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
@@ -31,6 +32,7 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
 
   const route = useRoute()
   const sessionStore = useSessionStore()
+  const dashboardStore = useDashboardStore()
   const mastersStore = useMastersStore()
   const templatesStore = useTemplatesStore()
   const apiPolicyStore = useApiPolicyStore()
@@ -45,6 +47,18 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
   const templatesLoadError = ref(false)
 
   const canViewWorkItems = computed(() => canViewCollaborationWorkItems(context.value))
+  const canAccessMasters = computed(() => sessionStore.canAccessRoute('route.master-management'))
+  const canAccessTemplates = computed(() => sessionStore.canAccessRoute('route.template-management'))
+  const needsDashboardSummary = computed(
+    () => canAccessMasters.value || canAccessTemplates.value,
+  )
+  const needsMasterWorkflowCandidates = computed(
+    () =>
+      canAccessMasters.value &&
+      (reviewMasters.value ||
+        manageMasters.value ||
+        primaryClusterOneRole.value === 'MASTER_DESIGNER'),
+  )
 
   const taskScope = computed(() =>
     parseDashboardTaskScope(route.query, {
@@ -91,27 +105,49 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
       collaborationStore,
     })
 
+  async function loadDashboardSummaryCounts(): Promise<void> {
+    if (!needsDashboardSummary.value) {
+      return
+    }
+    try {
+      await dashboardStore.fetchSummary()
+    } catch {
+      if (canAccessMasters.value) {
+        mastersLoadError.value = true
+      }
+      if (canAccessTemplates.value) {
+        templatesLoadError.value = true
+      }
+    }
+  }
+
+  async function loadMasterWorkflowCandidates(): Promise<void> {
+    if (!needsMasterWorkflowCandidates.value) {
+      return
+    }
+    await mastersStore.fetchDashboardWorkflowMasters({
+      includePendingReview:
+        reviewMasters.value || primaryClusterOneRole.value === 'MASTER_DESIGNER',
+      includeDraftOrRejected:
+        manageMasters.value || primaryClusterOneRole.value === 'MASTER_DESIGNER',
+    })
+  }
+
   async function loadDashboardData() {
     loading.value = true
     mastersLoadError.value = false
     templatesLoadError.value = false
 
-    const jobs: Promise<unknown>[] = []
-    if (sessionStore.canAccessRoute('route.master-management')) {
+    const jobs: Promise<unknown>[] = [loadDashboardSummaryCounts()]
+
+    if (needsMasterWorkflowCandidates.value) {
       jobs.push(
-        mastersStore.fetchAllMasters().catch(() => {
-          mastersLoadError.value = true
+        loadMasterWorkflowCandidates().catch(() => {
+          /* workflow todos degrade empty; summary cards already loaded separately */
         }),
       )
     }
-    if (sessionStore.canAccessRoute('route.template-management')) {
-      jobs.push(
-        templatesStore.fetchAllTemplates().catch(() => {
-          templatesLoadError.value = true
-        }),
-      )
-    }
-    if (authorTemplates.value && sessionStore.canAccessRoute('route.template-management')) {
+    if (authorTemplates.value && canAccessTemplates.value) {
       jobs.push(
         authorWorkflowStore.fetchOutdatedClauseReferenceTasks().catch(() => {
           /* degrade to empty clause-outdated partition */
@@ -149,10 +185,7 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
     }
 
     await Promise.all(jobs)
-    if (
-      sessionStore.canAccessRoute('route.master-management') &&
-      !mastersLoadError.value
-    ) {
+    if (needsMasterWorkflowCandidates.value && !mastersLoadError.value) {
       if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
         await mastersStore.enrichDraftMasterReviewHistory().catch(() => {
           /* degrade to summary-only journey mapping */
@@ -194,7 +227,7 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
   }
 
   function refreshAuthorWorkflowTasks() {
-    if (!(authorTemplates.value && sessionStore.canAccessRoute('route.template-management'))) {
+    if (!(authorTemplates.value && canAccessTemplates.value)) {
       return
     }
     void authorWorkflowStore.fetchOutdatedClauseReferenceTasks().catch(() => {
