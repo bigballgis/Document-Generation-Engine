@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Currency;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -86,7 +87,7 @@ final class ComputeExpressionEvaluator {
             case "COUNT" -> evalCount(requireOne(call));
             case "AVG" -> evalAvg(requireOne(call));
             case "FILTER" -> evalFilter(call.args());
-            case "FORMAT_AMOUNT" -> evalFormatAmount(requireOne(call));
+            case "FORMAT_AMOUNT" -> evalFormatAmount(call.args());
             case "FORMAT_DATE" -> evalFormatDate(requireOne(call));
             case "SPELL_AMOUNT" -> evalSpellAmount(requireOne(call));
             default -> fail("Unknown function '" + call.name() + "'");
@@ -186,13 +187,45 @@ final class ComputeExpressionEvaluator {
         return String.valueOf(left).compareTo(String.valueOf(right));
     }
 
-    private String evalFormatAmount(ComputeAst.Expr valueExpr) {
-        BigDecimal amount = toNumber(evaluate(valueExpr), "FORMAT_AMOUNT");
-        // Deterministic currency-style formatting so golden/unit expectations stay stable across JDKs.
+    private String evalFormatAmount(List<ComputeAst.Expr> args) {
+        if (args.size() != 1 && args.size() != 2) {
+            fail("FORMAT_AMOUNT requires 1 or 2 arguments");
+        }
+        BigDecimal amount = toNumber(evaluate(args.getFirst()), "FORMAT_AMOUNT");
         NumberFormat format = NumberFormat.getCurrencyInstance(locale);
-        format.setMinimumFractionDigits(2);
-        format.setMaximumFractionDigits(2);
+        if (args.size() == 1) {
+            // CE-K03 unary: locale-default currency, fraction digits fixed at 2.
+            format.setMinimumFractionDigits(2);
+            format.setMaximumFractionDigits(2);
+            return format.format(amount);
+        }
+        // IBL-A2 binary: ISO currency identity + locale number/currency formatting.
+        Currency currency = resolveIsoCurrency(evaluate(args.get(1)));
+        format.setCurrency(currency);
+        int fractionDigits = currency.getDefaultFractionDigits();
+        if (fractionDigits < 0) {
+            fractionDigits = format.getMaximumFractionDigits();
+        }
+        format.setMinimumFractionDigits(fractionDigits);
+        format.setMaximumFractionDigits(fractionDigits);
         return format.format(amount);
+    }
+
+    private Currency resolveIsoCurrency(Object currencyValue) {
+        if (currencyValue == null) {
+            fail("FORMAT_AMOUNT currency is null");
+        }
+        String code = String.valueOf(currencyValue).trim();
+        if (code.isEmpty()) {
+            fail("FORMAT_AMOUNT currency is blank");
+        }
+        String normalized = code.toUpperCase(Locale.ROOT);
+        try {
+            return Currency.getInstance(normalized);
+        } catch (IllegalArgumentException ex) {
+            fail("FORMAT_AMOUNT currency '" + normalized + "' is not a valid ISO 4217 code");
+            return null;
+        }
     }
 
     private String evalFormatDate(ComputeAst.Expr valueExpr) {

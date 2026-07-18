@@ -170,6 +170,12 @@ Caller-facing runtime generate / batch-generate and management preview assemble 
 
 Envelope reuses existing `error.fieldErrors[]` (`field` / `reason` / `message`); `reason` ∈ `REQUIRED` \| `INVALID_TYPE` \| `INVALID_FORMAT` \| `ENUM_NOT_ALLOWED` \| `UNKNOWN_FIELD`. Legacy single-field codes `VARIABLE_REQUIRED` / `VARIABLE_TYPE_INVALID` / `VARIABLE_FORMAT_INVALID` / `VARIABLE_RULE_FAILED` remain in the enum for catalog compatibility; **runtime/preview schema validation uses the aggregate code**. Publish does **not** validate generate body. CE-U03 test-data-set top-level code migration is out of scope. Implement in `ApiErrorCodes` + `messages_en.properties` (backend). Behavior SoT: [ibl-a1-variable-validation.md](../behavior/ibl-a1-variable-validation.md)（BDD-IBL-A1-001…008）. Formal phase **None**; **not** go-live.
 
+### ISO-currency `FORMAT_AMOUNT` (IBL-A2)
+
+Whitelist compute DSL `FORMAT_AMOUNT` accepts an optional second argument: ISO 4217 alphabetic currency code. Unary `FORMAT_AMOUNT(value)` keeps locale-default currency (CE-K03 compatible). Binary `FORMAT_AMOUNT(value, currencyCode)` sets currency identity from the ISO code while number/grouping localization still follows `context.locale` (evaluate API optional `locale`). Missing, blank, or invalid currency → existing **`VARIABLE_COMPUTE_FAILED`** (422; no silent locale-default fallback). Second argument is **not** a locale tag (e.g. do not pass `en-US`).
+
+Formal schema notes: [openapi-v1.yaml](openapi-v1.yaml) `validateComputeExpression` / `evaluateComputeExpression` (+ request `expression` / `locale` descriptions). Companion: [contract-outline.md](contract-outline.md) Schema 规则 IBL-A2 bullet + error catalog note. Behavior SoT: [ibl-a2-format-amount-currency.md](../behavior/ibl-a2-format-amount-currency.md)（BDD-IBL-A2-001…010）. Formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
+
 ### Full-library export (CE-E03)
 
 Management full-library export in [openapi-v1.yaml](openapi-v1.yaml) (`exportLibraryTemplates`) / [contract-outline.md](contract-outline.md) «模板导出/导入契约» CE-E03:

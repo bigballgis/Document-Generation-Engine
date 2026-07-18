@@ -10,6 +10,7 @@ adrNumber: "0056"
 topic: rendering-authoring
 related:
   - docs/behavior/ce-k03-variable-compute-engine.md
+  - docs/behavior/ibl-a2-format-amount-currency.md
   - docs/adr/rendering-authoring/0019-structured-authoring-and-rendering-boundary.md
   - docs/plan/core-excellence-program-2026-07.md
 ---
@@ -41,10 +42,17 @@ without exposing an arbitrary code-execution surface to template authors or API 
 5. **Hard bounds:** expression length ≤ 2048; function nesting depth ≤ 8;
    `${path}` segments ≤ 16; compute→compute dependency depth ≤ 8; collection size
    ≤ 10_000 for `SUM`/`AVG`/`COUNT`/`FILTER`.
-6. **Locale:** `FORMAT_AMOUNT` / `FORMAT_DATE` consume request `context.locale`;
-   blank/missing/unparseable → **`zh-CN`**. `SPELL_AMOUNT` is **CNY Chinese uppercase
-   only** and does not switch language with locale. Negatives and out-of-range amounts
-   fail closed.
+6. **Locale + optional ISO currency:** `FORMAT_DATE` and `FORMAT_AMOUNT` consume
+   request `context.locale` for number/date localization; blank/missing/unparseable
+   → **`zh-CN`**. `FORMAT_AMOUNT(value)` keeps locale-default currency (fraction
+   digits fixed at 2). Optional `FORMAT_AMOUNT(value, currencyCode)` takes an
+   **ISO 4217 alphabetic** code (normalized uppercase); currency identity comes from
+   that code while grouping/symbol placement still follow `context.locale`. The
+   second argument is **not** a locale tag. Null/blank/invalid ISO currency or
+   arity ∉ {1,2} → `VARIABLE_COMPUTE_FAILED` (no silent locale-default fallback).
+   Binary form uses the ISO currency’s default fraction digits. `SPELL_AMOUNT` is
+   **CNY Chinese uppercase only** and does not switch language with locale.
+   Negatives and out-of-range amounts for `SPELL_AMOUNT` fail closed.
 7. **Caller compute keys:** Values supplied under compute variable keys are ignored;
    engine results overwrite them.
 8. **Failure:** Runtime/preview evaluation failures surface as
