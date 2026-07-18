@@ -95,19 +95,6 @@ final class TemplateCatalogSupport {
         );
     }
 
-    List<TemplateSummaryView> listAll(ManagementSessionClaims session) {
-        List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
-        List<TemplateEntity> templates;
-        if (groupCodes.contains("*")) {
-            templates = templateRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc();
-        } else if (groupCodes.isEmpty()) {
-            return List.of();
-        } else {
-            templates = templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(groupCodes);
-        }
-        return displayEnrichment.enrichTemplateSummaries(templates.stream().map(templateViewMapper::toSummary).toList());
-    }
-
     private static TemplateLifecycleStatus parseLifecycleStatus(String raw) {
         String value = CatalogPageSupport.blankToNull(raw);
         if (value == null) {
