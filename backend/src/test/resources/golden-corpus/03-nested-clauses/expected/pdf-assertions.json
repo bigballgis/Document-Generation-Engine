@@ -3,6 +3,16 @@
   "requireEncrypted": false,
   "assertions": [
     {"type": "TEXT_CONTAINS", "substring": "Nested clause body"},
-    {"type": "TEXT_CONTAINS", "substring": "Conditional notice applies"}
+    {"type": "TEXT_CONTAINS", "substring": "Conditional notice applies"},
+    {"type": "PAGE_COUNT", "equals": 1},
+    {
+      "type": "TEXT_POSITION",
+      "substring": "Nested",
+      "pageIndex": 0,
+      "xMin": 40.0,
+      "xMax": 520.0,
+      "yMin": 40.0,
+      "yMax": 200.0
+    }
   ]
 }

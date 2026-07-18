@@ -25,7 +25,13 @@ public final class GoldenCorpusAssertionLoader {
     );
 
     private static final Set<String> DOCX_TYPES = Set.of("XML_CONTAINS", "XML_NOT_CONTAINS", "XPATH_EXISTS");
-    private static final Set<String> PDF_TYPES = Set.of("TEXT_CONTAINS", "TEXT_NOT_CONTAINS");
+    /** PDF text + layout-metric kinds (IBL-C1). Pixel/visual kinds remain forbidden. */
+    private static final Set<String> PDF_TYPES = Set.of(
+            "TEXT_CONTAINS",
+            "TEXT_NOT_CONTAINS",
+            "PAGE_COUNT",
+            "TEXT_POSITION"
+    );
 
     private final ObjectMapper objectMapper;
 
@@ -59,7 +65,8 @@ public final class GoldenCorpusAssertionLoader {
                 if (FORBIDDEN_TYPES.contains(type) || type.contains("PIXEL") || type.contains("SCREENSHOT")) {
                     throw new GoldenCorpusException(
                             "Forbidden pixel/visual assertion type '" + type + "' in " + assertionFile
-                                    + " — only DOCX XML keypath/XPath and PDF text extraction are allowed"
+                                    + " — PIXEL_* rejected unless PD-2 ADR Accepted; use DOCX XML/XPath,"
+                                    + " PDF text, PAGE_COUNT, or TEXT_POSITION"
                     );
                 }
                 if (!allowedTypes.contains(type)) {

@@ -1,0 +1,31 @@
+{
+  "status": "DEPLOY_OK",
+  "timestamp_utc": "20260718T230456Z",
+  "slice": "IBL-C1",
+  "task": 120,
+  "tip": "d2492fc4f419c82dd0620b05629fe8140e881a2a",
+  "tip_short": "d2492fc4",
+  "tip_subject": "feat(IBL-C1): PDFBox page-count and text-position golden assertions",
+  "command": "docker-deploy-queue.ps1 -ForceRebuild",
+  "compose_project": "documentgenerationengine",
+  "healthz": {
+    "http": 200,
+    "body": "{\"status\":\"UP\"}"
+  },
+  "ui_4173": "200",
+  "backend_image": "sha256:10bf9b7b016d6a977765053972f28d6dc2aa093cb055568cce11c74cd8cb1655",
+  "frontend_image": "sha256:961ff881261df9b391f07c77dd7d029e8825c7bc3969d25bdf16fb0bcdcbd3f0",
+  "backend_inspect": "sha256:10bf9b7b016d6a977765053972f28d6dc2aa093cb055568cce11c74cd8cb1655|2026-07-18T23:03:31.070252974Z|healthy",
+  "frontend_inspect": "sha256:961ff881261df9b391f07c77dd7d029e8825c7bc3969d25bdf16fb0bcdcbd3f0|2026-07-18T23:03:32.837239535Z|healthy",
+  "frontend_ui_in_scope": false,
+  "e2e": "N/A",
+  "go_live": false,
+  "word_baselines_invented": false,
+  "pixel_baselines_invented": false,
+  "soffice_in_backend": true,
+  "soffice_version": "LibreOffice 7.3.7.2 30(Build:2)",
+  "host_soffice": "NO",
+  "lo_pdf_layout_metric_smoke": "SKIPPED",
+  "lo_skip_reason": "Backend acceptance container rootfs is read-only (hardening); docker cp of probe DOCX into running docgen-backend fails. Host has no soffice binary for surefire LIBREOFFICE_COMMAND. IBL-C1 layout metrics are PDFBox assertions on LO-produced PDFs in CI/surefire when soffice available — Stage 10 does not invent Word baselines or claim live LO→PDF layout-metric PASS.",
+  "evidence_dir": "docs/plan/evidence/ibl-c1-layout-metric-pdf"
+}
