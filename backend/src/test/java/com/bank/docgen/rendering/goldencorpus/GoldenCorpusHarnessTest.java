@@ -55,7 +55,8 @@ class GoldenCorpusHarnessTest {
                 "dual-font-master",
                 "cross-page-table",
                 "qr-barcode",
-                "attachment-list"
+                "attachment-list",
+                "long-clause-limits"
         );
         assertThat(placeholders).doesNotContain(
                 "nested-clauses",
@@ -64,7 +65,8 @@ class GoldenCorpusHarnessTest {
                 "dual-font-master",
                 "cross-page-table",
                 "qr-barcode",
-                "attachment-list"
+                "attachment-list",
+                "long-clause-limits"
         );
         assertThat(active.size()).isGreaterThanOrEqualTo(3);
     }

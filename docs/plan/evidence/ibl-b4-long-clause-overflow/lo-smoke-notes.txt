@@ -1,0 +1,10 @@
+soffice_in_backend_image=YES
+soffice_path=/usr/bin/soffice
+soffice_version=LibreOffice 7.3.7.2 30(Build:2)
+host_soffice=NO
+docker_cp_into_running_backend=Error response from daemon: container rootfs is marked read-only
+lo_golden_pdf_pagecount_smoke=SKIPPED
+skip_reason=Backend acceptance container rootfs is read-only (hardening); docker cp of assembled golden DOCX into running docgen-backend fails. Host has no soffice binary for surefire LIBREOFFICE_COMMAND. Golden package 08-long-clause-limits ships JSON+master inputs only — no committed Word baseline DOCX (not invented). Prior surefire bddIblB4_003_and_004 skipped under K07-C9 (soffice unavailable on host). Stage-10 documents Docker soffice presence only; does not claim live page-count PASS.
+durable_lock=LongClauseOverflowGoldenCorpusTest#bddIblB4_003_and_004 (pages>=2 when soffice available)
+word_baselines_invented=false
+go_live=false

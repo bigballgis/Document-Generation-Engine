@@ -1,10 +1,10 @@
 {
   "id": "long-clause-limits",
   "theme": "Long clause limits (extreme length clause rendering)",
-  "maturity": "PLACEHOLDER",
-  "title": "Long clause limits — placeholder (future CE-K slice)",
+  "maturity": "ACTIVE",
+  "title": "Long clause limits — paginate / full retention (IBL-B4)",
   "renderMode": "STRUCTURED_ASSEMBLE",
   "pdfSource": "LIBREOFFICE",
-  "description": "Placeholder skeleton. Long-clause-limits business assertions (extreme length clause truncation vs full retention) are deferred to a later CE-K slice. K07-C5 leaves this PLACEHOLDER in the skeleton; the implementing slice must write concrete expected assertions consistent with confirmed product thresholds (not invented here).",
-  "owningFutureSlice": "future CE-K slice (not assigned in this skeleton)"
+  "description": "ACTIVE IBL-B4 sample: extreme-length structured clause with LONG_CLAUSE_START / LONG_CLAUSE_END markers. Product policy is paginate + full retention (truncate rejected). DOCX XML_CONTAINS both markers; LibreOffice PDF TEXT_CONTAINS both markers when soffice is available (K07-C9 skip otherwise). Companion LongClauseOverflowGoldenCorpusTest asserts PDFBox page count >= 2 when soffice is available.",
+  "owningFutureSlice": "IBL-B4 / #116"
 }
