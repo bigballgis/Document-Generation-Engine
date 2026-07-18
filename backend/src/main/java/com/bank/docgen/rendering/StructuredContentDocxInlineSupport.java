@@ -46,6 +46,10 @@ final class StructuredContentDocxInlineSupport {
             JsonNode paragraphDirectFormat
     ) {
         String type = node.path("type").asText("");
+        // B1-C3 / F9: paragraph whitelist keys on child inline apply to the enclosing
+        // XWPFParagraph (after parent apply; same-paragraph conflicts = last-write-wins).
+        // Run keys stay on the run via resolveRunDirectFormat + applyDirectFormatIfPresent.
+        styles.applyParagraphDirectFormat(paragraph, node.get("directFormat"));
         JsonNode runDirectFormat = StructuredContentDocxStyleSupport.resolveRunDirectFormat(
                 node.get("directFormat"),
                 paragraphDirectFormat

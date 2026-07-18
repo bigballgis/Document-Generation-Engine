@@ -92,7 +92,11 @@ final class StructuredContentDocxStyleSupport {
     }
 
     /**
-     * Prefer child run {@code directFormat}; fall back to paragraph-level font keys only.
+     * Merges child and enclosing-paragraph {@code directFormat} for run styling: child keys
+     * override paragraph keys. Only run whitelist keys ({@code fontFamily}/{@code fontSize}/
+     * {@code textColor}) are consumed by {@link #applyDirectFormatIfPresent}; paragraph
+     * spacing/indent keys in the merge are ignored here and must be applied separately via
+     * {@link #applyParagraphDirectFormat} on the enclosing {@link XWPFParagraph} (B1-C3).
      */
     static JsonNode resolveRunDirectFormat(JsonNode nodeDirectFormat, JsonNode paragraphDirectFormat) {
         if (nodeDirectFormat != null && nodeDirectFormat.isObject()) {

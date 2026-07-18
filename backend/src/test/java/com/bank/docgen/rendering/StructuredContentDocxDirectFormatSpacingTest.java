@@ -185,6 +185,45 @@ class StructuredContentDocxDirectFormatSpacingTest {
         }
     }
 
+    /**
+     * B1-C3 / F9 — paragraph keys on child inline must not be silently dropped when the
+     * enclosing paragraph has no directFormat (validation accepts any-node DF).
+     */
+    @Test
+    void bddIblB1C3_textRunOnlySpacingBeforeLandsOnEnclosingParagraph() throws Exception {
+        String structured = """
+                {"nodes":[{"type":"paragraph",
+                  "children":[{"type":"textRun","value":"Child spacing",
+                    "directFormat":{"spacingBefore":12}}]}]}
+                """;
+
+        byte[] result = render(structured);
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            XWPFParagraph paragraph = document.getParagraphs().getFirst();
+            assertThat(paragraph.getSpacingBefore()).isEqualTo(pointsToTwips(12));
+            assertThat(paragraph.getText()).isEqualTo("Child spacing");
+        }
+    }
+
+    @Test
+    void bddIblB1C3_laterChildParagraphKeysWinLastWrite() throws Exception {
+        String structured = """
+                {"nodes":[{"type":"paragraph",
+                  "children":[
+                    {"type":"textRun","value":"A","directFormat":{"spacingBefore":8}},
+                    {"type":"textRun","value":"B","directFormat":{"spacingBefore":18}}
+                  ]}]}
+                """;
+
+        byte[] result = render(structured);
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            assertThat(document.getParagraphs().getFirst().getSpacingBefore())
+                    .isEqualTo(pointsToTwips(18));
+        }
+    }
+
     private byte[] render(String structuredJson) throws Exception {
         return StructuredContentDocxWriterTestSupport.renderAnchorParagraph(
                 writer,

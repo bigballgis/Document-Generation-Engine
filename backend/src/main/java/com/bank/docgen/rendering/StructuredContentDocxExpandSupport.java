@@ -129,6 +129,10 @@ final class StructuredContentDocxExpandSupport {
         if (!children.isArray()) {
             return;
         }
+        // Parent DF (e.g. conditionBlock / loopBlock) supplies run-font defaults for inline
+        // children; paragraph spacing keys on the parent are applied once before children.
+        JsonNode parentDirectFormat = node.get("directFormat");
+        styles.applyParagraphDirectFormat(paragraph, parentDirectFormat);
         for (int index = 0; index < children.size(); index++) {
             JsonNode child = children.get(index);
             if (StructuredContentDocxCursorSupport.isBlockLevelType(child.path("type").asText(""))) {
@@ -138,7 +142,8 @@ final class StructuredContentDocxExpandSupport {
                     writeBlockNode.accept(child, cursor.insertParagraphAfter(paragraph));
                 }
             } else {
-                inlineSupport.writeInlineNode(child, paragraph, false, false, false);
+                inlineSupport.writeInlineNode(
+                        child, paragraph, false, false, false, parentDirectFormat);
             }
         }
     }
