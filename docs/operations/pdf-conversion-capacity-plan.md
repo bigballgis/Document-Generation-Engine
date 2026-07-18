@@ -2,11 +2,12 @@
 
 | Field | Value |
 | --- | --- |
-| **Status** | Active ops plan (IBL-B2 / Task Master **#114**) |
+| **Status** | Active ops plan — IBL-B2 / Task Master **#114** → **Done** (`29d022b6`) |
 | **Date** | 2026-07-19 |
 | **Behavior SoT** | [ibl-b2-pdf-conversion-capacity.md](../behavior/ibl-b2-pdf-conversion-capacity.md) |
 | **Taxonomy prior** | [prod-ops-resilience-pdf-pool.md](../behavior/prod-ops-resilience-pdf-pool.md) (PRR-D01A / #104) |
-| **Defect** | [DEF-LRP-D6-001](../plan/evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md) |
+| **Defect** | [DEF-LRP-D6-001](../plan/evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md) → **CLOSED** |
+| **Evidence** | [ibl-b2-pdf-capacity/](../plan/evidence/ibl-b2-pdf-capacity/) |
 
 This document is the **documented capacity plan** required by IBL-B2. It describes single-host
 bounded sync absorption, fail-closed saturation, async client overflow, and metrics. It does
