@@ -573,7 +573,10 @@ export interface paths {
          */
         get: operations["listContentModules"];
         put?: never;
-        /** Create a content module with an initial draft version */
+        /**
+         * Create a content module with an initial draft version
+         * @description Creates a content module with an initial draft version. IBL-E1 / ADR-0062: `locale` (BCP-47) is required; optional `localeVariantFamilyId` groups translation siblings. Same group + family + locale conflict → `409 LOCALE_VARIANT_CONFLICT`.
+         */
         post: operations["createContentModule"];
         delete?: never;
         options?: never;
@@ -932,7 +935,11 @@ export interface paths {
          */
         get: operations["listTemplates"];
         put?: never;
-        post?: never;
+        /**
+         * Create a template package
+         * @description Creates a template package under an authorized group (management catalog). IBL-E1 / ADR-0062: `locale` (BCP-47) is required; optional `localeVariantFamilyId` groups translation siblings. Same group + family + locale conflict → `409 LOCALE_VARIANT_CONFLICT`.
+         */
+        post: operations["createTemplate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1096,6 +1103,30 @@ export interface paths {
          */
         get: operations["getTemplateDevVersionDetail"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates/{templateId}/composition-inclusion-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Composition Inclusion Rules for the in-flight DEV template version
+         * @description ADR-0063 / IBL-E2. Returns structured inclusion rules (jurisdiction / product / channel) for pinned content-module references. Orthogonal to visibility `/rules` (`conditionExpression`). Requires template authoring access (`authorTemplates` boundary).
+         */
+        get: operations["getCompositionInclusionRules"];
+        /**
+         * Replace Composition Inclusion Rules on the in-flight DEV template version
+         * @description ADR-0063 / IBL-E2. Replaces the draft version inclusion rule set. Unknown `referenceKey`, empty `match`, or duplicate `ruleId` → 422 `COMPOSITION_INCLUSION_RULE_INVALID`. Published versions reject mutation (existing lock convention). No new roles — same authoring boundary as visibility rules.
+         */
+        put: operations["putCompositionInclusionRules"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1884,13 +1915,20 @@ export interface components {
         BatchItemStatus: "SUCCEEDED" | "FAILED" | "SKIPPED";
         /** @enum {string} */
         Permission: "ALLOW_PRINT" | "ALLOW_COPY" | "ALLOW_EDIT" | "ALLOW_ANNOTATE" | "ALLOW_FORM_FILL";
+        /** @description Safe whitelist (ADR-0013 amended by ADR-0063 / IBL-E2). Optional `jurisdiction` / `product` plus existing `channel` may drive Composition Inclusion Rules. Unknown fields → 400 REQUEST_BODY_INVALID. Must not carry PII, amounts, or template variable plaintext. */
         Context: {
             sourceSystem?: string;
+            /** @description Call-channel tracing/stats; also a composition inclusion match axis (ADR-0063). Not outbound delivery channel (PD-1). */
             channel?: string;
             businessRequestId?: string;
             upstreamTraceId?: string;
             scenario?: string;
+            /** @description Compute / language-compatibility hint (ADR-0056 / ADR-0062); not an IBL-E2 composition axis. */
             locale?: string;
+            /** @description Optional composition axis (ADR-0063). Trim; blank → absent; suggested maxLength 128; case-insensitive exact match against inclusion rules. */
+            jurisdiction?: string;
+            /** @description Optional composition axis (ADR-0063). Same normalization/match rules as jurisdiction. */
+            product?: string;
         };
         OutputOptions: {
             format: components["schemas"]["OutputFormat"];
@@ -2831,8 +2869,11 @@ export interface components {
             devVersionNumber: number;
             releaseVersion?: string | null;
             lifecycleStatus: components["schemas"]["TemplateLifecycleStatus"];
-            /** @enum {string|null} */
-            approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION" | null;
+            /**
+             * @description IBL-E3 / ADR-0064 — PENDING_LEGAL_DECISION and PENDING_COMPLIANCE_DECISION apply when approvalMatrixMode is LEGAL_THEN_COMPLIANCE; PENDING_DECISION remains SINGLE_TRACK.
+             * @enum {string|null}
+             */
+            approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION" | "PENDING_LEGAL_DECISION" | "PENDING_COMPLIANCE_DECISION" | null;
             lineKind: components["schemas"]["TemplateVersionLineKind"];
             /** Format: date-time */
             updatedAt: string;
@@ -2915,7 +2956,7 @@ export interface components {
             result: components["schemas"]["ChangeDiffView"];
         };
         /** @enum {string} */
-        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "CONTENT_MODULE_EFFECTIVE_EXPIRED" | "UNSUPPORTED_STRUCTURED_NODES" | "PASTE_CLEANING_BLOCKERS" | "PAGINATION_DELTA_BUDGET" | "BLOCKER_STATUS" | "FIDELITY_WARNINGS_VIEWED";
+        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "CONTENT_MODULE_EFFECTIVE_EXPIRED" | "CONTENT_MODULE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_REFERENCE_INVALID" | "UNSUPPORTED_STRUCTURED_NODES" | "PASTE_CLEANING_BLOCKERS" | "PAGINATION_DELTA_BUDGET" | "BLOCKER_STATUS" | "FIDELITY_WARNINGS_VIEWED";
         PublishGateItemView: {
             checkCode: components["schemas"]["PublishGateCheckCode"];
             ready: boolean;
@@ -3373,6 +3414,13 @@ export interface components {
             semanticVersion: string;
             contentStructureJson: string;
             changeDescription?: string;
+            /** @description IBL-E1 / ADR-0062 — required BCP-47 body locale for the content-module package (not a version-row field). */
+            locale: string;
+            /**
+             * Format: uuid
+             * @description IBL-E1 / ADR-0062 — optional UUID grouping translation siblings. Within the same groupCode, (localeVariantFamilyId, locale) is unique when non-null. Conflict → 409 LOCALE_VARIANT_CONFLICT.
+             */
+            localeVariantFamilyId?: string | null;
         };
         CreateContentModuleVersionRequest: {
             semanticVersion: string;
@@ -3498,6 +3546,13 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+            /** @description IBL-E1 / ADR-0062 — package body locale (BCP-47). */
+            locale: string;
+            /**
+             * Format: uuid
+             * @description IBL-E1 / ADR-0062 — optional locale-variant family id.
+             */
+            localeVariantFamilyId?: string | null;
         };
         ContentModuleDetailView: {
             moduleId: string;
@@ -3506,6 +3561,13 @@ export interface components {
             name: string;
             description?: string;
             sharedGroupCodes?: string[];
+            /** @description IBL-E1 / ADR-0062 — package body locale (BCP-47). */
+            locale: string;
+            /**
+             * Format: uuid
+             * @description IBL-E1 / ADR-0062 — optional locale-variant family id.
+             */
+            localeVariantFamilyId?: string | null;
             versions: components["schemas"]["ContentModuleVersionView"][];
             /** @description Chronological review timeline (SUBMITTED / APPROVED / REJECTED) for the lifecycle Tab el-timeline (CE-U08; master-aligned).
              *      */
@@ -3532,8 +3594,11 @@ export interface components {
         };
         /** @enum {string} */
         CollaborationTimeoutScopeType: "GLOBAL" | "GROUP";
-        /** @enum {string} */
-        CollaborationWorkItemQueue: "TEST" | "APPROVAL" | "REMEDIATION" | "PENDING_RELEASE" | "ESCALATION";
+        /**
+         * @description IBL-E3 / ADR-0064 — LEGAL is the legal-stage queue under LEGAL_THEN_COMPLIANCE (distinct from APPROVAL/COMPLIANCE).
+         * @enum {string}
+         */
+        CollaborationWorkItemQueue: "TEST" | "APPROVAL" | "LEGAL" | "REMEDIATION" | "PENDING_RELEASE" | "ESCALATION";
         /** @enum {string} */
         CollaborationWorkItemTriggerType: "SUBMIT_FOR_TEST" | "TEST_FAILURE_OR_RETURN_TO_DRAFT" | "SUBMIT_FOR_APPROVAL" | "APPROVAL_FAILURE_OR_RETURN_TO_DRAFT" | "APPROVAL_PENDING_RELEASE" | "TIMEOUT_ESCALATION";
         CollaborationWorkItemSummaryView: {
@@ -3652,6 +3717,13 @@ export interface components {
             devVersionNumber: number;
             /** Format: date-time */
             exportedAt: string;
+            /** @description IBL-E1 / ADR-0062 — package body locale (BCP-47) when present. */
+            locale?: string | null;
+            /**
+             * Format: uuid
+             * @description IBL-E1 / ADR-0062 — optional locale-variant family id.
+             */
+            localeVariantFamilyId?: string | null;
         };
         TemplateExportVariableSchemaView: {
             id?: string;
@@ -3704,6 +3776,55 @@ export interface components {
             targetAnchorId: string;
             trueBranchRuleId?: string | null;
             falseBranchRuleId?: string | null;
+        };
+        /** @description ADR-0063. At least one of jurisdiction / product / channel must be non-blank after trim. Declared axes are AND; undeclared axes are wildcards. */
+        CompositionInclusionMatch: {
+            jurisdiction?: string | null;
+            product?: string | null;
+            channel?: string | null;
+        };
+        CompositionInclusionRuleView: {
+            ruleId: string;
+            /** @description Must resolve to a CM reference on the same template version. */
+            referenceKey: string;
+            match: components["schemas"]["CompositionInclusionMatch"];
+            /**
+             * @description Lower value wins when ordering; ties broken by ruleId ascending.
+             * @default 0
+             */
+            priority: number;
+            /**
+             * @description When true and no rule for this referenceKey matches, generate fails with COMPOSITION_INCLUSION_UNSATISFIED.
+             * @default false
+             */
+            requiredInclusion: boolean;
+        };
+        PutCompositionInclusionRulesRequest: {
+            rules: components["schemas"]["CompositionInclusionRuleView"][];
+        };
+        CompositionInclusionRulesResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: {
+                rules: components["schemas"]["CompositionInclusionRuleView"][];
+            };
+        };
+        /** @enum {string} */
+        CompositionInclusionDecision: "INCLUDE" | "EXCLUDE";
+        /** @description Non-sensitive audit/invocation summary entry (ADR-0063). No clause body or variables. Default include (no targeting rules) uses matchedRuleId literal NONE_DEFAULT. */
+        CompositionInclusionSummaryEntry: {
+            referenceKey: string;
+            decision: components["schemas"]["CompositionInclusionDecision"];
+            /** @description First matching ruleId, or NONE_DEFAULT for default include. */
+            matchedRuleId: string;
+        };
+        TemplateExportCompositionInclusionRuleView: {
+            ruleId: string;
+            referenceKey: string;
+            match: components["schemas"]["CompositionInclusionMatch"];
+            /** @default 0 */
+            priority: number;
+            /** @default false */
+            requiredInclusion: boolean;
         };
         TemplateExportContentModuleReferenceView: {
             referenceKey: string;
@@ -4101,6 +4222,8 @@ export interface components {
             variables: components["schemas"]["TemplateExportVariableSchemaView"][];
             bindings: components["schemas"]["TemplateExportAnchorBindingView"][];
             rules: components["schemas"]["TemplateExportCompositionRuleView"][];
+            /** @description ADR-0063 / IBL-E2. Structured jurisdiction/product/channel inclusion rules (orthogonal to visibility `rules`). Absent or empty = no inclusion rules (all pinned CMs default INCLUDE). */
+            compositionInclusionRules?: components["schemas"]["TemplateExportCompositionInclusionRuleView"][];
             contentModuleReferences: components["schemas"]["TemplateExportContentModuleReferenceView"][];
             policySnapshot?: components["schemas"]["TemplateExportApiPolicySnapshot"];
             /** @description Required for v2 format; omit on v1. */
@@ -4197,8 +4320,21 @@ export interface components {
             groupCode: string;
             name: string;
             lifecycleStatus: components["schemas"]["TemplateLifecycleStatus"];
-            /** @enum {string|null} */
-            approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION" | null;
+            /**
+             * @description IBL-E3 / ADR-0064 — includes multi-stage legal/compliance sub-states.
+             * @enum {string|null}
+             */
+            approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION" | "PENDING_LEGAL_DECISION" | "PENDING_COMPLIANCE_DECISION" | null;
+            /**
+             * @description IBL-E3 / ADR-0064 — package-level approval matrix mode. Default and migrate value SINGLE_TRACK.
+             * @enum {string}
+             */
+            approvalMatrixMode?: "SINGLE_TRACK" | "LEGAL_THEN_COMPLIANCE";
+            /**
+             * @description IBL-E3 / ADR-0064 — current stage when in multi-stage approval (LEGAL | COMPLIANCE); null for SINGLE_TRACK or non-approval states. Must be uniquely derivable from approvalSubState when omitted on write.
+             * @enum {string|null}
+             */
+            approvalStage?: "LEGAL" | "COMPLIANCE" | null;
             releaseVersion?: string | null;
             releaseVersionCount: number;
             /** Format: uuid */
@@ -4213,6 +4349,53 @@ export interface components {
              * @description CE-G05 — template-level next annual-review UTC calendar date (`template.next_review_due`). Null for legacy rows not yet seeded. Seeded on first transition into `PUBLISHED` when empty (publishInstant UTC date + 365 days); subsequent publishes do not overwrite. Not a release-row field.
              */
             nextReviewDue?: string | null;
+            /** @description IBL-E1 / ADR-0062 — package body locale (BCP-47). */
+            locale: string;
+            /**
+             * Format: uuid
+             * @description IBL-E1 / ADR-0062 — optional locale-variant family id.
+             */
+            localeVariantFamilyId?: string | null;
+        };
+        CreateTemplateRequest: {
+            /** @description Stable business template identifier (path/runtime addressing). */
+            externalId: string;
+            groupCode: string;
+            name: string;
+            description?: string | null;
+            /**
+             * Format: uuid
+             * @description Source master document id for the new template package.
+             */
+            masterId: string;
+            /** @description IBL-E1 / ADR-0062 — required BCP-47 body locale for the template package (not a version-row field). */
+            locale: string;
+            /**
+             * Format: uuid
+             * @description IBL-E1 / ADR-0062 — optional UUID grouping translation siblings. Within the same groupCode, (localeVariantFamilyId, locale) is unique when non-null. Conflict → 409 LOCALE_VARIANT_CONFLICT.
+             */
+            localeVariantFamilyId?: string | null;
+            /**
+             * @description IBL-E3 / ADR-0064 — optional package approval matrix mode on create. Omitted → SINGLE_TRACK.
+             * @enum {string}
+             */
+            approvalMatrixMode?: "SINGLE_TRACK" | "LEGAL_THEN_COMPLIANCE";
+        };
+        UpdateTemplateRequest: {
+            name?: string;
+            description?: string;
+            /** @description IBL-E1 / ADR-0062 — optional body locale update (BCP-47). Omitted fields leave existing values unchanged. */
+            locale?: string;
+            /**
+             * Format: uuid
+             * @description IBL-E1 / ADR-0062 — optional locale-variant family id update.
+             */
+            localeVariantFamilyId?: string | null;
+            /**
+             * @description IBL-E3 / ADR-0064 — package approval matrix mode. Writable only in DRAFT or APPROVAL+PENDING_SUBMIT; otherwise 422 APPROVAL_MATRIX_MODE_LOCKED.
+             * @enum {string}
+             */
+            approvalMatrixMode?: "SINGLE_TRACK" | "LEGAL_THEN_COMPLIANCE";
         };
         /** @description Single-template summary envelope (CE-G05 annual-review complete and other summary-returning management operations). */
         TemplateSummaryResponse: {
@@ -4306,8 +4489,21 @@ export interface components {
             /** Format: uuid */
             masterId: string;
             lifecycleStatus: components["schemas"]["TemplateLifecycleStatus"];
-            /** @enum {string|null} */
-            approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION" | null;
+            /**
+             * @description IBL-E3 / ADR-0064 — includes multi-stage legal/compliance sub-states.
+             * @enum {string|null}
+             */
+            approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION" | "PENDING_LEGAL_DECISION" | "PENDING_COMPLIANCE_DECISION" | null;
+            /**
+             * @description IBL-E3 / ADR-0064 — package-level approval matrix mode.
+             * @enum {string}
+             */
+            approvalMatrixMode?: "SINGLE_TRACK" | "LEGAL_THEN_COMPLIANCE";
+            /**
+             * @description IBL-E3 / ADR-0064 — current multi-stage approval stage; null when SINGLE_TRACK or not in a stage decision window.
+             * @enum {string|null}
+             */
+            approvalStage?: "LEGAL" | "COMPLIANCE" | null;
             releaseVersion?: string | null;
             /** Format: uuid */
             devVersionId: string;
@@ -4315,6 +4511,8 @@ export interface components {
             variables: components["schemas"]["TemplateExportVariableSchemaView"][];
             bindings: components["schemas"]["TemplateExportAnchorBindingView"][];
             rules: components["schemas"]["TemplateExportCompositionRuleView"][];
+            /** @description ADR-0063 / IBL-E2 Composition Inclusion Rules for this version. */
+            compositionInclusionRules?: components["schemas"]["CompositionInclusionRuleView"][];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -4332,6 +4530,13 @@ export interface components {
              * @description CE-G05 — same template-row annual-review field as `TemplateSummaryView.nextReviewDue` (not release-scoped).
              */
             nextReviewDue?: string | null;
+            /** @description IBL-E1 / ADR-0062 — package body locale (BCP-47). */
+            locale: string;
+            /**
+             * Format: uuid
+             * @description IBL-E1 / ADR-0062 — optional locale-variant family id.
+             */
+            localeVariantFamilyId?: string | null;
         };
         TemplateImportResult: {
             importSummary: components["schemas"]["TemplateImportSummaryView"];
@@ -4436,17 +4641,28 @@ export interface components {
         LifecycleJourneyTransitionRequest: {
             /** @enum {string} */
             action: "SUBMIT_FOR_TEST" | "RECORD_TEST_DECISION" | "SUBMIT_FOR_APPROVAL" | "RECORD_APPROVAL_DECISION" | "MARK_PENDING_RELEASE" | "PUBLISH" | "STOP_USE" | "RESTORE" | "DEPRECATE" | "RECORD_EXPORT_GOVERNANCE_DECISION" | "EVALUATE_TIMEOUT_ESCALATION";
-            /** @enum {string} */
-            actorRole: "GLOBAL_ADMIN" | "GROUP_ADMIN" | "TEMPLATE_AUTHOR" | "TESTER" | "APPROVER";
+            /**
+             * @description IBL-E3 — LEGAL_REVIEWER for LEGAL-stage RECORD_APPROVAL_DECISION. ManagementRole mapping may use TEMPLATE_APPROVER / LEGAL_REVIEWER on the primary management API; this journey enum remains for the lifecycle journey stub.
+             * @enum {string}
+             */
+            actorRole: "GLOBAL_ADMIN" | "GROUP_ADMIN" | "TEMPLATE_AUTHOR" | "TESTER" | "APPROVER" | "LEGAL_REVIEWER";
             actorId: string;
             /** @enum {string} */
             decisionOutcome?: "PASS" | "FAIL" | "APPROVE" | "REJECT";
+            /**
+             * @description IBL-E3 / ADR-0064 — required (or uniquely implied by approvalSubState) for RECORD_APPROVAL_DECISION under LEGAL_THEN_COMPLIANCE. Mismatch → 409/422 APPROVAL_STAGE_MISMATCH. Wrong role → 403 APPROVAL_STAGE_ROLE_FORBIDDEN.
+             * @enum {string|null}
+             */
+            approvalStage?: "LEGAL" | "COMPLIANCE" | null;
             comment?: string;
             secondConfirmation?: boolean;
             reasonCode?: string;
             exportFallbackDecisionRecorded?: boolean;
-            /** @enum {string} */
-            timeoutStage?: "TEST" | "APPROVAL" | "PENDING_RELEASE" | "REMEDIATION";
+            /**
+             * @description IBL-E3 — LEGAL added for multi-stage legal-queue timeout escalation (visibility only; no auto decision).
+             * @enum {string}
+             */
+            timeoutStage?: "TEST" | "APPROVAL" | "LEGAL" | "PENDING_RELEASE" | "REMEDIATION";
             timeoutThresholdHours?: number;
             elapsedHours?: number;
         };
@@ -4557,7 +4773,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "RENDERING" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED" | "LOCALE_VARIANT_CONFLICT" | "TEMPLATE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_RULE_INVALID" | "COMPOSITION_INCLUSION_UNSATISFIED" | "CONTENT_MODULE_JURISDICTION_MISMATCH";
     };
     responses: {
         /** @description Async task accepted. */
@@ -5846,6 +6062,8 @@ export interface operations {
                 effectiveFrom?: string;
                 /** @description CE-K08 — keep modules whose catalog filter version effectiveTo is <= this Instant. Versions with null effectiveTo do not match. */
                 effectiveTo?: string;
+                /** @description IBL-E1 / ADR-0062 — optional exact match on content-module package body `locale` (BCP-47). AND with search / searchMode / status / groupCode / sort / CE-K08 legal filters. Unknown or non-matching values → successful empty page (not 400). */
+                locale?: string;
             };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
@@ -5897,6 +6115,7 @@ export interface operations {
             };
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
+            409: components["responses"]["ErrorResponse"];
             422: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
@@ -6459,12 +6678,14 @@ export interface operations {
                 search?: components["parameters"]["CatalogSearchQuery"];
                 /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
                 groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
-                /** @description Exact template lifecycle status filter (UI status / workflow chips). Workflow chip mapping: awaitingTest→TESTING; awaitingPublish→PENDING_RELEASE; awaitingApproval→APPROVAL (with `approvalSubState=PENDING_DECISION`). Unknown enum values: empty page recommended (or 400/422 — lock in tests). */
+                /** @description Exact template lifecycle status filter (UI status / workflow chips). Workflow chip mapping: awaitingTest→TESTING; awaitingPublish→PENDING_RELEASE; awaitingApproval→APPROVAL (with `approvalSubState=PENDING_DECISION` for SINGLE_TRACK; IBL-E3 multi-stage uses PENDING_LEGAL_DECISION / PENDING_COMPLIANCE_DECISION). Unknown enum values: empty page recommended (or 400/422 — lock in tests). */
                 lifecycleStatus?: components["schemas"]["TemplateLifecycleStatus"];
-                /** @description Optional approval sub-state filter (templates only). Used with `lifecycleStatus=APPROVAL` for the awaiting-approval workflow chip (`PENDING_DECISION`). */
-                approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION";
+                /** @description Optional approval sub-state filter (templates only). Used with `lifecycleStatus=APPROVAL` for awaiting-approval chips (`PENDING_DECISION`, or IBL-E3 `PENDING_LEGAL_DECISION` / `PENDING_COMPLIANCE_DECISION`). */
+                approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION" | "PENDING_LEGAL_DECISION" | "PENDING_COMPLIANCE_DECISION";
                 /** @description Whitelist sort key. Default `groupCodeAsc` (group-first). Unknown values fall back to `groupCodeAsc` (no 400). Templates also support `externalIdAsc`. */
                 sort?: "groupCodeAsc" | "updatedAtDesc" | "updatedAtAsc" | "nameAsc" | "externalIdAsc";
+                /** @description IBL-E1 / ADR-0062 — optional exact match on template package body `locale` (BCP-47). AND with search / groupCode / lifecycleStatus / approvalSubState / sort. Unknown or non-matching values → successful empty page (not 400). */
+                locale?: string;
             };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
@@ -6486,6 +6707,47 @@ export interface operations {
             };
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    createTemplate: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTemplateRequest"];
+            };
+        };
+        responses: {
+            /** @description Template created. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateDetailResponse"];
+                };
+            };
+            /** @description Template created (HTTP Created). */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateDetailResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            409: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -6774,6 +7036,70 @@ export interface operations {
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
             404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getCompositionInclusionRules: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inclusion rule set for the draft version. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompositionInclusionRulesResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    putCompositionInclusionRules: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutCompositionInclusionRulesRequest"];
+            };
+        };
+        responses: {
+            /** @description Persisted inclusion rule set. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompositionInclusionRulesResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            409: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };

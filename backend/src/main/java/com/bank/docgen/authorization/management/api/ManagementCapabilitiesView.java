@@ -6,6 +6,7 @@ public record ManagementCapabilitiesView(
         boolean authorTemplates,
         boolean decideTests,
         boolean decideApprovals,
+        boolean decideLegalApprovals,
         boolean publishTemplates,
         boolean stopTemplates,
         boolean restoreOrDeprecateTemplates,

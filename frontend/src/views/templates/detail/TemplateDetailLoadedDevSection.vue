@@ -19,6 +19,8 @@ defineProps<{
     :group-code="c.template.groupCode"
     :lifecycle-status="c.template.lifecycleStatus"
     :approval-sub-state="c.template.approvalSubState"
+    :approval-matrix-mode="c.template.approvalMatrixMode"
+    :approval-stage="c.template.approvalStage"
     :can-edit-content-module-references="c.canEditContentModuleReferences"
     :coverage-refresh-token="c.coverageRefreshToken"
     :last-preview="c.lastPreview"

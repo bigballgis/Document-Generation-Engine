@@ -13,6 +13,7 @@ vi.mock('@/composables/useCapabilities', () => ({
     authorTemplates: { value: false },
     decideTests: decideTests,
     decideApprovals: { value: false },
+    decideLegalApprovals: { value: false },
     publishTemplates: { value: false },
   }),
 }))

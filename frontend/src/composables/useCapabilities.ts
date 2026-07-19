@@ -4,6 +4,7 @@ import {
   canAuthorTemplates,
   canConfigureContentModuleSharedGroups,
   canDecideApprovals,
+  canDecideLegalApprovals,
   canDecideContentModuleReviews,
   canDecideTests,
   canDeleteTemplates,
@@ -39,6 +40,7 @@ export function useCapabilities() {
   const exportTemplates = computed(() => canExportTemplates(context.value))
   const decideTests = computed(() => canDecideTests(context.value))
   const decideApprovals = computed(() => canDecideApprovals(context.value))
+  const decideLegalApprovals = computed(() => canDecideLegalApprovals(context.value))
   const publishTemplates = computed(() => canPublishTemplates(context.value))
   const stopTemplates = computed(() => canStopTemplates(context.value))
   const restoreOrDeprecateTemplates = computed(() => canRestoreOrDeprecateTemplates(context.value))
@@ -68,6 +70,7 @@ export function useCapabilities() {
     exportTemplates,
     decideTests,
     decideApprovals,
+    decideLegalApprovals,
     publishTemplates,
     stopTemplates,
     restoreOrDeprecateTemplates,

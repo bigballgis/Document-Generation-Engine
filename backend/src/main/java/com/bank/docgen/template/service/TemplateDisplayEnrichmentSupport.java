@@ -44,7 +44,9 @@ final class TemplateDisplayEnrichmentSupport {
                         summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy()),
                         summary.nextReviewDue(),
                         summary.locale(),
-                        summary.localeVariantFamilyId()
+                        summary.localeVariantFamilyId(),
+                        summary.approvalMatrixMode(),
+                        summary.approvalStage()
                 ))
                 .toList();
     }

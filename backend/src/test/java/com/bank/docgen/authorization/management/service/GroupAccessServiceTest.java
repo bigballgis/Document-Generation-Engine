@@ -66,6 +66,9 @@ class GroupAccessServiceTest {
         assertThat(service.canDecideTemplateTests(session(List.of("TEMPLATE_APPROVER"), List.of()))).isFalse();
         assertThat(service.canDecideTemplateApprovals(session(List.of("TEMPLATE_APPROVER"), List.of()))).isTrue();
         assertThat(service.canDecideTemplateApprovals(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();
+        assertThat(service.canDecideLegalApprovals(session(List.of("LEGAL_REVIEWER"), List.of()))).isTrue();
+        assertThat(service.canDecideLegalApprovals(session(List.of("TEMPLATE_APPROVER"), List.of()))).isFalse();
+        assertThat(service.canDecideTemplateApprovals(session(List.of("LEGAL_REVIEWER"), List.of()))).isFalse();
     }
 
     @Test

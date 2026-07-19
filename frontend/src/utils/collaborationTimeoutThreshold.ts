@@ -11,6 +11,8 @@ export function resolveThresholdHoursForQueue(
     case 'TEST':
       return config.testThresholdHours
     case 'APPROVAL':
+    case 'LEGAL':
+      // IBL-E3 — LEGAL queue reuses approval timeout threshold until a dedicated field exists.
       return config.approvalThresholdHours
     case 'REMEDIATION':
       return config.remediationThresholdHours

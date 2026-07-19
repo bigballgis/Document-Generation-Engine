@@ -15,7 +15,13 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { authorTemplates, decideTests, decideApprovals, publishTemplates } = useCapabilities()
+const {
+  authorTemplates,
+  decideTests,
+  decideApprovals,
+  decideLegalApprovals,
+  publishTemplates,
+} = useCapabilities()
 
 const banner = computed(() =>
   resolveTemplateWorkflowBannerContext(
@@ -24,6 +30,7 @@ const banner = computed(() =>
       authorTemplates: authorTemplates.value,
       decideTests: decideTests.value,
       decideApprovals: decideApprovals.value,
+      decideLegalApprovals: decideLegalApprovals.value,
       publishTemplates: publishTemplates.value,
     },
     props.template.approvalSubState ?? null,

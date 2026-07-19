@@ -271,6 +271,20 @@ abstract class TemplateManagementWebTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.lifecycleStatus").value("APPROVAL"));
 
+        // Submit-for-approval publish-gate requires fidelity acknowledgements from the latest
+        // batch-test preview (not only the earlier test-generate preview).
+        acknowledgeLatestPreviewFidelityWarnings(templateId);
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/submit-approval")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"commentSummary":"Ready for approval"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.lifecycleStatus").value("APPROVAL"))
+                .andExpect(jsonPath("$.result.approvalSubState").value("PENDING_DECISION"));
+
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/approval-decision")
                         .with(authentication(new ManagementAuthentication(approver)))
                         .contentType(MediaType.APPLICATION_JSON)

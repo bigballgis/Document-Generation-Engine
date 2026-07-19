@@ -175,6 +175,7 @@ export default {
       allTasks: '全部任务',
       testing: '待我测试',
       approval: '待我审批',
+      legal: '待我法务审阅',
       remediation: '待我修改',
       pendingRelease: '待确认上线',
       escalation: '超时待跟进',
@@ -304,6 +305,10 @@ export default {
         title: '记录审批结果',
         description: '测试完成后批准或驳回模板。',
       },
+      templateLegalApproval: {
+        title: '记录法务审阅结果',
+        description: '在进入合规审批前完成法务阶段判定。',
+      },
       templatePublish: {
         title: '确认上线',
         description: '将已审批模板发布到指定环境。',
@@ -412,6 +417,10 @@ export default {
         APPROVAL: {
           label: '待审批',
           title: '待我审批',
+        },
+        LEGAL: {
+          label: '待法务审阅',
+          title: '待我法务审阅',
         },
         REMEDIATION: {
           label: '待修改',
@@ -1921,6 +1930,8 @@ export default {
       APPROVAL: '审批',
       approvalPendingSubmit: '待提交审批',
       approvalPendingDecision: '待审批',
+      approvalPendingLegalDecision: '待法务审阅',
+      approvalPendingComplianceDecision: '待合规审批',
       PENDING_RELEASE: '待上线',
       PUBLISHED: '已上线',
       STOPPED: '已停用',
@@ -2117,6 +2128,24 @@ export default {
       descriptionPlaceholder: '可选描述。',
       save: '保存基本信息',
       success: '模板基本信息已更新。',
+    },
+    approvalMatrix: {
+      label: '审批矩阵模式',
+      placeholder: '选择审批矩阵模式',
+      createSectionTitle: '审批矩阵',
+      hint: '单级审批保持一次合规审批；法务→合规需先由法务审阅人判定，再进入合规审批。',
+      save: '保存审批矩阵模式',
+      saveSuccess: '审批矩阵模式已更新。',
+      stageBannerTitle: '当前审批阶段',
+      stageBannerBody: '仅该阶段对应角色可执行通过或驳回。',
+      mode: {
+        SINGLE_TRACK: '单级审批',
+        LEGAL_THEN_COMPLIANCE: '法务后合规',
+      },
+      stage: {
+        LEGAL: '法务审阅',
+        COMPLIANCE: '合规审批',
+      },
     },
     contract: {
       title: '调用方合约',
@@ -2938,6 +2967,29 @@ export default {
           },
         },
       },
+      LEGAL_REVIEWER: {
+        title: '法务审阅流程',
+        empty: {
+          guidance: '从任务列表打开法务审阅任务，然后按下方步骤推进。',
+        },
+        steps: {
+          reviewRequest: {
+            label: '查看法务任务',
+            guidance: '打开法务审阅任务并确认提交背景。',
+            cta: '查看法务任务',
+          },
+          reviewSubmission: {
+            label: '审阅提交材料',
+            guidance: '在记录法务决定前审阅证据与保真摘要。',
+            cta: '审阅提交材料',
+          },
+          recordDecision: {
+            label: '记录法务决定',
+            guidance: '通过或驳回法务阶段，以便进入合规审批。',
+            cta: '记录法务决定',
+          },
+        },
+      },
       GROUP_ADMIN: {
         title: '组长上线确认流程',
         empty: {
@@ -3058,6 +3110,7 @@ export default {
       TEMPLATE_AUTHOR: '模板作者',
       TEMPLATE_TESTER: '模板测试员',
       TEMPLATE_APPROVER: '模板审批员',
+      LEGAL_REVIEWER: '法务审阅人',
       AUDIT_ADMIN: '审计管理员',
     },
     dimensions: {

@@ -2090,7 +2090,9 @@ paths:
           description: >-
             Exact template lifecycle status filter (UI status / workflow chips).
             Workflow chip mapping: awaitingTest→TESTING; awaitingPublish→PENDING_RELEASE;
-            awaitingApproval→APPROVAL (with `approvalSubState=PENDING_DECISION`).
+            awaitingApproval→APPROVAL (with `approvalSubState=PENDING_DECISION`
+            for SINGLE_TRACK; IBL-E3 multi-stage uses PENDING_LEGAL_DECISION /
+            PENDING_COMPLIANCE_DECISION).
             Unknown enum values: empty page recommended (or 400/422 — lock in tests).
           schema:
             $ref: '#/components/schemas/TemplateLifecycleStatus'
@@ -2099,11 +2101,16 @@ paths:
           required: false
           description: >-
             Optional approval sub-state filter (templates only). Used with
-            `lifecycleStatus=APPROVAL` for the awaiting-approval workflow chip
-            (`PENDING_DECISION`).
+            `lifecycleStatus=APPROVAL` for awaiting-approval chips
+            (`PENDING_DECISION`, or IBL-E3 `PENDING_LEGAL_DECISION` /
+            `PENDING_COMPLIANCE_DECISION`).
           schema:
             type: string
-            enum: [PENDING_SUBMIT, PENDING_DECISION]
+            enum:
+              - PENDING_SUBMIT
+              - PENDING_DECISION
+              - PENDING_LEGAL_DECISION
+              - PENDING_COMPLIANCE_DECISION
         - name: sort
           in: query
           required: false
@@ -7121,8 +7128,16 @@ components:
           $ref: '#/components/schemas/TemplateLifecycleStatus'
         approvalSubState:
           type: string
-          enum: [PENDING_SUBMIT, PENDING_DECISION]
+          enum:
+            - PENDING_SUBMIT
+            - PENDING_DECISION
+            - PENDING_LEGAL_DECISION
+            - PENDING_COMPLIANCE_DECISION
           nullable: true
+          description: >-
+            IBL-E3 / ADR-0064 — PENDING_LEGAL_DECISION and
+            PENDING_COMPLIANCE_DECISION apply when approvalMatrixMode is
+            LEGAL_THEN_COMPLIANCE; PENDING_DECISION remains SINGLE_TRACK.
         lineKind:
           $ref: '#/components/schemas/TemplateVersionLineKind'
         updatedAt:
@@ -8939,7 +8954,10 @@ components:
       enum: [GLOBAL, GROUP]
     CollaborationWorkItemQueue:
       type: string
-      enum: [TEST, APPROVAL, REMEDIATION, PENDING_RELEASE, ESCALATION]
+      enum: [TEST, APPROVAL, LEGAL, REMEDIATION, PENDING_RELEASE, ESCALATION]
+      description: >-
+        IBL-E3 / ADR-0064 — LEGAL is the legal-stage queue under
+        LEGAL_THEN_COMPLIANCE (distinct from APPROVAL/COMPLIANCE).
     CollaborationWorkItemTriggerType:
       type: string
       enum:
@@ -10504,8 +10522,28 @@ components:
           $ref: '#/components/schemas/TemplateLifecycleStatus'
         approvalSubState:
           type: string
-          enum: [PENDING_SUBMIT, PENDING_DECISION]
+          enum:
+            - PENDING_SUBMIT
+            - PENDING_DECISION
+            - PENDING_LEGAL_DECISION
+            - PENDING_COMPLIANCE_DECISION
           nullable: true
+          description: >-
+            IBL-E3 / ADR-0064 — includes multi-stage legal/compliance sub-states.
+        approvalMatrixMode:
+          type: string
+          enum: [SINGLE_TRACK, LEGAL_THEN_COMPLIANCE]
+          description: >-
+            IBL-E3 / ADR-0064 — package-level approval matrix mode. Default and
+            migrate value SINGLE_TRACK.
+        approvalStage:
+          type: string
+          enum: [LEGAL, COMPLIANCE]
+          nullable: true
+          description: >-
+            IBL-E3 / ADR-0064 — current stage when in multi-stage approval
+            (LEGAL | COMPLIANCE); null for SINGLE_TRACK or non-approval states.
+            Must be uniquely derivable from approvalSubState when omitted on write.
         releaseVersion:
           type: string
           nullable: true
@@ -10582,6 +10620,12 @@ components:
             IBL-E1 / ADR-0062 — optional UUID grouping translation siblings.
             Within the same groupCode, (localeVariantFamilyId, locale) is unique
             when non-null. Conflict → 409 LOCALE_VARIANT_CONFLICT.
+        approvalMatrixMode:
+          type: string
+          enum: [SINGLE_TRACK, LEGAL_THEN_COMPLIANCE]
+          description: >-
+            IBL-E3 / ADR-0064 — optional package approval matrix mode on create.
+            Omitted → SINGLE_TRACK.
     UpdateTemplateRequest:
       type: object
       additionalProperties: false
@@ -10603,6 +10647,13 @@ components:
           format: uuid
           nullable: true
           description: IBL-E1 / ADR-0062 — optional locale-variant family id update.
+        approvalMatrixMode:
+          type: string
+          enum: [SINGLE_TRACK, LEGAL_THEN_COMPLIANCE]
+          description: >-
+            IBL-E3 / ADR-0064 — package approval matrix mode. Writable only in
+            DRAFT or APPROVAL+PENDING_SUBMIT; otherwise 422
+            APPROVAL_MATRIX_MODE_LOCKED.
     TemplateSummaryResponse:
       type: object
       additionalProperties: false
@@ -10851,8 +10902,26 @@ components:
           $ref: '#/components/schemas/TemplateLifecycleStatus'
         approvalSubState:
           type: string
-          enum: [PENDING_SUBMIT, PENDING_DECISION]
+          enum:
+            - PENDING_SUBMIT
+            - PENDING_DECISION
+            - PENDING_LEGAL_DECISION
+            - PENDING_COMPLIANCE_DECISION
           nullable: true
+          description: >-
+            IBL-E3 / ADR-0064 — includes multi-stage legal/compliance sub-states.
+        approvalMatrixMode:
+          type: string
+          enum: [SINGLE_TRACK, LEGAL_THEN_COMPLIANCE]
+          description: >-
+            IBL-E3 / ADR-0064 — package-level approval matrix mode.
+        approvalStage:
+          type: string
+          enum: [LEGAL, COMPLIANCE]
+          nullable: true
+          description: >-
+            IBL-E3 / ADR-0064 — current multi-stage approval stage; null when
+            SINGLE_TRACK or not in a stage decision window.
         releaseVersion:
           type: string
           nullable: true
@@ -11158,13 +11227,27 @@ components:
             [SUBMIT_FOR_TEST, RECORD_TEST_DECISION, SUBMIT_FOR_APPROVAL, RECORD_APPROVAL_DECISION, MARK_PENDING_RELEASE, PUBLISH, STOP_USE, RESTORE, DEPRECATE, RECORD_EXPORT_GOVERNANCE_DECISION, EVALUATE_TIMEOUT_ESCALATION]
         actorRole:
           type: string
-          enum: [GLOBAL_ADMIN, GROUP_ADMIN, TEMPLATE_AUTHOR, TESTER, APPROVER]
+          enum: [GLOBAL_ADMIN, GROUP_ADMIN, TEMPLATE_AUTHOR, TESTER, APPROVER, LEGAL_REVIEWER]
+          description: >-
+            IBL-E3 — LEGAL_REVIEWER for LEGAL-stage RECORD_APPROVAL_DECISION.
+            ManagementRole mapping may use TEMPLATE_APPROVER / LEGAL_REVIEWER
+            on the primary management API; this journey enum remains for the
+            lifecycle journey stub.
         actorId:
           type: string
           minLength: 1
         decisionOutcome:
           type: string
           enum: [PASS, FAIL, APPROVE, REJECT]
+        approvalStage:
+          type: string
+          enum: [LEGAL, COMPLIANCE]
+          nullable: true
+          description: >-
+            IBL-E3 / ADR-0064 — required (or uniquely implied by approvalSubState)
+            for RECORD_APPROVAL_DECISION under LEGAL_THEN_COMPLIANCE. Mismatch →
+            409/422 APPROVAL_STAGE_MISMATCH. Wrong role → 403
+            APPROVAL_STAGE_ROLE_FORBIDDEN.
         comment:
           type: string
         secondConfirmation:
@@ -11175,7 +11258,10 @@ components:
           type: boolean
         timeoutStage:
           type: string
-          enum: [TEST, APPROVAL, PENDING_RELEASE, REMEDIATION]
+          enum: [TEST, APPROVAL, LEGAL, PENDING_RELEASE, REMEDIATION]
+          description: >-
+            IBL-E3 — LEGAL added for multi-stage legal-queue timeout escalation
+            (visibility only; no auto decision).
         timeoutThresholdHours:
           type: integer
           minimum: 0

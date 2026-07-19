@@ -100,6 +100,21 @@ export function canDecideApprovals(context: CapabilityContext): boolean {
   )
 }
 
+/** IBL-E3 / ADR-0064 — LEGAL-stage decisions (decideLegalApprovals). */
+export function canDecideLegalApprovals(context: CapabilityContext): boolean {
+  return resolveCapability(context, 'decideLegalApprovals', (roles) =>
+    roles.some((role) =>
+      (
+        [
+          MANAGEMENT_ROLES.GLOBAL_ADMIN,
+          MANAGEMENT_ROLES.GROUP_ADMIN,
+          MANAGEMENT_ROLES.LEGAL_REVIEWER,
+        ] as string[]
+      ).includes(role),
+    ),
+  )
+}
+
 export function canPublishTemplates(context: CapabilityContext): boolean {
   return resolveCapability(context, 'publishTemplates', (roles) =>
     roles.some((role) =>

@@ -16,6 +16,7 @@ const BASE_CAPABILITIES: ManagementCapabilities = {
   authorTemplates: false,
   decideTests: false,
   decideApprovals: false,
+  decideLegalApprovals: false,
   publishTemplates: false,
   stopTemplates: false,
   restoreOrDeprecateTemplates: false,

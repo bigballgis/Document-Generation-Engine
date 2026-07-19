@@ -355,6 +355,7 @@ class TemplateLifecycleServiceTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
         when(groupAccessService.canDecideTemplateApprovals(approver)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
+        when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_DECISION);
         when(collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, approver))
                 .thenReturn(Optional.of("10000005"));
         when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.PENDING_RELEASE));
@@ -383,6 +384,7 @@ class TemplateLifecycleServiceTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
         when(groupAccessService.canDecideTemplateApprovals(approver)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
+        when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_DECISION);
         when(collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, approver))
                 .thenReturn(Optional.of("10000005"));
         when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.DRAFT));
@@ -411,6 +413,7 @@ class TemplateLifecycleServiceTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
         when(groupAccessService.canDecideTemplateApprovals(approver)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
+        when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_DECISION);
         when(collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, approver))
                 .thenReturn(Optional.empty());
         when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.DRAFT));

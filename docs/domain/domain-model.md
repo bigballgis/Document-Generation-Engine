@@ -1304,8 +1304,10 @@ PRD §7 使用中文产品状态名；运行时 `TemplateLifecycleStatus` 枚举
 | 草稿 | `DRAFT` | — | |
 | 测试中 | `TESTING` | — | |
 | 测试通过 | `APPROVAL` | `PENDING_SUBMIT` | 测试判定通过后进入；等待具备权限角色提交审批 |
-| 待审批 | `APPROVAL` | `PENDING_DECISION` | `SUBMIT_FOR_APPROVAL` 之后；等待审批判定 |
-| 待发布 | `PENDING_RELEASE` | — | 审批通过后 |
+| 待审批 | `APPROVAL` | `PENDING_DECISION` | **`SINGLE_TRACK`：** `SUBMIT_FOR_APPROVAL` 之后；等待一级审批判定 |
+| 待法务审阅 | `APPROVAL` | `PENDING_LEGAL_DECISION` | **`LEGAL_THEN_COMPLIANCE`：** 提交审批后；等待 LEGAL 阶段判定（IBL-E3 / ADR-0064） |
+| 待合规审批 | `APPROVAL` | `PENDING_COMPLIANCE_DECISION` | **`LEGAL_THEN_COMPLIANCE`：** LEGAL 通过后；等待 COMPLIANCE 阶段判定 |
+| 待发布 | `PENDING_RELEASE` | — | 一级通过或 COMPLIANCE 通过后 |
 | 已发布 | `PUBLISHED` | — | |
 | 已停用 | `STOPPED` | — | |
 | 已废弃 | `DEPRECATED` | — | |
@@ -1314,31 +1316,42 @@ PRD §7 使用中文产品状态名；运行时 `TemplateLifecycleStatus` 枚举
 `TemplateDetailView.approvalSubState`。完整发布门禁、受控意见表单与覆盖率阈值仍属
 P19 范围（见 [P5 薄切片边界](../plan/detail/P5-lifecycle-governance.md)）。
 
+### 4.1.1 审批矩阵模式（IBL-E3 / ADR-0064，2026-07-20）
+
+模板**包**级字段 `approvalMatrixMode` ∈ {`SINGLE_TRACK`, `LEGAL_THEN_COMPLIANCE`}（与 `locale` 同级可治理元数据）：
+
+| Mode | 提交审批后子状态 | 正常判定角色 | 到达待发布条件 |
+| --- | --- | --- | --- |
+| `SINGLE_TRACK`（默认；存量迁移） | `PENDING_DECISION` | `TEMPLATE_APPROVER`（+管理员） | 一次 Approve |
+| `LEGAL_THEN_COMPLIANCE` | `PENDING_LEGAL_DECISION` →（LEGAL Approve）→ `PENDING_COMPLIANCE_DECISION` | LEGAL：`LEGAL_REVIEWER`（+管理员）；COMPLIANCE：`TEMPLATE_APPROVER`（+管理员） | 两阶段均 Approve |
+
+可选回显 `approvalStage`：`LEGAL` \| `COMPLIANCE` \| null（由子状态唯一推导或显式入参；对外契约禁止歧义双源）。Mode 可写窗口：仅 `DRAFT` 或 `APPROVAL`+`PENDING_SUBMIT`；否则 **422** `APPROVAL_MATRIX_MODE_LOCKED`。任一层 Reject → `DRAFT`；再发须重测+重审全链。母版审核与条款独立审批轨**不**采用本矩阵。CE-K08 法务元数据仍可选。行为：[ibl-e3-legal-approval-matrix.md](../behavior/ibl-e3-legal-approval-matrix.md)；决策：[ADR-0064](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)。Accepted ≠ impl Done。
+
 已确认状态规则：
 
-- v1 不新增发布前或发布后中间状态；发布前检查、生成预览、测试生成、渲染任务、阻断项和失败原因通过 Template Test Record、Preview Artifact、Pre-release Checklist、Release Summary 和 Audit Summary 表达，不升级为 Template Lifecycle Status。
+- v1 不新增发布前或发布后中间状态；发布前检查、生成预览、测试生成、渲染任务、阻断项和失败原因通过 Template Test Record、Preview Artifact、Pre-release Checklist、Release Summary 和 Audit Summary 表达，不升级为 Template Lifecycle Status。多级审批的 LEGAL/COMPLIANCE 通过 **`approvalSubState`** 表达，不新增顶层 `TemplateLifecycleStatus`。
 - 模板必须经过测试人员测试。
-- 模板必须经过审批人员审批。
+- 模板必须经过审批轨判定（`SINGLE_TRACK` 的审批人员，或 `LEGAL_THEN_COMPLIANCE` 的法务审阅人 + 审批人员）。
 - 测试人员按分组配置。
-- 审批人员按分组配置。
+- 审批人员与法务审阅人按分组配置。
 - 提交测试只能从草稿状态或测试通过状态发起；提交测试后模板进入测试中状态。
 - 正常测试判定由测试人员执行；分组管理员只在异常处理或补救场景中，作为例外管理员在被授权组范围内执行测试通过/不通过判定。
-- 正常审批判定由审批人员执行；分组管理员只在异常处理或补救场景中，作为例外管理员在被授权组范围内执行审批通过/不通过判定。
-- 分组管理员例外干预测试或审批判定时，必须填写原因、执行二次确认，并在审计中添加单独的管理员例外干预标记。
+- **`SINGLE_TRACK`：** 正常审批判定由审批人员执行；管理员可按权限矩阵对审批做正常判定（组范围）。**`LEGAL_THEN_COMPLIANCE`：** LEGAL 由 `LEGAL_REVIEWER`（+管理员）判定；COMPLIANCE 由 `TEMPLATE_APPROVER`（+管理员）判定；错角色/错阶段 fail-closed。
+- 分组管理员/全局管理员对同人自批的例外干预须填写原因、执行二次确认，并在审计中添加单独的管理员例外干预标记（CE-G01）。
 - 测试通过后，模板进入测试通过状态，不自动进入待审批状态。
-- 测试通过状态下，需要由具备提交审批权限的角色手动提交审批；提交审批后模板进入待审批状态。
+- 测试通过状态下，需要由具备提交审批权限的角色手动提交审批；提交审批后进入待审批（单级 `PENDING_DECISION` 或多级 `PENDING_LEGAL_DECISION`）。
 - 测试判定需要记录结构化结果和测试意见；测试意见采用受控表单模板，不复用结构化富文本编辑器。测试通过需要确认测试证据摘要、批量测试摘要、覆盖率摘要、生成预览摘要和保真警告摘要，可填写补充说明；测试不通过必须填写原因分类、影响范围和修复建议，并记录关联测试数据集和生成预览摘要。
 - 测试不通过后，模板回到草稿状态。
-- 审批判定需要记录结构化结果和审批意见；审批意见采用受控表单模板，不复用结构化富文本编辑器。审批通过必须填写理由摘要并确认关键证据摘要；审批不通过必须包含退回原因分类、影响范围和整改要求，并关联测试记录、变更差异摘要和发布前检查清单摘要。
+- 审批判定（每一阶段）需要记录结构化结果和审批意见；审批意见采用受控表单模板，不复用结构化富文本编辑器。审批通过必须填写理由摘要并确认关键证据摘要；审批不通过必须包含退回原因分类、影响范围和整改要求，并关联测试记录、变更差异摘要和发布前检查清单摘要。审计含 `approvalStage`（多级时）。
 - **Risk Prompt Copy（退回原因配置）** 由全局默认与可选模板级覆盖组成；解析链：**全局默认 → 若模板存在覆盖则模板覆盖 → 否则继承全局**。全局默认约定为启用全部 `TemplateDecisionReasonCategory` 枚举值并附带系统种子文案；`useDefault: true`（或 null/缺省）表示模板不持久化覆盖、继承全局；`useDefault: false` 且选定类别 + 可选自定义文案表示模板覆盖。全局管理员维护全局默认；模板编排人员及具备模板维护权限的管理员在模板创建（默认折叠的高级区）与模板详情维护覆盖。原因类别仅用于测试不通过/审批不通过的负向判定表单，不关闭 submit/publish gate；`BINDING_ISSUE` 在 UI 文案中与「绑定校验」门禁区分。持久化：`risk_prompt_config`（`scopeType=GLOBAL`）+ 模板级覆盖存储（Flyway 新增）；原 `scopeType=GROUP` 从面向用户的 API/UI 移除（遗留行不参与解析链）。配置变更必须记录审计。
-- 审批不通过后，模板回到草稿状态。
-- 测试不通过或审批不通过回到草稿后，原测试记录和审批记录作为历史保留；再次提交发布候选时必须完整重新提交测试和审批，生成新一轮测试记录和审批记录。
-- 审批通过后，模板进入待发布状态，不直接发布。
+- 审批不通过（任一层）后，模板回到草稿状态。
+- 测试不通过或审批不通过回到草稿后，原测试记录和审批记录作为历史保留；再次提交发布候选时必须完整重新提交测试和审批（多级须重走 LEGAL→COMPLIANCE），生成新一轮测试记录和审批记录。
+- 审批通过后（单级一次通过，或多级 COMPLIANCE 通过），模板进入待发布状态，不直接发布。
 - 待发布状态下，由具备发布模板权限的角色手动发布；当前已确认具备发布权限的角色以权限矩阵为准。
 - 待发布状态下执行发布前，必须展示发布摘要并进行二次确认；发布摘要至少包含发布版本号、变更差异摘要、批量测试摘要、覆盖率摘要、最终产物引用、预览对比摘要、发布前检查清单结果、API 契约摘要和影响范围。
 - 待发布状态下发布前检查发现阻断项时，不新增发布失败状态；模板保持待发布但不得发布，发布前检查清单记录阻断项。若修复需要修改模板内容、依赖版本、测试数据集或渲染配置，必须回到草稿或创建新的开发版本，并重新执行测试、审批和发布流程。
-- 模板审批为一级审批。
-- v1 引入站内协作待办超时升级，但超时升级不改变模板状态、不自动判定、不产生代理审批；任何代理审批、自动判定或自动状态变更机制都需要单独确认。
+- 模板审批默认仍为一级审批（`SINGLE_TRACK`）；可选包级 `LEGAL_THEN_COMPLIANCE` 有序两级（ADR-0064 / PD-8）。不得跳级、不得反序、不得代理/自动通过。
+- v1 引入站内协作待办超时升级，但超时升级不改变模板状态、不自动判定、不产生代理审批；任何代理审批、自动判定或自动状态变更机制都需要单独确认。多级模式下提交审批创建 LEGAL 队列待办；LEGAL 通过后创建 COMPLIANCE/APPROVAL 队列待办。
 - 提交审批和审批判定需要能查看测试记录、批量测试摘要、覆盖率摘要、生成预览、最终产物引用、预览对比摘要、变更差异摘要和发布前检查清单结果。
 - 发布模板前必须执行发布前检查清单；如存在阻断项，模板不得发布。
 

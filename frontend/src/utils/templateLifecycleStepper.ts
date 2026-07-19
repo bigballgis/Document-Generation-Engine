@@ -1,4 +1,6 @@
+import type { ApprovalSubState } from '@/types/approvalMatrix'
 import type { TemplateLifecycleStatus } from '@/types/template'
+import { isAwaitingAnyApprovalDecision } from '@/utils/approvalMatrix'
 import type { TemplateJourneyWorkspaceQuery } from '@/utils/templateJourneyWorkspaceLink'
 
 export const LIFECYCLE_STEPPER_STEP_IDS = [
@@ -14,7 +16,7 @@ export type LifecycleStepperStepId = (typeof LIFECYCLE_STEPPER_STEP_IDS)[number]
 
 export type LifecycleStepperStepStatus = 'completed' | 'current' | 'upcoming' | 'inactive'
 
-export type LifecycleApprovalSubState = 'PENDING_SUBMIT' | 'PENDING_DECISION' | null | undefined
+export type LifecycleApprovalSubState = ApprovalSubState | null | undefined
 
 export type LifecycleStepperModel = {
   /** When true, template is off the publish channel (STOPPED/DEPRECATED). */
@@ -55,7 +57,8 @@ export function resolveLifecycleStepperModel(
       return { terminal: false, currentIndex: 1 }
     case 'APPROVAL':
       // Missing sub-state aligns with existing FE: treat as ready to submit (PENDING_SUBMIT).
-      if (approvalSubState === 'PENDING_DECISION') {
+      // IBL-E3: LEGAL / COMPLIANCE / SINGLE_TRACK pending decision all map to pendingApproval.
+      if (isAwaitingAnyApprovalDecision(approvalSubState)) {
         return { terminal: false, currentIndex: 3 }
       }
       return { terminal: false, currentIndex: 2 }

@@ -159,6 +159,13 @@ public final class ApiErrorCodes {
     /** IBL-E2 / ADR-0063: INCLUDE'd CM jurisdiction differs from context.jurisdiction. */
     public static final String CONTENT_MODULE_JURISDICTION_MISMATCH = "CONTENT_MODULE_JURISDICTION_MISMATCH";
 
+    /** IBL-E3 / ADR-0064: approvalMatrixMode write outside DRAFT / APPROVAL+PENDING_SUBMIT. */
+    public static final String APPROVAL_MATRIX_MODE_LOCKED = "APPROVAL_MATRIX_MODE_LOCKED";
+    /** IBL-E3 / ADR-0064: decision actor lacks the role for the current approval stage. */
+    public static final String APPROVAL_STAGE_ROLE_FORBIDDEN = "APPROVAL_STAGE_ROLE_FORBIDDEN";
+    /** IBL-E3 / ADR-0064: requested approvalStage does not match current sub-state. */
+    public static final String APPROVAL_STAGE_MISMATCH = "APPROVAL_STAGE_MISMATCH";
+
     private ApiErrorCodes() {
     }
 }

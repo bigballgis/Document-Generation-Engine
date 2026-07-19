@@ -122,7 +122,9 @@ final class TemplateVersionLineViewSupport {
                 masterPin,
                 detail.nextReviewDue(),
                 detail.locale(),
-                detail.localeVariantFamilyId()
+                detail.localeVariantFamilyId(),
+                detail.approvalMatrixMode(),
+                detail.approvalStage()
         );
     }
 

@@ -3,6 +3,7 @@ import {
   DEMO_GROUP_CODE,
   DEMO_MASTER_NAME,
   E2E_GROUP_ADMIN,
+  E2E_LEGAL_REVIEWER,
   E2E_TEMPLATE_APPROVER,
   E2E_TEMPLATE_AUTHOR,
   E2E_TEMPLATE_TESTER,
@@ -14,11 +15,20 @@ interface ApiEnvelope<T> {
   result: T
 }
 
+export type ApprovalMatrixMode = 'SINGLE_TRACK' | 'LEGAL_THEN_COMPLIANCE'
+export type ApprovalSubState =
+  | 'PENDING_SUBMIT'
+  | 'PENDING_DECISION'
+  | 'PENDING_LEGAL_DECISION'
+  | 'PENDING_COMPLIANCE_DECISION'
+
 interface TemplateDetail {
   id: string
   externalId: string
   lifecycleStatus: string
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  approvalSubState?: ApprovalSubState | null
+  approvalMatrixMode?: ApprovalMatrixMode
+  approvalStage?: 'LEGAL' | 'COMPLIANCE' | null
   name: string
   groupCode: string
 }
@@ -94,6 +104,104 @@ async function authorizedPut<T>(
   }
   const body = (await response.json()) as ApiEnvelope<T>
   return body.result
+}
+
+async function authorizedPatch<T>(
+  request: APIRequestContext,
+  token: string,
+  pathSuffix: string,
+  data: unknown,
+): Promise<T> {
+  const response = await request.patch(`${E2E_API_BASE_URL}${pathSuffix}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    data,
+  })
+  if (!response.ok()) {
+    throw new Error(`PATCH ${pathSuffix} failed (${response.status()}): ${await response.text()}`)
+  }
+  const body = (await response.json()) as ApiEnvelope<T>
+  return body.result
+}
+
+/** IBL-E3 — set package approvalMatrixMode while writable (DRAFT / PENDING_SUBMIT). */
+export async function setApprovalMatrixMode(
+  request: APIRequestContext,
+  templateId: string,
+  mode: ApprovalMatrixMode,
+): Promise<TemplateDetail> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  return authorizedPatch<TemplateDetail>(request, authorToken, `/templates/${templateId}`, {
+    approvalMatrixMode: mode,
+  })
+}
+
+/**
+ * API setup — multi-stage template at APPROVAL/PENDING_LEGAL_DECISION
+ * (LEGAL_THEN_COMPLIANCE + submit-for-approval).
+ */
+export async function prepareTemplatePendingLegalDecision(
+  request: APIRequestContext,
+  options?: { externalId?: string; name?: string },
+): Promise<PendingSubmitTemplateFixture> {
+  const template = await prepareTemplatePendingSubmitReady(request, {
+    externalId: options?.externalId ?? uniqueExternalId('E2E-IBL-E3-LEGAL'),
+    name: options?.name ?? `E2E IBL-E3 Legal ${Date.now().toString(36).toUpperCase()}`,
+  })
+
+  const patched = await setApprovalMatrixMode(request, template.templateId, 'LEGAL_THEN_COMPLIANCE')
+  if (patched.approvalMatrixMode !== 'LEGAL_THEN_COMPLIANCE') {
+    throw new Error(
+      `Expected LEGAL_THEN_COMPLIANCE after patch, got ${patched.approvalMatrixMode ?? 'null'} (${template.templateId})`,
+    )
+  }
+
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  await authorizedPost(request, authorToken, `/templates/${template.templateId}/lifecycle/submit-approval`, {
+    commentSummary: 'E2E IBL-E3 fixture — ready for PENDING_LEGAL_DECISION',
+  })
+
+  const detail = await fetchTemplateDetail(request, template.templateId)
+  if (detail.lifecycleStatus !== 'APPROVAL' || detail.approvalSubState !== 'PENDING_LEGAL_DECISION') {
+    throw new Error(
+      `Expected APPROVAL/PENDING_LEGAL_DECISION, got ${detail.lifecycleStatus}/${detail.approvalSubState ?? 'null'} (${template.templateId})`,
+    )
+  }
+
+  return template
+}
+
+/**
+ * API setup — advances PENDING_LEGAL_DECISION → PENDING_COMPLIANCE_DECISION via LEGAL_REVIEWER.
+ */
+export async function prepareTemplatePendingComplianceDecision(
+  request: APIRequestContext,
+  options?: { externalId?: string; name?: string },
+): Promise<PendingSubmitTemplateFixture> {
+  const template = await prepareTemplatePendingLegalDecision(request, {
+    externalId: options?.externalId ?? uniqueExternalId('E2E-IBL-E3-COMP'),
+    name: options?.name ?? `E2E IBL-E3 Compliance ${Date.now().toString(36).toUpperCase()}`,
+  })
+
+  const legalToken = await apiLogin(request, E2E_LEGAL_REVIEWER)
+  await authorizedPost(request, legalToken, `/templates/${template.templateId}/lifecycle/approval-decision`, {
+    decision: 'APPROVED',
+    commentSummary: 'E2E IBL-E3 LEGAL approve — ready for PENDING_COMPLIANCE_DECISION',
+    fidelityViewedConfirmed: true,
+    keyEvidenceConfirmed: true,
+    approvalStage: 'LEGAL',
+  })
+
+  const detail = await fetchTemplateDetail(request, template.templateId)
+  if (
+    detail.lifecycleStatus !== 'APPROVAL' ||
+    detail.approvalSubState !== 'PENDING_COMPLIANCE_DECISION'
+  ) {
+    throw new Error(
+      `Expected APPROVAL/PENDING_COMPLIANCE_DECISION, got ${detail.lifecycleStatus}/${detail.approvalSubState ?? 'null'} (${template.templateId})`,
+    )
+  }
+
+  return template
 }
 
 function uniqueExternalId(prefix: string): string {

@@ -20,6 +20,7 @@ const capabilityRefs = {
   authorTemplates: ref(true),
   decideTests: ref(true),
   decideApprovals: ref(true),
+  decideLegalApprovals: ref(false),
   publishTemplates: ref(true),
   stopTemplates: ref(true),
   restoreOrDeprecateTemplates: ref(true),

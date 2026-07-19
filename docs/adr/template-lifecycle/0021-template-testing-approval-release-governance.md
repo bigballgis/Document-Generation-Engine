@@ -81,6 +81,12 @@ v1 introduces timeout escalation only as in-platform visibility for delayed work
 - **UX placement:** Configuration moves from template list to template create (collapsed advanced section) and template detail; decision dialogs must resolve effective config by `templateId` instead of hardcoded category lists.
 - **Audit and sensitive-data boundaries** from this ADR remain unchanged: prompt copy stays structured, audited, and free of variable/customer plaintext.
 
+## Amendment (2026-07-20 — ADR-0064 / IBL-E3 / PD-8)
+
+One-level template approval remains the **default** via package `approvalMatrixMode=SINGLE_TRACK` (migrate + new-package default). Packages may opt into ordered **LEGAL → COMPLIANCE** multi-stage approval (`LEGAL_THEN_COMPLIANCE`) with forced `LEGAL_REVIEWER` on the LEGAL stage, per [ADR-0064](./0064-legal-compliance-approval-matrix.md) (Decision = E3-C\*; BDD [ibl-e3-legal-approval-matrix.md](../../behavior/ibl-e3-legal-approval-matrix.md)).
+
+This Amendment does **not** change: structured test/approval forms, publish secondary confirmation, timeout visibility-only escalation, proxy/auto approval bans, station-internal work items only, or master/content-module single-track approval. Accepted ADR-0064 ≠ IBL-E3 implementation Done; does **not** flip checklist **#3b** / **#5a**.
+
 ## Related Documents
 
 - [Requirements Plan](../../requirements/requirements-plan.md)
@@ -89,3 +95,5 @@ v1 introduces timeout escalation only as in-platform visibility for delayed work
 - [Permission Matrix](../../security/permission-matrix.md)
 - [Lifecycle Review](../../domain/lifecycle-review.md)
 - [Usability Review](../../product/usability-review.md)
+- [ADR-0064 Legal → Compliance Approval Matrix](./0064-legal-compliance-approval-matrix.md)
+- [IBL-E3 behavior](../../behavior/ibl-e3-legal-approval-matrix.md)

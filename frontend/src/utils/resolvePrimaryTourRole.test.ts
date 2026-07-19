@@ -11,6 +11,7 @@ import {
 describe('resolvePrimaryTourRole', () => {
   const caps = {
     decideApprovals: false,
+  decideLegalApprovals: false,
     publishTemplates: false,
     reviewMasters: false,
   }
@@ -44,6 +45,7 @@ describe('resolvePrimaryTourRole', () => {
       resolvePrimaryTourRole({
         roles: ['TEMPLATE_APPROVER'],
         decideApprovals: true,
+  decideLegalApprovals: false,
         publishTemplates: false,
         reviewMasters: false,
       }),
@@ -55,6 +57,7 @@ describe('resolvePrimaryTourRole', () => {
       resolvePrimaryTourRole({
         roles: ['GLOBAL_ADMIN', 'GROUP_ADMIN'],
         decideApprovals: false,
+  decideLegalApprovals: false,
         publishTemplates: true,
         reviewMasters: true,
       }),

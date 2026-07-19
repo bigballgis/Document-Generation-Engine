@@ -20,6 +20,7 @@ final class CollaborationWorkItemQuerySupport {
         return EnumSet.of(
                 CollaborationWorkItemQueue.TEST,
                 CollaborationWorkItemQueue.APPROVAL,
+                CollaborationWorkItemQueue.LEGAL,
                 CollaborationWorkItemQueue.PENDING_RELEASE,
                 CollaborationWorkItemQueue.REMEDIATION
         );

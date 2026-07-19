@@ -2,7 +2,9 @@
 import { toRef } from 'vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
+import TemplateApprovalStageIndicator from '@/components/templates/TemplateApprovalStageIndicator.vue'
 import TemplateRiskPromptConfigPanel from '@/components/templates/TemplateRiskPromptConfigPanel.vue'
+import type { ApprovalMatrixMode, ApprovalStage, ApprovalSubState } from '@/types/approvalMatrix'
 import type { SemverBumpLevel } from '@/utils/semver'
 import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
 import type { BindingValidationResult } from '@/types/template'
@@ -18,6 +20,9 @@ type PublishBumpOption = {
 
 const props = defineProps<{
   templateId: string
+  approvalMatrixMode?: ApprovalMatrixMode | null
+  approvalSubState?: ApprovalSubState | null
+  approvalStage?: ApprovalStage | null
   showSubmitForApproval: boolean
   showPublishActions: boolean
   showGovernanceSection: boolean
@@ -60,6 +65,12 @@ const {
         :content="t('templates.devEditor.releaseWorkflowHelpContent')"
       />
     </div>
+
+    <TemplateApprovalStageIndicator
+      :approval-matrix-mode="approvalMatrixMode"
+      :approval-sub-state="approvalSubState"
+      :approval-stage="approvalStage"
+    />
 
     <el-tabs v-model="activeSubTab" class="approval-sub-tabs">
       <el-tab-pane :label="t(templateApprovalSubTabLabelKey('submitApproval'))" name="submitApproval">

@@ -21,7 +21,8 @@ public class RouteVisibilityService {
                 || roles.contains(ManagementRole.MASTER_DESIGNER)
                 || roles.contains(ManagementRole.TEMPLATE_AUTHOR)
                 || roles.contains(ManagementRole.TEMPLATE_TESTER)
-                || roles.contains(ManagementRole.TEMPLATE_APPROVER)) {
+                || roles.contains(ManagementRole.TEMPLATE_APPROVER)
+                || roles.contains(ManagementRole.LEGAL_REVIEWER)) {
             return ManagementRoute.DASHBOARD_HOME.routeKey();
         }
         throw new IllegalStateException("No default route for roles: " + roles);
@@ -77,6 +78,11 @@ public class RouteVisibilityService {
             visible.add(ManagementRoute.DASHBOARD_HOME.routeKey());
             visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey());
+            visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
+        }
+        if (roles.contains(ManagementRole.LEGAL_REVIEWER)) {
+            visible.add(ManagementRoute.DASHBOARD_HOME.routeKey());
+            visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
         }
         return new ArrayList<>(visible);

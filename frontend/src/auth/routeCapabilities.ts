@@ -7,6 +7,7 @@ import {
   canAuthorTemplates,
   canDecideApprovals,
   canDecideContentModuleReviews,
+  canDecideLegalApprovals,
   canDecideTests,
   canManageAssetLibrary,
   canManageContentModuleLifecycle,
@@ -97,6 +98,12 @@ function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
     allowed.add(ROUTE_KEYS.contentModuleManagement)
     allowed.add(ROUTE_KEYS.assetLibraryManagement)
   }
+  // IBL-E3 / ADR-0064 — mirrors RouteVisibilityService LEGAL_REVIEWER set.
+  if (roleSet.has(MANAGEMENT_ROLES.LEGAL_REVIEWER)) {
+    allowed.add(ROUTE_KEYS.dashboardHome)
+    allowed.add(ROUTE_KEYS.templateManagement)
+    allowed.add(ROUTE_KEYS.assetLibraryManagement)
+  }
   return allowed.has(routeKey)
 }
 
@@ -119,12 +126,18 @@ const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContext) => b
       [canUploadMasters, canReviewMasters],
       (roles) => canUploadMasters({ roles }) || canReviewMasters({ roles }),
     ),
-  // Testers/approvers/publishers must reach template hub + /dev decision UI even when
-  // authorTemplates is false (backend still lists route.template-management for them).
+  // Testers/approvers/legal reviewers/publishers must reach template hub + /dev decision UI
+  // even when authorTemplates is false (backend still lists route.template-management).
   [ROUTE_KEYS.templateManagement]: (context) =>
     strictRouteCapability(
       context,
-      [canAuthorTemplates, canDecideTests, canDecideApprovals, canPublishTemplates],
+      [
+        canAuthorTemplates,
+        canDecideTests,
+        canDecideApprovals,
+        canDecideLegalApprovals,
+        canPublishTemplates,
+      ],
       (roles) =>
         canAccessTemplateManagement(roles) ||
         roles.some((role) =>
@@ -132,6 +145,7 @@ const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContext) => b
             [
               MANAGEMENT_ROLES.TEMPLATE_TESTER,
               MANAGEMENT_ROLES.TEMPLATE_APPROVER,
+              MANAGEMENT_ROLES.LEGAL_REVIEWER,
               MANAGEMENT_ROLES.MASTER_DESIGNER,
             ] as string[]
           ).includes(role),

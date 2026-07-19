@@ -112,6 +112,12 @@ final class DemoFullFlowPublishSupport {
                 DemoCatalogSessions.templateTesterSession()
         );
 
+        templateLifecycleService.submitForApproval(
+                templateId,
+                new LifecycleCommentRequest("Demo full-flow seed ready for approval"),
+                author
+        );
+
         templateLifecycleService.recordApprovalDecision(
                 templateId,
                 new LifecycleDecisionRequest(

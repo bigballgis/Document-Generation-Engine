@@ -6,7 +6,7 @@ export interface RoleJourneyStep {
 
 export type ClusterOneRole = 'MASTER_DESIGNER' | 'TEMPLATE_AUTHOR' | 'TEMPLATE_TESTER'
 
-type ClusterTwoRole = 'TEMPLATE_APPROVER' | 'GROUP_ADMIN'
+type ClusterTwoRole = 'TEMPLATE_APPROVER' | 'LEGAL_REVIEWER' | 'GROUP_ADMIN'
 
 type ClusterThreeRole = 'GLOBAL_ADMIN'
 
@@ -56,6 +56,12 @@ export const templateApproverJourneySteps: RoleJourneyStep[] = [
   clusterTwoStep('TEMPLATE_APPROVER', 'reviewRequest'),
   clusterTwoStep('TEMPLATE_APPROVER', 'reviewSubmission'),
   clusterTwoStep('TEMPLATE_APPROVER', 'recordDecision'),
+]
+
+export const templateLegalReviewerJourneySteps: RoleJourneyStep[] = [
+  clusterTwoStep('LEGAL_REVIEWER', 'reviewRequest'),
+  clusterTwoStep('LEGAL_REVIEWER', 'reviewSubmission'),
+  clusterTwoStep('LEGAL_REVIEWER', 'recordDecision'),
 ]
 
 export const templateTeamLeadJourneySteps: RoleJourneyStep[] = [

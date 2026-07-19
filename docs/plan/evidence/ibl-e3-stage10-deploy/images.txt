@@ -1,0 +1,4 @@
+
+documentgenerationengine-docgen-frontend:latest                                                         0b7debb4df1a   2026-07-20 05:39:31 +0800 CST
+documentgenerationengine-docgen-backend:latest                                                          eaf639db7a4e   2026-07-20 05:31:23 +0800 CST
+

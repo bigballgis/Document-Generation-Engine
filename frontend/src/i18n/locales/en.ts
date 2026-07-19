@@ -179,6 +179,7 @@ export default {
       allTasks: 'All tasks',
       testing: 'Waiting on my testing',
       approval: 'Waiting on my approval',
+      legal: 'Waiting on my legal review',
       remediation: 'Waiting on my fixes',
       pendingRelease: 'Waiting to confirm go-live',
       escalation: 'Overdue to follow up',
@@ -311,6 +312,10 @@ export default {
         title: 'Record approval decision',
         description: 'Approve or reject the template after testing.',
       },
+      templateLegalApproval: {
+        title: 'Record legal review decision',
+        description: 'Complete the legal review stage before compliance approval.',
+      },
       templatePublish: {
         title: 'Confirm go-live',
         description: 'Release the approved template to the selected environment.',
@@ -423,6 +428,10 @@ export default {
         APPROVAL: {
           label: 'Awaiting approval',
           title: 'Waiting on my approval',
+        },
+        LEGAL: {
+          label: 'Awaiting legal review',
+          title: 'Waiting on my legal review',
         },
         REMEDIATION: {
           label: 'Needs fixes',
@@ -1083,6 +1092,8 @@ export default {
       APPROVAL: 'Approval',
       approvalPendingSubmit: 'Ready to submit for approval',
       approvalPendingDecision: 'Awaiting approval',
+      approvalPendingLegalDecision: 'Awaiting legal review',
+      approvalPendingComplianceDecision: 'Awaiting compliance approval',
       PENDING_RELEASE: 'Awaiting go-live',
       PUBLISHED: 'Live',
       STOPPED: 'Paused',
@@ -1282,6 +1293,24 @@ export default {
       descriptionPlaceholder: 'Optional description for this template.',
       save: 'Save metadata',
       success: 'Template metadata updated.',
+    },
+    approvalMatrix: {
+      label: 'Approval matrix mode',
+      placeholder: 'Select approval matrix mode',
+      createSectionTitle: 'Approval matrix',
+      hint: 'Single-track keeps one compliance approval. Legal then compliance requires a legal reviewer before compliance approval.',
+      save: 'Save approval matrix mode',
+      saveSuccess: 'Approval matrix mode updated.',
+      stageBannerTitle: 'Current approval stage',
+      stageBannerBody: 'Only the role for this stage can record Approve or Reject.',
+      mode: {
+        SINGLE_TRACK: 'Single-track approval',
+        LEGAL_THEN_COMPLIANCE: 'Legal then compliance',
+      },
+      stage: {
+        LEGAL: 'Legal review',
+        COMPLIANCE: 'Compliance approval',
+      },
     },
     export: {
       action: 'Export bundle',
@@ -2995,6 +3024,30 @@ export default {
           },
         },
       },
+      LEGAL_REVIEWER: {
+        title: 'Legal review workflow',
+        empty: {
+          guidance:
+            'Open a legal review request from your task list, then follow each step below.',
+        },
+        steps: {
+          reviewRequest: {
+            label: 'Review legal request',
+            guidance: 'Open the legal review request and confirm the submission context.',
+            cta: 'Review legal request',
+          },
+          reviewSubmission: {
+            label: 'Review submission package',
+            guidance: 'Review evidence and fidelity summaries before recording a legal decision.',
+            cta: 'Review submission package',
+          },
+          recordDecision: {
+            label: 'Record legal decision',
+            guidance: 'Approve or reject the legal stage so compliance can proceed.',
+            cta: 'Record legal decision',
+          },
+        },
+      },
       GROUP_ADMIN: {
         title: 'Team-lead go-live workflow',
         empty: {
@@ -3117,6 +3170,7 @@ export default {
       TEMPLATE_AUTHOR: 'Template author',
       TEMPLATE_TESTER: 'Template tester',
       TEMPLATE_APPROVER: 'Template approver',
+      LEGAL_REVIEWER: 'Legal reviewer',
       AUDIT_ADMIN: 'Audit administrator',
     },
     dimensions: {

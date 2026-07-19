@@ -53,6 +53,12 @@ export const E2E_CORP_TEMPLATE_AUTHOR = {
   password: 'ChangeMe123!',
 }
 
+/** RETAIL LEGAL_REVIEWER — IBL-E3 / V71 seed (…109). */
+export const E2E_LEGAL_REVIEWER = {
+  username: '10000009',
+  password: 'ChangeMe123!',
+}
+
 export const E2E_AUDIT_ADMIN = {
   username: '10000004',
   password: 'ChangeMe123!',

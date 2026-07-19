@@ -1,5 +1,8 @@
+import type { ApprovalMatrixMode, ApprovalStage, ApprovalSubState } from '@/types/approvalMatrix'
 import type { Schema } from '@/types/openapi'
 import type { PasteCleaningEvidence } from '@/types/templatePaste'
+
+export type { ApprovalMatrixMode, ApprovalStage, ApprovalSubState }
 
 /**
  * OpenAPI-backed management DTO aliases. Types without a matching schema remain
@@ -16,7 +19,7 @@ export interface TemplateSummary {
   groupCode: string
   name: string
   lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  approvalSubState?: ApprovalSubState | null
   releaseVersion: string | null
   releaseVersionCount: number
   masterId: string
@@ -29,6 +32,10 @@ export interface TemplateSummary {
   locale?: string
   /** IBL-E1 — optional locale-variant family grouping. */
   localeVariantFamilyId?: string | null
+  /** IBL-E3 — package approval matrix mode (default SINGLE_TRACK). */
+  approvalMatrixMode?: ApprovalMatrixMode
+  /** IBL-E3 — current multi-stage stage when applicable. */
+  approvalStage?: ApprovalStage | null
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management release version history). */
@@ -65,10 +72,16 @@ export type TemplateVersionLineDetail = Omit<
 
 export type TemplateDetail = Omit<
   Schema<'TemplateDetailView'>,
-  'lifecycleStatus' | 'approvalSubState' | 'releaseVersion'
+  | 'lifecycleStatus'
+  | 'approvalSubState'
+  | 'releaseVersion'
+  | 'locale'
+  | 'localeVariantFamilyId'
+  | 'approvalMatrixMode'
+  | 'approvalStage'
 > & {
   lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  approvalSubState?: ApprovalSubState | null
   releaseVersion: string | null
   updatedBy?: string | null
   updatedByDisplayName?: string | null
@@ -80,6 +93,10 @@ export type TemplateDetail = Omit<
   locale?: string
   /** IBL-E1 — optional locale-variant family grouping. */
   localeVariantFamilyId?: string | null
+  /** IBL-E3 — package approval matrix mode (default SINGLE_TRACK). */
+  approvalMatrixMode?: ApprovalMatrixMode
+  /** IBL-E3 — current multi-stage stage when applicable. */
+  approvalStage?: ApprovalStage | null
 }
 
 /** CE-G05 — Dashboard Tasks projection for annual review due. */
@@ -162,6 +179,8 @@ export interface CreateTemplatePayload {
   locale: string
   /** IBL-E1 — optional locale-variant family id. */
   localeVariantFamilyId?: string | null
+  /** IBL-E3 — optional package approval matrix mode (omitted → SINGLE_TRACK). */
+  approvalMatrixMode?: ApprovalMatrixMode
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management template metadata update). */
@@ -172,4 +191,6 @@ export interface UpdateTemplateMetadataPayload {
   locale?: string
   /** IBL-E1 — optional locale-variant family id update. */
   localeVariantFamilyId?: string | null
+  /** IBL-E3 — optional package approval matrix mode update. */
+  approvalMatrixMode?: ApprovalMatrixMode
 }

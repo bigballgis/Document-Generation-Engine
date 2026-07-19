@@ -111,6 +111,20 @@ class RouteVisibilityServiceTest {
     }
 
     @Test
+    void legalReviewerLandsOnDashboardWithTemplateManagement() {
+        Set<ManagementRole> roles = Set.of(ManagementRole.LEGAL_REVIEWER);
+
+        assertThat(routeVisibilityService.resolveDefaultRoute(roles))
+                .isEqualTo(ManagementRoute.DASHBOARD_HOME.routeKey());
+        assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
+                .containsExactly(
+                        ManagementRoute.DASHBOARD_HOME.routeKey(),
+                        ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
+                        ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey()
+                );
+    }
+
+    @Test
     void auditAdminSeesAuditConsoleOnly() {
         Set<ManagementRole> roles = Set.of(ManagementRole.AUDIT_ADMIN);
 

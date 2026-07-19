@@ -2,6 +2,7 @@ import {
   canViewEscalationQueue,
   canAuthorTemplates,
   canDecideApprovals,
+  canDecideLegalApprovals,
   canDecideTests,
   canPublishTemplates,
   canReviewMasters,
@@ -83,6 +84,13 @@ export const BEHAVIOR_NAV_ITEM_SPECS: BehaviorNavItemSpec[] = [
     query: { queue: 'APPROVAL' },
     hash: '#tasks-section',
     isVisible: (context) => canDecideApprovals(context),
+  },
+  {
+    id: 'behavior-legal',
+    labelKey: 'nav.behaviorItems.legal',
+    query: { queue: 'LEGAL' },
+    hash: '#tasks-section',
+    isVisible: (context) => canDecideLegalApprovals(context),
   },
   {
     id: 'behavior-remediation',

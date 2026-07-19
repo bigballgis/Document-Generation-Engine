@@ -49,6 +49,7 @@ const AUTHOR_CAPABILITIES: ManagementCapabilities = {
   authorTemplates: true,
   decideTests: false,
   decideApprovals: false,
+  decideLegalApprovals: false,
   publishTemplates: false,
   stopTemplates: false,
   restoreOrDeprecateTemplates: false,

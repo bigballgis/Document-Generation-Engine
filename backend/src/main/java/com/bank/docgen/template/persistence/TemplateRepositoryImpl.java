@@ -3,8 +3,10 @@ package com.bank.docgen.template.persistence;
 import com.bank.docgen.authorization.management.api.CatalogPageSupport;
 import com.bank.docgen.authorization.management.api.CatalogQueryPage;
 import com.bank.docgen.authorization.management.api.CatalogSortKey;
+import com.bank.docgen.template.domain.ApprovalMatrixMode;
 import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.LifecycleAction;
+import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -107,16 +109,33 @@ public class TemplateRepositoryImpl implements TemplateRepositoryCustom {
         if (filter.approvalSubState() != null) {
             predicates.add(cb.equal(root.get("lifecycleStatus"), TemplateLifecycleStatus.APPROVAL));
             Subquery<UUID> submitted = query.subquery(UUID.class);
-            Root<TemplateLifecycleRecordEntity> recordRoot = submitted.from(TemplateLifecycleRecordEntity.class);
-            submitted.select(recordRoot.get("templateId"));
+            Root<TemplateLifecycleRecordEntity> submittedRoot = submitted.from(TemplateLifecycleRecordEntity.class);
+            submitted.select(submittedRoot.get("templateId"));
             submitted.where(
-                    cb.equal(recordRoot.get("templateId"), root.get("id")),
-                    cb.equal(recordRoot.get("action"), LifecycleAction.SUBMIT_FOR_APPROVAL)
+                    cb.equal(submittedRoot.get("templateId"), root.get("id")),
+                    cb.equal(submittedRoot.get("action"), LifecycleAction.SUBMIT_FOR_APPROVAL)
             );
-            if (filter.approvalSubState() == ApprovalSubState.PENDING_DECISION) {
-                predicates.add(cb.exists(submitted));
-            } else if (filter.approvalSubState() == ApprovalSubState.PENDING_SUBMIT) {
+            Subquery<UUID> legalApproved = query.subquery(UUID.class);
+            Root<TemplateLifecycleRecordEntity> legalRoot = legalApproved.from(TemplateLifecycleRecordEntity.class);
+            legalApproved.select(legalRoot.get("templateId"));
+            legalApproved.where(
+                    cb.equal(legalRoot.get("templateId"), root.get("id")),
+                    cb.equal(legalRoot.get("action"), LifecycleAction.RECORD_APPROVAL_DECISION),
+                    cb.equal(legalRoot.get("decision"), LifecycleDecision.APPROVED),
+                    cb.equal(legalRoot.get("toStatus"), TemplateLifecycleStatus.APPROVAL)
+            );
+            if (filter.approvalSubState() == ApprovalSubState.PENDING_SUBMIT) {
                 predicates.add(cb.not(cb.exists(submitted)));
+            } else if (filter.approvalSubState() == ApprovalSubState.PENDING_DECISION) {
+                predicates.add(cb.equal(root.get("approvalMatrixMode"), ApprovalMatrixMode.SINGLE_TRACK));
+                predicates.add(cb.exists(submitted));
+            } else if (filter.approvalSubState() == ApprovalSubState.PENDING_LEGAL_DECISION) {
+                predicates.add(cb.equal(root.get("approvalMatrixMode"), ApprovalMatrixMode.LEGAL_THEN_COMPLIANCE));
+                predicates.add(cb.exists(submitted));
+                predicates.add(cb.not(cb.exists(legalApproved)));
+            } else if (filter.approvalSubState() == ApprovalSubState.PENDING_COMPLIANCE_DECISION) {
+                predicates.add(cb.equal(root.get("approvalMatrixMode"), ApprovalMatrixMode.LEGAL_THEN_COMPLIANCE));
+                predicates.add(cb.exists(legalApproved));
             }
         }
         return predicates.toArray(Predicate[]::new);

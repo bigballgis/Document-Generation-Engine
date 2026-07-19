@@ -63,7 +63,8 @@ public class TemplateService {
             TemplateCurrentVersionResolver templateVersionSupport,
             ApplicationEventPublisher eventPublisher,
             ManagementUserDisplayService managementUserDisplayService,
-            VariableComputeService variableComputeService
+            VariableComputeService variableComputeService,
+            ApprovalSubStateResolver approvalSubStateResolver
     ) {
         this.groupAccessService = groupAccessService;
         this.templateViewMapper = templateViewMapper;
@@ -74,7 +75,7 @@ public class TemplateService {
                 templateRepository, groupAccessService, templateViewMapper, displayEnrichment);
         this.metadataMutations = new TemplateMetadataMutationSupport(
                 templateRepository, templateVersionRepository, masterDocumentRepository,
-                groupAccessService, templateViewMapper, access);
+                groupAccessService, templateViewMapper, access, approvalSubStateResolver);
         this.contentMutations = new TemplateInFlightContentMutationSupport(
                 this, templateVersionSupport, access, bindingConfigurationService, eventPublisher);
         this.releaseVersions = new TemplateReleaseVersionListSupport(

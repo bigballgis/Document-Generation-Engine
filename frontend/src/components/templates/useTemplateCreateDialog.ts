@@ -5,6 +5,7 @@ import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { useMastersStore } from '@/stores/masters'
 import { useTemplatesStore } from '@/stores/templates'
 import * as templateRiskPromptApi from '@/api/templateRiskPromptConfig'
+import type { ApprovalMatrixMode } from '@/types/approvalMatrix'
 import type { TemplateRiskPromptFormState } from '@/types/template'
 
 export function useTemplateCreateDialog(deps: {
@@ -32,6 +33,7 @@ export function useTemplateCreateDialog(deps: {
     description: '',
     locale: '',
     localeVariantFamilyId: '',
+    approvalMatrixMode: 'SINGLE_TRACK' as ApprovalMatrixMode,
   })
 
   const advancedSections = ref<string[]>([])
@@ -109,6 +111,7 @@ export function useTemplateCreateDialog(deps: {
     form.description = ''
     form.locale = ''
     form.localeVariantFamilyId = ''
+    form.approvalMatrixMode = 'SINGLE_TRACK'
     advancedSections.value = []
     riskPromptFormState.value = {
       customize: false,
@@ -173,6 +176,7 @@ export function useTemplateCreateDialog(deps: {
         description: form.description.trim() || undefined,
         locale: form.locale.trim(),
         localeVariantFamilyId: familyId || undefined,
+        approvalMatrixMode: form.approvalMatrixMode,
       })
       if (riskPromptFormState.value.customize) {
         await saveRiskPromptOverride(created.id)

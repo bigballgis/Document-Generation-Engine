@@ -26,6 +26,7 @@ public class ManagementCapabilitiesService {
                 groupAccessService.canAuthorTemplates(session),
                 groupAccessService.canDecideTemplateTests(session),
                 groupAccessService.canDecideTemplateApprovals(session),
+                groupAccessService.canDecideLegalApprovals(session),
                 groupAccessService.canPublishTemplates(session),
                 groupAccessService.canStopTemplates(session),
                 groupAccessService.canRestoreOrDeprecateTemplates(session),

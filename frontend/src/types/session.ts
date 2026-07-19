@@ -33,6 +33,8 @@ export interface ManagementCapabilities {
   authorTemplates: boolean
   decideTests: boolean
   decideApprovals: boolean
+  /** IBL-E3 / ADR-0064 — LEGAL-stage decisions under LEGAL_THEN_COMPLIANCE. */
+  decideLegalApprovals: boolean
   publishTemplates: boolean
   stopTemplates: boolean
   restoreOrDeprecateTemplates: boolean

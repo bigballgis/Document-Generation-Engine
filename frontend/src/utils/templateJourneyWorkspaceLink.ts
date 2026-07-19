@@ -1,7 +1,12 @@
 import type { CollaborationWorkItemQueue } from '@/types/collaboration'
 import type { TemplateDevWorkspaceTab } from '@/views/templates/templateDevWorkspaceTabs'
 
-export type TemplateJourneyWorkspaceRole = 'AUTHOR' | 'TESTER' | 'APPROVER' | 'TEAM_LEAD'
+export type TemplateJourneyWorkspaceRole =
+  | 'AUTHOR'
+  | 'TESTER'
+  | 'APPROVER'
+  | 'LEGAL_REVIEWER'
+  | 'TEAM_LEAD'
 
 export type TemplateJourneyWorkspaceQuery = Record<string, string> & {
   workspaceTab: TemplateDevWorkspaceTab
@@ -29,6 +34,8 @@ export function resolveTemplateJourneyWorkspaceQuery(
       return resolveTesterStepQuery(stepId)
     case 'APPROVER':
       return resolveApproverStepQuery(stepId)
+    case 'LEGAL_REVIEWER':
+      return resolveLegalReviewerStepQuery(stepId)
     case 'TEAM_LEAD':
       return resolveTeamLeadStepQuery(stepId)
     default:
@@ -45,6 +52,8 @@ export function resolveCollaborationQueueWorkspaceQuery(
       return resolveTesterStepQuery('recordResult') ?? { workspaceTab: 'testing' }
     case 'APPROVAL':
       return resolveApproverStepQuery('reviewRequest') ?? { workspaceTab: 'approval' }
+    case 'LEGAL':
+      return resolveLegalReviewerStepQuery('reviewRequest') ?? { workspaceTab: 'approval' }
     case 'PENDING_RELEASE':
       return resolveTeamLeadStepQuery('confirmGoLive') ?? { workspaceTab: 'approval' }
     case 'REMEDIATION':
@@ -98,6 +107,7 @@ function isCollaborationQueue(value: string): value is CollaborationWorkItemQueu
   return (
     value === 'TEST' ||
     value === 'APPROVAL' ||
+    value === 'LEGAL' ||
     value === 'PENDING_RELEASE' ||
     value === 'REMEDIATION' ||
     value === 'ESCALATION'
@@ -144,6 +154,11 @@ function resolveApproverStepQuery(stepId: string): TemplateJourneyWorkspaceQuery
     default:
       return null
   }
+}
+
+function resolveLegalReviewerStepQuery(stepId: string): TemplateJourneyWorkspaceQuery | null {
+  // LEGAL deep-link lands on the same approval decision surface as COMPLIANCE.
+  return resolveApproverStepQuery(stepId)
 }
 
 function resolveTeamLeadStepQuery(stepId: string): TemplateJourneyWorkspaceQuery | null {

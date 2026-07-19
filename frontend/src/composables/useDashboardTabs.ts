@@ -22,6 +22,7 @@ function queueToNavKey(queue: CollaborationWorkItemQueue): string {
   const map: Record<CollaborationWorkItemQueue, string> = {
     TEST: 'testing',
     APPROVAL: 'approval',
+    LEGAL: 'legal',
     REMEDIATION: 'remediation',
     PENDING_RELEASE: 'pendingRelease',
     ESCALATION: 'escalation',

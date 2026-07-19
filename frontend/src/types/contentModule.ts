@@ -21,9 +21,17 @@ export type ContentModuleLocaleFields = {
   localeVariantFamilyId?: string | null
 }
 
-export type ContentModuleSummary = Schema<'ContentModuleSummaryView'> & ContentModuleLocaleFields
+export type ContentModuleSummary = Omit<
+  Schema<'ContentModuleSummaryView'>,
+  'locale' | 'localeVariantFamilyId'
+> &
+  ContentModuleLocaleFields
 
-export type ContentModuleDetail = Schema<'ContentModuleDetailView'> & ContentModuleLocaleFields
+export type ContentModuleDetail = Omit<
+  Schema<'ContentModuleDetailView'>,
+  'locale' | 'localeVariantFamilyId'
+> &
+  ContentModuleLocaleFields
 
 export type CreateContentModulePayload = Schema<'CreateContentModuleRequest'> & {
   /** IBL-E1 — required BCP-47 body locale. */

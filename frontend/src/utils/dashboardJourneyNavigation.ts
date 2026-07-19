@@ -15,6 +15,7 @@ export type DashboardJourneyKind =
   | 'TEMPLATE_AUTHOR'
   | 'TEMPLATE_TESTER'
   | 'TEMPLATE_APPROVER'
+  | 'LEGAL_REVIEWER'
   | 'GROUP_ADMIN'
   | 'GLOBAL_ADMIN'
 
@@ -26,6 +27,8 @@ function templateWorkspaceRole(kind: DashboardJourneyKind): TemplateJourneyWorks
       return 'TESTER'
     case 'TEMPLATE_APPROVER':
       return 'APPROVER'
+    case 'LEGAL_REVIEWER':
+      return 'LEGAL_REVIEWER'
     case 'GROUP_ADMIN':
       return 'TEAM_LEAD'
     default:

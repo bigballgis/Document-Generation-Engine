@@ -1,0 +1,7 @@
+Running 4 tests using 1 worker
+  ok 1 BDD-IBL-E3-015 (14.6s)
+  ok 2 BDD-IBL-E3-016 (8.0s)
+  ok 3 BDD-IBL-E3-005/006 (11.6s)
+  ok 4 BDD-IBL-E3-009 UI (6.9s)
+  4 passed (44.6s)
+Config: playwright.docker.config.ts @ http://127.0.0.1:4173

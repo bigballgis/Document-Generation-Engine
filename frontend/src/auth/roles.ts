@@ -24,6 +24,7 @@ export {
   canExportTemplates,
   canDecideTests,
   canDecideApprovals,
+  canDecideLegalApprovals,
   canPublishTemplates,
   canStopTemplates,
   canRestoreOrDeprecateTemplates,

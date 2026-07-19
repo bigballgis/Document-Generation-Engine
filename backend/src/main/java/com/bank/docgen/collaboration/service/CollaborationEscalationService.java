@@ -60,7 +60,7 @@ public class CollaborationEscalationService {
     private int thresholdHours(CollaborationWorkItemQueue queue, CollaborationTimeoutConfigView thresholds) {
         return switch (queue) {
             case TEST -> thresholds.testThresholdHours();
-            case APPROVAL -> thresholds.approvalThresholdHours();
+            case APPROVAL, LEGAL -> thresholds.approvalThresholdHours();
             case PENDING_RELEASE -> thresholds.pendingReleaseThresholdHours();
             case REMEDIATION -> thresholds.remediationThresholdHours();
             case ESCALATION -> Integer.MAX_VALUE;

@@ -11,6 +11,8 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.UpdateTemplateRequest;
+import com.bank.docgen.template.domain.ApprovalMatrixMode;
+import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateEntity;
@@ -31,6 +33,7 @@ final class TemplateMetadataMutationSupport {
     private final GroupAccessService groupAccessService;
     private final TemplateViewMapper templateViewMapper;
     private final TemplateAccessGuardSupport access;
+    private final ApprovalSubStateResolver approvalSubStateResolver;
 
     TemplateMetadataMutationSupport(
             TemplateRepository templateRepository,
@@ -38,7 +41,8 @@ final class TemplateMetadataMutationSupport {
             MasterDocumentRepository masterDocumentRepository,
             GroupAccessService groupAccessService,
             TemplateViewMapper templateViewMapper,
-            TemplateAccessGuardSupport access
+            TemplateAccessGuardSupport access,
+            ApprovalSubStateResolver approvalSubStateResolver
     ) {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
@@ -46,6 +50,7 @@ final class TemplateMetadataMutationSupport {
         this.groupAccessService = groupAccessService;
         this.templateViewMapper = templateViewMapper;
         this.access = access;
+        this.approvalSubStateResolver = approvalSubStateResolver;
     }
 
     TemplateDetailView create(CreateTemplateRequest request, ManagementSessionClaims session) {
@@ -80,6 +85,9 @@ final class TemplateMetadataMutationSupport {
         );
         template.setLocale(locale);
         template.setLocaleVariantFamilyId(familyId);
+        template.setApprovalMatrixMode(request.approvalMatrixMode() == null
+                ? ApprovalMatrixMode.SINGLE_TRACK
+                : request.approvalMatrixMode());
         templateRepository.save(template);
         TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), templateId, session.username());
         templateVersionRepository.save(version);
@@ -120,9 +128,29 @@ final class TemplateMetadataMutationSupport {
                     template.getId()
             );
         }
+        if (request.approvalMatrixMode() != null) {
+            assertApprovalMatrixModeWritable(template);
+            template.setApprovalMatrixMode(request.approvalMatrixMode());
+        }
         template.setUpdatedBy(session.username());
         templateRepository.save(template);
         return templateViewMapper.toDetail(template);
+    }
+
+    private void assertApprovalMatrixModeWritable(TemplateEntity template) {
+        TemplateLifecycleStatus status = template.getLifecycleStatus();
+        if (status == TemplateLifecycleStatus.DRAFT) {
+            return;
+        }
+        if (status == TemplateLifecycleStatus.APPROVAL
+                && approvalSubStateResolver.resolve(template) == ApprovalSubState.PENDING_SUBMIT) {
+            return;
+        }
+        throw new TemplateGovernanceException(
+                ApiErrorCodes.APPROVAL_MATRIX_MODE_LOCKED,
+                "api.error.template.approvalMatrixModeLocked",
+                HttpStatus.UNPROCESSABLE_ENTITY
+        );
     }
 
     private static String requireValidLocale(String locale) {
