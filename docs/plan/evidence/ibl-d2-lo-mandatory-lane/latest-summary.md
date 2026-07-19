@@ -2,10 +2,10 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **Implementation complete in feature worktree** (merge / Done / Wave D Done **not** claimed) |
+| Status | **Done** on MAIN (merge `21be3a99` / feature tip `4fd0c5da`; Wave D Done **not** claimed — D3–D5 remain) |
 | Timestamp (local) | 2026-07-19 |
-| Worktree | `D:/working/DGE-ibl-d2-lo-mandatory-lane` |
-| Branch | `feat/ibl-d2-lo-mandatory-lane` |
+| Worktree | removed after stage 11 merge |
+| Branch | `feat/ibl-d2-lo-mandatory-lane` (merged) |
 | Profile | **`libreoffice-ci`** |
 | Property | `docgen.libreoffice.mandatory=true` (profile); default `false` |
 | JUnit tag | `@Tag("libreoffice")` |

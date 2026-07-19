@@ -9,8 +9,8 @@
 | **Finding** | **F21** (LibreOffice-dependent tests skip silently when `soffice` missing — green without conversion) |
 | **Task Master** | **#124** |
 | **Formal phase** | **None** (do **not** invent a P-phase; do **not** claim IBL program Done) |
-| **Delivery status** | **In Progress** (Stage 4 rendering implementation + gate evidence in worktree; merge/Done not claimed) |
-| **Placement** | ISOLATED `D:/working/DGE-ibl-d2-lo-mandatory-lane` · `feat/ibl-d2-lo-mandatory-lane` |
+| **Delivery status** | **Done** (MAIN merge `21be3a99` / feature tip `4fd0c5da`; worktree removed; F21 closed) |
+| **Placement** | Merged to MAIN (was ISOLATED `D:/working/DGE-ibl-d2-lo-mandatory-lane` · `feat/ibl-d2-lo-mandatory-lane`) |
 | **Frontend UI** | **`frontend_ui_in_scope=false`** — no management UI / Playwright E2E / UIUX |
 | **Batch** | **solo** (`member_task_ids: ["124"]`; vetoes **IBL-D3-k6**, **IBL-D4-chaos**, **IBL-D5-legalhold**, **IBL-B7-Word**) |
 

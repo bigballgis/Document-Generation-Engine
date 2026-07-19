@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: cleared. Prior NON-CE #123 IBL-D1 Done 1a686938 / f399489c (F20 closed; Wave IBL-D In Progress D1 Done / D2–D5 Not Started; next #124 note-only). Prior NON-CE #122 IBL-C3 Done bdfc285d / dbfff086. Prior NON-CE #121 IBL-C2 Done (1d357e4d / 767b4ceb+abf564dc). Prior NON-CE #120 IBL-C1 Done (55909dd2 / d2492fc4+5d89b606). Prior NON-CE #118 IBL-B6 Done (8722f4f1 / 8e8c62e6).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: cleared (prior NON-CE #123 IBL-D1 Done; Wave IBL-D In Progress D1 Done / D2–D5 Not Started; Wave IBL-C Done; Wave IBL-B In Progress B7 Blocked residual; Wave IBL-A Done; next #124 note-only). Do NOT claim program Done (CE-O02 deferred per D5).",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: cleared. Prior NON-CE #124 IBL-D2 Done 21be3a99 / 4fd0c5da (F21 closed; Wave IBL-D In Progress D1+D2 Done / D3–D5 Not Started; next #125 note-only). Prior NON-CE #123 IBL-D1 Done 1a686938 / f399489c (F20 closed). Prior NON-CE #122 IBL-C3 Done bdfc285d / dbfff086. Prior NON-CE #121 IBL-C2 Done (1d357e4d / 767b4ceb+abf564dc). Prior NON-CE #120 IBL-C1 Done (55909dd2 / d2492fc4+5d89b606). Prior NON-CE #118 IBL-B6 Done (8722f4f1 / 8e8c62e6).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: cleared (prior NON-CE #124 IBL-D2 Done; Wave IBL-D In Progress D1+D2 Done / D3–D5 Not Started; Wave IBL-C Done; Wave IBL-B In Progress B7 Blocked residual; Wave IBL-A Done; next #125 note-only). Do NOT claim program Done (CE-O02 deferred per D5).",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-19T06:53:00.000Z"
+        "updatedAt": "2026-07-19T08:33:00Z"
       },
       {
         "id": "54",
@@ -1708,22 +1708,22 @@
       {
         "id": "124",
         "title": "IBL-D2: CI LibreOffice mandatory lane",
-        "description": "IN PROGRESS (sole-active NON-CE delivery leaf). Plan ID IBL-D2. Slice ibl-d2-lo-mandatory-lane. Owner: rendering-engineer + build-deploy-agent. BDD: not-applicable. Maps F21. Wave IBL-D In Progress (D1 Done #123; D2 In Progress; D3–D5 Not Started — do NOT mark Wave D Done). Placement ISOLATED D:/working/DGE-ibl-d2-lo-mandatory-lane · feat/ibl-d2-lo-mandatory-lane. Batch solo (member_task_ids: [\"124\"]; proposed_slice_id: ibl-d2-lo-mandatory-lane; vetoes: IBL-D3, IBL-D4, IBL-D5, IBL-B7, umbrella-106). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Do NOT activate D3+/B7/Wave E. Do NOT claim Wave B / Wave D / IBL program Done. Next after leaf (note only): #125 IBL-D3. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "ACTIVATED 2026-07-19. Slice id: ibl-d2-lo-mandatory-lane. Status: in-progress (sole-active). Worktree: D:/working/DGE-ibl-d2-lo-mandatory-lane · branch feat/ibl-d2-lo-mandatory-lane. Batch recommendation solo (member_task_ids: [\"124\"]). BDD not-applicable (docs/behavior/ibl-d2-lo-mandatory-lane.md); frontend_ui_in_scope=false. Acceptance: LO-dependent tests fail (not skip) on mandatory LO CI lane when soffice absent; optional local skip documented. Gates: CI evidence. Owners: rendering-engineer + build-deploy-agent. Wave IBL-D stays In Progress (D1 Done; D2 In Progress; D3–D5 Not Started). Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim go-live / Wave D / IBL program Done. Next after leaf (note only): #125 IBL-D3. Next: rendering-engineer + build-deploy-agent.",
+        "description": "DONE 2026-07-19. Plan ID IBL-D2. Slice ibl-d2-lo-mandatory-lane. MAIN merge 21be3a99 / feature tip 4fd0c5da; worktree removed. F21 closed — opt-in -Plibreoffice-ci fail-not-skip when soffice absent; default optional LO skip retained. Owner: rendering-engineer + build-deploy-agent. BDD: not-applicable. Wave IBL-D stays In Progress (D1+D2 Done; D3–D5 Not Started — do NOT mark Wave D Done). Batch solo closed. Gates: default mvn verify GREEN 2138/14 skipped; -Plibreoffice-ci fail-closed without soffice (expected FAIL); arch PASS_WITH_NOTES; Stage 10 ForceRebuild DEPLOY_OK; FE/E2E N/A. Residual: company CI job wiring -Plibreoffice-ci may remain; soffice-positive GREEN not proven on this host. Sole-active cleared. Next queue (not activated): #125 IBL-D3. Formal phase None. Not go-live. Do NOT flip #3b/#5a GO. Do NOT claim Wave B / Wave D / IBL program Done. B7 still Blocked. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "COMPLETED 2026-07-19. Slice id: ibl-d2-lo-mandatory-lane. Status: done. MAIN merge 21be3a99f7e898b7ffba293545cc1060438cc689 (includes feature tip 4fd0c5da); worktree REMOVED. Batch recommendation solo (member_task_ids: [\"124\"]; proposed_slice_id: ibl-d2-lo-mandatory-lane) closed. BDD not-applicable (docs/behavior/ibl-d2-lo-mandatory-lane.md); frontend_ui_in_scope=false. F21 closed: opt-in -Plibreoffice-ci fail-not-skip; default optional skip retained; docs docs/architecture/libreoffice-ci-lane.md. Gates: default mvn verify GREEN 2138/0 fail/14 skipped; -Plibreoffice-ci fail-closed without soffice (expected FAIL); arch PASS_WITH_NOTES (after excluding demo docx); Stage 10 ForceRebuild DEPLOY_OK. Evidence: docs/plan/evidence/ibl-d2-lo-mandatory-lane/ + docs/plan/evidence/ibl-d2-stage10-deploy/. Residual: company CI job wiring for -Plibreoffice-ci may remain; soffice-positive GREEN not proven on this host. Wave IBL-D stays In Progress (D1+D2 Done; D3–D5 Not Started). Sole-active cleared. Next queue (not activated): #125 IBL-D3. #119 B7 remains Blocked. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim go-live / Wave D / IBL program Done.",
         "testStrategy": "Mandatory LO CI lane fails when soffice missing; optional local skip documented; CI evidence.",
         "priority": "medium",
         "dependencies": [
           "106"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00Z"
+        "updatedAt": "2026-07-19T08:33:00Z"
       },
       {
         "id": "125",
         "title": "IBL-D3: k6 load suite + NFR SLO confirmation path",
-        "description": "PENDING (not activated — next after #124 leaf; note only). Plan ID IBL-D3. Owner: build-deploy-agent + doc-keeper. BDD: not-applicable. Depends: B2 (#114) recommended. Maps F22; NFR §待确认. Wave D In Progress (D2 sole-active; do NOT activate D3 until #124 Done). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-D3. Owner specialist: build-deploy-agent + doc-keeper. BDD: not-applicable. Depends: B2 (#114) recommended. Acceptance: k6 (or approved) suite checked in; feeds NFR 搂寰呯‘璁?鈥?no confirmed SLO invented. Gates: scripted run evidence. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "description": "PENDING (not activated — next queue after #124 Done; note only). Plan ID IBL-D3. Owner: build-deploy-agent + doc-keeper. BDD: not-applicable. Depends: B2 (#114) recommended. Maps F22; NFR §待确认. Wave D In Progress (D1+D2 Done; D3–D5 Not Started; sole-active cleared — do NOT activate D3 until explicitly activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "IBL-D3. Owner specialist: build-deploy-agent + doc-keeper. BDD: not-applicable. Depends: B2 (#114) recommended. Acceptance: k6 (or approved) suite checked in; feeds NFR confirmation path — no confirmed SLO invented. Gates: scripted run evidence. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
         "testStrategy": "k6 (or approved) suite + run evidence; NFR values stay pending until user confirms; no invented SLOs.",
         "priority": "medium",
         "dependencies": [
@@ -1731,7 +1731,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00Z"
+        "updatedAt": "2026-07-19T08:33:00Z"
       },
       {
         "id": "126",

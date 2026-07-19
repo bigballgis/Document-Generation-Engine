@@ -32,8 +32,10 @@
   },
   "docs": "docs/architecture/libreoffice-ci-lane.md",
   "claims": {
-    "done": false,
-    "merged": false,
+    "done": true,
+    "merged": true,
+    "mainMerge": "21be3a99",
+    "featureTip": "4fd0c5da",
     "waveDDone": false,
     "goLive": false
   }
