@@ -3,6 +3,7 @@ package com.bank.docgen.rendering.goldencorpus;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.bank.docgen.rendering.LibreOfficeTestSupport;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +22,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * CE-K07 harness + ACTIVE samples: BDD-CE-K07-005…010, 019.
+ *
+ * <p>Tagged {@code libreoffice} so {@code -Plibreoffice-ci} exercises LIBREOFFICE PDF halves
+ * fail-closed when {@code soffice} is absent (IBL-D2 / F21). SYNTHETIC packages still pass.
  */
+@Tag(LibreOfficeTestSupport.TAG)
 class GoldenCorpusHarnessTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

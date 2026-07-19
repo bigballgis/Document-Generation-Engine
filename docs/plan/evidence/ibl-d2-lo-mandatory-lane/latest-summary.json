@@ -1,0 +1,40 @@
+{
+  "slice": "ibl-d2-lo-mandatory-lane",
+  "taskId": 124,
+  "finding": "F21",
+  "profile": "libreoffice-ci",
+  "mandatoryProperty": "docgen.libreoffice.mandatory",
+  "tag": "libreoffice",
+  "hostSoffice": "absent",
+  "gates": {
+    "defaultVerify": {
+      "command": "mvn -B -ntp -f backend/pom.xml verify",
+      "result": "BUILD SUCCESS",
+      "testsRun": 2138,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 14,
+      "log": "default-verify.log"
+    },
+    "libreofficeCiWithoutSoffice": {
+      "command": "mvn -B -ntp -f backend/pom.xml -Plibreoffice-ci,dev-fast test -Dtest=LibreOfficeMandatoryLaneGateTest",
+      "result": "BUILD FAILURE",
+      "intentional": true,
+      "testsRun": 1,
+      "failures": 1,
+      "skipped": 0,
+      "log": "lo-mandatory-fail-without-soffice.log"
+    },
+    "libreofficeCiWithSoffice": {
+      "result": "NOT_RUN",
+      "reason": "soffice absent on delivery host"
+    }
+  },
+  "docs": "docs/architecture/libreoffice-ci-lane.md",
+  "claims": {
+    "done": false,
+    "merged": false,
+    "waveDDone": false,
+    "goLive": false
+  }
+}

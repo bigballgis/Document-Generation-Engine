@@ -8,6 +8,7 @@ import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocxPdfConversionPreprocessor;
 import com.bank.docgen.rendering.LibreOfficePdfConversionService;
+import com.bank.docgen.rendering.LibreOfficeTestSupport;
 import com.bank.docgen.rendering.PdfConversionOptions;
 import com.bank.docgen.rendering.PdfConversionPoolRejectionMetrics;
 import com.bank.docgen.rendering.PdfConversionPostProcessor;
@@ -25,11 +26,11 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -38,7 +39,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * IBL-B4 / F13 — long-clause overflow policy + golden theme {@code 08-long-clause-limits}.
  *
  * <p>BDD: docs/behavior/ibl-b4-long-clause-overflow.md (BDD-IBL-B4-001…011).
+ *
+ * <p>LibreOffice PDF half: optional local skip; {@code -Plibreoffice-ci} fails closed (IBL-D2 / F21).
  */
+@Tag(LibreOfficeTestSupport.TAG)
 class LongClauseOverflowGoldenCorpusTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -103,8 +107,10 @@ class LongClauseOverflowGoldenCorpusTest {
 
     @Test
     void bddIblB4_003_and_004_libreOfficePdfRetainsMarkersAndPaginates() throws Exception {
-        String soffice = System.getenv().getOrDefault("LIBREOFFICE_COMMAND", "soffice");
-        assumeTrue(isSofficeAvailable(soffice), "LibreOffice soffice unavailable (K07-C9 PDF half skip)");
+        LibreOfficeTestSupport.requireSoffice(
+                "LibreOffice soffice unavailable (K07-C9 / IBL-D2 PDF half)"
+        );
+        String soffice = LibreOfficeTestSupport.sofficeCommand();
 
         GoldenCorpusPackage corpusPackage = loadPackage();
         byte[] docx = assembleDocx(corpusPackage);
@@ -120,8 +126,10 @@ class LongClauseOverflowGoldenCorpusTest {
 
     @Test
     void bddIblB4_005_docxHalfRunsWhenSofficeUnavailable() throws Exception {
-        String soffice = System.getenv().getOrDefault("LIBREOFFICE_COMMAND", "soffice");
-        assumeTrue(!isSofficeAvailable(soffice), "soffice is available; skip no-soffice honesty path");
+        assumeTrue(
+                !LibreOfficeTestSupport.isSofficeAvailable(),
+                "soffice is available; skip no-soffice honesty path"
+        );
 
         GoldenCorpusPackage corpusPackage = loadPackage();
         assertThat(corpusPackage.maturity()).isEqualTo(GoldenCorpusMaturity.ACTIVE);
@@ -278,16 +286,6 @@ class LongClauseOverflowGoldenCorpusTest {
                     .pdfBytes();
         } finally {
             executor.shutdown();
-        }
-    }
-
-    private static boolean isSofficeAvailable(String command) {
-        try {
-            Process process = new ProcessBuilder(command, "--version").redirectErrorStream(true).start();
-            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
-            return finished && process.exitValue() == 0;
-        } catch (Exception ex) {
-            return false;
         }
     }
 

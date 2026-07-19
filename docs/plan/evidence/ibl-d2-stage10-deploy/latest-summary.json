@@ -1,0 +1,18 @@
+{
+  "result": "DEPLOY_OK",
+  "slice": "ibl-d2-lo-mandatory-lane",
+  "task": 124,
+  "gitTip": "c5387826c87492b613159012939e57cfd9e88c51",
+  "branch": "feat/ibl-d2-lo-mandatory-lane",
+  "mode": "ForceRebuild",
+  "backendImageId": "sha256:de73ac7f08e8e2b635bbe152f6805919302875be42edb6ebd40dbbda55e74a25",
+  "frontendImageId": "sha256:d7657314570d1bbe138549d865724129b064c2c2e884c95c641da009bdc2ab5b",
+  "healthz8080": 200,
+  "frontend4173": 200,
+  "verifiedAt": "2026-07-19T16:30:25+08:00",
+  "startedAt": "2026-07-19T16:27:06+08:00",
+  "endedAt": "2026-07-19T16:29:53+08:00",
+  "feE2eInScope": false,
+  "worktree": "D:/working/DGE-ibl-d2-lo-mandatory-lane",
+  "composeProject": "documentgenerationengine"
+}

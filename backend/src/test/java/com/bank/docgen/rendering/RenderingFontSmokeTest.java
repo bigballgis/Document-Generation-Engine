@@ -7,7 +7,6 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -15,6 +14,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -22,9 +22,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * LR-A2 / P23-T02 / BDD-DEMO-TYP-009–010: smoke test that mixed CJK + Calibri-styled Latin
  * DOCX converts to PDF without tofu when the Docker font baseline (Noto CJK + Carlito) is present.
  *
- * <p>Skipped when {@code soffice} is unavailable (local dev without LibreOffice). Runs in the
- * packaged backend image used by {@code docker-deploy.ps1}.
+ * <p>Default verify: optional skip when {@code soffice} is unavailable. Mandatory CI lane:
+ * {@code -Plibreoffice-ci} fails closed (IBL-D2 / F21).
  */
+@Tag(LibreOfficeTestSupport.TAG)
 class RenderingFontSmokeTest {
 
     private static final String CJK_SAMPLE = "中华人民共和国外资银行";
@@ -33,11 +34,9 @@ class RenderingFontSmokeTest {
 
     @Test
     void mixedScriptDocxConvertsToPdfWithExtractableChinese() throws Exception {
-        String soffice = System.getenv().getOrDefault("LIBREOFFICE_COMMAND", "soffice");
-        if (!isSofficeAvailable(soffice)) {
-            return;
-        }
+        LibreOfficeTestSupport.requireSoffice("RenderingFontSmokeTest / LR-A2 font smoke");
 
+        String soffice = LibreOfficeTestSupport.sofficeCommand();
         DocgenRenderingProperties properties = new DocgenRenderingProperties();
         properties.setLibreOfficeCommand(soffice);
         properties.setConversionTimeoutSeconds(120);
@@ -75,16 +74,6 @@ class RenderingFontSmokeTest {
 
     private static String normalizeForAssertion(String text) {
         return text.replaceAll("\\s+", "");
-    }
-
-    private static boolean isSofficeAvailable(String command) {
-        try {
-            Process process = new ProcessBuilder(command, "--version").redirectErrorStream(true).start();
-            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
-            return finished && process.exitValue() == 0;
-        } catch (Exception ex) {
-            return false;
-        }
     }
 
     private static byte[] mixedScriptDocx() throws IOException {
