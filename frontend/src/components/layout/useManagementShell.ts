@@ -11,6 +11,8 @@ import {
   Histogram,
   User,
   UserFilled,
+  FolderOpened,
+  Lock,
 } from '@element-plus/icons-vue'
 import { useOnboardingTour } from '@/composables/useOnboardingTour'
 import { useSessionRenewal } from '@/composables/useSessionRenewal'
@@ -29,8 +31,10 @@ const NAV_ICON_MAP: Record<string, Component> = {
   masters: Postcard,
   templates: Document,
   'content-modules': Collection,
+  'asset-library': FolderOpened,
   'api-policies': Connection,
   audit: Histogram,
+  'legal-holds': Lock,
 }
 
 export function useManagementShell() {

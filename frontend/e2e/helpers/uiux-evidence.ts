@@ -1722,3 +1722,43 @@ export async function captureIblC2LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+export const NAV_MISSING_ICONS_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'nav-missing-icons',
+)
+export const NAV_MISSING_ICONS_SCREENSHOT_DIR = path.join(
+  NAV_MISSING_ICONS_EVIDENCE_ROOT,
+  'screenshots',
+)
+export const NAV_MISSING_ICONS_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureNavMissingIconsEvidenceDirs(): void {
+  fs.mkdirSync(NAV_MISSING_ICONS_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function navMissingIconsScreenshotPath(filename: string): string {
+  return path.join(NAV_MISSING_ICONS_SCREENSHOT_DIR, filename)
+}
+
+export async function captureNavMissingIconsScreenshot(
+  page: Page,
+  filename: string,
+): Promise<string> {
+  ensureNavMissingIconsEvidenceDirs()
+  const target = navMissingIconsScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureNavMissingIconsLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureNavMissingIconsEvidenceDirs()
+  const target = navMissingIconsScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

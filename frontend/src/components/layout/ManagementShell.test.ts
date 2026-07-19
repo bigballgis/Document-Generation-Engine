@@ -358,4 +358,100 @@ describe('ManagementShell', () => {
     expect(wrapper.find('[data-testid="help-menu"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="help-menu-trigger"]').text()).toContain('Help')
   })
+
+  function findNavItemButton(wrapper: ReturnType<typeof mountShell>, label: string) {
+    return wrapper.findAll('button.nav-item').find((button) => button.text().includes(label))
+  }
+
+  it('renders Element Plus icons for asset-library and legal-holds when visible (BDD-NAV-ICON-001/002)', async () => {
+    const wrapper = mountShell({
+      username: '10000001',
+      displayName: 'Global Admin',
+      email: 'admin@example.com',
+      authSource: 'LOCAL',
+      roles: ['GLOBAL_ADMIN'],
+      authorizedGroupCodes: ['*'],
+      defaultRoute: ROUTE_KEYS.dashboardHome,
+      visibleRoutes: [
+        ROUTE_KEYS.dashboardHome,
+        ROUTE_KEYS.assetLibraryManagement,
+        ROUTE_KEYS.legalHoldAdministration,
+        ROUTE_KEYS.templateManagement,
+        ROUTE_KEYS.auditConsole,
+      ],
+      capabilities: {
+        ...globalAdminCapabilities,
+        manageAssetLibrary: true,
+        manageLegalHold: true,
+      },
+      expiresAt: new Date().toISOString(),
+    })
+
+    await flushPromises()
+
+    const assetLibraryButton = findNavItemButton(wrapper, 'Asset library')
+    const legalHoldsButton = findNavItemButton(wrapper, 'Legal holds')
+    expect(assetLibraryButton).toBeDefined()
+    expect(legalHoldsButton).toBeDefined()
+    expect(assetLibraryButton!.find('.el-icon').exists()).toBe(true)
+    expect(legalHoldsButton!.find('.el-icon').exists()).toBe(true)
+  })
+
+  it('does not render asset-library or legal-holds when routes are hidden (BDD-NAV-ICON-003)', async () => {
+    const wrapper = mountShell({
+      username: '10000001',
+      displayName: 'Global Admin',
+      email: 'admin@example.com',
+      authSource: 'LOCAL',
+      roles: ['GLOBAL_ADMIN'],
+      authorizedGroupCodes: ['*'],
+      defaultRoute: ROUTE_KEYS.dashboardHome,
+      visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.auditConsole],
+      capabilities: {
+        ...globalAdminCapabilities,
+        manageAssetLibrary: false,
+        manageLegalHold: false,
+      },
+      expiresAt: new Date().toISOString(),
+    })
+
+    await flushPromises()
+
+    expect(findNavItemButton(wrapper, 'Asset library')).toBeUndefined()
+    expect(findNavItemButton(wrapper, 'Legal holds')).toBeUndefined()
+  })
+
+  it('keeps sibling nav icons after asset-library and legal-holds mapping (BDD-NAV-ICON-004)', async () => {
+    const wrapper = mountShell({
+      username: '10000001',
+      displayName: 'Global Admin',
+      email: 'admin@example.com',
+      authSource: 'LOCAL',
+      roles: ['GLOBAL_ADMIN'],
+      authorizedGroupCodes: ['*'],
+      defaultRoute: ROUTE_KEYS.dashboardHome,
+      visibleRoutes: [
+        ROUTE_KEYS.dashboardHome,
+        ROUTE_KEYS.templateManagement,
+        ROUTE_KEYS.auditConsole,
+        ROUTE_KEYS.assetLibraryManagement,
+        ROUTE_KEYS.legalHoldAdministration,
+      ],
+      capabilities: {
+        ...globalAdminCapabilities,
+        manageAssetLibrary: true,
+        manageLegalHold: true,
+      },
+      expiresAt: new Date().toISOString(),
+    })
+
+    await flushPromises()
+
+    const templatesButton = findNavItemButton(wrapper, 'Templates')
+    const auditButton = findNavItemButton(wrapper, 'Activity log')
+    expect(templatesButton).toBeDefined()
+    expect(auditButton).toBeDefined()
+    expect(templatesButton!.find('.el-icon').exists()).toBe(true)
+    expect(auditButton!.find('.el-icon').exists()).toBe(true)
+  })
 })
