@@ -183,7 +183,7 @@ v1 正式业务出信由上游业务系统通过动态 API 间接触发；文档
 
 **IBL-E1 / PD-4（2026-07-19）：** 模板包与条款/内容模块须声明正文语种 `locale`（BCP-47）；可选 `localeVariantFamilyId` 编组多语种变体。每个语种变体独立编排、测试、审批与发布。动态 API 仍通过路径钉扎具体模板版本；请求 `context.locale` 继续用于变量 compute，并在双方均提供时与模板声明语种做兼容校验（fail-closed）。详情：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)、[ADR-0062 Accepted](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)（2026-07-19）。
 
-**IBL-E2 / PD-5（2026-07-20）：** 模板版本可声明 **Composition Inclusion Rules**，按 runtime `context.jurisdiction` / `product` / `channel` **确定性**纳入或排除钉扎的内容模块引用；结果可审计。既有锚点可见性 composition rules（变量表达式）并存且正交。路径仍钉扎具体模板版本；**不**按辖区自动选模板包。管理面 API-first（本叶不要求规则编辑 UI）。详情：[ibl-e2-jurisdiction-rule-engine.md](../behavior/ibl-e2-jurisdiction-rule-engine.md)、[ADR-0063 Accepted](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)（2026-07-20；Decision = E2-C\*；impl still In Progress）。与 CE-K08 / IBL-E1 locale **正交**。
+**IBL-E2 / PD-5（2026-07-20）：** 模板版本可声明 **Composition Inclusion Rules**，按 runtime `context.jurisdiction` / `product` / `channel` **确定性**纳入或排除钉扎的内容模块引用；结果可审计。既有锚点可见性 composition rules（变量表达式）并存且正交。路径仍钉扎具体模板版本；**不**按辖区自动选模板包。管理面 API-first（本叶不要求规则编辑 UI）。详情：[ibl-e2-jurisdiction-rule-engine.md](../behavior/ibl-e2-jurisdiction-rule-engine.md)、[ADR-0063 Accepted](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)（2026-07-20；Decision = E2-C\*；impl **Done** `81a1ca29` / `6a96e9ab`）。与 CE-K08 / IBL-E1 locale **正交**。
 
 ### 6.4 锚点内容类型
 

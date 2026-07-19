@@ -19,7 +19,7 @@
 - **DEPLOY_QUEUE:** idle after release (see `queue-status.txt`)
 - **First attempt:** FAIL - default compose project from worktree directory collided with existing `docgen-*` container names. Remediation: retry with canonical `COMPOSE_PROJECT_NAME=documentgenerationengine`.
 - **FE UI in scope:** false - healthz + stack up sufficient for this Stage 10
-- **Does NOT claim:** Task #129 Done (stage 10 evidence only; merge / MAIN doc-sync / commit pending).
+- **Task #129 status (post stage 12):** **Done** on MAIN — merge `81a1ca29` / feature tip `6a96e9ab`; this folder remains Stage 10 deploy evidence only.
 
 ## Artifacts
 
