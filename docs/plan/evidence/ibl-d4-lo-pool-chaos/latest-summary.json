@@ -1,0 +1,60 @@
+{
+  "slice": "ibl-d4-lo-pool-chaos",
+  "taskId": 126,
+  "finding": "F22",
+  "recordedAt": "2026-07-19T10:21:18Z",
+  "bddReadiness": "not-applicable",
+  "frontendUiInScope": false,
+  "chaosProfile": {
+    "id": "lo-pool-chaos",
+    "command": "mvn -B -ntp -f backend/pom.xml -Plo-pool-chaos,dev-fast test",
+    "classes": [
+      {
+        "name": "com.bank.docgen.rendering.PdfConversionPoolChaosTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.bank.docgen.rendering.LibreOfficePdfConversionPoolChaosIntegrationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "skipReason": "LibreOffice soffice unavailable (optional local skip; -Plibreoffice-ci fail-closed)"
+      }
+    ]
+  },
+  "mvnVerify": {
+    "command": "mvn -B -ntp -f backend/pom.xml verify",
+    "result": "BUILD_SUCCESS",
+    "tests": 2144,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 15
+  },
+  "b2MetricsAsserted": [
+    "docgen.pdf.conversion.pool.active",
+    "docgen.pdf.conversion.pool.queue.size",
+    "docgen.pdf.conversion.pool.queue.remaining",
+    "docgen.pdf.conversion.pool.rejections"
+  ],
+  "scenarios": [
+    "saturation_queue_gauges_then_reject",
+    "hung_conversion_timeout_no_rejection_metric",
+    "reject_capacity_exceeded_increments_rejections",
+    "failover_recovery_after_pressure_clears",
+    "process_hang_timeout_via_fake_lo_script",
+    "real_soffice_saturation_reject_then_recover"
+  ],
+  "claims": {
+    "leafDone": false,
+    "merged": false,
+    "checklist3bGo": false,
+    "checklist5aGo": false,
+    "goLive": false,
+    "waveDDone": false,
+    "confirmedNfrSlos": false
+  }
+}

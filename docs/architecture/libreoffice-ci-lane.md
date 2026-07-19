@@ -56,16 +56,21 @@ Command discovery: `LIBREOFFICE_COMMAND` env (default `soffice`).
 - CI gate test: `LibreOfficeMandatoryLaneGateTest` (`@Tag("libreoffice")`).
 - Wired callers: `RenderingFontSmokeTest`, `LibreOfficeParallelConversionIntegrationTest`,
   `GoldenCorpusActiveRunner` (LIBREOFFICE PDF halves), `LongClauseOverflowGoldenCorpusTest`,
-  `GoldenCorpusHarnessTest`.
+  `GoldenCorpusHarnessTest`,
+  `LibreOfficePdfConversionPoolChaosIntegrationTest` (IBL-D4 real-soffice saturation half).
 - Maven: profile `libreoffice-ci` sets Surefire `groups=libreoffice` and
   `docgen.libreoffice.mandatory=true` (via Surefire `systemPropertyVariables`).
+- IBL-D4 focused chaos lane (deterministic + hang script; includes LO half when tagged):
+  Maven profile **`lo-pool-chaos`** / `@Tag("lo-pool-chaos")` — see
+  [ibl-d4-lo-pool-chaos evidence](../plan/evidence/ibl-d4-lo-pool-chaos/).
 
 ## Honesty residuals (out of this leaf)
 
 - Do **not** invent LibreOffice-attributed golden PDF binaries when soffice is absent
   (IBL-C3 / F19 honesty).
 - Word / pixel baselines remain **IBL-B7** (Blocked).
-- IBL-D3 k6 / D4 LO chaos / D5 legalhold — separate leaves; D3 path: [k6-nfr-confirmation-path.md](./k6-nfr-confirmation-path.md).
+- IBL-D3 k6 path: [k6-nfr-confirmation-path.md](./k6-nfr-confirmation-path.md).
+  IBL-D5 legalhold — separate leaf.
 
 ## Traceability
 

@@ -82,6 +82,13 @@ Capacity / CB / timeout must **not** surface as `TEMPLATE_VALIDATION_FAILED`.
 
 Alert thresholds remain draft / pending NFR confirmation (see runbook).
 
+**Chaos / failover IT (IBL-D4):** deterministic saturation / timeout / reject / recovery
+suite asserts these B2 metric names under controlled pool pressure
+(`PdfConversionPoolChaosTest`, `@Tag("lo-pool-chaos")`). Focused lane:
+`mvn -B -ntp -f backend/pom.xml -Plo-pool-chaos,dev-fast test`. Real-`soffice` half is
+optional-skip by default / fail-closed under `-Plibreoffice-ci`. Evidence:
+[ibl-d4-lo-pool-chaos/](../plan/evidence/ibl-d4-lo-pool-chaos/).
+
 ---
 
 ## 6. Docker acceptance pin

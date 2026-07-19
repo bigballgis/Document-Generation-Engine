@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: cleared. Prior NON-CE #124 IBL-D2 Done 21be3a99 / 4fd0c5da (F21 closed; Wave IBL-D In Progress D1+D2 Done / D3–D5 Not Started; next #125 note-only). Prior NON-CE #123 IBL-D1 Done 1a686938 / f399489c (F20 closed). Prior NON-CE #122 IBL-C3 Done bdfc285d / dbfff086. Prior NON-CE #121 IBL-C2 Done (1d357e4d / 767b4ceb+abf564dc). Prior NON-CE #120 IBL-C1 Done (55909dd2 / d2492fc4+5d89b606). Prior NON-CE #118 IBL-B6 Done (8722f4f1 / 8e8c62e6).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: cleared (prior NON-CE #124 IBL-D2 Done; Wave IBL-D In Progress D1+D2 Done / D3–D5 Not Started; Wave IBL-C Done; Wave IBL-B In Progress B7 Blocked residual; Wave IBL-A Done; next #125 note-only). Do NOT claim program Done (CE-O02 deferred per D5).",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: #126 IBL-D4 (ibl-d4-lo-pool-chaos). Prior NON-CE #125 IBL-D3 Done 6b9b6487 / 0242084e (F22 partial; Wave IBL-D In Progress D1–D3 Done / D4 In Progress / D5 Not Started; next after leaf #127 note-only). Prior NON-CE #124 IBL-D2 Done 21be3a99 / 4fd0c5da (F21 closed). Prior NON-CE #123 IBL-D1 Done 1a686938 / f399489c (F20 closed). Prior NON-CE #122 IBL-C3 Done bdfc285d / dbfff086. Prior NON-CE #121 IBL-C2 Done (1d357e4d / 767b4ceb+abf564dc). Prior NON-CE #120 IBL-C1 Done (55909dd2 / d2492fc4+5d89b606). Prior NON-CE #118 IBL-B6 Done (8722f4f1 / 8e8c62e6).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: #126 IBL-D4 (ibl-d4-lo-pool-chaos; Wave IBL-D In Progress D1–D3 Done / D4 In Progress / D5 Not Started; Wave IBL-C Done; Wave IBL-B In Progress B7 Blocked residual; Wave IBL-A Done; next after leaf #127 note-only). Do NOT claim program Done (CE-O02 deferred per D5).",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-19T08:33:00Z"
+        "updatedAt": "2026-07-19T09:46:00.000Z"
       },
       {
         "id": "54",
@@ -1468,14 +1468,14 @@
       {
         "id": "106",
         "title": "IBL: International Bank Letter Readiness Program (umbrella)",
-        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A Done (A1–A6; #107–#112 Done; A6 tip 5cacff2a); Wave IBL-B In Progress (#113–#118 IBL-B1–B6 Done — B6 merge 8722f4f1 / 8e8c62e6; B7 #119 Blocked Word host); Wave IBL-C Done (#120–#122 IBL-C1–C3 Done — C3 merge bdfc285d / dbfff086; F19 honesty SYNTHETIC); Wave IBL-D In Progress (#123 IBL-D1 Done 1a686938 / f399489c — F20 closed; #124 IBL-D2 Done 21be3a99 / 4fd0c5da — F21 closed; #125 IBL-D3 In Progress sole-active ibl-d3-k6-nfr-path; D4–D5 Not Started — do NOT mark Wave D Done). Host sole-active: #125. Next after leaf (note only): #126 IBL-D4. Formal phase None. Not go-live. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active: #125 IBL-D3 (ibl-d3-k6-nfr-path; Wave IBL-D In Progress D1+D2 Done / D3 In Progress / D4–D5 Not Started; Wave IBL-C Done; Wave IBL-B In Progress B1–B6 Done / B7 Blocked residual; Wave IBL-A remains Done). Next after leaf (note only): #126 IBL-D4. Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT mark Wave B / Wave D / IBL program Done.",
+        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A Done (A1–A6; #107–#112 Done; A6 tip 5cacff2a); Wave IBL-B In Progress (#113–#118 IBL-B1–B6 Done — B6 merge 8722f4f1 / 8e8c62e6; B7 #119 Blocked Word host); Wave IBL-C Done (#120–#122 IBL-C1–C3 Done — C3 merge bdfc285d / dbfff086; F19 honesty SYNTHETIC); Wave IBL-D In Progress (#123 IBL-D1 Done 1a686938 / f399489c — F20 closed; #124 IBL-D2 Done 21be3a99 / 4fd0c5da — F21 closed; #125 IBL-D3 Done 6b9b6487 / 0242084e — F22 partial; #126 IBL-D4 In Progress sole-active ibl-d4-lo-pool-chaos; D5 Not Started — do NOT mark Wave D Done). Host sole-active: #126. Next after leaf (note only): #127 IBL-D5. Formal phase None. Not go-live. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active: #126 IBL-D4 (ibl-d4-lo-pool-chaos; Wave IBL-D In Progress D1–D3 Done / D4 In Progress / D5 Not Started; Wave IBL-C Done; Wave IBL-B In Progress B1–B6 Done / B7 Blocked residual; Wave IBL-A remains Done). Next after leaf (note only): #127 IBL-D5. Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT mark Wave B / Wave D / IBL program Done.",
         "testStrategy": "N/A — umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-19T06:53:00.000Z"
+        "updatedAt": "2026-07-19T09:46:00.000Z"
       },
       {
         "id": "107",
@@ -1736,22 +1736,22 @@
       {
         "id": "126",
         "title": "IBL-D4: LibreOffice pool chaos / failover tests",
-        "description": "PENDING (not activated — next queue after #125 Done; note only). Plan ID IBL-D4. Owner: rendering-engineer + backend-engineer. BDD: not-applicable. Depends: B2 (#114). Maps F22 residual (LO chaos). Wave IBL-D In Progress (D1–D3 Done; D4–D5 Not Started — do NOT activate D4 until explicitly activated). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-D4. Owner specialist: rendering-engineer + backend-engineer. BDD: not-applicable. Depends: B2 (#114). Acceptance: Chaos/failover for LO pool saturation/timeout/reject; ties to B2 metrics. Gates: backend verify / IT profile. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "description": "IN PROGRESS 2026-07-19 — sole-active. Plan ID IBL-D4. Slice ibl-d4-lo-pool-chaos. Owner: rendering-engineer + backend-engineer. BDD: not-applicable. Depends: B2 (#114). Maps F22 residual (LO chaos). Wave IBL-D In Progress (D1–D3 Done; D4 In Progress; D5 Not Started — do NOT mark Wave D Done). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Next after leaf (note only): #127 IBL-D5. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "ACTIVATED 2026-07-19. Slice id: ibl-d4-lo-pool-chaos. Status: in-progress (host sole-active NON-CE delivery leaf). Placement ISOLATED: D:/working/DGE-ibl-d4-lo-pool-chaos · feat/ibl-d4-lo-pool-chaos. Batch recommendation solo (member_task_ids: [\"126\"]; proposed_slice_id: ibl-d4-lo-pool-chaos; vetoes_applied: IBL-D5, IBL-B7, umbrella-106). Owner specialist: rendering-engineer + backend-engineer. BDD: not-applicable; frontend_ui_in_scope=false. Scope: Chaos/failover for LO pool saturation/timeout/reject; ties to B2 metrics. Gates: backend verify / IT profile. Wave IBL-D In Progress (D1–D3 Done; D4 In Progress; D5 Not Started). Wave IBL-C Done; Wave IBL-B In Progress (B1–B6 Done; B7 Blocked residual); Wave IBL-A Done. Umbrella #106 registry-only pending. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim go-live. Do NOT mark Wave B / Wave D / IBL program Done. Next after leaf (note only): #127 IBL-D5. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
         "testStrategy": "Chaos/failover IT for LO pool; ties to B2 metrics; mvn verify / IT profile GREEN.",
         "priority": "medium",
         "dependencies": [
           "114"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-19T09:24:00.000Z"
+        "updatedAt": "2026-07-19T09:46:00.000Z"
       },
       {
         "id": "127",
         "title": "IBL-D5: legalhold test depth increase",
-        "description": "PENDING (not activated). Plan ID IBL-D5. Owner: backend-engineer. BDD: not-applicable (tests) / required if behavior gaps found. Depends: 鈥? Maps F23. Wave D 鈥?pending; can follow/interleave after A per program; one wave In Progress at activation. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "IBL-D5. Owner specialist: backend-engineer. BDD: not-applicable (tests) / required if behavior gaps found. Depends: 鈥? Acceptance: Meaningful legalhold coverage beyond 2 thin classes (create/enforce/block); critical hold regressions. Docker Playwright 9/162 expansion out of scope. Gates: backend verify. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "description": "PENDING (not activated — next after leaf #126 Done; note only). Plan ID IBL-D5. Owner: backend-engineer. BDD: not-applicable (tests) / required if behavior gaps found. Maps F23. Wave IBL-D In Progress (D1–D3 Done; D4 In Progress sole-active #126; D5 Not Started — do NOT activate D5 until explicitly activated). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "IBL-D5. Owner specialist: backend-engineer. BDD: not-applicable (tests) / required if behavior gaps found. Acceptance: Meaningful legalhold coverage beyond 2 thin classes (create/enforce/block); critical hold regressions. Docker Playwright 9/162 expansion out of scope. Gates: backend verify. Host sole-active is #126 IBL-D4 — do NOT activate this leaf. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
         "testStrategy": "legalhold create/enforce/block depth beyond 2 thin classes; mvn verify GREEN.",
         "priority": "medium",
         "dependencies": [
@@ -1759,7 +1759,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00Z"
+        "updatedAt": "2026-07-19T09:46:00.000Z"
       },
       {
         "id": "128",

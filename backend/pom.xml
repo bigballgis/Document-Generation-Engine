@@ -602,6 +602,24 @@
                 <docgen.libreoffice.mandatory>true</docgen.libreoffice.mandatory>
             </properties>
         </profile>
+        <!--
+          IBL-D4 / F22: LibreOffice PDF pool chaos / failover suite (opt-in focused lane).
+          Runs @Tag("lo-pool-chaos") — deterministic saturation/timeout/reject + B2 metrics,
+          plus LO hang timeout. Real-soffice saturation half also carries @Tag("libreoffice")
+          (optional skip by default; combine with -Plibreoffice-ci for fail-closed).
+          Commands:
+            mvn -B -ntp -f backend/pom.xml -Plo-pool-chaos,dev-fast test
+            mvn -B -ntp -f backend/pom.xml -Plo-pool-chaos verify
+          Default verify already includes the deterministic chaos class; this profile is the
+          documented IT / chaos suite invocation for evidence.
+        -->
+        <profile>
+            <id>lo-pool-chaos</id>
+            <properties>
+                <surefire.groups>lo-pool-chaos</surefire.groups>
+                <surefire.excludedGroups></surefire.excludedGroups>
+            </properties>
+        </profile>
         <profile>
             <id>sbom</id>
             <build>
