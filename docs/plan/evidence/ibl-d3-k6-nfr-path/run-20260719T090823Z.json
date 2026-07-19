@@ -1,0 +1,24 @@
+{
+  "timestampUtc": "20260719T090823Z",
+  "taskIds": [
+    "125"
+  ],
+  "runner": "docker",
+  "nfrStatus": "measured-input path only — proposed awaiting confirmation (no confirmed SLO)",
+  "baseUrl": "http://localhost:8080",
+  "script": "perf/k6/smoke-healthz.js",
+  "healthzPreflight": "OK 200",
+  "metrics": null,
+  "notes": [
+    "- Mode: dry-run / presence evidence (k6 load **not** executed).",
+    "- Install host k6: `winget install --id GrafanaLabs.k6 -e` then re-run without `-DryRun`.",
+    "- Or: `docker pull grafana/k6:latest` and re-run (BASE_URL=http://host.docker.internal:8080 on Docker Desktop).",
+    "- Suite checked in under `perf/k6/`; see `perf/k6/README.md`.",
+    "- Preflight healthz: OK 200"
+  ],
+  "k6Available": true,
+  "finding": "F22",
+  "exitCode": 0,
+  "mode": "dry-run",
+  "slice": "ibl-d3-k6-nfr-path"
+}

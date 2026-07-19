@@ -44,6 +44,8 @@ Architecture views describe current architectural facts, boundaries, responsibil
 | [Module Boundaries](module-boundaries.md) | Internal bounded modules and responsibility boundaries | Accepted baseline |
 | [Technology Stack Decision Log](technology-stack-decisions.md) | Persistent ledger for confirmed/pending technology choices and ADR synchronization status | Proposed baseline |
 | [Test database strategy (H2 vs Testcontainers)](test-database-strategy.md) | IBL-D1 / F20 **Done** (`1a686938` / `f399489c`) — default H2 verify vs `-Ptestcontainers` Flyway-on PostgreSQL lane | Active baseline (2026-07-19) |
+| [LibreOffice CI lane (optional skip vs mandatory)](libreoffice-ci-lane.md) | IBL-D2 / F21 **Done** (`21be3a99` / `4fd0c5da`) — default optional LO skip vs `-Plibreoffice-ci` fail-closed | Active baseline (2026-07-19) |
+| [k6 + NFR confirmation path](k6-nfr-confirmation-path.md) | IBL-D3 / F22 — checked-in k6 suite + LR-D5 measured-input path (**no** invented confirmed SLOs); leaf **In Progress** `#125` | Active baseline (2026-07-19) |
 | [Agent Evolution Governance](agent-evolution-governance.md) | Controlled evolution protocol for agent prompts/hooks, incident-driven tuning, and rollback-safe adjustments | Proposed baseline |
 | [Implementation Task Plan](implementation-task-plan.md) | Technical waves 0-14 mapped to OpenAPI v1 | Synced 2026-06-23 |
 | [Execution sync ledger](../plan/execution-sync-ledger.md) | Epic/milestone ↔ phase mapping + gate evidence | Active mirror |
