@@ -1722,21 +1722,21 @@
       {
         "id": "125",
         "title": "IBL-D3: k6 load suite + NFR SLO confirmation path",
-        "description": "IN PROGRESS 2026-07-19 (sole-active). Plan ID IBL-D3. Slice ibl-d3-k6-nfr-path. Placement ISOLATED; worktree D:/working/DGE-ibl-d3-k6-nfr-path · feat/ibl-d3-k6-nfr-path. Owner: build-deploy-agent + doc-keeper. BDD: not-applicable. Depends: B2 (#114) recommended. Maps F22; NFR confirmation path only — do NOT invent confirmed SLOs. Wave IBL-D stays In Progress (D1+D2 Done; D3 In Progress; D4–D5 Not Started — do NOT mark Wave D Done). Batch solo (member_task_ids: [\"125\"]; proposed_slice_id: ibl-d3-k6-nfr-path; vetoes: IBL-D4, IBL-D5, IBL-B7, umbrella-106). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Next after leaf (note only): #126 IBL-D4. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "ACTIVATED 2026-07-19. Slice id: ibl-d3-k6-nfr-path. Status: in-progress (sole-active NON-CE delivery leaf). Batch recommendation solo (member_task_ids: [\"125\"]; proposed_slice_id: ibl-d3-k6-nfr-path; vetoes_applied: IBL-D4, IBL-D5, IBL-B7, umbrella-106). BDD not-applicable; frontend_ui_in_scope=false. Owners: build-deploy-agent + doc-keeper (NFR docs). Scope F22: k6 (or approved) load suite + NFR SLO confirmation path — values stay pending until user confirms; never invent confirmed SLOs. Wave IBL-D In Progress (D1+D2 Done; D3 In Progress; D4–D5 Not Started). Wave IBL-C Done; Wave IBL-B In Progress (B1–B6 Done; B7 Blocked residual); Wave IBL-A Done. Umbrella #106 registry-only pending. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim go-live. Do NOT mark Wave B / Wave D / IBL program Done. Next after this leaf (note only): #126 IBL-D4. Handoff: build-deploy-agent (+ doc-keeper for NFR docs).",
+        "description": "DONE 2026-07-19. Plan ID IBL-D3. Slice ibl-d3-k6-nfr-path. MAIN merge 6b9b6487 / feature tip 0242084e; worktree removed. Owner: build-deploy-agent + doc-keeper. BDD: not-applicable. F22 partial — k6 suite + NFR confirmation path closed (SLOs stay proposed); LO chaos remains D4. Honest dry-run residual (k6 binary unavailable on host). Wave IBL-D stays In Progress (D1–D3 Done; D4–D5 Not Started — do NOT mark Wave D Done). Batch solo closed. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Sole-active cleared. Next queue (not activated): #126 IBL-D4. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "COMPLETED 2026-07-19. Slice id: ibl-d3-k6-nfr-path. Status: done. Merge: 6b9b6487c07eead4d8c1ada3a1c0a486a4492621 (includes feature tip 0242084e); worktree REMOVED. Batch recommendation solo (member_task_ids: [\"125\"]; proposed_slice_id: ibl-d3-k6-nfr-path) closed. BDD not-applicable; frontend_ui_in_scope=false. Delivered: perf/k6 suite + scripts/k6-smoke.ps1; arch k6-nfr-confirmation-path.md; NFR LR-D5 confirmation-path notes (proposed only — no confirmed SLOs). Honesty: dry-run only on this host (k6 binary/image unavailable); healthz preflight OK; no invented latency/error metrics. Gates: arch PASS_WITH_NOTES merge_go=true; Stage 10 SkipBuild health DEPLOY_OK; FE/E2E N/A. Evidence: docs/plan/evidence/ibl-d3-k6-nfr-path/ + ibl-d3-stage10-deploy/. F22 partial (load suite + confirmation path closed; LO chaos → IBL-D4). Wave IBL-D In Progress (D1–D3 Done; D4–D5 Not Started). Wave IBL-C Done; Wave IBL-B In Progress (B1–B6 Done; B7 Blocked residual); Wave IBL-A Done. Umbrella #106 registry-only pending. Sole-active cleared. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim go-live. Do NOT mark Wave B / Wave D / IBL program Done. Next queue (not activated): #126 IBL-D4.",
         "testStrategy": "k6 (or approved) suite + run evidence; NFR values stay pending until user confirms; no invented SLOs.",
         "priority": "medium",
         "dependencies": [
           "114"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T08:50:46.000Z"
+        "updatedAt": "2026-07-19T09:24:00.000Z"
       },
       {
         "id": "126",
         "title": "IBL-D4: LibreOffice pool chaos / failover tests",
-        "description": "PENDING (not activated — next after #125 leaf; note only). Plan ID IBL-D4. Owner: rendering-engineer + backend-engineer. BDD: not-applicable. Depends: B2 (#114). Maps F22. Wave IBL-D In Progress (D1+D2 Done; D3 In Progress sole-active #125; D4–D5 Not Started — do NOT activate D4 until #125 Done). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "description": "PENDING (not activated — next queue after #125 Done; note only). Plan ID IBL-D4. Owner: rendering-engineer + backend-engineer. BDD: not-applicable. Depends: B2 (#114). Maps F22 residual (LO chaos). Wave IBL-D In Progress (D1–D3 Done; D4–D5 Not Started — do NOT activate D4 until explicitly activated). Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
         "details": "IBL-D4. Owner specialist: rendering-engineer + backend-engineer. BDD: not-applicable. Depends: B2 (#114). Acceptance: Chaos/failover for LO pool saturation/timeout/reject; ties to B2 metrics. Gates: backend verify / IT profile. Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
         "testStrategy": "Chaos/failover IT for LO pool; ties to B2 metrics; mvn verify / IT profile GREEN.",
         "priority": "medium",
@@ -1745,7 +1745,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-18T01:25:00Z"
+        "updatedAt": "2026-07-19T09:24:00.000Z"
       },
       {
         "id": "127",

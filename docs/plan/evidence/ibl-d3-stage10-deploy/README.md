@@ -18,7 +18,7 @@
 - **4173:** 200 (see `frontend-4173.txt`)
 - **Containers:** see `compose-ps.txt` (all services healthy)
 - **FE UI in scope:** false (docs/perf leaf; Stage 10 acceptance-surface health only)
-- **Done closeout:** not claimed — Stage 11+ remains for parent pipeline
+- **Done closeout:** Stage 11 merge `6b9b6487` / feature tip `0242084e`; Stage 12 doc-sync on MAIN; sole-active cleared
 
 ## Artifacts
 
