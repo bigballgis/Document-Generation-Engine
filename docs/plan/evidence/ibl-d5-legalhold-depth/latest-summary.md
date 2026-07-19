@@ -4,7 +4,7 @@
 | --- | --- |
 | **Recorded** | 2026-07-19 |
 | **Worktree** | `D:/working/DGE-ibl-d5-legalhold-depth` · `feat/ibl-d5-legalhold-depth` |
-| **Slice status** | Stage 4 backend complete (tests + verify) — **not** claiming leaf Done / merge |
+| **Slice status** | **Done** — MAIN merge `6f672271` / feature tip `2e56787e`; Wave IBL-D closed |
 
 ## Legalhold suite
 
@@ -41,5 +41,5 @@ Delta vs F23 baseline (2 thin classes / 17 tests): **+5 classes / +44 tests**.
 ## Residuals / honesty
 
 - Docker Playwright subset **9/162** expansion **out of scope**.
-- **Not** claimed: #3b/#5a GO, go-live, Wave D Done, Wave E, IBL-B7 Word, IBL program Done.
+- **Not** claimed: #3b/#5a GO, go-live, Wave E, IBL-B7 Word, IBL program Done. (Wave D Done claimed only via program sync after this leaf.)
 - First full-suite attempt hit host-flake `LibreOfficePdfConversionServiceTest` temp-dir accumulation (unrelated to legalhold); cleaned `%TEMP%\docgen-*` and re-ran verify → GREEN. Isolated LO cleanup tests also green.

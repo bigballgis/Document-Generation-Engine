@@ -81,7 +81,7 @@ Do **not** re-open or invent concurrent-PDF SLOs from either path.
 
 - Host may lack `k6` on `PATH`; Docker Hub pull may fail — use `-DryRun` and install guidance; do not invent metrics.
 - Heavier authenticated / generation load scripts may be added later under `perf/k6/` without flipping NFR confirmation.
-- **IBL-D4** LO pool chaos → **Done** (`94cc8eeb` / `94526674`; F22 closed with this leaf). **IBL-D5** legalhold depth — separate leaf (not activated).
+- **IBL-D4** LO pool chaos → **Done** (`94cc8eeb` / `94526674`; F22 closed with this leaf). **IBL-D5** legalhold depth → **Done** (`6f672271` / `2e56787e`; F23 legalhold half closed; Playwright residual OUT).
 - Soft thresholds in `smoke-healthz.js` are **not** F8 alert thresholds.
 
 ## Traceability

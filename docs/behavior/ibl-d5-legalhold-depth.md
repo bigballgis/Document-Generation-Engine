@@ -9,7 +9,7 @@
 | **Finding** | **F23** — `legalhold` has only 2 thin test classes; Docker Playwright smoke subset 9/162 (Playwright expansion **out of this leaf**) |
 | **Task Master** | **#127** |
 | **Formal phase** | **None** (do **not** invent a P-phase; do **not** claim IBL program Done) |
-| **Delivery status** | **Not Started** / Stage 1 BDD gate (this doc) — activation & implementation follow pipeline |
+| **Delivery status** | **Done** — MAIN merge `6f672271` / feature tip `2e56787e`; Wave IBL-D Done; sole-active cleared |
 | **Placement** | ISOLATED `D:/working/DGE-ibl-d5-legalhold-depth` · `feat/ibl-d5-legalhold-depth` |
 | **Frontend UI** | **`frontend_ui_in_scope=false`** — no management UI / Playwright E2E / UIUX in this leaf |
 | **Batch** | **solo** (`member_task_ids: ["127"]`; vetoes **#3b/#5a GO**, go-live, Wave E, **IBL-B7** Word, Docker Playwright 9→162 expansion, Wave D Done claim from incomplete siblings) |

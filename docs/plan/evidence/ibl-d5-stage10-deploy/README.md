@@ -18,7 +18,7 @@
 - **4173:** 200 (see `frontend-4173.txt`)
 - **Containers:** see `compose-ps.txt` (all services healthy)
 - **FE UI in scope:** false (Stage 10 acceptance-surface health only)
-- **Done closeout:** not claimed (Stage 10 evidence only)
+- **Done closeout:** leaf **Done** on MAIN (`6f672271` / `2e56787e`) — Stage 10 evidence retained; Wave IBL-D closed via program sync
 
 ## Artifacts
 
