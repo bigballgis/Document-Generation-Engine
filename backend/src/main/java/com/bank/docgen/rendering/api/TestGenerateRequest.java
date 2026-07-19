@@ -6,10 +6,15 @@ import java.util.Map;
 
 public record TestGenerateRequest(
         Map<String, Object> variables,
-        String testDataSetId
+        String testDataSetId,
+        PreviewCompositionContext context
 ) {
     public TestGenerateRequest {
         variables = DefensiveCopies.copyMap(variables);
     }
 
+    /** Compatibility constructor for callers that omit composition context. */
+    public TestGenerateRequest(Map<String, Object> variables, String testDataSetId) {
+        this(variables, testDataSetId, null);
+    }
 }

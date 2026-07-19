@@ -79,7 +79,13 @@ class InvocationRecordServiceTest {
                 new InvocationParameterSanitizer(
                         new ObjectMapper(),
                         templateVersionRepository,
-                        variableSchemaRepository
+                        variableSchemaRepository,
+                        org.mockito.Mockito.mock(
+                                com.bank.docgen.template.service.CompositionInclusionRuleService.class
+                        ),
+                        org.mockito.Mockito.mock(
+                                com.bank.docgen.template.service.TemplateContentModuleReferenceService.class
+                        )
                 ),
                 idempotencyService,
                 fingerprintSupport

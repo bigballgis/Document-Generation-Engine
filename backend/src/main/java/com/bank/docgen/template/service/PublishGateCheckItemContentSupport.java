@@ -2,13 +2,20 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
 import com.bank.docgen.template.api.BindingValidationView;
+import com.bank.docgen.template.api.CompositionInclusionRuleView;
 import com.bank.docgen.template.api.CoverageSummaryView;
 import com.bank.docgen.template.api.PublishGateItemView;
 import com.bank.docgen.template.domain.PublishGateCheckCode;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.port.PreviewEvidencePort;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -83,6 +90,56 @@ final class PublishGateCheckItemContentSupport {
                         : "api.publishGate.contentModuleLocaleMismatch.ready",
                 detail
         );
+    }
+
+    PublishGateItemView compositionInclusionReferenceItem(TemplateVersionEntity version) {
+        List<String> dangling = danglingInclusionReferenceKeys(version);
+        boolean blocking = !dangling.isEmpty();
+        return new PublishGateItemView(
+                PublishGateCheckCode.COMPOSITION_INCLUSION_REFERENCE_INVALID,
+                !blocking,
+                blocking,
+                blocking
+                        ? "api.publishGate.compositionInclusionReferenceInvalid.blocked"
+                        : "api.publishGate.compositionInclusionReferenceInvalid.ready",
+                blocking
+                        ? "danglingReferenceKeys=" + String.join(",", dangling)
+                        : "danglingReferenceKeys=0"
+        );
+    }
+
+    private List<String> danglingInclusionReferenceKeys(TemplateVersionEntity version) {
+        List<CompositionInclusionRuleView> rules = readInclusionRules(version);
+        if (rules.isEmpty()) {
+            return List.of();
+        }
+        Set<String> declared = contentModuleReferenceService.listReferenceKeys(version.getId());
+        List<String> dangling = new ArrayList<>();
+        for (CompositionInclusionRuleView rule : rules) {
+            if (rule.referenceKey() == null || !declared.contains(rule.referenceKey())) {
+                dangling.add(rule.ruleId() + ":" + rule.referenceKey());
+            }
+        }
+        return dangling;
+    }
+
+    private List<CompositionInclusionRuleView> readInclusionRules(TemplateVersionEntity version) {
+        String json = version.getCompositionInclusionRulesJson();
+        if (json == null || json.isBlank()) {
+            return List.of();
+        }
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<CompositionInclusionRuleView>>() {
+            });
+        } catch (JsonProcessingException exception) {
+            return List.of(new CompositionInclusionRuleView(
+                    "INVALID_JSON",
+                    "__unreadable__",
+                    null,
+                    0,
+                    false
+            ));
+        }
     }
 
     PublishGateItemView unsupportedStructuredNodesItem(UUID versionId) {

@@ -1,0 +1,20 @@
+{
+  "result": "DEPLOY_OK",
+  "slice": "ibl-e2-jurisdiction-rule-engine",
+  "task": 129,
+  "gitTip": "0a2ee56a624370a133b481eb44d949a5479b3f2e",
+  "branch": "feat/ibl-e2-jurisdiction-rule-engine",
+  "mode": "full",
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"IBL-E2/#129 stage10 full redeploy after BE Critical tip=0a2ee56a COMPOSE_PROJECT_NAME=documentgenerationengine\"",
+  "backendImageId": "sha256:1d2285168ff5e910c00dcbea0719c6635b3d760200d312bd944f281cc2557c32",
+  "frontendImageId": "sha256:bb0d4547ba990a73f8fac900877e89f5ce1a13134eff4bc51dfc002b483b3d3f",
+  "healthz8080": 200,
+  "frontend4173": 200,
+  "verifiedAt": "2026-07-20T03:50:24+08:00",
+  "feUiInScope": false,
+  "flyway": "V70__composition_inclusion_rules.sql",
+  "firstAttempt": "COMPOSE_PROJECT_NAME_DEFAULT_CONFLICT",
+  "reason": "full redeploy after BE Critical fix",
+  "worktreePackagedUncommittedWip": true,
+  "doesNotClaimDone": true
+}

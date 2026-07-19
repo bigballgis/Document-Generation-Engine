@@ -125,7 +125,7 @@ class PreviewSpecimenWatermarkAssemblyTest {
         when(master.getStorageKey()).thenReturn("masters/m1.docx");
         when(masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)).thenReturn(Optional.of(master));
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)).thenReturn(List.of());
-        when(renderContextPort.resolvePinnedContentStructures(versionId)).thenReturn(Map.of());
+        when(renderContextPort.resolvePinnedContentStructures(eq(versionId), any())).thenReturn(Map.of());
         when(objectStoragePort.get("masters/m1.docx")).thenReturn(new ByteArrayInputStream(new byte[] {1}));
         when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(assembledDocx);
 
@@ -186,7 +186,7 @@ class PreviewSpecimenWatermarkAssemblyTest {
         when(master.getStorageKey()).thenReturn("masters/m1.docx");
         when(masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)).thenReturn(Optional.of(master));
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)).thenReturn(List.of());
-        when(renderContextPort.resolvePinnedContentStructures(versionId)).thenReturn(Map.of());
+        when(renderContextPort.resolvePinnedContentStructures(eq(versionId), any())).thenReturn(Map.of());
         when(objectStoragePort.get("masters/m1.docx")).thenReturn(new ByteArrayInputStream(new byte[] {1}));
         when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(assembledDocx);
 

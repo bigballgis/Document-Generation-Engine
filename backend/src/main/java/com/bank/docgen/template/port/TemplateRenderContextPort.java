@@ -11,5 +11,12 @@ public interface TemplateRenderContextPort {
 
     TemplateVersionEntity requireInFlightDevVersion(UUID templateId);
 
-    Map<String, String> resolvePinnedContentStructures(UUID templateVersionId);
+    /**
+     * Resolves pinned CM structures after ADR-0063 Composition Inclusion evaluation
+     * using the same evaluator as runtime generate (E2-C9).
+     */
+    Map<String, String> resolvePinnedContentStructures(
+            UUID templateVersionId,
+            CompositionInclusionAxes inclusionAxes
+    );
 }

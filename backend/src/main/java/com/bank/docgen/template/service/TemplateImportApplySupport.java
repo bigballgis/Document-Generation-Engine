@@ -24,17 +24,20 @@ final class TemplateImportApplySupport {
 
     private final TemplateService templateService;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final CompositionInclusionRuleService compositionInclusionRuleService;
     private final ApiPolicyRepository apiPolicyRepository;
     private final ObjectMapper objectMapper;
 
     TemplateImportApplySupport(
             TemplateService templateService,
             TemplateContentModuleReferenceService contentModuleReferenceService,
+            CompositionInclusionRuleService compositionInclusionRuleService,
             ApiPolicyRepository apiPolicyRepository,
             ObjectMapper objectMapper
     ) {
         this.templateService = templateService;
         this.contentModuleReferenceService = contentModuleReferenceService;
+        this.compositionInclusionRuleService = compositionInclusionRuleService;
         this.apiPolicyRepository = apiPolicyRepository;
         this.objectMapper = objectMapper;
     }
@@ -101,6 +104,13 @@ final class TemplateImportApplySupport {
             } else {
                 contentModuleReferenceService.upsertReference(templateId, request, session);
             }
+        }
+        if (bundle.compositionInclusionRules() != null) {
+            compositionInclusionRuleService.replaceRulesForImport(
+                    templateId,
+                    bundle.compositionInclusionRules(),
+                    session
+            );
         }
     }
 

@@ -7,6 +7,7 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.rendering.PaginationDeltaFidelitySupport;
+import com.bank.docgen.rendering.api.PreviewCompositionContext;
 import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.api.PreviewSummaryView;
 import com.bank.docgen.rendering.api.TestGenerateRequest;
@@ -22,6 +23,9 @@ import com.bank.docgen.template.port.TemplateRenderContextPort;
 import com.bank.docgen.template.port.TestDataSetEvidencePort;
 import com.bank.docgen.template.port.VariableComputePort;
 import com.bank.docgen.template.port.VariableSchemaValidationPort;
+import com.bank.docgen.template.port.CompositionInclusionAxes;
+import com.bank.docgen.template.port.CompositionInclusionUnsatisfiedException;
+import com.bank.docgen.template.port.ContentModuleJurisdictionMismatchException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
@@ -160,9 +164,17 @@ public class PreviewGenerationService {
         preview.markProcessing();
         renderProfileService.applyPreviewRenderProfileVersion(preview, version);
         previewRecordRepository.save(preview);
+        CompositionInclusionAxes inclusionAxes = inclusionAxesFrom(request.context());
         try {
             PreviewGenerationAssemblySupport.AssembledPreview assembled =
-                    assembly.assembleAndStore(template, version, preview.getId(), variables);
+                    assembly.assembleAndStore(
+                            template,
+                            version,
+                            preview.getId(),
+                            variables,
+                            null,
+                            inclusionAxes
+                    );
             preview.markSucceeded(
                     assembled.storageKey(),
                     assembled.pdfStorageKey(),
@@ -191,6 +203,15 @@ public class PreviewGenerationService {
                 throw computeEx;
             }
             return mapping.toView(preview, List.of(), List.of());
+        } catch (CompositionInclusionUnsatisfiedException | ContentModuleJurisdictionMismatchException inclusionEx) {
+            LOG.warn("Preview composition inclusion failed for template {} preview {}: {}",
+                    templateId, preview.getId(), inclusionEx.getMessage());
+            preview.markFailed();
+            previewRecordRepository.save(preview);
+            if (throwOnFailure) {
+                throw inclusionEx;
+            }
+            return mapping.toView(preview, List.of(), List.of());
         } catch (IOException | RuntimeException ex) {
             LOG.warn("Preview generation failed for template {} preview {}: {}", templateId, preview.getId(), ex.getMessage());
             preview.markFailed();
@@ -200,6 +221,13 @@ public class PreviewGenerationService {
             }
             return mapping.toView(preview, List.of(), List.of());
         }
+    }
+
+    private static CompositionInclusionAxes inclusionAxesFrom(PreviewCompositionContext context) {
+        if (context == null) {
+            return CompositionInclusionAxes.empty();
+        }
+        return CompositionInclusionAxes.of(context.jurisdiction(), context.product(), context.channel());
     }
 
     @Transactional(readOnly = true)

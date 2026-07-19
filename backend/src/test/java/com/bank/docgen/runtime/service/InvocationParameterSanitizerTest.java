@@ -17,6 +17,8 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
+import com.bank.docgen.template.service.CompositionInclusionRuleService;
+import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -39,6 +41,10 @@ class InvocationParameterSanitizerTest {
     private TemplateVersionRepository templateVersionRepository;
     @Mock
     private VariableSchemaRepository variableSchemaRepository;
+    @Mock
+    private CompositionInclusionRuleService compositionInclusionRuleService;
+    @Mock
+    private TemplateContentModuleReferenceService contentModuleReferenceService;
 
     private InvocationParameterSanitizer sanitizer;
     private ObjectMapper objectMapper;
@@ -49,7 +55,9 @@ class InvocationParameterSanitizerTest {
         sanitizer = new InvocationParameterSanitizer(
                 objectMapper,
                 templateVersionRepository,
-                variableSchemaRepository
+                variableSchemaRepository,
+                compositionInclusionRuleService,
+                contentModuleReferenceService
         );
     }
 

@@ -27,6 +27,7 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.service.CompositionInclusionRuleService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
@@ -71,6 +72,7 @@ class TemplateExportServiceTest {
                 apiPolicyRepository,
                 apiPolicyViewMapper,
                 contentModuleReferenceService,
+                org.mockito.Mockito.mock(CompositionInclusionRuleService.class),
                 managementAuditRecorder,
                 templateService,
                 new TemplateExportAccessService(new GroupAccessService()),

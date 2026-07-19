@@ -23,6 +23,7 @@ import com.bank.docgen.template.port.RenderableTemplateSnapshot;
 import com.bank.docgen.template.port.TemplateRenderContextPort;
 import com.bank.docgen.template.port.VariableComputePort;
 import com.bank.docgen.template.port.VariableSchemaValidationPort;
+import com.bank.docgen.template.port.CompositionInclusionAxes;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,7 +94,7 @@ final class PreviewGenerationAssemblySupport {
             UUID previewId,
             Map<String, Object> variables
     ) throws IOException {
-        return assembleAndStore(template, version, previewId, variables, null);
+        return assembleAndStore(template, version, previewId, variables, null, CompositionInclusionAxes.empty());
     }
 
     AssembledPreview assembleAndStore(
@@ -102,6 +103,24 @@ final class PreviewGenerationAssemblySupport {
             UUID previewId,
             Map<String, Object> variables,
             String localeTag
+    ) throws IOException {
+        return assembleAndStore(
+                template,
+                version,
+                previewId,
+                variables,
+                localeTag,
+                CompositionInclusionAxes.empty()
+        );
+    }
+
+    AssembledPreview assembleAndStore(
+            RenderableTemplateSnapshot template,
+            TemplateVersionEntity version,
+            UUID previewId,
+            Map<String, Object> variables,
+            String localeTag,
+            CompositionInclusionAxes inclusionAxes
     ) throws IOException {
         // IBL-A1: preview aligned with runtime — fail-closed before compute/assemble.
         variableSchemaValidationPort.validateForAssembly(version.getId(), variables);
@@ -116,8 +135,12 @@ final class PreviewGenerationAssemblySupport {
                 .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
         Map<String, String> bindingJson = new LinkedHashMap<>();
         bindings.forEach(binding -> bindingJson.put(binding.getAnchorId(), binding.getStructuredContentJson()));
+        // ADR-0063 / E2-C9: same evaluator + real axes as runtime generate.
         Map<String, String> pinnedModuleStructures =
-                renderContextPort.resolvePinnedContentStructures(version.getId());
+                renderContextPort.resolvePinnedContentStructures(
+                        version.getId(),
+                        inclusionAxes == null ? CompositionInclusionAxes.empty() : inclusionAxes
+                );
         byte[] docx;
         try (InputStream masterStream = objectStoragePort.get(master.getStorageKey())) {
             docx = docxAssembler.assembleStructured(

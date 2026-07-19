@@ -85,7 +85,8 @@ class OpenApiContractTest {
         assertAdditionalPropertiesForbidden(context);
         assertThat(context.getProperties()).containsOnlyKeys(
                 "sourceSystem", "channel", "businessRequestId",
-                "upstreamTraceId", "scenario", "locale");
+                "upstreamTraceId", "scenario", "locale",
+                "jurisdiction", "product");
 
         Schema<?> generateRequest = openAPI.getComponents().getSchemas().get("GenerateRequest");
         assertThat(generateRequest).isNotNull();

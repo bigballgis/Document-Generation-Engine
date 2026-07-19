@@ -81,6 +81,14 @@ public class BatchExecutionService {
 
         String requestLocale = request.context() == null ? null : request.context().locale();
         TemplateLocaleCompatibilitySupport.assertRequestLocaleCompatible(template, requestLocale);
+        com.bank.docgen.template.port.CompositionInclusionAxes inclusionAxes =
+                request.context() == null
+                        ? com.bank.docgen.template.port.CompositionInclusionAxes.empty()
+                        : com.bank.docgen.template.port.CompositionInclusionAxes.of(
+                                request.context().jurisdiction(),
+                                request.context().product(),
+                                request.context().channel()
+                        );
         for (BatchGenerateRequestBody.BatchGenerateItemBody item : request.items()) {
             OutputOptionsView output = item.output() != null ? item.output() : request.output();
             EncryptionOptionsView encryption = item.encryption() != null ? item.encryption() : request.encryption();
@@ -93,7 +101,8 @@ public class BatchExecutionService {
                         encryption,
                         com.bank.docgen.authoring.structured.CallerRenderOverride.empty(),
                         mode,
-                        requestLocale
+                        requestLocale,
+                        inclusionAxes
                 );
                 if (continueOnItemFailure) {
                     idempotencyService.registerDownloadableDocument(

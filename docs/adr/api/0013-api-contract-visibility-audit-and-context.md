@@ -58,6 +58,10 @@ ADR 0016 confirms that API management configuration changes use `eventType=API_P
 
 The v1 `context` object uses a strict safe whitelist. Allowed fields are `sourceSystem`, `channel`, `businessRequestId`, `upstreamTraceId`, `scenario`, and `locale`; values are strings. Unknown `context` fields return `400 REQUEST_BODY_INVALID`. `context` must not contain customer names, identity document numbers, account numbers, amounts, passwords, template variable raw values, complete request bodies, API secrets, full download URLs, or complete AD Group membership.
 
+### Amendment (2026-07-20) — IBL-E2 / ADR-0063
+
+**Amends** the `context` whitelist above: optional `jurisdiction` and `product` (strings) are added. Existing `channel` additionally participates in **composition inclusion** matching (field name unchanged). Non-blank values of `jurisdiction` / `product` / `channel` may be recorded in `contextSummary` and consumed by Composition Inclusion Rules ([ADR-0063](../template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)). `sourceSystem` / `businessRequestId` / `upstreamTraceId` / `scenario` do **not** enter inclusion matching. Sensitive-content prohibitions and unknown-field `400 REQUEST_BODY_INVALID` are unchanged. Normative scenarios: [ibl-e2-jurisdiction-rule-engine.md](../../behavior/ibl-e2-jurisdiction-rule-engine.md).
+
 Asynchronous accepted responses return `task.queryPath`, a relative task-query path. `task.queryPath` is not an unauthenticated or signed URL; later task query calls still require API credential, AD Group, and template-level authorization.
 
 v1 does not provide release-version-level API management configuration overrides. Template-level API management configuration remains the only confirmed baseline and applies to all non-disabled release versions under the template.

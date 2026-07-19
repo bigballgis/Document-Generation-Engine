@@ -10,8 +10,10 @@ import com.bank.docgen.template.api.ComputeExpressionEvaluateRequest;
 import com.bank.docgen.template.api.ComputeExpressionEvaluateView;
 import com.bank.docgen.template.api.ComputeExpressionValidateRequest;
 import com.bank.docgen.template.api.ComputeExpressionValidateView;
+import com.bank.docgen.template.api.CompositionInclusionRulesResultView;
 import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
+import com.bank.docgen.template.api.PutCompositionInclusionRulesRequest;
 import com.bank.docgen.template.api.MasterStyleCatalogView;
 import com.bank.docgen.template.api.PasteCleanRequest;
 import com.bank.docgen.template.api.PasteCleanResultView;
@@ -21,6 +23,7 @@ import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertContentModuleReferenceRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
+import com.bank.docgen.template.service.CompositionInclusionRuleService;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.TemplateRuleValidationService;
 import com.bank.docgen.template.service.TemplateService;
@@ -47,17 +50,20 @@ public class TemplateAuthoringController {
     private final TemplateService templateService;
     private final TemplateRuleValidationService templateRuleValidationService;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final CompositionInclusionRuleService compositionInclusionRuleService;
     private final TraceIdProvider traceIdProvider;
 
     public TemplateAuthoringController(
             TemplateService templateService,
             TemplateRuleValidationService templateRuleValidationService,
             TemplateContentModuleReferenceService contentModuleReferenceService,
+            CompositionInclusionRuleService compositionInclusionRuleService,
             TraceIdProvider traceIdProvider
     ) {
         this.templateService = templateService;
         this.templateRuleValidationService = templateRuleValidationService;
         this.contentModuleReferenceService = contentModuleReferenceService;
+        this.compositionInclusionRuleService = compositionInclusionRuleService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -181,6 +187,28 @@ public class TemplateAuthoringController {
                 ))
                 .toList();
         return envelope(request, templateService.saveRules(templateId, rules, session));
+    }
+
+    @GetMapping("/{templateId}/composition-inclusion-rules")
+    public SuccessEnvelope<CompositionInclusionRulesResultView> getCompositionInclusionRules(
+            @PathVariable UUID templateId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, compositionInclusionRuleService.getRules(templateId, session));
+    }
+
+    @PutMapping("/{templateId}/composition-inclusion-rules")
+    public SuccessEnvelope<CompositionInclusionRulesResultView> putCompositionInclusionRules(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody PutCompositionInclusionRulesRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(
+                request,
+                compositionInclusionRuleService.putRules(templateId, body.rules(), session)
+        );
     }
 
     @PostMapping("/{templateId}/rules/validate")

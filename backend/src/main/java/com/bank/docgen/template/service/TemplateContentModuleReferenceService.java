@@ -24,8 +24,10 @@ import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -322,6 +324,33 @@ public class TemplateContentModuleReferenceService {
                     ));
         }
         return pinnedStructures;
+    }
+
+    @Transactional(readOnly = true)
+    public Set<String> listReferenceKeys(UUID templateVersionId) {
+        Set<String> keys = new LinkedHashSet<>();
+        for (TemplateContentModuleReferenceEntity reference
+                : referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(templateVersionId)) {
+            keys.add(reference.getReferenceKey());
+        }
+        return Set.copyOf(keys);
+    }
+
+    /**
+     * Pinned CM jurisdictions keyed by referenceKey (for ADR-0063 E2-C10 mismatch check).
+     */
+    @Transactional(readOnly = true)
+    public Map<String, String> resolvePinnedJurisdictions(UUID templateVersionId) {
+        Map<String, String> jurisdictions = new LinkedHashMap<>();
+        for (TemplateContentModuleReferenceEntity reference
+                : referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(templateVersionId)) {
+            contentModuleVersionRepository.findById(reference.getContentModuleVersionId())
+                    .ifPresent(version -> jurisdictions.put(
+                            reference.getReferenceKey(),
+                            version.getJurisdiction()
+                    ));
+        }
+        return jurisdictions;
     }
 
     private void assertDraft(TemplateEntity template) {

@@ -7,9 +7,15 @@ import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.sharedkernel.security.VariableHashSupport;
 import com.bank.docgen.template.domain.VariablePiiCategory;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
+import com.bank.docgen.template.port.CompositionInclusionAxes;
+import com.bank.docgen.template.service.CompositionInclusionEvaluator;
+import com.bank.docgen.template.service.CompositionInclusionRuleService;
+import com.bank.docgen.template.port.CompositionInclusionUnsatisfiedException;
+import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,15 +33,21 @@ public class InvocationParameterSanitizer {
     private final ObjectMapper objectMapper;
     private final TemplateVersionRepository templateVersionRepository;
     private final VariableSchemaRepository variableSchemaRepository;
+    private final CompositionInclusionRuleService compositionInclusionRuleService;
+    private final TemplateContentModuleReferenceService contentModuleReferenceService;
 
     public InvocationParameterSanitizer(
             ObjectMapper objectMapper,
             TemplateVersionRepository templateVersionRepository,
-            VariableSchemaRepository variableSchemaRepository
+            VariableSchemaRepository variableSchemaRepository,
+            CompositionInclusionRuleService compositionInclusionRuleService,
+            TemplateContentModuleReferenceService contentModuleReferenceService
     ) {
         this.objectMapper = objectMapper;
         this.templateVersionRepository = templateVersionRepository;
         this.variableSchemaRepository = variableSchemaRepository;
+        this.compositionInclusionRuleService = compositionInclusionRuleService;
+        this.contentModuleReferenceService = contentModuleReferenceService;
     }
 
     public String sanitizeSingleRequest(
@@ -43,11 +55,12 @@ public class InvocationParameterSanitizer {
             String resolvedReleaseVersion,
             UUID templateId
     ) {
-        return sanitizeSingleRequest(
+        String json = sanitizeSingleRequest(
                 request,
                 resolvedReleaseVersion,
                 loadPiiCategories(templateId, resolvedReleaseVersion)
         );
+        return appendCompositionInclusionSummary(json, request, resolvedReleaseVersion, templateId);
     }
 
     /**
@@ -233,12 +246,51 @@ public class InvocationParameterSanitizer {
         putIfNonBlank(summary, "upstreamTraceId", context.upstreamTraceId());
         putIfNonBlank(summary, "scenario", context.scenario());
         putIfNonBlank(summary, "locale", context.locale());
+        putIfNonBlank(summary, "jurisdiction", context.jurisdiction());
+        putIfNonBlank(summary, "product", context.product());
         return summary;
     }
 
     private static void putIfNonBlank(Map<String, String> target, String key, String value) {
         if (value != null && !value.isBlank()) {
             target.put(key, value);
+        }
+    }
+
+    private String appendCompositionInclusionSummary(
+            String json,
+            GenerateRequestBody request,
+            String resolvedReleaseVersion,
+            UUID templateId
+    ) {
+        if (templateId == null || resolvedReleaseVersion == null || resolvedReleaseVersion.isBlank()) {
+            return json;
+        }
+        try {
+            TemplateVersionEntity version = templateVersionRepository
+                    .findByTemplateIdAndReleaseVersion(templateId, resolvedReleaseVersion.trim())
+                    .orElse(null);
+            if (version == null) {
+                return json;
+            }
+            CompositionInclusionAxes axes = request.context() == null
+                    ? CompositionInclusionAxes.empty()
+                    : CompositionInclusionAxes.of(
+                            request.context().jurisdiction(),
+                            request.context().product(),
+                            request.context().channel()
+                    );
+            var evaluation = CompositionInclusionEvaluator.evaluate(
+                    new java.util.ArrayList<>(contentModuleReferenceService.listReferenceKeys(version.getId())),
+                    compositionInclusionRuleService.loadRules(version),
+                    axes
+            );
+            ObjectNode root = (ObjectNode) objectMapper.readTree(json);
+            root.set("compositionInclusionSummary", objectMapper.valueToTree(evaluation.decisions()));
+            return objectMapper.writeValueAsString(root);
+        } catch (CompositionInclusionUnsatisfiedException | JsonProcessingException ignored) {
+            // Success-path audit only; required-unsatisfied failures do not persist this summary.
+            return json;
         }
     }
 

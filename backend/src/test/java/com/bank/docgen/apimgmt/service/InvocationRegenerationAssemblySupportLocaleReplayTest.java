@@ -93,6 +93,7 @@ class InvocationRegenerationAssemblySupportLocaleReplayTest {
                 docxAssembler,
                 documentArtifactPipeline,
                 contentModuleReferenceService,
+                org.mockito.Mockito.mock(com.bank.docgen.template.service.CompositionInclusionRuleService.class),
                 renderProfileService,
                 variableComputeService,
                 new ObjectMapper()

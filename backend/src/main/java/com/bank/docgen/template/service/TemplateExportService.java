@@ -42,6 +42,7 @@ public class TemplateExportService {
     private final ApiPolicyRepository apiPolicyRepository;
     private final ApiPolicyViewMapper apiPolicyViewMapper;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final CompositionInclusionRuleService compositionInclusionRuleService;
     private final ManagementAuditRecorder managementAuditRecorder;
     private final TemplateService templateService;
     private final TemplateExportAccessService exportAccessSupport;
@@ -54,6 +55,7 @@ public class TemplateExportService {
             ApiPolicyRepository apiPolicyRepository,
             ApiPolicyViewMapper apiPolicyViewMapper,
             TemplateContentModuleReferenceService contentModuleReferenceService,
+            CompositionInclusionRuleService compositionInclusionRuleService,
             ManagementAuditRecorder managementAuditRecorder,
             TemplateService templateService,
             TemplateExportAccessService exportAccessSupport,
@@ -65,6 +67,7 @@ public class TemplateExportService {
         this.apiPolicyRepository = apiPolicyRepository;
         this.apiPolicyViewMapper = apiPolicyViewMapper;
         this.contentModuleReferenceService = contentModuleReferenceService;
+        this.compositionInclusionRuleService = compositionInclusionRuleService;
         this.managementAuditRecorder = managementAuditRecorder;
         this.templateService = templateService;
         this.exportAccessSupport = exportAccessSupport;
@@ -166,7 +169,8 @@ public class TemplateExportService {
                     v2.masterPin(),
                     v2.clauseSnapshots(),
                     v2.renderProfile(),
-                    v2.assetKeyManifest()
+                    v2.assetKeyManifest(),
+                    compositionInclusionRuleService.loadRules(version)
             );
             return new BuiltExport(EXPORT_FORMAT_V2, bundle, v2.masterDocxBytes());
         }
@@ -178,7 +182,12 @@ public class TemplateExportService {
                 detail.bindings(),
                 templateService.loadRules(version),
                 references,
-                policy
+                policy,
+                null,
+                null,
+                null,
+                null,
+                compositionInclusionRuleService.loadRules(version)
         );
         return new BuiltExport(EXPORT_FORMAT, bundle, new byte[0]);
     }

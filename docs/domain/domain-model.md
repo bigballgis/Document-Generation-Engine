@@ -520,6 +520,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 关联的 API 管理配置。
 - **CE-G05：** 下一年度复核到期日 `nextReviewDue`（API camelCase；DB `next_review_due`，UTC 日历日 DATE；可空）。挂在 **template 行**（非单 release 行）——年检是模板治理周期，不是单版本生命周期态。
 - **IBL-E1 / PD-4：** 正文语种 `locale`（BCP-47 字符串，挂在 **template 包行**，创建必填；存量迁移默认 `zh-CN`）与可选 `localeVariantFamilyId`（同组同家族内 locale 唯一）。每个 locale 变体仍是独立模板包，独立版本线/测试/审批/发布；**不**在一包内多正文，**不** runtime 按 locale 静默换包。运行时路径仍钉扎具体模板；非空 `context.locale` 须与模板 `locale` 语言兼容（primary language），否则 fail-closed。详情与场景见行为规格 / ADR-0062。
+- **IBL-E2 / PD-5：** 模板版本可挂载 Composition Inclusion Rules（辖区/产品/渠道驱动的钉扎 CM 纳入）；见 §2.9 与 [ADR-0063](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)。与 IBL-E1 locale **正交**。
 
 已确认规则：
 
@@ -574,7 +575,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 ### 2.9 编排规则 Composition Rule
 
-编排规则控制锚点内容如何渲染。
+编排规则控制锚点内容如何渲染，以及（IBL-E2）版本内钉扎内容模块引用的纳入/排除。
 
 需要支持：
 
@@ -586,6 +587,20 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 简单计算。
 - 枚举映射。
 - 跨字段校验。
+
+**锚点可见性规则（既有）：** `conditionExpression` → `targetAnchorId`（及分支链接），对 **variables** 求值；不消费 `context` 组合轴。
+
+**组合纳入规则 Composition Inclusion Rule（IBL-E2 / PD-5；[ADR-0063](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)）：**
+
+- 挂在**模板版本**；与可见性规则并存且正交；**不**经 `ConditionExpressionEvaluator` / variables。
+- 最小字段：`ruleId`、`referenceKey`（须指向同版本已声明 CM reference）、`match.jurisdiction?` / `match.product?` / `match.channel?`（至少一轴非空）、可选 `priority`（缺省 0）、可选 `requiredInclusion`（缺省 false）。
+- 匹配：单规则已声明轴 AND；未声明轴通配；请求侧对应轴缺失/空白 → 该规则不匹配。
+- 纳入算法（确定性）：无规则指向的 `referenceKey` 默认 INCLUDE；否则按 (`priority` 升序, `ruleId` 字典序) 求值，任一匹配 INCLUDE（OR）；皆不匹配且存在 `requiredInclusion=true` → fail-closed；皆不匹配且无 required → EXCLUDE。
+- Runtime `context` 可选三轴：`jurisdiction`、`product`、既有 `channel`（另承担组合匹配；非 outbound delivery）。路径仍钉扎模板+版本；**不**按辖区自动选包。
+- 与 CE-K08 正交：被 INCLUDE 且双方 `jurisdiction` 均非空且大小写不敏感不等 → fail-closed；任一侧空白跳过。本叶**不**在 CM 版本增加 product/channel 字段。
+- 草稿可写；发布锁定；发布硬门禁校验 inclusion `referenceKey` 可解析；导入/导出携带规则集。
+- 权限复用模板编排 / `authorTemplates`；**无**新角色。管理 UI 规则编辑器非本叶范围（API-first）。
+- 行为 SoT：[ibl-e2-jurisdiction-rule-engine.md](../behavior/ibl-e2-jurisdiction-rule-engine.md)（BDD-IBL-E2-001…016 / E2-C*）。
 
 ### 2.9.1 结构化文档片段 Structured Document Fragment
 
@@ -651,6 +666,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 所属分组或可访问范围。
 - **版本法务元数据（CE-K08，可选）：** `jurisdiction`、`effectiveFrom`、`effectiveTo`、`legalReviewRef`（UTC Instant / 短文本；见行为规格）。
 - **IBL-E1 / PD-4：** 正文语种 `locale`（BCP-47，挂在 **content module 包行**，创建必填；存量迁移默认 `zh-CN`）与可选 `localeVariantFamilyId`（同组同家族内 locale 唯一）。与 CE-K08 `jurisdiction` **正交**（辖区 ≠ 语种）。规格：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)；[ADR-0062](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)。
+- **IBL-E2 / PD-5：** 本叶**不**在 `content_module_version` 增加 product/channel 字段；产品/渠道仅出现在模板版本 inclusion 规则的 `match.*` 与 runtime `context.*`。被 INCLUDE 时可选与 CE-K08 `jurisdiction` 做双方非空一致性校验（见 [ADR-0063](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)）。
 
 已确认规则：
 
@@ -1251,7 +1267,7 @@ Sensitive Data Classification -- constrains --> API Response / Audit Log / Manag
 已确认规则：
 
 - 动态 API v1 请求字段命名基线采用 `output.format`、`output.mode`、`variables`、`encryption`、`requestId`、`idempotencyKey`、`items[].itemId` 和 `context`。
-- `context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`；字段值均为字符串。`context` 不得包含客户姓名、证件号、账号、金额、密码、模板变量原值、完整请求体、API secret、完整下载地址或完整 AD Group 成员等敏感内容；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。
+- `context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`、`jurisdiction`、`product`；字段值均为字符串。其中 `jurisdiction` / `product` / `channel` 可作为组合纳入控制输入（IBL-E2 / ADR-0063；非 PII、非模板变量）；`locale` 仍用于 compute / 语言兼容（ADR-0062）。`context` 不得包含客户姓名、证件号、账号、金额、密码、模板变量原值、完整请求体、API secret、完整下载地址或完整 AD Group 成员等敏感内容；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。
 - 模板标识和发布版本号只通过路径表达，生成请求体不得重复传入 `templateId` 或 `releaseVersion`。
 - 正式 API 契约 Schema 采用 OpenAPI 3.1 YAML 维护；Markdown 文档负责解释、索引、决策背景和示例说明。
 - v1 请求采用严格字段校验，契约 Schema 之外的未知字段返回 `400 REQUEST_BODY_INVALID`。
