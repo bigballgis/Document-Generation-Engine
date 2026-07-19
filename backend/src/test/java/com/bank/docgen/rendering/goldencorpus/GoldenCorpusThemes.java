@@ -15,6 +15,8 @@ public final class GoldenCorpusThemes {
             "nested-clauses",
             "compute-variables",
             "chinese-uppercase-amount",
+            "english-locale-letter",
+            "multi-currency-amount",
             "specimen-watermark",
             "encrypted-pdf",
             "long-clause-limits",

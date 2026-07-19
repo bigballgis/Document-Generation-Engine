@@ -1,0 +1,9 @@
+{
+  "deferred": false,
+  "assertions": [
+    {"type": "TEXT_CONTAINS", "substring": "International bank letter"},
+    {"type": "TEXT_CONTAINS", "substring": "$1,000.00"},
+    {"type": "TEXT_CONTAINS", "substring": "USD One Thousand Only"},
+    {"type": "PAGE_COUNT", "equals": 1}
+  ]
+}

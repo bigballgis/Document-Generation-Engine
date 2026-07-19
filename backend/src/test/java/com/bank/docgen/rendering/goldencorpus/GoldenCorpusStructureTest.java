@@ -91,6 +91,8 @@ class GoldenCorpusStructureTest {
                 "specimen-watermark",
                 "compute-variables",
                 "chinese-uppercase-amount",
+                "english-locale-letter",
+                "multi-currency-amount",
                 "cross-page-table",
                 "qr-barcode",
                 "attachment-list",
@@ -104,6 +106,8 @@ class GoldenCorpusStructureTest {
                 "dual-font-master",
                 "compute-variables",
                 "chinese-uppercase-amount",
+                "english-locale-letter",
+                "multi-currency-amount",
                 "attachment-list"
         );
     }

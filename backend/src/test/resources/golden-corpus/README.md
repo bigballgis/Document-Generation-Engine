@@ -1,4 +1,4 @@
-# Golden corpus (CE-K07)
+# Golden corpus (CE-K07 + IBL-C3)
 
 Regression fixtures for DOCX keypath + PDF text / layout-metric assertions
 (no pixel/visual compare; no Word baselines).
@@ -9,13 +9,29 @@ Regression fixtures for DOCX keypath + PDF text / layout-metric assertions
 | `cross-page-table` | ACTIVE | CE-K06a |
 | `nested-clauses` | ACTIVE | CE-K07 sample (+ IBL-C1 layout metrics) |
 | `compute-variables` | ACTIVE | CE-K03 |
-| `chinese-uppercase-amount` | ACTIVE | CE-K03 |
+| `chinese-uppercase-amount` | ACTIVE | CE-K03 (**zh** locale / Chinese amount-in-words) |
+| `english-locale-letter` | ACTIVE | IBL-C3 (**en-US** letter + `SPELL_AMOUNT` USD) |
+| `multi-currency-amount` | ACTIVE | IBL-C3 (**EUR / USD / CNY** `FORMAT_AMOUNT`) |
 | `specimen-watermark` | ACTIVE | CE-G02 |
 | `encrypted-pdf` | ACTIVE | CE-K07 sample (+ IBL-C1 layout metrics) |
 | `pdfa-2b` | ACTIVE | CE-O01 (lightweight pdfaid XMP on SYNTHETIC PDF; + IBL-C1) |
 | `long-clause-limits` | ACTIVE | IBL-B4 |
 
 Harness: `com.bank.docgen.rendering.goldencorpus` (executed by `mvn verify`).
+
+## IBL-C3 / F19 — cross-locale matrix + PDF provenance honesty
+
+| Requirement | How this corpus satisfies it |
+| --- | --- |
+| en + zh themes | `english-locale-letter` (`en-US`) + `chinese-uppercase-amount` (`zh-CN`) |
+| Multi-currency | `multi-currency-amount` (EUR / USD / CNY) — not Chinese-amount-only |
+| `LIBREOFFICE` honesty | PDF half labeled `LIBREOFFICE` is converted via `soffice` in the harness **or** the PDF half is **Assumptions.skip** when `soffice` is absent — never a forged LO binary |
+| `SYNTHETIC` honesty | PDFBox text projection from assembled DOCX; packages that cannot claim LO keep `pdfSource: SYNTHETIC` |
+| No invented LO PDFs | No `expected/*.pdf` baselines checked in; do not relabel `SYNTHETIC` → `LIBREOFFICE` without real LO conversion |
+
+**Host note (delivery worktree 2026-07-19):** this Windows host has **no** `soffice` on `PATH`. Existing `LIBREOFFICE` packages therefore **SKIP** the PDF half under surefire (DOCX half still runs). New IBL-C3 themes use **honest SYNTHETIC** PDF halves so the locale/currency matrix stays green without inventing LO PDFs. Mandatory LO CI lane remains **IBL-D2** (out of this leaf).
+
+Evidence: `docs/plan/evidence/ibl-c3-cross-locale-golden/`.
 
 ## Assertion types
 

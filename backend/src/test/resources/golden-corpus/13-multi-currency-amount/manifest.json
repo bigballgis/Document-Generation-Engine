@@ -1,0 +1,10 @@
+{
+  "id": "multi-currency-amount",
+  "theme": "Multi-currency FORMAT_AMOUNT (EUR / USD / CNY)",
+  "maturity": "ACTIVE",
+  "title": "Multi-currency amount — ACTIVE (IBL-C3 / F19)",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "SYNTHETIC",
+  "description": "IBL-C3 multi-currency matrix: binary FORMAT_AMOUNT for EUR, USD, and CNY in one letter body. PDF half is honest SYNTHETIC (not LibreOffice).",
+  "owningFutureSlice": "IBL-C3"
+}

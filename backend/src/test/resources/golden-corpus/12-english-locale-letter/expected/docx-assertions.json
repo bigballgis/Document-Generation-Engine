@@ -1,0 +1,8 @@
+{
+  "deferred": false,
+  "assertions": [
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "International bank letter"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "$1,000.00"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "USD One Thousand Only"}
+  ]
+}
