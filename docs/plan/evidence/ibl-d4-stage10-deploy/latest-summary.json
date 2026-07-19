@@ -1,0 +1,19 @@
+{
+  "result": "DEPLOY_OK",
+  "slice": "ibl-d4-lo-pool-chaos",
+  "task": "IBL-D4",
+  "gitTip": "538aa26098ab50d22c3b52c49a85ceab62c3dbdd",
+  "branch": "feat/ibl-d4-lo-pool-chaos",
+  "mode": "SkipBuildHealthRecheck",
+  "skipBuildAttempt": "REFUSED_JWT_SECRET_DEFAULT",
+  "stackSource": "prior IBL-D2 ForceRebuild (documentgenerationengine; working_dir=D:\\working\\DGE-ibl-d2-lo-mandatory-lane)",
+  "backendImageId": "sha256:de73ac7f08e8e2b635bbe152f6805919302875be42edb6ebd40dbbda55e74a25",
+  "frontendImageId": "sha256:d7657314570d1bbe138549d865724129b064c2c2e884c95c641da009bdc2ab5b",
+  "healthz8080": 200,
+  "frontend4173": 200,
+  "verifiedAt": "2026-07-19T18:24:59+08:00",
+  "feE2eInScope": false,
+  "worktree": "D:/working/DGE-ibl-d4-lo-pool-chaos",
+  "composeProject": "documentgenerationengine",
+  "doneClaimed": false
+}
