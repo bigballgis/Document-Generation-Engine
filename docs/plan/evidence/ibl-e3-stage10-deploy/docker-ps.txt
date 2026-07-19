@@ -1,0 +1,7 @@
+NAMES             IMAGE                                      STATUS                        CREATED AT
+docgen-frontend   documentgenerationengine-docgen-frontend   Up 30 seconds (healthy)       2026-07-20 05:52:54 +0800 CST
+docgen-backend    documentgenerationengine-docgen-backend    Up About a minute (healthy)   2026-07-20 05:52:53 +0800 CST
+docgen-kafka      bitnamilegacy/kafka:3.7                    Up 43 hours (healthy)         2026-07-18 10:42:14 +0800 CST
+docgen-postgres   postgres:16-alpine                         Up 43 hours (healthy)         2026-07-18 10:40:01 +0800 CST
+docgen-redis      redis:7-alpine                             Up 43 hours (healthy)         2026-07-18 10:40:01 +0800 CST
+docgen-minio      minio/minio:RELEASE.2024-12-18T13-15-44Z   Up 43 hours (healthy)         2026-07-18 10:40:01 +0800 CST

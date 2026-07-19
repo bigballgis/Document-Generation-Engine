@@ -2,6 +2,7 @@ import {
   canViewEscalationQueue,
   canAuthorTemplates,
   canDecideApprovals,
+  canDecideLegalApprovals,
   canDecideTests,
   canPublishTemplates,
   MANAGEMENT_ROLES,
@@ -17,6 +18,7 @@ export type WorkflowTaskKind =
   | 'master-rework'
   | 'template-test'
   | 'template-approval'
+  | 'template-legal-approval'
   | 'template-publish'
   | 'template-rework'
   | 'template-escalation'
@@ -50,6 +52,7 @@ export interface WorkflowTask {
 const COLLABORATION_QUEUES: readonly CollaborationWorkItemQueue[] = [
   'TEST',
   'APPROVAL',
+  'LEGAL',
   'REMEDIATION',
   'PENDING_RELEASE',
   'ESCALATION',
@@ -111,6 +114,9 @@ export function getVisibleCollaborationQueues(context: CapabilityContext): Colla
   }
   if (canDecideApprovals(context)) {
     queues.push('APPROVAL')
+  }
+  if (canDecideLegalApprovals(context)) {
+    queues.push('LEGAL')
   }
   if (canSeeBehaviorRemediation(context)) {
     queues.push('REMEDIATION')

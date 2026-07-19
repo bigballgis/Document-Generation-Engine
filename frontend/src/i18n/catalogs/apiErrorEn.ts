@@ -89,6 +89,17 @@ export const apiErrorEn = {
     localeRequired: "A valid BCP-47 locale is required for the template body language.",
     localeVariantConflict:
       "A template with the same locale already exists in this locale variant family for the group.",
+    approvalMatrixModeLocked:
+      "Approval matrix mode cannot be changed after approval has started.",
+    approvalStageRoleForbidden:
+      "You do not have permission to decide this approval stage.",
+    approvalStageMismatch:
+      "The requested approval stage does not match the template's current approval stage.",
+    compositionInclusionRuleInvalid: "The composition inclusion rule set is invalid.",
+    compositionInclusionUnsatisfied:
+      "A required composition inclusion rule was not satisfied by the request context.",
+    contentModuleJurisdictionMismatch:
+      "An included content module jurisdiction does not match the request jurisdiction.",
     variableTypeUnsupported: "The variable type is not supported.",
     enumValuesRequired: "Enum variables require enum values.",
     structuredContentInvalid: "The structured content definition is invalid.",

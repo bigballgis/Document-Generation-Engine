@@ -4,6 +4,7 @@ import {
   resolveClusterOneJourney,
   resolvePrimaryClusterOneRole,
   templateApproverJourneySteps,
+  templateLegalReviewerJourneySteps,
   templateTeamLeadJourneySteps,
   type JourneyRole,
   type RoleJourneyStep,
@@ -12,6 +13,7 @@ import { MANAGEMENT_ROLES } from '@/auth/roles'
 import { shouldShowAuditAdminJourney } from '@/utils/auditAdminJourney'
 import { shouldShowGlobalAdminJourney } from '@/utils/globalAdminJourney'
 import { shouldShowTemplateApproverJourney } from '@/utils/templateApproverJourney'
+import { shouldShowTemplateLegalReviewerJourney } from '@/utils/templateLegalReviewerJourney'
 import { shouldShowTemplateTeamLeadJourney } from '@/utils/templateTeamLeadJourney'
 
 export type TourRole = JourneyRole
@@ -19,6 +21,7 @@ export type TourRole = JourneyRole
 export interface ResolvePrimaryTourRoleInput {
   roles: string[]
   decideApprovals: boolean
+  decideLegalApprovals?: boolean
   publishTemplates: boolean
   reviewMasters: boolean
 }
@@ -33,6 +36,15 @@ export function resolvePrimaryTourRole(input: ResolvePrimaryTourRoleInput): Tour
   const clusterOne = resolvePrimaryClusterOneRole(roles)
   if (clusterOne) {
     return clusterOne
+  }
+
+  if (
+    roles.includes(MANAGEMENT_ROLES.LEGAL_REVIEWER) &&
+    shouldShowTemplateLegalReviewerJourney({
+      decideLegalApprovals: input.decideLegalApprovals ?? false,
+    })
+  ) {
+    return 'LEGAL_REVIEWER'
   }
 
   if (
@@ -72,6 +84,8 @@ export function resolveTourStepsForRole(role: TourRole): RoleJourneyStep[] {
       return resolveClusterOneJourney(role)
     case 'TEMPLATE_APPROVER':
       return templateApproverJourneySteps
+    case 'LEGAL_REVIEWER':
+      return templateLegalReviewerJourneySteps
     case 'GLOBAL_ADMIN':
       return globalAdminJourneySteps
     case 'GROUP_ADMIN':

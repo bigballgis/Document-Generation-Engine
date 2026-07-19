@@ -10,6 +10,7 @@ import { resolveCollaborationQueueWorkspaceQuery } from '@/utils/templateJourney
 const QUEUE_KIND: Record<CollaborationWorkItemQueue, WorkflowTaskKind> = {
   TEST: 'template-test',
   APPROVAL: 'template-approval',
+  LEGAL: 'template-legal-approval',
   REMEDIATION: 'template-rework',
   PENDING_RELEASE: 'template-publish',
   ESCALATION: 'template-escalation',
@@ -18,6 +19,7 @@ const QUEUE_KIND: Record<CollaborationWorkItemQueue, WorkflowTaskKind> = {
 const QUEUE_TITLE_KEY: Record<CollaborationWorkItemQueue, string> = {
   TEST: 'dashboard.tasks.templateTest.title',
   APPROVAL: 'dashboard.tasks.templateApproval.title',
+  LEGAL: 'dashboard.tasks.templateLegalApproval.title',
   REMEDIATION: 'dashboard.tasks.templateRework.title',
   PENDING_RELEASE: 'dashboard.tasks.templatePublish.title',
   ESCALATION: 'collaboration.workItem.queue.ESCALATION.title',

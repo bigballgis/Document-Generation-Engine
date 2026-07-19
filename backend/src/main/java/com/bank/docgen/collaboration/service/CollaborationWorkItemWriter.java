@@ -21,6 +21,8 @@ public class CollaborationWorkItemWriter {
     static final String SUBMIT_FOR_TEST_SUMMARY_KEY = "api.collaboration.workItem.submitForTest.summary";
     static final String REMEDIATION_SUMMARY_KEY = "api.collaboration.workItem.remediation.summary";
     static final String SUBMIT_FOR_APPROVAL_SUMMARY_KEY = "api.collaboration.workItem.submitForApproval.summary";
+    static final String SUBMIT_FOR_LEGAL_REVIEW_SUMMARY_KEY =
+            "api.collaboration.workItem.submitForLegalReview.summary";
     static final String APPROVAL_FAILURE_REMEDIATION_SUMMARY_KEY =
             "api.collaboration.workItem.approvalFailureRemediation.summary";
     static final String PENDING_RELEASE_SUMMARY_KEY = "api.collaboration.workItem.pendingRelease.summary";
@@ -114,6 +116,23 @@ public class CollaborationWorkItemWriter {
     }
 
     /**
+     * IBL-E3 — upsert OPEN LEGAL queue work item after multi-stage submit-for-approval.
+     */
+    @Transactional
+    public CollaborationWorkItemEntity upsertSubmitForLegalReviewWorkItem(
+            TemplateEntity template,
+            ManagementSessionClaims session
+    ) {
+        String summary = messageResolver.resolve(SUBMIT_FOR_LEGAL_REVIEW_SUMMARY_KEY);
+        Instant now = Instant.now();
+        return workItemRepository
+                .findOpenByTemplateIdAndQueue(template.getId(), CollaborationWorkItemQueue.LEGAL)
+                .map(existing -> persistSupport.refreshSubmitForLegalReview(existing, template, session, summary, now))
+                .orElseGet(() -> persistSupport.createSubmitForLegalReview(
+                        template, session, summary, now, actorSummary(session)));
+    }
+
+    /**
      * Resolves every OPEN APPROVAL work item for the template. Idempotent no-op when none exist.
      * Returns the carried-forward orchestrator for downstream remediation / pending-release routing.
      */
@@ -123,6 +142,17 @@ public class CollaborationWorkItemWriter {
             ManagementSessionClaims session
     ) {
         return resolveOpenWorkItems(template, session, CollaborationWorkItemQueue.APPROVAL);
+    }
+
+    /**
+     * IBL-E3 — resolve every OPEN LEGAL work item for the template.
+     */
+    @Transactional
+    public Optional<String> resolveOpenLegalWorkItems(
+            TemplateEntity template,
+            ManagementSessionClaims session
+    ) {
+        return resolveOpenWorkItems(template, session, CollaborationWorkItemQueue.LEGAL);
     }
 
     @Transactional

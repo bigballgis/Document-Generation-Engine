@@ -12,6 +12,7 @@ import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
 import com.bank.docgen.template.api.PublishTemplateRequest;
+import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
@@ -259,6 +260,7 @@ class TemplateLifecyclePublishGateTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
         when(groupAccessService.canDecideTemplateApprovals(approver)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
+        when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_DECISION);
 
         assertThatThrownBy(() -> service.recordApprovalDecision(
                 templateId,

@@ -11,10 +11,14 @@ import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.service.MasterCurrentRevisionUnavailableException;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
 import com.bank.docgen.template.api.PublishTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
+import com.bank.docgen.template.domain.ApprovalMatrixMode;
+import com.bank.docgen.template.domain.ApprovalStage;
+import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
@@ -33,6 +37,7 @@ import java.time.Instant;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 /**
  * Package-private approval-flow + publish bodies for TemplateLifecycleService.
@@ -117,7 +122,11 @@ final class TemplateLifecycleApprovalFlowSupport {
         publishGateService.assertReadyForSubmitForApproval(templateId, session);
         transitions.transition(template, TemplateLifecycleStatus.APPROVAL, LifecycleAction.SUBMIT_FOR_APPROVAL,
                 null, decisionComments.normalizeComment(request.commentSummary()), session);
-        collaborationWorkItemWriter.upsertSubmitForApprovalWorkItem(template, session);
+        if (template.getApprovalMatrixMode() == ApprovalMatrixMode.LEGAL_THEN_COMPLIANCE) {
+            collaborationWorkItemWriter.upsertSubmitForLegalReviewWorkItem(template, session);
+        } else {
+            collaborationWorkItemWriter.upsertSubmitForApprovalWorkItem(template, session);
+        }
         return templateService.toDetail(template);
     }
 
@@ -128,6 +137,13 @@ final class TemplateLifecycleApprovalFlowSupport {
     ) {
         TemplateEntity template = eligibility.requireApprovableTemplate(templateId, session);
         eligibility.requireStatus(template, TemplateLifecycleStatus.APPROVAL);
+        ApprovalSubState subState = eligibility.requireAwaitingApprovalDecision(template);
+        ApprovalStage effectiveStage = resolveAndValidateStage(template, subState, request.approvalStage());
+        if (effectiveStage == null) {
+            eligibility.requireSingleTrackApproverRole(session);
+        } else {
+            eligibility.requireStageRole(effectiveStage, session);
+        }
         decisionFormService.validateApprovalDecision(request, session);
         String lastSubmitActor = transitions.latestSubmitForApprovalActor(templateId);
         SelfApprovalGuard.EnforceOutcome outcome = selfApprovalGuard.enforce(new SelfApprovalGuard.EnforceRequest(
@@ -142,12 +158,78 @@ final class TemplateLifecycleApprovalFlowSupport {
                 "api.error.template.exceptionReasonRequired",
                 "api.error.template.exceptionSecondaryConfirmRequired"
         ));
-        String persistedComment = decisionComments.formatDecisionComment(request, session);
+        String persistedComment = decisionComments.formatDecisionComment(request, session, effectiveStage);
+        if (effectiveStage == ApprovalStage.LEGAL) {
+            return recordLegalStageDecision(template, request, session, outcome, persistedComment);
+        }
+        return recordComplianceOrSingleTrackDecision(template, request, session, outcome, persistedComment);
+    }
+
+    private ApprovalStage resolveAndValidateStage(
+            TemplateEntity template,
+            ApprovalSubState subState,
+            ApprovalStage requestedStage
+    ) {
+        if (template.getApprovalMatrixMode() == ApprovalMatrixMode.LEGAL_THEN_COMPLIANCE) {
+            ApprovalStage expected = ApprovalStage.fromSubState(subState);
+            if (expected == null) {
+                throw new TemplateValidationException("api.error.template.invalidState");
+            }
+            if (requestedStage != null && requestedStage != expected) {
+                throw new TemplateGovernanceException(
+                        ApiErrorCodes.APPROVAL_STAGE_MISMATCH,
+                        "api.error.template.approvalStageMismatch",
+                        HttpStatus.CONFLICT
+                );
+            }
+            return expected;
+        }
+        if (requestedStage != null) {
+            throw new TemplateGovernanceException(
+                    ApiErrorCodes.APPROVAL_STAGE_MISMATCH,
+                    "api.error.template.approvalStageMismatch",
+                    HttpStatus.CONFLICT
+            );
+        }
+        return null;
+    }
+
+    private TemplateDetailView recordLegalStageDecision(
+            TemplateEntity template,
+            LifecycleDecisionRequest request,
+            ManagementSessionClaims session,
+            SelfApprovalGuard.EnforceOutcome outcome,
+            String persistedComment
+    ) {
+        if (request.decision() == LifecycleDecision.APPROVED) {
+            transitions.transition(template, TemplateLifecycleStatus.APPROVAL, LifecycleAction.RECORD_APPROVAL_DECISION,
+                    request.decision(), persistedComment, session,
+                    outcome.selfApprovalException(), outcome.exceptionReason());
+            collaborationWorkItemWriter.resolveOpenLegalWorkItems(template, session);
+            collaborationWorkItemWriter.upsertSubmitForApprovalWorkItem(template, session);
+        } else {
+            transitions.transition(template, TemplateLifecycleStatus.DRAFT, LifecycleAction.RECORD_APPROVAL_DECISION,
+                    request.decision(), persistedComment, session,
+                    outcome.selfApprovalException(), outcome.exceptionReason());
+            String orchestrator = collaborationWorkItemWriter.resolveOpenLegalWorkItems(template, session)
+                    .orElseGet(template::getCreatedBy);
+            collaborationWorkItemWriter.upsertApprovalFailureRemediationWorkItem(template, orchestrator, session);
+        }
+        return templateService.toDetail(template);
+    }
+
+    private TemplateDetailView recordComplianceOrSingleTrackDecision(
+            TemplateEntity template,
+            LifecycleDecisionRequest request,
+            ManagementSessionClaims session,
+            SelfApprovalGuard.EnforceOutcome outcome,
+            String persistedComment
+    ) {
         if (request.decision() == LifecycleDecision.APPROVED) {
             transitions.transition(template, TemplateLifecycleStatus.PENDING_RELEASE, LifecycleAction.RECORD_APPROVAL_DECISION,
                     request.decision(), persistedComment, session,
                     outcome.selfApprovalException(), outcome.exceptionReason());
-            apiPolicyMaterializationService.ensureApiPolicySkeleton(templateId, session.username());
+            apiPolicyMaterializationService.ensureApiPolicySkeleton(template.getId(), session.username());
             String orchestrator = collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, session)
                     .orElseGet(template::getCreatedBy);
             collaborationWorkItemWriter.upsertPendingReleaseWorkItem(template, orchestrator, session);

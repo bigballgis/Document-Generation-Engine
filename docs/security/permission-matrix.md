@@ -16,6 +16,7 @@
 - [CE-G04 Legal hold 行为规格](../behavior/ce-g04-legal-hold.md)（BDD-CE-G04；#75 — retention 豁免叠加，不改 ADR-0040/0048 正文）
 - [CE-G05 模板年检 + 条款正文全文检索](../behavior/ce-g05-annual-review-fts.md)（BDD-CE-G05；#77 — 无新 capability；复用 `authorTemplates` / §5.1 目录浏览）
 - [PRR-D01c Dashboard summary API](../behavior/prod-dashboard-summary-api.md)（BDD-PRR-D01C；#136 — 无新 capability；会话认证 + catalog 同款 group-scope；§13.1.3）
+- [IBL-E3 法务→合规审批矩阵](../behavior/ibl-e3-legal-approval-matrix.md)（BDD-IBL-E3；#130 — 新角色 `LEGAL_REVIEWER` + capability `decideLegalApprovals`；[ADR-0064 Accepted](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)）
 
 ## 2. 权限设计原则
 
@@ -52,7 +53,8 @@
 | 母版设计人员 | 需要分组；负责母版相关操作，并可以完整参与模板创建与编排。 |
 | 模板编排人员 | 需要分组；负责模板编排相关操作。 |
 | 测试人员 | 按分组配置；只执行测试通过/不通过判定，不获得额外母版/模板编辑权限。 |
-| 审批人员 | 按分组配置；只执行审批通过/不通过判定，不获得额外母版/模板编辑权限。 |
+| 审批人员 | 按分组配置；只执行审批通过/不通过判定（`SINGLE_TRACK` 一级审批，或 `LEGAL_THEN_COMPLIANCE` 的 **COMPLIANCE** 阶段），不获得额外母版/模板编辑权限；**不得**在多级模式下代批 LEGAL（无 `LEGAL_REVIEWER`/非管理员 → 403）。 |
+| 法务审阅人 | 按分组配置；角色标识 `LEGAL_REVIEWER`；只执行多级模式下 **LEGAL** 阶段通过/不通过判定（capability `decideLegalApprovals`），不获得额外母版/模板编辑权限；**不得**在多级模式下代批 COMPLIANCE，也**不得**在 `SINGLE_TRACK` 下执行一级审批判定（403）。 |
 | 审计管理员 | 可查看全部审计记录。 |
 | API 调用方 | 通过 API 凭证 + AD Group 进行授权；只调用已授权 API，并可在授权范围内查看后台 API 契约页调用方视图中的非敏感契约、页面计算的契约版本对比、错误码说明、调用示例、可调用版本、API 策略摘要、自己凭证非敏感状态和保真警告摘要，不获得后台母版/模板操作权限、完整审计查看权限或 API 凭证自助管理权限。API 凭证代表调用系统/应用；请求中同时识别实际访问账号，访问账号可以是 service account 或 user account。 |
 
@@ -79,7 +81,7 @@
 | 配置条件/循环规则 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 分组管理员可在被授权组范围内配置条件/循环规则；母版设计人员可以完整参与模板创建与编排；模板编排人员负责配置条件/循环规则；非主责角色不获得额外模板编辑权限。**IBL-E2 / ADR-0063：** 草稿版本 Composition Inclusion Rules（`GET|PUT …/composition-inclusion-rules`）**复用本行** / `authorTemplates` 边界；**无**新角色或 capability bit。 |
 | 维护模板测试数据集 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 模板测试数据集用于测试生成、生成预览、变量 Schema 校验、规则校验和覆盖率计算；同一模板或发布候选可保存多组命名测试样例，并标记场景名称、必选或可选、覆盖标签和数据集版本；全局管理员、分组管理员、母版设计人员和模板编排人员可按范围创建、编辑、复制、派生和删除；测试人员和审批人员只能在测试、审批材料中查看和判定，不获得维护权限；数据集进入测试生成、测试记录、审批材料或发布证据后锁定不可变，修改需复制或派生新版本并重新执行测试生成、测试判定和后续审批发布流程。CE-G03：`SYNTHETIC` / `EXPLICIT_SENSITIVE` 闸门**复用本行维护权**（不限 `GROUP_ADMIN`）；不新增权限。 |
 | 维护测试/审批意见模板和风险提示文案 | 是 | 被授权组范围内（模板级覆盖） | 否 | 否 | 否 | 否 | 测试意见、审批意见和负向判定退回原因提示采用受控表单与系统默认文案；全局管理员维护全局默认；分组管理员与模板编排人员在模板创建/详情中维护可选模板级覆盖（被授权组范围内）；原因类别配置不替代 submit/publish gate；不得配置为保存模板变量测试值、客户数据、完整生成内容或敏感明文；配置变更必须记录审计。 |
-| 查看协作待办和状态提示 | 是 | 被授权组范围内 | 否 | 是 | 是 | 是 | 协作待办按模板所属组、角色队列和相关提交人展示；模板编排人员查看提交、整改和发布相关待办，测试人员查看测试队列待办，审批人员查看审批队列待办，分组管理员查看被授权组范围内待办和超时升级；待办展示不授予额外模板编辑、测试判定、审批判定或发布权限，不得展示模板变量值、客户数据、完整生成内容或敏感明文。 |
+| 查看协作待办和状态提示 | 是 | 被授权组范围内 | 否 | 是 | 是 | 是 | 协作待办按模板所属组、角色队列和相关提交人展示；模板编排人员查看提交、整改和发布相关待办，测试人员查看测试队列待办，审批人员查看 **APPROVAL/COMPLIANCE**（含单级 `PENDING_DECISION`）队列待办，**法务审阅人**查看 **LEGAL** 队列待办（见 §5.2 / §13.1.2），分组管理员查看被授权组范围内待办和超时升级；待办展示不授予额外模板编辑、测试判定、审批判定或发布权限，不得展示模板变量值、客户数据、完整生成内容或敏感明文。 |
 | 维护协作待办超时阈值 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 超时阈值覆盖测试待办、审批待办、待发布待办和整改待办；全局管理员维护全局默认，分组管理员在被授权组范围内维护组级覆盖；配置变更必须记录审计。 |
 | 测试生成 DOCX/PDF | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 分组管理员可在被授权组范围内测试生成 DOCX/PDF；母版设计人员可以完整参与模板创建与编排；模板发布候选支持选择多组样例批量测试生成，并生成逐样例记录、批量测试摘要和覆盖率摘要；测试人员只执行测试通过/不通过判定。 |
 | 查看生成预览和变更差异摘要 | 是 | 被授权组范围内 | 是 | 是 | 是 | 是 | 生成预览、测试记录、批量测试摘要、覆盖率摘要、变更差异摘要、发布前检查清单结果和审批摘要用于测试判定、审批判定和发布前检查；测试人员和审批人员可在其分组范围内查看，不获得额外模板编辑权限。 |
@@ -87,8 +89,8 @@
 | 测试通过 | 是 | 例外干预，被授权组范围内 | 否 | 否 | 是 | 否 | 正常测试判定由测试人员执行；分组管理员只在异常处理或补救场景中作为例外管理员执行；测试通过需要确认测试证据摘要、批量测试摘要、覆盖率摘要、生成预览摘要和保真警告摘要，可填写补充说明，并记录关联测试数据集和生成预览摘要；分组管理员例外干预必须填写原因、二次确认并添加单独审计标记；测试通过后进入测试通过状态，不自动进入待审批。 |
 | 测试不通过 | 是 | 例外干预，被授权组范围内 | 否 | 否 | 是 | 否 | 正常测试判定由测试人员执行；分组管理员只在异常处理或补救场景中作为例外管理员执行；测试不通过必须填写原因分类、影响范围和修复建议，并记录关联测试数据集和生成预览摘要；分组管理员例外干预必须填写原因、二次确认并添加单独审计标记；测试不通过后回到草稿。 |
 | 提交审批 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 测试通过状态下需手动提交审批，提交审批后进入待审批；提交审批材料需要包含测试记录、批量测试摘要、覆盖率摘要、生成预览、最终产物引用、预览对比摘要、变更差异摘要和发布前检查清单结果；分组管理员可在被授权组范围内提交审批；母版设计人员可以完整参与模板创建与编排；模板编排人员负责提交测试/审批；审批人员只执行审批判定。 |
-| 审批通过 | 是 | 例外干预，被授权组范围内 | 否 | 否 | 否 | 是 | 正常审批判定由审批人员执行；分组管理员只在异常处理或补救场景中作为例外管理员执行；一级审批；审批通过必须填写理由摘要并确认关键证据摘要，关联测试记录、变更差异摘要和发布前检查清单摘要；分组管理员例外干预必须填写原因、二次确认并添加单独审计标记；审批通过后进入待发布，不直接发布。 |
-| 审批不通过 | 是 | 例外干预，被授权组范围内 | 否 | 否 | 否 | 是 | 正常审批判定由审批人员执行；分组管理员只在异常处理或补救场景中作为例外管理员执行；审批不通过必须填写退回原因分类、影响范围和整改要求，并关联测试记录、变更差异摘要和发布前检查清单摘要；分组管理员例外干预必须填写原因、二次确认并添加单独审计标记；审批不通过后回到草稿。 |
+| 审批通过 | 是 | 被授权组范围内（正常判定；同人例外干预仍须二次确认） | 否 | 否 | 否 | 是 | **`SINGLE_TRACK`：** 一级审批，由 `TEMPLATE_APPROVER`（+管理员）判定 → 待发布。**`LEGAL_THEN_COMPLIANCE`：** 本行指 **COMPLIANCE** 阶段通过（`PENDING_COMPLIANCE_DECISION`）；LEGAL 阶段见 §5.2。审批通过必须填写理由摘要并确认关键证据摘要，关联测试记录、变更差异摘要和发布前检查清单摘要；COMPLIANCE 通过后进入待发布，不直接发布。纯 `LEGAL_REVIEWER` 不得执行本行（403）。 |
+| 审批不通过 | 是 | 被授权组范围内（正常判定；同人例外干预仍须二次确认） | 否 | 否 | 否 | 是 | 同上分轨；**`SINGLE_TRACK`** 或 **COMPLIANCE** 阶段拒绝须填写退回原因分类、影响范围和整改要求；拒绝后回到草稿。LEGAL 阶段拒绝见 §5.2。 |
 | 发布模板 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 待发布状态下手动发布；发布前必须执行发布前检查清单，存在阻断项时不得发布；发布前必须展示发布摘要并二次确认，发布摘要至少包含发布版本号、变更差异摘要、批量测试摘要、覆盖率摘要、最终产物引用、预览对比摘要、发布前检查清单结果、API 契约摘要和影响范围；分组管理员可在被授权组范围内发布模板；母版设计人员可以完整参与模板创建与编排；模板编排人员负责发布/停用模板；非主责角色不获得额外模板编辑权限。 |
 | 停用模板 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 分组管理员可在被授权组范围内停用模板；母版设计人员可以完整参与模板创建与编排；模板停用后所有版本停用；非主责角色不获得额外模板编辑权限。 |
 | 恢复模板 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 模板恢复由全局管理员和分组管理员执行；恢复前需要影响预览、二次确认和审计；恢复后模板下未停用且未废弃的发布版本按模板级 API 管理配置重新进入可调用候选范围。 |
@@ -100,6 +102,7 @@
 | 删除模板 | 是 | 否 | 否 | 否 | 否 | 否 | 普通模板删除仅由全局管理员执行。 |
 | 更新模板基础信息 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 普通模板基础信息更新由全局管理员和分组管理员执行；全局管理员可更新全部普通模板基础信息，分组管理员可更新被授权组范围内普通模板基础信息。 |
 | 完成模板年检 / 查看年到期待办（CE-G05） | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | **无新 capability bit。** 复用 `authorTemplates`（与 CE-U07 作者工作流同级）：组范围模板访问 **且** 具备编排权。列表 `GET …/author-workflow/annual-review-due-tasks`；完成 `POST …/templates/{templateId}/annual-review/complete`。测试人员 / 审批人员默认不可见待办、不可 complete（403）。不新建独立治理路由或角色。行为：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。 |
+| 配置审批矩阵模式 `approvalMatrixMode`（IBL-E3） | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 包级 `SINGLE_TRACK` \| `LEGAL_THEN_COMPLIANCE`；仅 `DRAFT` 或 `APPROVAL`+`PENDING_SUBMIT` 可写；进入 LEGAL/COMPLIANCE/`PENDING_DECISION`/待发布/已发布线后 **422** `APPROVAL_MATRIX_MODE_LOCKED`。默认与迁移值均为 `SINGLE_TRACK`。[ADR-0064](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)。测试/审批/法务角色无配置权。多级阶段判定见 §5.2。 |
 
 ### 5.1 条款或内容模块权限矩阵
 
@@ -115,7 +118,7 @@
 | 审批通过 | 是 | 例外干预，被授权组范围内 | 否 | 否 | 否 | 是 | 正常审批判定由审批人员执行；分组管理员只在异常处理或补救场景中作为例外管理员执行；审批通过后该模块版本进入已批准状态。 |
 | 审批不通过 | 是 | 例外干预，被授权组范围内 | 否 | 否 | 否 | 是 | 正常审批判定由审批人员执行；审批不通过必须填写退回原因；审批不通过后该模块版本回到草稿。 |
 | 引用模块版本 | 是 | 被授权组范围内 | 所属或被授权组范围内 | 所属或被授权组范围内 | 否 | 否 | 只能引用可访问范围内已批准且未停用、未废弃的具体模块版本；模板发布版本必须锁定具体模块版本；测试人员和审批人员不得在模板编排中新增或变更模块引用。 |
-| 查看被引用模块内容（测试/审批材料） | 是 | 被授权组范围内 | 是 | 是 | 是 | 是 | 与 PRD §6.4.2 及 P14-T01 角色矩阵一致：测试人员和审批人员只在测试材料、生成预览和审批材料中只读查看已被引用的模块版本，不获得模块维护或模板引用编辑权限；不得展示超出判定所需的敏感明文。 |
+| 查看被引用模块内容（测试/审批材料） | 是 | 被授权组范围内 | 是 | 是 | 是 | 是 | 与 PRD §6.4.2 及 P14-T01 角色矩阵一致：测试人员、审批人员和**法务审阅人**（IBL-E3）只在测试/审批材料、生成预览中只读查看已被引用的模块版本，不获得模块维护或模板引用编辑权限；不得展示超出判定所需的敏感明文。 |
 | 配置共享范围 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 默认同组隔离；共享范围变更需要影响分析、二次确认和审计。 |
 | 停用模块或版本 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 停用由管理员执行；执行前必须进行影响分析、二次确认并记录审计；影响分析必须覆盖引用模板、引用发布版本、default 路由影响、近期调用摘要、是否需要停用模板或发布版本，以及可替代模块版本建议。 |
 | 恢复模块或版本 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 恢复由管理员执行；执行前必须进行影响分析、二次确认并记录审计。 |
@@ -123,6 +126,19 @@
 | 导出模块 | 是 | 被授权组范围内 | 所属或被授权组范围内 | 所属或被授权组范围内 | 否 | 否 | 导出范围不得越过角色、分组和对象访问范围；导出内容按敏感数据脱敏规则处理。 |
 | 查看模块审计 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 模块审计查看沿用后台审计查看边界；审计管理员可按审计权限查看全部审计记录。 |
 | 浏览目录 / 正文全文检索 / where-used（CE-G05） | 是 | 被授权组范围内 | 是 | 是 | 否 | 是 | **无新 capability bit。** 与条款目录 list/get 相同浏览边界：`GLOBAL_ADMIN` / `GROUP_ADMIN` / `MASTER_DESIGNER` / `TEMPLATE_AUTHOR` / `TEMPLATE_APPROVER` 可调用 `searchMode=FULL_TEXT` 与 `GET …/where-used`；`TEMPLATE_TESTER` **无**目录浏览 → **403**。跨组仅共享/授权可见模块；where-used **不得**返回调用方不可见模板。`contentStructureJson` 响应策略不变；where-used **不含**条款全文。行为：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。 |
+
+### 5.2 IBL-E3 法务→合规多级审批（ADR-0064）
+
+**已确认（2026-07-20 / PD-8 / BDD-IBL-E3）：** 模板生命周期审批轨可配置多级矩阵；母版审核与条款独立审批轨**保持单级**。法务元数据（CE-K08）**仍可选**。Accepted ADR ≠ impl Done；**不**翻转 #3b/#5a。
+
+| 操作 | 全局管理员 | 分组管理员 | 法务审阅人 (`LEGAL_REVIEWER`) | 审批人员 (`TEMPLATE_APPROVER`) | 说明 |
+| --- | --- | --- | --- | --- | --- |
+| LEGAL 阶段通过/不通过（`PENDING_LEGAL_DECISION`） | 是（正常判定，组范围） | 是（正常判定，被授权组） | 是（正常判定，组内） | **否**（403 `APPROVAL_STAGE_ROLE_FORBIDDEN`，除非兼 `LEGAL_REVIEWER`） | 通过 → `PENDING_COMPLIANCE_DECISION`；拒绝 → `DRAFT`。须结构化意见 + 保真已查看；CE-G01 同人阻断每阶段生效；审计含 `approvalStage=LEGAL`。 |
+| COMPLIANCE 阶段通过/不通过（`PENDING_COMPLIANCE_DECISION`） | 是 | 是 | **否**（403，除非兼 `TEMPLATE_APPROVER`） | 是 | 通过 → `PENDING_RELEASE`；拒绝 → `DRAFT`。审计含 `approvalStage=COMPLIANCE`。 |
+| `SINGLE_TRACK` 一级审批判定（`PENDING_DECISION`） | 是 | 是 | **否**（403） | 是 | 与 ADR-0021 兼容；不得跳过 LEGAL「一键双批」。 |
+| 错阶段 / 跳级 | — | — | — | — | 错阶段 payload → **409/422** `APPROVAL_STAGE_MISMATCH`；跳过 LEGAL → 4xx；状态不变。 |
+
+Capability：`decideLegalApprovals` = {`GLOBAL_ADMIN`,`GROUP_ADMIN`,`LEGAL_REVIEWER`}；`decideApprovals` 仍 = {`GLOBAL_ADMIN`,`GROUP_ADMIN`,`TEMPLATE_APPROVER`}（COMPLIANCE / 单级）。行为 SoT：[ibl-e3-legal-approval-matrix.md](../behavior/ibl-e3-legal-approval-matrix.md)。
 
 ## 6. API 权限矩阵
 
@@ -263,7 +279,7 @@ API 管理配置按配置域独立保存；每个配置域操作动线为编辑�
 
 ### 9.1 用户管理权限矩阵
 
-用户管理覆盖用户全生命周期。本地账户库长期作为授权权威源，SSO 仅负责认证（见 [ADR 0036](../adr/authorization-security/0036-local-account-store-authorization-authority.md)）。角色标识与本矩阵角色名映射为：`GLOBAL_ADMIN`=全局管理员、`GROUP_ADMIN`=分组管理员、`MASTER_DESIGNER`=母版设计人员、`TEMPLATE_AUTHOR`=模板编排人员、`TEMPLATE_TESTER`=测试人员、`TEMPLATE_APPROVER`=审批人员、`AUDIT_ADMIN`=审计管理员。
+用户管理覆盖用户全生命周期。本地账户库长期作为授权权威源，SSO 仅负责认证（见 [ADR 0036](../adr/authorization-security/0036-local-account-store-authorization-authority.md)）。角色标识与本矩阵角色名映射为：`GLOBAL_ADMIN`=全局管理员、`GROUP_ADMIN`=分组管理员、`MASTER_DESIGNER`=母版设计人员、`TEMPLATE_AUTHOR`=模板编排人员、`TEMPLATE_TESTER`=测试人员、`TEMPLATE_APPROVER`=审批人员、`LEGAL_REVIEWER`=法务审阅人、`AUDIT_ADMIN`=审计管理员。
 
 用户口令只允许以 Argon2id 哈希持久化；重置密码采用管理员传入新口令模式，平台只存哈希，不返回一次性临时口令，不在响应、日志或审计中回显口令明文或哈希。
 
@@ -273,7 +289,7 @@ API 管理配置按配置域独立保存；每个配置域操作动线为编辑�
 | 创建用户 | 是 | 被授权组范围内 | 分组管理员只能创建其 `authorizedGroupCodes` 子集范围内用户；分配的组范围必须 ⊆ 自身被授权组范围，越权返回 `403 GROUP_SCOPE_OUT_OF_RANGE`。 |
 | 查看用户详情 | 是 | 被授权组范围内 | 范围外用户按不可见处理，返回 `404 USER_NOT_FOUND`，不泄露存在性。 |
 | 编辑用户（显示名、邮箱） | 是 | 被授权组范围内 | 分组管理员只能编辑被授权组范围内用户。 |
-| 分配角色 | 是（全部角色） | 仅运营类角色，被授权组范围内 | 分组管理员只能分配 `MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_TESTER`、`TEMPLATE_APPROVER`；不得分配 `GLOBAL_ADMIN`、`AUDIT_ADMIN`、`GROUP_ADMIN`，越权返回 `403 ROLE_ASSIGNMENT_NOT_ALLOWED`（防提权）。 |
+| 分配角色 | 是（全部角色） | 仅运营类角色，被授权组范围内 | 分组管理员只能分配 `MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_TESTER`、`TEMPLATE_APPROVER`、`LEGAL_REVIEWER`；不得分配 `GLOBAL_ADMIN`、`AUDIT_ADMIN`、`GROUP_ADMIN`，越权返回 `403 ROLE_ASSIGNMENT_NOT_ALLOWED`（防提权）。 |
 | 分配被授权组范围 | 是 | 被授权组范围内 | 分配的组范围必须 ⊆ 分组管理员自身被授权组范围，越权返回 `403 GROUP_SCOPE_OUT_OF_RANGE`。 |
 | 停用/启用用户 | 是 | 被授权组范围内 | 分组管理员可在被授权组范围内停用/启用用户。 |
 | 重置密码 | 是 | 被授权组范围内 | 分组管理员可在被授权组范围内重置密码；管理员传入新口令，平台只存哈希。 |
@@ -296,7 +312,7 @@ API 管理配置按配置域独立保存；每个配置域操作动线为编辑�
 这是权限矩阵此前没有的新权限点，必须显式启用并强制审计，全部按 fail-closed 处理：
 
 - 分组管理员只能创建/编辑其 `authorizedGroupCodes` 子集范围内的用户；为用户分配的组范围必须 ⊆ 自身被授权组范围（`403 GROUP_SCOPE_OUT_OF_RANGE`）。
-- 分组管理员只能分配运营类角色（`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_TESTER`、`TEMPLATE_APPROVER`）；不得分配 `GLOBAL_ADMIN`、`AUDIT_ADMIN`、`GROUP_ADMIN`（`403 ROLE_ASSIGNMENT_NOT_ALLOWED`，防提权）。
+- 分组管理员只能分配运营类角色（`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_TESTER`、`TEMPLATE_APPROVER`、`LEGAL_REVIEWER`）；不得分配 `GLOBAL_ADMIN`、`AUDIT_ADMIN`、`GROUP_ADMIN`（`403 ROLE_ASSIGNMENT_NOT_ALLOWED`，防提权）。
 - 逻辑删除用户、分组的创建/编辑/停用/启用仅全局管理员可执行；分组管理员对分组只读，仅可见被授权组范围内分组（`403 USER_DELETE_NOT_ALLOWED` / `403 GROUP_MANAGEMENT_NOT_ALLOWED`）。
 - 分组管理员可在被授权组范围内停用/启用与重置密码用户。
 - 任何越权请求一律 fail-closed，返回统一安全错误码与通用安全消息，不泄露未授权资源是否存在、未授权组详情或敏感明文（口令、口令哈希等）。
@@ -415,8 +431,9 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 
 **已确认（2026-06-23 维护者决策）：**
 
-- 管理角色目录为 **7 个角色**：`GLOBAL_ADMIN`、`GROUP_ADMIN`、`MASTER_DESIGNER`、
-  `TEMPLATE_AUTHOR`、`TEMPLATE_TESTER`、`TEMPLATE_APPROVER`、`AUDIT_ADMIN`。
+- 管理角色目录为 **8 个角色**：`GLOBAL_ADMIN`、`GROUP_ADMIN`、`MASTER_DESIGNER`、
+  `TEMPLATE_AUTHOR`、`TEMPLATE_TESTER`、`TEMPLATE_APPROVER`、`LEGAL_REVIEWER`、`AUDIT_ADMIN`
+  （IBL-E3 / ADR-0064，2026-07-20；原 7 角色目录扩展）。
 - **不设置独立 `API_ADMIN` 角色**；API 管理由全局管理员和分组管理员承担（与 §2 一致）。
 - **无权限控件隐藏**（不渲染），不采用禁用置灰；直链访问仍走 Forbidden fail-closed。
 - 会话 **`capabilities`** 与 **`visibleRoutes`** 由后端统一下发；前端不得自行推导 master/template
@@ -428,17 +445,17 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 **实现来源（2026-06-24）：** `RouteVisibilityService.resolveDefaultRoute` /
 `resolveVisibleRoutes`；前端 canonical 路径见 `frontend/src/routing/routeKeys.ts`。
 
-| 逻辑路由标识 | GLOBAL | GROUP | MASTER_DESIGNER | TEMPLATE_AUTHOR | TEMPLATE_TESTER | TEMPLATE_APPROVER | AUDIT_ADMIN |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `route.dashboard-home` | ✓ default | ✓ default | ✓ default | ✓ default | ✓ default | ✓ default | — |
-| `route.identity-administration` | ✓ | ✓ | — | — | — | — | — |
-| `route.master-management` | ✓ | ✓ | ✓ | — | — | — | — |
-| `route.template-management` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — |
-| `route.content-module-management` | ✓ | ✓ | ✓ | ✓ | — | ✓ | — |
-| `route.api-policy-management` | ✓ | ✓ | — | — | — | — | — |
-| `route.asset-library-management` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — |
-| `route.legal-hold-administration` | ✓ | — | — | — | — | — | — |
-| `route.audit-console` | ✓ | ✓ | — | — | — | — | ✓ default |
+| 逻辑路由标识 | GLOBAL | GROUP | MASTER_DESIGNER | TEMPLATE_AUTHOR | TEMPLATE_TESTER | TEMPLATE_APPROVER | LEGAL_REVIEWER | AUDIT_ADMIN |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `route.dashboard-home` | ✓ default | ✓ default | ✓ default | ✓ default | ✓ default | ✓ default | ✓ default | — |
+| `route.identity-administration` | ✓ | ✓ | — | — | — | — | — | — |
+| `route.master-management` | ✓ | ✓ | ✓ | — | — | — | — | — |
+| `route.template-management` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — |
+| `route.content-module-management` | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | — |
+| `route.api-policy-management` | ✓ | ✓ | — | — | — | — | — | — |
+| `route.asset-library-management` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `route.legal-hold-administration` | ✓ | — | — | — | — | — | — | — |
+| `route.audit-console` | ✓ | ✓ | — | — | — | — | — | ✓ default |
 
 **Canonical 前端路径：** `route.dashboard-home` → `/dashboard`（`DashboardView`）；
 `route.identity-administration` → `/entitlement/users` 与 `/entitlement/groups`
@@ -471,21 +488,23 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 协作工作项队列可见性（`CollaborationWorkItemAccessSupport`）。入口标签使用业务用语
 （见 [business-terminology-guide.md](../product/business-terminology-guide.md)），i18n key 保持稳定。
 
-| 行为型入口 | 来源队列 | GLOBAL | GROUP | MASTER_DESIGNER | TEMPLATE_AUTHOR | TEMPLATE_TESTER | TEMPLATE_APPROVER | AUDIT_ADMIN |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 待我测试（Waiting on my testing） | TEST | ✓ | ✓ | — | — | ✓ | — | — |
-| 待我审批（Waiting on my approval） | APPROVAL | ✓ | ✓ | — | — | — | ✓ | — |
-| 待我修改（Waiting on my fixes） | REMEDIATION | ✓ | ✓ | — | ✓ | — | — | — |
-| 待确认上线（Waiting to confirm go-live） | PENDING_RELEASE | ✓ | ✓ | — | — | — | — | — |
-| 超时待跟进（Overdue to follow up） | ESCALATION | ✓ | ✓ | — | — | — | — | — |
-| 待审核母版（Masters to review） | master review（非协作队列） | ✓ | ✓ | (本人返工) | — | — | — | — |
+| 行为型入口 | 来源队列 | GLOBAL | GROUP | MASTER_DESIGNER | TEMPLATE_AUTHOR | TEMPLATE_TESTER | TEMPLATE_APPROVER | LEGAL_REVIEWER | AUDIT_ADMIN |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 待我测试（Waiting on my testing） | TEST | ✓ | ✓ | — | — | ✓ | — | — | — |
+| 待我法务审阅（Waiting on my legal review） | LEGAL | ✓ | ✓ | — | — | — | — | ✓ | — |
+| 待我审批（Waiting on my approval） | APPROVAL | ✓ | ✓ | — | — | — | ✓ | — | — |
+| 待我修改（Waiting on my fixes） | REMEDIATION | ✓ | ✓ | — | ✓ | — | — | — | — |
+| 待确认上线（Waiting to confirm go-live） | PENDING_RELEASE | ✓ | ✓ | — | — | — | — | — | — |
+| 超时待跟进（Overdue to follow up） | ESCALATION | ✓ | ✓ | — | — | — | — | — | — |
+| 待审核母版（Masters to review） | master review（非协作队列） | ✓ | ✓ | (本人返工) | — | — | — | — | — |
 
 说明：
 
 - 展示行为型入口 **不授予** 额外编辑/判定/发布权限；处置仍在模板/母版详情的受控决策表单完成。
+- **IBL-E3：**「待我法务审阅」仅对具备 `decideLegalApprovals` 的会话可见；列表仅含 LEGAL 队列（`PENDING_LEGAL_DECISION`）。「待我审批」仅展示 COMPLIANCE / 单级 `PENDING_DECISION` 项，**不含** LEGAL 待办。深链落入对应阶段决策面。
 - `ESCALATION/超时提醒` 仅管理员（GLOBAL/GROUP）可见；交互强调"可见性提醒"，不代为完成、不改变模板状态。
 - 编排人员走到 `PENDING_RELEASE` 显示"等待组长确认上线"，无发布主按钮（COR-T07 重申）。
-- **实现说明（2026-06-30）：** 全部 6 种协作触发均已发射工作项，决策/发布路径写入 `RESOLVED` 关闭环 — **P21-T02**（TEST 路径 + REMEDIATION 发射）、**P21-T07**（APPROVAL / PENDING_RELEASE / publish 路径）。行为型入口由真实队列支撑，非空壳。
+- **实现说明（2026-06-30）：** 既有协作触发已发射工作项；**IBL-E3** 扩展 LEGAL 队列发射/关闭环（实现叶交付）。
 
 ### 13.1.3 Dashboard Overview 汇总 API（PRR-D01c）
 
@@ -501,10 +520,11 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 | `reviewMasters` | GLOBAL, GROUP |
 | `authorTemplates` | GLOBAL, GROUP, MASTER_DESIGNER, TEMPLATE_AUTHOR |
 | `decideTests` | GLOBAL, GROUP, TEMPLATE_TESTER |
+| `decideLegalApprovals` | GLOBAL, GROUP, LEGAL_REVIEWER |
 | `decideApprovals` | GLOBAL, GROUP, TEMPLATE_APPROVER |
 | `publishTemplates` | GLOBAL, GROUP only (Batch B default; authors submit for release, admins publish) |
 | `exportTemplates` | GLOBAL, GROUP, TEMPLATE_AUTHOR |
-| `viewCollaborationWorkItems` | GLOBAL, GROUP, TEMPLATE_AUTHOR, TEMPLATE_TESTER, TEMPLATE_APPROVER |
+| `viewCollaborationWorkItems` | GLOBAL, GROUP, TEMPLATE_AUTHOR, TEMPLATE_TESTER, TEMPLATE_APPROVER, LEGAL_REVIEWER |
 | `maintainCollaborationTimeoutConfig` | GLOBAL, GROUP |
 | `authorContentModules` | GLOBAL, GROUP, MASTER_DESIGNER, TEMPLATE_AUTHOR |
 | `decideContentModuleReviews` | GLOBAL, GROUP, TEMPLATE_APPROVER |
@@ -512,6 +532,8 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 | `manageApiPolicy` | GLOBAL, GROUP |
 | `manageAssetLibrary` | GLOBAL, GROUP, MASTER_DESIGNER, TEMPLATE_AUTHOR, TEMPLATE_TESTER, TEMPLATE_APPROVER |
 | `readAudit` | GLOBAL, GROUP, AUDIT_ADMIN |
+
+**IBL-E3 / ADR-0064（2026-07-20）：** 新角色 `LEGAL_REVIEWER` + 新 capability `decideLegalApprovals`（上表）。`decideApprovals` **不**授予 LEGAL 阶段。阶段错位 → 403/409/422 稳定码见 §5.2。
 
 **CE-E02 资产库管理面（2026-07-16）：**
 
@@ -522,8 +544,8 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 
 **CE-G01 同人审批阻断 / 例外干预（2026-07-14）：**
 
-- 同人阻断对**全部**角色生效（含 `GLOBAL_ADMIN` 自提自批）：模板 `recordApprovalDecision`、母版 `decideReview`、条款 `APPROVE_REVIEW`/`REJECT_REVIEW` 在决策执行人 username 与最近一次提交人 username 精确相等时 fail-closed 返回 `403 SELF_APPROVAL_FORBIDDEN`（`api.error.lifecycle.selfApprovalForbidden`）。
-- **例外干预权仅** `GROUP_ADMIN` / `GLOBAL_ADMIN`；必须 `exceptionIntervention=true` + 非空 `exceptionReason` + `secondaryConfirmed=true`。`TEMPLATE_APPROVER` / `MASTER_DESIGNER` / `TEMPLATE_TESTER` **无**例外权。
+- 同人阻断对**全部**角色生效（含 `GLOBAL_ADMIN` 自提自批）：模板 `recordApprovalDecision`（**含 IBL-E3 每一审批阶段**）、母版 `decideReview`、条款 `APPROVE_REVIEW`/`REJECT_REVIEW` 在决策执行人 username 与最近一次 `SUBMIT_FOR_APPROVAL`（或对应提交）提交人 username 精确相等时 fail-closed 返回 `403 SELF_APPROVAL_FORBIDDEN`（`api.error.lifecycle.selfApprovalForbidden`）。LEGAL 通过**不**重置提交人——COMPLIANCE 仍比对该次提交审批的 submitter。
+- **例外干预权仅** `GROUP_ADMIN` / `GLOBAL_ADMIN`；必须 `exceptionIntervention=true` + 非空 `exceptionReason` + `secondaryConfirmed=true`。`TEMPLATE_APPROVER` / `LEGAL_REVIEWER` / `MASTER_DESIGNER` / `TEMPLATE_TESTER` **无**例外权。
 - 例外成功决策在生命周期审计行永久保留 `selfApprovalException=true` + `exceptionReason`；读取权限沿用既有 `AUDIT_ADMIN` / `GLOBAL_ADMIN` / `GROUP_ADMIN(+groupScope+templateId)` 矩阵（§10 / §348），本片不放宽。
 - 不做四眼双人复核（ADR-0021 维持；用户 D1 拍板）。
 

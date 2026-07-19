@@ -14,6 +14,7 @@ export function useTemplateDetailVisibility(options: UseTemplateDetailVisibility
     authorTemplates,
     decideTests,
     decideApprovals,
+    decideLegalApprovals,
     publishTemplates,
     exportTemplates,
     editTemplateMetadata,
@@ -55,7 +56,7 @@ export function useTemplateDetailVisibility(options: UseTemplateDetailVisibility
     if (decideTests.value && (status === 'DRAFT' || status === 'TESTING')) {
       return true
     }
-    if (decideApprovals.value && status === 'APPROVAL') {
+    if ((decideApprovals.value || decideLegalApprovals.value) && status === 'APPROVAL') {
       return true
     }
     if (publishTemplates.value && status === 'PENDING_RELEASE') {

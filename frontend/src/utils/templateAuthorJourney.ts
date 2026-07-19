@@ -75,6 +75,7 @@ export function resolveTemplateAuthorJourneyIndex(
     if (approvalSubState === 'PENDING_SUBMIT') {
       return { currentStepIndex: 4, activeStepId: 'submitApproval' }
     }
+    // PENDING_DECISION / PENDING_LEGAL_DECISION / PENDING_COMPLIANCE_DECISION / missing
     return { currentStepIndex: null, guidanceKey: WAITING_APPROVAL_GUIDANCE }
   }
 

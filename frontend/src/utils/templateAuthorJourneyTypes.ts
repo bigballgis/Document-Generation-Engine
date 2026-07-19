@@ -1,8 +1,9 @@
+import type { ApprovalSubState } from '@/types/approvalMatrix'
 import type { TemplateLifecycleStatus, TemplateSummary } from '@/types/template'
 
 export interface TemplateAuthorJourneyContext {
   lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  approvalSubState?: ApprovalSubState | null
   bindingsCount?: number
   hasSuccessfulTrialOutput?: boolean
   isRemediation?: boolean
@@ -18,7 +19,7 @@ export interface TemplateAuthorJourneyResolution {
 export type TemplateAuthorDashboardTemplate = TemplateSummary & {
   bindingsCount?: number
   hasSuccessfulTrialOutput?: boolean
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  approvalSubState?: ApprovalSubState | null
 }
 
 export interface TemplateAuthorRemediationItem {

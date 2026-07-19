@@ -56,13 +56,14 @@ public class TemplateViewMapper {
                 .stream()
                 .filter(version -> version.getReleaseVersion() != null && !version.getReleaseVersion().isBlank())
                 .count();
+        var approvalSubState = approvalSubStateResolver.resolve(template);
         return new TemplateSummaryView(
                 template.getId().toString(),
                 template.getExternalId(),
                 template.getGroupCode(),
                 template.getName(),
                 template.getLifecycleStatus(),
-                approvalSubStateResolver.resolve(template),
+                approvalSubState,
                 template.getReleaseVersion(),
                 releaseVersionCount,
                 template.getMasterId().toString(),
@@ -73,7 +74,9 @@ public class TemplateViewMapper {
                 template.getLocale(),
                 template.getLocaleVariantFamilyId() == null
                         ? null
-                        : template.getLocaleVariantFamilyId().toString()
+                        : template.getLocaleVariantFamilyId().toString(),
+                template.getApprovalMatrixMode(),
+                approvalSubStateResolver.resolveStage(template)
         );
     }
 
@@ -104,6 +107,8 @@ public class TemplateViewMapper {
         String releaseVersion = templateCurrentVersionResolver.isInFlight(version)
                 ? template.getReleaseVersion()
                 : version.getReleaseVersion();
+        boolean inFlight = templateCurrentVersionResolver.isInFlight(version);
+        var approvalSubState = inFlight ? approvalSubStateResolver.resolve(template) : null;
         return new TemplateDetailView(
                 template.getId().toString(),
                 template.getExternalId(),
@@ -114,9 +119,7 @@ public class TemplateViewMapper {
                 readOnly
                         ? version.getLifecycleStatus()
                         : template.getLifecycleStatus(),
-                templateCurrentVersionResolver.isInFlight(version)
-                        ? approvalSubStateResolver.resolve(template)
-                        : null,
+                approvalSubState,
                 releaseVersion,
                 version.getId().toString(),
                 version.getDevVersionNumber(),
@@ -133,7 +136,9 @@ public class TemplateViewMapper {
                 template.getLocale(),
                 template.getLocaleVariantFamilyId() == null
                         ? null
-                        : template.getLocaleVariantFamilyId().toString()
+                        : template.getLocaleVariantFamilyId().toString(),
+                template.getApprovalMatrixMode(),
+                inFlight ? approvalSubStateResolver.resolveStage(template) : null
         );
     }
 

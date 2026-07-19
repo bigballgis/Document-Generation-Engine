@@ -21,6 +21,7 @@ vi.mock('vue-router', () => ({
 
 const capabilityRefs = {
   decideApprovals: { value: false },
+  decideLegalApprovals: { value: false },
   publishTemplates: { value: false },
   reviewMasters: { value: false },
 }
@@ -35,6 +36,7 @@ const BASE_CAPABILITIES: ManagementCapabilities = {
   authorTemplates: true,
   decideTests: false,
   decideApprovals: false,
+  decideLegalApprovals: false,
   publishTemplates: false,
   stopTemplates: false,
   restoreOrDeprecateTemplates: false,

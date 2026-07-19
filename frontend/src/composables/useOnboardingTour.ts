@@ -49,7 +49,8 @@ export function useOnboardingTour(options: UseOnboardingTourOptions = {}) {
   const route = useRoute()
   const router = useRouter()
   const sessionStore = useSessionStore()
-  const { decideApprovals, publishTemplates, reviewMasters } = useCapabilities()
+  const { decideApprovals, decideLegalApprovals, publishTemplates, reviewMasters } =
+    useCapabilities()
 
   const open: Ref<boolean> = ref(false)
   const current: Ref<number> = ref(0)
@@ -59,6 +60,7 @@ export function useOnboardingTour(options: UseOnboardingTourOptions = {}) {
     return resolvePrimaryTourRole({
       roles,
       decideApprovals: decideApprovals.value,
+      decideLegalApprovals: decideLegalApprovals.value,
       publishTemplates: publishTemplates.value,
       reviewMasters: reviewMasters.value,
     })

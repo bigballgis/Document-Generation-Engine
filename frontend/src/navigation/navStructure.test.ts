@@ -21,6 +21,7 @@ const globalAdminCapabilities: ManagementCapabilities = {
   authorTemplates: true,
   decideTests: true,
   decideApprovals: true,
+  decideLegalApprovals: false,
   publishTemplates: true,
   stopTemplates: true,
   restoreOrDeprecateTemplates: true,
@@ -44,6 +45,7 @@ const testerCapabilities: ManagementCapabilities = {
   authorTemplates: false,
   decideTests: true,
   decideApprovals: false,
+  decideLegalApprovals: false,
   publishTemplates: false,
   stopTemplates: false,
   restoreOrDeprecateTemplates: false,
@@ -63,6 +65,7 @@ const approverCapabilities: ManagementCapabilities = {
   ...testerCapabilities,
   decideTests: false,
   decideApprovals: true,
+  decideLegalApprovals: false,
   decideContentModuleReviews: true,
 }
 
@@ -249,6 +252,7 @@ describe('navStructure', () => {
           authorTemplates: false,
           decideTests: false,
           decideApprovals: false,
+  decideLegalApprovals: false,
           publishTemplates: false,
           stopTemplates: false,
           restoreOrDeprecateTemplates: false,
@@ -310,6 +314,7 @@ describe('navStructure', () => {
       expect(BEHAVIOR_NAV_ITEM_SPECS.map((spec) => spec.id)).toEqual([
         'behavior-testing',
         'behavior-approval',
+        'behavior-legal',
         'behavior-remediation',
         'behavior-pending-release',
         'behavior-escalation',

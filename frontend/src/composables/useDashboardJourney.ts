@@ -6,11 +6,15 @@ import {
   roleJourneyTitleKey,
   globalAdminJourneySteps,
   templateApproverJourneySteps,
+  templateLegalReviewerJourneySteps,
   templateTeamLeadJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
 import {
   shouldShowTemplateApproverJourney,
 } from '@/utils/templateApproverJourney'
+import {
+  shouldShowTemplateLegalReviewerJourney,
+} from '@/utils/templateLegalReviewerJourney'
 import {
   shouldShowTemplateTeamLeadJourney,
 } from '@/utils/templateTeamLeadJourney'
@@ -31,8 +35,14 @@ export function useDashboardJourney() {
   const mastersStore = useMastersStore()
   const templatesStore = useTemplatesStore()
   const collaborationStore = useCollaborationStore()
-  const { context, decideApprovals, publishTemplates, reviewMasters, deleteTemplates } =
-    useCapabilities()
+  const {
+    context,
+    decideApprovals,
+    decideLegalApprovals,
+    publishTemplates,
+    reviewMasters,
+    deleteTemplates,
+  } = useCapabilities()
 
   const showTimeoutConfig = computed(() => canMaintainCollaborationTimeoutConfig(context.value))
 
@@ -40,9 +50,19 @@ export function useDashboardJourney() {
     resolvePrimaryClusterOneRole(sessionStore.session?.roles ?? []),
   )
 
+  const showLegalReviewerJourney = computed(
+    () =>
+      !primaryClusterOneRole.value &&
+      (sessionStore.session?.roles ?? []).includes(MANAGEMENT_ROLES.LEGAL_REVIEWER) &&
+      shouldShowTemplateLegalReviewerJourney({
+        decideLegalApprovals: decideLegalApprovals.value,
+      }),
+  )
+
   const showApproverJourney = computed(
     () =>
       !primaryClusterOneRole.value &&
+      !showLegalReviewerJourney.value &&
       (sessionStore.session?.roles ?? []).includes(MANAGEMENT_ROLES.TEMPLATE_APPROVER) &&
       shouldShowTemplateApproverJourney({ decideApprovals: decideApprovals.value }),
   )
@@ -50,6 +70,7 @@ export function useDashboardJourney() {
   const showGlobalAdminJourney = computed(
     () =>
       !primaryClusterOneRole.value &&
+      !showLegalReviewerJourney.value &&
       !showApproverJourney.value &&
       shouldShowGlobalAdminJourney({ roles: sessionStore.session?.roles ?? [] }),
   )
@@ -57,6 +78,7 @@ export function useDashboardJourney() {
   const showTeamLeadJourney = computed(
     () =>
       !primaryClusterOneRole.value &&
+      !showLegalReviewerJourney.value &&
       !showApproverJourney.value &&
       !showGlobalAdminJourney.value &&
       (sessionStore.session?.roles ?? []).includes(MANAGEMENT_ROLES.GROUP_ADMIN) &&
@@ -70,6 +92,7 @@ export function useDashboardJourney() {
     () =>
       Boolean(
         primaryClusterOneRole.value ||
+          showLegalReviewerJourney.value ||
           showApproverJourney.value ||
           showGlobalAdminJourney.value ||
           showTeamLeadJourney.value,
@@ -79,6 +102,9 @@ export function useDashboardJourney() {
   const journeySteps = computed(() => {
     if (primaryClusterOneRole.value) {
       return resolveClusterOneJourney(primaryClusterOneRole.value)
+    }
+    if (showLegalReviewerJourney.value) {
+      return templateLegalReviewerJourneySteps
     }
     if (showApproverJourney.value) {
       return templateApproverJourneySteps
@@ -96,6 +122,9 @@ export function useDashboardJourney() {
     if (primaryClusterOneRole.value) {
       return roleJourneyTitleKey(primaryClusterOneRole.value)
     }
+    if (showLegalReviewerJourney.value) {
+      return roleJourneyTitleKey('LEGAL_REVIEWER')
+    }
     if (showApproverJourney.value) {
       return roleJourneyTitleKey('TEMPLATE_APPROVER')
     }
@@ -112,6 +141,7 @@ export function useDashboardJourney() {
     useDashboardJourneyResolutions(
       {
         primaryClusterOneRole,
+        showLegalReviewerJourney,
         showApproverJourney,
         showGlobalAdminJourney,
         showTeamLeadJourney,

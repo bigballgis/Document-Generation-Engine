@@ -16,6 +16,10 @@ import {
   type TemplateApproverApprovalWorkItem,
 } from '@/utils/templateApproverJourney'
 import {
+  resolveTemplateLegalReviewerDashboardJourneyIndex,
+  type TemplateLegalApprovalWorkItem,
+} from '@/utils/templateLegalReviewerJourney'
+import {
   resolveTemplateTeamLeadDashboardJourneyIndex,
   type TemplateTeamLeadPendingReleaseWorkItem,
 } from '@/utils/templateTeamLeadJourney'
@@ -34,6 +38,7 @@ type TemplatesStore = ReturnType<typeof useTemplatesStore>
 
 export type DashboardJourneyVisibility = {
   primaryClusterOneRole: ComputedRef<ClusterOneRole | null>
+  showLegalReviewerJourney: ComputedRef<boolean>
   showApproverJourney: ComputedRef<boolean>
   showGlobalAdminJourney: ComputedRef<boolean>
   showTeamLeadJourney: ComputedRef<boolean>
@@ -49,8 +54,13 @@ export function useDashboardJourneyRoleResolutions(
     collaborationStore: CollaborationStore
   },
 ) {
-  const { primaryClusterOneRole, showApproverJourney, showGlobalAdminJourney, showTeamLeadJourney } =
-    visibility
+  const {
+    primaryClusterOneRole,
+    showLegalReviewerJourney,
+    showApproverJourney,
+    showGlobalAdminJourney,
+    showTeamLeadJourney,
+  } = visibility
   const { mastersStore, templatesStore, collaborationStore } = stores
 
   const masterDesignerJourneyResolution = computed(() => {
@@ -99,6 +109,25 @@ export function useDashboardJourneyRoleResolutions(
     return resolveTemplateTesterDashboardJourneyIndex(
       templatesStore.templates,
       templateTesterTestWorkItems.value,
+    )
+  })
+
+  const templateLegalApprovalWorkItems = computed((): TemplateLegalApprovalWorkItem[] =>
+    collaborationStore.workItems
+      .filter((item) => item.queue === 'LEGAL')
+      .map((item) => ({
+        templateId: item.templateId,
+        createdAt: item.createdAt,
+      })),
+  )
+
+  const templateLegalReviewerJourneyResolution = computed(() => {
+    if (!showLegalReviewerJourney.value) {
+      return null
+    }
+    return resolveTemplateLegalReviewerDashboardJourneyIndex(
+      templatesStore.templates,
+      templateLegalApprovalWorkItems.value,
     )
   })
 
@@ -168,6 +197,7 @@ export function useDashboardJourneyRoleResolutions(
     masterDesignerJourneyResolution,
     templateAuthorJourneyResolution,
     templateTesterJourneyResolution,
+    templateLegalReviewerJourneyResolution,
     templateApproverJourneyResolution,
     templateTeamLeadJourneyResolution,
     globalAdminJourneyResolution,

@@ -81,7 +81,8 @@ class TemplateServiceCatalogPaginationTest {
                 templateCurrentVersionResolver,
                 eventPublisher,
                 managementUserDisplayService,
-                org.mockito.Mockito.mock(com.bank.docgen.template.service.VariableComputeService.class)
+                org.mockito.Mockito.mock(com.bank.docgen.template.service.VariableComputeService.class),
+                org.mockito.Mockito.mock(ApprovalSubStateResolver.class)
         );
         globalAdmin = session("10000001", List.of("GLOBAL_ADMIN"), List.of("*"));
         retailAuthor = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));

@@ -1,5 +1,9 @@
 import { computed, type ComputedRef } from 'vue'
 import type { SemverBumpLevel } from '@/utils/semver'
+import {
+  canShowApprovalDecisionActions,
+  isAwaitingAnyApprovalDecision,
+} from '@/utils/approvalMatrix'
 import { resolveWorkflowBannerActionKind } from '@/utils/templateWorkflowBannerContext'
 import type { TemplateDetail } from '@/types/template'
 
@@ -8,6 +12,7 @@ export function createTemplateLifecycleVisibility(deps: {
   authorTemplates: ComputedRef<boolean>
   decideTests: ComputedRef<boolean>
   decideApprovals: ComputedRef<boolean>
+  decideLegalApprovals: ComputedRef<boolean>
   publishTemplates: ComputedRef<boolean>
   stopTemplates: ComputedRef<boolean>
   restoreOrDeprecateTemplates: ComputedRef<boolean>
@@ -18,6 +23,7 @@ export function createTemplateLifecycleVisibility(deps: {
     authorTemplates,
     decideTests,
     decideApprovals,
+    decideLegalApprovals,
     publishTemplates,
     stopTemplates,
     restoreOrDeprecateTemplates,
@@ -30,6 +36,7 @@ export function createTemplateLifecycleVisibility(deps: {
     authorTemplates: authorTemplates.value,
     decideTests: decideTests.value,
     decideApprovals: decideApprovals.value,
+    decideLegalApprovals: decideLegalApprovals.value,
     publishTemplates: publishTemplates.value,
   }))
 
@@ -51,7 +58,7 @@ export function createTemplateLifecycleVisibility(deps: {
     if (template.value?.lifecycleStatus !== 'APPROVAL' || !authorTemplates.value) {
       return false
     }
-    if (approvalSubState.value === 'PENDING_DECISION') {
+    if (isAwaitingAnyApprovalDecision(approvalSubState.value)) {
       return false
     }
     if (decideApprovals.value && !authorTemplates.value) {
@@ -59,15 +66,14 @@ export function createTemplateLifecycleVisibility(deps: {
     }
     return true
   })
-  const showApprovalDecisionActions = computed(() => {
-    if (template.value?.lifecycleStatus !== 'APPROVAL' || !decideApprovals.value) {
-      return false
-    }
-    if (approvalSubState.value === 'PENDING_SUBMIT') {
-      return false
-    }
-    return true
-  })
+  const showApprovalDecisionActions = computed(() =>
+    canShowApprovalDecisionActions({
+      lifecycleStatus: template.value?.lifecycleStatus,
+      approvalSubState: approvalSubState.value,
+      decideApprovals: decideApprovals.value,
+      decideLegalApprovals: decideLegalApprovals.value,
+    }),
+  )
   const showPublishActions = computed(() => workflowBannerActionKind.value === 'publish')
   const showStopAction = computed(
     () => template.value?.lifecycleStatus === 'PUBLISHED' && stopTemplates.value,

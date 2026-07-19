@@ -55,6 +55,21 @@ final class CollaborationWorkItemPersistSupport {
                 CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL, now, actorSummary);
     }
 
+    CollaborationWorkItemEntity refreshSubmitForLegalReview(
+            CollaborationWorkItemEntity existing, TemplateEntity template,
+            ManagementSessionClaims session, String summary, Instant now) {
+        return refresh(existing, template, session.username(), summary,
+                CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL, now, true);
+    }
+
+    CollaborationWorkItemEntity createSubmitForLegalReview(
+            TemplateEntity template, ManagementSessionClaims session,
+            String summary, Instant now, String actorSummary) {
+        return create(template, session.username(), session, summary,
+                CollaborationWorkItemQueue.LEGAL,
+                CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL, now, actorSummary);
+    }
+
     CollaborationWorkItemEntity refreshRemediation(
             CollaborationWorkItemEntity existing, TemplateEntity template, String submitterUserId,
             String summary, CollaborationWorkItemTriggerType triggerType, Instant now) {

@@ -25,13 +25,19 @@ export function useDashboardJourneyResolutions(
     collaborationStore: CollaborationStore
   },
 ) {
-  const { primaryClusterOneRole, showApproverJourney, showGlobalAdminJourney, showTeamLeadJourney } =
-    visibility
+  const {
+    primaryClusterOneRole,
+    showLegalReviewerJourney,
+    showApproverJourney,
+    showGlobalAdminJourney,
+    showTeamLeadJourney,
+  } = visibility
 
   const {
     masterDesignerJourneyResolution,
     templateAuthorJourneyResolution,
     templateTesterJourneyResolution,
+    templateLegalReviewerJourneyResolution,
     templateApproverJourneyResolution,
     templateTeamLeadJourneyResolution,
     globalAdminJourneyResolution,
@@ -46,6 +52,9 @@ export function useDashboardJourneyResolutions(
     }
     if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
       return templateTesterJourneyResolution.value?.currentStepIndex ?? null
+    }
+    if (showLegalReviewerJourney.value) {
+      return templateLegalReviewerJourneyResolution.value?.currentStepIndex ?? null
     }
     if (showApproverJourney.value) {
       return templateApproverJourneyResolution.value?.currentStepIndex ?? null
@@ -69,6 +78,9 @@ export function useDashboardJourneyResolutions(
     if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
       return templateTesterJourneyResolution.value?.guidanceKey
     }
+    if (showLegalReviewerJourney.value) {
+      return templateLegalReviewerJourneyResolution.value?.guidanceKey
+    }
     if (showApproverJourney.value) {
       return templateApproverJourneyResolution.value?.guidanceKey
     }
@@ -90,6 +102,9 @@ export function useDashboardJourneyResolutions(
     }
     if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
       return 'TEMPLATE_TESTER'
+    }
+    if (showLegalReviewerJourney.value) {
+      return 'LEGAL_REVIEWER'
     }
     if (showApproverJourney.value) {
       return 'TEMPLATE_APPROVER'
@@ -113,6 +128,9 @@ export function useDashboardJourneyResolutions(
     if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
       return templateTesterJourneyResolution.value?.activeStepId
     }
+    if (showLegalReviewerJourney.value) {
+      return templateLegalReviewerJourneyResolution.value?.activeStepId
+    }
     if (showApproverJourney.value) {
       return templateApproverJourneyResolution.value?.activeStepId
     }
@@ -131,6 +149,9 @@ export function useDashboardJourneyResolutions(
     }
     if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
       return templateTesterJourneyResolution.value?.targetTemplateId
+    }
+    if (showLegalReviewerJourney.value) {
+      return templateLegalReviewerJourneyResolution.value?.targetTemplateId
     }
     if (showApproverJourney.value) {
       return templateApproverJourneyResolution.value?.targetTemplateId

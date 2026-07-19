@@ -1,0 +1,49 @@
+{
+  "slice": "ibl-e3-legal-approval-matrix",
+  "taskId": "130",
+  "stage": 6,
+  "config": "frontend/playwright.docker.config.ts",
+  "baseURL": "http://127.0.0.1:4173",
+  "apiBase": "http://127.0.0.1:8080/api/management/v1",
+  "spec": "frontend/e2e/ibl-e3-legal-approval-matrix.spec.ts",
+  "workers": 1,
+  "result": "PASS",
+  "counts": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "didNotRun": 0,
+    "total": 4
+  },
+  "durationSeconds": 44.6,
+  "tests": [
+    {
+      "title": "BDD-IBL-E3-015 — author configures LEGAL_THEN_COMPLIANCE; Legal stage gates Approve CTAs",
+      "bdd": ["BDD-IBL-E3-015", "BDD-IBL-E3-002"],
+      "status": "passed"
+    },
+    {
+      "title": "BDD-IBL-E3-016 — LEGAL_REVIEWER Waiting on my legal review queue deep-links to decision surface",
+      "bdd": ["BDD-IBL-E3-016"],
+      "status": "passed"
+    },
+    {
+      "title": "BDD-IBL-E3-005/006 — LEGAL then COMPLIANCE Approve CTAs reach PENDING_RELEASE",
+      "bdd": ["BDD-IBL-E3-005", "BDD-IBL-E3-006"],
+      "status": "passed"
+    },
+    {
+      "title": "BDD-IBL-E3-009 UI — LEGAL_REVIEWER-only surface; compliance fixture shows Compliance stage",
+      "bdd": ["BDD-IBL-E3-009", "BDD-IBL-E3-010", "BDD-IBL-E3-003"],
+      "status": "passed"
+    }
+  ],
+  "seedUser": {
+    "LEGAL_REVIEWER": "10000009",
+    "password": "ChangeMe123!"
+  },
+  "notes": [
+    "Stage-6 functional only — does not claim Task #130 Done",
+    "Blocked initially by missing LEGAL_REVIEWER in FE routeCapabilities (dashboard/template guards); fixed in frontend/src/auth/routeCapabilities.ts and redeployed with COMPOSE_PROJECT_NAME=documentgenerationengine"
+  ]
+}

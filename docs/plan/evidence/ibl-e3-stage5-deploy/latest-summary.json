@@ -1,0 +1,34 @@
+{
+  "result": "DEPLOY_OK",
+  "stage": 5,
+  "slice": "ibl-e3-legal-approval-matrix",
+  "task": "#130",
+  "when": "2026-07-20T05:32:26+08:00",
+  "worktree": "D:/working/DGE-ibl-e3-legal-approval-matrix",
+  "branch": "feat/ibl-e3-legal-approval-matrix",
+  "gitTip": "e66a3bbfde70d1e6be0456524403172cd413b969",
+  "gitShort": "e66a3bbf",
+  "composeProject": "documentgenerationengine",
+  "frontendPort": 4173,
+  "backendHealthz": {
+    "status": 200,
+    "body": {
+      "status": "UP"
+    }
+  },
+  "frontendRoot": {
+    "status": 200
+  },
+  "images": {
+    "backend": "sha256:4a6146b05ceea827f0bf68f17531e6471590071cdad8c67d29c76ffdd9662782",
+    "frontend": "sha256:ba1ed85d4781e9e12fabd8e8b3dda808c01b64f7db1a9bb2bde23251307eeff7"
+  },
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 (full build; not -SkipBuild)",
+  "jwtSecret": "synced from MAIN (len=64, non-insecure; value not recorded)",
+  "notes": [
+    "Attempt 1: FAIL — worktree .env from .env.example insecure JWT default (BDD-OPS-JWT-SECRET-001).",
+    "Attempt 2: FAIL — V71 seed collided with V34 CORP author UUID …108 / 10000008; fixed seed to …109 / 10000009.",
+    "Attempt 3: SUCCESS — canonical COMPOSE_PROJECT_NAME=documentgenerationengine; healthz 200; frontend 200."
+  ],
+  "doesNotClaim": "Task #130 Done (stage 5 only; E2E/reviews/merge/doc-sync pending)"
+}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import type { ApprovalSubState } from '@/types/approvalMatrix'
 import type { TemplateLifecycleStatus } from '@/types/template'
 
 withDefaults(
@@ -7,7 +8,7 @@ withDefaults(
     templateName: string
     groupLabel?: string
     status?: TemplateLifecycleStatus
-    approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+    approvalSubState?: ApprovalSubState | null
     backLabel: string
   }>(),
   {

@@ -1,9 +1,15 @@
+import type { ApprovalSubState } from '@/types/approvalMatrix'
 import type { TemplateLifecycleStatus } from '@/types/template'
+import {
+  isPendingApproverDecision,
+  isPendingLegalDecision,
+} from '@/utils/approvalMatrix'
 
 export type TemplateWorkflowBannerCapabilities = {
   authorTemplates: boolean
   decideTests: boolean
   decideApprovals: boolean
+  decideLegalApprovals: boolean
   publishTemplates: boolean
 }
 
@@ -16,95 +22,85 @@ export type WorkflowBannerActionKind = 'testing' | 'approval' | 'publish' | 'dra
 
 type TemplateWorkflowBannerLifecycleContext = {
   lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  approvalSubState?: ApprovalSubState | null
 }
 
-type BannerRule = {
-  kind: WorkflowBannerActionKind
-  status: TemplateLifecycleStatus
-  capability: keyof TemplateWorkflowBannerCapabilities
-  titleKey: string
-  descriptionKey: string
-}
-
-const WORKFLOW_BANNER_RULES: readonly BannerRule[] = [
-  {
-    kind: 'testing',
-    status: 'TESTING',
-    capability: 'decideTests',
-    titleKey: 'dashboard.tasks.templateTest.title',
-    descriptionKey: 'dashboard.tasks.templateTest.description',
-  },
-  {
-    kind: 'approval',
-    status: 'APPROVAL',
-    capability: 'decideApprovals',
-    titleKey: 'dashboard.tasks.templateApproval.title',
-    descriptionKey: 'dashboard.tasks.templateApproval.description',
-  },
-  {
-    kind: 'publish',
-    status: 'PENDING_RELEASE',
-    capability: 'publishTemplates',
-    titleKey: 'dashboard.tasks.templatePublish.title',
-    descriptionKey: 'dashboard.tasks.templatePublish.description',
-  },
-  {
-    kind: 'draft',
-    status: 'DRAFT',
-    capability: 'authorTemplates',
-    titleKey: 'dashboard.tasks.templateDraft.title',
-    descriptionKey: 'dashboard.tasks.templateDraft.description',
-  },
-] as const
-
-function matchesBannerRule(
-  rule: BannerRule,
+function matchesApprovalBanner(
   lifecycle: TemplateWorkflowBannerLifecycleContext,
   capabilities: TemplateWorkflowBannerCapabilities,
 ): boolean {
-  if (lifecycle.lifecycleStatus !== rule.status || !capabilities[rule.capability]) {
+  if (lifecycle.lifecycleStatus !== 'APPROVAL') {
     return false
   }
-  if (rule.kind === 'approval') {
-    return lifecycle.approvalSubState === 'PENDING_DECISION'
+  if (isPendingLegalDecision(lifecycle.approvalSubState)) {
+    return capabilities.decideLegalApprovals
   }
-  return true
+  if (isPendingApproverDecision(lifecycle.approvalSubState)) {
+    return capabilities.decideApprovals
+  }
+  return false
 }
 
 export function resolveWorkflowBannerActionKind(
   lifecycleStatus: TemplateLifecycleStatus,
   capabilities: TemplateWorkflowBannerCapabilities,
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null,
+  approvalSubState?: ApprovalSubState | null,
 ): WorkflowBannerActionKind | null {
   const lifecycle: TemplateWorkflowBannerLifecycleContext = {
     lifecycleStatus,
     approvalSubState,
   }
-  const rule = WORKFLOW_BANNER_RULES.find((entry) =>
-    matchesBannerRule(entry, lifecycle, capabilities),
-  )
-  return rule?.kind ?? null
+  if (lifecycleStatus === 'TESTING' && capabilities.decideTests) {
+    return 'testing'
+  }
+  if (matchesApprovalBanner(lifecycle, capabilities)) {
+    return 'approval'
+  }
+  if (lifecycleStatus === 'PENDING_RELEASE' && capabilities.publishTemplates) {
+    return 'publish'
+  }
+  if (lifecycleStatus === 'DRAFT' && capabilities.authorTemplates) {
+    return 'draft'
+  }
+  return null
 }
 
 export function resolveTemplateWorkflowBannerContext(
   lifecycleStatus: TemplateLifecycleStatus,
   capabilities: TemplateWorkflowBannerCapabilities,
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null,
+  approvalSubState?: ApprovalSubState | null,
 ): TemplateWorkflowBannerContext | null {
-  const lifecycle: TemplateWorkflowBannerLifecycleContext = {
+  const kind = resolveWorkflowBannerActionKind(
     lifecycleStatus,
+    capabilities,
     approvalSubState,
-  }
-  const rule = WORKFLOW_BANNER_RULES.find((entry) =>
-    matchesBannerRule(entry, lifecycle, capabilities),
   )
-  if (!rule) {
+  if (!kind) {
     return null
   }
-  return {
-    titleKey: rule.titleKey,
-    descriptionKey: rule.descriptionKey,
+  if (kind === 'approval' && isPendingLegalDecision(approvalSubState)) {
+    return {
+      titleKey: 'dashboard.tasks.templateLegalApproval.title',
+      descriptionKey: 'dashboard.tasks.templateLegalApproval.description',
+    }
   }
+  const byKind: Record<WorkflowBannerActionKind, TemplateWorkflowBannerContext> = {
+    testing: {
+      titleKey: 'dashboard.tasks.templateTest.title',
+      descriptionKey: 'dashboard.tasks.templateTest.description',
+    },
+    approval: {
+      titleKey: 'dashboard.tasks.templateApproval.title',
+      descriptionKey: 'dashboard.tasks.templateApproval.description',
+    },
+    publish: {
+      titleKey: 'dashboard.tasks.templatePublish.title',
+      descriptionKey: 'dashboard.tasks.templatePublish.description',
+    },
+    draft: {
+      titleKey: 'dashboard.tasks.templateDraft.title',
+      descriptionKey: 'dashboard.tasks.templateDraft.description',
+    },
+  }
+  return byKind[kind]
 }
-

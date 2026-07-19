@@ -102,7 +102,8 @@ class IblE1LocaleVariantModelTest {
                 templateCurrentVersionResolver,
                 eventPublisher,
                 managementUserDisplayService,
-                org.mockito.Mockito.mock(VariableComputeService.class)
+                org.mockito.Mockito.mock(VariableComputeService.class),
+                new ApprovalSubStateResolver(lifecycleRecordRepository)
         );
         author = new ManagementSessionClaims(
                 "10000003",

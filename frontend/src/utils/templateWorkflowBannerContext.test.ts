@@ -10,6 +10,7 @@ const allFalse: TemplateWorkflowBannerCapabilities = {
   authorTemplates: false,
   decideTests: false,
   decideApprovals: false,
+  decideLegalApprovals: false,
   publishTemplates: false,
 }
 
@@ -70,6 +71,18 @@ describe('templateWorkflowBannerContext', () => {
     expect(context).toBeNull()
   })
 
+  it('returns legal approval banner when PENDING_LEGAL_DECISION and decideLegalApprovals', () => {
+    const context = resolveTemplateWorkflowBannerContext(
+      'APPROVAL',
+      { ...allFalse, decideLegalApprovals: true },
+      'PENDING_LEGAL_DECISION',
+    )
+    expect(context).toEqual({
+      titleKey: 'dashboard.tasks.templateLegalApproval.title',
+      descriptionKey: 'dashboard.tasks.templateLegalApproval.description',
+    })
+  })
+
   it('returns publish banner when PENDING_RELEASE and publishTemplates', () => {
     const context = resolveTemplateWorkflowBannerContext('PENDING_RELEASE', {
       ...allFalse,
@@ -110,8 +123,9 @@ describe('templateWorkflowBannerContext', () => {
     const caps: TemplateWorkflowBannerCapabilities = {
       authorTemplates: true,
       decideTests: true,
-      decideApprovals: true,
-      publishTemplates: true,
+        decideApprovals: true,
+        decideLegalApprovals: false,
+        publishTemplates: true,
     }
 
     expect(resolveWorkflowBannerActionKind('TESTING', caps)).toBe('testing')

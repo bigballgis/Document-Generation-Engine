@@ -224,6 +224,9 @@ function onAuthoringPathDismiss() {
       <template #approval>
         <TemplateDetailApprovalTab
           :template-id="templateId"
+          :approval-matrix-mode="approvalMatrixMode"
+          :approval-sub-state="approvalSubState"
+          :approval-stage="approvalStage"
           :show-submit-for-approval="showSubmitForApproval"
           :show-publish-actions="showPublishActions"
           :show-governance-section="showGovernanceSection"

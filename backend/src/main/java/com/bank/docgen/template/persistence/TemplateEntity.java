@@ -1,6 +1,7 @@
 package com.bank.docgen.template.persistence;
 
 import com.bank.docgen.sharedkernel.document.compute.ComputeDslLimits;
+import com.bank.docgen.template.domain.ApprovalMatrixMode;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -68,6 +69,11 @@ public class TemplateEntity {
     @Column(name = "locale_variant_family_id")
     private UUID localeVariantFamilyId;
 
+    /** IBL-E3 — package-level approval matrix mode (default SINGLE_TRACK). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_matrix_mode", nullable = false, length = 32)
+    private ApprovalMatrixMode approvalMatrixMode;
+
     protected TemplateEntity() {
     }
 
@@ -88,6 +94,7 @@ public class TemplateEntity {
         this.masterId = masterId;
         this.lifecycleStatus = TemplateLifecycleStatus.DRAFT;
         this.locale = ComputeDslLimits.DEFAULT_LOCALE;
+        this.approvalMatrixMode = ApprovalMatrixMode.SINGLE_TRACK;
         this.createdBy = createdBy;
         this.updatedBy = createdBy;
         Instant now = Instant.now();
@@ -169,6 +176,16 @@ public class TemplateEntity {
 
     public void setLocaleVariantFamilyId(UUID localeVariantFamilyId) {
         this.localeVariantFamilyId = localeVariantFamilyId;
+    }
+
+    public ApprovalMatrixMode getApprovalMatrixMode() {
+        return approvalMatrixMode == null ? ApprovalMatrixMode.SINGLE_TRACK : approvalMatrixMode;
+    }
+
+    public void setApprovalMatrixMode(ApprovalMatrixMode approvalMatrixMode) {
+        this.approvalMatrixMode = approvalMatrixMode == null
+                ? ApprovalMatrixMode.SINGLE_TRACK
+                : approvalMatrixMode;
     }
 
     public void setName(String name) {

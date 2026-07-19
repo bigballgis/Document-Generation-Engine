@@ -21,6 +21,7 @@ const testerCapabilities: ManagementCapabilities = {
   authorTemplates: false,
   decideTests: true,
   decideApprovals: false,
+  decideLegalApprovals: false,
   publishTemplates: false,
   stopTemplates: false,
   restoreOrDeprecateTemplates: false,
@@ -121,6 +122,7 @@ describe('useWorkflowTasks', () => {
       capabilities: {
         ...testerCapabilities,
         decideApprovals: true,
+  decideLegalApprovals: false,
         publishTemplates: true,
       },
     } as never
@@ -471,6 +473,7 @@ describe('useWorkflowTasks', () => {
     const adminCapabilities: ManagementCapabilities = {
       ...testerCapabilities,
       decideApprovals: true,
+  decideLegalApprovals: false,
       publishTemplates: true,
     }
     const queues = getVisibleCollaborationQueues({
@@ -602,6 +605,7 @@ describe('useWorkflowTasks', () => {
       capabilities: {
         ...testerCapabilities,
         decideApprovals: true,
+  decideLegalApprovals: false,
         publishTemplates: true,
       },
     } as never
@@ -639,6 +643,7 @@ describe('useWorkflowTasks', () => {
     const adminCapabilities: ManagementCapabilities = {
       ...testerCapabilities,
       decideApprovals: true,
+  decideLegalApprovals: false,
       publishTemplates: true,
     }
     const partitions = buildTaskPartitions(scope, tasks.value, {

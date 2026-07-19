@@ -29,6 +29,7 @@ describe('routeCapabilities', () => {
           authorTemplates: false,
           decideTests: false,
           decideApprovals: false,
+  decideLegalApprovals: false,
           publishTemplates: false,
           stopTemplates: false,
           restoreOrDeprecateTemplates: false,
@@ -60,6 +61,7 @@ describe('routeCapabilities', () => {
           authorTemplates: true,
           decideTests: false,
           decideApprovals: false,
+  decideLegalApprovals: false,
           publishTemplates: false,
           stopTemplates: false,
           restoreOrDeprecateTemplates: false,
@@ -92,6 +94,7 @@ describe('routeCapabilities', () => {
           authorTemplates: false,
           decideTests: true,
           decideApprovals: false,
+  decideLegalApprovals: false,
           publishTemplates: false,
           stopTemplates: false,
           restoreOrDeprecateTemplates: false,
@@ -113,6 +116,42 @@ describe('routeCapabilities', () => {
     expect(allowed).toBe(true)
   })
 
+  it('IBL-E3: allows dashboard + template routes for LEGAL_REVIEWER with decideLegalApprovals', () => {
+    const legalSession = session({
+      roles: ['LEGAL_REVIEWER'],
+      visibleRoutes: [
+        ROUTE_KEYS.dashboardHome,
+        ROUTE_KEYS.templateManagement,
+        ROUTE_KEYS.assetLibraryManagement,
+      ],
+      capabilities: {
+        manageMasters: false,
+        reviewMasters: false,
+        authorTemplates: false,
+        decideTests: false,
+        decideApprovals: false,
+        decideLegalApprovals: true,
+        publishTemplates: false,
+        stopTemplates: false,
+        restoreOrDeprecateTemplates: false,
+        deleteTemplates: false,
+        exportTemplates: false,
+        viewCollaborationWorkItems: true,
+        maintainCollaborationTimeoutConfig: false,
+        authorContentModules: false,
+        decideContentModuleReviews: false,
+        manageContentModuleLifecycle: false,
+        manageApiPolicy: false,
+        readAudit: false,
+        manageAssetLibrary: true,
+        manageLegalHold: false,
+      },
+    })
+
+    expect(canAccessRouteWithCapability(ROUTE_KEYS.dashboardHome, legalSession)).toBe(true)
+    expect(canAccessRouteWithCapability(ROUTE_KEYS.templateManagement, legalSession)).toBe(true)
+  })
+
   it('allows template route for approver with decideApprovals', () => {
     const allowed = canAccessRouteWithCapability(
       ROUTE_KEYS.templateManagement,
@@ -124,6 +163,7 @@ describe('routeCapabilities', () => {
           authorTemplates: false,
           decideTests: false,
           decideApprovals: true,
+  decideLegalApprovals: false,
           publishTemplates: false,
           stopTemplates: false,
           restoreOrDeprecateTemplates: false,
@@ -156,6 +196,7 @@ describe('routeCapabilities', () => {
           authorTemplates: false,
           decideTests: false,
           decideApprovals: false,
+  decideLegalApprovals: false,
           publishTemplates: true,
           stopTemplates: false,
           restoreOrDeprecateTemplates: false,
@@ -225,6 +266,7 @@ describe('routeCapabilities', () => {
           authorTemplates: true,
           decideTests: false,
           decideApprovals: false,
+  decideLegalApprovals: false,
           publishTemplates: false,
           stopTemplates: false,
           restoreOrDeprecateTemplates: false,
@@ -257,6 +299,7 @@ describe('routeCapabilities', () => {
           authorTemplates: false,
           decideTests: false,
           decideApprovals: false,
+  decideLegalApprovals: false,
           publishTemplates: false,
           stopTemplates: false,
           restoreOrDeprecateTemplates: false,
@@ -289,6 +332,7 @@ describe('routeCapabilities', () => {
           authorTemplates: true,
           decideTests: true,
           decideApprovals: true,
+  decideLegalApprovals: false,
           publishTemplates: true,
           stopTemplates: true,
           restoreOrDeprecateTemplates: true,

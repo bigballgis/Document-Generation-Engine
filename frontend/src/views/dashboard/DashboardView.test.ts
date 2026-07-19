@@ -494,6 +494,7 @@ describe('DashboardView', () => {
         publishTemplates: true,
         reviewMasters: true,
         decideApprovals: false,
+  decideLegalApprovals: false,
         viewCollaborationWorkItems: true,
         maintainCollaborationTimeoutConfig: true,
       }),

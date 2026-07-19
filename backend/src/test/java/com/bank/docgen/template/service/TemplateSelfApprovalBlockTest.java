@@ -24,6 +24,7 @@ import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
+import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
@@ -368,6 +369,7 @@ class TemplateSelfApprovalBlockTest {
     private void stubApprovable(ManagementSessionClaims session) {
         when(groupAccessService.canDecideTemplateApprovals(session)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, session)).thenReturn(template);
+        when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_DECISION);
         when(apiPolicyMaterializationService.ensureApiPolicySkeleton(any(), any())).thenReturn(null);
     }
 

@@ -2,6 +2,7 @@
 import { toRef } from 'vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
+import TemplateApprovalMatrixModeField from '@/components/templates/TemplateApprovalMatrixModeField.vue'
 import TemplateRiskPromptConfigPanel from '@/components/templates/TemplateRiskPromptConfigPanel.vue'
 import { useTemplateCreateDialog } from '@/components/templates/useTemplateCreateDialog'
 import { DOCUMENT_LOCALE_OPTIONS } from '@/constants/documentLocales'
@@ -111,6 +112,9 @@ defineExpose({
               :placeholder="t('templates.create.localeVariantFamilyIdPlaceholder')"
             />
           </el-form-item>
+        </el-collapse-item>
+        <el-collapse-item :title="t('templates.approvalMatrix.createSectionTitle')" name="approvalMatrix">
+          <TemplateApprovalMatrixModeField v-model="form.approvalMatrixMode" />
         </el-collapse-item>
         <el-collapse-item :title="t('templates.riskPrompt.createSectionTitle')" name="riskPrompt">
           <TemplateRiskPromptConfigPanel

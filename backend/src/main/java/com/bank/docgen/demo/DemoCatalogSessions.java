@@ -32,6 +32,10 @@ final class DemoCatalogSessions {
         return session("10000007", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
     }
 
+    static ManagementSessionClaims legalReviewerSession() {
+        return session("10000009", List.of("LEGAL_REVIEWER"), List.of("RETAIL"));
+    }
+
     private static ManagementSessionClaims session(String username, List<String> roles, List<String> groups) {
         return new ManagementSessionClaims(
                 username,

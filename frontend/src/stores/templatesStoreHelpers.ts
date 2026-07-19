@@ -24,6 +24,8 @@ export function toTemplateSummary(
     locale: detail.locale ?? existing?.locale,
     localeVariantFamilyId:
       detail.localeVariantFamilyId ?? existing?.localeVariantFamilyId ?? null,
+    approvalMatrixMode: detail.approvalMatrixMode ?? existing?.approvalMatrixMode,
+    approvalStage: detail.approvalStage ?? existing?.approvalStage ?? null,
   }
 }
 

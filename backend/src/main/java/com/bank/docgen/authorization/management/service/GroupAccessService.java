@@ -50,6 +50,15 @@ public class GroupAccessService {
                 || session.roles().contains("TEMPLATE_APPROVER");
     }
 
+    /**
+     * IBL-E3 / ADR-0064 — capability {@code decideLegalApprovals} for LEGAL-stage decisions.
+     */
+    public boolean canDecideLegalApprovals(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("LEGAL_REVIEWER");
+    }
+
     public boolean canPublishTemplates(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN") || session.roles().contains("GROUP_ADMIN");
     }
@@ -117,7 +126,8 @@ public class GroupAccessService {
                 || session.roles().contains("GROUP_ADMIN")
                 || session.roles().contains("MASTER_DESIGNER")
                 || session.roles().contains("TEMPLATE_AUTHOR")
-                || session.roles().contains("TEMPLATE_APPROVER");
+                || session.roles().contains("TEMPLATE_APPROVER")
+                || session.roles().contains("LEGAL_REVIEWER");
     }
 
     public boolean canViewContentModuleStructure(ManagementSessionClaims session) {
@@ -140,7 +150,8 @@ public class GroupAccessService {
                 || session.roles().contains("GROUP_ADMIN")
                 || session.roles().contains("TEMPLATE_AUTHOR")
                 || session.roles().contains("TEMPLATE_TESTER")
-                || session.roles().contains("TEMPLATE_APPROVER");
+                || session.roles().contains("TEMPLATE_APPROVER")
+                || session.roles().contains("LEGAL_REVIEWER");
     }
 
     public boolean hasCollaborationWorkItemAdminVisibility(ManagementSessionClaims session) {
@@ -169,7 +180,8 @@ public class GroupAccessService {
                 || session.roles().contains("MASTER_DESIGNER")
                 || session.roles().contains("TEMPLATE_AUTHOR")
                 || session.roles().contains("TEMPLATE_TESTER")
-                || session.roles().contains("TEMPLATE_APPROVER");
+                || session.roles().contains("TEMPLATE_APPROVER")
+                || session.roles().contains("LEGAL_REVIEWER");
     }
 
     public boolean canUploadImageOrOtherAsset(ManagementSessionClaims session) {
@@ -197,6 +209,7 @@ public class GroupAccessService {
                 && !session.roles().contains("GROUP_ADMIN")
                 && !session.roles().contains("MASTER_DESIGNER")
                 && !session.roles().contains("TEMPLATE_AUTHOR")
-                && !session.roles().contains("TEMPLATE_APPROVER");
+                && !session.roles().contains("TEMPLATE_APPROVER")
+                && !session.roles().contains("LEGAL_REVIEWER");
     }
 }

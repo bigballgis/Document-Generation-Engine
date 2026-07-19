@@ -2,6 +2,7 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
+import com.bank.docgen.template.domain.ApprovalStage;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +25,14 @@ final class TemplateLifecycleDecisionCommentSupport {
     }
 
     String formatDecisionComment(LifecycleDecisionRequest request, ManagementSessionClaims session) {
+        return formatDecisionComment(request, session, request.approvalStage());
+    }
+
+    String formatDecisionComment(
+            LifecycleDecisionRequest request,
+            ManagementSessionClaims session,
+            ApprovalStage approvalStage
+    ) {
         String comment = request.commentSummary();
         if (requiresStructuredNegativeOpinion(request.decision())) {
             comment = appendBlock(comment, formatStructuredDecisionComment(request));
@@ -34,6 +43,9 @@ final class TemplateLifecycleDecisionCommentSupport {
         String exceptionMarker = formatExceptionMarker(request, session);
         if (exceptionMarker != null) {
             comment = appendBlock(comment, exceptionMarker);
+        }
+        if (approvalStage != null) {
+            comment = appendBlock(comment, "approvalStage=" + approvalStage.name());
         }
         return comment;
     }

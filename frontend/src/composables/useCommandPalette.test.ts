@@ -36,6 +36,7 @@ const fullCapabilities: ManagementCapabilities = {
   authorTemplates: true,
   decideTests: true,
   decideApprovals: true,
+  decideLegalApprovals: false,
   publishTemplates: true,
   stopTemplates: true,
   restoreOrDeprecateTemplates: true,

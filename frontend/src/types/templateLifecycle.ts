@@ -50,6 +50,8 @@ export interface LifecycleDecisionPayload {
   exceptionIntervention?: boolean
   exceptionReason?: string
   secondaryConfirmed?: boolean
+  /** IBL-E3 — required/implied under LEGAL_THEN_COMPLIANCE for RECORD_APPROVAL_DECISION. */
+  approvalStage?: 'LEGAL' | 'COMPLIANCE' | null
 }
 
 export type PublishGateCheckCode =

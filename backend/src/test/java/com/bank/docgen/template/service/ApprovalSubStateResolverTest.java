@@ -3,8 +3,10 @@ package com.bank.docgen.template.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.template.domain.ApprovalMatrixMode;
 import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.LifecycleAction;
+import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
@@ -46,7 +48,8 @@ class ApprovalSubStateResolverTest {
                 .thenReturn(List.of(record(
                         LifecycleAction.RECORD_TEST_DECISION,
                         TemplateLifecycleStatus.TESTING,
-                        TemplateLifecycleStatus.APPROVAL
+                        TemplateLifecycleStatus.APPROVAL,
+                        null
                 )));
 
         assertThat(resolver.resolve(template)).isEqualTo(ApprovalSubState.PENDING_SUBMIT);
@@ -60,16 +63,56 @@ class ApprovalSubStateResolverTest {
                         record(
                                 LifecycleAction.SUBMIT_FOR_APPROVAL,
                                 TemplateLifecycleStatus.APPROVAL,
-                                TemplateLifecycleStatus.APPROVAL
+                                TemplateLifecycleStatus.APPROVAL,
+                                null
                         ),
                         record(
                                 LifecycleAction.RECORD_TEST_DECISION,
                                 TemplateLifecycleStatus.TESTING,
-                                TemplateLifecycleStatus.APPROVAL
+                                TemplateLifecycleStatus.APPROVAL,
+                                null
                         )
                 ));
 
         assertThat(resolver.resolve(template)).isEqualTo(ApprovalSubState.PENDING_DECISION);
+    }
+
+    @Test
+    void resolve_multiStage_returnsPendingLegalAfterSubmit() {
+        TemplateEntity template = template(TemplateLifecycleStatus.APPROVAL);
+        template.setApprovalMatrixMode(ApprovalMatrixMode.LEGAL_THEN_COMPLIANCE);
+        when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
+                .thenReturn(List.of(record(
+                        LifecycleAction.SUBMIT_FOR_APPROVAL,
+                        TemplateLifecycleStatus.APPROVAL,
+                        TemplateLifecycleStatus.APPROVAL,
+                        null
+                )));
+
+        assertThat(resolver.resolve(template)).isEqualTo(ApprovalSubState.PENDING_LEGAL_DECISION);
+    }
+
+    @Test
+    void resolve_multiStage_returnsPendingComplianceAfterLegalApprove() {
+        TemplateEntity template = template(TemplateLifecycleStatus.APPROVAL);
+        template.setApprovalMatrixMode(ApprovalMatrixMode.LEGAL_THEN_COMPLIANCE);
+        when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
+                .thenReturn(List.of(
+                        record(
+                                LifecycleAction.RECORD_APPROVAL_DECISION,
+                                TemplateLifecycleStatus.APPROVAL,
+                                TemplateLifecycleStatus.APPROVAL,
+                                LifecycleDecision.APPROVED
+                        ),
+                        record(
+                                LifecycleAction.SUBMIT_FOR_APPROVAL,
+                                TemplateLifecycleStatus.APPROVAL,
+                                TemplateLifecycleStatus.APPROVAL,
+                                null
+                        )
+                ));
+
+        assertThat(resolver.resolve(template)).isEqualTo(ApprovalSubState.PENDING_COMPLIANCE_DECISION);
     }
 
     private TemplateEntity template(TemplateLifecycleStatus status) {
@@ -89,7 +132,8 @@ class ApprovalSubStateResolverTest {
     private TemplateLifecycleRecordEntity record(
             LifecycleAction action,
             TemplateLifecycleStatus from,
-            TemplateLifecycleStatus to
+            TemplateLifecycleStatus to,
+            LifecycleDecision decision
     ) {
         return new TemplateLifecycleRecordEntity(
                 UUID.randomUUID(),
@@ -97,7 +141,7 @@ class ApprovalSubStateResolverTest {
                 action,
                 from,
                 to,
-                null,
+                decision,
                 null,
                 null,
                 "10000003"

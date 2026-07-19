@@ -1,0 +1,30 @@
+{
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -SkipBuild -Reason \"IBL-E3/#130 stage10 SkipBuild after E2E FE routeCapabilities redeploy\"",
+  "git_short": "e66a3bbf",
+  "evidence_dir": "docs/plan/evidence/ibl-e3-stage10-deploy",
+  "uiux_manifest": "frontend/e2e/evidence/IBL-E3-uiux-manifest.md",
+  "stage5_frontend_image_id": "sha256:ba1ed85d4781e9e12fabd8e8b3dda808c01b64f7db1a9bb2bde23251307eeff7",
+  "frontend_image_id": "sha256:0b7debb4df1af52153279cf914c596867233614dada577e2f98217c7fa435076",
+  "when": "2026-07-20T05:53:56+08:00",
+  "frontend_port": 4173,
+  "stage5_backend_image_id": "sha256:4a6146b05ceea827f0bf68f17531e6471590071cdad8c67d29c76ffdd9662782",
+  "healthz_body": {
+    "status": "UP"
+  },
+  "compose_project": "documentgenerationengine",
+  "task_ids": [
+    "130"
+  ],
+  "worktree": "D:/working/DGE-ibl-e3-legal-approval-matrix",
+  "healthz_8080": 200,
+  "result": "DEPLOY_OK",
+  "frontend_4173": 200,
+  "slice": "ibl-e3-legal-approval-matrix",
+  "branch": "feat/ibl-e3-legal-approval-matrix",
+  "git_tip": "e66a3bbfde70d1e6be0456524403172cd413b969",
+  "skip_build": true,
+  "backend_image_id": "sha256:eaf639db7a4ec735a631d78487b598cfd9e388dda57a3c37d369ddd409e57beb",
+  "claims_done": false,
+  "skip_build_rationale": "Stack already had latest FE with routeCapabilities LEGAL_REVIEWER fix from Stage 6 E2E redeploy (FE image CreatedAt 2026-07-20 05:39; newer than Stage 5 ba1ed85d). SkipBuild packaging: FE COPY dist CACHED; BE jar COPY CACHED. Recreate + health only.",
+  "mode": "SkipBuild"
+}

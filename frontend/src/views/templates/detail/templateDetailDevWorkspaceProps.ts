@@ -1,3 +1,4 @@
+import type { ApprovalMatrixMode, ApprovalStage, ApprovalSubState } from '@/types/approvalMatrix'
 import type { SemverBumpLevel } from '@/utils/semver'
 import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
 import type {
@@ -25,7 +26,9 @@ export type TemplateDetailDevWorkspaceProps = {
   rules: CompositionRule[] | null
   groupCode: string | null
   lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  approvalSubState?: ApprovalSubState | null
+  approvalMatrixMode?: ApprovalMatrixMode | null
+  approvalStage?: ApprovalStage | null
   canEditContentModuleReferences: boolean
   coverageRefreshToken: number
   lastPreview: PreviewRecord | null

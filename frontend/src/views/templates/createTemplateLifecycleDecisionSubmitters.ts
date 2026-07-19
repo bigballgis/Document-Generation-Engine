@@ -3,6 +3,7 @@ import type { Router } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { templatePackageHubPath } from '@/routing/routeKeys'
 import type { useTemplatesStore } from '@/stores/templates'
+import { deriveApprovalStage } from '@/utils/approvalMatrix'
 import type { TemplateDetailTab } from '@/views/templates/templateDetailTabs'
 import type { useTemplateLifecycleGates } from '@/views/templates/useTemplateLifecycleGates'
 
@@ -86,6 +87,9 @@ export function createTemplateLifecycleDecisionSubmitters(deps: {
         })
         ElMessage.success(t('templates.lifecycle.testDecisionSuccess'))
       } else if (mode === 'approval-reject') {
+        const approvalStage = deriveApprovalStage(
+          templatesStore.selectedTemplate?.approvalSubState,
+        )
         await templatesStore.recordApprovalDecision(templateId.value, {
           decision: 'REJECTED',
           reasonCategory: payload.reasonCategory,
@@ -94,9 +98,13 @@ export function createTemplateLifecycleDecisionSubmitters(deps: {
           remediationTestRecordId: payload.remediationTestRecordId,
           remediationChangeDiffRef: payload.remediationChangeDiffRef,
           remediationChecklistCode: payload.remediationChecklistCode,
+          ...(approvalStage ? { approvalStage } : {}),
         })
         ElMessage.success(t('templates.lifecycle.approvalDecisionSuccess'))
       } else if (mode === 'approval-approve') {
+        const approvalStage = deriveApprovalStage(
+          templatesStore.selectedTemplate?.approvalSubState,
+        )
         await templatesStore.recordApprovalDecision(templateId.value, {
           decision: 'APPROVED',
           commentSummary: payload.commentSummary,
@@ -105,6 +113,7 @@ export function createTemplateLifecycleDecisionSubmitters(deps: {
           exceptionIntervention: payload.exceptionIntervention,
           exceptionReason: payload.exceptionReason,
           secondaryConfirmed: payload.secondaryConfirmed,
+          ...(approvalStage ? { approvalStage } : {}),
         })
         ElMessage.success(t('templates.lifecycle.approvalDecisionSuccess'))
       }

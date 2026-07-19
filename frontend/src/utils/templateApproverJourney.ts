@@ -1,8 +1,10 @@
+import type { ApprovalSubState } from '@/types/approvalMatrix'
 import type { TemplateLifecycleStatus, TemplateSummary } from '@/types/template'
+import { isPendingApproverDecision } from '@/utils/approvalMatrix'
 
 export interface TemplateApproverJourneyContext {
   lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  approvalSubState?: ApprovalSubState | null
   submissionReviewedConfirmed?: boolean
   keyEvidenceViewedConfirmed?: boolean
 }
@@ -26,10 +28,11 @@ const EMPTY_GUIDANCE = 'journey.roles.TEMPLATE_APPROVER.empty.guidance'
 
 export function isAwaitingApproverDecision(template: {
   lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  approvalSubState?: ApprovalSubState | null
 }): boolean {
   return (
-    template.lifecycleStatus === 'APPROVAL' && template.approvalSubState === 'PENDING_DECISION'
+    template.lifecycleStatus === 'APPROVAL' &&
+    isPendingApproverDecision(template.approvalSubState)
   )
 }
 
@@ -50,7 +53,7 @@ export function resolveTemplateApproverJourneyIndex(
 ): TemplateApproverJourneyResolution {
   if (
     context.lifecycleStatus !== 'APPROVAL' ||
-    context.approvalSubState !== 'PENDING_DECISION'
+    !isPendingApproverDecision(context.approvalSubState)
   ) {
     return { currentStepIndex: null }
   }

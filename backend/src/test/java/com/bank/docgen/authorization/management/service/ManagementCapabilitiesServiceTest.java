@@ -20,6 +20,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.authorTemplates()).isTrue();
         assertThat(capabilities.decideTests()).isTrue();
         assertThat(capabilities.decideApprovals()).isTrue();
+        assertThat(capabilities.decideLegalApprovals()).isTrue();
         assertThat(capabilities.publishTemplates()).isTrue();
         assertThat(capabilities.stopTemplates()).isTrue();
         assertThat(capabilities.restoreOrDeprecateTemplates()).isTrue();
@@ -67,6 +68,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.deleteTemplates()).isFalse();
         assertThat(capabilities.decideTests()).isFalse();
         assertThat(capabilities.decideApprovals()).isFalse();
+        assertThat(capabilities.decideLegalApprovals()).isFalse();
         assertThat(capabilities.exportTemplates()).isFalse();
         assertThat(capabilities.viewCollaborationWorkItems()).isFalse();
         assertThat(capabilities.maintainCollaborationTimeoutConfig()).isFalse();
@@ -117,6 +119,7 @@ class ManagementCapabilitiesServiceTest {
         var capabilities = service.resolve(Set.of(ManagementRole.TEMPLATE_APPROVER));
 
         assertThat(capabilities.decideApprovals()).isTrue();
+        assertThat(capabilities.decideLegalApprovals()).isFalse();
         assertThat(capabilities.authorTemplates()).isFalse();
         assertThat(capabilities.manageApiPolicy()).isFalse();
         assertThat(capabilities.deleteTemplates()).isFalse();
@@ -127,6 +130,18 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
         assertThat(capabilities.manageAssetLibrary()).isTrue();
         assertThat(capabilities.manageLegalHold()).isFalse();
+    }
+
+    @Test
+    void legalReviewerCanDecideLegalApprovalsOnly() {
+        var capabilities = service.resolve(Set.of(ManagementRole.LEGAL_REVIEWER));
+
+        assertThat(capabilities.decideLegalApprovals()).isTrue();
+        assertThat(capabilities.decideApprovals()).isFalse();
+        assertThat(capabilities.authorTemplates()).isFalse();
+        assertThat(capabilities.viewCollaborationWorkItems()).isTrue();
+        assertThat(capabilities.manageAssetLibrary()).isTrue();
+        assertThat(capabilities.decideContentModuleReviews()).isFalse();
     }
 
     @Test
