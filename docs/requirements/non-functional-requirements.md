@@ -10,6 +10,7 @@
 - [领域模型](../domain/domain-model.md)
 - [权限矩阵](../security/permission-matrix.md)
 - [技术选型日志](../architecture/technology-stack-decisions.md)
+- [k6 + NFR confirmation path (IBL-D3)](../architecture/k6-nfr-confirmation-path.md)
 - [文档治理规则](../governance.md)
 
 ## 归口原则
@@ -71,6 +72,13 @@
 > thresholds. Do **not** move them into «已确认» until the user explicitly confirms.
 > Owner: doc-keeper (LR-D5 / Task Master #38). Authored: 2026-07-12.
 > Fed by LR-D6 evidence (merge `56383eb`); smoke numbers remain **inputs**, not SLOs.
+>
+> **Confirmation path (IBL-D3 / #125 / F22 — tooling only):** Industry load suite **k6** is
+> checked in at [`perf/k6/`](../../perf/k6/) with runner [`scripts/k6-smoke.ps1`](../../scripts/k6-smoke.ps1)
+> and architecture note [k6-nfr-confirmation-path.md](../architecture/k6-nfr-confirmation-path.md).
+> Scripted evidence lands under [ibl-d3-k6-nfr-path/](../plan/evidence/ibl-d3-k6-nfr-path/).
+> That path **feeds** this section as **measured-input / proposed** material only.
+> A green k6 smoke **does not** confirm any row below. Soft k6 `thresholds` ≠ product SLOs.
 
 **Related (do not conflate):** Role task-time budgets live in
 [usability-review.md](../product/usability-review.md) §CD-UX-T01 (non-SLA UX draft).
@@ -87,11 +95,11 @@ remain `draft: true` until confirmation here.
 | Ports | Backend `8080` / Management UI `4173` |
 | Stack / git | `stackVersion` **a262706** (see evidence JSON) |
 | Template | `CORP-FOL-OFFER` (FOL demo) |
-| Harness | JUnit load-smoke under `backend/src/test/.../runtime/loadsmoke/` (no vendor APM) |
+| Harness | JUnit load-smoke under `backend/src/test/.../runtime/loadsmoke/` (generation capacity; no vendor APM). **IBL-D3:** industry **k6** suite under [`perf/k6/`](../../perf/k6/) (safe `/healthz` smoke + confirmation-path wiring) |
 | Metrics (ops) | Micrometer `docgen.generation.duration` / `docgen.pdf.conversion.*` (F8); Prometheus rules stay draft |
-| Evidence | Historical LR-D6: [latest-summary.json](../plan/evidence/lrp-d6-load-smoke/latest-summary.json); [TRIAGE-pdf-422.md](../plan/evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md) (`DEF-LRP-D6-001` → **CLOSED**). IBL-B2 re-smoke: [ibl-b2-pdf-capacity/](../plan/evidence/ibl-b2-pdf-capacity/) |
+| Evidence | Historical LR-D6: [latest-summary.json](../plan/evidence/lrp-d6-load-smoke/latest-summary.json); [TRIAGE-pdf-422.md](../plan/evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md) (`DEF-LRP-D6-001` → **CLOSED**). IBL-B2 re-smoke: [ibl-b2-pdf-capacity/](../plan/evidence/ibl-b2-pdf-capacity/). **IBL-D3 k6 path:** [ibl-d3-k6-nfr-path/](../plan/evidence/ibl-d3-k6-nfr-path/) (measured-input / presence only — **not** confirmed SLOs) |
 
-**Evidence status legend:** `pre-measurement` = industry-norm / planning proposal, not yet measured (or not measured for that dimension); `measured-input` = LR-D6 (or named adjacent) observation used as proposal input only.
+**Evidence status legend:** `pre-measurement` = industry-norm / planning proposal, not yet measured (or not measured for that dimension); `measured-input` = LR-D6 / IBL-B2 / IBL-D3 k6 (or named adjacent) observation used as proposal input only — **never** auto-promoted to confirmed.
 
 #### Proposal table
 
@@ -102,7 +110,7 @@ remain `draft: true` until confirmation here.
 | SSE first-event latency | ≤ **5 s** from preview start to first progress/event in browser | **pre-measurement** | Playwright timing on preview journey **or** harness timestamp of first SSE event (not captured in D6 Scenario B summary) | Prior LR-D5 table; D6 did **not** record first-event ms | **Post-launch** (unless LR-E1 browser SSE proof expands measurement). |
 | SSE stream integrity (no silent drop) | **Zero dropped streams** at ≥ **5** parallel preview streams; all streams reach a terminal event | **measured-input** | LR-D6 Scenario B | [latest-summary.json](../plan/evidence/lrp-d6-load-smoke/latest-summary.json) `scenarioB`: started=5, terminal=5, dropped=0 | **Launch-gate (LR-E2 / LR-E1 adjacency):** Preserve zero silent-drop bar; re-evidence if SSE path changes. |
 | Concurrent sync generation capacity | Requested concurrency **≥ 20** in-flight sync generations. **Historical LR-D6 (pool=2/queue=0):** n=20, success=12, **errorRate=0.4** — concurrent PDF → `TEMPLATE_VALIDATION_FAILED` ([DEF-LRP-D6-001](../plan/evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md)). **IBL-B2 (pool=4/queue=8; #114 Done):** Scenario A n=20 success=**20** errors=**0**; PDF failures **0/10**; `poolRejections=0` — [ibl-b2-pdf-capacity/](../plan/evidence/ibl-b2-pdf-capacity/). DEF **CLOSED**. Do **not** invent confirmed concurrent-PDF SLO from this smoke; p95 observed under B2 is higher (~41 s) — still **not** an NFR confirmation. | **measured-input** | LR-D6 + IBL-B2 Scenario A | Historical triage + IBL-B2 evidence; do not tune thresholds to green the smoke | **Launch-gate:** `DEF-LRP-D6-001` disposition **CLOSED** (IBL-B2). User may still confirm interim latency envelope separately. **Post-launch:** Steady-state concurrent PDF SLO after ops baseline confirmation. |
-| Availability target | ≥ **99.5%** monthly for management API + sync generation path (planning) | **pre-measurement** | Platform `healthz` / structured `readyz` (Postgres-gated per SOR-O06) + deploy/uptime records — **no** vendor APM invented | Industry-norm planning; not measured in D6 | **Post-launch** (ops maturity); launch checklist may only require health endpoints green. |
+| Availability target | ≥ **99.5%** monthly for management API + sync generation path (planning) | **pre-measurement** | Platform `healthz` / structured `readyz` (Postgres-gated per SOR-O06) + deploy/uptime records — **no** vendor APM invented. **IBL-D3:** k6 `smoke-healthz.js` can re-probe acceptance `healthz` as a **confirmation-path smoke** (latency/error samples stay measured-input; do **not** treat as monthly availability proof) | Industry-norm planning; not measured in D6; IBL-D3 does **not** confirm 99.5% | **Post-launch** (ops maturity); launch checklist may only require health endpoints green. |
 | Max concurrent management sessions | ≤ **50** concurrent authenticated UI sessions per acceptance/single-host class (planning) | **pre-measurement** | Session/store metrics or controlled Playwright multi-session smoke (not run in D6) | Planning only | **Post-launch** capacity planning. |
 | Max concurrent SSE connections | ≥ **5** parallel preview streams (integrity proven); higher caps (e.g. 20+) **unmeasured** | **measured-input** (≥5 integrity); **pre-measurement** (higher caps) | LR-D6 Scenario B for ≥5; scale tests later via same harness class | Scenario B zero drops | **Launch-gate:** ≥5 zero-drop integrity. **Post-launch:** Raise cap after measured soak. |
 | Template capacity / catalog list p95 | ≥ **500** templates per tenant; catalog list p95 ≤ **2 s** (planning) | **pre-measurement** (as NFR); adjacent UX: LR-C5 catalog pagination evidence exists but is **not** promoted here as SLA | Catalog API timing / Playwright list journeys | Keep pending; LR-C5 p95 ~75 ms is feature evidence, not confirmed NFR | **Post-launch** / capacity; not LR-E2 blocker unless user elevates. |
@@ -112,6 +120,8 @@ remain `draft: true` until confirmation here.
 **Percentile note (Scenario A):** Reported p50/p95/p99 are over the **12 successful** responses in a mixed DOCX/PDF cohort. They are **not** a clean “PDF-only p95” and **not** a DOCX-only p95. Use them as concurrent FOL smoke envelope only.
 
 **Confirmation gate:** Until user confirmation, `deploy/observability/prometheus-alerts.yaml` keeps `draft: true`; F8 §8 draft thresholds that still cite ≤3 s / ≤10 s are **stale relative to D6 FOL concurrent smoke** and must be revised together with this table when confirmed. LR-D3 ops draft table + runbook annotation targets: [runbook § Draft alert thresholds](../operations/runbook.md#draft-alert-thresholds-lrd3--not-confirmed-slos) · [deploy/observability/README.md](../../deploy/observability/README.md).
+
+**IBL-D3 confirmation-path reminder:** Having k6 + evidence under [ibl-d3-k6-nfr-path/](../plan/evidence/ibl-d3-k6-nfr-path/) means reviewers can **re-run** a scripted probe and attach results here as measured-input. It does **not** close LR-D5 confirmation, invent SLOs, or flip launch checklist GO items.
 
 ## 已确认：生产渲染（CORE-FORTRESS F4 / LR-A7 子集）
 

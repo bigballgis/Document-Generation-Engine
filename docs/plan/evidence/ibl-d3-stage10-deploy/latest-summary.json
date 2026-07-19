@@ -1,0 +1,19 @@
+{
+  "result": "DEPLOY_OK",
+  "slice": "ibl-d3-k6-nfr-path",
+  "task": 125,
+  "gitTip": "2bfb8e4034920c01055824606aa2d678a26bfe37",
+  "branch": "feat/ibl-d3-k6-nfr-path",
+  "mode": "SkipBuildHealthRecheck",
+  "skipBuildAttempt": "REFUSED_JWT_SECRET_DEFAULT",
+  "stackSource": "prior IBL-D2 ForceRebuild (documentgenerationengine)",
+  "backendImageId": "sha256:de73ac7f08e8e2b635bbe152f6805919302875be42edb6ebd40dbbda55e74a25",
+  "frontendImageId": "sha256:d7657314570d1bbe138549d865724129b064c2c2e884c95c641da009bdc2ab5b",
+  "healthz8080": 200,
+  "frontend4173": 200,
+  "verifiedAt": "2026-07-19T17:21:54+08:00",
+  "feE2eInScope": false,
+  "worktree": "D:/working/DGE-ibl-d3-k6-nfr-path",
+  "composeProject": "documentgenerationengine",
+  "doneClaimed": false
+}

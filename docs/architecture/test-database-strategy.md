@@ -54,7 +54,7 @@ verify in CI as a **second job**, not a replacement for the H2 gate.)
 
 - Does **not** replace default H2 verify.
 - Does **not** implement IBL-D2 LibreOffice CI lane.
-- Does **not** invent SLOs (IBL-D3) or flip go-live / checklist **#3b/#5a**.
+- Does **not** invent SLOs (IBL-D3 — see [k6-nfr-confirmation-path.md](./k6-nfr-confirmation-path.md)) or flip go-live / checklist **#3b/#5a**.
 
 ## Traceability
 

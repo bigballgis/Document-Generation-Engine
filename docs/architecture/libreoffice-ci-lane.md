@@ -65,7 +65,7 @@ Command discovery: `LIBREOFFICE_COMMAND` env (default `soffice`).
 - Do **not** invent LibreOffice-attributed golden PDF binaries when soffice is absent
   (IBL-C3 / F19 honesty).
 - Word / pixel baselines remain **IBL-B7** (Blocked).
-- IBL-D3 k6 / D4 LO chaos / D5 legalhold — separate leaves.
+- IBL-D3 k6 / D4 LO chaos / D5 legalhold — separate leaves; D3 path: [k6-nfr-confirmation-path.md](./k6-nfr-confirmation-path.md).
 
 ## Traceability
 

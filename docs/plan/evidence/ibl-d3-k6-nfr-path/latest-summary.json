@@ -1,0 +1,30 @@
+{
+  "slice": "ibl-d3-k6-nfr-path",
+  "taskIds": ["125"],
+  "finding": "F22",
+  "timestampUtc": "20260719T091747Z",
+  "mode": "dry-run",
+  "baseUrl": "http://localhost:8080",
+  "k6Available": false,
+  "runner": "docker-missing-image",
+  "exitCode": 0,
+  "healthzPreflight": "OK 200",
+  "script": "perf/k6/smoke-healthz.js",
+  "nfrStatus": "measured-input path only — proposed awaiting confirmation (no confirmed SLO)",
+  "metrics": null,
+  "k6Executed": false,
+  "hostResiduals": {
+    "wingetInstall": "cancelled_msi_1602",
+    "dockerPullGrafanaK6": "registry_timeout",
+    "portableZip": "download_hung_0_bytes_aborted",
+    "healthz": "UP"
+  },
+  "notes": [
+    "Mode: dry-run / presence evidence (k6 load not executed).",
+    "Suite checked in under perf/k6/; see perf/k6/README.md.",
+    "Install host k6: winget install --id GrafanaLabs.k6 -e then re-run without -DryRun.",
+    "Or: docker pull grafana/k6:latest and re-run (BASE_URL=http://host.docker.internal:8080 on Docker Desktop).",
+    "Honesty: no load metrics invented.",
+    "Do not promote any future k6 numbers to confirmed SLOs without separate user confirmation."
+  ]
+}
