@@ -15,6 +15,8 @@ import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.port.VariableSchemaValidationPort;
+import com.bank.docgen.template.port.CompositionInclusionAxes;
+import com.bank.docgen.template.service.CompositionInclusionRuleService;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.VariableComputeService;
 import com.bank.docgen.template.service.VersionFidelityWarningService;
@@ -39,6 +41,7 @@ public class DocumentGenerationEngine {
             DocxAssembler docxAssembler,
             DocumentArtifactPipeline documentArtifactPipeline,
             TemplateContentModuleReferenceService contentModuleReferenceService,
+            CompositionInclusionRuleService compositionInclusionRuleService,
             RenderProfileService renderProfileService,
             VersionFidelityWarningService versionFidelityWarningService,
             VariableComputeService variableComputeService,
@@ -55,6 +58,7 @@ public class DocumentGenerationEngine {
                 docxAssembler,
                 documentArtifactPipeline,
                 contentModuleReferenceService,
+                compositionInclusionRuleService,
                 renderProfileService,
                 versionFidelityWarningService,
                 variableComputeService,
@@ -71,7 +75,17 @@ public class DocumentGenerationEngine {
             String outputFormat,
             EncryptionOptionsView encryption
     ) {
-        return generate(template, releaseVersion, variables, outputFormat, encryption, CallerRenderOverride.empty(), "sync", null);
+        return generate(
+                template,
+                releaseVersion,
+                variables,
+                outputFormat,
+                encryption,
+                CallerRenderOverride.empty(),
+                "sync",
+                null,
+                CompositionInclusionAxes.empty()
+        );
     }
 
     public GeneratedDocument generate(
@@ -90,7 +104,8 @@ public class DocumentGenerationEngine {
                 encryption,
                 callerRenderOverride,
                 "sync",
-                null
+                null,
+                CompositionInclusionAxes.empty()
         );
     }
 
@@ -110,7 +125,8 @@ public class DocumentGenerationEngine {
                 encryption,
                 CallerRenderOverride.empty(),
                 mode,
-                null
+                null,
+                CompositionInclusionAxes.empty()
         );
     }
 
@@ -131,7 +147,8 @@ public class DocumentGenerationEngine {
                 encryption,
                 callerRenderOverride,
                 mode,
-                null
+                null,
+                CompositionInclusionAxes.empty()
         );
     }
 
@@ -145,6 +162,30 @@ public class DocumentGenerationEngine {
             String mode,
             String localeTag
     ) {
+        return generate(
+                template,
+                releaseVersion,
+                variables,
+                outputFormat,
+                encryption,
+                callerRenderOverride,
+                mode,
+                localeTag,
+                CompositionInclusionAxes.empty()
+        );
+    }
+
+    public GeneratedDocument generate(
+            TemplateEntity template,
+            String releaseVersion,
+            Map<String, Object> variables,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            CallerRenderOverride callerRenderOverride,
+            String mode,
+            String localeTag,
+            CompositionInclusionAxes inclusionAxes
+    ) {
         Instant start = Instant.now();
         String format = GenerationMetrics.normalizeFormat(outputFormat);
         String invocationMode = mode == null || mode.isBlank() ? "sync" : mode;
@@ -156,7 +197,8 @@ public class DocumentGenerationEngine {
                     outputFormat,
                     encryption,
                     callerRenderOverride,
-                    localeTag
+                    localeTag,
+                    inclusionAxes == null ? CompositionInclusionAxes.empty() : inclusionAxes
             );
             generationMetrics.record(Duration.between(start, Instant.now()), "success", format, invocationMode);
             return result;

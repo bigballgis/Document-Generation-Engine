@@ -107,7 +107,7 @@ Field names, capability breakdown, error-code names, and response structure are 
 - `permissions` 的 v1 抽象权限枚举确认为 `ALLOW_PRINT`、`ALLOW_COPY`、`ALLOW_EDIT`、`ALLOW_ANNOTATE`、`ALLOW_FORM_FILL`。
 - `templateId` 采用可读稳定模板键：`TPL-` 前缀 + 英文、数字和连字符；发布后不可修改，不得包含客户、个人、账号、金额或其他敏感业务信息。
 - `taskId`、`batchId`、`documentId` 采用资源前缀 + 不透明随机 token：`TASK-`、`BATCH-`、`DOC-`；token 不得承载日期、序号、模板、客户或业务变量含义。
-- `context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`；字段值均为字符串；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。
+- `context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`、`jurisdiction`、`product`；字段值均为字符串；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。`jurisdiction` / `product` / `channel` 可作为组合纳入控制输入（IBL-E2 / ADR-0063）；`sourceSystem` / `businessRequestId` / `upstreamTraceId` / `scenario` 不进入 inclusion 匹配。
 - API 管理配置展示字段 v1 基线确认为 `apiPolicy.policyVersion`、`apiPolicy.updatedAt`、`apiPolicy.updatedBy`、`apiPolicy.allowedOutputFormats`、`apiPolicy.allowedOutputModes`、`apiPolicy.batchLimits.syncMaxItems`、`apiPolicy.batchLimits.asyncMaxItems`、`apiPolicy.encryptionCapabilities`、`apiPolicy.adGroupAuthorizationSummary`、`apiPolicy.credentialSummary`。
 - 异步任务受理响应返回 `task.queryPath`，值为任务查询相对路径，不是免认证或签名地址；后续查询仍需 API 凭证、AD Group 和模板级授权。
 - v1 采用统一授权判定基线；文档生成、批量生成、异步任务查询、异步任务取消、下载取文件、API 契约查看、可调用版本列表、**调用记录查询**和 API 管理均在业务处理或敏感响应返回前完成对应授权判定。
@@ -295,6 +295,8 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 **CE-K08（BDD `ready`，2026-07-15）：** `ContentModuleVersionView` / create-update 请求增加可选法务字段 `jurisdiction`、`effectiveFrom`、`effectiveTo`、`legalReviewRef`；`GET /content-modules` 增加对应筛选 query；发布门禁新增硬项 `PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED`（与 `CONTENT_MODULE_REFERENCES` 正交）。行为 SoT：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)。OpenAPI 字段以同片实现同步为准。
 
 **IBL-E1 / PD-4（BDD `ready`，2026-07-19；Task Master #128；[ADR-0062 Accepted](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)）：** 模板包与内容模块包行增加必填 `locale`（BCP-47）与可选 `localeVariantFamilyId`；管理创建请求（`CreateTemplateRequest` / `CreateContentModuleRequest`）及 summary/detail 视图同步；`GET /templates` 与 `GET /content-modules` 增加可选精确筛选 `locale`（与既有 filters **AND**；非法值推荐空页）。同组同家族 `(localeVariantFamilyId, locale)` 冲突 → `409`（`LOCALE_VARIANT_CONFLICT`）。发布门禁新增硬项 `PublishGateCheckCode.CONTENT_MODULE_LOCALE_MISMATCH`，与 CE-K08 过期门禁正交。Runtime：路径仍钉扎模板版本；非空 `context.locale` 与模板 `locale` 语言不兼容 → `422`（`TEMPLATE_LOCALE_MISMATCH`）；省略 `context.locale` 不做该校验（compute 默认仍按 ADR-0056）。**不**提供按 locale 自动选包。行为 SoT：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)（**BDD-IBL-E1-001…018** / E1-C*）。正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。
+
+**IBL-E2 / PD-5（BDD `ready`，2026-07-20；Task Master #129；[ADR-0063 Accepted](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)）：** Runtime `context` 白名单新增可选 `jurisdiction`、`product`；既有 `channel` 额外承担组合匹配（非 outbound delivery）。模板版本挂载 **Composition Inclusion Rules**（结构化；与锚点可见性 `/rules` 正交）。管理面 `GET|PUT /api/management/v1/templates/{templateId}/composition-inclusion-rules`（草稿可写；非法规则 → `422` `COMPOSITION_INCLUSION_RULE_INVALID`）。发布硬门禁 `PublishGateCheckCode.COMPOSITION_INCLUSION_REFERENCE_INVALID`。Runtime 确定性 INCLUDE/EXCLUDE；`requiredInclusion` 不满足 → `422` `COMPOSITION_INCLUSION_UNSATISFIED`；可选 CE-K08 双方非空 jurisdiction 不等 → `422` `CONTENT_MODULE_JURISDICTION_MISMATCH`。成功路径审计/invocation 摘要含非敏感 `compositionInclusionSummary`（`matchedRuleId` 默认纳入用字面 `NONE_DEFAULT`）。导出包携带 inclusion rules。路径仍钉扎模板版本；**不**按辖区自动选包；**不**在 CM 版本增加 product/channel 字段；管理 UI 规则编辑器非本叶 Done 条件（`frontend_ui_in_scope=false`）。行为 SoT：[ibl-e2-jurisdiction-rule-engine.md](../behavior/ibl-e2-jurisdiction-rule-engine.md)（**BDD-IBL-E2-001…016** / E2-C*）。正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。Accepted ADR ≠ E2 impl Done；**不**翻转 #3b/#5a。
 
 **PRR-C01 / Task #103（BDD `ready`，2026-07-18）：** 管理面 `GET|PUT /api/management/v1/templates/{templateId}/dev-version/author-word-page-count` 读写可选 `authorWordPageCount`（Microsoft Word 作者页数；**禁止**用 LO/PDF 回填）。PDF 成功路径按预算 `B=paginationDeltaBudgetPages`（默认 1）发出 `LOW_RISK_PAGINATION_DIFFERENCE`；`delta > 2×B` 时发布门禁 `PublishGateCheckCode.PAGINATION_DELTA_BUDGET` blocker。行为 SoT：[prod-adr-0042-0043-closeout.md](../behavior/prod-adr-0042-0043-closeout.md)。
 
@@ -720,18 +722,20 @@ Generate document request draft
 
 ## context 字段白名单确认
 
-确认基线：`context` 只用于调用方非敏感追踪和分组排查信息，不用于传递模板变量、客户信息或生成控制参数。
+确认基线：`context` 用于调用方非敏感追踪/排查信息，以及（IBL-E2）可选的**组合纳入控制轴**；不用于传递模板变量、客户信息或任意生成控制参数。
 
 | 字段名 | 语义 | 约束 |
 | --- | --- | --- |
-| `sourceSystem` | 调用来源系统。 | 字符串；不得放入 API secret 或内部敏感配置。 |
-| `channel` | 调用渠道。 | 字符串；用于渠道统计或排查。 |
-| `businessRequestId` | 调用方业务请求关联标识。 | 字符串；不得直接使用客户姓名、账号、证件号、金额或合同全文。 |
-| `upstreamTraceId` | 上游链路追踪标识。 | 字符串；用于跨系统排查。 |
-| `scenario` | 调用场景。 | 字符串；用于非敏感场景分类。 |
-| `locale` | 调用方期望语种或地区提示。 | 字符串；不替代模板变量或输出规则。 |
+| `sourceSystem` | 调用来源系统。 | 字符串；不得放入 API secret 或内部敏感配置；**不**进入 inclusion 匹配。 |
+| `channel` | 调用渠道。 | 字符串；用于渠道统计或排查；**另**作为 Composition Inclusion 匹配轴（ADR-0063）；非 outbound delivery channel（PD-1）。 |
+| `businessRequestId` | 调用方业务请求关联标识。 | 字符串；不得直接使用客户姓名、账号、证件号、金额或合同全文；**不**进入 inclusion 匹配。 |
+| `upstreamTraceId` | 上游链路追踪标识。 | 字符串；用于跨系统排查；**不**进入 inclusion 匹配。 |
+| `scenario` | 调用场景。 | 字符串；用于非敏感场景分类；**不**进入 inclusion 匹配。 |
+| `locale` | 调用方期望语种或地区提示。 | 字符串；用于 compute / 语言兼容（ADR-0056 / ADR-0062）；**不**作为 IBL-E2 组合三轴。 |
+| `jurisdiction` | 调用方法域/辖区提示（可选）。 | 字符串；IBL-E2 组合轴；trim；空串视为缺失；建议 max 128；大小写不敏感 exact 匹配。 |
+| `product` | 调用方产品线/产品码提示（可选）。 | 字符串；IBL-E2 组合轴；约束同 `jurisdiction`。 |
 
-`context` 未列出的字段按未知字段处理，返回 `400 REQUEST_BODY_INVALID`。`context` 不得包含客户姓名、证件号、账号、金额、密码、模板变量原值、完整请求体、API secret、完整下载地址或完整 AD Group 成员等敏感内容。审计中使用 `contextSummary` 记录必要摘要。
+`context` 未列出的字段按未知字段处理，返回 `400 REQUEST_BODY_INVALID`。`context` 不得包含客户姓名、证件号、账号、金额、密码、模板变量原值、完整请求体、API secret、完整下载地址或完整 AD Group 成员等敏感内容。审计中使用 `contextSummary` 记录必要摘要（非空白三轴同步收录）。
 
 ## 批量请求结构确认
 

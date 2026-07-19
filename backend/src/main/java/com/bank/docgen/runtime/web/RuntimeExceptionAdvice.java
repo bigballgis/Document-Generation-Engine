@@ -15,6 +15,8 @@ import com.bank.docgen.runtime.service.RuntimeDownloadExpiredException;
 import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
 import com.bank.docgen.runtime.service.SyncBatchFailureException;
 import com.bank.docgen.runtime.service.TemplateLocaleMismatchException;
+import com.bank.docgen.template.port.CompositionInclusionUnsatisfiedException;
+import com.bank.docgen.template.port.ContentModuleJurisdictionMismatchException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
@@ -87,6 +89,34 @@ public class RuntimeExceptionAdvice {
     public ResponseEntity<ErrorEnvelope> handleTemplateLocaleMismatch(
             HttpServletRequest request,
             TemplateLocaleMismatchException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.errorCode(),
+                ApiErrorCategories.TEMPLATE,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(CompositionInclusionUnsatisfiedException.class)
+    public ResponseEntity<ErrorEnvelope> handleCompositionInclusionUnsatisfied(
+            HttpServletRequest request,
+            CompositionInclusionUnsatisfiedException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.errorCode(),
+                ApiErrorCategories.TEMPLATE,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(ContentModuleJurisdictionMismatchException.class)
+    public ResponseEntity<ErrorEnvelope> handleContentModuleJurisdictionMismatch(
+            HttpServletRequest request,
+            ContentModuleJurisdictionMismatchException ex
     ) {
         return errorEnvelopeFactory.domainError(
                 request,

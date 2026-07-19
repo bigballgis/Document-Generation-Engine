@@ -22,6 +22,9 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.port.VariableSchemaValidationPort;
+import com.bank.docgen.template.service.CompositionInclusionAssemblySupport;
+import com.bank.docgen.template.port.CompositionInclusionAxes;
+import com.bank.docgen.template.service.CompositionInclusionRuleService;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.VariableComputeService;
@@ -53,6 +56,7 @@ final class DocumentGenerationAssemblySupport {
     private final DocxAssembler docxAssembler;
     private final DocumentArtifactPipeline documentArtifactPipeline;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final CompositionInclusionRuleService compositionInclusionRuleService;
     private final RenderProfileService renderProfileService;
     private final VersionFidelityWarningService versionFidelityWarningService;
     private final VariableComputeService variableComputeService;
@@ -68,6 +72,7 @@ final class DocumentGenerationAssemblySupport {
             DocxAssembler docxAssembler,
             DocumentArtifactPipeline documentArtifactPipeline,
             TemplateContentModuleReferenceService contentModuleReferenceService,
+            CompositionInclusionRuleService compositionInclusionRuleService,
             RenderProfileService renderProfileService,
             VersionFidelityWarningService versionFidelityWarningService,
             VariableComputeService variableComputeService,
@@ -82,6 +87,7 @@ final class DocumentGenerationAssemblySupport {
         this.docxAssembler = docxAssembler;
         this.documentArtifactPipeline = documentArtifactPipeline;
         this.contentModuleReferenceService = contentModuleReferenceService;
+        this.compositionInclusionRuleService = compositionInclusionRuleService;
         this.renderProfileService = renderProfileService;
         this.versionFidelityWarningService = versionFidelityWarningService;
         this.variableComputeService = variableComputeService;
@@ -97,7 +103,16 @@ final class DocumentGenerationAssemblySupport {
             EncryptionOptionsView encryption,
             CallerRenderOverride callerRenderOverride
     ) {
-        return generate(template, releaseVersion, variables, outputFormat, encryption, callerRenderOverride, null);
+        return generate(
+                template,
+                releaseVersion,
+                variables,
+                outputFormat,
+                encryption,
+                callerRenderOverride,
+                null,
+                CompositionInclusionAxes.empty()
+        );
     }
 
     DocumentGenerationEngine.GeneratedDocument generate(
@@ -108,6 +123,28 @@ final class DocumentGenerationAssemblySupport {
             EncryptionOptionsView encryption,
             CallerRenderOverride callerRenderOverride,
             String localeTag
+    ) {
+        return generate(
+                template,
+                releaseVersion,
+                variables,
+                outputFormat,
+                encryption,
+                callerRenderOverride,
+                localeTag,
+                CompositionInclusionAxes.empty()
+        );
+    }
+
+    DocumentGenerationEngine.GeneratedDocument generate(
+            TemplateEntity template,
+            String releaseVersion,
+            Map<String, Object> variables,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            CallerRenderOverride callerRenderOverride,
+            String localeTag,
+            CompositionInclusionAxes inclusionAxes
     ) {
         TemplateVersionEntity version = templateVersionRepository
                 .findByTemplateIdAndReleaseVersion(template.getId(), releaseVersion)
@@ -129,8 +166,17 @@ final class DocumentGenerationAssemblySupport {
                 .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
         Map<String, String> bindingJson = new LinkedHashMap<>();
         bindings.forEach(binding -> bindingJson.put(binding.getAnchorId(), binding.getStructuredContentJson()));
-        Map<String, String> pinnedModuleStructures =
+        Map<String, String> allPinned =
                 contentModuleReferenceService.resolvePinnedContentStructures(version.getId());
+        CompositionInclusionAssemblySupport.AppliedInclusion applied =
+                CompositionInclusionAssemblySupport.apply(
+                        version,
+                        allPinned,
+                        contentModuleReferenceService.resolvePinnedJurisdictions(version.getId()),
+                        compositionInclusionRuleService.loadRules(version),
+                        inclusionAxes == null ? CompositionInclusionAxes.empty() : inclusionAxes
+                );
+        Map<String, String> pinnedModuleStructures = applied.pinnedStructures();
         byte[] docx;
         try (InputStream masterStream = openMasterStream(masterStorageKey, template, version)) {
             docx = docxAssembler.assembleStructured(

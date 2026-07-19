@@ -70,6 +70,7 @@ public class TemplateImportService {
             ApiPolicyRepository apiPolicyRepository,
             TemplateService templateService,
             TemplateContentModuleReferenceService contentModuleReferenceService,
+            CompositionInclusionRuleService compositionInclusionRuleService,
             ManagementAuditRecorder managementAuditRecorder,
             TemplateExportAccessService importAccessSupport,
             TemplateImportBundleValidator bundleValidator,
@@ -101,6 +102,7 @@ public class TemplateImportService {
         this.applySupport = new TemplateImportApplySupport(
                 templateService,
                 contentModuleReferenceService,
+                compositionInclusionRuleService,
                 apiPolicyRepository,
                 objectMapper
         );

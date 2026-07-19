@@ -101,6 +101,7 @@ class TemplateExportServiceV2Test {
                 apiPolicyRepository,
                 apiPolicyViewMapper,
                 contentModuleReferenceService,
+                org.mockito.Mockito.mock(com.bank.docgen.template.service.CompositionInclusionRuleService.class),
                 managementAuditRecorder,
                 templateService,
                 new TemplateExportAccessService(new GroupAccessService()),

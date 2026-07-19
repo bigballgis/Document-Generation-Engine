@@ -237,6 +237,10 @@ final class PublishGateCheckItemSupport {
         return contentItems.contentModuleLocaleMismatchItem(versionId);
     }
 
+    PublishGateItemView compositionInclusionReferenceItem(TemplateVersionEntity version) {
+        return contentItems.compositionInclusionReferenceItem(version);
+    }
+
     PublishGateItemView unsupportedStructuredNodesItem(UUID versionId) {
         return contentItems.unsupportedStructuredNodesItem(versionId);
     }

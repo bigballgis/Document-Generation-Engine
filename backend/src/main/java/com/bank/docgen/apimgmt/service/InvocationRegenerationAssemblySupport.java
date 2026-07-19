@@ -22,6 +22,9 @@ import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.service.CompositionInclusionAssemblySupport;
+import com.bank.docgen.template.port.CompositionInclusionAxes;
+import com.bank.docgen.template.service.CompositionInclusionRuleService;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.VariableComputeService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -59,6 +62,7 @@ public class InvocationRegenerationAssemblySupport {
     private final DocxAssembler docxAssembler;
     private final DocumentArtifactPipeline documentArtifactPipeline;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final CompositionInclusionRuleService compositionInclusionRuleService;
     private final RenderProfileService renderProfileService;
     private final VariableComputeService variableComputeService;
     private final ObjectMapper objectMapper;
@@ -71,6 +75,7 @@ public class InvocationRegenerationAssemblySupport {
             DocxAssembler docxAssembler,
             DocumentArtifactPipeline documentArtifactPipeline,
             TemplateContentModuleReferenceService contentModuleReferenceService,
+            CompositionInclusionRuleService compositionInclusionRuleService,
             RenderProfileService renderProfileService,
             VariableComputeService variableComputeService,
             ObjectMapper objectMapper
@@ -82,6 +87,7 @@ public class InvocationRegenerationAssemblySupport {
         this.docxAssembler = docxAssembler;
         this.documentArtifactPipeline = documentArtifactPipeline;
         this.contentModuleReferenceService = contentModuleReferenceService;
+        this.compositionInclusionRuleService = compositionInclusionRuleService;
         this.renderProfileService = renderProfileService;
         this.variableComputeService = variableComputeService;
         this.objectMapper = objectMapper;
@@ -118,8 +124,14 @@ public class InvocationRegenerationAssemblySupport {
                 .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
         Map<String, String> bindingJson = new LinkedHashMap<>();
         bindings.forEach(binding -> bindingJson.put(binding.getAnchorId(), binding.getStructuredContentJson()));
-        Map<String, String> pinnedModuleStructures =
-                contentModuleReferenceService.resolvePinnedContentStructures(version.getId());
+        CompositionInclusionAxes inclusionAxes = extractInclusionAxes(invocation.getParametersStorage());
+        Map<String, String> pinnedModuleStructures = CompositionInclusionAssemblySupport.apply(
+                version,
+                contentModuleReferenceService.resolvePinnedContentStructures(version.getId()),
+                contentModuleReferenceService.resolvePinnedJurisdictions(version.getId()),
+                compositionInclusionRuleService.loadRules(version),
+                inclusionAxes
+        ).pinnedStructures();
 
         byte[] docx;
         try (InputStream masterStream = new ByteArrayInputStream(masterBytes)) {
@@ -268,6 +280,28 @@ public class InvocationRegenerationAssemblySupport {
         } catch (IOException | RuntimeException ignored) {
             return null;
         }
+    }
+
+    CompositionInclusionAxes extractInclusionAxes(String parametersStorage) {
+        try {
+            JsonNode summary = objectMapper.readTree(parametersStorage == null ? "{}" : parametersStorage)
+                    .path("contextSummary");
+            return CompositionInclusionAxes.of(
+                    textOrNull(summary.path("jurisdiction")),
+                    textOrNull(summary.path("product")),
+                    textOrNull(summary.path("channel"))
+            );
+        } catch (IOException | RuntimeException ignored) {
+            return CompositionInclusionAxes.empty();
+        }
+    }
+
+    private static String textOrNull(JsonNode node) {
+        if (node == null || node.isMissingNode() || node.isNull() || !node.isTextual()) {
+            return null;
+        }
+        String value = node.asText();
+        return value == null || value.isBlank() ? null : value;
     }
 
     private Map<String, Object> replayVariables(JsonNode variablesNode) {

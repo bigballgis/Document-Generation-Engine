@@ -15,6 +15,8 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.document.compute.VariableComputeException;
 import com.bank.docgen.runtime.service.TemplateLocaleMismatchException;
+import com.bank.docgen.template.port.CompositionInclusionUnsatisfiedException;
+import com.bank.docgen.template.port.ContentModuleJurisdictionMismatchException;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.bank.docgen.sharedkernel.document.variable.VariableValidationException;
 
@@ -29,6 +31,24 @@ final class FailedSyncInvocationErrorMapper {
 
     static InvocationErrorEnvelope from(Throwable throwable, MessageResolver messageResolver) {
         if (throwable instanceof TemplateLocaleMismatchException ex) {
+            return envelope(
+                    ex.errorCode(),
+                    ApiErrorCategories.TEMPLATE,
+                    ex.messageKey(),
+                    false,
+                    messageResolver
+            );
+        }
+        if (throwable instanceof CompositionInclusionUnsatisfiedException ex) {
+            return envelope(
+                    ex.errorCode(),
+                    ApiErrorCategories.TEMPLATE,
+                    ex.messageKey(),
+                    false,
+                    messageResolver
+            );
+        }
+        if (throwable instanceof ContentModuleJurisdictionMismatchException ex) {
             return envelope(
                     ex.errorCode(),
                     ApiErrorCategories.TEMPLATE,

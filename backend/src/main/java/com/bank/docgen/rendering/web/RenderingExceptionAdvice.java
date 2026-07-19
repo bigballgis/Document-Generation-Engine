@@ -16,6 +16,8 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelopeFactory;
+import com.bank.docgen.template.port.CompositionInclusionUnsatisfiedException;
+import com.bank.docgen.template.port.ContentModuleJurisdictionMismatchException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -118,6 +120,34 @@ public class RenderingExceptionAdvice {
         );
     }
 
+    @ExceptionHandler(CompositionInclusionUnsatisfiedException.class)
+    public ResponseEntity<ErrorEnvelope> handleCompositionInclusionUnsatisfied(
+            HttpServletRequest request,
+            CompositionInclusionUnsatisfiedException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.errorCode(),
+                ApiErrorCategories.TEMPLATE,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(ContentModuleJurisdictionMismatchException.class)
+    public ResponseEntity<ErrorEnvelope> handleContentModuleJurisdictionMismatch(
+            HttpServletRequest request,
+            ContentModuleJurisdictionMismatchException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.errorCode(),
+                ApiErrorCategories.TEMPLATE,
+                ex.messageKey()
+        );
+    }
+
     @ExceptionHandler(PreviewGenerationException.class)
     public ResponseEntity<ErrorEnvelope> handlePreviewGeneration(
             HttpServletRequest request,
@@ -129,6 +159,12 @@ public class RenderingExceptionAdvice {
         }
         if (cause instanceof com.bank.docgen.sharedkernel.document.compute.VariableComputeException computeEx) {
             return errorEnvelopeFactory.variableComputeFailed(request, computeEx);
+        }
+        if (cause instanceof CompositionInclusionUnsatisfiedException inclusionEx) {
+            return handleCompositionInclusionUnsatisfied(request, inclusionEx);
+        }
+        if (cause instanceof ContentModuleJurisdictionMismatchException mismatchEx) {
+            return handleContentModuleJurisdictionMismatch(request, mismatchEx);
         }
         if (cause instanceof DocxAssemblyException assemblyException) {
             return errorEnvelopeFactory.domainError(

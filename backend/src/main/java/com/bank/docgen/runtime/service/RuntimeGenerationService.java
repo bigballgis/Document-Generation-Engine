@@ -17,6 +17,7 @@ import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.port.CompositionInclusionAxes;
 import com.bank.docgen.template.service.TemplateCallabilitySupport;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
@@ -172,7 +173,8 @@ public class RuntimeGenerationService {
                 request.encryption(),
                 com.bank.docgen.authoring.structured.CallerRenderOverride.empty(),
                 "sync",
-                request.context() == null ? null : request.context().locale()
+                request.context() == null ? null : request.context().locale(),
+                inclusionAxesFrom(request)
         );
         idempotencyService.complete(idempotency, generated.storageKey(), generated.documentId());
         InputStream artifactStream = objectStoragePort.get(generated.storageKey());
@@ -191,5 +193,16 @@ public class RuntimeGenerationService {
         if (!template.getId().equals(session.templateId())) {
             throw new TemplateValidationException("api.error.runtime.templateCredentialMismatch");
         }
+    }
+
+    private static CompositionInclusionAxes inclusionAxesFrom(GenerateRequestBody request) {
+        if (request.context() == null) {
+            return CompositionInclusionAxes.empty();
+        }
+        return CompositionInclusionAxes.of(
+                request.context().jurisdiction(),
+                request.context().product(),
+                request.context().channel()
+        );
     }
 }

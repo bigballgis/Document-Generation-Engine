@@ -104,6 +104,7 @@ class IblA1VariableValidationAssemblyTest {
                 docxAssembler,
                 documentArtifactPipeline,
                 contentModuleReferenceService,
+                org.mockito.Mockito.mock(com.bank.docgen.template.service.CompositionInclusionRuleService.class),
                 renderProfileService,
                 versionFidelityWarningService,
                 variableComputeService,

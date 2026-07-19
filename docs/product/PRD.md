@@ -181,7 +181,9 @@ v1 正式业务出信由上游业务系统通过动态 API 间接触发；文档
 
 模板编排与 API 管理需要严格区分。AD Group 授权配置和 DOCX/PDF 动态加密配置不属于模板编排或模板提交功能，只在 API 管理中配置。
 
-**IBL-E1 / PD-4（2026-07-19）：** 模板包与条款/内容模块须声明正文语种 `locale`（BCP-47）；可选 `localeVariantFamilyId` 编组多语种变体。每个语种变体独立编排、测试、审批与发布。动态 API 仍通过路径钉扎具体模板版本；请求 `context.locale` 继续用于变量 compute，并在双方均提供时与模板声明语种做兼容校验（fail-closed）。详情：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)、[ADR-0062 Accepted](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)（2026-07-19；impl still In Progress）。
+**IBL-E1 / PD-4（2026-07-19）：** 模板包与条款/内容模块须声明正文语种 `locale`（BCP-47）；可选 `localeVariantFamilyId` 编组多语种变体。每个语种变体独立编排、测试、审批与发布。动态 API 仍通过路径钉扎具体模板版本；请求 `context.locale` 继续用于变量 compute，并在双方均提供时与模板声明语种做兼容校验（fail-closed）。详情：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)、[ADR-0062 Accepted](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)（2026-07-19）。
+
+**IBL-E2 / PD-5（2026-07-20）：** 模板版本可声明 **Composition Inclusion Rules**，按 runtime `context.jurisdiction` / `product` / `channel` **确定性**纳入或排除钉扎的内容模块引用；结果可审计。既有锚点可见性 composition rules（变量表达式）并存且正交。路径仍钉扎具体模板版本；**不**按辖区自动选模板包。管理面 API-first（本叶不要求规则编辑 UI）。详情：[ibl-e2-jurisdiction-rule-engine.md](../behavior/ibl-e2-jurisdiction-rule-engine.md)、[ADR-0063 Accepted](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)（2026-07-20；Decision = E2-C\*；impl still In Progress）。与 CE-K08 / IBL-E1 locale **正交**。
 
 ### 6.4 锚点内容类型
 
@@ -617,7 +619,7 @@ API 生成 DOCX/PDF 后，支持以下返回方式，具体方式按 API 管理�
 - 同步返回下载地址。
 - 异步任务返回任务 ID。
 
-动态 API v1 请求字段命名基线采用 `output.format`、`output.mode`、`variables`、`encryption`、`requestId`、`idempotencyKey`、`items[].itemId` 和 `context`。`context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`；字段值均为字符串；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。模板标识和发布版本号只通过路径表达，不允许在请求体中重复传入。
+动态 API v1 请求字段命名基线采用 `output.format`、`output.mode`、`variables`、`encryption`、`requestId`、`idempotencyKey`、`items[].itemId` 和 `context`。`context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`、`jurisdiction`、`product`；字段值均为字符串；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。其中 `jurisdiction` / `product` / `channel` 可作为组合纳入控制输入（IBL-E2 / ADR-0063；非 PII、非模板变量）。模板标识和发布版本号只通过路径表达，不允许在请求体中重复传入。
 
 `context` 不得包含客户姓名、证件号、账号、金额、密码、模板变量原值、完整请求体、API secret、完整下载地址或完整 AD Group 成员等敏感内容。
 

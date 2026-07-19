@@ -89,7 +89,7 @@ class BatchExecutionServiceTest {
 
     @Test
     void bddCeC05_003_echoesOriginalBatchIdOnSuccessfulBatchResult() {
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any(), any()))
                 .thenReturn(generated("DOC-1"))
                 .thenReturn(generated("DOC-2"));
 
@@ -118,7 +118,7 @@ class BatchExecutionServiceTest {
 
     @Test
     void bddCeC05_001_omitsOriginalBatchIdWhenRequestHasNone() {
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any(), any()))
                 .thenReturn(generated("DOC-1"))
                 .thenReturn(generated("DOC-2"));
 
@@ -136,7 +136,7 @@ class BatchExecutionServiceTest {
     @Test
     void executeAsyncMode_marksPartialSucceededWhenOneItemFails() {
         when(messageResolver.resolve(anyString())).thenReturn("Generation failed.");
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any(), any()))
                 .thenReturn(generated("DOC-1"))
                 .thenThrow(new TemplateValidationException("api.error.rendering.generationFailed"));
 
@@ -158,7 +158,7 @@ class BatchExecutionServiceTest {
     @Test
     void executeSyncMode_throwsWhenAnyItemFailsWithoutRegisteringDocuments() {
         when(messageResolver.resolve(anyString())).thenReturn("Generation failed.");
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any(), any()))
                 .thenReturn(generated("DOC-1"))
                 .thenThrow(new TemplateValidationException("api.error.rendering.generationFailed"));
 
@@ -177,7 +177,7 @@ class BatchExecutionServiceTest {
     void bddIblA1_007_batchItemVariableValidationFailed_keepsOtherItemSucceeded() {
         when(messageResolver.resolve(VariableValidationException.MESSAGE_KEY))
                 .thenReturn("One or more template variables failed validation.");
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any(), any()))
                 .thenReturn(generated("DOC-1"))
                 .thenThrow(new VariableValidationException(List.of(
                         new FieldError("customerName", "REQUIRED", "Field is required.")
@@ -211,7 +211,7 @@ class BatchExecutionServiceTest {
     void execute_emitsVariableComputeFailedNotRenderingFailed() {
         when(messageResolver.resolve("api.error.variable.computeFailed"))
                 .thenReturn("Variable compute failed.");
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any(), any()))
                 .thenThrow(new VariableComputeException(
                         "principalCn",
                         "SPELL_AMOUNT(${principal})",

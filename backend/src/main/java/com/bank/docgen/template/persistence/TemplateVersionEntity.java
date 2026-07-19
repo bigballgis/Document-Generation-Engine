@@ -36,6 +36,10 @@ public class TemplateVersionEntity {
     @Column(name = "rules_json")
     private String rulesJson;
 
+    /** ADR-0063 / IBL-E2: Composition Inclusion Rules JSON array. */
+    @Column(name = "composition_inclusion_rules_json", columnDefinition = "TEXT")
+    private String compositionInclusionRulesJson;
+
     @Column(name = "render_profile_version", length = 32)
     private String renderProfileVersion;
 
@@ -129,6 +133,15 @@ public class TemplateVersionEntity {
 
     public void setRulesJson(String rulesJson) {
         this.rulesJson = rulesJson;
+        this.updatedAt = Instant.now();
+    }
+
+    public String getCompositionInclusionRulesJson() {
+        return compositionInclusionRulesJson;
+    }
+
+    public void setCompositionInclusionRulesJson(String compositionInclusionRulesJson) {
+        this.compositionInclusionRulesJson = compositionInclusionRulesJson;
         this.updatedAt = Instant.now();
     }
 

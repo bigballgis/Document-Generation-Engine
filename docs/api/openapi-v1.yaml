@@ -2636,6 +2636,82 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/composition-inclusion-rules:
+    get:
+      tags: [Admin]
+      operationId: getCompositionInclusionRules
+      summary: Get Composition Inclusion Rules for the in-flight DEV template version
+      description: >-
+        ADR-0063 / IBL-E2. Returns structured inclusion rules (jurisdiction /
+        product / channel) for pinned content-module references. Orthogonal to
+        visibility `/rules` (`conditionExpression`). Requires template authoring
+        access (`authorTemplates` boundary).
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Inclusion rule set for the draft version.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompositionInclusionRulesResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    put:
+      tags: [Admin]
+      operationId: putCompositionInclusionRules
+      summary: Replace Composition Inclusion Rules on the in-flight DEV template version
+      description: >-
+        ADR-0063 / IBL-E2. Replaces the draft version inclusion rule set.
+        Unknown `referenceKey`, empty `match`, or duplicate `ruleId` → 422
+        `COMPOSITION_INCLUSION_RULE_INVALID`. Published versions reject mutation
+        (existing lock convention). No new roles — same authoring boundary as
+        visibility rules.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutCompositionInclusionRulesRequest'
+      responses:
+        '200':
+          description: Persisted inclusion rule set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompositionInclusionRulesResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/templates/{templateId}/dev-version/author-word-page-count:
     get:
       tags: [Admin]
@@ -4855,11 +4931,19 @@ components:
     Context:
       type: object
       additionalProperties: false
+      description: >-
+        Safe whitelist (ADR-0013 amended by ADR-0063 / IBL-E2). Optional
+        `jurisdiction` / `product` plus existing `channel` may drive Composition
+        Inclusion Rules. Unknown fields → 400 REQUEST_BODY_INVALID. Must not
+        carry PII, amounts, or template variable plaintext.
       properties:
         sourceSystem:
           type: string
         channel:
           type: string
+          description: >-
+            Call-channel tracing/stats; also a composition inclusion match axis
+            (ADR-0063). Not outbound delivery channel (PD-1).
         businessRequestId:
           type: string
         upstreamTraceId:
@@ -4868,6 +4952,19 @@ components:
           type: string
         locale:
           type: string
+          description: Compute / language-compatibility hint (ADR-0056 / ADR-0062); not an IBL-E2 composition axis.
+        jurisdiction:
+          type: string
+          description: >-
+            Optional composition axis (ADR-0063). Trim; blank → absent; suggested
+            maxLength 128; case-insensitive exact match against inclusion rules.
+          maxLength: 128
+        product:
+          type: string
+          description: >-
+            Optional composition axis (ADR-0063). Same normalization/match rules
+            as jurisdiction.
+          maxLength: 128
     OutputOptions:
       type: object
       additionalProperties: false
@@ -7248,6 +7345,7 @@ components:
         - CONTENT_MODULE_REFERENCES
         - CONTENT_MODULE_EFFECTIVE_EXPIRED
         - CONTENT_MODULE_LOCALE_MISMATCH
+        - COMPOSITION_INCLUSION_REFERENCE_INVALID
         - UNSUPPORTED_STRUCTURED_NODES
         - PASTE_CLEANING_BLOCKERS
         - PAGINATION_DELTA_BUDGET
@@ -9263,6 +9361,110 @@ components:
         falseBranchRuleId:
           type: string
           nullable: true
+    CompositionInclusionMatch:
+      type: object
+      additionalProperties: false
+      description: >-
+        ADR-0063. At least one of jurisdiction / product / channel must be
+        non-blank after trim. Declared axes are AND; undeclared axes are wildcards.
+      properties:
+        jurisdiction:
+          type: string
+          nullable: true
+          maxLength: 128
+        product:
+          type: string
+          nullable: true
+          maxLength: 128
+        channel:
+          type: string
+          nullable: true
+          maxLength: 128
+    CompositionInclusionRuleView:
+      type: object
+      additionalProperties: false
+      required: [ruleId, referenceKey, match]
+      properties:
+        ruleId:
+          type: string
+          minLength: 1
+        referenceKey:
+          type: string
+          minLength: 1
+          description: Must resolve to a CM reference on the same template version.
+        match:
+          $ref: '#/components/schemas/CompositionInclusionMatch'
+        priority:
+          type: integer
+          default: 0
+          description: Lower value wins when ordering; ties broken by ruleId ascending.
+        requiredInclusion:
+          type: boolean
+          default: false
+          description: >-
+            When true and no rule for this referenceKey matches, generate fails
+            with COMPOSITION_INCLUSION_UNSATISFIED.
+    PutCompositionInclusionRulesRequest:
+      type: object
+      additionalProperties: false
+      required: [rules]
+      properties:
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompositionInclusionRuleView'
+    CompositionInclusionRulesResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [rules]
+          properties:
+            rules:
+              type: array
+              items:
+                $ref: '#/components/schemas/CompositionInclusionRuleView'
+    CompositionInclusionDecision:
+      type: string
+      enum: [INCLUDE, EXCLUDE]
+    CompositionInclusionSummaryEntry:
+      type: object
+      additionalProperties: false
+      required: [referenceKey, decision, matchedRuleId]
+      description: >-
+        Non-sensitive audit/invocation summary entry (ADR-0063). No clause body
+        or variables. Default include (no targeting rules) uses matchedRuleId
+        literal NONE_DEFAULT.
+      properties:
+        referenceKey:
+          type: string
+        decision:
+          $ref: '#/components/schemas/CompositionInclusionDecision'
+        matchedRuleId:
+          type: string
+          description: First matching ruleId, or NONE_DEFAULT for default include.
+    TemplateExportCompositionInclusionRuleView:
+      type: object
+      additionalProperties: false
+      required: [ruleId, referenceKey, match]
+      properties:
+        ruleId:
+          type: string
+        referenceKey:
+          type: string
+        match:
+          $ref: '#/components/schemas/CompositionInclusionMatch'
+        priority:
+          type: integer
+          default: 0
+        requiredInclusion:
+          type: boolean
+          default: false
     TemplateExportContentModuleReferenceView:
       type: object
       additionalProperties: false
@@ -10089,6 +10291,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TemplateExportCompositionRuleView'
+        compositionInclusionRules:
+          type: array
+          description: >-
+            ADR-0063 / IBL-E2. Structured jurisdiction/product/channel inclusion
+            rules (orthogonal to visibility `rules`). Absent or empty = no
+            inclusion rules (all pinned CMs default INCLUDE).
+          items:
+            $ref: '#/components/schemas/TemplateExportCompositionInclusionRuleView'
         contentModuleReferences:
           type: array
           items:
@@ -10664,6 +10874,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TemplateExportCompositionRuleView'
+        compositionInclusionRules:
+          type: array
+          description: ADR-0063 / IBL-E2 Composition Inclusion Rules for this version.
+          items:
+            $ref: '#/components/schemas/CompositionInclusionRuleView'
         createdAt:
           type: string
           format: date-time
@@ -11287,3 +11502,6 @@ components:
         - LEGAL_HOLD_ALREADY_RELEASED
         - LOCALE_VARIANT_CONFLICT
         - TEMPLATE_LOCALE_MISMATCH
+        - COMPOSITION_INCLUSION_RULE_INVALID
+        - COMPOSITION_INCLUSION_UNSATISFIED
+        - CONTENT_MODULE_JURISDICTION_MISMATCH

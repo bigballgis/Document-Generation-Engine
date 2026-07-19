@@ -86,6 +86,7 @@ class TemplateImportServiceTest {
                 apiPolicyRepository,
                 templateService,
                 contentModuleReferenceService,
+                org.mockito.Mockito.mock(com.bank.docgen.template.service.CompositionInclusionRuleService.class),
                 managementAuditRecorder,
                 new TemplateExportAccessService(new GroupAccessService()),
                 new TemplateImportBundleValidator(new ObjectMapper().findAndRegisterModules()),

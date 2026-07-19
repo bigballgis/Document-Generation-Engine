@@ -198,6 +198,20 @@ Top-level `result.schemas: string[]` remains an **envelope type-name index** (at
 
 Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `getTemplateApiContract` / `CallableVersion.variables` / `ContractVariableSchemaView`. Companion: [contract-outline.md](contract-outline.md) IBL-A4 bullets + «消费者契约 breaking-change 闸门（IBL-A4）». Example: [examples/contract-response.json](examples/contract-response.json). Behavior SoT: [ibl-a4-contract-field-schemas.md](../behavior/ibl-a4-contract-field-schemas.md)（BDD-IBL-A4-001…011）. `frontend_ui_in_scope=false`. Formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
 
+### Jurisdiction / product / channel composition inclusion (IBL-E2)
+
+Runtime `context` whitelist adds optional `jurisdiction` / `product`; existing `channel` also matches Composition Inclusion Rules ([ADR-0063](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)). Management draft API: `GET|PUT /api/management/v1/templates/{templateId}/composition-inclusion-rules` (orthogonal to visibility `/rules`).
+
+| Condition | HTTP | `error.code` (stable) |
+| --- | --- | --- |
+| Unknown `context` field | 400 | `REQUEST_BODY_INVALID` |
+| Illegal inclusion rule set on PUT | 422 | `COMPOSITION_INCLUSION_RULE_INVALID` |
+| Required inclusion unsatisfied at generate | 422 | `COMPOSITION_INCLUSION_UNSATISFIED` |
+| INCLUDE + CE-K08 jurisdiction both set and unequal | 422 | `CONTENT_MODULE_JURISDICTION_MISMATCH` |
+| Publish dangling inclusion `referenceKey` | publish gate | `COMPOSITION_INCLUSION_REFERENCE_INVALID` |
+
+Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `Context`, `CompositionInclusionRuleView`, `PublishGateCheckCode`, `ErrorCode`. Companion: [contract-outline.md](contract-outline.md) IBL-E2 bullet + context whitelist table. Behavior SoT: [ibl-e2-jurisdiction-rule-engine.md](../behavior/ibl-e2-jurisdiction-rule-engine.md)（BDD-IBL-E2-001…016）. `frontend_ui_in_scope=false`. Accepted ADR ≠ impl Done; formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
+
 ### Full-library export (CE-E03)
 
 Management full-library export in [openapi-v1.yaml](openapi-v1.yaml) (`exportLibraryTemplates`) / [contract-outline.md](contract-outline.md) «模板导出/导入契约» CE-E03:

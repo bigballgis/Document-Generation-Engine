@@ -18,7 +18,8 @@ public record TemplateExportBundleView(
         TemplateExportMasterPinView masterPin,
         List<TemplateExportClauseSnapshotView> clauseSnapshots,
         TemplateExportRenderProfileView renderProfile,
-        List<TemplateExportAssetKeyManifestItemView> assetKeyManifest
+        List<TemplateExportAssetKeyManifestItemView> assetKeyManifest,
+        List<CompositionInclusionRuleView> compositionInclusionRules
 ) {
     public TemplateExportBundleView {
         variables = DefensiveCopies.copyList(variables);
@@ -27,9 +28,10 @@ public record TemplateExportBundleView(
         contentModuleReferences = DefensiveCopies.copyList(contentModuleReferences);
         clauseSnapshots = DefensiveCopies.copyList(clauseSnapshots);
         assetKeyManifest = DefensiveCopies.copyList(assetKeyManifest);
+        compositionInclusionRules = DefensiveCopies.copyList(compositionInclusionRules);
     }
 
-    /** v1-compatible constructor (no CE-E01 v2 fields). */
+    /** v1-compatible constructor (no CE-E01 v2 fields / inclusion rules). */
     public TemplateExportBundleView(
             String format,
             TemplateExportMetadataView metadata,
@@ -50,6 +52,37 @@ public record TemplateExportBundleView(
                 null,
                 null,
                 null,
+                null,
+                null
+        );
+    }
+
+    /** CE-E01 v2 constructor without inclusion rules. */
+    public TemplateExportBundleView(
+            String format,
+            TemplateExportMetadataView metadata,
+            List<VariableSchemaView> variables,
+            List<AnchorBindingView> bindings,
+            List<CompositionRuleView> rules,
+            List<ContentModuleReferenceView> contentModuleReferences,
+            ApiPolicyView policySnapshot,
+            TemplateExportMasterPinView masterPin,
+            List<TemplateExportClauseSnapshotView> clauseSnapshots,
+            TemplateExportRenderProfileView renderProfile,
+            List<TemplateExportAssetKeyManifestItemView> assetKeyManifest
+    ) {
+        this(
+                format,
+                metadata,
+                variables,
+                bindings,
+                rules,
+                contentModuleReferences,
+                policySnapshot,
+                masterPin,
+                clauseSnapshots,
+                renderProfile,
+                assetKeyManifest,
                 null
         );
     }

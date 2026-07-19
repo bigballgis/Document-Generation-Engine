@@ -60,6 +60,7 @@ final class TemplateVersionLineMutationSupport {
         target.setDevVersionNumber(templateCurrentVersionResolver.maxDevVersionNumber(templateId) + 1);
         target.setMasterCatalogVersion(source.getMasterCatalogVersion());
         target.setRulesJson(source.getRulesJson());
+        target.setCompositionInclusionRulesJson(source.getCompositionInclusionRulesJson());
         target.setRenderProfileVersion(source.getRenderProfileVersion());
         target.setRenderProfileJson(source.getRenderProfileJson());
         target.setAuthorWordPageCount(source.getAuthorWordPageCount());

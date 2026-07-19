@@ -152,6 +152,13 @@ public final class ApiErrorCodes {
     /** IBL-E1: runtime context.locale incompatible with pinned template locale. */
     public static final String TEMPLATE_LOCALE_MISMATCH = "TEMPLATE_LOCALE_MISMATCH";
 
+    /** IBL-E2 / ADR-0063: illegal Composition Inclusion Rule set on management PUT. */
+    public static final String COMPOSITION_INCLUSION_RULE_INVALID = "COMPOSITION_INCLUSION_RULE_INVALID";
+    /** IBL-E2 / ADR-0063: required inclusion rule unsatisfied at generate. */
+    public static final String COMPOSITION_INCLUSION_UNSATISFIED = "COMPOSITION_INCLUSION_UNSATISFIED";
+    /** IBL-E2 / ADR-0063: INCLUDE'd CM jurisdiction differs from context.jurisdiction. */
+    public static final String CONTENT_MODULE_JURISDICTION_MISMATCH = "CONTENT_MODULE_JURISDICTION_MISMATCH";
+
     private ApiErrorCodes() {
     }
 }
