@@ -1,8 +1,11 @@
-# 05-chinese-uppercase-amount (PLACEHOLDER)
+# chinese-uppercase-amount (ACTIVE — zh matrix cell)
 
-Placeholder skeleton for CE-K03 (Chinese uppercase amount / SPELL_AMOUNT).
+ACTIVE CE-K03 package; also the **zh** locale cell of the IBL-C3 / F19 cross-locale matrix
+(paired with `english-locale-letter` and `multi-currency-amount`).
 
-- **Maturity:** `PLACEHOLDER` — skeleton validated by harness; business assertions
-  deferred until CE-K03 enriches this package.
-- **Enrichment scope (CE-K03, NOT this slice):** assert Chinese uppercase amount
-  (SPELL_AMOUNT) text appears in rendered DOCX/PDF.
+| Half | Provenance |
+| --- | --- |
+| DOCX | `SPELL_AMOUNT` Chinese uppercase (`壹佰元整`) |
+| PDF | **SYNTHETIC** / deferred assertions — honest; not LibreOffice |
+
+Do not relabel PDF to `LIBREOFFICE` without real `soffice` conversion.

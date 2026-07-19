@@ -1,0 +1,9 @@
+{
+  "deferred": false,
+  "assertions": [
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "Multi-currency letter"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "€1,234.56"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "$1,234.56"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "CN¥1,234.56"}
+  ]
+}

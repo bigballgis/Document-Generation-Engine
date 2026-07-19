@@ -1,0 +1,22 @@
+{
+  "locale": "en-US",
+  "variableSchemas": [
+    {
+      "variableKey": "principal",
+      "variableType": "AMOUNT"
+    },
+    {
+      "variableKey": "formattedAmount",
+      "variableType": "COMPUTED",
+      "computeExpression": "FORMAT_AMOUNT(${principal})"
+    },
+    {
+      "variableKey": "amountInWords",
+      "variableType": "COMPUTED",
+      "computeExpression": "SPELL_AMOUNT(${principal}, 'USD')"
+    }
+  ],
+  "bindings": {
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"International bank letter. Amount: \"},{\"type\":\"variable\",\"key\":\"formattedAmount\"},{\"type\":\"textRun\",\"value\":\" Words: \"},{\"type\":\"variable\",\"key\":\"amountInWords\"}]}]}"
+  }
+}

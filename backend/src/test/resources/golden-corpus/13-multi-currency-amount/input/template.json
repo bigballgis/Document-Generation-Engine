@@ -1,0 +1,27 @@
+{
+  "locale": "en-US",
+  "variableSchemas": [
+    {
+      "variableKey": "principal",
+      "variableType": "AMOUNT"
+    },
+    {
+      "variableKey": "amountEur",
+      "variableType": "COMPUTED",
+      "computeExpression": "FORMAT_AMOUNT(${principal}, 'EUR')"
+    },
+    {
+      "variableKey": "amountUsd",
+      "variableType": "COMPUTED",
+      "computeExpression": "FORMAT_AMOUNT(${principal}, 'USD')"
+    },
+    {
+      "variableKey": "amountCny",
+      "variableType": "COMPUTED",
+      "computeExpression": "FORMAT_AMOUNT(${principal}, 'CNY')"
+    }
+  ],
+  "bindings": {
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"Multi-currency letter EUR=\"},{\"type\":\"variable\",\"key\":\"amountEur\"},{\"type\":\"textRun\",\"value\":\" USD=\"},{\"type\":\"variable\",\"key\":\"amountUsd\"},{\"type\":\"textRun\",\"value\":\" CNY=\"},{\"type\":\"variable\",\"key\":\"amountCny\"}]}]}"
+  }
+}

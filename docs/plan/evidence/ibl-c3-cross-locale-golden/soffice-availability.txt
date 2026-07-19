@@ -1,0 +1,12 @@
+recorded_at=2026-07-19
+host_os=Windows 10.0.26200
+PATH_soffice=NOT_FOUND
+LIBREOFFICE_COMMAND_env=unset
+common_paths_checked=
+  C:\Program Files\LibreOffice\program\soffice.exe = absent
+  C:\Program Files (x86)\LibreOffice\program\soffice.exe = absent
+honesty=
+  LIBREOFFICE golden PDF halves SKIP under surefire when soffice unavailable
+  IBL-C3 new themes use SYNTHETIC pdfSource (not forged LIBREOFFICE)
+  Do not invent LO-attributed PDF binaries
+ibl_d2_mandatory_lo_ci_lane=OUT_OF_SCOPE_for_IBL_C3

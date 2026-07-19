@@ -1,0 +1,13 @@
+command=mvn -B -ntp -f backend/pom.xml verify
+result=BUILD SUCCESS
+recorded_at=2026-07-19T14:21:07+08:00
+tests_run=2133
+failures=0
+errors=0
+skipped=11
+static_analysis=Checkstyle 0 / PMD pass / SpotBugs 0 / JaCoCo floors met
+notes=
+  GoldenCorpusCrossLocaleMatrixTest: 5/5 green
+  New ACTIVE themes english-locale-letter + multi-currency-amount exercised by GoldenCorpusHarnessTest
+  Skipped count includes Assumptions.skip for LIBREOFFICE PDF halves when host soffice unavailable
+  IBL-D2 mandatory LO CI lane not implemented (out of leaf)

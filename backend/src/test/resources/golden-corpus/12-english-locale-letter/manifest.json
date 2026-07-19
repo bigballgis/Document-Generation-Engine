@@ -1,0 +1,10 @@
+{
+  "id": "english-locale-letter",
+  "theme": "English locale letter (en-US FORMAT_AMOUNT + SPELL_AMOUNT USD)",
+  "maturity": "ACTIVE",
+  "title": "English locale letter — ACTIVE (IBL-C3 / F19)",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "SYNTHETIC",
+  "description": "IBL-C3 cross-locale matrix: en-US letter body with locale-default FORMAT_AMOUNT and binary SPELL_AMOUNT USD. PDF half is honest SYNTHETIC (host may lack soffice); not Chinese-amount-only.",
+  "owningFutureSlice": "IBL-C3"
+}
