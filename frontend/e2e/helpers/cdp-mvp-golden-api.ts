@@ -192,6 +192,7 @@ async function createGoldenDraftTemplate(
       name,
       description: 'CDP browser MVP golden path template (setup seed only)',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )

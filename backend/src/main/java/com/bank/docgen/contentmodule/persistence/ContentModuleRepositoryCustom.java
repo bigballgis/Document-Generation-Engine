@@ -22,7 +22,8 @@ public interface ContentModuleRepositoryCustom {
             String legalReviewRef,
             Instant effectiveFrom,
             Instant effectiveTo,
-            ContentModuleSearchMode searchMode
+            ContentModuleSearchMode searchMode,
+            String locale
     ) {
         public ContentModuleCatalogFilter {
             if (searchMode == null) {
@@ -39,7 +40,7 @@ public interface ContentModuleRepositoryCustom {
         ) {
             this(
                     accessibleGroupCodes, allGroups, groupCodeExact, search, sort,
-                    null, null, null, null, null, ContentModuleSearchMode.NAME
+                    null, null, null, null, null, ContentModuleSearchMode.NAME, null
             );
         }
 
@@ -58,7 +59,27 @@ public interface ContentModuleRepositoryCustom {
             this(
                     accessibleGroupCodes, allGroups, groupCodeExact, search, sort,
                     status, jurisdiction, legalReviewRef, effectiveFrom, effectiveTo,
-                    ContentModuleSearchMode.NAME
+                    ContentModuleSearchMode.NAME, null
+            );
+        }
+
+        public ContentModuleCatalogFilter(
+                List<String> accessibleGroupCodes,
+                boolean allGroups,
+                String groupCodeExact,
+                String search,
+                CatalogSortKey sort,
+                ContentModuleCatalogDisplayStatus status,
+                String jurisdiction,
+                String legalReviewRef,
+                Instant effectiveFrom,
+                Instant effectiveTo,
+                ContentModuleSearchMode searchMode
+        ) {
+            this(
+                    accessibleGroupCodes, allGroups, groupCodeExact, search, sort,
+                    status, jurisdiction, legalReviewRef, effectiveFrom, effectiveTo,
+                    searchMode, null
             );
         }
 

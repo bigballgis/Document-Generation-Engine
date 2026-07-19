@@ -90,7 +90,9 @@ public class DemoCatalogSeeder implements ApplicationRunner {
                         DEMO_GROUP_CODE,
                         DEMO_TEMPLATE_NAME,
                         "Automated demo template for catalog and E2E tests",
-                        masterId
+                        masterId,
+                        "zh-CN",
+                        null
                 ),
                 templateAuthorSession()
         );

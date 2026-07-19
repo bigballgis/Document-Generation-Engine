@@ -147,6 +147,11 @@ public final class ApiErrorCodes {
     /** CE-G04: release requested on already RELEASED hold. */
     public static final String LEGAL_HOLD_ALREADY_RELEASED = "LEGAL_HOLD_ALREADY_RELEASED";
 
+    /** IBL-E1: same group + localeVariantFamilyId + locale already exists. */
+    public static final String LOCALE_VARIANT_CONFLICT = "LOCALE_VARIANT_CONFLICT";
+    /** IBL-E1: runtime context.locale incompatible with pinned template locale. */
+    public static final String TEMPLATE_LOCALE_MISMATCH = "TEMPLATE_LOCALE_MISMATCH";
+
     private ApiErrorCodes() {
     }
 }

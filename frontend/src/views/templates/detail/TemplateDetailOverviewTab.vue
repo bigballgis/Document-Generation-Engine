@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { getMaster } from '@/api/masters'
 import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
+import LocaleVariantFamilyNav from '@/components/common/LocaleVariantFamilyNav.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
+import { useTemplateLocaleVariantSiblings } from '@/composables/useLocaleVariantFamilySiblings'
 import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateDetail } from '@/types/template'
@@ -17,13 +19,15 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const { masterDetailLink } = useEntityLinkTargets()
+const { masterDetailLink, templateDetailLink } = useEntityLinkTargets()
 const { authorTemplates } = useCapabilities()
 const { confirmAction } = useConfirmAction()
 const templatesStore = useTemplatesStore()
 const authorWorkflowStore = useAuthorWorkflowStore()
 const masterName = ref<string | null>(null)
 const completing = ref(false)
+const { siblings: localeVariantSiblings, loading: localeVariantLoading } =
+  useTemplateLocaleVariantSiblings(toRef(props, 'template'))
 
 const nextReviewDueLabel = computed(() => {
   const due = props.template.nextReviewDue
@@ -89,6 +93,10 @@ async function completeAnnualReview() {
         <dt>{{ t('templates.detail.externalId') }}</dt>
         <dd>{{ template.externalId }}</dd>
       </div>
+      <div data-testid="template-overview-locale">
+        <dt>{{ t('templates.detail.locale') }}</dt>
+        <dd>{{ template.locale || '—' }}</dd>
+      </div>
       <div>
         <dt>{{ t('templates.detail.masterId') }}</dt>
         <dd>
@@ -129,6 +137,14 @@ async function completeAnnualReview() {
         }}
       </el-button>
     </div>
+
+    <LocaleVariantFamilyNav
+      v-if="template.locale || template.localeVariantFamilyId"
+      :current-locale="template.locale"
+      :siblings="localeVariantSiblings"
+      :loading="localeVariantLoading"
+      :sibling-link="templateDetailLink"
+    />
   </el-card>
 </template>
 

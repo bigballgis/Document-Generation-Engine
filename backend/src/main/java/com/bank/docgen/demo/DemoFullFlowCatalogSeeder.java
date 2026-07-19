@@ -108,7 +108,9 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
                         DemoCatalogSeeder.DEMO_GROUP_CODE,
                         DEMO_FULL_FLOW_NAME,
                         "Full lifecycle demo template for E2E and manual walkthrough",
-                        masterId
+                        masterId,
+                        "zh-CN",
+                        null
                 ),
                 DemoCatalogSessions.templateAuthorSession()
         );

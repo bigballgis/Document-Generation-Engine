@@ -1,5 +1,6 @@
 package com.bank.docgen.contentmodule.persistence;
 
+import com.bank.docgen.sharedkernel.document.compute.ComputeDslLimits;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -44,6 +45,14 @@ public class ContentModuleEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    /** IBL-E1 — authored body locale (BCP-47). */
+    @Column(name = "locale", nullable = false, length = 64)
+    private String locale;
+
+    /** IBL-E1 — optional translation sibling family within groupCode. */
+    @Column(name = "locale_variant_family_id")
+    private UUID localeVariantFamilyId;
+
     protected ContentModuleEntity() {
     }
 
@@ -62,6 +71,7 @@ public class ContentModuleEntity {
         this.name = name;
         this.description = description;
         this.sharedGroupCodesJson = sharedGroupCodesJson;
+        this.locale = ComputeDslLimits.DEFAULT_LOCALE;
         this.createdBy = createdBy;
         this.updatedBy = createdBy;
         Instant now = Instant.now();
@@ -111,6 +121,24 @@ public class ContentModuleEntity {
 
     public Instant getDeletedAt() {
         return deletedAt;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+        this.updatedAt = Instant.now();
+    }
+
+    public UUID getLocaleVariantFamilyId() {
+        return localeVariantFamilyId;
+    }
+
+    public void setLocaleVariantFamilyId(UUID localeVariantFamilyId) {
+        this.localeVariantFamilyId = localeVariantFamilyId;
+        this.updatedAt = Instant.now();
     }
 
     public void setName(String name) {

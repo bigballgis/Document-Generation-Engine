@@ -12,6 +12,8 @@ public enum PublishGateCheckCode {
     API_POLICY,
     CONTENT_MODULE_REFERENCES,
     CONTENT_MODULE_EFFECTIVE_EXPIRED,
+    /** IBL-E1 / ADR-0061: pinned content-module locale incompatible with template locale. */
+    CONTENT_MODULE_LOCALE_MISMATCH,
     UNSUPPORTED_STRUCTURED_NODES,
     PASTE_CLEANING_BLOCKERS,
     /** ADR-0042: |pdfPages - authorWordPageCount| exceeds 2× pagination delta budget. */

@@ -69,7 +69,11 @@ public class TemplateViewMapper {
                 template.getUpdatedBy(),
                 template.getUpdatedAt(),
                 null,
-                template.getNextReviewDue()
+                template.getNextReviewDue(),
+                template.getLocale(),
+                template.getLocaleVariantFamilyId() == null
+                        ? null
+                        : template.getLocaleVariantFamilyId().toString()
         );
     }
 
@@ -125,7 +129,11 @@ public class TemplateViewMapper {
                 null,
                 readOnly,
                 null,
-                template.getNextReviewDue()
+                template.getNextReviewDue(),
+                template.getLocale(),
+                template.getLocaleVariantFamilyId() == null
+                        ? null
+                        : template.getLocaleVariantFamilyId().toString()
         );
     }
 

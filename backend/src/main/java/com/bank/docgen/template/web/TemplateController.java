@@ -79,10 +79,11 @@ public class TemplateController {
             @RequestParam(required = false) String lifecycleStatus,
             @RequestParam(required = false) String approvalSubState,
             @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String locale,
             HttpServletRequest request
     ) {
         return envelope(request, templateService.list(
-                session, page, size, search, groupCode, lifecycleStatus, approvalSubState, sort));
+                session, page, size, search, groupCode, lifecycleStatus, approvalSubState, sort, locale));
     }
 
     @GetMapping("/{templateId}")

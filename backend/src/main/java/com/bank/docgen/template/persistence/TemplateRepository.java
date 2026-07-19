@@ -47,4 +47,17 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, UUID>,
             List<String> groupCodes,
             LocalDate dueOnOrBefore
     );
+
+    boolean existsByGroupCodeAndLocaleVariantFamilyIdAndLocaleAndDeletedAtIsNull(
+            String groupCode,
+            UUID localeVariantFamilyId,
+            String locale
+    );
+
+    boolean existsByGroupCodeAndLocaleVariantFamilyIdAndLocaleAndDeletedAtIsNullAndIdNot(
+            String groupCode,
+            UUID localeVariantFamilyId,
+            String locale,
+            UUID id
+    );
 }

@@ -18,4 +18,17 @@ public interface ContentModuleRepository extends JpaRepository<ContentModuleEnti
     Optional<ContentModuleEntity> findByModuleCodeAndDeletedAtIsNull(String moduleCode);
 
     boolean existsByModuleCodeAndDeletedAtIsNull(String moduleCode);
+
+    boolean existsByGroupCodeAndLocaleVariantFamilyIdAndLocaleAndDeletedAtIsNull(
+            String groupCode,
+            UUID localeVariantFamilyId,
+            String locale
+    );
+
+    boolean existsByGroupCodeAndLocaleVariantFamilyIdAndLocaleAndDeletedAtIsNullAndIdNot(
+            String groupCode,
+            UUID localeVariantFamilyId,
+            String locale,
+            UUID id
+    );
 }

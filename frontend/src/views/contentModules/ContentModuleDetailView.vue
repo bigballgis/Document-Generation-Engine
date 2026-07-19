@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import LocaleVariantFamilyNav from '@/components/common/LocaleVariantFamilyNav.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
+import { useContentModuleLocaleVariantSiblings } from '@/composables/useLocaleVariantFamilySiblings'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import ContentModuleDetailDialogs from '@/views/contentModules/detail/ContentModuleDetailDialogs.vue'
 import ContentModuleDetailWorkspace from '@/views/contentModules/detail/ContentModuleDetailWorkspace.vue'
 import { useContentModuleDetailController } from '@/views/contentModules/useContentModuleDetailController'
@@ -49,6 +52,10 @@ const {
   confirmLifecycleOperation,
   handleVersionSaved,
 } = useContentModuleDetailController()
+
+const { contentModuleDetailLink } = useEntityLinkTargets()
+const { siblings: localeVariantSiblings, loading: localeVariantLoading } =
+  useContentModuleLocaleVariantSiblings(detail)
 </script>
 
 <template>
@@ -68,6 +75,13 @@ const {
     </PageHeader>
 
     <p v-if="detail?.description" class="header-extra">{{ detail.description }}</p>
+    <p
+      v-if="detail?.locale"
+      class="header-extra locale-line"
+      data-testid="content-module-detail-locale"
+    >
+      {{ t('contentModules.detail.localeLabel', { locale: detail.locale }) }}
+    </p>
 
     <LoadErrorPanel
       v-if="loadFailed"
@@ -78,6 +92,14 @@ const {
     <el-skeleton v-else-if="contentModulesStore.loadingDetail" :rows="8" animated />
 
     <template v-else-if="detail">
+      <LocaleVariantFamilyNav
+        v-if="detail.locale || detail.localeVariantFamilyId"
+        class="family-nav"
+        :current-locale="detail.locale"
+        :siblings="localeVariantSiblings"
+        :loading="localeVariantLoading"
+        :sibling-link="contentModuleDetailLink"
+      />
       <ContentModuleDetailWorkspace
         v-model="activeWorkspaceTab"
         :workspace-tabs="workspaceTabs"
@@ -128,5 +150,13 @@ const {
 .header-extra {
   margin: calc(-1 * var(--space-4)) 0 var(--space-6);
   color: var(--text-muted);
+}
+
+.header-extra.locale-line {
+  margin-top: calc(-1 * var(--space-5));
+}
+
+.family-nav {
+  margin-bottom: var(--space-6);
 }
 </style>

@@ -10,6 +10,7 @@ import { useContentModulesStore } from '@/stores/contentModules'
 import {
   excludeOwnerFromSharedGroupCodes,
 } from '@/utils/contentModuleSharedGroups'
+import { DOCUMENT_LOCALE_OPTIONS } from '@/constants/documentLocales'
 import {
   DEFAULT_STRUCTURED_CONTENT_JSON,
   parseStructuredContent,
@@ -43,6 +44,8 @@ const form = reactive({
   moduleCode: '',
   name: '',
   description: '',
+  locale: '',
+  localeVariantFamilyId: '',
   semanticVersion: '1.0.0',
   contentStructureJson: DEFAULT_STRUCTURED_CONTENT_JSON,
   changeDescription: '',
@@ -79,6 +82,23 @@ const formRules = computed<FormRules>(() => ({
   ],
   name: [
     { required: true, message: t('contentModules.create.validation.nameRequired'), trigger: 'blur' },
+  ],
+  locale: [
+    {
+      required: true,
+      message: t('contentModules.create.validation.localeRequired'),
+      trigger: 'change',
+    },
+    {
+      validator: (_rule, value: unknown, callback) => {
+        if (typeof value !== 'string' || !value.trim()) {
+          callback(new Error(t('contentModules.create.validation.localeRequired')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
   ],
   semanticVersion: [
     {
@@ -121,6 +141,8 @@ function resetForm() {
   form.moduleCode = ''
   form.name = ''
   form.description = ''
+  form.locale = ''
+  form.localeVariantFamilyId = ''
   form.semanticVersion = '1.0.0'
   form.contentStructureJson = DEFAULT_STRUCTURED_CONTENT_JSON
   form.changeDescription = ''
@@ -132,6 +154,10 @@ async function handleSubmit() {
   if (!valid) {
     return
   }
+  // BDD-IBL-E1-013 — never omit/blank locale on create.
+  if (!form.locale.trim()) {
+    return
+  }
   const contentStructureJson = serializeStructuredContent(
     parseStructuredContent(form.contentStructureJson),
   )
@@ -140,11 +166,14 @@ async function handleSubmit() {
     const sharedGroupCodes = canConfigureSharedGroups.value
       ? excludeOwnerFromSharedGroupCodes(form.sharedGroupCodes, form.groupCode)
       : []
+    const familyId = form.localeVariantFamilyId.trim()
     const created = await contentModulesStore.createModule({
       groupCode: form.groupCode,
       moduleCode: form.moduleCode.trim(),
       name: form.name.trim(),
       description: form.description.trim() || undefined,
+      locale: form.locale.trim(),
+      localeVariantFamilyId: familyId || undefined,
       semanticVersion: form.semanticVersion.trim(),
       contentStructureJson,
       changeDescription: form.changeDescription.trim() || undefined,
@@ -218,6 +247,30 @@ defineExpose({
       <el-form-item :label="t('contentModules.create.name')" prop="name">
         <el-input v-model="form.name" data-testid="module-name-input" />
       </el-form-item>
+      <el-form-item :label="t('contentModules.create.locale')" prop="locale">
+        <el-select
+          v-model="form.locale"
+          data-testid="content-module-create-locale"
+          filterable
+          clearable
+          class="locale-select"
+          :placeholder="t('contentModules.create.localePlaceholder')"
+        >
+          <el-option
+            v-for="option in DOCUMENT_LOCALE_OPTIONS"
+            :key="option.value"
+            :label="t(option.labelKey)"
+            :value="option.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item :label="t('contentModules.create.localeVariantFamilyId')">
+        <el-input
+          v-model="form.localeVariantFamilyId"
+          data-testid="content-module-create-locale-family"
+          :placeholder="t('contentModules.create.localeVariantFamilyIdPlaceholder')"
+        />
+      </el-form-item>
       <el-form-item :label="t('contentModules.create.description')" prop="description">
         <el-input v-model="form.description" type="textarea" :rows="2" />
       </el-form-item>
@@ -246,6 +299,10 @@ defineExpose({
 }
 
 .shared-groups-select {
+  width: 100%;
+}
+
+.locale-select {
   width: 100%;
 }
 </style>

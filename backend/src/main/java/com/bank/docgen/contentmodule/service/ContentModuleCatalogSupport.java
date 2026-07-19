@@ -85,6 +85,27 @@ final class ContentModuleCatalogSupport {
             String status,
             String searchMode
     ) {
+        return list(
+                session, page, size, search, groupCode, sort,
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status, searchMode, null
+        );
+    }
+
+    PageView<ContentModuleSummaryView> list(
+            ManagementSessionClaims session,
+            Integer page,
+            Integer size,
+            String search,
+            String groupCode,
+            String sort,
+            String jurisdiction,
+            String legalReviewRef,
+            Instant effectiveFrom,
+            Instant effectiveTo,
+            String status,
+            String searchMode,
+            String locale
+    ) {
         assertCatalogBrowseAllowed(session);
         int safePage = CatalogPageSupport.normalizePage(page);
         int safeSize = CatalogPageSupport.normalizeSize(size);
@@ -131,7 +152,8 @@ final class ContentModuleCatalogSupport {
                 ContentModuleLegalMetadataSupport.normalizeText(legalReviewRef),
                 effectiveFrom,
                 effectiveTo,
-                mode
+                mode,
+                CatalogPageSupport.blankToNull(locale)
         );
         CatalogQueryPage<ContentModuleEntity> modulePage =
                 moduleRepository.searchCatalog(filter, safePage, safeSize);
@@ -185,7 +207,11 @@ final class ContentModuleCatalogSupport {
                 module.getDescription(),
                 accessSupport.readSharedGroupCodes(module),
                 versions,
-                reviewHistory
+                reviewHistory,
+                module.getLocale(),
+                module.getLocaleVariantFamilyId() == null
+                        ? null
+                        : module.getLocaleVariantFamilyId().toString()
         );
     }
 
@@ -228,7 +254,11 @@ final class ContentModuleCatalogSupport {
                 headVersion.getReviewState().name(),
                 lifecycleState,
                 module.getCreatedAt(),
-                module.getUpdatedAt()
+                module.getUpdatedAt(),
+                module.getLocale(),
+                module.getLocaleVariantFamilyId() == null
+                        ? null
+                        : module.getLocaleVariantFamilyId().toString()
         );
     }
 

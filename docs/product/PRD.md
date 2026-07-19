@@ -181,6 +181,8 @@ v1 正式业务出信由上游业务系统通过动态 API 间接触发；文档
 
 模板编排与 API 管理需要严格区分。AD Group 授权配置和 DOCX/PDF 动态加密配置不属于模板编排或模板提交功能，只在 API 管理中配置。
 
+**IBL-E1 / PD-4（2026-07-19）：** 模板包与条款/内容模块须声明正文语种 `locale`（BCP-47）；可选 `localeVariantFamilyId` 编组多语种变体。每个语种变体独立编排、测试、审批与发布。动态 API 仍通过路径钉扎具体模板版本；请求 `context.locale` 继续用于变量 compute，并在双方均提供时与模板声明语种做兼容校验（fail-closed）。详情：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)、[ADR-0062 Accepted](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)（2026-07-19；impl still In Progress）。
+
 ### 6.4 锚点内容类型
 
 锚点内容需要支持：

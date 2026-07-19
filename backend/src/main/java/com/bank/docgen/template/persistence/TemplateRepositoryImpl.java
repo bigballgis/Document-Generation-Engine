@@ -93,6 +93,9 @@ public class TemplateRepositoryImpl implements TemplateRepositoryCustom {
         if (filter.lifecycleStatus() != null) {
             predicates.add(cb.equal(root.get("lifecycleStatus"), filter.lifecycleStatus()));
         }
+        if (filter.locale() != null) {
+            predicates.add(cb.equal(root.get("locale"), filter.locale()));
+        }
         if (filter.search() != null) {
             String pattern = "%" + filter.search().toLowerCase(Locale.ROOT) + "%";
             predicates.add(cb.or(

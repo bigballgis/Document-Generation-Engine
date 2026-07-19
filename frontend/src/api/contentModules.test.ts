@@ -75,6 +75,31 @@ describe('contentModules API', () => {
     })
   })
 
+  it('IBL-E1-014: forwards exact locale catalog filter', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [],
+          page: 0,
+          size: 20,
+          totalElements: 0,
+          totalPages: 0,
+        },
+      },
+    })
+
+    await contentModulesApi.listContentModules(0, 20, {
+      locale: 'en-US',
+      groupCode: 'HQ',
+    })
+
+    expect(http.get).toHaveBeenCalledWith('/content-modules', {
+      params: { page: 0, size: 20, locale: 'en-US', groupCode: 'HQ' },
+      signal: undefined,
+    })
+  })
+
   it('CE-G05: forwards searchMode=FULL_TEXT when not NAME default', async () => {
     vi.mocked(http.get).mockResolvedValue({
       data: {
@@ -191,12 +216,14 @@ describe('contentModules API', () => {
       moduleCode: 'MOD-LOAN-DISCLOSURE',
       groupCode: 'RETAIL',
       name: 'Loan disclosure',
+      locale: 'zh-CN',
       semanticVersion: '1.0.0',
       contentStructureJson: '{"blocks":[]}',
     })
 
     expect(http.post).toHaveBeenCalledWith('/content-modules', expect.objectContaining({
       moduleCode: 'MOD-LOAN-DISCLOSURE',
+      locale: 'zh-CN',
     }))
     expect(created.versions[0]?.reviewState).toBe('DRAFT')
   })

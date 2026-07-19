@@ -15,12 +15,15 @@ export function buildTemplateListQuery(options: {
   searchQuery: string
   groupCode?: string
   statusFilter?: string
+  /** IBL-E1 — optional exact BCP-47 locale filter. */
+  localeFilter?: string
   activeWorkflowFilter: WorkflowFilterKey | null
   activeSortKey: string
 }) {
   const search = options.searchQuery.trim() || undefined
   const groupCode = options.groupCode?.trim() || undefined
   const statusFilter = options.statusFilter?.trim() || undefined
+  const locale = options.localeFilter?.trim() || undefined
   const chip = options.activeWorkflowFilter
     ? WORKFLOW_CHIP_QUERY[options.activeWorkflowFilter]
     : null
@@ -39,6 +42,7 @@ export function buildTemplateListQuery(options: {
     groupCode,
     lifecycleStatus,
     approvalSubState,
+    locale,
     sort: options.activeSortKey || 'groupCodeAsc',
   }
 }

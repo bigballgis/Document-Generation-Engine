@@ -8,6 +8,7 @@ import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { useContentModuleStatusFilterOptions } from '@/composables/useTableFilterOptions'
+import { DOCUMENT_LOCALE_OPTIONS } from '@/constants/documentLocales'
 import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { contentModuleDetailPath } from '@/routing/routeKeys'
 import { useContentModulesStore } from '@/stores/contentModules'
@@ -55,6 +56,12 @@ export function useContentModuleListView() {
         key: 'status',
         labelKey: 'contentModules.list.columns.status',
         getValue: (row) => contentModuleCatalogDisplayStatus(row),
+        matchMode: 'exact',
+      },
+      {
+        key: 'locale',
+        labelKey: 'contentModules.list.columns.locale',
+        getValue: (row) => row.locale ?? '',
         matchMode: 'exact',
       },
     ],
@@ -105,6 +112,15 @@ export function useContentModuleListView() {
       type: 'select' as const,
       options: statusFilterOptions.value,
     },
+    {
+      key: 'locale',
+      labelKey: 'contentModules.list.columns.locale',
+      type: 'select' as const,
+      options: DOCUMENT_LOCALE_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.value,
+      })),
+    },
   ])
 
   const catalogSortOptions = computed(() => [
@@ -134,6 +150,7 @@ export function useContentModuleListView() {
       searchMode: searchMode.value,
       groupCode: filters.groupCode?.trim() || undefined,
       status: filters.status?.trim() || undefined,
+      locale: filters.locale?.trim() || undefined,
       sort: activeSortKey.value || 'groupCodeAsc',
     }
   }

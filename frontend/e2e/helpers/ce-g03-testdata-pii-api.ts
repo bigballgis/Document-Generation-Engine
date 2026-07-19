@@ -98,6 +98,7 @@ export async function prepareCeG03PiiSchemaFixture(
       name,
       description: 'CE-G03 PII governance Playwright fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )

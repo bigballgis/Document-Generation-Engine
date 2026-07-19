@@ -82,6 +82,16 @@ const { formatDateTime } = useLocaleFormatters()
         min-width="180"
         show-overflow-tooltip
       />
+      <el-table-column
+        prop="locale"
+        :label="t('templates.list.columns.locale')"
+        width="120"
+        show-overflow-tooltip
+      >
+        <template #default="{ row }">
+          {{ row.locale || '—' }}
+        </template>
+      </el-table-column>
       <el-table-column :label="t('templates.list.columns.status')" width="160">
         <template #default="{ row }">
           <TemplateStatusBadge

@@ -138,7 +138,11 @@ public class TemplateExportService {
                 template.getReleaseVersion(),
                 version.getId().toString(),
                 version.getDevVersionNumber(),
-                Instant.now()
+                Instant.now(),
+                template.getLocale(),
+                template.getLocaleVariantFamilyId() == null
+                        ? null
+                        : template.getLocaleVariantFamilyId().toString()
         );
         var policy = apiPolicyRepository.findByTemplateId(templateId)
                 .map(apiPolicyViewMapper::toPolicyView)

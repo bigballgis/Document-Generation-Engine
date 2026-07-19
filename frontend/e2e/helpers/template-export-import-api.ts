@@ -228,6 +228,7 @@ export async function preparePublishedTemplate(
       name,
       description: 'P14-T03 template export/import Playwright fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )

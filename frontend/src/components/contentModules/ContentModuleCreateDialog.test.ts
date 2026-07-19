@@ -89,6 +89,7 @@ type CreateDialogExposed = {
     groupCode: string
     moduleCode: string
     name: string
+    locale: string
     contentStructureJson: string
     sharedGroupCodes: string[]
   }
@@ -144,6 +145,28 @@ describe('ContentModuleCreateDialog CE-U20 structured create', () => {
     expect(parsed.blocks).toBeUndefined()
   })
 
+  it('IBL-E1-013: create requires locale and does not submit without it', async () => {
+    const wrapper = mountDialog(pinia)
+    const store = useContentModulesStore()
+    const createModule = vi.spyOn(store, 'createModule')
+
+    await flushPromises()
+    const form = wrapper.findComponent({ name: 'ElForm' })
+    const rules = form.props('rules') as Record<string, Array<{ required?: boolean }>>
+    expect(rules.locale?.[0]?.required).toBe(true)
+
+    const vm = wrapper.vm as unknown as CreateDialogExposed
+    vm.form.groupCode = 'HQ'
+    vm.form.moduleCode = 'MOD-LOAN'
+    vm.form.name = 'Loan'
+    vm.form.locale = ''
+
+    await vm.handleSubmit()
+    await flushPromises()
+
+    expect(createModule).not.toHaveBeenCalled()
+  })
+
   it('CCS-003: submit posts normalized structured content JSON with paragraph text', async () => {
     const wrapper = mountDialog(pinia)
     const store = useContentModulesStore()
@@ -152,6 +175,7 @@ describe('ContentModuleCreateDialog CE-U20 structured create', () => {
       moduleCode: 'MOD-LOAN',
       groupCode: 'HQ',
       name: 'Loan',
+      locale: 'zh-CN',
       sharedGroupCodes: [],
       versions: [],
       reviewHistory: [],
@@ -163,6 +187,7 @@ describe('ContentModuleCreateDialog CE-U20 structured create', () => {
     vm.form.groupCode = 'HQ'
     vm.form.moduleCode = 'MOD-LOAN'
     vm.form.name = 'Loan'
+    vm.form.locale = 'zh-CN'
     vm.form.contentStructureJson = JSON.stringify({
       schemaVersion: '1.0',
       nodes: [{ type: 'paragraph', children: [{ type: 'textRun', value: 'Disclosure paragraph' }] }],
@@ -173,6 +198,7 @@ describe('ContentModuleCreateDialog CE-U20 structured create', () => {
 
     expect(createModule).toHaveBeenCalledWith(
       expect.objectContaining({
+        locale: 'zh-CN',
         contentStructureJson: expect.stringContaining('Disclosure paragraph'),
       }),
     )
@@ -207,6 +233,7 @@ describe('ContentModuleCreateDialog sharedGroupCodes (CE-U10)', () => {
       moduleCode: 'MOD-LOAN',
       groupCode: 'HQ',
       name: 'Loan',
+      locale: 'en-US',
       sharedGroupCodes: ['RETAIL'],
       versions: [],
       reviewHistory: [],
@@ -221,6 +248,7 @@ describe('ContentModuleCreateDialog sharedGroupCodes (CE-U10)', () => {
     vm.form.groupCode = 'HQ'
     vm.form.moduleCode = 'MOD-LOAN'
     vm.form.name = 'Loan'
+    vm.form.locale = 'en-US'
     vm.form.sharedGroupCodes = ['RETAIL']
 
     await vm.handleSubmit()
@@ -230,6 +258,7 @@ describe('ContentModuleCreateDialog sharedGroupCodes (CE-U10)', () => {
       expect.objectContaining({
         groupCode: 'HQ',
         moduleCode: 'MOD-LOAN',
+        locale: 'en-US',
         sharedGroupCodes: ['RETAIL'],
       }),
     )
@@ -245,6 +274,7 @@ describe('ContentModuleCreateDialog sharedGroupCodes (CE-U10)', () => {
       moduleCode: 'MOD-LOAN',
       groupCode: 'HQ',
       name: 'Loan',
+      locale: 'zh-CN',
       sharedGroupCodes: [],
       versions: [],
       reviewHistory: [],
@@ -259,6 +289,7 @@ describe('ContentModuleCreateDialog sharedGroupCodes (CE-U10)', () => {
     vm.form.groupCode = 'HQ'
     vm.form.moduleCode = 'MOD-LOAN'
     vm.form.name = 'Loan'
+    vm.form.locale = 'zh-CN'
     vm.form.sharedGroupCodes = ['RETAIL']
 
     await vm.handleSubmit()
@@ -266,6 +297,7 @@ describe('ContentModuleCreateDialog sharedGroupCodes (CE-U10)', () => {
 
     expect(createModule).toHaveBeenCalledWith(
       expect.objectContaining({
+        locale: 'zh-CN',
         sharedGroupCodes: [],
       }),
     )

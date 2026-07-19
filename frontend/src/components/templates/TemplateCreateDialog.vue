@@ -4,6 +4,7 @@ import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import TemplateRiskPromptConfigPanel from '@/components/templates/TemplateRiskPromptConfigPanel.vue'
 import { useTemplateCreateDialog } from '@/components/templates/useTemplateCreateDialog'
+import { DOCUMENT_LOCALE_OPTIONS } from '@/constants/documentLocales'
 
 const props = defineProps<{
   modelValue: boolean
@@ -30,6 +31,11 @@ const {
   modelValue: toRef(props, 'modelValue'),
   emitModelValue: (value) => emit('update:modelValue', value),
   emitCreated: (templateId) => emit('created', templateId),
+})
+
+defineExpose({
+  form,
+  handleSubmit,
 })
 </script>
 
@@ -75,11 +81,37 @@ const {
       <el-form-item :label="t('templates.create.name')" prop="name">
         <el-input v-model="form.name" />
       </el-form-item>
+      <el-form-item :label="t('templates.create.locale')" prop="locale">
+        <el-select
+          v-model="form.locale"
+          data-testid="template-create-locale"
+          filterable
+          clearable
+          class="locale-select"
+          :placeholder="t('templates.create.localePlaceholder')"
+        >
+          <el-option
+            v-for="option in DOCUMENT_LOCALE_OPTIONS"
+            :key="option.value"
+            :label="t(option.labelKey)"
+            :value="option.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item :label="t('templates.create.description')">
         <el-input v-model="form.description" type="textarea" :rows="3" />
       </el-form-item>
 
       <el-collapse v-model="advancedSections" class="create-advanced">
+        <el-collapse-item :title="t('templates.create.localeFamilySection')" name="localeFamily">
+          <el-form-item :label="t('templates.create.localeVariantFamilyId')">
+            <el-input
+              v-model="form.localeVariantFamilyId"
+              data-testid="template-create-locale-family"
+              :placeholder="t('templates.create.localeVariantFamilyIdPlaceholder')"
+            />
+          </el-form-item>
+        </el-collapse-item>
         <el-collapse-item :title="t('templates.riskPrompt.createSectionTitle')" name="riskPrompt">
           <TemplateRiskPromptConfigPanel
             v-model:form-state="riskPromptFormState"

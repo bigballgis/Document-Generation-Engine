@@ -113,7 +113,12 @@ Create an ADR when a decision affects future design or implementation, including
 | [0058-pdfa-2b-archival-output.md](./rendering-authoring/0058-pdfa-2b-archival-output.md) | Accepted | PDF/A-2b archival via publish-locked `pdfArchivalProfile` (`NONE`\|`PDF_A_2B`); LO filter; mutex with encryption (CE-O01 / D6, 2026-07-16) |
 | [0059-verapdf-pdfa-verify-gate.md](./rendering-authoring/0059-verapdf-pdfa-verify-gate.md) | Accepted | veraPDF Greenfield (`validation-model-jakarta`) PDF/A-2b machine gate in `mvn verify` (IBL-B3 / F12, 2026-07-19) — does not amend ADR-0058 product decision |
 | [0060-legal-reproducibility-freeze.md](./rendering-authoring/0060-legal-reproducibility-freeze.md) | Accepted | Legal reproducibility freeze — LO version record, ADR-0041 font set reaffirm, SHA-256 content-hash baseline procedure (IBL-B6 / F16, 2026-07-19); no Word/pixel baselines; does not flip #3b/#5a |
+| [0062-locale-variant-template-clause-model.md](./template-lifecycle/0062-locale-variant-template-clause-model.md) | Accepted | Locale-variant template/clause model (IBL-E1 / #128 / F24 / PD-4, 2026-07-19; **renumbered from draft ADR-0061** same day — collision with documentation-governance ADR-0061 audience-manuals). BDD [ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md) **ready** (BDD-IBL-E1-001…018 / E1-C*); does not flip #3b/#5a or PD-6 |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
+
+### Proposed (not yet Accepted)
+
+_None at this time._
 
 ### LR-A5 triad (0041/0042/0043 Accepted — 0042 Path X residual; 0043 slice B residual)
 

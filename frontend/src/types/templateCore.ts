@@ -25,6 +25,10 @@ export interface TemplateSummary {
   updatedAt: string
   /** CE-G05 — UTC calendar date; null when not seeded. */
   nextReviewDue?: string | null
+  /** IBL-E1 — authored body locale (BCP-47). */
+  locale?: string
+  /** IBL-E1 — optional locale-variant family grouping. */
+  localeVariantFamilyId?: string | null
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management release version history). */
@@ -72,6 +76,10 @@ export type TemplateDetail = Omit<
   masterPin?: TemplateMasterPin | null
   /** CE-G05 — UTC calendar date; null when not seeded (OpenAPI field pending codegen). */
   nextReviewDue?: string | null
+  /** IBL-E1 — authored body locale (BCP-47). */
+  locale?: string
+  /** IBL-E1 — optional locale-variant family grouping. */
+  localeVariantFamilyId?: string | null
 }
 
 /** CE-G05 — Dashboard Tasks projection for annual review due. */
@@ -150,10 +158,18 @@ export interface CreateTemplatePayload {
   name: string
   masterId: string
   description?: string
+  /** IBL-E1 — required BCP-47 body locale. */
+  locale: string
+  /** IBL-E1 — optional locale-variant family id. */
+  localeVariantFamilyId?: string | null
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management template metadata update). */
 export interface UpdateTemplateMetadataPayload {
   name?: string
   description?: string | null
+  /** IBL-E1 — optional body locale update. */
+  locale?: string
+  /** IBL-E1 — optional locale-variant family id update. */
+  localeVariantFamilyId?: string | null
 }

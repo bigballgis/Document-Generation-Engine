@@ -203,7 +203,8 @@ class TemplatePlatformSliceTest extends TemplateManagementWebTestSupport {
                                   "externalId":"TPL-REJECT",
                                   "groupCode":"RETAIL",
                                   "name":"Reject Template",
-                                  "masterId":"%s"
+                                  "masterId":"%s",
+                                  "locale":"zh-CN"
                                 }
                                 """.formatted(masterId)))
                 .andExpect(status().isUnprocessableEntity())

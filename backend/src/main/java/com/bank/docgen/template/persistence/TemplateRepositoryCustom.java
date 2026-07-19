@@ -27,7 +27,28 @@ public interface TemplateRepositoryCustom {
             String search,
             TemplateLifecycleStatus lifecycleStatus,
             ApprovalSubState approvalSubState,
-            CatalogSortKey sort
+            CatalogSortKey sort,
+            String locale
     ) {
+        public TemplateCatalogFilter(
+                List<String> accessibleGroupCodes,
+                boolean allGroups,
+                String groupCodeExact,
+                String search,
+                TemplateLifecycleStatus lifecycleStatus,
+                ApprovalSubState approvalSubState,
+                CatalogSortKey sort
+        ) {
+            this(
+                    accessibleGroupCodes,
+                    allGroups,
+                    groupCodeExact,
+                    search,
+                    lifecycleStatus,
+                    approvalSubState,
+                    sort,
+                    null
+            );
+        }
     }
 }

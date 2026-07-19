@@ -138,7 +138,8 @@ abstract class TemplateManagementWebTestSupport {
                                   "groupCode":"RETAIL",
                                   "name":"Retail Letter",
                                   "description":"Slice template",
-                                  "masterId":"%s"
+                                  "masterId":"%s",
+                                  "locale":"zh-CN"
                                 }
                                 """.formatted(masterId)))
                 .andExpect(status().isCreated())

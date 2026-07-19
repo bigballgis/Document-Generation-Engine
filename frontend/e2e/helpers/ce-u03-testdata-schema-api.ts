@@ -106,6 +106,7 @@ async function createDraftTemplate(
       name,
       description: 'CE-U03 schema-driven test data form Playwright fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )

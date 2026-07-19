@@ -34,6 +34,8 @@ export function toContentModuleSummary(detail: ContentModuleDetail): ContentModu
     lifecycleState: head?.lifecycleState,
     createdAt: detail.versions[0]?.createdAt ?? '',
     updatedAt: head?.updatedAt ?? detail.versions[0]?.updatedAt ?? '',
+    locale: detail.locale,
+    localeVariantFamilyId: detail.localeVariantFamilyId ?? null,
   }
 }
 

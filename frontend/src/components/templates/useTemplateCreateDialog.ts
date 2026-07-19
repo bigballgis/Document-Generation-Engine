@@ -30,6 +30,8 @@ export function useTemplateCreateDialog(deps: {
     externalId: '',
     name: '',
     description: '',
+    locale: '',
+    localeVariantFamilyId: '',
   })
 
   const advancedSections = ref<string[]>([])
@@ -56,6 +58,23 @@ export function useTemplateCreateDialog(deps: {
     ],
     name: [
       { required: true, message: t('templates.create.validation.nameRequired'), trigger: 'blur' },
+    ],
+    locale: [
+      {
+        required: true,
+        message: t('templates.create.validation.localeRequired'),
+        trigger: 'change',
+      },
+      {
+        validator: (_rule, value: unknown, callback) => {
+          if (typeof value !== 'string' || !value.trim()) {
+            callback(new Error(t('templates.create.validation.localeRequired')))
+            return
+          }
+          callback()
+        },
+        trigger: 'change',
+      },
     ],
   }))
 
@@ -88,6 +107,8 @@ export function useTemplateCreateDialog(deps: {
     form.externalId = ''
     form.name = ''
     form.description = ''
+    form.locale = ''
+    form.localeVariantFamilyId = ''
     advancedSections.value = []
     riskPromptFormState.value = {
       customize: false,
@@ -138,13 +159,20 @@ export function useTemplateCreateDialog(deps: {
     } catch {
       return
     }
+    // BDD-IBL-E1-013 — never omit/blank locale on create.
+    if (!form.locale.trim()) {
+      return
+    }
     try {
+      const familyId = form.localeVariantFamilyId.trim()
       const created = await templatesStore.createTemplate({
         groupCode: form.groupCode.trim(),
         masterId: form.masterId,
         externalId: form.externalId.trim(),
         name: form.name.trim(),
         description: form.description.trim() || undefined,
+        locale: form.locale.trim(),
+        localeVariantFamilyId: familyId || undefined,
       })
       if (riskPromptFormState.value.customize) {
         await saveRiskPromptOverride(created.id)

@@ -79,6 +79,35 @@ describe('templates API', () => {
     })
   })
 
+  it('IBL-E1-014: forwards exact locale catalog filter', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [],
+          page: 0,
+          size: 20,
+          totalElements: 0,
+          totalPages: 0,
+        },
+      },
+    })
+
+    await templatesApi.listTemplates(0, 20, {
+      locale: 'en-US',
+      groupCode: 'RETAIL',
+    })
+
+    expect(http.get).toHaveBeenCalledWith('/templates', {
+      params: {
+        page: 0,
+        size: 20,
+        locale: 'en-US',
+        groupCode: 'RETAIL',
+      },
+    })
+  })
+
   it('submits template for test', async () => {
     vi.mocked(http.post).mockResolvedValue({
       data: {

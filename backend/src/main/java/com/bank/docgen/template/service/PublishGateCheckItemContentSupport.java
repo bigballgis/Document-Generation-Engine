@@ -68,6 +68,23 @@ final class PublishGateCheckItemContentSupport {
         );
     }
 
+    PublishGateItemView contentModuleLocaleMismatchItem(UUID versionId) {
+        var mismatch = contentModuleReferenceService.evaluateLocaleMismatch(versionId);
+        boolean blocking = mismatch != null && mismatch.blocking();
+        String detail = blocking
+                ? String.join(";", mismatch.mismatchDetails())
+                : "mismatchedReferences=0";
+        return new PublishGateItemView(
+                PublishGateCheckCode.CONTENT_MODULE_LOCALE_MISMATCH,
+                !blocking,
+                blocking,
+                blocking
+                        ? "api.publishGate.contentModuleLocaleMismatch.blocked"
+                        : "api.publishGate.contentModuleLocaleMismatch.ready",
+                detail
+        );
+    }
+
     PublishGateItemView unsupportedStructuredNodesItem(UUID versionId) {
         int unsupportedNodeCount = 0;
         for (AnchorBindingEntity binding : anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)) {

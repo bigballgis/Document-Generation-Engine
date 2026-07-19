@@ -1,5 +1,6 @@
 import { computed, type ComputedRef, type Ref } from 'vue'
 import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
+import { DOCUMENT_LOCALE_OPTIONS } from '@/constants/documentLocales'
 import type { TemplateSummary } from '@/types/template'
 
 type LifecycleStatusOption = { label: string; value: string }
@@ -28,6 +29,12 @@ export function createTemplateListCatalogControls(
         key: 'status',
         labelKey: 'templates.list.columns.status',
         getValue: (row) => row.lifecycleStatus,
+        matchMode: 'exact',
+      },
+      {
+        key: 'locale',
+        labelKey: 'templates.list.columns.locale',
+        getValue: (row) => row.locale ?? '',
         matchMode: 'exact',
       },
     ],
@@ -73,6 +80,15 @@ export function createTemplateListCatalogControls(
       labelKey: 'templates.list.columns.status',
       type: 'select' as const,
       options: lifecycleStatusFilterOptions.value,
+    },
+    {
+      key: 'locale',
+      labelKey: 'templates.list.columns.locale',
+      type: 'select' as const,
+      options: DOCUMENT_LOCALE_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.value,
+      })),
     },
   ])
 

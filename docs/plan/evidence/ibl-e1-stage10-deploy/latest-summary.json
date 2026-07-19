@@ -1,0 +1,22 @@
+{
+  "result": "DEPLOY_OK",
+  "when": "2026-07-20T02:15:24+08:00",
+  "slice": "ibl-e1-locale-variant-model",
+  "task_ids": ["128"],
+  "worktree": "D:/working/DGE-ibl-e1-locale-variant-model",
+  "branch": "feat/ibl-e1-locale-variant-model",
+  "git_tip": "3e76b9db7c178ba0a99a3e1d01ff65bf7fd0e337",
+  "git_short": "3e76b9db",
+  "skip_build": true,
+  "compose_project": "documentgenerationengine",
+  "frontend_port": 4173,
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 pwsh ./scripts/docker-deploy-queue.ps1 -SkipBuild -Reason \"IBL-E1/#128 stage10 SkipBuild tip=3e76b9db COMPOSE_PROJECT_NAME=documentgenerationengine\"",
+  "backend_image_id": "sha256:37e0dc632976c772d47b8657c902aa27ca4f471fee769ef0984547fd7619f63d",
+  "frontend_image_id": "sha256:3616a5a4ea1e884f006e3cdb557c7b6b29551f5541bdc5c6bae61e602e75162b",
+  "stage5_backend_image_id": "sha256:9e310f3188fa19d1a2e815359c16b4395295eb15a7d60ede8c1f74d744b8f110",
+  "stage5_frontend_image_id": "sha256:86ac804fa4e3cd003bf62739098e0775ca728fce335a402db109ffffc0b69b3f",
+  "healthz_8080": 200,
+  "frontend_4173": 200,
+  "evidence_dir": "docs/plan/evidence/ibl-e1-stage10-deploy",
+  "claims_done": false
+}

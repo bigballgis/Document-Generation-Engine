@@ -64,6 +64,7 @@ final class TemplateImportTargetResolutionSupport {
                 targetMasterId,
                 session.username()
         );
+        applyLocaleMetadata(template, metadata);
         templateRepository.save(template);
         TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), sourceTemplateId, session.username());
         templateVersionRepository.save(version);
@@ -77,6 +78,7 @@ final class TemplateImportTargetResolutionSupport {
     ) {
         template.setName(metadata.name());
         template.setDescription(metadata.description());
+        applyLocaleMetadata(template, metadata);
         template.setLifecycleStatus(TemplateLifecycleStatus.DRAFT);
         template.setReleaseVersion(null);
         template.setUpdatedBy(session.username());
@@ -95,6 +97,16 @@ final class TemplateImportTargetResolutionSupport {
         }
         if (!master.getGroupCode().equals(metadata.groupCode())) {
             throw new TemplateValidationException("api.error.template.masterGroupMismatch");
+        }
+    }
+
+    private static void applyLocaleMetadata(TemplateEntity template, TemplateExportMetadataView metadata) {
+        String locale = metadata.locale() == null || metadata.locale().isBlank()
+                ? "zh-CN"
+                : metadata.locale().trim();
+        template.setLocale(locale);
+        if (metadata.localeVariantFamilyId() != null && !metadata.localeVariantFamilyId().isBlank()) {
+            template.setLocaleVariantFamilyId(UUID.fromString(metadata.localeVariantFamilyId()));
         }
     }
 }

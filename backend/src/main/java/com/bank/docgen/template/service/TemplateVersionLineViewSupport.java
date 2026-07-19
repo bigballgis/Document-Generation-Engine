@@ -120,7 +120,9 @@ final class TemplateVersionLineViewSupport {
                 updatedByDisplayName,
                 detail.readOnly(),
                 masterPin,
-                detail.nextReviewDue()
+                detail.nextReviewDue(),
+                detail.locale(),
+                detail.localeVariantFamilyId()
         );
     }
 

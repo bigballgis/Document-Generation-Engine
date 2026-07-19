@@ -325,7 +325,11 @@ public class TemplateImportService {
                                 List.of(),
                                 semanticVersion,
                                 snapshot.contentStructureJson(),
-                                "Materialized from template export bundle v2"
+                                "Materialized from template export bundle v2",
+                                metadata.locale() == null || metadata.locale().isBlank()
+                                        ? "zh-CN"
+                                        : metadata.locale(),
+                                null
                         ),
                         session
                 );

@@ -270,6 +270,7 @@ export async function prepareTemplatePendingSubmitBlocked(
       name,
       description: 'P12-AUD-B10 submit gate blocker Playwright fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )

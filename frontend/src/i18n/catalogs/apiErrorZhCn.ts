@@ -81,6 +81,8 @@ export const apiErrorZhCn = {
     masterNotApproved: "仅可从已批准的母版创建模板。",
     masterGroupMismatch: "母版组与模板组不匹配。",
     externalIdExists: "具有此外部标识符的模板已存在。",
+    localeRequired: "模板正文语种需要有效的 BCP-47 locale。",
+    localeVariantConflict: "同一分组的语种变体家族中已存在相同 locale 的模板。",
     variableTypeUnsupported: "不支持该变量类型。",
     enumValuesRequired: "枚举变量需要枚举值。",
     structuredContentInvalid: "结构化内容定义无效。",
@@ -207,7 +209,8 @@ export const apiErrorZhCn = {
     rateLimitExceeded: "请求过多，请稍后重试。",
     invocationNotFound: "未找到调用记录。",
     invocationRecordExpired: "调用记录已过期。",
-    invocationViewInvalid: "调用记录视图参数无效。"
+    invocationViewInvalid: "调用记录视图参数无效。",
+    templateLocaleMismatch: "请求 locale 与钉扎模板的正文语种不兼容。",
   },
   encryption: {
     encryptionParameterInvalid: "当前请求的加密参数无效。",
@@ -246,6 +249,8 @@ export const apiErrorZhCn = {
     accessDenied: "您无权访问此标准条款。",
     groupCodeRequired: "列出标准条款时必须提供分组代码。",
     moduleCodeExists: "已存在使用该模块代码的标准条款。",
+    localeRequired: "标准条款正文语种需要有效的 BCP-47 locale。",
+    localeVariantConflict: "同一分组的语种变体家族中已存在相同 locale 的标准条款。",
     versionExists: "已存在使用该语义版本的标准条款版本。",
     versionRequired: "该标准条款没有可用于投影目录状态的版本。",
     draftOnlyEditable: "仅草稿版本可编辑。",

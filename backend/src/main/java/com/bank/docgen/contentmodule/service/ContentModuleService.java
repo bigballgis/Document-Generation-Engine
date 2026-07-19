@@ -16,11 +16,14 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
+import com.bank.docgen.sharedkernel.locale.LocaleLanguageCompatibility;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,9 +77,31 @@ public class ContentModuleService {
             String status,
             String searchMode
     ) {
+        return list(
+                session, page, size, search, groupCode, sort,
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status, searchMode, null
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PageView<ContentModuleSummaryView> list(
+            ManagementSessionClaims session,
+            Integer page,
+            Integer size,
+            String search,
+            String groupCode,
+            String sort,
+            String jurisdiction,
+            String legalReviewRef,
+            Instant effectiveFrom,
+            Instant effectiveTo,
+            String status,
+            String searchMode,
+            String locale
+    ) {
         return catalog.list(
                 session, page, size, search, groupCode, sort,
-                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status, searchMode
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status, searchMode, locale
         );
     }
 
@@ -157,6 +182,9 @@ public class ContentModuleService {
         if (!groupAccessService.canAccessGroup(session, groupCode)) {
             throw new ContentModuleAccessDeniedException();
         }
+        String locale = requireValidLocale(request.locale());
+        UUID familyId = request.localeVariantFamilyId();
+        assertFamilyLocaleUnique(groupCode, familyId, locale);
         String moduleCode = request.moduleCode().trim().toUpperCase(Locale.ROOT);
         if (moduleRepository.existsByModuleCodeAndDeletedAtIsNull(moduleCode)) {
             throw new ContentModuleValidationException("api.error.contentModule.moduleCodeExists");
@@ -173,6 +201,8 @@ public class ContentModuleService {
                 accessSupport.writeSharedGroupCodes(request.sharedGroupCodes()),
                 session.username()
         );
+        module.setLocale(locale);
+        module.setLocaleVariantFamilyId(familyId);
         moduleRepository.save(module);
 
         ContentModuleVersionEntity version = new ContentModuleVersionEntity(
@@ -314,6 +344,28 @@ public class ContentModuleService {
                 accessSupport.actorSummary(session)
         );
         return catalog.toDetail(module, session);
+    }
+
+    private static String requireValidLocale(String locale) {
+        try {
+            return LocaleLanguageCompatibility.requireValidTag(locale);
+        } catch (IllegalArgumentException ex) {
+            throw new ContentModuleValidationException("api.error.contentModule.localeRequired");
+        }
+    }
+
+    private void assertFamilyLocaleUnique(String groupCode, UUID familyId, String locale) {
+        if (familyId == null) {
+            return;
+        }
+        if (moduleRepository.existsByGroupCodeAndLocaleVariantFamilyIdAndLocaleAndDeletedAtIsNull(
+                groupCode, familyId, locale)) {
+            throw new ContentModuleGovernanceException(
+                    ApiErrorCodes.LOCALE_VARIANT_CONFLICT,
+                    "api.error.contentModule.localeVariantConflict",
+                    HttpStatus.CONFLICT
+            );
+        }
     }
 
     private void validateContentStructureJson(String contentStructureJson) {

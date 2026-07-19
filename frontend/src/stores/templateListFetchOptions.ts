@@ -10,5 +10,7 @@ export type TemplateListFetchOptions = AbortableRequestOptions & {
   groupCode?: string
   lifecycleStatus?: string
   approvalSubState?: string
+  /** IBL-E1 — optional exact BCP-47 locale filter. */
+  locale?: string
   sort?: string
 }

@@ -72,6 +72,7 @@ export function useTemplateListCatalog() {
       searchQuery: controls.searchQuery.value,
       groupCode: controls.filters.groupCode,
       statusFilter: controls.filters.status,
+      localeFilter: controls.filters.locale,
       activeWorkflowFilter: activeWorkflowFilter.value,
       activeSortKey: controls.activeSortKey.value,
     })

@@ -129,6 +129,16 @@ const {
               />
             </template>
           </el-table-column>
+          <el-table-column
+            prop="locale"
+            :label="t('contentModules.list.columns.locale')"
+            width="120"
+            show-overflow-tooltip
+          >
+            <template #default="{ row }">
+              {{ row.locale || '—' }}
+            </template>
+          </el-table-column>
           <el-table-column :label="t('contentModules.list.columns.updatedAt')" width="200">
             <template #default="{ row }">
               {{ formatDateTime(row.updatedAt) }}
