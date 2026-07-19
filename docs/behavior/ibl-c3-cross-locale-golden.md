@@ -6,11 +6,11 @@
 | **bdd_readiness** | **`not-applicable`** |
 | **Recorded** | 2026-07-19 |
 | **Program leaf** | **IBL-C3** — [intl-bank-letter-readiness-program.md](../plan/intl-bank-letter-readiness-program.md) § Wave IBL-C |
-| **Finding** | **F19** (Cross-locale/multi-script matrix incomplete; Chinese-amount theme only; several golden PDF halves SYNTHETIC) |
+| **Finding** | **F19** (closed — cross-locale matrix + honest SYNTHETIC/LIBREOFFICE labels) |
 | **Task Master** | **#122** |
 | **Formal phase** | **None** (do **not** invent a P-phase; do **not** claim IBL program Done) |
-| **Status** | **Not Started** (BDD stub only; implementation follows plan-orchestrator) |
-| **Placement** | **ISOLATED** — `D:/working/DGE-ibl-c3-cross-locale-golden` · `feat/ibl-c3-cross-locale-golden` |
+| **Status** | **Done** (MAIN merge `bdfc285d` / feature tip `dbfff086`; worktree removed) |
+| **Placement** | Merged to MAIN — worktree removed |
 | **Frontend UI** | **`frontend_ui_in_scope=false`** — no management UI / Playwright E2E / UIUX |
 
 ---
@@ -28,20 +28,21 @@ Program authority: IBL Wave C row **IBL-C3** — **BDD: `not-applicable`**.
 
 Acceptance pointer (authoritative for Done of this leaf): [intl-bank-letter-readiness-program.md](../plan/intl-bank-letter-readiness-program.md) § Acceptance **IBL-C3**.
 
-Analogous readiness: [ibl-c1-layout-metric-pdf.md](./ibl-c1-layout-metric-pdf.md) / [ibl-b6-repro-freeze.md](./ibl-b6-repro-freeze.md) — corpus / evidence / freeze slices with `bdd_readiness: not-applicable`.
-
 ---
 
-## Acceptance sketch (from plan F19 / IBL-C3)
+## Delivered (Done)
 
-| Deliverable | Intent |
+| Deliverable | Result |
 | --- | --- |
-| **en/zh themes** | Golden corpus includes English and Chinese locale/script themes (not Chinese-amount-only) |
-| **Multi-currency themes** | Corpus covers multi-currency letter themes beyond a single currency fixture |
-| **LIBREOFFICE honesty** | PDF halves labeled **LIBREOFFICE** are produced by LibreOffice (`soffice`) — not silently SYNTHETIC |
-| **No invented LO PDFs** | When `soffice` is absent: **SKIP** and/or keep **honest SYNTHETIC** labels — never invent LO-attributed PDFs |
-| **Label correction** | If a half cannot be LO-produced, correct the label honestly (SYNTHETIC / SKIP) rather than claiming LIBREOFFICE |
-| **Gates** | Backend `mvn verify` green; LO lane when **IBL-D2** exists (optional note — D2 is later; not mandatory CI for this leaf until D2 lands) |
+| **en/zh themes** | `english-locale-letter` (`en-US`) + existing `chinese-uppercase-amount` (`zh-CN`) |
+| **Multi-currency themes** | `multi-currency-amount` (EUR / USD / CNY via binary `FORMAT_AMOUNT`) |
+| **LIBREOFFICE honesty** | New themes labeled **SYNTHETIC** (PDFBox projection); existing LIBREOFFICE packages **SKIP** PDF half when soffice unavailable |
+| **No invented LO PDFs** | Host soffice **absent** — no LO-attributed binaries invented under `expected/` |
+| **LO residual** | Mandatory LO CI / soffice-produced PDF upgrades → **IBL-D2** / **F21** (out of this leaf) |
+| **Gates** | `mvn verify` **GREEN 2133**/0/11; arch **PASS_WITH_NOTES** `merge_go=true`; Stage 10 ForceRebuild **DEPLOY_OK**; FE/E2E **N/A** |
+| **Evidence** | [ibl-c3-cross-locale-golden/](../plan/evidence/ibl-c3-cross-locale-golden/) + [ibl-c3-stage10-deploy/](../plan/evidence/ibl-c3-stage10-deploy/) |
+
+**Wave IBL-C → Done** (C1+C2+C3). Do **not** claim all goldens are now LIBREOFFICE-produced. Do **not** claim Wave B / IBL program Done.
 
 ---
 
@@ -50,10 +51,9 @@ Analogous readiness: [ibl-c1-layout-metric-pdf.md](./ibl-c1-layout-metric-pdf.md
 - **No** product UI/API/permission/audit journey; **no** Playwright E2E / UIUX (`frontend_ui_in_scope=false`).
 - **Do not** flip checklist **#3b GO** / **#5a GO**.
 - **Do not** claim go-live.
-- **Do not** claim Wave **IBL-C Done** without C3 closeout (this leaf closes C3; Wave Done only after C3 Done + program rules).
-- **No pixel** baselines / `PIXEL_*` assertions (unless a future pixel ADR is Accepted — not this leaf).
+- **No pixel** baselines / `PIXEL_*` assertions.
 - **No Word** baselines / Path E Word-vs-LO (remains **IBL-B7**).
-- **IBL-D2** mandatory CI LO lane is **out of this leaf** (may note “when D2 exists” only; do not implement D2 here).
+- **IBL-D2** mandatory CI LO lane is **out of this leaf**.
 - Formal phase remains **None**.
 
 ---
@@ -62,13 +62,14 @@ Analogous readiness: [ibl-c1-layout-metric-pdf.md](./ibl-c1-layout-metric-pdf.md
 
 | Artifact | Role |
 | --- | --- |
-| Task Master **#122** | Owning leaf IBL-C3 |
+| Task Master **#122** | Owning leaf IBL-C3 → **done** |
 | IBL program **F19** / **IBL-C3** acceptance | Gap + Done criteria (cross-locale matrix + LO label honesty) |
-| Batch / queue | Solo leaf; vetoes: IBL-D2-LO-CI-lane, IBL-B7-Word, umbrella-106, Wave-D-unrelated |
+| Batch / queue | Solo leaf closed; next **#123** IBL-D1 (not activated) |
 
 ```
 bdd_readiness: not-applicable
 owning_doc: docs/behavior/ibl-c3-cross-locale-golden.md
 task_ids: ["122"]
 frontend_ui_in_scope: false
+status: Done
 ```

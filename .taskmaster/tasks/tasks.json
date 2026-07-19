@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: NON-CE #122 IBL-C3 in-progress (slice ibl-c3-cross-locale-golden; Wave IBL-C In Progress C1+C2 Done / C3 In Progress; Wave IBL-B In Progress B1–B6 Done / B7 Blocked; Wave IBL-A Done; #119 Blocked; next after leaf note-only #123 IBL-D1 not activated). Prior NON-CE #121 IBL-C2 Done (1d357e4d / 767b4ceb+abf564dc). Prior NON-CE #120 IBL-C1 Done (55909dd2 / d2492fc4+5d89b606). Prior NON-CE #118 IBL-B6 Done (8722f4f1 / 8e8c62e6).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: NON-CE #122 IBL-C3 in-progress (Wave IBL-C In Progress C1+C2 Done / C3 In Progress; Wave IBL-B In Progress B1–B6 Done / B7 Blocked; Wave IBL-A Done; next after leaf note-only #123 not activated). Do NOT claim program Done (CE-O02 deferred per D5).",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: cleared (prior NON-CE #122 IBL-C3 Done bdfc285d / dbfff086; Wave IBL-C → Done C1+C2+C3; Wave IBL-B In Progress B1–B6 Done / B7 Blocked; Wave IBL-A Done; #119 Blocked; next queue note-only #123 IBL-D1 not activated). Prior NON-CE #121 IBL-C2 Done (1d357e4d / 767b4ceb+abf564dc). Prior NON-CE #120 IBL-C1 Done (55909dd2 / d2492fc4+5d89b606). Prior NON-CE #118 IBL-B6 Done (8722f4f1 / 8e8c62e6).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: cleared (prior NON-CE #122 IBL-C3 Done; Wave IBL-C → Done; Wave IBL-B In Progress B7 Blocked residual; Wave IBL-A Done; next queue note-only #123 not activated). Do NOT claim program Done (CE-O02 deferred per D5).",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-19T05:58:00.000Z"
+        "updatedAt": "2026-07-19T06:35:00.000Z"
       },
       {
         "id": "54",
@@ -1468,14 +1468,14 @@
       {
         "id": "106",
         "title": "IBL: International Bank Letter Readiness Program (umbrella)",
-        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A Done (A1–A6; #107–#112 Done; A6 tip 5cacff2a); Wave IBL-B In Progress (#113–#118 IBL-B1–B6 Done — B6 merge 8722f4f1 / 8e8c62e6; B7 #119 Blocked Word host); Wave IBL-C In Progress (#120 IBL-C1 Done 55909dd2 / d2492fc4+5d89b606; #121 IBL-C2 Done 1d357e4d / 767b4ceb+abf564dc; #122 IBL-C3 in-progress sole-active). Waves D–E Not Started / Blocked. Host sole-active: #122 IBL-C3. Next after leaf (note only, not activated): #123 IBL-D1. Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim IBL program Done. Do NOT treat #106 as sole-active. Do NOT claim Wave B/C Done while B7 Blocked / C3 open.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active: #122 IBL-C3 in-progress (slice ibl-c3-cross-locale-golden; Wave IBL-C In Progress C1+C2 Done / C3 In Progress; Wave IBL-B In Progress B1–B6 Done / B7 Blocked residual; Wave IBL-A remains Done). Next after leaf (note only, not activated): #123 IBL-D1. Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim IBL program Done. Do NOT claim Wave B/C Done.",
+        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A Done (A1–A6; #107–#112 Done; A6 tip 5cacff2a); Wave IBL-B In Progress (#113–#118 IBL-B1–B6 Done — B6 merge 8722f4f1 / 8e8c62e6; B7 #119 Blocked Word host); Wave IBL-C Done (#120–#122 IBL-C1–C3 Done — C3 merge bdfc285d / dbfff086; F19 honesty SYNTHETIC + LO residual → IBL-D2/F21). Waves D–E Not Started / Blocked. Host sole-active: cleared. Next queue (note only, not activated): #123 IBL-D1. Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim IBL program Done. Do NOT treat #106 as sole-active. Do NOT claim Wave B Done while B7 Blocked.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active: cleared (prior #122 IBL-C3 Done; Wave IBL-C → Done C1+C2+C3; Wave IBL-B In Progress B1–B6 Done / B7 Blocked residual; Wave IBL-A remains Done). Next queue (note only, not activated): #123 IBL-D1. Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim IBL program Done. Do NOT claim Wave B Done.",
         "testStrategy": "N/A — umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-19T05:58:00.000Z"
+        "updatedAt": "2026-07-19T06:35:00.000Z"
       },
       {
         "id": "107",
@@ -1679,17 +1679,17 @@
       {
         "id": "122",
         "title": "IBL-C3: Cross-locale golden matrix + SYNTHETIC→LIBREOFFICE",
-        "description": "IN-PROGRESS 2026-07-19. Sole-active NON-CE delivery leaf. Plan ID IBL-C3. Slice ibl-c3-cross-locale-golden; ISOLATED D:/working/DGE-ibl-c3-cross-locale-golden · feat/ibl-c3-cross-locale-golden. Owners: rendering-engineer + doc-keeper. BDD: not-applicable. Maps F19. Batch solo (member_task_ids:[\"122\"]; proposed_slice_id: ibl-c3-cross-locale-golden; vetoes_applied: IBL-D1, IBL-D2, IBL-B7, umbrella-106). Wave IBL-C stays In Progress (C1+C2 Done; C3 In Progress). Wave IBL-B stays In Progress (B1–B6 Done; B7 Blocked residual). Wave IBL-A Done. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim Wave B/C / IBL program Done. Next after leaf (note only, not activated): #123 IBL-D1. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "ACTIVATED 2026-07-19 Stage 2. Slice id: ibl-c3-cross-locale-golden. Status: in-progress (sole-active). Placement ISOLATED. Owners: rendering-engineer, doc-keeper. BDD: not-applicable. Depends: #108 IBL-A2, #109 IBL-A3 (recommended). Acceptance: corpus en/zh + multi-currency; PDF halves marked LIBREOFFICE produced by LO (not SYNTHETIC) or labels corrected honestly. Gates: backend verify + LO lane when D2 exists. Wave IBL-C remains In Progress — do NOT mark Wave C or IBL program Done. #119 IBL-B7 remains Blocked. #106 registry-only pending. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Next after this leaf (note only, not activated): #123 IBL-D1 (or program order IBL-D).",
+        "description": "DONE 2026-07-19. IBL-C3 / F19 closed — cross-locale golden matrix + honest SYNTHETIC/LIBREOFFICE labels. MAIN merge bdfc285d (includes feature tip dbfff086); worktree removed. Slice ibl-c3-cross-locale-golden. Themes english-locale-letter + multi-currency-amount added (honest SYNTHETIC PDF halves). Host soffice absent — no invented LO PDFs; LO PDF upgrade residual → IBL-D2 / F21. Do NOT claim all goldens are LIBREOFFICE-produced. BDD not-applicable. Batch solo closed. Gates: mvn verify GREEN 2133/0 fail/11 skipped; architecture PASS_WITH_NOTES merge_go=true; Stage 10 ForceRebuild DEPLOY_OK; FE/E2E N/A. Wave IBL-C → Done (C1+C2+C3 Done). Wave IBL-B stays In Progress (B1–B6 Done; B7 Blocked residual). Wave IBL-A remains Done. Sole-active cleared. Next queue (not activated): #123 IBL-D1. #119 remains Blocked. #106 registry-only pending. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim Wave B / IBL program Done. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "COMPLETED 2026-07-19 Stage 12 on MAIN. Slice id: ibl-c3-cross-locale-golden. Status: done. MAIN merge bdfc285d (includes feature tip dbfff086); worktree REMOVED (stage 11). Closed F19 — en/zh + multi-currency corpus themes; new themes honest SYNTHETIC (PDFBox projection); existing LIBREOFFICE packages SKIP PDF half when soffice unavailable; no invented LO-attributed PDFs. LO PDF upgrade residual deferred to IBL-D2 / F21 when soffice/CI lane exists. BDD not-applicable (docs/behavior/ibl-c3-cross-locale-golden.md); frontend_ui_in_scope=false. Batch solo (member_task_ids:[\"122\"]; proposed_slice_id: ibl-c3-cross-locale-golden) closed. Gates: mvn verify GREEN 2133/0/11; arch PASS_WITH_NOTES merge_go=true; Stage 10 ForceRebuild DEPLOY_OK. Evidence: docs/plan/evidence/ibl-c3-cross-locale-golden/ + ibl-c3-stage10-deploy/. Wave IBL-C → Done (C1+C2+C3). Sole-active cleared. Next queue (not activated): #123 IBL-D1. Do NOT mark Wave B / IBL program Done. Do NOT flip #3b/#5a GO. Do NOT claim go-live.",
         "testStrategy": "Cross-locale/multi-currency goldens; honest LIBREOFFICE vs SYNTHETIC labels; mvn verify (+ LO lane when #124).",
         "priority": "medium",
         "dependencies": [
           "108",
           "109"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T05:58:00.000Z"
+        "updatedAt": "2026-07-19T06:35:00.000Z"
       },
       {
         "id": "123",
