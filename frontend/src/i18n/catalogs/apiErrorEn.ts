@@ -20,7 +20,9 @@ export const apiErrorEn = {
     fieldSizeInvalid: "This field length is invalid.",
     fieldPatternInvalid: "This field format is invalid.",
     fieldUnknown: "Unknown field.",
-    contentModuleStructureMissing: "The referenced content module has no pinned structure."
+    contentModuleStructureMissing: "The referenced content module has no pinned structure.",
+    variableValidationFailed:
+      "One or more template variables failed VariableSchema validation.",
   },
   storage: {
     operationFailed: "Object storage operation failed."

@@ -1880,6 +1880,17 @@ export default {
         loadDetail: '无法加载预览详情。',
         download: '无法下载预览产物。',
       },
+      renderedCompare: {
+        action: '对比渲染输出',
+        title: '对比渲染输出',
+        description:
+          '并排展示两次成功预览运行的 PDF 页面。此视图显示已渲染产物，而非语义或仅警告差异。',
+        hintNone: '请恰好选择两条已成功且含 PDF 的预览运行，以对比渲染输出。',
+        hintOne: '再选择一条已成功且含 PDF 的预览运行，以启用对比渲染输出。',
+        hintTooMany: '请恰好选择两条预览运行（请取消多余选项）以对比渲染输出。',
+        hintIneligible: '对比需要恰好两条已成功且各自含有 PDF 产物的预览运行。',
+        hintReady: '已就绪，可对比所选渲染 PDF 输出。',
+      },
     },
     status: {
       DRAFT: '编写中',

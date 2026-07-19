@@ -1771,6 +1771,18 @@ export default {
         loadDetail: 'Unable to load preview details.',
         download: 'Unable to download the preview artifact.',
       },
+      renderedCompare: {
+        action: 'Compare rendered outputs',
+        title: 'Compare rendered outputs',
+        description:
+          'Side-by-side PDF pages from two succeeded preview runs. This view shows rendered artifacts, not semantic or warning-only diffs.',
+        hintNone: 'Select exactly two succeeded preview runs with PDF to compare rendered outputs.',
+        hintOne: 'Select one more succeeded preview run with PDF to enable Compare rendered outputs.',
+        hintTooMany: 'Select exactly two preview runs (clear extras to compare rendered outputs).',
+        hintIneligible:
+          'Compare requires exactly two succeeded preview runs that each have a PDF artifact.',
+        hintReady: 'Ready to compare the selected rendered PDF outputs.',
+      },
     },
     testDataSets: {
       title: 'Test data sets',

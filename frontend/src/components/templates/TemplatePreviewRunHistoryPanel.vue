@@ -2,6 +2,7 @@
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import RenderedCompareDialog from '@/components/templates/RenderedCompareDialog.vue'
 import { useTemplatePreviewRunHistoryPanelFromProps } from '@/components/templates/useTemplatePreviewRunHistoryPanel'
 
 const props = defineProps<{
@@ -24,6 +25,13 @@ const {
   loadRuns,
   downloadArtifact,
   selectRow,
+  onSelectionChange,
+  canCompareRendered,
+  compareHintKey,
+  compareRunA,
+  compareRunB,
+  compareDialogVisible,
+  openRenderedCompare,
   statusTagType,
   rowClassName,
 } = useTemplatePreviewRunHistoryPanelFromProps(props, (id) => emit('selected', id))
@@ -45,6 +53,21 @@ defineExpose({ reload: loadRuns })
       </template>
     </SectionPanelHeader>
 
+    <div class="preview-run-history__toolbar">
+      <el-button
+        type="primary"
+        size="small"
+        data-testid="compare-rendered-outputs"
+        :disabled="!canCompareRendered"
+        @click="openRenderedCompare"
+      >
+        {{ t('templates.previewHistory.renderedCompare.action') }}
+      </el-button>
+      <span class="preview-run-history__compare-hint" data-testid="compare-rendered-outputs-hint">
+        {{ t(compareHintKey) }}
+      </span>
+    </div>
+
     <el-empty v-if="!filteredRuns.length" :description="t('templates.previewHistory.empty')" />
 
     <AppDataTable
@@ -54,7 +77,10 @@ defineExpose({ reload: loadRuns })
       highlight-current-row
       class="preview-run-history__table"
       @row-click="selectRow"
+      @selection-change="onSelectionChange"
     >
+      <el-table-column type="selection" width="48" />
+
       <el-table-column
         prop="createdAt"
         :label="t('templates.previewHistory.columns.runAt')"
@@ -122,6 +148,13 @@ defineExpose({ reload: loadRuns })
         </template>
       </el-table-column>
     </AppDataTable>
+
+    <RenderedCompareDialog
+      v-model="compareDialogVisible"
+      :template-id="templateId"
+      :run-a="compareRunA"
+      :run-b="compareRunB"
+    />
   </section>
 </template>
 
