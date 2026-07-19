@@ -20,7 +20,7 @@
   - Attempt 1: FAIL — worktree `.env` from `.env.example` insecure JWT default (BDD-OPS-JWT-SECRET-001).
   - Attempt 2: FAIL — Flyway V71 seed collided with V34 CORP author (`…108` / `10000008`); seed moved to `…109` / `10000009` (`E2E_LEGAL_REVIEWER`).
   - Attempt 3: SUCCESS — canonical `COMPOSE_PROJECT_NAME=documentgenerationengine`.
-- **Does NOT claim:** Task #130 Done (stage 5 only; E2E/reviews/merge/doc-sync pending).
+- **Stage 12:** Task #130 → **Done** (MAIN merge `233342d3` / tip `e81a6bac`; sole-active cleared).
 
 ## Ready for
 

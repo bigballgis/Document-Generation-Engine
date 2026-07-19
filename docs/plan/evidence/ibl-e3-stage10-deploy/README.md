@@ -18,7 +18,7 @@
 - **Containers:** see docker-ps.txt / compose-ps.txt
 - **DEPLOY_QUEUE:** see queue-status.txt
 - **UIUX:** `frontend/e2e/evidence/IBL-E3-uiux-manifest.md` — Verdict PASS, Critical=0, merge_go=true, Stage 6 4/4
-- **Does NOT claim:** Task #130 Done (stage 10 evidence only; merge/doc-sync pending).
+- **Stage 12:** Task #130 → **Done** (MAIN merge `233342d3` / tip `e81a6bac`; sole-active cleared).
 
 ## Artifacts
 

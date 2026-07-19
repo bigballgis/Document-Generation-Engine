@@ -186,7 +186,7 @@ v1 正式业务出信由上游业务系统通过动态 API 间接触发；文档
 
 **IBL-E2 / PD-5（2026-07-20）：** 模板版本可声明 **Composition Inclusion Rules**，按 runtime `context.jurisdiction` / `product` / `channel` **确定性**纳入或排除钉扎的内容模块引用；结果可审计。既有锚点可见性 composition rules（变量表达式）并存且正交。路径仍钉扎具体模板版本；**不**按辖区自动选模板包。管理面 API-first（本叶不要求规则编辑 UI）。详情：[ibl-e2-jurisdiction-rule-engine.md](../behavior/ibl-e2-jurisdiction-rule-engine.md)、[ADR-0063 Accepted](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)（2026-07-20；Decision = E2-C\*；impl **Done** `81a1ca29` / `6a96e9ab`）。与 CE-K08 / IBL-E1 locale **正交**。
 
-**IBL-E3 / PD-8（2026-07-20）：** 模板包可配置审批矩阵模式 `approvalMatrixMode`：`SINGLE_TRACK`（默认，兼容一级审批）或 `LEGAL_THEN_COMPLIANCE`（有序法务→合规两级；LEGAL 强制由法务审阅人 `LEGAL_REVIEWER` 判定）。管理 UI 须支持模式配置、阶段指示与分角色决策；Dashboard 分 LEGAL / APPROVAL 队列。CE-K08 法务元数据**仍可选**；母版/条款审批轨不改为多级。详情：[ibl-e3-legal-approval-matrix.md](../behavior/ibl-e3-legal-approval-matrix.md)、[ADR-0064 Accepted](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)（2026-07-20；Decision = E3-C\*；Accepted ≠ impl Done）。**不**翻转 checklist **#3b** / **#5a**；**不**宣称 Wave E / go-live Done。
+**IBL-E3 / PD-8（2026-07-20）：** 模板包可配置审批矩阵模式 `approvalMatrixMode`：`SINGLE_TRACK`（默认，兼容一级审批）或 `LEGAL_THEN_COMPLIANCE`（有序法务→合规两级；LEGAL 强制由法务审阅人 `LEGAL_REVIEWER` 判定）。管理 UI 须支持模式配置、阶段指示与分角色决策；Dashboard 分 LEGAL / APPROVAL 队列。CE-K08 法务元数据**仍可选**；母版/条款审批轨不改为多级。详情：[ibl-e3-legal-approval-matrix.md](../behavior/ibl-e3-legal-approval-matrix.md)、[ADR-0064 Accepted](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)（2026-07-20；Decision = E3-C\*；impl **Done** `233342d3` / `e81a6bac`）。**不**翻转 checklist **#3b** / **#5a**；**不**宣称 Wave E / go-live Done。
 
 ### 6.4 锚点内容类型
 
