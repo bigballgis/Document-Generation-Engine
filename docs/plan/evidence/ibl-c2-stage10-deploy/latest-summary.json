@@ -1,0 +1,42 @@
+{
+  "result": "DEPLOY_OK",
+  "stage": 10,
+  "mode": "SkipBuild",
+  "when_started": "2026-07-19T13:38:44+08:00",
+  "when_ended": "2026-07-19T13:40:37+08:00",
+  "when_verified": "2026-07-19T13:40:58+08:00",
+  "slice_id": "ibl-c2-rendered-compare-ui",
+  "task_ids": [
+    "121"
+  ],
+  "worktree": "D:/working/DGE-ibl-c2-rendered-compare-ui",
+  "branch": "feat/ibl-c2-rendered-compare-ui",
+  "git_tip": "abf564dce7186625d539c28be9f3ec1f78c54410",
+  "git_tip_short": "abf564dc",
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -SkipBuild -Reason \"IBL-C2 stage10 SkipBuild health recheck feat/ibl-c2-rendered-compare-ui@canonical-project\"",
+  "first_attempt": {
+    "when": "2026-07-19T13:38:32+08:00",
+    "result": "DEPLOY_FAIL",
+    "reason": "missing COMPOSE_PROJECT_NAME -> project dge-ibl-c2-rendered-compare-ui collided with /docgen-minio"
+  },
+  "compose_project": "documentgenerationengine",
+  "frontend_port": 4173,
+  "backend_port": 8080,
+  "healthz": 200,
+  "healthz_body": "{\"status\":\"UP\"}",
+  "frontend_http": 200,
+  "images": {
+    "frontend": "sha256:5c9dd275a0d27ca60694a3172a6589219d7a21b89a4920b899203f664a88d9f4",
+    "backend": "sha256:fb38d009502b6dd11e15206a4f386231a63a05413ab100475fe201020b61ddad"
+  },
+  "stage5_reference": {
+    "when": "2026-07-19T12:47:11+08:00",
+    "note": "Full rebuild DEPLOY_OK; FE UI in tree; functional+UIUX E2E passed. No product code change requiring rebuild after Stage 5 (Playwright harness/helpers + evidence only).",
+    "evidence": "docs/plan/evidence/ibl-c2-stage5-deploy"
+  },
+  "notes": [
+    "SkipBuild still ran local mvn package -Dmaven.test.skip + pnpm build + docker bake (layers CACHED for app COPY).",
+    "Backend/frontend containers recreated and healthy.",
+    "Do not claim Done from this Stage 10 evidence alone."
+  ]
+}
