@@ -1,0 +1,11 @@
+backend_image=documentgenerationengine-docgen-backend:latest
+backend_id=sha256:de73ac7f08e8e2b635bbe152f6805919302875be42edb6ebd40dbbda55e74a25
+backend_repo_digest=documentgenerationengine-docgen-backend@sha256:de73ac7f08e8e2b635bbe152f6805919302875be42edb6ebd40dbbda55e74a25
+backend_created=2026-07-19T08:28:50.774208362Z
+frontend_image=documentgenerationengine-docgen-frontend:latest
+frontend_id=sha256:d7657314570d1bbe138549d865724129b064c2c2e884c95c641da009bdc2ab5b
+frontend_repo_digest=documentgenerationengine-docgen-frontend@sha256:d7657314570d1bbe138549d865724129b064c2c2e884c95c641da009bdc2ab5b
+frontend_created=2026-07-19T04:45:55.03816954Z
+git_tip=c5387826c87492b613159012939e57cfd9e88c51
+branch=feat/ibl-d2-lo-mandatory-lane
+verified_at=2026-07-19T16:30:25+08:00

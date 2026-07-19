@@ -21,13 +21,18 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * F4-A1 / BDD-F4-A1-001: real {@code soffice} parallel conversion through a production-equivalent
- * bounded pool. Skipped when LibreOffice is unavailable (local dev without {@code soffice}).
+ * bounded pool.
+ *
+ * <p>Default verify: optional skip when LibreOffice is unavailable. Mandatory CI lane:
+ * {@code -Plibreoffice-ci} fails closed (IBL-D2 / F21).
  */
+@Tag(LibreOfficeTestSupport.TAG)
 class LibreOfficeParallelConversionIntegrationTest {
 
     private static final int CONCURRENCY = 4;
@@ -43,11 +48,9 @@ class LibreOfficeParallelConversionIntegrationTest {
 
     @Test
     void parallelConversionsThroughPool_allSucceed() throws Exception {
-        String soffice = System.getenv().getOrDefault("LIBREOFFICE_COMMAND", "soffice");
-        if (!isSofficeAvailable(soffice)) {
-            return;
-        }
+        LibreOfficeTestSupport.requireSoffice("LibreOfficeParallelConversionIntegrationTest / F4-A1");
 
+        String soffice = LibreOfficeTestSupport.sofficeCommand();
         DocgenRenderingProperties properties = new DocgenRenderingProperties();
         properties.setLibreOfficeCommand(soffice);
         properties.setConversionPoolSize(CONCURRENCY);
@@ -87,16 +90,6 @@ class LibreOfficeParallelConversionIntegrationTest {
         assertThat(countDocgenLoProfileDirs())
                 .as("profile directories must not leak after parallel conversions")
                 .isEqualTo(profileDirsBefore);
-    }
-
-    private static boolean isSofficeAvailable(String command) {
-        try {
-            Process process = new ProcessBuilder(command, "--version").redirectErrorStream(true).start();
-            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
-            return finished && process.exitValue() == 0;
-        } catch (Exception ex) {
-            return false;
-        }
     }
 
     private static ThreadPoolTaskExecutor productionEquivalentPool(int poolSize) {

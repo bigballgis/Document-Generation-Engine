@@ -29,7 +29,7 @@ Harness: `com.bank.docgen.rendering.goldencorpus` (executed by `mvn verify`).
 | `SYNTHETIC` honesty | PDFBox text projection from assembled DOCX; packages that cannot claim LO keep `pdfSource: SYNTHETIC` |
 | No invented LO PDFs | No `expected/*.pdf` baselines checked in; do not relabel `SYNTHETIC` → `LIBREOFFICE` without real LO conversion |
 
-**Host note (delivery worktree 2026-07-19):** this Windows host has **no** `soffice` on `PATH`. Existing `LIBREOFFICE` packages therefore **SKIP** the PDF half under surefire (DOCX half still runs). New IBL-C3 themes use **honest SYNTHETIC** PDF halves so the locale/currency matrix stays green without inventing LO PDFs. Mandatory LO CI lane remains **IBL-D2** (out of this leaf).
+**Host / CI note:** without `soffice` on `PATH`, `LIBREOFFICE` PDF halves **SKIP** under default `mvn verify` (DOCX half still runs). New IBL-C3 themes use **honest SYNTHETIC** PDF halves so the locale/currency matrix stays green without inventing LO PDFs. Mandatory LO CI lane: **`-Plibreoffice-ci`** (IBL-D2 / F21) — fail-closed when soffice is absent; see [libreoffice-ci-lane.md](../../../../../docs/architecture/libreoffice-ci-lane.md).
 
 Evidence: `docs/plan/evidence/ibl-c3-cross-locale-golden/`.
 

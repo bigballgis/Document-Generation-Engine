@@ -2,6 +2,7 @@ package com.bank.docgen.rendering.goldencorpus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bank.docgen.rendering.LibreOfficeTestSupport;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.file.Files;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Locale.LanguageRange;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
@@ -100,9 +100,7 @@ class GoldenCorpusCrossLocaleMatrixTest {
     @Test
     void pdfSourceLabelsAreHonestAndNeverInventLibreOfficeBinaries() throws Exception {
         List<GoldenCorpusPackage> packages = scanner.scanAndValidate();
-        boolean sofficeAvailable = isSofficeAvailable(
-                System.getenv().getOrDefault("LIBREOFFICE_COMMAND", "soffice")
-        );
+        boolean sofficeAvailable = LibreOfficeTestSupport.isSofficeAvailable();
 
         for (GoldenCorpusPackage corpusPackage : packages) {
             String pdfSource = corpusPackage.manifest().pdfSource() == null
@@ -121,8 +119,8 @@ class GoldenCorpusCrossLocaleMatrixTest {
             }
 
             if ("LIBREOFFICE".equals(pdfSource) && !sofficeAvailable) {
-                // Honesty: without soffice, LIBREOFFICE PDF half must SKIP (Assumptions), not invent LO PDFs.
-                // Documented contract — runner uses Assumptions.assumeTrue(isSofficeAvailable).
+                // Honesty: without soffice, LIBREOFFICE PDF half must skip (optional) or fail
+                // under -Plibreoffice-ci — never invent LO PDFs (LibreOfficeTestSupport).
                 assertThat(pdfSource).isEqualTo("LIBREOFFICE");
             }
         }
@@ -151,16 +149,6 @@ class GoldenCorpusCrossLocaleMatrixTest {
         } catch (Exception ex) {
             List<LanguageRange> ranges = LanguageRange.parse(languageTag);
             return !ranges.isEmpty() && ranges.get(0).getRange().toLowerCase(Locale.ROOT).startsWith(language);
-        }
-    }
-
-    private static boolean isSofficeAvailable(String command) {
-        try {
-            Process process = new ProcessBuilder(command, "--version").redirectErrorStream(true).start();
-            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
-            return finished && process.exitValue() == 0;
-        } catch (Exception ex) {
-            return false;
         }
     }
 }

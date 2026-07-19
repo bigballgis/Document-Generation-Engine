@@ -4,6 +4,7 @@ import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocxPdfConversionPreprocessor;
 import com.bank.docgen.rendering.LibreOfficePdfConversionService;
+import com.bank.docgen.rendering.LibreOfficeTestSupport;
 import com.bank.docgen.rendering.PdfConversionOptions;
 import com.bank.docgen.rendering.PdfConversionPoolRejectionMetrics;
 import com.bank.docgen.rendering.PdfConversionPostProcessor;
@@ -28,7 +29,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -36,7 +36,6 @@ import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
-import org.junit.jupiter.api.Assumptions;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -129,12 +128,11 @@ public final class GoldenCorpusActiveRunner {
         if ("SYNTHETIC".equalsIgnoreCase(pdfSource)) {
             plainPdf = synthesizePdfFromDocxText(assembledDocx, requirePdfA2b);
         } else {
-            String soffice = System.getenv().getOrDefault("LIBREOFFICE_COMMAND", "soffice");
-            Assumptions.assumeTrue(
-                    isSofficeAvailable(soffice),
-                    "Skipping PDF assertions for package '" + corpusPackage.id()
-                            + "': LibreOffice soffice unavailable (DOCX assertions already executed)"
+            LibreOfficeTestSupport.requireSoffice(
+                    "Golden corpus PDF half for package '" + corpusPackage.id()
+                            + "' (DOCX assertions already executed)"
             );
+            String soffice = LibreOfficeTestSupport.sofficeCommand();
             plainPdf = convertWithLibreOffice(assembledDocx, soffice, archivalProfile);
         }
 
@@ -318,15 +316,5 @@ public final class GoldenCorpusActiveRunner {
             return null;
         }
         return value.asText();
-    }
-
-    private static boolean isSofficeAvailable(String command) {
-        try {
-            Process process = new ProcessBuilder(command, "--version").redirectErrorStream(true).start();
-            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
-            return finished && process.exitValue() == 0;
-        } catch (Exception ex) {
-            return false;
-        }
     }
 }

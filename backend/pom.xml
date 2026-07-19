@@ -63,6 +63,8 @@
         <!-- IBL-D1 / F20: default verify stays H2; TC+Flyway only via -Ptestcontainers. -->
         <surefire.groups></surefire.groups>
         <surefire.excludedGroups>testcontainers</surefire.excludedGroups>
+        <!-- IBL-D2 / F21: default optional LO skip; -Plibreoffice-ci sets mandatory=true. -->
+        <docgen.libreoffice.mandatory>false</docgen.libreoffice.mandatory>
         <spotbugs.effort>Max</spotbugs.effort>
     </properties>
 
@@ -482,6 +484,8 @@
                         <!-- IBL-B3: veraPDF PDF/A gate — CI must keep required=true and skip=false -->
                         <docgen.verapdf.required>${docgen.verapdf.required}</docgen.verapdf.required>
                         <docgen.verapdf.skip>${docgen.verapdf.skip}</docgen.verapdf.skip>
+                        <!-- IBL-D2 / F21: false = optional skip; -Plibreoffice-ci flips to fail-closed -->
+                        <docgen.libreoffice.mandatory>${docgen.libreoffice.mandatory}</docgen.libreoffice.mandatory>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -579,6 +583,24 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <!--
+          IBL-D2 / F21: LibreOffice mandatory CI lane (opt-in; not default verify).
+          Runs @Tag("libreoffice") with docgen.libreoffice.mandatory=true so missing
+          soffice FAILS (does not skip). Default verify keeps optional local skip.
+          Docs: docs/architecture/libreoffice-ci-lane.md
+          Commands:
+            mvn -B -ntp -f backend/pom.xml -Plibreoffice-ci,dev-fast test
+            mvn -B -ntp -f backend/pom.xml -Plibreoffice-ci verify
+          Hosts without soffice: the lane is expected to FAIL (CI gate proof).
+        -->
+        <profile>
+            <id>libreoffice-ci</id>
+            <properties>
+                <surefire.groups>libreoffice</surefire.groups>
+                <surefire.excludedGroups></surefire.excludedGroups>
+                <docgen.libreoffice.mandatory>true</docgen.libreoffice.mandatory>
+            </properties>
         </profile>
         <profile>
             <id>sbom</id>
