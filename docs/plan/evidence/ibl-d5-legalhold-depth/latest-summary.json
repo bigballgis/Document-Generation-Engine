@@ -1,0 +1,81 @@
+{
+  "slice": "ibl-d5-legalhold-depth",
+  "taskId": 127,
+  "finding": "F23",
+  "recordedAt": "2026-07-19T11:05:00Z",
+  "bddReadiness": "not-applicable",
+  "frontendUiInScope": false,
+  "legalholdSuite": {
+    "priorClasses": 2,
+    "priorTests": 17,
+    "classes": [
+      {
+        "name": "com.bank.docgen.legalhold.service.LegalHoldServiceTest",
+        "tests": 9,
+        "role": "prior-baseline"
+      },
+      {
+        "name": "com.bank.docgen.legalhold.service.LegalHoldExemptionServiceTest",
+        "tests": 8,
+        "role": "prior-baseline"
+      },
+      {
+        "name": "com.bank.docgen.legalhold.service.LegalHoldCreateDepthTest",
+        "tests": 16,
+        "role": "create-depth"
+      },
+      {
+        "name": "com.bank.docgen.legalhold.service.LegalHoldEnforceBlockMatrixTest",
+        "tests": 11,
+        "role": "enforce-block-matrix"
+      },
+      {
+        "name": "com.bank.docgen.legalhold.service.LegalHoldRetentionEnforceBridgeTest",
+        "tests": 7,
+        "role": "retention-bridge-enforce-block"
+      },
+      {
+        "name": "com.bank.docgen.legalhold.web.LegalHoldControllerWebTest",
+        "tests": 6,
+        "role": "api-create-release-failclosed"
+      },
+      {
+        "name": "com.bank.docgen.legalhold.web.LegalHoldExceptionAdviceTest",
+        "tests": 4,
+        "role": "http-mapping"
+      }
+    ],
+    "totalClasses": 7,
+    "totalTests": 61,
+    "addedClasses": 5,
+    "addedTests": 44
+  },
+  "mvnVerify": {
+    "command": "mvn -B -ntp -f backend/pom.xml verify",
+    "result": "BUILD_SUCCESS",
+    "tests": 2188,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 15,
+    "checkstyleViolations": 0,
+    "priorD4VerifyTests": 2144,
+    "deltaVsD4": 44
+  },
+  "paths": ["create", "enforce", "block"],
+  "outOfScope": [
+    "playwright-9-to-162",
+    "checklist-3b-go",
+    "checklist-5a-go",
+    "go-live",
+    "wave-e",
+    "ibl-b7-word"
+  ],
+  "claims": {
+    "leafDone": false,
+    "merged": false,
+    "checklist3bGo": false,
+    "checklist5aGo": false,
+    "goLive": false,
+    "waveDDone": false
+  }
+}
