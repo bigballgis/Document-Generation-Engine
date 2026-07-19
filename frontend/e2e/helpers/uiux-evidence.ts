@@ -1723,6 +1723,36 @@ export async function captureIblC2LocatorScreenshot(
   return filename
 }
 
+/** IBL-E1 / #128 locale-variant model UI — 1440×900 dual-brand evidence. */
+export const IBL_E1_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'IBL-E1')
+export const IBL_E1_SCREENSHOT_DIR = path.join(IBL_E1_EVIDENCE_ROOT, 'screenshots')
+export const IBL_E1_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureIblE1EvidenceDirs(): void {
+  fs.mkdirSync(IBL_E1_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function iblE1ScreenshotPath(filename: string): string {
+  return path.join(IBL_E1_SCREENSHOT_DIR, filename)
+}
+
+export async function captureIblE1Screenshot(page: Page, filename: string): Promise<string> {
+  ensureIblE1EvidenceDirs()
+  const target = iblE1ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureIblE1LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureIblE1EvidenceDirs()
+  const target = iblE1ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
 export const NAV_MISSING_ICONS_EVIDENCE_ROOT = path.join(
   E2E_DIR,
   '..',

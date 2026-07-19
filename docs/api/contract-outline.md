@@ -294,6 +294,8 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 
 **CE-K08（BDD `ready`，2026-07-15）：** `ContentModuleVersionView` / create-update 请求增加可选法务字段 `jurisdiction`、`effectiveFrom`、`effectiveTo`、`legalReviewRef`；`GET /content-modules` 增加对应筛选 query；发布门禁新增硬项 `PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED`（与 `CONTENT_MODULE_REFERENCES` 正交）。行为 SoT：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)。OpenAPI 字段以同片实现同步为准。
 
+**IBL-E1 / PD-4（BDD `ready`，2026-07-19；Task Master #128；[ADR-0062 Accepted](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)）：** 模板包与内容模块包行增加必填 `locale`（BCP-47）与可选 `localeVariantFamilyId`；管理创建请求（`CreateTemplateRequest` / `CreateContentModuleRequest`）及 summary/detail 视图同步；`GET /templates` 与 `GET /content-modules` 增加可选精确筛选 `locale`（与既有 filters **AND**；非法值推荐空页）。同组同家族 `(localeVariantFamilyId, locale)` 冲突 → `409`（`LOCALE_VARIANT_CONFLICT`）。发布门禁新增硬项 `PublishGateCheckCode.CONTENT_MODULE_LOCALE_MISMATCH`，与 CE-K08 过期门禁正交。Runtime：路径仍钉扎模板版本；非空 `context.locale` 与模板 `locale` 语言不兼容 → `422`（`TEMPLATE_LOCALE_MISMATCH`）；省略 `context.locale` 不做该校验（compute 默认仍按 ADR-0056）。**不**提供按 locale 自动选包。行为 SoT：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)（**BDD-IBL-E1-001…018** / E1-C*）。正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。
+
 **PRR-C01 / Task #103（BDD `ready`，2026-07-18）：** 管理面 `GET|PUT /api/management/v1/templates/{templateId}/dev-version/author-word-page-count` 读写可选 `authorWordPageCount`（Microsoft Word 作者页数；**禁止**用 LO/PDF 回填）。PDF 成功路径按预算 `B=paginationDeltaBudgetPages`（默认 1）发出 `LOW_RISK_PAGINATION_DIFFERENCE`；`delta > 2×B` 时发布门禁 `PublishGateCheckCode.PAGINATION_DELTA_BUDGET` blocker。行为 SoT：[prod-adr-0042-0043-closeout.md](../behavior/prod-adr-0042-0043-closeout.md)。
 
 **CE-U20（BDD `ready`，2026-07-17；Task Master #94）：** `ContentModuleSummaryView` 增加 head 版本投影字段 `reviewState`（必填）与 `lifecycleState`（可选）；`GET /api/management/v1/content-modules` 增加可选 query `status`（`DRAFT` \| `SUBMITTED` \| `APPROVED` \| `STOPPED` \| `DEPRECATED`），按 **head 版本** 徽章语义服务端精确过滤，与 `search` / `groupCode` / sort / CE-K08 legal filters **AND**；非法 `status` → 成功空页（不 400）。Head 选择：`updatedAt` 最大，并列取 `semanticVersion` 字典序更大者。**不**改变 create 请求体（仍为 `CreateContentModuleRequest.contentStructureJson`）、**不**改变审批/生命周期状态机。行为 SoT：[ce-u20-clause-create-structured.md](../behavior/ce-u20-clause-create-structured.md)。正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。
@@ -574,9 +576,9 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 分页 | `page` 默认 **0**；`size` 默认 **20**，合法范围 **1…100**；越界/缺失规范化（不 500）；超出末页 → 空 `content`，`totalElements` 不变 |
 | 默认排序（COR-F09） | **行分页** + `groupCode ASC`，次级 `updatedAt DESC`（`sort=groupCodeAsc`）；**不**按组个数分页 |
 | 共用 query | `search`（可选，contains，空忽略）；`groupCode`（可选，精确，与会话授权求交） |
-| Templates 专有 | `lifecycleStatus`；`approvalSubState`（审批 chip：`APPROVAL` + `PENDING_DECISION`）；`sort` 另含 `externalIdAsc` |
+| Templates 专有 | `lifecycleStatus`；`approvalSubState`（审批 chip：`APPROVAL` + `PENDING_DECISION`）；`sort` 另含 `externalIdAsc`；**IBL-E1** 可选精确 `locale`（BCP-47；与其它 filters **AND**） |
 | Masters 专有 | `status`（`MasterDocumentReviewStatus`）；`sort` 接受 `groupAsc` 作为 `groupCodeAsc` 同义 |
-| Content-modules 专有 | 既有可选 `groupCode` 与 page/size/search/sort 共存；`sort` 另含 `moduleCodeAsc`；**CE-U20** 落地可选 `status`（head 版本徽章语义；见「条款或内容模块治理契约」CE-U20 注）。LR-C5 C5-C6 曾写「v1 不强制」——本表以 CE-U20 BDD `ready` 为最新确认 |
+| Content-modules 专有 | 既有可选 `groupCode` 与 page/size/search/sort 共存；`sort` 另含 `moduleCodeAsc`；**CE-U20** 落地可选 `status`（head 版本徽章语义；见「条款或内容模块治理契约」CE-U20 注）。LR-C5 C5-C6 曾写「v1 不强制」——本表以 CE-U20 BDD `ready` 为最新确认；**IBL-E1** 可选精确 `locale`（与 status / CE-K08 / searchMode **AND**） |
 | 破坏性契约 | Masters / Content-modules 自裸数组升级为 `PageView`（管理端一体升级） |
 | 溯源 | OPT-F4 residual（masters/modules + 端到端 filter）；COR-F09 语义保留为默认 group-first 行排序 |
 

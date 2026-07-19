@@ -236,6 +236,7 @@ async function prepareTemplateInTestingWithMaster(
       name,
       description: 'P14-T02 collaboration Playwright fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )

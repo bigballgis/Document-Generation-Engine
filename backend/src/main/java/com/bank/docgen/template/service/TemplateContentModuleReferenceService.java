@@ -1,12 +1,15 @@
 package com.bank.docgen.template.service;
 
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.contentmodule.service.ContentModuleAccessService;
+import com.bank.docgen.sharedkernel.locale.LocaleLanguageCompatibility;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView;
+import com.bank.docgen.template.api.ContentModuleLocaleMismatchSummaryView;
 import com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.api.OutdatedClauseReferenceAuthorTaskView;
@@ -34,6 +37,7 @@ public class TemplateContentModuleReferenceService {
     private final TemplateRepository templateRepository;
     private final TemplateVersionRepository templateVersionRepository;
     private final TemplateContentModuleReferenceRepository referenceRepository;
+    private final ContentModuleRepository contentModuleRepository;
     private final ContentModuleVersionRepository contentModuleVersionRepository;
     private final TemplateCurrentVersionResolver templateVersionSupport;
     private final TemplateContentModuleReferenceSupport referenceSupport;
@@ -54,6 +58,7 @@ public class TemplateContentModuleReferenceService {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
         this.referenceRepository = referenceRepository;
+        this.contentModuleRepository = contentModuleRepository;
         this.contentModuleVersionRepository = contentModuleVersionRepository;
         this.templateVersionSupport = templateVersionSupport;
         this.groupAccessService = groupAccessService;
@@ -229,6 +234,57 @@ public class TemplateContentModuleReferenceService {
                 expiredDetails.size(),
                 resolved,
                 expiredDetails
+        );
+    }
+
+    /**
+     * IBL-E1: referenced content-module locale must be language-compatible with the template locale.
+     */
+    @Transactional(readOnly = true)
+    public ContentModuleLocaleMismatchSummaryView evaluateLocaleMismatch(UUID templateVersionId) {
+        TemplateVersionEntity templateVersion = templateVersionRepository.findById(templateVersionId).orElse(null);
+        if (templateVersion == null) {
+            return new ContentModuleLocaleMismatchSummaryView(false, 0, 0, List.of());
+        }
+        TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNull(templateVersion.getTemplateId())
+                .orElse(null);
+        if (template == null || LocaleLanguageCompatibility.isBlankOrMissing(template.getLocale())) {
+            return new ContentModuleLocaleMismatchSummaryView(false, 0, 0, List.of());
+        }
+        String templateLocale = template.getLocale();
+        List<TemplateContentModuleReferenceEntity> references =
+                referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(templateVersionId);
+        List<String> mismatchDetails = new ArrayList<>();
+        int resolved = 0;
+        for (TemplateContentModuleReferenceEntity reference : references) {
+            ContentModuleVersionEntity version = contentModuleVersionRepository
+                    .findById(reference.getContentModuleVersionId())
+                    .orElse(null);
+            if (version == null) {
+                continue;
+            }
+            ContentModuleEntity module = contentModuleRepository.findByIdAndDeletedAtIsNull(version.getModuleId())
+                    .orElse(null);
+            if (module == null) {
+                continue;
+            }
+            resolved++;
+            if (LocaleLanguageCompatibility.areCompatible(templateLocale, module.getLocale())) {
+                continue;
+            }
+            mismatchDetails.add(
+                    module.getModuleCode()
+                            + "@"
+                            + version.getSemanticVersion()
+                            + " locale="
+                            + module.getLocale()
+            );
+        }
+        return new ContentModuleLocaleMismatchSummaryView(
+                !mismatchDetails.isEmpty(),
+                mismatchDetails.size(),
+                resolved,
+                mismatchDetails
         );
     }
 

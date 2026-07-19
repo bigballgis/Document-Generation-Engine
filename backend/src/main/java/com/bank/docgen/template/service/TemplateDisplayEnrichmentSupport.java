@@ -42,7 +42,9 @@ final class TemplateDisplayEnrichmentSupport {
                         summary.updatedBy(),
                         summary.updatedAt(),
                         summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy()),
-                        summary.nextReviewDue()
+                        summary.nextReviewDue(),
+                        summary.locale(),
+                        summary.localeVariantFamilyId()
                 ))
                 .toList();
     }

@@ -15,11 +15,22 @@ export type ContentModuleGovernanceActorRole =
 
 export type ContentModuleVersion = Schema<'ContentModuleVersionView'>
 
-export type ContentModuleSummary = Schema<'ContentModuleSummaryView'>
+/** IBL-E1 locale fields pending OpenAPI codegen sync. */
+export type ContentModuleLocaleFields = {
+  locale?: string
+  localeVariantFamilyId?: string | null
+}
 
-export type ContentModuleDetail = Schema<'ContentModuleDetailView'>
+export type ContentModuleSummary = Schema<'ContentModuleSummaryView'> & ContentModuleLocaleFields
 
-export type CreateContentModulePayload = Schema<'CreateContentModuleRequest'>
+export type ContentModuleDetail = Schema<'ContentModuleDetailView'> & ContentModuleLocaleFields
+
+export type CreateContentModulePayload = Schema<'CreateContentModuleRequest'> & {
+  /** IBL-E1 — required BCP-47 body locale. */
+  locale: string
+  /** IBL-E1 — optional locale-variant family id. */
+  localeVariantFamilyId?: string | null
+}
 
 /** Minimal update body for PUT …/content-modules/{id}/shared-group-codes (CE-U10 / U10-C4). */
 export type UpdateContentModuleSharedGroupCodesPayload = {

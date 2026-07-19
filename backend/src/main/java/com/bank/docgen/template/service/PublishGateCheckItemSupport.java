@@ -233,6 +233,10 @@ final class PublishGateCheckItemSupport {
         return contentItems.contentModuleEffectiveExpiredItem(versionId);
     }
 
+    PublishGateItemView contentModuleLocaleMismatchItem(UUID versionId) {
+        return contentItems.contentModuleLocaleMismatchItem(versionId);
+    }
+
     PublishGateItemView unsupportedStructuredNodesItem(UUID versionId) {
         return contentItems.unsupportedStructuredNodesItem(versionId);
     }

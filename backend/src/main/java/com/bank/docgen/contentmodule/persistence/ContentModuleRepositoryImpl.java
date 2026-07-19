@@ -108,91 +108,7 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
                 """);
         // close EXISTS for FTS; append access / legal / status via JPQL-equivalent SQL below
         fromWhere.append(")");
-
-        StringBuilder accessSql = new StringBuilder();
-        if (filter.groupCodeExact() != null) {
-            accessSql.append(" AND (m.group_code = :groupExact OR m.shared_group_codes_json LIKE :sharedExact)");
-        } else if (!filter.allGroups()) {
-            accessSql.append(" AND (m.group_code IN :accessGroups");
-            int i = 0;
-            for (String ignored : filter.accessibleGroupCodes()) {
-                accessSql.append(" OR m.shared_group_codes_json LIKE :shared").append(i);
-                i++;
-            }
-            accessSql.append(")");
-        }
-        fromWhere.append(accessSql);
-
-        if (filter.status() != null) {
-            fromWhere.append("""
-                     AND EXISTS (
-                      SELECT 1 FROM content_module_version hv
-                      WHERE hv.module_id = m.id
-                        AND NOT EXISTS (
-                          SELECT 1 FROM content_module_version newer
-                          WHERE newer.module_id = m.id
-                            AND (
-                              newer.updated_at > hv.updated_at
-                              OR (newer.updated_at = hv.updated_at AND newer.semantic_version > hv.semantic_version)
-                            )
-                        )
-                """);
-            fromWhere.append(statusSqlPredicate(filter.status()));
-            fromWhere.append(")");
-        }
-
-        if (filter.hasLegalFilters()) {
-            fromWhere.append("""
-                     AND EXISTS (
-                      SELECT 1 FROM content_module_version lv
-                      WHERE lv.module_id = m.id
-                        AND (
-                          (
-                            EXISTS (
-                              SELECT 1 FROM content_module_version aa
-                              WHERE aa.module_id = m.id
-                                AND aa.review_state = 'APPROVED'
-                                AND aa.lifecycle_state = 'ACTIVE'
-                            )
-                            AND lv.review_state = 'APPROVED'
-                            AND lv.lifecycle_state = 'ACTIVE'
-                            AND lv.semantic_version = (
-                              SELECT MAX(aa2.semantic_version)
-                              FROM content_module_version aa2
-                              WHERE aa2.module_id = m.id
-                                AND aa2.review_state = 'APPROVED'
-                                AND aa2.lifecycle_state = 'ACTIVE'
-                            )
-                          )
-                          OR (
-                            NOT EXISTS (
-                              SELECT 1 FROM content_module_version aa
-                              WHERE aa.module_id = m.id
-                                AND aa.review_state = 'APPROVED'
-                                AND aa.lifecycle_state = 'ACTIVE'
-                            )
-                            AND lv.semantic_version = (
-                              SELECT MAX(aa3.semantic_version)
-                              FROM content_module_version aa3
-                              WHERE aa3.module_id = m.id
-                            )
-                          )
-                        )
-                """);
-            if (filter.jurisdiction() != null) {
-                fromWhere.append(" AND LOWER(lv.jurisdiction) = :jurisdiction");
-            }
-            if (filter.legalReviewRef() != null) {
-                fromWhere.append(" AND LOWER(lv.legal_review_ref) = :legalReviewRef");
-            }
-            if (filter.effectiveFrom() != null) {
-                fromWhere.append(" AND lv.effective_from IS NOT NULL AND lv.effective_from >= :effectiveFrom");
-            }
-            if (filter.effectiveTo() != null) {
-                fromWhere.append(" AND lv.effective_to IS NOT NULL AND lv.effective_to <= :effectiveTo");
-            }
-            fromWhere.append(")");
-        }
+        appendFullTextAccessAndFilters(fromWhere, filter);
 
         // OpenAPI: default ts_rank when FULL_TEXT + search unless explicit whitelist sort supplied.
         String orderSql;
@@ -244,6 +160,102 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
         return new CatalogQueryPage<>(ordered, totalElements, CatalogPageSupport.totalPages(totalElements, size));
     }
 
+    private static void appendFullTextAccessAndFilters(
+            StringBuilder fromWhere,
+            ContentModuleCatalogFilter filter
+    ) {
+        if (filter.groupCodeExact() != null) {
+            fromWhere.append(" AND (m.group_code = :groupExact OR m.shared_group_codes_json LIKE :sharedExact)");
+        } else if (!filter.allGroups()) {
+            fromWhere.append(" AND (m.group_code IN :accessGroups");
+            int i = 0;
+            for (String ignored : filter.accessibleGroupCodes()) {
+                fromWhere.append(" OR m.shared_group_codes_json LIKE :shared").append(i);
+                i++;
+            }
+            fromWhere.append(")");
+        }
+        if (filter.locale() != null) {
+            fromWhere.append(" AND m.locale = :locale");
+        }
+        if (filter.status() != null) {
+            fromWhere.append("""
+                     AND EXISTS (
+                      SELECT 1 FROM content_module_version hv
+                      WHERE hv.module_id = m.id
+                        AND NOT EXISTS (
+                          SELECT 1 FROM content_module_version newer
+                          WHERE newer.module_id = m.id
+                            AND (
+                              newer.updated_at > hv.updated_at
+                              OR (newer.updated_at = hv.updated_at AND newer.semantic_version > hv.semantic_version)
+                            )
+                        )
+                """);
+            fromWhere.append(statusSqlPredicate(filter.status()));
+            fromWhere.append(")");
+        }
+        if (filter.hasLegalFilters()) {
+            appendFullTextLegalFilters(fromWhere, filter);
+        }
+    }
+
+    private static void appendFullTextLegalFilters(
+            StringBuilder fromWhere,
+            ContentModuleCatalogFilter filter
+    ) {
+        fromWhere.append("""
+                 AND EXISTS (
+                  SELECT 1 FROM content_module_version lv
+                  WHERE lv.module_id = m.id
+                    AND (
+                      (
+                        EXISTS (
+                          SELECT 1 FROM content_module_version aa
+                          WHERE aa.module_id = m.id
+                            AND aa.review_state = 'APPROVED'
+                            AND aa.lifecycle_state = 'ACTIVE'
+                        )
+                        AND lv.review_state = 'APPROVED'
+                        AND lv.lifecycle_state = 'ACTIVE'
+                        AND lv.semantic_version = (
+                          SELECT MAX(aa2.semantic_version)
+                          FROM content_module_version aa2
+                          WHERE aa2.module_id = m.id
+                            AND aa2.review_state = 'APPROVED'
+                            AND aa2.lifecycle_state = 'ACTIVE'
+                        )
+                      )
+                      OR (
+                        NOT EXISTS (
+                          SELECT 1 FROM content_module_version aa
+                          WHERE aa.module_id = m.id
+                            AND aa.review_state = 'APPROVED'
+                            AND aa.lifecycle_state = 'ACTIVE'
+                        )
+                        AND lv.semantic_version = (
+                          SELECT MAX(aa3.semantic_version)
+                          FROM content_module_version aa3
+                          WHERE aa3.module_id = m.id
+                        )
+                      )
+                    )
+            """);
+        if (filter.jurisdiction() != null) {
+            fromWhere.append(" AND LOWER(lv.jurisdiction) = :jurisdiction");
+        }
+        if (filter.legalReviewRef() != null) {
+            fromWhere.append(" AND LOWER(lv.legal_review_ref) = :legalReviewRef");
+        }
+        if (filter.effectiveFrom() != null) {
+            fromWhere.append(" AND lv.effective_from IS NOT NULL AND lv.effective_from >= :effectiveFrom");
+        }
+        if (filter.effectiveTo() != null) {
+            fromWhere.append(" AND lv.effective_to IS NOT NULL AND lv.effective_to <= :effectiveTo");
+        }
+        fromWhere.append(")");
+    }
+
     private static String statusSqlPredicate(ContentModuleCatalogDisplayStatus status) {
         return switch (status) {
             case STOPPED -> " AND hv.lifecycle_state = 'STOPPED'";
@@ -278,6 +290,9 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
         }
         if (filter.effectiveTo() != null) {
             query.setParameter("effectiveTo", filter.effectiveTo());
+        }
+        if (filter.locale() != null) {
+            query.setParameter("locale", filter.locale());
         }
     }
 
@@ -318,6 +333,10 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
 
         if (filter.status() != null) {
             predicates.add(buildHeadDisplayStatusPredicate(cb, query, root, filter.status()));
+        }
+
+        if (filter.locale() != null) {
+            predicates.add(cb.equal(root.get("locale"), filter.locale()));
         }
 
         if (filter.hasLegalFilters()) {

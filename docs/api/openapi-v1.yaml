@@ -1389,6 +1389,17 @@ paths:
           schema:
             type: string
             format: date-time
+        - name: locale
+          in: query
+          required: false
+          description: >-
+            IBL-E1 / ADR-0062 — optional exact match on content-module package
+            body `locale` (BCP-47). AND with search / searchMode / status /
+            groupCode / sort / CE-K08 legal filters. Unknown or non-matching
+            values → successful empty page (not 400).
+          schema:
+            type: string
+            maxLength: 64
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
         '200':
@@ -1407,6 +1418,11 @@ paths:
       tags: [Admin]
       operationId: createContentModule
       summary: Create a content module with an initial draft version
+      description: >-
+        Creates a content module with an initial draft version. IBL-E1 /
+        ADR-0062: `locale` (BCP-47) is required; optional
+        `localeVariantFamilyId` groups translation siblings. Same group + family
+        + locale conflict → `409 LOCALE_VARIANT_CONFLICT`.
       parameters:
         - $ref: '#/components/parameters/TraceIdHeader'
       requestBody:
@@ -1425,6 +1441,8 @@ paths:
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
           $ref: '#/components/responses/ErrorResponse'
         '422':
           $ref: '#/components/responses/ErrorResponse'
@@ -2102,6 +2120,17 @@ paths:
               - nameAsc
               - externalIdAsc
             default: groupCodeAsc
+        - name: locale
+          in: query
+          required: false
+          description: >-
+            IBL-E1 / ADR-0062 — optional exact match on template package body
+            `locale` (BCP-47). AND with search / groupCode / lifecycleStatus /
+            approvalSubState / sort. Unknown or non-matching values → successful
+            empty page (not 400).
+          schema:
+            type: string
+            maxLength: 64
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
         '200':
@@ -2113,6 +2142,46 @@ paths:
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      tags: [Admin]
+      operationId: createTemplate
+      summary: Create a template package
+      description: >-
+        Creates a template package under an authorized group (management catalog).
+        IBL-E1 / ADR-0062: `locale` (BCP-47) is required; optional
+        `localeVariantFamilyId` groups translation siblings. Same group + family
+        + locale conflict → `409 LOCALE_VARIANT_CONFLICT`.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTemplateRequest'
+      responses:
+        '200':
+          description: Template created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateDetailResponse'
+        '201':
+          description: Template created (HTTP Created).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateDetailResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -7178,6 +7247,7 @@ components:
         - API_POLICY
         - CONTENT_MODULE_REFERENCES
         - CONTENT_MODULE_EFFECTIVE_EXPIRED
+        - CONTENT_MODULE_LOCALE_MISMATCH
         - UNSUPPORTED_STRUCTURED_NODES
         - PASTE_CLEANING_BLOCKERS
         - PAGINATION_DELTA_BUDGET
@@ -8407,7 +8477,7 @@ components:
     CreateContentModuleRequest:
       type: object
       additionalProperties: false
-      required: [moduleCode, groupCode, name, semanticVersion, contentStructureJson]
+      required: [moduleCode, groupCode, name, semanticVersion, contentStructureJson, locale]
       properties:
         moduleCode:
           type: string
@@ -8441,6 +8511,21 @@ components:
         changeDescription:
           type: string
           maxLength: 2048
+        locale:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: >-
+            IBL-E1 / ADR-0062 — required BCP-47 body locale for the content-module
+            package (not a version-row field).
+        localeVariantFamilyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: >-
+            IBL-E1 / ADR-0062 — optional UUID grouping translation siblings.
+            Within the same groupCode, (localeVariantFamilyId, locale) is unique
+            when non-null. Conflict → 409 LOCALE_VARIANT_CONFLICT.
     CreateContentModuleVersionRequest:
       type: object
       additionalProperties: false
@@ -8621,7 +8706,7 @@ components:
     ContentModuleSummaryView:
       type: object
       additionalProperties: false
-      required: [moduleId, moduleCode, groupCode, name, reviewState, createdAt, updatedAt]
+      required: [moduleId, moduleCode, groupCode, name, reviewState, createdAt, updatedAt, locale]
       properties:
         moduleId:
           type: string
@@ -8658,10 +8743,19 @@ components:
         updatedAt:
           type: string
           format: date-time
+        locale:
+          type: string
+          maxLength: 64
+          description: IBL-E1 / ADR-0062 — package body locale (BCP-47).
+        localeVariantFamilyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: IBL-E1 / ADR-0062 — optional locale-variant family id.
     ContentModuleDetailView:
       type: object
       additionalProperties: false
-      required: [moduleId, moduleCode, groupCode, name, versions, reviewHistory]
+      required: [moduleId, moduleCode, groupCode, name, versions, reviewHistory, locale]
       properties:
         moduleId:
           type: string
@@ -8677,6 +8771,15 @@ components:
           type: array
           items:
             type: string
+        locale:
+          type: string
+          maxLength: 64
+          description: IBL-E1 / ADR-0062 — package body locale (BCP-47).
+        localeVariantFamilyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: IBL-E1 / ADR-0062 — optional locale-variant family id.
         versions:
           type: array
           items:
@@ -9043,6 +9146,16 @@ components:
         exportedAt:
           type: string
           format: date-time
+        locale:
+          type: string
+          maxLength: 64
+          nullable: true
+          description: IBL-E1 / ADR-0062 — package body locale (BCP-47) when present.
+        localeVariantFamilyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: IBL-E1 / ADR-0062 — optional locale-variant family id.
     TemplateExportVariableSchemaView:
       type: object
       additionalProperties: false
@@ -10166,6 +10279,7 @@ components:
         - masterId
         - updatedBy
         - updatedAt
+        - locale
       properties:
         id:
           type: string
@@ -10212,6 +10326,73 @@ components:
             Seeded on first transition into `PUBLISHED` when empty
             (publishInstant UTC date + 365 days); subsequent publishes do not
             overwrite. Not a release-row field.
+        locale:
+          type: string
+          maxLength: 64
+          description: IBL-E1 / ADR-0062 — package body locale (BCP-47).
+        localeVariantFamilyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: IBL-E1 / ADR-0062 — optional locale-variant family id.
+    CreateTemplateRequest:
+      type: object
+      additionalProperties: false
+      required: [externalId, groupCode, name, masterId, locale]
+      properties:
+        externalId:
+          type: string
+          minLength: 1
+          description: Stable business template identifier (path/runtime addressing).
+        groupCode:
+          type: string
+          minLength: 1
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          nullable: true
+        masterId:
+          type: string
+          format: uuid
+          description: Source master document id for the new template package.
+        locale:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: >-
+            IBL-E1 / ADR-0062 — required BCP-47 body locale for the template
+            package (not a version-row field).
+        localeVariantFamilyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: >-
+            IBL-E1 / ADR-0062 — optional UUID grouping translation siblings.
+            Within the same groupCode, (localeVariantFamilyId, locale) is unique
+            when non-null. Conflict → 409 LOCALE_VARIANT_CONFLICT.
+    UpdateTemplateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          maxLength: 256
+        description:
+          type: string
+          maxLength: 1024
+        locale:
+          type: string
+          maxLength: 64
+          description: >-
+            IBL-E1 / ADR-0062 — optional body locale update (BCP-47). Omitted
+            fields leave existing values unchanged.
+        localeVariantFamilyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: IBL-E1 / ADR-0062 — optional locale-variant family id update.
     TemplateSummaryResponse:
       type: object
       additionalProperties: false
@@ -10439,6 +10620,7 @@ components:
         - rules
         - createdAt
         - updatedAt
+        - locale
       properties:
         id:
           type: string
@@ -10519,6 +10701,15 @@ components:
           description: >-
             CE-G05 — same template-row annual-review field as
             `TemplateSummaryView.nextReviewDue` (not release-scoped).
+        locale:
+          type: string
+          maxLength: 64
+          description: IBL-E1 / ADR-0062 — package body locale (BCP-47).
+        localeVariantFamilyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: IBL-E1 / ADR-0062 — optional locale-variant family id.
     TemplateImportResult:
       type: object
       additionalProperties: false
@@ -11094,3 +11285,5 @@ components:
         - ASSET_LIBRARY_ASSET_NOT_FOUND
         - LEGAL_HOLD_NOT_FOUND
         - LEGAL_HOLD_ALREADY_RELEASED
+        - LOCALE_VARIANT_CONFLICT
+        - TEMPLATE_LOCALE_MISMATCH

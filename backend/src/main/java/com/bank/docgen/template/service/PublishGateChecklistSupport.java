@@ -46,6 +46,7 @@ final class PublishGateChecklistSupport {
         checklistItems.add(items.apiPolicyItem(templateId));
         checklistItems.add(items.contentModuleReferencesItem(version.getId()));
         checklistItems.add(items.contentModuleEffectiveExpiredItem(version.getId()));
+        checklistItems.add(items.contentModuleLocaleMismatchItem(version.getId()));
         checklistItems.add(items.unsupportedStructuredNodesItem(version.getId()));
         checklistItems.add(items.pasteCleaningBlockersItem(version.getId()));
         checklistItems.add(items.paginationDeltaBudgetItem(templateId, version));

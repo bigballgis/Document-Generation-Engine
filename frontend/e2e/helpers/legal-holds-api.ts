@@ -161,6 +161,7 @@ export async function ensureLegalHoldTemplateFixture(
       name,
       description: 'CE-G04 Legal Hold Playwright TEMPLATE_WINDOW fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
   })
   if (!createResponse.ok()) {

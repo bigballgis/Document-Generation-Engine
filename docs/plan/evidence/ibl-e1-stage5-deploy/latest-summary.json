@@ -1,0 +1,18 @@
+{
+  "branch": "feat/ibl-e1-locale-variant-model",
+  "frontend_4173": 200,
+  "git_tip": "3e76b9db7c178ba0a99a3e1d01ff65bf7fd0e337",
+  "slice": "ibl-e1-locale-variant-model",
+  "skip_build": false,
+  "frontend_image_id": "sha256:86ac804fa4e3cd003bf62739098e0775ca728fce335a402db109ffffc0b69b3f",
+  "result": "DEPLOY_OK",
+  "compose_project": "documentgenerationengine",
+  "task_ids": [
+    "128"
+  ],
+  "evidence_dir": "docs/plan/evidence/ibl-e1-stage5-deploy",
+  "when": "2026-07-20T01:31:57+08:00",
+  "backend_image_id": "sha256:9e310f3188fa19d1a2e815359c16b4395295eb15a7d60ede8c1f74d744b8f110",
+  "git_short": "3e76b9db",
+  "healthz_8080": 200
+}

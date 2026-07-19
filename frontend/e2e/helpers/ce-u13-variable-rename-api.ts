@@ -195,6 +195,7 @@ export async function prepareCeU13CascadeFixture(
       name,
       description: 'CE-U13 variable rename cascade Playwright fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )

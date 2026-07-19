@@ -1,5 +1,6 @@
 package com.bank.docgen.template.persistence;
 
+import com.bank.docgen.sharedkernel.document.compute.ComputeDslLimits;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -59,6 +60,14 @@ public class TemplateEntity {
     @Column(name = "next_review_due")
     private LocalDate nextReviewDue;
 
+    /** IBL-E1 — authored body locale (BCP-47). */
+    @Column(name = "locale", nullable = false, length = 64)
+    private String locale;
+
+    /** IBL-E1 — optional translation sibling family within groupCode. */
+    @Column(name = "locale_variant_family_id")
+    private UUID localeVariantFamilyId;
+
     protected TemplateEntity() {
     }
 
@@ -78,6 +87,7 @@ public class TemplateEntity {
         this.description = description;
         this.masterId = masterId;
         this.lifecycleStatus = TemplateLifecycleStatus.DRAFT;
+        this.locale = ComputeDslLimits.DEFAULT_LOCALE;
         this.createdBy = createdBy;
         this.updatedBy = createdBy;
         Instant now = Instant.now();
@@ -143,6 +153,22 @@ public class TemplateEntity {
 
     public void setNextReviewDue(LocalDate nextReviewDue) {
         this.nextReviewDue = nextReviewDue;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
+    public UUID getLocaleVariantFamilyId() {
+        return localeVariantFamilyId;
+    }
+
+    public void setLocaleVariantFamilyId(UUID localeVariantFamilyId) {
+        this.localeVariantFamilyId = localeVariantFamilyId;
     }
 
     public void setName(String name) {

@@ -181,7 +181,8 @@ class TemplateExportControllerTest {
                                   "groupCode":"RETAIL",
                                   "name":"Export Letter",
                                   "description":"Export test template",
-                                  "masterId":"%s"
+                                  "masterId":"%s",
+                                  "locale":"zh-CN"
                                 }
                                 """.formatted(masterId)))
                 .andExpect(status().isCreated())

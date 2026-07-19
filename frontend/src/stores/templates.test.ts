@@ -172,6 +172,7 @@ describe('templates store', () => {
         masterId: 'master-1',
         externalId: 'TPL-DUP',
         name: 'Duplicate',
+        locale: 'zh-CN',
       }),
     ).rejects.toBeTruthy()
 
@@ -188,6 +189,7 @@ describe('templates store', () => {
         masterId: 'master-1',
         externalId: 'TPL-NEW',
         name: 'New template',
+        locale: 'zh-CN',
       }),
     ).rejects.toBeTruthy()
 

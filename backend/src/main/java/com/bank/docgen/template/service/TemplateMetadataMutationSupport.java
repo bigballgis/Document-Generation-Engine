@@ -5,6 +5,8 @@ import com.bank.docgen.master.domain.MasterDocumentStatus;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.service.MasterNotFoundException;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
+import com.bank.docgen.sharedkernel.locale.LocaleLanguageCompatibility;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
@@ -16,6 +18,7 @@ import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 
 /**
  * Package-private create / metadata-update bodies for TemplateService.
@@ -50,6 +53,9 @@ final class TemplateMetadataMutationSupport {
         if (!groupAccessService.canAccessGroup(session, request.groupCode())) {
             throw new TemplateAccessDeniedException();
         }
+        String locale = requireValidLocale(request.locale());
+        UUID familyId = request.localeVariantFamilyId();
+        assertFamilyLocaleUnique(request.groupCode(), familyId, locale, null);
         UUID masterId = UUID.fromString(request.masterId());
         MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)
                 .orElseThrow(MasterNotFoundException::new);
@@ -72,6 +78,8 @@ final class TemplateMetadataMutationSupport {
                 masterId,
                 session.username()
         );
+        template.setLocale(locale);
+        template.setLocaleVariantFamilyId(familyId);
         templateRepository.save(template);
         TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), templateId, session.username());
         templateVersionRepository.save(version);
@@ -95,8 +103,57 @@ final class TemplateMetadataMutationSupport {
         if (request.description() != null) {
             template.setDescription(request.description());
         }
+        boolean localeOrFamilyChanged = false;
+        if (request.locale() != null) {
+            template.setLocale(requireValidLocale(request.locale()));
+            localeOrFamilyChanged = true;
+        }
+        if (request.localeVariantFamilyId() != null) {
+            template.setLocaleVariantFamilyId(request.localeVariantFamilyId());
+            localeOrFamilyChanged = true;
+        }
+        if (localeOrFamilyChanged) {
+            assertFamilyLocaleUnique(
+                    template.getGroupCode(),
+                    template.getLocaleVariantFamilyId(),
+                    template.getLocale(),
+                    template.getId()
+            );
+        }
         template.setUpdatedBy(session.username());
         templateRepository.save(template);
         return templateViewMapper.toDetail(template);
+    }
+
+    private static String requireValidLocale(String locale) {
+        try {
+            return LocaleLanguageCompatibility.requireValidTag(locale);
+        } catch (IllegalArgumentException ex) {
+            throw new TemplateValidationException("api.error.template.localeRequired");
+        }
+    }
+
+    private void assertFamilyLocaleUnique(
+            String groupCode,
+            UUID familyId,
+            String locale,
+            UUID excludingTemplateId
+    ) {
+        if (familyId == null) {
+            return;
+        }
+        boolean conflict = excludingTemplateId == null
+                ? templateRepository.existsByGroupCodeAndLocaleVariantFamilyIdAndLocaleAndDeletedAtIsNull(
+                        groupCode, familyId, locale)
+                : templateRepository
+                        .existsByGroupCodeAndLocaleVariantFamilyIdAndLocaleAndDeletedAtIsNullAndIdNot(
+                                groupCode, familyId, locale, excludingTemplateId);
+        if (conflict) {
+            throw new TemplateGovernanceException(
+                    ApiErrorCodes.LOCALE_VARIANT_CONFLICT,
+                    "api.error.template.localeVariantConflict",
+                    HttpStatus.CONFLICT
+            );
+        }
     }
 }

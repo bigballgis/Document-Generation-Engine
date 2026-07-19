@@ -113,6 +113,7 @@ async function createDraftTemplate(
       name,
       description: 'P18-T10 controlled structured authoring Playwright fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )
@@ -295,6 +296,7 @@ export async function prepareDualAnchorFolDraftTemplate(
       name,
       description: 'CE-U21 per-anchor draft isolation Playwright fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )

@@ -98,6 +98,75 @@ describe('TemplateCreateDialog', () => {
     expect(rules.masterId?.[0]?.required).toBe(true)
     expect(rules.externalId?.[0]?.required).toBe(true)
     expect(rules.name?.[0]?.required).toBe(true)
+    expect(rules.locale?.[0]?.required).toBe(true)
+  })
+
+  type CreateDialogExposed = {
+    form: {
+      groupCode: string
+      masterId: string
+      externalId: string
+      name: string
+      locale: string
+    }
+    handleSubmit: () => Promise<void>
+  }
+
+  it('IBL-E1-013: blocks create submit when locale is empty', async () => {
+    const wrapper = mountDialog()
+    await flushPromises()
+
+    const vm = wrapper.vm as unknown as CreateDialogExposed
+    vm.form.groupCode = 'RETAIL'
+    vm.form.masterId = 'master-1'
+    vm.form.externalId = 'TPL-NEW'
+    vm.form.name = 'New template'
+    vm.form.locale = ''
+
+    await vm.handleSubmit()
+    await flushPromises()
+
+    expect(templatesApi.createTemplate).not.toHaveBeenCalled()
+  })
+
+  it('IBL-E1-013: submits create payload with required locale', async () => {
+    vi.mocked(templatesApi.createTemplate).mockResolvedValue({
+      id: 'tpl-1',
+      externalId: 'TPL-NEW',
+      groupCode: 'RETAIL',
+      name: 'New template',
+      masterId: 'master-1',
+      lifecycleStatus: 'DRAFT',
+      releaseVersion: null,
+      locale: 'en-US',
+      devVersionId: 'dev-1',
+      devVersionNumber: 1,
+      variables: [],
+      bindings: [],
+      rules: [],
+      createdAt: '2026-07-19T10:00:00Z',
+      updatedAt: '2026-07-19T10:00:00Z',
+    })
+
+    const wrapper = mountDialog()
+    await flushPromises()
+
+    const vm = wrapper.vm as unknown as CreateDialogExposed
+    vm.form.groupCode = 'RETAIL'
+    vm.form.masterId = 'master-1'
+    vm.form.externalId = 'TPL-NEW'
+    vm.form.name = 'New template'
+    vm.form.locale = 'en-US'
+
+    await vm.handleSubmit()
+    await flushPromises()
+
+    expect(templatesApi.createTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locale: 'en-US',
+        externalId: 'TPL-NEW',
+      }),
+    )
   })
 
   it('surfaces API error message keys in the dialog', async () => {
@@ -117,14 +186,14 @@ describe('TemplateCreateDialog', () => {
     const templatesStore = useTemplatesStore()
     await flushPromises()
 
-    const selects = wrapper.findAll('.select-stub')
-    await selects[0]?.setValue('RETAIL')
-    await selects[1]?.setValue('master-1')
-    await wrapper.find('input[placeholder="e.g. TPL-RETAIL-LETTER"]').setValue('TPL-DUP')
-    const nameInput = wrapper.findAll('.el-input__inner')[1]
-    await nameInput.setValue('Duplicate template')
+    const vm = wrapper.vm as unknown as CreateDialogExposed
+    vm.form.groupCode = 'RETAIL'
+    vm.form.masterId = 'master-1'
+    vm.form.externalId = 'TPL-DUP'
+    vm.form.name = 'Duplicate template'
+    vm.form.locale = 'zh-CN'
 
-    await wrapper.find('.el-button--primary').trigger('click')
+    await vm.handleSubmit()
     await flushPromises()
 
     expect(templatesStore.lastErrorMessageKey).toBe('api.error.template.externalIdExists')

@@ -94,7 +94,15 @@ public class TemplateService {
             ManagementSessionClaims session, Integer page, Integer size, String search, String groupCode,
             String lifecycleStatus, String approvalSubState, String sort
     ) {
-        return catalogSupport.list(session, page, size, search, groupCode, lifecycleStatus, approvalSubState, sort);
+        return catalogSupport.list(session, page, size, search, groupCode, lifecycleStatus, approvalSubState, sort, null);
+    }
+
+    public PageView<TemplateSummaryView> list(
+            ManagementSessionClaims session, Integer page, Integer size, String search, String groupCode,
+            String lifecycleStatus, String approvalSubState, String sort, String locale
+    ) {
+        return catalogSupport.list(
+                session, page, size, search, groupCode, lifecycleStatus, approvalSubState, sort, locale);
     }
 
     @Transactional(readOnly = true)

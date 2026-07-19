@@ -48,6 +48,20 @@ final class TemplateCatalogSupport {
             String approvalSubState,
             String sort
     ) {
+        return list(session, page, size, search, groupCode, lifecycleStatus, approvalSubState, sort, null);
+    }
+
+    PageView<TemplateSummaryView> list(
+            ManagementSessionClaims session,
+            Integer page,
+            Integer size,
+            String search,
+            String groupCode,
+            String lifecycleStatus,
+            String approvalSubState,
+            String sort,
+            String locale
+    ) {
         int safePage = CatalogPageSupport.normalizePage(page);
         int safeSize = CatalogPageSupport.normalizeSize(size);
         List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
@@ -71,6 +85,7 @@ final class TemplateCatalogSupport {
         if (approvalSubState != null && !approvalSubState.isBlank() && approvalFilter == null) {
             return new PageView<>(List.of(), safePage, safeSize, 0, 0);
         }
+        String localeFilter = CatalogPageSupport.blankToNull(locale);
 
         CatalogSortKey sortKey = CatalogSortKey.parse(sort, CatalogSortKey.EXTERNAL_ID_ASC);
         TemplateCatalogFilter filter = new TemplateCatalogFilter(
@@ -80,7 +95,8 @@ final class TemplateCatalogSupport {
                 CatalogPageSupport.blankToNull(search),
                 statusFilter,
                 approvalFilter,
-                sortKey
+                sortKey,
+                localeFilter
         );
         CatalogQueryPage<TemplateEntity> templatePage = templateRepository.searchCatalog(filter, safePage, safeSize);
         List<TemplateSummaryView> content = displayEnrichment.enrichTemplateSummaries(templatePage.content().stream()

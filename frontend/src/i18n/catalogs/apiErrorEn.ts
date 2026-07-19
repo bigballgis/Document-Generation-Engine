@@ -86,6 +86,9 @@ export const apiErrorEn = {
     masterNotApproved: "Templates can only be created from approved letterheads.",
     masterGroupMismatch: "The letterhead group does not match the template group.",
     externalIdExists: "A template with this external identifier already exists.",
+    localeRequired: "A valid BCP-47 locale is required for the template body language.",
+    localeVariantConflict:
+      "A template with the same locale already exists in this locale variant family for the group.",
     variableTypeUnsupported: "The variable type is not supported.",
     enumValuesRequired: "Enum variables require enum values.",
     structuredContentInvalid: "The structured content definition is invalid.",
@@ -220,7 +223,9 @@ export const apiErrorEn = {
     rateLimitExceeded: "Too many requests. Please retry later.",
     invocationNotFound: "The invocation record was not found.",
     invocationRecordExpired: "The invocation record has expired.",
-    invocationViewInvalid: "The invocation view parameter is invalid."
+    invocationViewInvalid: "The invocation view parameter is invalid.",
+    templateLocaleMismatch:
+      "The request locale is not language-compatible with the pinned template locale.",
   },
   encryption: {
     encryptionParameterInvalid: "Encryption parameters are invalid for the current request.",
@@ -260,6 +265,9 @@ export const apiErrorEn = {
     accessDenied: "You do not have permission to access this content module.",
     groupCodeRequired: "A group code is required to list content modules.",
     moduleCodeExists: "A content module with this module code already exists.",
+    localeRequired: "A valid BCP-47 locale is required for the content module body language.",
+    localeVariantConflict:
+      "A content module with the same locale already exists in this locale variant family for the group.",
     versionExists: "A content module version with this semantic version already exists.",
     versionRequired: "The content module has no version to project catalog status from.",
     draftOnlyEditable: "Only draft versions can be edited.",

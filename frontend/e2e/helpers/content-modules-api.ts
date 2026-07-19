@@ -477,6 +477,7 @@ export async function createApprovedContentModule(
       semanticVersion,
       contentStructureJson,
       changeDescription: 'Initial E2E draft',
+      locale: 'en-US',
     },
   )
 
@@ -533,6 +534,7 @@ export async function createDraftContentModule(
       semanticVersion,
       contentStructureJson: '{"blocks":[{"type":"paragraph","text":"E2E draft clause"}]}',
       changeDescription: 'Initial E2E draft for UIUX evidence',
+      locale: 'en-US',
     },
   )
 
@@ -638,6 +640,7 @@ export async function createSubmittedContentModuleForReview(
       semanticVersion,
       contentStructureJson: '{"blocks":[{"type":"paragraph","text":"E2E CMRL submitted clause"}]}',
       changeDescription: 'Initial E2E CMRL draft',
+      locale: 'en-US',
     },
   )
 
@@ -756,6 +759,7 @@ export async function createDraftContentModuleWithSharedGroups(
       semanticVersion,
       contentStructureJson: '{"blocks":[{"type":"paragraph","text":"E2E SGC clause"}]}',
       changeDescription: 'Initial E2E SGC draft',
+      locale: 'en-US',
     },
   )
 
@@ -878,6 +882,7 @@ export async function prepareDraftTemplateWithOutdatedClauseReference(
       name: `E2E outdated clause ${externalId}`,
       description: 'CE-U07 outdated clause Playwright fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )
@@ -1022,6 +1027,7 @@ export async function preparePublishedTemplateReferencingModule(
       name: options?.name ?? `E2E publish lock ${externalId}`,
       description: 'P14-T01 publish lock Playwright fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )
@@ -1169,6 +1175,7 @@ export async function createDemoFullFlowDraftTemplate(
       name: DEMO_FULL_FLOW_NAME,
       description: 'Full lifecycle demo template for E2E and manual walkthrough',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )
@@ -1537,6 +1544,7 @@ export async function createIsolatedTemplatePendingRelease(
       name: `E2E API materialize ${externalId}`,
       description: 'CD-E2E-T13 publish materialize fixture',
       masterId: master.id,
+      locale: 'en-US',
     },
     201,
   )

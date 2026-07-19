@@ -353,6 +353,7 @@ export async function createDraftTemplateNeverPublished(
       name,
       description: 'CE-G05 null nextReviewDue control',
       masterId: master.id,
+      locale: 'en-US',
     },
   })
   if (response.status() !== 201) {

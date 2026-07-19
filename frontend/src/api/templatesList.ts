@@ -17,17 +17,21 @@ import type {
   TemplateSummary,
 } from '@/types/template'
 
+export type TemplateListQueryOptions = {
+  signal?: AbortSignal
+  search?: string
+  groupCode?: string
+  lifecycleStatus?: string
+  approvalSubState?: string
+  /** IBL-E1 — optional exact BCP-47 locale filter (AND with other filters). */
+  locale?: string
+  sort?: string
+}
+
 export async function listTemplates(
   page = 0,
   size = 20,
-  options: {
-    signal?: AbortSignal
-    search?: string
-    groupCode?: string
-    lifecycleStatus?: string
-    approvalSubState?: string
-    sort?: string
-  } = {},
+  options: TemplateListQueryOptions = {},
 ): Promise<PageView<TemplateSummary>> {
   const params: Record<string, string | number> = { page, size }
   if (options.search) {
@@ -43,6 +47,10 @@ export async function listTemplates(
   if (options.approvalSubState) {
     params.approvalSubState = options.approvalSubState
   }
+  const locale = options.locale?.trim()
+  if (locale) {
+    params.locale = locale
+  }
   if (options.sort) {
     params.sort = options.sort
   }
@@ -55,14 +63,7 @@ export async function listTemplates(
 
 /** Multi-page merge for dashboard / picker consumers (LR-C5 PageView). */
 export async function listAllTemplates(
-  options: {
-    signal?: AbortSignal
-    search?: string
-    groupCode?: string
-    lifecycleStatus?: string
-    approvalSubState?: string
-    sort?: string
-  } = {},
+  options: TemplateListQueryOptions = {},
 ): Promise<CollectedCatalogPage<TemplateSummary>> {
   return collectAllPageContent((page, size) => listTemplates(page, size, options))
 }

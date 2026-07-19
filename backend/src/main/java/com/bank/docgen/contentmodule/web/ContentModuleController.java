@@ -81,12 +81,13 @@ public class ContentModuleController {
             @RequestParam(required = false) String legalReviewRef,
             @RequestParam(required = false) Instant effectiveFrom,
             @RequestParam(required = false) Instant effectiveTo,
+            @RequestParam(required = false) String locale,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
         return envelope(request, contentModuleService.list(
                 session, page, size, search, groupCode, sort,
-                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status, searchMode
+                jurisdiction, legalReviewRef, effectiveFrom, effectiveTo, status, searchMode, locale
         ));
     }
 

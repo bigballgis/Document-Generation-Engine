@@ -31,6 +31,8 @@ export type ContentModuleListQueryOptions = {
   groupCode?: string
   /** CE-U20 — head display status filter (badge-aligned). */
   status?: string
+  /** IBL-E1 — optional exact BCP-47 locale filter (AND with other filters). */
+  locale?: string
   sort?: string
 }
 
@@ -57,6 +59,10 @@ export async function listContentModules(
   }
   if (options.status?.trim()) {
     params.status = options.status.trim()
+  }
+  const locale = options.locale?.trim()
+  if (locale) {
+    params.locale = locale
   }
   if (options.sort) {
     params.sort = options.sort

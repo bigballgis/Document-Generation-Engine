@@ -71,7 +71,8 @@ class ContentModuleControllerTest {
                                   "sharedGroupCodes":[],
                                   "semanticVersion":"1.0.0",
                                   "contentStructureJson":"{\\"blocks\\":[]}",
-                                  "changeDescription":"Initial draft"
+                                  "changeDescription":"Initial draft",
+                                  "locale":"zh-CN"
                                 }
                                 """))
                 .andExpect(status().isOk())
@@ -169,7 +170,8 @@ class ContentModuleControllerTest {
                                   "groupCode":"RETAIL",
                                   "name":"Denied",
                                   "semanticVersion":"1.0.0",
-                                  "contentStructureJson":"{}"
+                                  "contentStructureJson":"{}",
+                                  "locale":"zh-CN"
                                 }
                                 """))
                 .andExpect(status().isForbidden());

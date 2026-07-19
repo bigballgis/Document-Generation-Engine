@@ -496,6 +496,8 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 模板是基于母版进行锚点内容编排后形成的文档生成资产。
 
+**Wave E / locale-variant（IBL-E1 / PD-4，2026-07-19）：** Product-boundary **PD-4** Confirmed — locale-variant template/clause model via ADR + **IBL-E1**（#128）。行为 SoT：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)；架构 [ADR-0062](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)（**Accepted** 2026-07-19；impl still In Progress）。SPECIMEN 去水印（PD-6）与授权字体（PD-7）**OUT of E1**。
+
 已确认属性：
 
 - 所属母版。
@@ -517,6 +519,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 审批摘要。
 - 关联的 API 管理配置。
 - **CE-G05：** 下一年度复核到期日 `nextReviewDue`（API camelCase；DB `next_review_due`，UTC 日历日 DATE；可空）。挂在 **template 行**（非单 release 行）——年检是模板治理周期，不是单版本生命周期态。
+- **IBL-E1 / PD-4：** 正文语种 `locale`（BCP-47 字符串，挂在 **template 包行**，创建必填；存量迁移默认 `zh-CN`）与可选 `localeVariantFamilyId`（同组同家族内 locale 唯一）。每个 locale 变体仍是独立模板包，独立版本线/测试/审批/发布；**不**在一包内多正文，**不** runtime 按 locale 静默换包。运行时路径仍钉扎具体模板；非空 `context.locale` 须与模板 `locale` 语言兼容（primary language），否则 fail-closed。详情与场景见行为规格 / ADR-0062。
 
 已确认规则：
 
@@ -647,6 +650,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 适用范围。
 - 所属分组或可访问范围。
 - **版本法务元数据（CE-K08，可选）：** `jurisdiction`、`effectiveFrom`、`effectiveTo`、`legalReviewRef`（UTC Instant / 短文本；见行为规格）。
+- **IBL-E1 / PD-4：** 正文语种 `locale`（BCP-47，挂在 **content module 包行**，创建必填；存量迁移默认 `zh-CN`）与可选 `localeVariantFamilyId`（同组同家族内 locale 唯一）。与 CE-K08 `jurisdiction` **正交**（辖区 ≠ 语种）。规格：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)；[ADR-0062](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)。
 
 已确认规则：
 
@@ -669,6 +673,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 如果业务需要立即停止使用包含问题条款或内容模块的已发布模板，必须通过停用对应模板或发布版本来阻断生成和 API 调用。
 - 条款或内容模块停用或废弃前的影响分析必须覆盖引用模板、引用发布版本、default 路由影响、近期调用摘要、是否需要停用模板或发布版本，以及可替代模块版本建议。
 - **CE-K08：** 法务元数据仅草稿版本可写；`effectiveFrom`/`effectiveTo` 皆非空时须 `effectiveFrom <= effectiveTo`；空 `effectiveTo` 表示无到期。内容模块目录 list 可按法务字段筛选（catalog filter version = 优先最新 `APPROVED`+`ACTIVE`，否则最新版本）。模板发布时，若任一引用版本满足 `effectiveTo != null && utcNow.isAfter(effectiveTo)`，发布门禁 `CONTENT_MODULE_EFFECTIVE_EXPIRED` 硬阻断；未来 `effectiveFrom` 不阻断；已锁定已发布版本运行期不因事后过期失败。规格：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)。
+- **IBL-E1：** 模板发布时，任一锁定引用的内容模块 `locale` 须与模板 `locale` 语言兼容（primary language）；否则发布门禁硬阻断（如 `CONTENT_MODULE_LOCALE_MISMATCH`），与 CE-K08 过期门禁正交。各 locale 变体独立审批/生命周期，家族内不自动传播发布状态。
 - **CE-U20（目录摘要状态，2026-07-17）：** 管理目录 `ContentModuleSummaryView` 投影模块 **head 版本** 的 `reviewState`（必填）与 `lifecycleState`（可空）。Head 定义：该模块全部版本中 `updatedAt` 最大者；并列时取 `semanticVersion` 字典序更大者。目录状态列/徽章语义与详情版本表一致：若 head `lifecycleState` 为 `DEPRECATED` 或 `STOPPED` 则展示/筛选命中这些值，否则按 `reviewState`（`APPROVED` 且 lifecycle 为 `ACTIVE` 或 null/缺省）。`GET /content-modules` 可选 query `status`（`DRAFT` \| `SUBMITTED` \| `APPROVED` \| `STOPPED` \| `DEPRECATED`）对该展示状态做服务端精确过滤，与 search / groupCode / sort / CE-K08 legal filters **AND**；非法值 → 空页。此 head 选择规则与 CE-K08 catalog filter version **正交**。不改变审批/生命周期状态机。规格：[ce-u20-clause-create-structured.md](../behavior/ce-u20-clause-create-structured.md)。
 - **CE-G05 正文全文检索与 where-used（2026-07-17）：** 对 `content_module_version.content_structure_json` 维护 PostgreSQL `tsvector`（或 GENERATED 等价）+ GIN；写入/更新版本时同事务同步；配置 **`simple`**（中英混合信函，避免 english stemmer 误伤）。可检索文本从 JSON 抽取人类可读节点（须覆盖 `paragraph` / `text` / list item 文本；键名与纯结构标点可剥离）；抽取失败 → 该版本向量为空（不 500）；写版本成功则向量最终一致。目录 `searchMode=FULL_TEXT` 时对 **catalog filter version**（同 CE-K08：优先最新 `APPROVED`+`ACTIVE`，否则最新）正文向量匹配，与 CE-U20 `status` / legal filters **AND**；`NAME`（缺省）保持 LR-C5 ILIKE，不依赖 tsvector。where-used：授权范围内引用该模块的模板清单（只读；复用 `template_content_module_reference` 及发布锁定关系；**不**要求扫描全部 binding JSON；响应不含条款全文）。规格：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。
 

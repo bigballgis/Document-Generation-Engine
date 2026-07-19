@@ -120,6 +120,10 @@ public class RuntimeGenerationService {
                 .orElseThrow(() -> new TemplateValidationException("api.error.runtime.policyNotConfigured"));
         requestSupport.validateGenerateRequest(request, policy);
         encryptionParameterValidator.validate(request.encryption(), policy, request.output().format());
+        TemplateLocaleCompatibilitySupport.assertRequestLocaleCompatible(
+                template,
+                request.context() == null ? null : request.context().locale()
+        );
         String resolvedVersion = releaseVersion != null ? releaseVersion : policy.getDefaultRouteReleaseVersion();
         if (resolvedVersion == null) {
             throw new TemplateValidationException("api.error.runtime.releaseVersionRequired");

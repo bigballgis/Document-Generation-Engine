@@ -21,6 +21,9 @@ export function toTemplateSummary(
     updatedBy: existing?.updatedBy ?? '',
     updatedAt: detail.updatedAt,
     nextReviewDue: detail.nextReviewDue ?? existing?.nextReviewDue ?? null,
+    locale: detail.locale ?? existing?.locale,
+    localeVariantFamilyId:
+      detail.localeVariantFamilyId ?? existing?.localeVariantFamilyId ?? null,
   }
 }
 

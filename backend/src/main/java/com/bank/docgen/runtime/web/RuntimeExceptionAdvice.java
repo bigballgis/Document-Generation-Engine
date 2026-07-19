@@ -14,6 +14,7 @@ import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
 import com.bank.docgen.runtime.service.RuntimeDownloadExpiredException;
 import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
 import com.bank.docgen.runtime.service.SyncBatchFailureException;
+import com.bank.docgen.runtime.service.TemplateLocaleMismatchException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
@@ -78,6 +79,20 @@ public class RuntimeExceptionAdvice {
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 ex.errorCode(),
                 ApiErrorCategories.RUNTIME,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(TemplateLocaleMismatchException.class)
+    public ResponseEntity<ErrorEnvelope> handleTemplateLocaleMismatch(
+            HttpServletRequest request,
+            TemplateLocaleMismatchException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.errorCode(),
+                ApiErrorCategories.TEMPLATE,
                 ex.messageKey()
         );
     }
