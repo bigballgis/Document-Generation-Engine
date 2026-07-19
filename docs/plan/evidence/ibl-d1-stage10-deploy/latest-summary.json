@@ -1,0 +1,14 @@
+{
+  "result": "DEPLOY_OK",
+  "slice": "ibl-d1-testcontainers-flyway",
+  "task": 123,
+  "gitTip": "97488945f69aab18bdba3d23993503e63438da66",
+  "branch": "feat/ibl-d1-testcontainers-flyway",
+  "mode": "ForceRebuild",
+  "backendImageId": "sha256:783e4af53842cee37c8c4259e6ab7fe21c314a68adfef44605526590adde874a",
+  "frontendImageId": "sha256:75586aaafc956b96d5b9c3813632728f45c66ed229099e487a25c505f5e3b710",
+  "healthz8080": 200,
+  "frontend4173": 200,
+  "verifiedAt": "2026-07-19T15:39:16+08:00",
+  "feE2eInScope": false
+}
