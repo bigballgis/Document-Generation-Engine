@@ -3,8 +3,10 @@
   "task_ids": ["123"],
   "program_leaf": "IBL-D1",
   "finding": "F20",
-  "status": "GATES_OK",
-  "done_claimed": false,
+  "status": "DONE",
+  "done_claimed": true,
+  "main_merge": "1a6869381cd77b7cc9cb75fa6b8ffb796cf7bb74",
+  "feature_tip": "f399489c",
   "profile": "testcontainers",
   "testcontainers_version": "2.0.5",
   "postgres_image": "postgres:16-alpine",
@@ -28,10 +30,17 @@
       "migrations_applied": 68,
       "flyway_version_reached": "v68",
       "ryuk_disabled": true
-    }
+    },
+    "architecture": "PASS_WITH_NOTES",
+    "merge_go": true,
+    "stage10": "DEPLOY_OK"
   },
   "docs": {
     "h2_vs_tc": "docs/architecture/test-database-strategy.md",
-    "behavior": "docs/behavior/ibl-d1-testcontainers-flyway.md"
-  }
+    "behavior": "docs/behavior/ibl-d1-testcontainers-flyway.md",
+    "stage10_evidence": "docs/plan/evidence/ibl-d1-stage10-deploy/"
+  },
+  "wave_ibl_d": "In Progress (D1 Done; D2–D5 Not Started)",
+  "sole_active": "cleared",
+  "next_queue_note_only": "124"
 }

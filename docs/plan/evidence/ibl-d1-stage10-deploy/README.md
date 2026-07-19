@@ -19,8 +19,8 @@
 - **First attempt:** FAIL — worktree `.env` created from `.env.example` with insecure JWT default; deploy script refused per BDD-OPS-JWT-SECRET-001. Remediation: synced acceptance `JWT_SECRET` from MAIN `.env` (length 64; value not recorded). Retry succeeded.
 - **FE UI in scope:** false (FE/E2E N/A); Stage 10 for docker-only-validation / acceptance surface only
 - **DEPLOY_QUEUE after:** 
-- **Not Done:** Stage 10 evidence only — do not claim Done
+- **Done closeout:** Stage 11 merge `1a686938` (feature tip `f399489c`) + Stage 12 MAIN doc-sync — leaf **Done**; Wave IBL-D stays **In Progress** (D1 Done; D2–D5 Not Started)
 
-## Ready for
+## Closed
 
-Stage **11** — `integration-merger` (merge + worktree cleanup) then MAIN doc-sync / commit-review
+Stage **11** merge + worktree cleanup complete; Stage **12** post-task-doc-sync on MAIN

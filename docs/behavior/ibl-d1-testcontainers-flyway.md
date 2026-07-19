@@ -9,8 +9,8 @@
 | **Finding** | **F20** (H2 / Flyway-off default verify; zero Testcontainers) |
 | **Task Master** | **#123** |
 | **Formal phase** | **None** (do **not** invent a P-phase; do **not** claim IBL program Done) |
-| **Delivery status** | Stage 1 BDD recorded — implementation not claimed Done |
-| **Placement** | ISOLATED — `D:/working/DGE-ibl-d1-testcontainers-flyway` · `feat/ibl-d1-testcontainers-flyway` |
+| **Delivery status** | **Done** — MAIN merge `1a686938` / feature tip `f399489c`; worktree removed; F20 closed |
+| **Placement** | Merged to MAIN (was ISOLATED `D:/working/DGE-ibl-d1-testcontainers-flyway` · `feat/ibl-d1-testcontainers-flyway`) |
 | **Frontend UI** | **`frontend_ui_in_scope=false`** — no management UI / Playwright E2E / UIUX |
 | **Batch** | **solo** (`member_task_ids: ["123"]`; vetoes IBL-D2-LO-CI, IBL-B7, umbrella-106) |
 

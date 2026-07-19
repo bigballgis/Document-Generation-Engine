@@ -2,10 +2,10 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **GATES_OK** (backend-engineer stage 4; not Done / not merged) |
+| Status | **Done** — MAIN merge `1a686938` / feature tip `f399489c`; worktree removed |
 | Timestamp (local) | 2026-07-19 |
-| Worktree | `D:/working/DGE-ibl-d1-testcontainers-flyway` |
-| Branch | `feat/ibl-d1-testcontainers-flyway` |
+| Worktree | removed (was `D:/working/DGE-ibl-d1-testcontainers-flyway`) |
+| Branch | merged (`feat/ibl-d1-testcontainers-flyway`) |
 | Profile | **`testcontainers`** |
 | BOM pin | Testcontainers **2.0.5** (Spring Boot 4.1.0 `testcontainers.version`) — Maven Central |
 | Image | `postgres:16-alpine` |
