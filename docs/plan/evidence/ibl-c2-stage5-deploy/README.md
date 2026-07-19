@@ -21,3 +21,11 @@
 ## Ready for
 
 Stage **6** — `e2e-test-engineer` (IBL-C2 rendered compare UI @ :4173 / :8080)
+
+## Stage 10 SkipBuild (appended)
+
+- **Result:** DEPLOY_OK
+- **When:** 2026-07-19T13:40:58+08:00 (started 2026-07-19T13:38:44+08:00 / ended 2026-07-19T13:40:37+08:00)
+- **Evidence:** [ibl-c2-stage10-deploy](../ibl-c2-stage10-deploy/)
+- **8080/healthz:** 200
+- **4173:** 200
