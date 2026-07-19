@@ -1,0 +1,19 @@
+{
+  "result": "DEPLOY_OK",
+  "slice": "ibl-d5-legalhold-depth",
+  "task": "IBL-D5",
+  "gitTip": "23bd6da9dd90138a494b20343a057d2891e418e0",
+  "branch": "feat/ibl-d5-legalhold-depth",
+  "mode": "SkipBuildHealthRecheck",
+  "skipBuildAttempt": "REFUSED_JWT_SECRET_DEFAULT",
+  "stackSource": "prior IBL-D2 ForceRebuild (documentgenerationengine; working_dir=D:\\working\\DGE-ibl-d2-lo-mandatory-lane)",
+  "backendImageId": "sha256:de73ac7f08e8e2b635bbe152f6805919302875be42edb6ebd40dbbda55e74a25",
+  "frontendImageId": "sha256:d7657314570d1bbe138549d865724129b064c2c2e884c95c641da009bdc2ab5b",
+  "healthz8080": 200,
+  "frontend4173": 200,
+  "verifiedAt": "2026-07-19T19:15:35+08:00",
+  "feE2eInScope": false,
+  "worktree": "D:/working/DGE-ibl-d5-legalhold-depth",
+  "composeProject": "documentgenerationengine",
+  "doneClaimed": false
+}
