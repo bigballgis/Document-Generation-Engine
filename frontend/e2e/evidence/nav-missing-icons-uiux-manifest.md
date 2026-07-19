@@ -1,11 +1,11 @@
 # nav-missing-icons UIUX Evidence Manifest — Shell nav icons
 
-**Task / Slice:** `nav-missing-icons` (`feat/nav-missing-icons`)  
-**Worktree:** `D:/working/DGE-nav-missing-icons`  
+**Task / Slice:** `nav-missing-icons` → **Done** (MAIN merge `137a115f` / feature tip `47784667`; worktree **REMOVED**)  
+**Branch (historical):** `feat/nav-missing-icons`  
 **Reviewer:** e2e-uiux-reviewer (Stage 7)  
 **Date:** 2026-07-19  
 **Viewport:** 1440×900 (desktop-first)  
-**Stack:** Docker frontend `http://127.0.0.1:4173` + backend `http://127.0.0.1:8080` — **UP** (Stage 5 DEPLOY_OK; no redeploy this pass)  
+**Stack:** Docker frontend `http://127.0.0.1:4173` + backend `http://127.0.0.1:8080` — **UP** (Stage 5 + Stage 10 DEPLOY_OK)  
 **Verdict:** **PASS** (Critical = 0; dual-brand expanded + collapsed verified)
 
 ## Behavior SoT
@@ -19,7 +19,7 @@
 | Artifact | Status |
 | --- | --- |
 | Functional: `nav-missing-icons.spec.ts` | **2/2 passed** (reconfirmed this stage, ~5.3s) |
-| UIUX evidence harness: `nav-missing-icons-uiux-evidence.spec.ts` | **Not persisted** (Ask-mode blocked Write of new spec); visual review via Docker browser + CDP geometry |
+| UIUX evidence harness: `nav-missing-icons-uiux-evidence.spec.ts` | **On MAIN** (merged with slice tip `47784667`); Stage 7 visual review also used Docker browser + CDP geometry |
 
 ## Test / evidence execution
 
@@ -88,7 +88,7 @@ GREENBC: `data-brand=GREENBC`, `--brand-primary=#00847F`, greenbc logo SVG appli
 | --- | --- | --- |
 | — | No 🔴 Critical | — |
 | — | No 🟡 Suggestion specific to this slice | — |
-| 🟢 Nice to have | Persist `nav-missing-icons-uiux-evidence.spec.ts` + helpers in `uiux-evidence.ts` on a follow-up Agent-mode pass so Stage 7 is fully automatable like CE-E02/IBL-C2 | evidence harness |
+| 🟢 Nice to have | Wire harness helpers into shared `uiux-evidence.ts` patterns (optional) so Stage 7 matches CE-E02/IBL-C2 automation style — harness file already on MAIN | evidence harness |
 | 🟢 Nice to have | Collapsed rail can scroll shorter viewports — some icon rows may sit below the fold (pre-existing shell); not introduced by this icon mapping | `ManagementShellNav.scss` overflow |
 
 ## Verdict / merge gate (UIUX dimension only)
@@ -103,6 +103,6 @@ GREENBC: `data-brand=GREENBC`, `--brand-primary=#00847F`, greenbc logo SVG appli
 
 ## Notes
 
-1. Read-only on app Vue/TS — no product code changes this stage.  
-2. Evidence files written under worktree `frontend/e2e/evidence/nav-missing-icons/`.  
-3. Ask-mode blocked creating the Playwright UIUX evidence spec via Write tool; geometry + screenshots still collected against live Docker stack.
+1. Stage 7 was read-only on app Vue/TS; product icon-map fix landed in frontend-engineer stage and merged to MAIN (`137a115f`).  
+2. Evidence files under `frontend/e2e/evidence/nav-missing-icons/` (screenshots + this manifest) are on MAIN after Stage 11.  
+3. `nav-missing-icons-uiux-evidence.spec.ts` is present on MAIN; Stage 7 also collected geometry + screenshots against the live Docker stack.

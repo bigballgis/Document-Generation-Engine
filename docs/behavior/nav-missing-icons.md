@@ -7,7 +7,7 @@
 | **Recorded** | 2026-07-19 |
 | **Formal phase** | **None** (do **not** activate IBL-B7 / Wave E; do **not** flip checklist **#3b** / **#5a**) |
 | **Task / slice id** | `nav-missing-icons` |
-| **Placement** | **ISOLATED** — `D:/working/DGE-nav-missing-icons` · `feat/nav-missing-icons` |
+| **Placement** | **Closed** — MAIN merge `137a115f` / feature tip `47784667`; worktree **REMOVED** (was ISOLATED `D:/working/DGE-nav-missing-icons` · `feat/nav-missing-icons`) |
 | **`frontend_ui_in_scope`** | **`true`** (shell chrome only) |
 | **Parent surfaces** | CE-E02 Asset Library (`/library/assets`); CE-G04 Legal Hold (`/governance/legal-holds`); ManagementShell nav |
 

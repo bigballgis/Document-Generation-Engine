@@ -20,7 +20,7 @@
 - **Containers:** see `compose-ps.txt` / `docker-ps.txt` (all services healthy)
 - **DEPLOY_QUEUE:** idle after release
 - **FE UI in scope:** true (shell nav icons; Stage 10 acceptance-surface health only)
-- **Notes:** No merge; no #3b/#5a flip; IBL-B7 not activated. Evidence only.
+- **Notes:** Slice later merged MAIN `137a115f` (feature tip `47784667`); worktree removed. No #3b/#5a flip; IBL-B7 not activated. Stage 10 health evidence only.
 
 ## Artifacts
 

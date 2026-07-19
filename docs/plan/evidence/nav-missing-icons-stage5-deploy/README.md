@@ -14,8 +14,8 @@
 - **4173:** 200 (healthy)
 - **DEPLOY_QUEUE:** idle after release
 - **Artifacts:** `latest-summary.json`, `compose-ps.txt`, `digests.txt`, `healthz-8080.json`, `frontend-4173.txt`
-- **Notes:** Worktree `.env` JWT_SECRET synced from MAIN (insecure defaults refused); FRONTEND_PORT corrected 5173→4173 after first recreate; orphan `dge-nav-missing-icons_*` network/volumes from failed project-name attempt removed. No merge; no #3b/#5a flip; IBL-B7 not activated.
+- **Notes:** Worktree `.env` JWT_SECRET synced from MAIN (insecure defaults refused); FRONTEND_PORT corrected 5173→4173 after first recreate; orphan `dge-nav-missing-icons_*` network/volumes from failed project-name attempt removed. Slice later merged MAIN `137a115f`; no #3b/#5a flip; IBL-B7 not activated.
 
-## Ready for
+## Pipeline follow-on (historical)
 
-Stage **6–7** — `e2e-test-engineer` / `e2e-uiux-reviewer` against rebuilt FE (nav icons) @ :4173 / :8080
+Stage **6–7** ran against rebuilt FE (nav icons) @ :4173 / :8080; Stage 11 merge + Stage 12 doc-sync closed the leaf.
