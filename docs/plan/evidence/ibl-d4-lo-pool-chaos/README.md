@@ -4,7 +4,7 @@
 | --- | --- |
 | **Slice** | `ibl-d4-lo-pool-chaos` |
 | **Task Master** | **#126** |
-| **Finding** | **F22** residual (chaos half; D3 closed k6 path) |
+| **Finding** | **F22** closed (chaos half; with D3 k6 path) — leaf **Done** `94cc8eeb` / `94526674` |
 | **BDD** | [ibl-d4-lo-pool-chaos.md](../../../behavior/ibl-d4-lo-pool-chaos.md) (`not-applicable`) |
 | **Depends** | IBL-B2 metrics — [pdf-conversion-capacity-plan.md](../../../operations/pdf-conversion-capacity-plan.md) |
 | **frontend_ui_in_scope** | false |

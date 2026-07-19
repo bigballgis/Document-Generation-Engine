@@ -3,8 +3,8 @@
 | Field | Value |
 | --- | --- |
 | **Recorded** | 2026-07-19 |
-| **Worktree tip context** | `feat/ibl-d4-lo-pool-chaos` @ `D:/working/DGE-ibl-d4-lo-pool-chaos` |
-| **Slice status** | Stage 4 rendering-engineer complete — **not** leaf Done / merge |
+| **Worktree tip context** | Merged to MAIN `94cc8eeb` (feature tip `94526674`); worktree removed |
+| **Slice status** | **Done** — Stage 12 doc-sync; F22 closed with D3 load suite |
 
 ## Chaos suite (`-Plo-pool-chaos,dev-fast`)
 

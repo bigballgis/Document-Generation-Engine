@@ -9,8 +9,8 @@
 | **Finding** | **F22** residual — LO pool chaos / failover suite (D3 closed k6 + NFR confirmation path; SLOs stay proposed) |
 | **Task Master** | **#126** |
 | **Formal phase** | **None** (do **not** invent a P-phase; do **not** claim IBL program Done) |
-| **Delivery status** | Stage 4 rendering-engineer **complete** (chaos suite + evidence; `mvn verify` GREEN) — **not** leaf Done / merge |
-| **Placement** | ISOLATED `D:/working/DGE-ibl-d4-lo-pool-chaos` · `feat/ibl-d4-lo-pool-chaos` |
+| **Delivery status** | **Done** — MAIN merge `94cc8eeb` / feature tip `94526674`; worktree removed; F22 closed with D3 |
+| **Placement** | Was ISOLATED `D:/working/DGE-ibl-d4-lo-pool-chaos` · `feat/ibl-d4-lo-pool-chaos` (removed after stage 11) |
 | **Frontend UI** | **`frontend_ui_in_scope=false`** — no management UI / Playwright E2E / UIUX |
 | **Batch** | **solo** (`member_task_ids: ["126"]`; vetoes **IBL-D5-legalhold**, **IBL-B7-Word**, checklist GO / Wave D Done) |
 | **Depends** | **IBL-B2** (#114) — capacity plan + queue/reject Micrometer metrics |

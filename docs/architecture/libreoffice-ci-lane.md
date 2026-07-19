@@ -70,7 +70,8 @@ Command discovery: `LIBREOFFICE_COMMAND` env (default `soffice`).
   (IBL-C3 / F19 honesty).
 - Word / pixel baselines remain **IBL-B7** (Blocked).
 - IBL-D3 k6 path: [k6-nfr-confirmation-path.md](./k6-nfr-confirmation-path.md).
-  IBL-D5 legalhold — separate leaf.
+  IBL-D4 chaos suite **Done** (`94cc8eeb` / `94526674`) — real-soffice saturation half may still skip without soffice.
+  IBL-D5 legalhold — separate leaf (not activated).
 
 ## Traceability
 
