@@ -1,0 +1,12 @@
+{
+  "status": "DEPLOY_OK",
+  "backend_healthz": "UP",
+  "backend_image": "sha256:ab30fce26e6143f359187fa4b65468e588275b5d43c554bc71830df75ecbef1e",
+  "leaf": "nav-missing-icons",
+  "compose_project": "documentgenerationengine",
+  "frontend_4173": "HTTP 200",
+  "stage_6_7_ready": true,
+  "stage": 5,
+  "frontend_image": "sha256:f9b679e8e63ab0b389e09dd0606f4c17aa9381801b96b78aa5061394d3052bd2",
+  "timestamp": "2026-07-19T21:38:37.6603836+08:00"
+}
