@@ -1,0 +1,37 @@
+{
+  "slice": "ibl-d1-testcontainers-flyway",
+  "task_ids": ["123"],
+  "program_leaf": "IBL-D1",
+  "finding": "F20",
+  "status": "GATES_OK",
+  "done_claimed": false,
+  "profile": "testcontainers",
+  "testcontainers_version": "2.0.5",
+  "postgres_image": "postgres:16-alpine",
+  "gates": {
+    "default_verify": {
+      "command": "mvn -B -ntp -f backend/pom.xml verify",
+      "result": "BUILD SUCCESS",
+      "tests_run": 2133,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 11,
+      "flyway_postgresql_smoke_executed": false
+    },
+    "testcontainers_lane": {
+      "command": "mvn -B -ntp -f backend/pom.xml -Ptestcontainers,dev-fast test -Dtest=FlywayPostgresqlMigrationSmokeTest",
+      "result": "BUILD SUCCESS",
+      "tests_run": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "migrations_applied": 68,
+      "flyway_version_reached": "v68",
+      "ryuk_disabled": true
+    }
+  },
+  "docs": {
+    "h2_vs_tc": "docs/architecture/test-database-strategy.md",
+    "behavior": "docs/behavior/ibl-d1-testcontainers-flyway.md"
+  }
+}

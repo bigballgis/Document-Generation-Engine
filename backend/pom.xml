@@ -60,6 +60,9 @@
         <spotbugs.version>4.10.2</spotbugs.version>
         <surefire.forkCount>1</surefire.forkCount>
         <surefire.argLine>-Xmx512m -XX:+ExitOnOutOfMemoryError</surefire.argLine>
+        <!-- IBL-D1 / F20: default verify stays H2; TC+Flyway only via -Ptestcontainers. -->
+        <surefire.groups></surefire.groups>
+        <surefire.excludedGroups>testcontainers</surefire.excludedGroups>
         <spotbugs.effort>Max</spotbugs.effort>
     </properties>
 
@@ -156,6 +159,26 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--
+          IBL-D1 / F20: Testcontainers PostgreSQL (version from Spring Boot 4.1.0 BOM:
+          testcontainers.version). Opt-in lane: -Ptestcontainers. Default verify excludes
+          @Tag("testcontainers") so H2 stays the fast local gate.
+        -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -453,6 +476,8 @@
                     <reuseForks>true</reuseForks>
                     <forkCount>${surefire.forkCount}</forkCount>
                     <argLine>${surefire.argLine} ${argLine}</argLine>
+                    <groups>${surefire.groups}</groups>
+                    <excludedGroups>${surefire.excludedGroups}</excludedGroups>
                     <systemPropertyVariables>
                         <!-- IBL-B3: veraPDF PDF/A gate — CI must keep required=true and skip=false -->
                         <docgen.verapdf.required>${docgen.verapdf.required}</docgen.verapdf.required>
@@ -518,6 +543,42 @@
                 <spotbugs.effort>Default</spotbugs.effort>
                 <surefire.forkCount>0.5C</surefire.forkCount>
             </properties>
+        </profile>
+        <!--
+          IBL-D1 / F20: Testcontainers PostgreSQL + Flyway-on lane (opt-in; not default verify).
+          Requires Docker for Testcontainers. Migration/SQL defects fail this lane.
+          Command:
+            mvn -B -ntp -f backend/pom.xml -Ptestcontainers,dev-fast test
+          Or with static gates:
+            mvn -B -ntp -f backend/pom.xml -Ptestcontainers verify
+          H2 vs TC docs: docs/architecture/test-database-strategy.md
+        -->
+        <profile>
+            <id>testcontainers</id>
+            <properties>
+                <surefire.groups>testcontainers</surefire.groups>
+                <surefire.excludedGroups></surefire.excludedGroups>
+                <!--
+                  Ryuk is optional cleanup sidecar. Disable by default in this lane so
+                  environments that cannot pull docker.io/testcontainers/ryuk still run
+                  against a local postgres image (compose already uses postgres:16-alpine).
+                  Override: -Dtestcontainers.ryuk.disabled=false when Hub/mirror has ryuk.
+                -->
+                <testcontainers.ryuk.disabled>true</testcontainers.ryuk.disabled>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <environmentVariables>
+                                <TESTCONTAINERS_RYUK_DISABLED>${testcontainers.ryuk.disabled}</TESTCONTAINERS_RYUK_DISABLED>
+                            </environmentVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>sbom</id>
