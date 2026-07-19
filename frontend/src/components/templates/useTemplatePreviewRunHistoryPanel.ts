@@ -5,6 +5,10 @@ import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { downloadBlobExport } from '@/utils/downloadExport'
+import {
+  canOpenRenderedCompare,
+  resolveRenderedCompareHintKey,
+} from '@/components/templates/renderedCompareSelection'
 import type { PreviewRunSummary } from '@/types/template'
 
 function useTemplatePreviewRunHistoryPanel(options: {
@@ -17,6 +21,8 @@ function useTemplatePreviewRunHistoryPanel(options: {
   const { formatDateTime } = useLocaleFormatters()
   const panelDataStore = useTemplatePanelDataStore()
   const downloadingKey = ref<string | null>(null)
+  const selectedCompareRuns = ref<PreviewRunSummary[]>([])
+  const compareDialogVisible = ref(false)
   const entry = computed(() => panelDataStore.getEntry(options.templateId.value))
   const loading = computed(() => entry.value.loadingPreviewRuns)
   const runs = computed(() => entry.value.previewRuns)
@@ -30,6 +36,15 @@ function useTemplatePreviewRunHistoryPanel(options: {
 
   const sortByCreatedAt = rowSortMethod<PreviewRunSummary>((row) => row.createdAt)
 
+  const canCompareRendered = computed(() => canOpenRenderedCompare(selectedCompareRuns.value))
+  const compareHintKey = computed(() => resolveRenderedCompareHintKey(selectedCompareRuns.value))
+  const compareRunA = computed(() =>
+    canCompareRendered.value ? (selectedCompareRuns.value[0] ?? null) : null,
+  )
+  const compareRunB = computed(() =>
+    canCompareRendered.value ? (selectedCompareRuns.value[1] ?? null) : null,
+  )
+
   async function loadRuns() {
     try {
       await panelDataStore.fetchPreviewRuns(options.templateId.value)
@@ -41,6 +56,10 @@ function useTemplatePreviewRunHistoryPanel(options: {
           options.emitSelected(null)
         }
       }
+      const availableIds = new Set(runs.value.map((row) => row.previewId))
+      selectedCompareRuns.value = selectedCompareRuns.value.filter((row) =>
+        availableIds.has(row.previewId),
+      )
     } catch {
       ElMessage.error(t('templates.previewHistory.error.load'))
     }
@@ -65,6 +84,17 @@ function useTemplatePreviewRunHistoryPanel(options: {
 
   function selectRow(row: PreviewRunSummary) {
     options.emitSelected(row.previewId)
+  }
+
+  function onSelectionChange(rows: PreviewRunSummary[]) {
+    selectedCompareRuns.value = rows
+  }
+
+  function openRenderedCompare() {
+    if (!canCompareRendered.value) {
+      return
+    }
+    compareDialogVisible.value = true
   }
 
   function statusTagType(
@@ -103,6 +133,13 @@ function useTemplatePreviewRunHistoryPanel(options: {
     loadRuns,
     downloadArtifact,
     selectRow,
+    onSelectionChange,
+    canCompareRendered,
+    compareHintKey,
+    compareRunA,
+    compareRunB,
+    compareDialogVisible,
+    openRenderedCompare,
     statusTagType,
     rowClassName,
   }

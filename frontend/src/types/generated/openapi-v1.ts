@@ -13,7 +13,7 @@ export interface paths {
         };
         /**
          * Get template API contract summary
-         * @description Returns the current authorized contract summary, policy summary, callable versions, error code summary, and example index. The response does not embed this full OpenAPI YAML file.
+         * @description Returns the current authorized contract summary, policy summary, callable versions (each with per-field `variables[]` projected from the release-locked VariableSchema — IBL-A4), envelope schema type-name index (`schemas: string[]`), error code summary, and example index. Management `GET /api/management/v1/templates/{templateId}/api/contract` uses the same assembly for `callableVersions[].variables`. The response does not embed this full OpenAPI YAML file. See `docs/behavior/ibl-a4-contract-field-schemas.md` (BDD-IBL-A4-001 through BDD-IBL-A4-011).
          */
         get: operations["getTemplateApiContract"];
         put?: never;
@@ -33,7 +33,7 @@ export interface paths {
         };
         /**
          * List callable release versions
-         * @description Returns release versions currently callable from the caller's authorization view. This is not a back-office version management list. Optional per-item `deprecated` and `sunsetAt` fields are display/discovery metadata only and must not change the callable candidate set (see ADR-0003 / ADR-0017 display boundary).
+         * @description Returns release versions currently callable from the caller's authorization view. This is not a back-office version management list. Optional per-item `deprecated` and `sunsetAt` fields are display/discovery metadata only and must not change the callable candidate set (see ADR-0003 / ADR-0017 display boundary). Per-field `variables[]` is authoritative on `GET .../contract` (IBL-A4); this list endpoint may omit `variables` to keep payloads light.
          */
         get: operations["listCallableVersions"];
         put?: never;
@@ -53,7 +53,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Generate a document by explicit release version */
+        /**
+         * Generate a document by explicit release version
+         * @description IBL-A1: Before compute/assemble, `variables` are fail-closed validated against the target release VariableSchema (required / type / enum; unknown keys rejected). Failures return HTTP 422 with `error.code=VARIABLE_VALIDATION_FAILED`, `category=VALIDATION`, `retryable=false`, and non-empty `fieldErrors[]` (`reason` ∈ REQUIRED | INVALID_TYPE | INVALID_FORMAT | ENUM_NOT_ALLOWED | UNKNOWN_FIELD). No successful DOCX/PDF on failure. Behavior: docs/behavior/ibl-a1-variable-validation.md.
+         */
         post: operations["generateDocumentByVersion"];
         delete?: never;
         options?: never;
@@ -70,7 +73,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Generate a document through the default route */
+        /**
+         * Generate a document through the default route
+         * @description IBL-A1: Same fail-closed VariableSchema validation as explicit-version generate. Failures → 422 `VARIABLE_VALIDATION_FAILED` + `fieldErrors[]`. Behavior: docs/behavior/ibl-a1-variable-validation.md.
+         */
         post: operations["generateDocumentByDefaultRoute"];
         delete?: never;
         options?: never;
@@ -87,7 +93,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Batch generate documents by explicit release version */
+        /**
+         * Batch generate documents by explicit release version
+         * @description IBL-A1: Each item's `variables` are fail-closed validated against the target release VariableSchema before assemble. A failing item must not be `SUCCEEDED` and must not write a successful artifact; item error semantics use `VARIABLE_VALIDATION_FAILED` + field list (same shape as sync generate). Behavior: docs/behavior/ibl-a1-variable-validation.md.
+         */
         post: operations["batchGenerateByVersion"];
         delete?: never;
         options?: never;
@@ -104,7 +113,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Batch generate documents through the default route */
+        /**
+         * Batch generate documents through the default route
+         * @description IBL-A1: Same per-item fail-closed VariableSchema validation as explicit-version batch-generate. Item failures → `VARIABLE_VALIDATION_FAILED` + field list. Behavior: docs/behavior/ibl-a1-variable-validation.md.
+         */
         post: operations["batchGenerateByDefaultRoute"];
         delete?: never;
         options?: never;
@@ -978,7 +990,9 @@ export interface paths {
         put?: never;
         /**
          * Validate a whitelist compute expression (syntax + references)
-         * @description CE-K03 author-time validation for `computeExpression` values. Checks whitelist DSL syntax, length/nesting bounds, and that `${path}` roots exist in `knownVariableKeys`. Returns `valid`/`message` in the success envelope (does not throw for invalid expressions). Does not evaluate sample data or produce a document. Traceability: BDD-CE-K03-024…025; ADR-0056.
+         * @description CE-K03 author-time validation for `computeExpression` values. Checks whitelist DSL syntax, length/nesting bounds, and that `${path}` roots exist in `knownVariableKeys`. Returns `valid`/`message` in the success envelope (does not throw for invalid expressions). Does not evaluate sample data or produce a document.
+         *     Whitelist `FORMAT_AMOUNT` forms (IBL-A2): `FORMAT_AMOUNT(value)` keeps locale-default currency; optional `FORMAT_AMOUNT(value, currencyCode)` takes an ISO 4217 alphabetic code (e.g. `EUR`) — not a locale tag. Number/grouping localization still follows request `context.locale` (default `zh-CN`). Blank/invalid currency on the binary form fails evaluation as `VARIABLE_COMPUTE_FAILED` (see evaluate). Behavior SoT: docs/behavior/ibl-a2-format-amount-currency.md (BDD-IBL-A2-001…010).
+         *     Whitelist `SPELL_AMOUNT` forms (IBL-A3): `SPELL_AMOUNT(value)` is always CNY Chinese uppercase (locale-independent). Optional `SPELL_AMOUNT(value, currencyCode)` takes an ISO 4217 alphabetic code; spelling language comes from `context.locale` primary language. Required supported pairs this leaf: `(en, USD)` and `(zh, CNY)`. Unsupported (language, currency) pair, illegal/blank currency, or arity ∉ {1,2} → `VARIABLE_COMPUTE_FAILED` (no silent wrong-language fallback). Behavior SoT: docs/behavior/ibl-a3-amount-in-words.md (BDD-IBL-A3-001…012). Traceability: BDD-CE-K03-024…025; ADR-0056; IBL-A2; IBL-A3.
          */
         post: operations["validateComputeExpression"];
         delete?: never;
@@ -998,7 +1012,9 @@ export interface paths {
         put?: never;
         /**
          * Evaluate a compute expression against sample variables (author preview)
-         * @description CE-K03 author-time sample evaluation for compute preview. Evaluates the whitelist expression against `sampleVariables` (optional `locale`) and returns a non-sensitive result summary. Failures surface as `VARIABLE_COMPUTE_FAILED` (422) with `variableKey` + `expressionSummary` — never as a successful document. Does not assemble DOCX/PDF. Traceability: BDD-CE-K03-026…027; ADR-0056.
+         * @description CE-K03 author-time sample evaluation for compute preview. Evaluates the whitelist expression against `sampleVariables` (optional `locale`) and returns a non-sensitive result summary. Failures surface as `VARIABLE_COMPUTE_FAILED` (422) with `variableKey` + `expressionSummary` — never as a successful document. Does not assemble DOCX/PDF.
+         *     Whitelist `FORMAT_AMOUNT` forms (IBL-A2): unary `FORMAT_AMOUNT(value)` uses locale-default currency; binary `FORMAT_AMOUNT(value, currencyCode)` uses ISO 4217 alphabetic currency while locale formatting still follows optional `locale` / `context.locale`. Missing, blank, or invalid `currencyCode` → `VARIABLE_COMPUTE_FAILED` (no silent locale-default fallback). Second argument is never a locale tag. Behavior SoT: docs/behavior/ibl-a2-format-amount-currency.md (BDD-IBL-A2-001…010).
+         *     Whitelist `SPELL_AMOUNT` forms (IBL-A3): unary `SPELL_AMOUNT(value)` is always CNY Chinese uppercase (ignores locale language). Binary `SPELL_AMOUNT(value, currencyCode)` uses ISO 4217 currency identity + `locale` / `context.locale` primary language for spelling. At least `(en, USD)` and `(zh, CNY)` must succeed; unsupported pair, illegal/ blank currency, or bad arity → `VARIABLE_COMPUTE_FAILED` (no silent wrong-language fallback). Behavior SoT: docs/behavior/ibl-a3-amount-in-words.md (BDD-IBL-A3-001…012). Traceability: BDD-CE-K03-026…027; ADR-0056; IBL-A2; IBL-A3.
          */
         post: operations["evaluateComputeExpression"];
         delete?: never;
@@ -1859,7 +1875,7 @@ export interface components {
          * @description Caller-visible fidelity warning codes for runtime success paths (JSON `fidelityWarnings[].warningCode` and SYNC_STREAM `fidelityWarningCodes` header). Baseline ADR-0019 codes plus engine-emitted codes that may appear on the formal runtime success path (CE-C03 honest enum). Includes DOCX_PERMISSIONS_NOT_APPLIED (CE-C06) when DOCX requests non-empty encryption.permissions; JSON path `messageKey` for that code is generation.warning.fidelity.docxPermissionsNotApplied.
          * @enum {string}
          */
-        FidelityWarningCode: "OPTIONAL_CONTENT_EMPTY" | "LOW_RISK_PAGINATION_DIFFERENCE" | "LOW_RISK_TABLE_PAGE_BREAK" | "CONTROLLED_STYLE_FALLBACK" | "IMAGE_SCALING_ADJUSTED" | "MASTER_STYLE_FALLBACK" | "PARTIAL_TABLE_LAYOUT_ADJUSTMENT" | "UNRESOLVED_VARIABLE" | "INVALID_CONDITION_EXPRESSION" | "MISSING_ANCHOR_CONTENT" | "UNSUPPORTED_NODE" | "MISSING_STYLE_REFERENCE" | "INAPPLICABLE_STYLE" | "DIRECT_FORMAT_OUT_OF_WHITELIST" | "DIRECT_FORMAT_GLOBAL_LAYOUT" | "NESTED_TABLE" | "UNRELIABLE_TABLE_LAYOUT" | "INVALID_TABLE_COMPONENT" | "SEAL_OUTSIDE_AUTHORIZED_AREA" | "SEAL_SCALING_NOT_ALLOWED" | "MISSING_REFERENCE_KEY" | "DUPLICATE_NUMBER" | "BROKEN_NUMBER_CROSS_REFERENCE" | "PDF_PAGE_NUMBER_STAMP_FAILED" | "PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA" | "DOCX_PERMISSIONS_NOT_APPLIED";
+        FidelityWarningCode: "OPTIONAL_CONTENT_EMPTY" | "LOW_RISK_PAGINATION_DIFFERENCE" | "LOW_RISK_TABLE_PAGE_BREAK" | "CONTROLLED_STYLE_FALLBACK" | "IMAGE_SCALING_ADJUSTED" | "MASTER_STYLE_FALLBACK" | "PARTIAL_TABLE_LAYOUT_ADJUSTMENT" | "UNRESOLVED_VARIABLE" | "INVALID_CONDITION_EXPRESSION" | "MISSING_ANCHOR_CONTENT" | "UNSUPPORTED_NODE" | "MISSING_STYLE_REFERENCE" | "INAPPLICABLE_STYLE" | "DIRECT_FORMAT_OUT_OF_WHITELIST" | "DIRECT_FORMAT_GLOBAL_LAYOUT" | "DIRECT_FORMAT_INVALID_VALUE" | "NESTED_TABLE" | "UNRELIABLE_TABLE_LAYOUT" | "INVALID_TABLE_COMPONENT" | "SEAL_OUTSIDE_AUTHORIZED_AREA" | "SEAL_AUTHORIZED_AREA_UNKNOWN" | "SEAL_AUTHORIZED_AREA_INVALID" | "SEAL_PLACEMENT_GEOMETRY_INVALID" | "SEAL_SCALING_NOT_ALLOWED" | "MISSING_REFERENCE_KEY" | "DUPLICATE_NUMBER" | "BROKEN_NUMBER_CROSS_REFERENCE" | "PDF_PAGE_NUMBER_STAMP_FAILED" | "PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA" | "DOCX_PERMISSIONS_NOT_APPLIED";
         /** @enum {string} */
         IdempotencyStatus: "IDEMPOTENCY_NEW" | "IDEMPOTENCY_REPLAYED" | "IDEMPOTENCY_CONFLICTED";
         /** @enum {string} */
@@ -2115,7 +2131,9 @@ export interface components {
                 paths: string[];
                 defaultRoute?: components["schemas"]["DefaultRouteSummary"];
                 apiPolicy: components["schemas"]["ApiPolicySummary"];
+                /** @description Callable release versions. On this `/contract` response each item includes `variables[]` (per-field VariableSchema projection; may be empty). Match `defaultRoute.currentTargetReleaseVersion` to the same `releaseVersion` for the default-route field contract. */
                 callableVersions: components["schemas"]["CallableVersion"][];
+                /** @description Envelope OpenAPI type-name index only (IBL-A4 / A4-C3). At least `GenerateRequest`, `BatchGenerateRequest`, `OutputOptions`, and `EncryptionOptions`. Not a substitute for per-field variable schemas; those live under `callableVersions[].variables`. Must not be cleared or replaced by field-level objects. */
                 schemas: string[];
                 errorCodes: components["schemas"]["ErrorCodeSummary"][];
                 examples: string[];
@@ -2138,6 +2156,24 @@ export interface components {
              * @description Optional display-only sunset timestamp (ISO 8601 with timezone offset). Discovery metadata only; does not change callable candidate rules. Omit for currently callable PUBLISHED items when no sunset is published.
              */
             sunsetAt?: string;
+            /** @description Per-field variable schema for this `releaseVersion` (IBL-A4). Always present on `GET …/contract` (empty array when the version has zero VariableSchema rows). May be omitted on `GET …/versions`. Sorted by `variableKey` ascending. Does not include internal `id`, `defaultValue`, or `computeExpression` plaintext. */
+            variables?: components["schemas"]["ContractVariableSchemaView"][];
+        };
+        /** @description Caller-visible per-field VariableSchema projection on `/contract` (IBL-A4). Behavior SoT: `docs/behavior/ibl-a4-contract-field-schemas.md`. */
+        ContractVariableSchemaView: {
+            /** @description Stable variable key for generate `variables` map entries. */
+            variableKey: string;
+            variableType: components["schemas"]["TemplateVariableType"];
+            /** @description Whether a non-computed caller value is required at generate time. */
+            required: boolean;
+            /** @description `true` when `variableType=COMPUTED` or the locked schema has a non-empty compute expression. Callers must not submit values for computed keys (aligned with IBL-A1). Expression plaintext is never returned. */
+            computed: boolean;
+            /** @description Always present on `/contract` projections (including `NONE`) so consumers need not infer classification. PII label changes alone are not treated as breaking by the consumer contract gate (IBL-A5 owns retention redaction). */
+            piiCategory: components["schemas"]["VariablePiiCategory"];
+            /** @description Present when `variableType=ENUM`: non-empty stable JSON string array of allowed values. Omitted for non-ENUM types. */
+            enumValues?: string[];
+            /** @description Optional human-readable field description; may be null or omitted. */
+            description?: string | null;
         };
         DefaultRouteSummary: {
             url: string;
@@ -3138,11 +3174,11 @@ export interface components {
             summary?: components["schemas"]["TemplateVariableValidationSummary"];
             auditSummary?: components["schemas"]["TemplateVariableValidationAuditSummary"];
         };
-        /** @description CE-K03 author-time compute expression validation payload (`POST …/compute-expressions/validate`). */
+        /** @description CE-K03 author-time compute expression validation payload (`POST …/compute-expressions/validate`). IBL-A2: `FORMAT_AMOUNT(value)` or `FORMAT_AMOUNT(value, currencyCode)` (ISO 4217); see docs/behavior/ibl-a2-format-amount-currency.md. IBL-A3: `SPELL_AMOUNT(value)` (CNY Chinese always) or `SPELL_AMOUNT(value, currencyCode)` (ISO + locale language); see docs/behavior/ibl-a3-amount-in-words.md. */
         ComputeExpressionValidateRequest: {
             /** @description Optional variable key being authored (for error context). */
             variableKey?: string;
-            /** @description Whitelist compute DSL expression to validate. */
+            /** @description Whitelist compute DSL expression to validate. `FORMAT_AMOUNT(value)` (locale-default currency) or `FORMAT_AMOUNT(value, currencyCode)` with ISO 4217 alphabetic code (IBL-A2); second arg is not a locale tag. `SPELL_AMOUNT(value)` (CNY Chinese, locale-independent) or `SPELL_AMOUNT(value, currencyCode)` (ISO 4217 + locale language; IBL-A3); supported pairs at least `(en,USD)` and `(zh,CNY)`. */
             expression: string;
             /** @description Variable keys available for `${path}` reference checks. */
             knownVariableKeys: string[];
@@ -3157,17 +3193,17 @@ export interface components {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["ComputeExpressionValidateView"];
         };
-        /** @description CE-K03 author-time sample evaluation payload (`POST …/compute-expressions/evaluate`). */
+        /** @description CE-K03 author-time sample evaluation payload (`POST …/compute-expressions/evaluate`). IBL-A2: binary `FORMAT_AMOUNT` optional ISO 4217 currency; invalid/blank currency → `VARIABLE_COMPUTE_FAILED`. Behavior: docs/behavior/ibl-a2-format-amount-currency.md. IBL-A3: unary `SPELL_AMOUNT` = CNY Chinese always; binary `SPELL_AMOUNT` = ISO + locale language; unsupported pair / illegal currency / bad arity → `VARIABLE_COMPUTE_FAILED`. Behavior: docs/behavior/ibl-a3-amount-in-words.md. */
         ComputeExpressionEvaluateRequest: {
             /** @description Optional variable key being previewed (for error context). */
             variableKey?: string;
-            /** @description Whitelist compute DSL expression to evaluate. */
+            /** @description Whitelist compute DSL expression to evaluate. Examples: `FORMAT_AMOUNT(${principal})` (locale-default currency); `FORMAT_AMOUNT(${principal}, 'EUR')` (ISO 4217 + locale formatting); `SPELL_AMOUNT(${principal})` (CNY Chinese always); `SPELL_AMOUNT(${principal}, 'USD')` with locale `en-US` (en+USD amount-in-words). Invalid/blank currency, unsupported SPELL pair, or bad arity on binary forms → `VARIABLE_COMPUTE_FAILED`. */
             expression: string;
             /** @description Sample variable map for preview evaluation. Must not include secrets; values are author-supplied fixtures only. */
             sampleVariables: {
                 [key: string]: unknown;
             };
-            /** @description Optional BCP-47 locale tag (default zh-CN for FORMAT_* / SPELL_AMOUNT). */
+            /** @description Optional BCP-47 locale tag (default zh-CN for FORMAT_* / SPELL_AMOUNT). Controls number/grouping localization for `FORMAT_AMOUNT`; currency identity on binary `FORMAT_AMOUNT` comes from the ISO 4217 argument, not from this field (IBL-A2). For binary `SPELL_AMOUNT`, primary language of this locale selects the speller with the ISO currency (IBL-A3); unary `SPELL_AMOUNT` ignores locale language (always CNY Chinese). Default `zh-CN` means binary USD requires an explicit `en` / `en-US` locale. */
             locale?: string;
         };
         /** @description CE-K03 sample compute evaluation result body. */
@@ -4521,7 +4557,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "RENDERING" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED";
     };
     responses: {
         /** @description Async task accepted. */

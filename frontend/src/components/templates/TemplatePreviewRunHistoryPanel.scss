@@ -1,6 +1,19 @@
 .preview-run-history {
   margin-bottom: 1rem;
 
+  &__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  &__compare-hint {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
   &__table {
     width: 100%;
   }

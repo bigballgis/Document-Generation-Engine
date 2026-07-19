@@ -104,9 +104,74 @@ const BRAND_OPTION_NAME: Record<BrandPreset, RegExp> = {
   GREENBC: /^(green bank|绿色银行)$/i,
 }
 
+/**
+ * LR-C8 onboarding tour mask (`el-tour__hollow`) intercepts header clicks
+ * (including `.brand-switcher`) until Skip/Finish. First-run tour can mount
+ * after login navigation — short 3s polls miss it. Wait longer, force-click
+ * Skip, Esc if only the hollow is up, and retry until both are gone.
+ */
+export async function dismissOnboardingTourIfPresent(
+  page: Page,
+  options?: { appearTimeoutMs?: number },
+): Promise<void> {
+  const appearTimeoutMs = options?.appearTimeoutMs ?? 12_000
+  const skipTour = page.getByTestId('onboarding-tour-skip')
+  const hollow = page.locator('.el-tour__hollow')
+
+  const skipAppeared = await skipTour
+    .waitFor({ state: 'visible', timeout: appearTimeoutMs })
+    .then(() => true)
+    .catch(() => false)
+  const hollowAppeared =
+    skipAppeared ||
+    (await hollow
+      .first()
+      .waitFor({ state: 'visible', timeout: Math.min(2_000, appearTimeoutMs) })
+      .then(() => true)
+      .catch(() => false))
+
+  if (!skipAppeared && !hollowAppeared) {
+    if ((await skipTour.count()) === 0 && (await hollow.count()) === 0) {
+      return
+    }
+  }
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if ((await skipTour.count()) === 0 && (await hollow.count()) === 0) {
+      return
+    }
+    if ((await skipTour.count()) > 0) {
+      await skipTour.click({ force: true })
+    } else {
+      // close-on-press-escape is enabled on OnboardingTour el-tour
+      await page.keyboard.press('Escape')
+    }
+    try {
+      await expect
+        .poll(async () => (await skipTour.count()) + (await hollow.count()), {
+          timeout: 5_000,
+          intervals: [100, 200, 400],
+        })
+        .toBe(0)
+    } catch {
+      // Retry loop continues if tour/hollow still settling.
+    }
+  }
+
+  await expect(skipTour).toHaveCount(0)
+  await expect(hollow).toHaveCount(0)
+}
+
 export async function switchBrand(page: Page, brand: BrandPreset): Promise<void> {
+  // Tour may appear after the post-login dismiss window; clear mask before header click.
+  await dismissOnboardingTourIfPresent(page, { appearTimeoutMs: 2_000 })
   const brandSwitcher = page.locator('.brand-switcher')
-  await brandSwitcher.click()
+  try {
+    await brandSwitcher.click({ timeout: 5_000 })
+  } catch {
+    await dismissOnboardingTourIfPresent(page, { appearTimeoutMs: 8_000 })
+    await brandSwitcher.click()
+  }
   await page.getByRole('option', { name: BRAND_OPTION_NAME[brand] }).click()
   await expect(page.locator('html')).toHaveAttribute('data-brand', brand)
 }
@@ -1623,6 +1688,37 @@ export async function capturePrrD01cLocatorScreenshot(
 ): Promise<string> {
   ensurePrrD01cEvidenceDirs()
   const target = prrD01cScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+/** IBL-C2 / F18 side-by-side rendered PDF compare — 1920×1080 dual-brand evidence. */
+export const IBL_C2_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'IBL-C2')
+export const IBL_C2_SCREENSHOT_DIR = path.join(IBL_C2_EVIDENCE_ROOT, 'screenshots')
+export const IBL_C2_VIEWPORT = { width: 1920, height: 1080 } as const
+export const IBL_C2_NARROW_VIEWPORT = { width: 900, height: 900 } as const
+
+export function ensureIblC2EvidenceDirs(): void {
+  fs.mkdirSync(IBL_C2_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function iblC2ScreenshotPath(filename: string): string {
+  return path.join(IBL_C2_SCREENSHOT_DIR, filename)
+}
+
+export async function captureIblC2Screenshot(page: Page, filename: string): Promise<string> {
+  ensureIblC2EvidenceDirs()
+  const target = iblC2ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureIblC2LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureIblC2EvidenceDirs()
+  const target = iblC2ScreenshotPath(filename)
   await locator.screenshot({ path: target })
   return filename
 }

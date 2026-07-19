@@ -1,0 +1,25 @@
+{
+  "result": "DEPLOY_OK",
+  "when": "2026-07-19T12:47:11+08:00",
+  "slice_id": "ibl-c2-rendered-compare-ui",
+  "task_ids": [
+    "121"
+  ],
+  "worktree": "D:/working/DGE-ibl-c2-rendered-compare-ui",
+  "branch": "feat/ibl-c2-rendered-compare-ui",
+  "git_tip": "1c1ea8cf017d3dd746b8392758bc54df8fc63642",
+  "compose_project": "documentgenerationengine",
+  "frontend_port": 4173,
+  "backend_port": 8080,
+  "healthz": 200,
+  "frontend_http": 200,
+  "images": {
+    "backend": "sha256:5c0742027be229ca3dbea7bbd2a4a19db6020011167217da12c074ec4f6f4d12",
+    "frontend": "sha256:ae8305d1f9a1a17024f61573d779af2e08d064085dcc41b4ac962ec4bbd9ca49"
+  },
+  "stage10_skip_build_ok": true,
+  "stage10_skip_build_condition": "tip unchanged at 1c1ea8cf and image digests match",
+  "stage10_executed_at": "2026-07-19T13:40:58+08:00",
+  "stage10_result": "DEPLOY_OK",
+  "stage10_evidence": "docs/plan/evidence/ibl-c2-stage10-deploy"
+}

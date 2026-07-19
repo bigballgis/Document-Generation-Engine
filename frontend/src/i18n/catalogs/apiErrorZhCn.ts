@@ -20,7 +20,8 @@ export const apiErrorZhCn = {
     fieldSizeInvalid: "此字段长度无效。",
     fieldPatternInvalid: "此字段格式无效。",
     fieldUnknown: "未知字段。",
-    contentModuleStructureMissing: "引用的内容模块没有固定的结构。"
+    contentModuleStructureMissing: "引用的内容模块没有固定的结构。",
+    variableValidationFailed: "一个或多个模板变量未通过 VariableSchema 校验。",
   },
   storage: {
     operationFailed: "对象存储操作失败。"
