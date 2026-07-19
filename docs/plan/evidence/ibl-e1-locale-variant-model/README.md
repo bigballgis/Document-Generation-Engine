@@ -35,4 +35,4 @@ pnpm exec playwright test `
 
 **Blockers:** none  
 **Next:** Stage **7** — `e2e-uiux-reviewer`  
-**Not claimed:** Task Master #128 Done / Wave E Done
+**Closed:** Task Master #128 → Done (MAIN merge `4c712b03` / tip `9decf19c`). Wave E stays In Progress (E2–E7 not activated).
