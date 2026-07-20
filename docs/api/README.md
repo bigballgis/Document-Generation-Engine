@@ -139,17 +139,30 @@ Management contracts for template `nextReviewDue`, annual-review due tasks, cont
 
 `TemplateSummaryView` / `TemplateDetailView` expose optional nullable `nextReviewDue` (`format: date`). Audit on successful complete: `TEMPLATE_ANNUAL_REVIEW_COMPLETED` (no variables / credentials / clause body).
 
-### Template batch-test history sampleResults (CE-U18)
+### Template batch-test history sampleResults (CE-U18 / PTA)
 
-Management batch-test history is a **management-API** contract (documented in [contract-outline.md](contract-outline.md) «批量测试历史 sampleResults（CE-U18）」 and [openapi-v1.yaml](openapi-v1.yaml)).
+Management batch-test history is a **management-API** contract (documented in [contract-outline.md](contract-outline.md) «批量测试历史 sampleResults（CE-U18 / PTA）」 and [openapi-v1.yaml](openapi-v1.yaml)).
 
 | Operation | Method / path |
 | --- | --- |
 | List recent runs (with `sampleResults`) | `GET /api/management/v1/templates/{templateId}/batch-tests?limit=` (default 5) |
 
-`BatchTestRunSummaryView.sampleResults` is derived from persisted `sampleResultsJson`. Canonical async item shape: `dataSetExternalId`, `success`, optional `errorDetail` / `docxKey` / `pdfKey`. Frontend must normalize legacy sync-shaped historical items. Implementer may instead expose the same field on `GET .../batch-tests/{runId}` — choose one primary surface. Management UI retires the sync `POST .../previews/batch-test` journey (async `POST .../batch-tests/run` only). Caller-facing runtime generate paths are unchanged.
+`BatchTestRunSummaryView.sampleResults` is derived from persisted `sampleResultsJson`. Canonical async item shape: `dataSetExternalId`, `success`, optional `errorDetail`; when a sample produced a preview — non-null `previewId`, plus `docxKey` / `pdfKey` when those artifacts were stored (PTA / BDD-PTA-004). Failed samples may omit preview/artifact keys. Frontend must normalize legacy sync-shaped items and pre-PTA rows that dropped `previewId`. Implementer may instead expose the same field on `GET .../batch-tests/{runId}` — choose one primary surface. Management UI retires the sync `POST .../previews/batch-test` journey (async `POST .../batch-tests/run` only). Caller-facing runtime generate paths are unchanged. **No permission-matrix widen.**
 
-Behavior SoT: [ce-u18-batch-test-history.md](../behavior/ce-u18-batch-test-history.md).
+Behavior SoT: [ce-u18-batch-test-history.md](../behavior/ce-u18-batch-test-history.md); PTA persist: [published-template-test-artifacts.md](../behavior/published-template-test-artifacts.md).
+
+### Preview artifact download (existing; PTA documented)
+
+Existing management download paths (not new endpoints). Documented so published-release Testing can reuse the same contracts without inventing a second download surface.
+
+| Operation | Method / path |
+| --- | --- |
+| Download SUCCEEDED preview DOCX | `GET /api/management/v1/templates/{templateId}/previews/{previewId}/artifacts/docx` |
+| Download SUCCEEDED preview PDF | `GET /api/management/v1/templates/{templateId}/previews/{previewId}/artifacts/pdf` |
+
+Authorization: `requireReadableSnapshot` (fail-closed). **Not** lifecycle-gated on `PUBLISHED` / `STOPPED` / `DEPRECATED` — prior test artifacts remain downloadable when still available (BDD-PTA-008). Binary attachment responses (not JSON envelope). OpenAPI operationIds: `downloadTemplatePreviewDocx` / `downloadTemplatePreviewPdf`.
+
+Behavior SoT: [published-template-test-artifacts.md](../behavior/published-template-test-artifacts.md); journey pattern: [preview-success-artifact-download-journey.md](../behavior/preview-success-artifact-download-journey.md).
 
 ### Platform asset library catalog (CE-E02)
 

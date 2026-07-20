@@ -23,6 +23,7 @@ export const apiErrorEn = {
     contentModuleStructureMissing: "The referenced content module has no pinned structure.",
     variableValidationFailed:
       "One or more template variables failed VariableSchema validation.",
+    contentModuleNestingCycle: "Content module nesting cycle detected during expansion.",
   },
   storage: {
     operationFailed: "Object storage operation failed."
@@ -98,6 +99,11 @@ export const apiErrorEn = {
     compositionInclusionRuleInvalid: "The composition inclusion rule set is invalid.",
     compositionInclusionUnsatisfied:
       "A required composition inclusion rule was not satisfied by the request context.",
+    bulkRepin: {
+      dryRunRequired: "dryRun is required for bulk re-pin.",
+      groupCodeRequired: "groupCode is required when the authorized group context is ambiguous.",
+      targetXor: "Provide exactly one of toSemanticVersion or useLatestApproved=true.",
+    },
     contentModuleJurisdictionMismatch:
       "An included content module jurisdiction does not match the request jurisdiction.",
     variableTypeUnsupported: "The variable type is not supported.",
@@ -256,7 +262,8 @@ export const apiErrorEn = {
     invocationKindNotRegenerable:
       "This invocation kind cannot be regenerated; use a SINGLE, BATCH_ITEM, or ASYNC_TASK record.",
     invocationRecordExpired: "Invocation record has expired.",
-    specimenWatermarkFailed: "SPECIMEN watermark could not be applied."
+    specimenWatermarkFailed: "SPECIMEN watermark could not be applied.",
+    productionReissueReasonRequired: "A non-blank reason is required for production re-issue.",
   },
   batch: {
     originalBatchNotFound: "Original batch was not found."
@@ -283,6 +290,12 @@ export const apiErrorEn = {
     versionRequired: "The content module has no version to project catalog status from.",
     draftOnlyEditable: "Only draft versions can be edited.",
     contentStructureRequired: "Content structure is required.",
+    nestingCycle: "Content module nesting forms a cycle.",
+    nestingDepthExceeded: "Content module nesting depth exceeds the maximum of 8.",
+    nestingTargetUnresolved:
+      "A nested content module reference could not be resolved to a visible module.",
+    nestingStructureInvalid:
+      "Content module structure JSON is malformed and cannot be used for nesting governance.",
     moduleIdRequired: "The content module identifier is required.",
     changeDescriptionRequired: "A change description is required to submit for review.",
     rejectionReasonRequired: "A rejection reason is required to reject review.",

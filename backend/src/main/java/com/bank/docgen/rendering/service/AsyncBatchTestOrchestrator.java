@@ -98,10 +98,17 @@ public class AsyncBatchTestOrchestrator {
         return batchSseRegistry.register(runId);
     }
 
+    /**
+     * Canonical async sample shape persisted into {@code sampleResultsJson}
+     * (OpenAPI {@code BatchTestHistorySampleResultView} / BDD-PTA-004).
+     * Success samples that produced a preview must carry {@code previewId}
+     * and stored artifact keys; failure samples may leave those null.
+     */
     record SampleResult(
             String dataSetExternalId,
             boolean success,
             String errorDetail,
+            String previewId,
             String docxKey,
             String pdfKey
     ) {

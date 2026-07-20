@@ -1026,6 +1026,8 @@ export default {
       },
       testing: {
         readOnlySummary: '此已发布版本在上线前已完成测试工作流。下方快照数据为只读。',
+        openDataSetReadOnly:
+          '已发布版本详情页不可编辑数据集。请使用下方预览运行历史查看并下载既有测试产物。',
         lifecycleStatus: '发布时状态',
       },
       approval: {

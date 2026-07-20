@@ -5,6 +5,7 @@ import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import BatchTestHistoryPanel from '@/components/templates/BatchTestHistoryPanel.vue'
+import TemplatePreviewRunHistoryPanel from '@/components/templates/TemplatePreviewRunHistoryPanel.vue'
 import TemplateLifecycleAuditTimeline from '@/components/templates/TemplateLifecycleAuditTimeline.vue'
 import PublishGateReadOnlyPanel from '@/components/templates/PublishGateReadOnlyPanel.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
@@ -20,6 +21,7 @@ const {
   loadFailed,
   cloning,
   releaseDetail,
+  selectedPreviewId,
   activeWorkspaceTab,
   templateId,
   releaseVersion,
@@ -32,6 +34,8 @@ const {
   loadReleaseDetail,
   backToHub,
   handleClone,
+  handleOpenPreview,
+  handleOpenDataSet,
 } = useTemplateReleaseDetailView()
 </script>
 
@@ -87,8 +91,19 @@ const {
       </template>
 
       <template #testing>
-        <p class="read-only-hint">{{ t('templates.releaseDetail.testing.readOnlySummary') }}</p>
-        <BatchTestHistoryPanel :template-id="templateId" />
+        <div class="release-testing" data-testid="release-testing-readonly">
+          <p class="read-only-hint">{{ t('templates.releaseDetail.testing.readOnlySummary') }}</p>
+          <BatchTestHistoryPanel
+            :template-id="templateId"
+            @open-preview="handleOpenPreview"
+            @open-data-set="handleOpenDataSet"
+          />
+          <TemplatePreviewRunHistoryPanel
+            :template-id="templateId"
+            :selected-preview-id="selectedPreviewId"
+            @selected="selectedPreviewId = $event"
+          />
+        </div>
       </template>
 
       <template #approval>
@@ -174,5 +189,11 @@ const {
   margin: 0 0 1rem;
   color: var(--text-muted);
   font-size: var(--font-size-sm);
+}
+
+.release-testing {
+  :deep(.batch-test-history) {
+    margin-bottom: 1.25rem;
+  }
 }
 </style>

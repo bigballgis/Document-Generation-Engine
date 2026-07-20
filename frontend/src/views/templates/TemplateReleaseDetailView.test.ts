@@ -1,12 +1,12 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
-import ElementPlus from 'element-plus'
+import ElementPlus, { ElMessage } from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplateReleaseDetailView from '@/views/templates/TemplateReleaseDetailView.vue'
 import en from '@/i18n/locales/en'
 import * as templatesApi from '@/api/templates'
-import type { TemplateDetail } from '@/types/template'
+import type { TemplateDetail, TemplateLifecycleStatus } from '@/types/template'
 
 const routerReplace = vi.fn()
 const routerPush = vi.fn()
@@ -17,6 +17,14 @@ const routeState = {
 
 const fetchReleaseVersionDetail = vi.fn()
 const cloneReleaseVersion = vi.fn()
+const fetchBatchTestHistory = vi.fn()
+const fetchPreviewRuns = vi.fn()
+const emptyPanelEntry = {
+  loadingBatchTestHistory: false,
+  batchTestHistory: [],
+  loadingPreviewRuns: false,
+  previewRuns: [],
+}
 
 vi.mock('vue-router', () => ({
   useRoute: () => routeState,
@@ -27,6 +35,9 @@ vi.mock('@/stores/templatePanelData', () => ({
   useTemplatePanelDataStore: () => ({
     fetchReleaseVersionDetail,
     cloneReleaseVersion,
+    fetchBatchTestHistory,
+    fetchPreviewRuns,
+    getEntry: () => emptyPanelEntry,
   }),
 }))
 
@@ -50,6 +61,19 @@ vi.mock('@/api/templates', async (importOriginal) => {
     ...actual,
     fetchPublishGate: vi.fn(),
     fetchReleasePublishGate: vi.fn(),
+  }
+})
+
+vi.mock('element-plus', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('element-plus')>()
+  return {
+    ...actual,
+    ElMessage: {
+      success: vi.fn(),
+      error: vi.fn(),
+      warning: vi.fn(),
+      info: vi.fn(),
+    },
   }
 })
 
@@ -100,7 +124,12 @@ describe('TemplateReleaseDetailView', () => {
     routerReplace.mockReset()
     fetchReleaseVersionDetail.mockReset()
     cloneReleaseVersion.mockReset()
+    fetchBatchTestHistory.mockReset()
+    fetchPreviewRuns.mockReset()
     fetchReleaseVersionDetail.mockResolvedValue(releaseDetail)
+    fetchBatchTestHistory.mockResolvedValue([])
+    fetchPreviewRuns.mockResolvedValue([])
+    vi.mocked(ElMessage.info).mockReset()
     vi.mocked(templatesApi.fetchPublishGate).mockReset()
     vi.mocked(templatesApi.fetchReleasePublishGate).mockReset()
     vi.mocked(templatesApi.fetchReleasePublishGate).mockResolvedValue({
@@ -166,5 +195,68 @@ describe('TemplateReleaseDetailView', () => {
     const layout = wrapper.find('.app-page-layout')
     expect(layout.classes()).toContain('app-page-layout--contained')
     expect(layout.classes()).toContain('app-page-layout--panel')
+  })
+
+  it('BDD-PTA-001: Testing tab mounts read-only preview history beside batch history', async () => {
+    routeState.query = { workspaceTab: 'testing' }
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(wrapper.findComponent({ name: 'BatchTestHistoryPanel' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'TemplatePreviewRunHistoryPanel' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'TemplateTestDataSetPanel' }).exists()).toBe(false)
+    expect(wrapper.findComponent({ name: 'TemplateTestPreviewWorkflowPanel' }).exists()).toBe(false)
+    expect(wrapper.text()).toContain(
+      'This published release completed the testing workflow before go-live. Snapshot data below is read-only.',
+    )
+  })
+
+  it.each(['STOPPED', 'DEPRECATED'] as TemplateLifecycleStatus[])(
+    'BDD-PTA-003: %s release Testing still mounts read-only preview history',
+    async (lifecycleStatus) => {
+      routeState.query = { workspaceTab: 'testing' }
+      fetchReleaseVersionDetail.mockResolvedValue({ ...releaseDetail, lifecycleStatus })
+      const wrapper = mountView()
+      await flushPromises()
+
+      expect(wrapper.findComponent({ name: 'TemplatePreviewRunHistoryPanel' }).exists()).toBe(true)
+      expect(wrapper.findComponent({ name: 'BatchTestHistoryPanel' }).exists()).toBe(true)
+      expect(wrapper.findComponent({ name: 'TemplateTestDataSetPanel' }).exists()).toBe(false)
+    },
+  )
+
+  it('BDD-PTA-005: open-preview selects the matching preview history row', async () => {
+    routeState.query = { workspaceTab: 'testing' }
+    const wrapper = mountView()
+    await flushPromises()
+
+    const historyPanel = wrapper.findComponent({ name: 'TemplatePreviewRunHistoryPanel' })
+    expect(historyPanel.props('selectedPreviewId')).toBeNull()
+
+    await wrapper.findComponent({ name: 'BatchTestHistoryPanel' }).vm.$emit('open-preview', {
+      previewId: 'prev-99',
+    })
+    await flushPromises()
+
+    expect(historyPanel.props('selectedPreviewId')).toBe('prev-99')
+  })
+
+  it('BDD-PTA-006: open-data-set shows non-editing feedback without authoring panels', async () => {
+    routeState.query = { workspaceTab: 'testing' }
+    const wrapper = mountView()
+    await flushPromises()
+
+    await wrapper.findComponent({ name: 'BatchTestHistoryPanel' }).vm.$emit('open-data-set', {
+      dataSetExternalId: 'ds-ext-1',
+      testDataSetId: 'ds-1',
+      matched: true,
+    })
+    await flushPromises()
+
+    expect(ElMessage.info).toHaveBeenCalledWith(
+      en.templates.releaseDetail.testing.openDataSetReadOnly,
+    )
+    expect(wrapper.findComponent({ name: 'TemplateTestDataSetPanel' }).exists()).toBe(false)
+    expect(routerPush).not.toHaveBeenCalled()
   })
 })
