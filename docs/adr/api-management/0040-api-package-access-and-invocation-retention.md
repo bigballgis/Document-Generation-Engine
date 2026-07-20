@@ -10,6 +10,7 @@ adrNumber: "0040"
 topic: api-management
 related:
 	- docs/behavior/api-package-access-and-invocation-records.md
+	- docs/behavior/sys-norm-hub-ia.md
 	- docs/adr/api-management/0002-api-management-template-scope.md
 	- docs/adr/api-management/0016-api-management-ui-and-audit-format.md
 	- docs/adr/api/0004-api-idempotency-strategy.md
@@ -37,6 +38,8 @@ Callers also need durable **invocation records** (parameters + optional artifact
 - The **primary** API management surface is the template package hub **External access** tab (`对外接入`), not a standalone API policy catalog list.
 - The standalone API policy home remains a **cross-package monitoring / alert** entry only; deep links redirect to the package hub tab.
 - Configuration domains (AD Group, output policy, batch limits, encryption capability, default route, **invocation retention**) remain template-level and immediate-only per ADR 0007; UI structure in ADR 0016 applies within the hub tab (L1 essentials + advanced collapsed areas).
+
+> **Navigation surface superseded** by [Amendment — 2026-07-21](#amendment--2026-07-21-navigation-surface-sys-norm-wave-2) (package settings route). Package-first / non-catalog decision **unchanged**.
 
 ### Auto-materialize `api_policy`
 
@@ -83,12 +86,28 @@ Callers also need durable **invocation records** (parameters + optional artifact
 
 **Amended alignment:** That exception is **narrowed by** [ADR-0057](../authorization-security/0057-invocation-parameters-retention-for-regenerate.md) Amendment 2026-07-18 — cleartext variable values may be retained **only** for `piiCategory = NONE` (schema default); `piiCategory ≠ NONE` and unknown keys must redact/exclude. Password strip, invocation TTL, management non-exposure, and encryption-at-rest deferral are unchanged. Behavior: [ibl-a5-pii-retention-redaction.md](../../behavior/ibl-a5-pii-retention-redaction.md). Does **not** flip checklist **#3b** / **#5a**.
 
+## Amendment — 2026-07-21 (navigation surface; SYS-NORM Wave 2)
+
+**Unchanged package-first decision:** API configuration remains **package-scoped** (not a standalone policy catalog); `/api/policies` remains cross-package monitoring only; auto-materialize / retention / invocation semantics above are unchanged.
+
+**Amended navigation surface (IA only):** The primary management edit entry is **no longer** the template package hub **External access** tab. SYS-NORM Wave 2 removes that hub tab and routes operators to the package API settings shell:
+
+| Surface | Role after Wave 2 |
+| --- | --- |
+| Template package hub | Version lines primary; hub header **API settings** jump |
+| Canonical edit shell | `/api/packages/:templateId/settings` (optional `?panel=` / `?releaseVersion=`) |
+| Legacy hub `?tab=apiAccess` / `#apiAccess` | Redirect → settings shell |
+| Legacy `/api/policies/:templateId` | Redirect → settings shell (replaces prior redirect-to-hub-tab) |
+| Full settings panels + invocation dashboard | Wave 3 (`sys-norm-external-ops`) — shell may be interim until then |
+
+Behavior: [sys-norm-hub-ia.md](../../behavior/sys-norm-hub-ia.md); redirect table sync in [api-package-access-and-invocation-records.md](../../behavior/api-package-access-and-invocation-records.md) §15. Does **not** flip checklist **#3b** / **#5a**. Does **not** reopen per-version ApiPolicy entities.
+
 ## Consequences
 
 - Publish gate logic must materialize policy **before** «policy must exist» checks (see BDD R1).
 - Runtime and cleanup jobs must implement separate schedulers for idempotency (7d), artifacts (package doc TTL), and invocation rows (package record TTL).
 - OpenAPI v1 and management APIs gain invocation list/detail paths and retention fields on `api_policy`.
-- Standalone API catalog UX is demoted; E2E journeys anchor on package hub External access tab.
+- Standalone API catalog UX is demoted; management edit journeys anchor on the package API settings route (`/api/packages/:templateId/settings`) after SYS-NORM Wave 2 (historical hub External access tab retired).
 
 ## Alternatives Considered
 

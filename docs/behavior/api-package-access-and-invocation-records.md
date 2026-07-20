@@ -1,13 +1,21 @@
 # BDD 行为规格：包级 API 接入、约定配置与调用记录
 
 **文件状态**: `ready`  
-**版本**: 1.0.1  
+**版本**: 1.0.2  
 **编写日期**: 2026-07-03  
 **BDD ID**: `BDD-API-PACKAGE-ACCESS-INVOCATION-001`  
 **来源**: 产品讨论（包结构 API、约定大于配置、调用记录与可选文档留存）  
 **CDP (S1–S3 materialize):** CD-2 → **CD-E2E-T13** — [CDP-e2e-full-chain-evidence.md](../plan/detail/CDP-e2e-full-chain-evidence.md) § deferred / T13  
 **Playwright:** `frontend/e2e/CDP-E2E-T13-api-package-materialize.spec.ts`（maps **§8 S1–S3** only; no duplicate BDD IDs）  
 **P13 historical:** P13-ESO-F01…F03 Done (2026-07-08); CDP wave T13 re-evidence closes ledger gap
+
+> **SYS-NORM Wave 2 navigation sync (2026-07-21):** Package-first **policy semantics** unchanged
+> ([ADR-0040](../adr/api-management/0040-api-package-access-and-invocation-retention.md)). Hub
+> **External access** tab is **removed**; canonical edit shell is
+> `/api/packages/:templateId/settings`. See §15 redirect table (amended) and
+> [sys-norm-hub-ia.md](./sys-norm-hub-ia.md). Historical scenarios that still say
+> `?tab=apiAccess` describe pre-Wave-2 IA; runtime redirects supersede them. Wave 3 fills
+> settings panels + invocation dashboard.
 
 ---
 
@@ -30,7 +38,7 @@
 | `RuntimeGenerationAuditRecorder` + `runtime_generation_audit_event` | **Reuse** — 合规审计摘要（管理员）；**不**作为调用方查询面 |
 | `GenerationIdempotencyEntity` + `IdempotencyConstants.RETENTION_SECONDS` (7d) | **Reuse** — 幂等窗口；可与调用记录留存解耦（幂等短、记录可更长） |
 | `DocumentDownloadService` + MinIO `responseStorageKey` | **Extend** — 包级「保存文档」开启时延长 artifact 生命周期 |
-| `ApiPolicyDetailView` / `ApiPolicyHomeView` | **Replace IA** — 收拢至包 Hub；独立列表降级或移除 |
+| `ApiPolicyDetailView` / `ApiPolicyHomeView` | **Replace IA** — 收拢至包级 settings shell（Wave 2+）；`/api/policies` overview 保留为跨包监控；独立详情编辑器移除 |
 | `PublishGateService.apiPolicyItem` | **Change** — 从「policy 是否存在」→「callable-ready + 首次发布 auto-materialize 后检查 AD Group 等」 |
 
 ---
@@ -307,53 +315,58 @@ L2 可早于 L3 结束（C8）；L0 可多次重签（requirements 允许在 art
 
 ---
 
-## 15. P13 Phase 1 — IA 收敛与 Legacy 重定向（2026-07-08）
+## 15. P13 Phase 1 — IA 收敛与 Legacy 重定向（2026-07-08；**amended 2026-07-21 Wave 2**)
 
 **BDD ID:** `BDD-API-PACKAGE-ACCESS-IA-REDIRECT-001`  
 **Actor:** 分组/全局管理员（`canManageApiPolicy`）  
-**Goal:** 消除 `ApiPolicyDetailView` 与包 Hub External access 双编辑面；legacy 书签与深链自动迁移至 Hub Tab。
+**Goal:** 消除独立 `ApiPolicyDetailView` 与双编辑面；legacy 书签与深链自动迁移至**唯一**包级编辑面。
 
-### 15.1 重定向语义（已确认）
+> **Wave 2 amendment:** Target surface is `/api/packages/:templateId/settings` (not hub
+> `?tab=apiAccess`). Hub External access tab is removed. Full L1/advanced panels + invocation
+> history UI completeness = Wave 3; Wave 2 guarantees redirect + settings shell route.
 
-| Legacy 路由 | 目标 | 备注 |
+### 15.1 重定向语义（已确认 — Wave 2 current）
+
+| Legacy / prior 路由 | 目标（Wave 2+） | 备注 |
 | --- | --- | --- |
-| `/api/policies/:templateId` | `/templates/:templateId?tab=apiAccess` | Vue Router `redirect`；无 duplicate editor |
-| `/api/policies/:templateId?domain=OUTPUT_POLICY` | 同上 + `#domain=OUTPUT_POLICY` | `domain` query 转为 hash anchor；Hub 展开高级设置并滚动至对应域 |
-| `/api/policies`（overview） | **保留** | 跨包监控概览（摘要卡可选 + 告警表；非 catalog；ADR-0040）；深链至 Hub `?tab=apiAccess`；`PENDING_RELEASE` 预配见 C10 / [api-ops-discoverability.md](./api-ops-discoverability.md) |
+| `/api/policies/:templateId` | `/api/packages/:templateId/settings` | Vue Router `redirect`；无 duplicate editor；**supersedes** 2026-07-08 hub-tab target |
+| `/api/policies/:templateId?domain=OUTPUT_POLICY` | `/api/packages/:templateId/settings?domain=OUTPUT_POLICY&panel=domain` | Preserve domain intent for Wave 3 panel deep-link |
+| `/templates/:templateId?tab=apiAccess` / `#apiAccess` | `/api/packages/:templateId/settings` | Hub tab retired (SYS-NORM W2-010/011) |
+| `/api/policies`（overview） | **保留** | 跨包监控概览（摘要卡可选 + 告警表；非 catalog；ADR-0040）；深链应指向 settings shell；`PENDING_RELEASE` 预配见 C10 / [api-ops-discoverability.md](./api-ops-discoverability.md)（surface wording sync） |
 
-**不变约束：** 包级 `api_policy` 语义不变；管理端 invocation API 本阶段不变（Phase 2）。
+**不变约束：** 包级 `api_policy` 语义不变；管理端 invocation API 本阶段不变（Phase 2 / Wave 3 UI）。
 
 ### 15.2 Acceptance Scenarios（Given / When / Then）
 
-**SCEN-IA-01 — Legacy 详情路由重定向（required）**
+**SCEN-IA-01 — Legacy 详情路由重定向（required；Wave 2 target）**
 
 - **Given** 已发布模板 `T` 且管理员有 `canManageApiPolicy`
 - **When** 浏览器访问 `/api/policies/T`
-- **Then** 客户端导航至 `/templates/T?tab=apiAccess`；**不**渲染独立 `ApiPolicyDetailView` 全屏编辑器
+- **Then** 客户端导航至 `/api/packages/T/settings`；**不**渲染独立 `ApiPolicyDetailView` 全屏编辑器；**不**落在 hub `?tab=apiAccess`
 
-**SCEN-IA-02 — Domain query 保留为 hash（required）**
+**SCEN-IA-02 — Domain query 保留（required；Wave 2 target）**
 
 - **Given** 同上
 - **When** 访问 `/api/policies/T?domain=OUTPUT_POLICY`
-- **Then** 重定向至 `/templates/T?tab=apiAccess#domain=OUTPUT_POLICY`；Hub External access Tab 可见且高级设置中 Output settings 区域可定位（折叠展开或滚动）
+- **Then** 重定向至 settings shell 且保留 domain/panel 意图（`?domain=OUTPUT_POLICY` 与/或 `panel=domain`）；无 duplicate editor
 
-**SCEN-IA-03 — Overview 深链至 Hub（required）**
+**SCEN-IA-03 — Overview 深链至 settings shell（required；Wave 2 target）**
 
 - **Given** External services overview 列出已发布包 `T`
-- **When** 管理员点击包行或「Open external access」
-- **Then** 导航至 `/templates/T?tab=apiAccess`（非 legacy detail 路径）
+- **When** 管理员点击包行或「Open external access」/ API settings
+- **Then** 导航至 `/api/packages/T/settings`（非 legacy detail、非 hub External access tab）
 
 **SCEN-IA-04 — 无 duplicate editor（required）**
 
-- **Given** 管理员已在 Hub External access Tab 编辑策略
-- **When** 通过任意入口（侧栏 overview、模板 Hub、legacy 书签）再次打开同一包接入配置
-- **Then** 始终落在同一 Hub Tab 编辑面；不存在第二套 domain-console 全页编辑器
+- **Given** 管理员已在包级 API settings 编辑策略（Wave 2 shell / Wave 3 panels）
+- **When** 通过任意入口（侧栏 overview、模板 Hub API settings、legacy 书签）再次打开同一包接入配置
+- **Then** 始终落在同一 settings shell；不存在第二套 domain-console 全页编辑器；hub 不再承载 External access tab
 
 **SCEN-IA-05 — Legacy 书签迁移边界**
 
-- **Given** 用户收藏了旧 URL `/api/policies/T?domain=BATCH_LIMIT`
+- **Given** 用户收藏了旧 URL `/api/policies/T?domain=BATCH_LIMIT` 或 `/templates/T?tab=apiAccess`
 - **When** 打开收藏
-- **Then** 重定向成功；Hub Tab 加载 L1 + 凭证 + 最近调用；无 404、无空白 duplicate 页
+- **Then** 重定向至 settings shell 成功；无 404、无空白 duplicate 页；无 hub External access tab
 
 ---
 

@@ -17,8 +17,8 @@ related:
 
 # SYS-NORM Wave 2 — Template (+ Master parity) Package Hub IA
 
-> **TM:** Task Master **#146** · slice `sys-norm-hub-ia` · worktree `D:/working/DGE-sys-norm-hub-ia` ·
-> branch `feat/sys-norm-hub-ia`.  
+> **TM:** Task Master **#146** · slice `sys-norm-hub-ia` → **Done** (MAIN merge `5d77db80` / feature
+> `992f6822`; worktree **REMOVED**).  
 > **Locks:** Program charter [system-normalization-program.md](./system-normalization-program.md) §2.2,
 > §2.9; plan [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md).  
 > **Do not reopen** API model A vs B, hub tab removals, or Wave 3/4 scope.

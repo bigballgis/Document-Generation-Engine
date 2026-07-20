@@ -1,7 +1,7 @@
 # BDD 行为规格：API 运维可发现性（C10 前端对齐 + Overview 摘要 + PENDING_RELEASE 告警）
 
 **文件状态**: `ready`  
-**版本**: 1.0.0  
+**版本**: 1.0.1  
 **编写日期**: 2026-07-14  
 **BDD ID**: `BDD-API-OPS-DISCOVERABILITY-001`  
 **Slice**: `api-ops-discoverability`  
@@ -10,15 +10,24 @@
 **Formal phase**: **None**（非正式 P-phase；不 invent sole-active）  
 **授权依据**: Parent / delivery-orchestrator Stage 1 — 本会话明确切片范围（P1–P4）
 
+> **SYS-NORM Wave 2 navigation sync (2026-07-21):** Discoverability **semantics**
+> (`PENDING_RELEASE` pre-provision, overview alerts, `adGroupsConfigured` warnings) remain in
+> force. **Surface wording:** Hub External access / `?tab=apiAccess` is **retired**; operators
+> reach package API settings via `/api/packages/:templateId/settings` (and legacy redirects).
+> See [ADR-0040 Amendment 2026-07-21](../adr/api-management/0040-api-package-access-and-invocation-retention.md)
+> and [sys-norm-hub-ia.md](./sys-norm-hub-ia.md). Historical scenarios below that name the hub
+> tab remain acceptance for **C10 capability**; implementers map UI assertions to the settings
+> shell (Wave 3 completes panels).
+
 ---
 
 ## 1. 概述
 
-本切片关闭 **C10 骨架 policy** 与管理 UI / 跨包 Overview 之间的可发现性缺口：后端已允许在 `PENDING_RELEASE` 读写包级 `api_policy`（`ApiManagementAccessSupport.requirePublishedTemplate`），但前端仍把 External access Tab 绑在 `PUBLISHED`，导致待发布期无法预配 AD Group、深链失效；Overview 缺少轻量就绪摘要，告警也未覆盖待发布缺 AD Group 的包。
+本切片关闭 **C10 骨架 policy** 与管理 UI / 跨包 Overview 之间的可发现性缺口：后端已允许在 `PENDING_RELEASE` 读写包级 `api_policy`（`ApiManagementAccessSupport.requirePublishedTemplate`），但前端曾把 External access Tab 绑在 `PUBLISHED`，导致待发布期无法预配 AD Group、深链失效；Overview 缺少轻量就绪摘要，告警也未覆盖待发布缺 AD Group 的包。
 
 | 优先级 | 域 | 摘要 |
 | --- | --- | --- |
-| **P1 Critical** | C10 前端对齐 | `showPolicyPanel` / Hub External access / `loadPolicyData` 对 `PENDING_RELEASE` + `canManageApiPolicy` 生效；深链 `?tab=apiAccess` Tab 必须注册 |
+| **P1 Critical** | C10 前端对齐 | `PENDING_RELEASE` + `canManageApiPolicy` 时包级 policy 可加载/可编辑；深链可用（Wave 2+: settings shell；historical: hub `?tab=apiAccess`） |
 | **P2** | Overview 轻量就绪摘要 | `/api/policies`（`ApiPolicyHomeView`）展示范围内统计；遵守 **SCEN-ALERT-04**（告警表 + 可选摘要卡，非分页 catalog） |
 | **P3** | 告警扩展 | `ApiAccessAlertQueryService` 将 **缺 AD Group** 的 `PENDING_RELEASE` 纳入告警；保留 GROUP_ADMIN 组范围 |
 | **P4** | 发布 / 可调用语义 | 将 `adGroupsConfigured` 诊断暴露为可见警告；区分「已发布」与「运行时可调用」 |
@@ -27,7 +36,7 @@
 
 | 非目标 | 处理 |
 | --- | --- |
-| 独立 API 配置 catalog / 第二套编辑面 | **禁止** — 遵守 [ADR-0040](../adr/api-management/0040-api-package-access-and-invocation-retention.md) 与既有 IA：Hub `?tab=apiAccess` 为主入口；`/api/policies` 仅为跨包监控 |
+| 独立 API 配置 catalog / 第二套编辑面 | **禁止** — 遵守 [ADR-0040](../adr/api-management/0040-api-package-access-and-invocation-retention.md) package-first：Wave 2+ 主入口为 `/api/packages/:templateId/settings`；`/api/policies` 仅为跨包监控 |
 | Launch checklist **#3b** | **Out of scope** |
 | Boot 4.1 / Java 平台升级 | **Out of scope**（已由 `boot-4-1-upgrade` 处理） |
 | 改变运行时 fail-closed 授权（无 AD Group → deny） | **禁止** — 本切片只提升可发现性与预配能力 |
