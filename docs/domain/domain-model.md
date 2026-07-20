@@ -218,7 +218,7 @@ API 管理由全局管理员和分组管理员承担，不设置独立 API 管�
 
 **解析与应用：** 非空白 `legalEntityCode` → 同组 LegalEntity → 绑定 DocumentBrand（未知/INACTIVE → **422** 稳定码）；解析成功后在 generate / preview / test-generation **同一路径**将 logo / 可选默认 seal / 信头法定名称应用到文档品牌槽位。显式 sealRef **优先于**品牌默认 seal；签章几何仍走 IBL-B5。模板包可选 `allowedDocumentBrandCodes`；空/缺省 = 允许组内任一 ACTIVE 文档品牌；非空且解析品牌不在名单 → **422** `DOCUMENT_BRAND_NOT_ALLOWED`。路径仍钉扎模板版本，**不**按法人自动选包。
 
-行为 SoT：[ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)；决策：[ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)。Accepted ≠ E4 impl Done；F27 的 `effectiveFrom`/bulk 半幅仍属 **IBL-E5**。
+行为 SoT：[ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)；决策：[ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)。impl **Done**（`4d810395` / `212c6be9`）；F27 的 `effectiveFrom`/bulk 半幅仍属 **IBL-E5**。
 
 ### 2.4 AD Group
 

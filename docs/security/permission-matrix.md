@@ -144,7 +144,7 @@ Capability：`decideLegalApprovals` = {`GLOBAL_ADMIN`,`GROUP_ADMIN`,`LEGAL_REVIE
 
 ### 5.3 IBL-E4 文档品牌与法人实体目录（ADR-0065）
 
-**已确认（2026-07-20 / PD-9 / BDD-IBL-E4）：** DocumentBrand / LegalEntity 为组范围主数据目录；**无新角色**、**无新 capability bit**。壳层 `REDBC`/`GREENBC` 主题切换权不变（UI-only）。Accepted ADR ≠ impl Done；**不**翻转 #3b/#5a。
+**已确认（2026-07-20 / PD-9 / BDD-IBL-E4）：** DocumentBrand / LegalEntity 为组范围主数据目录；**无新角色**、**无新 capability bit**。壳层 `REDBC`/`GREENBC` 主题切换权不变（UI-only）。impl **Done**（`4d810395` / `212c6be9`）；**不**翻转 #3b/#5a。
 
 | 操作 | 全局管理员 | 分组管理员 | 母版设计人员 | 模板编排人员 | 测试/审批/法务 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |

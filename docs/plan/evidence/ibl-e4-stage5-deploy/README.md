@@ -17,6 +17,7 @@
 - **Notes:**
   - Attempt 1: FAIL — worktree `.env` from `.env.example` insecure JWT default (BDD-OPS-JWT-SECRET-001).
   - Attempt 2: SUCCESS — JWT synced from MAIN; canonical `COMPOSE_PROJECT_NAME=documentgenerationengine`.
+- **Stage 12:** Task #131 → **Done** (MAIN merge `4d810395` / tip `212c6be9`; sole-active cleared).
 
 ## Ready for
 

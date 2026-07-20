@@ -1468,14 +1468,14 @@
       {
         "id": "106",
         "title": "IBL: International Bank Letter Readiness Program (umbrella)",
-        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A Done (A1–A6; #107–#112 Done; A6 tip 5cacff2a); Wave IBL-B In Progress (#113–#118 IBL-B1–B6 Done — B6 merge 8722f4f1 / 8e8c62e6; B7 #119 Blocked Word host); Wave IBL-C Done (#120–#122 IBL-C1–C3 Done — C3 merge bdfc285d / dbfff086; F19 honesty SYNTHETIC); Wave IBL-D Done (#123–#127 IBL-D1–D5 Done — D5 merge 6f672271 / 2e56787e; F23 legalhold half closed; Playwright residual OUT); Wave IBL-E In Progress (#128 IBL-E1 Done — MAIN tip 0a2ee56a / feature 4c712b03 / 9decf19c; F24 closed; PD-4…PD-9 confirmed 2026-07-19; #129 IBL-E2 Done — MAIN merge 81a1ca29 / tip 6a96e9ab / docs tip e66a3bbf; F25 closed; #130 IBL-E3 Done — MAIN merge 233342d3 / tip e81a6bac / docs tip 3bd2cd87; F26 closed; #131 IBL-E4 In Progress sole-active — slice ibl-e4-entity-document-brands; worktree D:/working/DGE-ibl-e4-entity-document-brands; #132–#134 pending not activated). Host sole-active: #131 IBL-E4. #119 IBL-B7 still Blocked (Word host — do not invent Word evidence). Formal phase None. Do NOT treat #106 as sole-active. Do NOT activate #132–#134 here. Do NOT flip #3b/#5a GO. Do NOT claim Wave E / IBL program Done / go-live.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active: #131 IBL-E4 (ibl-e4-entity-document-brands; worktree D:/working/DGE-ibl-e4-entity-document-brands). Wave IBL-E → In Progress (E1–E3 Done; E4 #131 In Progress sole-active; E5–E7 #132–#134 pending — not activated). Wave IBL-D Done D1–D5; Wave IBL-C Done; Wave IBL-B In Progress B1–B6 Done / B7 #119 Blocked residual; Wave IBL-A remains Done. Do NOT mark #132–#134 in-progress until orchestrator activates. Do NOT activate #119. Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT mark Wave B / Wave E / IBL program Done.",
+        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A Done (A1–A6; #107–#112 Done; A6 tip 5cacff2a); Wave IBL-B In Progress (#113–#118 IBL-B1–B6 Done — B6 merge 8722f4f1 / 8e8c62e6; B7 #119 Blocked Word host); Wave IBL-C Done (#120–#122 IBL-C1–C3 Done — C3 merge bdfc285d / dbfff086; F19 honesty SYNTHETIC); Wave IBL-D Done (#123–#127 IBL-D1–D5 Done — D5 merge 6f672271 / 2e56787e; F23 legalhold half closed; Playwright residual OUT); Wave IBL-E In Progress (#128 IBL-E1 Done — MAIN tip 0a2ee56a / feature 4c712b03 / 9decf19c; F24 closed; PD-4…PD-9 confirmed 2026-07-19; #129 IBL-E2 Done — MAIN merge 81a1ca29 / tip 6a96e9ab / docs tip e66a3bbf; F25 closed; #130 IBL-E3 Done — MAIN merge 233342d3 / tip e81a6bac / docs tip 3bd2cd87; F26 closed; #131 IBL-E4 Done — MAIN merge 4d810395 / tip 212c6be9; F27 document-brand half closed; #132–#134 pending not activated). Host sole-active: cleared. #119 IBL-B7 still Blocked (Word host — do not invent Word evidence). Formal phase None. Do NOT treat #106 as sole-active. Do NOT activate #132 here. Do NOT flip #3b/#5a GO. Do NOT claim Wave E / IBL program Done / go-live.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active: cleared (#131 IBL-E4 Done 4d810395 / 212c6be9). Wave IBL-E → In Progress (E1–E4 Done; E5–E7 #132–#134 pending — not activated). Wave IBL-D Done D1–D5; Wave IBL-C Done; Wave IBL-B In Progress B1–B6 Done / B7 #119 Blocked residual; Wave IBL-A remains Done. Do NOT mark #132–#134 in-progress until orchestrator activates. Do NOT activate #119. Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT mark Wave B / Wave E / IBL program Done.",
         "testStrategy": "N/A — umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-20T06:15:00.000Z"
+        "updatedAt": "2026-07-20T08:20:00.000Z"
       },
       {
         "id": "107",
@@ -1800,20 +1800,20 @@
       {
         "id": "131",
         "title": "IBL-E4: Per-legal-entity document brand variants",
-        "description": "IN PROGRESS 2026-07-20 (sole-active NON-CE delivery leaf). IBL-E4 per-legal-entity document brand variants (beyond REDBC/GREENBC UI chrome). Slice ibl-e4-entity-document-brands. Placement ISOLATED: D:/working/DGE-ibl-e4-entity-document-brands · feat/ibl-e4-entity-document-brands (base MAIN tip 3bd2cd87 — includes #130 Done). Batch solo (member_task_ids:[\"131\"]; proposed_slice_id: ibl-e4-entity-document-brands; vetoes: IBL-E5-E7/#132–#134, IBL-B7/#119, umbrella-106). Owners: backend-engineer + frontend-engineer. BDD: required. Maps F27 / PD-9 confirmed. Wave IBL-E In Progress (E1–E3 Done; E4 In Progress; #132–#134 not activated). #119 remains Blocked. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim Wave E / IBL program Done. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "ACTIVATED 2026-07-20 (stage 2 plan-orchestrator on worktree only — no MAIN edits). Slice id: ibl-e4-entity-document-brands. Batch recommendation solo (member_task_ids: [\"131\"]; proposed_slice_id: ibl-e4-entity-document-brands; vetoes_applied: IBL-E5-E7/#132–#134, IBL-B7/#119, umbrella-106). Worktree D:/working/DGE-ibl-e4-entity-document-brands · feat/ibl-e4-entity-document-brands. Base MAIN tip 3bd2cd87 (#130 IBL-E3 Done). Owners: backend-engineer + frontend-engineer. BDD: required before impl. Draft acceptance: Document brand variants selectable per legal entity (beyond REDBC/GREENBC UI chrome). Do NOT activate #132–#134 or #119. Formal phase None. Not go-live. Do NOT flip checklist #3b/#5a GO. Do NOT claim Wave E / IBL program Done. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "testStrategy": "BDD ready + per-entity document brands (beyond UI theming) + FE/BE gates + E2E/UIUX if UI in scope + queued deploy evidence.",
+        "description": "DONE 2026-07-20. IBL-E4 per-legal-entity document brand variants (ADR-0065 Accepted + impl). MAIN merge 4d810395 / feature tip 212c6be9; worktree REMOVED. Slice ibl-e4-entity-document-brands. F27 document-brand half closed (effectiveFrom/bulk → IBL-E5). Batch solo closed. Gates: mvn verify GREEN 2264; FE lint/type-check/test/build GREEN; E2E 6/6 PASS; UIUX PASS Critical=0; architecture merge_go; Stage 5+10 DEPLOY_OK. Wave IBL-E stays In Progress (E1–E4 Done; #132–#134 pending not activated). Sole-active cleared. Do NOT activate #132. #119 remains Blocked. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim Wave E / IBL program Done / go-live. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "CLOSED 2026-07-20 (stage 12 post-task-doc-sync on MAIN). Slice ibl-e4-entity-document-brands. Batch solo member_task_ids [131] closed. Delivered: DocumentBrand + LegalEntity catalogs; context.legalEntityCode resolve → document brand assets; optional allowedDocumentBrandCodes; management UI catalog/bind/allow-list; shell REDBC/GREENBC remains UI-only; ADR-0065 Accepted. BDD ready docs/behavior/ibl-e4-entity-document-brands.md (BDD-IBL-E4-001…017). Gates: mvn verify GREEN 2264; FE gates GREEN; E2E 6/6; UIUX PASS; arch merge_go; Stage 5+10 DEPLOY_OK. Evidence: docs/plan/evidence/ibl-e4-stage5-deploy/ + ibl-e4-entity-document-brands/ + ibl-e4-stage10-deploy/. Sole-active cleared. Wave IBL-E In Progress (E1–E4 Done; E5–E7 pending). Do NOT activate #132. #119 Blocked. Checklist #3b/#5a CONDITIONAL. Formal phase None. manuals: N/A this commit (OMM mgmt-ui/integrator patches deferred — isolate fe-audience-manuals WIP; not in HEAD).",
+        "testStrategy": "BDD ready + ADR-0065 + permission-matrix §5.3 + mvn verify 2264 + FE gates + E2E 6/6 + UIUX PASS + arch merge_go + Stage 5/10 DEPLOY_OK.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T06:15:00.000Z"
+        "updatedAt": "2026-07-20T08:20:00.000Z"
       },
       {
         "id": "132",
         "title": "IBL-E5: effectiveFrom publish enforcement + bulk re-pin",
-        "description": "PENDING (PD-unblocked 2026-07-19 — not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress — #131 IBL-E4 is sole-active; orchestrator must activate. Plan ID IBL-E5. Owner: backend-engineer. BDD: required. Maps F27. Wave IBL-E In Progress (E1–E3 Done; E4 #131 sole-active; this leaf not activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "PENDING (not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress while #131 is sole-active. IBL-E5. Owners: backend-engineer. BDD: required when activated. Draft acceptance: Future effectiveFrom blocked/scheduled at publish; bulk re-pin with dry-run + audit. Status pending (not a delivery leaf until activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "description": "PENDING (unblocked by PD-* user confirm 2026-07-19 — not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress — sole-active cleared; orchestrator must activate. Plan ID IBL-E5. Owner: backend-engineer. BDD: required. Depends: E1/E4 may interact; not activated. Maps F27. Wave IBL-E In Progress (E1–E4 Done; this leaf not activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "PENDING (unblocked by PD-* — not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress while sole-active cleared (#131 Done). IBL-E5. Owners: backend-engineer. BDD: required when activated. Depends: E1/E4 may interact; not activated. Draft acceptance: Future effectiveFrom blocked/scheduled at publish; bulk re-pin with dry-run + audit. Status pending (not a delivery leaf until activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
         "testStrategy": "After activation: effectiveFrom publish + bulk re-pin dry-run/audit + BDD + mvn verify.",
         "priority": "low",
         "dependencies": [
@@ -1822,31 +1822,31 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-20T06:15:00.000Z"
+        "updatedAt": "2026-07-20T08:20:00.000Z"
       },
       {
         "id": "133",
         "title": "IBL-E6: Clause nesting governance",
-        "description": "PENDING (PD-unblocked 2026-07-19 — not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress — #131 IBL-E4 is sole-active; orchestrator must activate. Plan ID IBL-E6. Owner: backend-engineer. BDD: required. Maps F28. Wave IBL-E In Progress (E1–E3 Done; E4 #131 sole-active; this leaf not activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "PENDING (not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress while #131 is sole-active. IBL-E6. Owners: backend-engineer. BDD: required when activated. Draft acceptance: Nesting depth governed; where-used reports deep refs; cycles fail-closed. Status pending (not a delivery leaf until activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "description": "PENDING (unblocked by PD-* user confirm 2026-07-19 — not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress — sole-active cleared; orchestrator must activate. Plan ID IBL-E6. Owner: backend-engineer. BDD: required. Depends: Wave E PD unblocked; not activated. Maps F28. Wave IBL-E In Progress (E1–E4 Done; this leaf not activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "PENDING (unblocked by PD-* — not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress while sole-active cleared (#131 Done). IBL-E6. Owners: backend-engineer. BDD: required when activated. Depends: Wave E PD unblocked; not activated. Draft acceptance: Nesting depth governed; where-used reports deep refs; cycles fail-closed. Status pending (not a delivery leaf until activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
         "testStrategy": "After activation: nesting governance + where-used depth + cycle fail-closed + BDD + mvn verify.",
         "priority": "low",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-20T06:15:00.000Z"
+        "updatedAt": "2026-07-20T08:20:00.000Z"
       },
       {
         "id": "134",
         "title": "IBL-E7: RTL / bidirectional script exploration spike",
-        "description": "PENDING (PD-unblocked 2026-07-19 — not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress — #131 IBL-E4 is sole-active; orchestrator must activate. Plan ID IBL-E7. Owner: rendering-engineer + doc-keeper. BDD: not-applicable (spike). Maps F15. Wave IBL-E In Progress (E1–E3 Done; E4 #131 sole-active; this leaf not activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
-        "details": "PENDING (not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress while #131 is sole-active. IBL-E7. Owners: rendering-engineer + doc-keeper. BDD: not-applicable (spike) when activated. Draft acceptance: Spike report — feasibility, LO/POI gaps, recommend ADR or descoped. Status pending (not a delivery leaf until activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "description": "PENDING (unblocked by PD-* user confirm 2026-07-19 — not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress — sole-active cleared; orchestrator must activate. Plan ID IBL-E7. Owner: rendering-engineer + doc-keeper. BDD: not-applicable (spike). Depends: market-need still product-gated; not activated. Maps F15. Wave IBL-E In Progress (E1–E4 Done; this leaf not activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
+        "details": "PENDING (unblocked by PD-* — not activated). Queue after #131 IBL-E4 Done. Do NOT mark in-progress while sole-active cleared (#131 Done). IBL-E7. Owners: rendering-engineer + doc-keeper. BDD: not-applicable (spike) when activated. Depends: market-need still product-gated; not activated. Draft acceptance: Spike report — feasibility, LO/POI gaps, recommend ADR or descoped. Status pending (not a delivery leaf until activated). Formal phase None. Not go-live. Do NOT flip checklist #3b. Plan: docs/plan/intl-bank-letter-readiness-program.md.",
         "testStrategy": "After activation: spike report feasibility + LO/POI gaps + ADR-or-descope recommendation.",
         "priority": "low",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-20T06:15:00.000Z"
+        "updatedAt": "2026-07-20T08:20:00.000Z"
       },
       {
         "id": "135",
