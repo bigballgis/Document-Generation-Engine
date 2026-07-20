@@ -1,5 +1,6 @@
 package com.bank.docgen.audit.service;
 
+import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_BULK_REPIN;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_CREATED;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_LIFECYCLE_OPERATION;
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_REVIEW_TRANSITION;
@@ -8,6 +9,9 @@ import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MO
 import static com.bank.docgen.audit.service.ManagementAuditEventTypes.CONTENT_MODULE_VERSION_UPDATED;
 
 import com.bank.docgen.audit.api.ContentModuleLifecycleAuditDetail;
+import com.bank.docgen.template.api.BulkRepinItemView;
+import com.bank.docgen.template.api.BulkRepinSummaryView;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -188,6 +192,58 @@ class ContentModuleAuditRecorder {
                 actorUsername,
                 actorSummary,
                 null
+        );
+    }
+
+    @Transactional
+    void recordContentModuleBulkRepin(
+            UUID moduleId,
+            String groupCode,
+            String actorUsername,
+            String actorSummary,
+            boolean dryRun,
+            String fromSemanticVersion,
+            String toSemanticVersion,
+            boolean useLatestApproved,
+            BulkRepinSummaryView summary,
+            List<BulkRepinItemView> items
+    ) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("dryRun", dryRun);
+        payload.put("fromSemanticVersion", fromSemanticVersion);
+        payload.put("toSemanticVersion", toSemanticVersion);
+        payload.put("useLatestApproved", useLatestApproved);
+        payload.put("wouldApplyCount", summary.wouldApplyCount());
+        payload.put("appliedCount", summary.appliedCount());
+        payload.put("skippedLockedCount", summary.skippedLockedCount());
+        payload.put("skippedAlreadyAtTargetCount", summary.skippedAlreadyAtTargetCount());
+        payload.put("skippedNoMatchCount", summary.skippedNoMatchCount());
+        payload.put("failedCount", summary.failedCount());
+        List<Map<String, Object>> itemPayloads = new ArrayList<>();
+        for (BulkRepinItemView item : items) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("templateId", item.templateId());
+            row.put("templateVersionId", item.templateVersionId());
+            row.put("referenceKey", item.referenceKey());
+            row.put("beforeSemanticVersion", item.beforeSemanticVersion());
+            row.put("afterSemanticVersion", item.afterSemanticVersion());
+            row.put("status", item.status() == null ? null : item.status().name());
+            row.put("errorCode", item.errorCode());
+            itemPayloads.add(row);
+        }
+        payload.put("items", itemPayloads);
+        String summaryText = "Bulk re-pin dryRun=" + dryRun
+                + " applied=" + summary.appliedCount()
+                + " wouldApply=" + summary.wouldApplyCount()
+                + " failed=" + summary.failedCount();
+        recordContentModuleEvent(
+                CONTENT_MODULE_BULK_REPIN,
+                moduleId,
+                groupCode,
+                summaryText,
+                actorUsername,
+                actorSummary,
+                eventWriter.writeJsonMap(payload)
         );
     }
 

@@ -186,4 +186,20 @@ final class TemplateContentModuleReferenceSupport {
                 + " effectiveTo="
                 + version.getEffectiveTo();
     }
+
+    String formatNotStartedEffectiveDetail(
+            TemplateContentModuleReferenceEntity reference,
+            ContentModuleVersionEntity version
+    ) {
+        ContentModuleEntity module = contentModuleRepository.findByIdAndDeletedAtIsNull(version.getModuleId())
+                .orElse(null);
+        String moduleCode = module == null ? version.getModuleId().toString() : module.getModuleCode();
+        return reference.getReferenceKey()
+                + " "
+                + moduleCode
+                + "@"
+                + version.getSemanticVersion()
+                + " effectiveFrom="
+                + version.getEffectiveFrom();
+    }
 }

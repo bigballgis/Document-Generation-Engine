@@ -76,7 +76,9 @@ class ManagementOpenApiPathSanityTest {
         if (path.contains("/previews") || path.contains("/batch-tests")) {
             return java.util.Optional.of("com.bank.docgen.rendering");
         }
-        if (path.startsWith("/api/management/v1/templates")) {
+        if (path.startsWith("/api/management/v1/templates")
+                || path.startsWith("/api/management/v1/content-module-references")
+                || path.startsWith("/api/management/v1/author-workflow")) {
             return java.util.Optional.of("com.bank.docgen.template");
         }
         if (path.startsWith("/api/management/v1/admin/audit")

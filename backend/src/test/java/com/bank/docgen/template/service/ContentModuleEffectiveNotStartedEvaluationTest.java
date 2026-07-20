@@ -2,7 +2,6 @@ package com.bank.docgen.template.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
@@ -11,7 +10,7 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.contentmodule.service.ContentModuleAccessService;
-import com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView;
+import com.bank.docgen.template.api.ContentModuleEffectiveNotStartedSummaryView;
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceEntity;
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
@@ -28,10 +27,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
- * CE-K08 BDD-CE-K08-LM-008…013 — effectiveTo publish-gate expiry evaluation.
+ * IBL-E5 BDD-IBL-E5-001…004 / 017 — effectiveFrom not-started publish-gate evaluation.
  */
 @ExtendWith(MockitoExtension.class)
-class ContentModuleEffectiveExpiryEvaluationTest {
+class ContentModuleEffectiveNotStartedEvaluationTest {
 
     private static final UUID TEMPLATE_VERSION_ID = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static final UUID MODULE_ID = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
@@ -58,7 +57,6 @@ class ContentModuleEffectiveExpiryEvaluationTest {
 
     private TemplateContentModuleReferenceService service;
     private ContentModuleVersionEntity moduleVersion;
-    private TemplateContentModuleReferenceEntity reference;
 
     @BeforeEach
     void setUp() {
@@ -85,7 +83,7 @@ class ContentModuleEffectiveExpiryEvaluationTest {
         );
         moduleVersion.setReviewState(ContentModuleReviewState.APPROVED);
         moduleVersion.setLifecycleState(ContentModuleLifecycleState.ACTIVE);
-        reference = new TemplateContentModuleReferenceEntity(
+        TemplateContentModuleReferenceEntity reference = new TemplateContentModuleReferenceEntity(
                 REF_ID,
                 TEMPLATE_VERSION_ID,
                 "CLAUSE-A",
@@ -109,90 +107,56 @@ class ContentModuleEffectiveExpiryEvaluationTest {
     }
 
     @Test
-    void evaluateEffectiveExpiry_pastEffectiveTo_blocks_lm008() {
-        moduleVersion.setEffectiveTo(Instant.parse("2026-07-01T00:00:00Z"));
+    void evaluateEffectiveNotStarted_futureEffectiveFrom_blocks_e5001() {
+        moduleVersion.setEffectiveFrom(Instant.parse("2027-01-01T00:00:00Z"));
 
-        ContentModuleEffectiveExpirySummaryView summary =
-                service.evaluateEffectiveExpiry(TEMPLATE_VERSION_ID, NOW);
+        ContentModuleEffectiveNotStartedSummaryView summary =
+                service.evaluateEffectiveNotStarted(TEMPLATE_VERSION_ID, NOW);
 
         assertThat(summary.blocking()).isTrue();
-        assertThat(summary.expiredReferences()).isEqualTo(1);
-        assertThat(summary.expiredDetails().getFirst()).contains("MOD-A@1.0.0");
-        assertThat(summary.expiredDetails().getFirst()).contains("effectiveTo=");
+        assertThat(summary.notStartedReferences()).isEqualTo(1);
+        assertThat(summary.notStartedDetails().getFirst()).contains("CLAUSE-A");
+        assertThat(summary.notStartedDetails().getFirst()).contains("MOD-A@1.0.0");
+        assertThat(summary.notStartedDetails().getFirst()).contains("effectiveFrom=");
     }
 
     @Test
-    void evaluateEffectiveExpiry_nullEffectiveTo_passes_lm009() {
-        moduleVersion.setEffectiveTo(null);
-
-        ContentModuleEffectiveExpirySummaryView summary =
-                service.evaluateEffectiveExpiry(TEMPLATE_VERSION_ID, NOW);
-
-        assertThat(summary.blocking()).isFalse();
-        assertThat(summary.expiredReferences()).isZero();
-    }
-
-    @Test
-    void evaluateEffectiveExpiry_equalNow_notExpired_lm010() {
-        moduleVersion.setEffectiveTo(NOW);
-
-        ContentModuleEffectiveExpirySummaryView summary =
-                service.evaluateEffectiveExpiry(TEMPLATE_VERSION_ID, NOW);
-
-        assertThat(summary.blocking()).isFalse();
-    }
-
-    @Test
-    void evaluateEffectiveExpiry_futureEffectiveFrom_doesNotTripExpired_lm011Orthogonal() {
-        // IBL-E5: future effectiveFrom must not overload CONTENT_MODULE_EFFECTIVE_EXPIRED.
-        // Not-started blocking is covered by ContentModuleEffectiveNotStartedEvaluationTest.
-        moduleVersion.setEffectiveFrom(Instant.parse("2027-01-01T00:00:00Z"));
-        moduleVersion.setEffectiveTo(null);
-
-        ContentModuleEffectiveExpirySummaryView summary =
-                service.evaluateEffectiveExpiry(TEMPLATE_VERSION_ID, NOW);
-
-        assertThat(summary.blocking()).isFalse();
-    }
-
-    @Test
-    void entity_isEffectiveNotStarted_strictBeforeOnly() {
-        moduleVersion.setEffectiveFrom(NOW);
-        assertThat(moduleVersion.isEffectiveNotStarted(NOW)).isFalse();
-        assertThat(moduleVersion.isEffectiveNotStarted(NOW.minusSeconds(1))).isTrue();
+    void evaluateEffectiveNotStarted_nullEffectiveFrom_passes_e5002() {
         moduleVersion.setEffectiveFrom(null);
-        assertThat(moduleVersion.isEffectiveNotStarted(NOW)).isFalse();
+
+        ContentModuleEffectiveNotStartedSummaryView summary =
+                service.evaluateEffectiveNotStarted(TEMPLATE_VERSION_ID, NOW);
+
+        assertThat(summary.blocking()).isFalse();
+        assertThat(summary.notStartedReferences()).isZero();
     }
 
     @Test
-    void resolvePinnedContentStructures_ignoresEffectiveExpiry_lm012() {
-        moduleVersion.setEffectiveTo(Instant.parse("2020-01-01T00:00:00Z"));
+    void evaluateEffectiveNotStarted_equalNow_passes_e5003() {
+        moduleVersion.setEffectiveFrom(NOW);
 
-        var pinned = service.resolvePinnedContentStructures(TEMPLATE_VERSION_ID);
+        ContentModuleEffectiveNotStartedSummaryView summary =
+                service.evaluateEffectiveNotStarted(TEMPLATE_VERSION_ID, NOW);
 
-        assertThat(pinned).containsEntry("CLAUSE-A", "{\"blocks\":[]}");
+        assertThat(summary.blocking()).isFalse();
     }
 
     @Test
-    void evaluateEffectiveExpiry_orthogonalToReferenceValidity_lm013() {
+    void evaluateEffectiveNotStarted_pastEffectiveFrom_passes_e5004() {
+        moduleVersion.setEffectiveFrom(Instant.parse("2026-01-01T00:00:00Z"));
+
+        ContentModuleEffectiveNotStartedSummaryView summary =
+                service.evaluateEffectiveNotStarted(TEMPLATE_VERSION_ID, NOW);
+
+        assertThat(summary.blocking()).isFalse();
+    }
+
+    @Test
+    void evaluateEffectiveNotStarted_orthogonalToExpiry_e5005() {
         moduleVersion.setEffectiveTo(Instant.parse("2026-07-01T00:00:00Z"));
-        // Structure present + referencable → CONTENT_MODULE_REFERENCES would PASS
-        assertThat(moduleVersion.isReferencable()).isTrue();
+        moduleVersion.setEffectiveFrom(null);
 
-        ContentModuleEffectiveExpirySummaryView expiry =
-                service.evaluateEffectiveExpiry(TEMPLATE_VERSION_ID, NOW);
-        var refs = service.validateReferences(TEMPLATE_VERSION_ID);
-
-        assertThat(refs.blocking()).isFalse();
-        assertThat(expiry.blocking()).isTrue();
-    }
-
-    @Test
-    void entity_isEffectiveExpired_strictAfterOnly() {
-        moduleVersion.setEffectiveTo(NOW);
-        assertThat(moduleVersion.isEffectiveExpired(NOW)).isFalse();
-        assertThat(moduleVersion.isEffectiveExpired(NOW.plusSeconds(1))).isTrue();
-        moduleVersion.setEffectiveTo(null);
-        assertThat(moduleVersion.isEffectiveExpired(NOW)).isFalse();
+        assertThat(service.evaluateEffectiveExpiry(TEMPLATE_VERSION_ID, NOW).blocking()).isTrue();
+        assertThat(service.evaluateEffectiveNotStarted(TEMPLATE_VERSION_ID, NOW).blocking()).isFalse();
     }
 }

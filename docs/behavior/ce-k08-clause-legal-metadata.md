@@ -29,7 +29,7 @@
 | 非目标 | 处理 |
 | --- | --- |
 | 强制填写法务字段 | Out of scope — 全部可选；空 `effectiveTo` = 无到期 |
-| `effectiveFrom` 未到即阻断发布 | Out of scope — 本片仅阻断 **已过** `effectiveTo` |
+| `effectiveFrom` 未到即阻断发布 | **Out of CE-K08 scope** — 本片仅阻断 **已过** `effectiveTo`。**IBL-E5 / [ADR-0066 Accepted](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)（2026-07-20）修正：** 未来 `effectiveFrom` 由新硬项 `CONTENT_MODULE_EFFECTIVE_NOT_STARTED` 阻断；见 [ibl-e5-effectivefrom-bulk-repin.md](./ibl-e5-effectivefrom-bulk-repin.md)（**BDD-IBL-E5-001…017** / E5-C*）。本文件 K08-C6 / LM-011 历史「不阻断」期望 **已被取代**。 |
 | 运行期生成因过期失败 | Out of scope — 与 STOPPED/DEPRECATED 一致：已发布锁定版本继续可生成；阻断只作用于**新发布** |
 | 自动停用过期模块 / 自动 bump | Out of scope — CE-U07 升版提醒正交；本片不做自动治理 |
 | 新角色或新权限码 | Out of scope — 复用 `authorContentModules` / catalog browse / 既有 publish 能力 |
@@ -103,7 +103,7 @@
 | **K08-C3** | 仅 `DRAFT` 可写；`SUBMITTED` / `APPROVED` 更新法务字段 → 拒绝（422 或既有状态机拒绝）；变更须新版本。 |
 | **K08-C4** | 日期校验：两者皆非空时要求 `effectiveFrom <= effectiveTo`；相等允许（零长度区间仍有效至该 Instant）。 |
 | **K08-C5** | 过期判定：`effectiveTo == null` → 永不过期；否则 `Instant.now(UTC).isAfter(effectiveTo)` 为过期。相等时刻**未**过期。 |
-| **K08-C6** | **仅** `effectiveTo` 过期进入发布硬门禁；未来 `effectiveFrom`（尚未生效）**不**阻断本片发布。 |
+| **K08-C6** | **本片（CE-K08）：** **仅** `effectiveTo` 过期进入发布硬门禁 `CONTENT_MODULE_EFFECTIVE_EXPIRED`。未来 `effectiveFrom` **不**由本片码阻断。**修正（IBL-E5 / [ADR-0066 Accepted](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)，2026-07-20）：** 未来 `effectiveFrom` 由 **`CONTENT_MODULE_EFFECTIVE_NOT_STARTED`** 硬阻断（正交新码）；见 [ibl-e5-effectivefrom-bulk-repin.md](./ibl-e5-effectivefrom-bulk-repin.md) E5-C1…C7。 |
 | **K08-C7** | 目录筛选作用于 `GET /content-modules`。匹配版本 = 该模块的 **catalog filter version**：优先最新 `APPROVED`+`ACTIVE`；若无则取最新版本（`createdAt`/`semanticVersion` 与现网「当前版本」展示一致的规则）。筛选语义：`jurisdiction` / `legalReviewRef` = 大小写不敏感 **exact**（trim 后）；`effectiveFrom` query = filterVersion.effectiveFrom >= param（若 filterVersion 该字段 null 则不匹配该条件）；`effectiveTo` query = filterVersion.effectiveTo <= param（null 不匹配）。未传的筛选参数忽略。 |
 | **K08-C8** | 新检查码 `CONTENT_MODULE_EFFECTIVE_EXPIRED`（独立于 `CONTENT_MODULE_REFERENCES`）；硬阻断；详情可列 moduleCode + semanticVersion + effectiveTo（非敏感）。 |
 | **K08-C9** | 已发布 release 运行期**不**因随后过期而失败；与模块 STOPPED/DEPRECATED「已锁定仍可生成」一致。 |
@@ -204,12 +204,16 @@ When 评估 publish-gate
 Then 本检查项不因「已过期」失败（K08-C5）
 ```
 
-### BDD-CE-K08-LM-011 — 未来 effectiveFrom 不阻断发布
+### BDD-CE-K08-LM-011 — 未来 effectiveFrom 与 EXPIRED 码正交（历史；E5 修正阻断）
+
+> **历史 CE-K08（2026-07-15）：** 未来 `effectiveFrom` **不**触发 `CONTENT_MODULE_EFFECTIVE_EXPIRED`。  
+> **IBL-E5 修正（2026-07-20）：** 同一数据须因 **`CONTENT_MODULE_EFFECTIVE_NOT_STARTED`** FAIL；见 **BDD-IBL-E5-001** / **BDD-IBL-E5-017**。[ibl-e5-effectivefrom-bulk-repin.md](./ibl-e5-effectivefrom-bulk-repin.md)
 
 ```gherkin
 Given 引用版本 effectiveFrom 在未来，effectiveTo 为空或仍在未来
 When 评估 publish-gate
 Then 不因 effectiveFrom 未到而 FAIL CONTENT_MODULE_EFFECTIVE_EXPIRED
+And（E5 实现后）须 FAIL CONTENT_MODULE_EFFECTIVE_NOT_STARTED
 ```
 
 ### BDD-CE-K08-LM-012 — 已发布锁定版本运行期不受事后过期影响

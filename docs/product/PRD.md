@@ -191,6 +191,8 @@ v1 正式业务出信由上游业务系统通过动态 API 间接触发；文档
 
 **IBL-E4 / PD-9（2026-07-20）：** 组内可治理 **DocumentBrand**（文档品牌）与 **LegalEntity**（法人实体）目录；每法人实体必选绑定一个 ACTIVE 文档品牌。Runtime / preview / test-generation 可选 `context.legalEntityCode` 解析文档品牌并应用于产物信头/logo/可选默认签章；省略时走组默认法人或种子 `PLATFORM_DEFAULT`。模板可选 `allowedDocumentBrandCodes` allow-list。管理 UI 须支持品牌/实体目录、实体→品牌选择器、组默认与解析回显；壳层 `REDBC`/`GREENBC` 主题保持 UI-only。详情：[ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)、[ADR-0065 Accepted](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)（2026-07-20；Decision = E4-C\*；impl **Done** `4d810395` / `212c6be9`）。F27 的 `effectiveFrom`/bulk 半幅仍属 **IBL-E5**。**不**翻转 checklist **#3b** / **#5a**；**不**宣称 Wave E / go-live Done。
 
+**IBL-E5 / F27 residual（2026-07-20）：** 模板发布前，若任一钉扎条款/内容模块版本的 `effectiveFrom` 尚未到达（UTC Instant），发布门禁硬阻断（`CONTENT_MODULE_EFFECTIVE_NOT_STARTED`；与 CE-K08 `effectiveTo` 过期门禁正交）。作者仍可在 CM **草稿**版本预填未来 `effectiveFrom`（「schedule」元数据）；**不**引入模板延迟发布 / `SCHEDULED` 生命周期。组范围提供管理 API 批量改钉草稿引用（dry-run + 审计；复用既有钉扎写校验）；管理 UI bulk 控制台非本叶必交付。详情：[ibl-e5-effectivefrom-bulk-repin.md](../behavior/ibl-e5-effectivefrom-bulk-repin.md)、[ADR-0066 Accepted](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)（2026-07-20；Decision = E5-C\*；Accepted ≠ impl Done）。**不**翻转 checklist **#3b** / **#5a**；**不**宣称 Wave E / go-live Done。
+
 ### 6.4 锚点内容类型
 
 锚点内容需要支持：
@@ -311,6 +313,7 @@ Word 或 HTML 粘贴内容必须清洗并转换为受控结构化节点后才能
 - 样式引用缺失。
 - 条款或内容模块引用缺失。
 - 引用条款/内容模块版本已过 `effectiveTo`（CE-K08）。
+- 引用条款/内容模块版本 `effectiveFrom` 未到（IBL-E5）。
 - 表格组件引用缺失。
 - 母版锚点引用缺失。
 - 编号断裂且影响条款语义。
@@ -413,7 +416,7 @@ P18 已确认结构化节点矩阵、母版样式目录与发布锁定的 `rende
 
 模板发布版本必须锁定引用的具体已批准条款或内容模块版本。条款或内容模块新版本发布后，不自动影响已发布模板；模板升级引用新模块版本时，必须执行影响分析，并重新经过测试、审批和发布流程。
 
-**条款治理元数据（CE-K08，2026-07-15 确认）：** 每个内容模块**版本**可维护可选法务字段：管辖地（`jurisdiction`）、生效起止（`effectiveFrom` / `effectiveTo`）、法务评审单号（`legalReviewRef`）。目录检索支持按上述字段筛选。模板发布前，若任一引用的条款版本已过 `effectiveTo`，发布门禁硬阻断；未设置 `effectiveTo` 视为无到期。已发布并锁定的版本不因事后过期而中断运行期生成。完整 BDD：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)。
+**条款治理元数据（CE-K08，2026-07-15 确认；IBL-E5 修正 2026-07-20）：** 每个内容模块**版本**可维护可选法务字段：管辖地（`jurisdiction`）、生效起止（`effectiveFrom` / `effectiveTo`）、法务评审单号（`legalReviewRef`）。目录检索支持按上述字段筛选。模板发布前，若任一引用的条款版本已过 `effectiveTo`，发布门禁硬阻断；未设置 `effectiveTo` 视为无到期。**IBL-E5：** 若任一引用版本 `effectiveFrom` 尚未到达，发布门禁另以 `CONTENT_MODULE_EFFECTIVE_NOT_STARTED` 硬阻断（与过期项正交）。已发布并锁定的版本不因事后时钟越过/未越过生效窗而中断运行期生成。完整 BDD：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)；[ibl-e5-effectivefrom-bulk-repin.md](../behavior/ibl-e5-effectivefrom-bulk-repin.md)。
 
 条款或内容模块停用、恢复和废弃仅由全局管理员和分组管理员执行；执行前必须进行影响分析、二次确认并记录审计。
 
