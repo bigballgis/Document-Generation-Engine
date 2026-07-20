@@ -15,7 +15,7 @@
 | **Umbrella** | **#106** registry only（非本叶） |
 | **Formal phase** | **None**（不发明 sole-active 正式 P-phase） |
 | **Batch recommendation** | **solo**（`proposed_slice_id: ibl-e6-clause-nesting-governance`） |
-| **Owning docs** | **本文件（本叶行为 SoT）**；[ADR-0067 Accepted](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md)（Decision = E6-C*；OpenAPI synced；Accepted ≠ impl Done）；对照 [intl-bank-letter-readiness-program.md](../plan/intl-bank-letter-readiness-program.md) F28 / IBL-E6 验收；CE-G05 where-used [ce-g05-annual-review-fts.md](./ce-g05-annual-review-fts.md)（G05-C13…C15 — 本叶**扩展**深度）；domain §2.6.10 / §2.9.2 `contentModuleRef` 嵌套图；F1 [core-fortress-f1-rendering-correctness.md](./core-fortress-f1-rendering-correctness.md) 空 pin fail-closed；嵌套边界同构 [ComputeDslLimits](../../backend/src/main/java/com/bank/docgen/sharedkernel/document/compute/ComputeDslLimits.java) `MAX_NESTING_DEPTH=8`；permission-matrix §5.1 条款目录浏览 / where-used |
+| **Owning docs** | **本文件（本叶行为 SoT）**；[ADR-0067 Accepted](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md)（Decision = E6-C*；OpenAPI synced；impl **Done** `dcc42c81` / `0e542c03`）；对照 [intl-bank-letter-readiness-program.md](../plan/intl-bank-letter-readiness-program.md) F28 / IBL-E6 验收；CE-G05 where-used [ce-g05-annual-review-fts.md](./ce-g05-annual-review-fts.md)（G05-C13…C15 — 本叶**扩展**深度）；domain §2.6.10 / §2.9.2 `contentModuleRef` 嵌套图；F1 [core-fortress-f1-rendering-correctness.md](./core-fortress-f1-rendering-correctness.md) 空 pin fail-closed；嵌套边界同构 [ComputeDslLimits](../../backend/src/main/java/com/bank/docgen/sharedkernel/document/compute/ComputeDslLimits.java) `MAX_NESTING_DEPTH=8`；permission-matrix §5.1 条款目录浏览 / where-used |
 | **Frontend UI** | **`frontend_ui_in_scope=false`**（owner = **backend-engineer**；API / 治理 / 门禁优先；既有 where-used 面板可消费扩展字段但**非** Done 条件；E2E/UIUX **N/A**） |
 
 **完成声明约束：** 本叶关闭 F28——条款嵌套成为**可治理模块图**；嵌套深度受控；where-used 报告深度引用；环路 fail-closed。**不**交付 RTL（IBL-E7 / #134）。**SPECIMEN 水印不得在本叶移除**（PD-6 **OUT**）。**PD-7** 授权字体 **OUT**。**禁止**翻转 checklist **#3b** / **#5a**；**禁止**宣称 go-live / Wave E / IBL 程序 Done；**禁止**激活 IBL-E7 / #119；**禁止**发明 Word / SPECIMEN / PD 新边界。E1–E5 语义**正交不改写**。
@@ -26,7 +26,7 @@ frontend_ui_in_scope: false
 open_questions: []
 owning_doc: docs/behavior/ibl-e6-clause-nesting-governance.md
 task_ids: ["133"]
-adr_status: Accepted — docs/adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md (Decision = E6-C*; OpenAPI/domain/indexes synced; Accepted ≠ E6 impl Done)
+adr_status: Accepted — docs/adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md (Decision = E6-C*; OpenAPI/domain/indexes synced; impl Done — MAIN `dcc42c81` / tip `0e542c03` / stage10 `32b62136`)
 ```
 
 ---
@@ -137,7 +137,7 @@ batch_recommendation:
 | **E6-C16** | **审计：** 嵌套校验失败不必强制写业务审计（422 即可）；结构成功保存若变更嵌套边，建议管理审计摘要含边变更计数（可选最小：依赖既有 CM 版本更新审计）。禁止正文/variables。 | 审计卫生；不过度发明 |
 | **E6-C17** | **E1–E5 正交：** 不改 locale、inclusion rules、审批矩阵、DocumentBrand、`effectiveFrom`/bulk-repin 语义。 | Wave E 兄弟叶 Done |
 | **E6-C18** | **SPECIMEN / PD-6 / PD-7 / Word：** 不改变。 | 程序 §8；vetoes |
-| **E6-C19** | **ADR：** [ADR-0067](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md) **Accepted**（2026-07-20；Decision = 本节 E6-C*；OpenAPI/domain/indexes synced）。Accepted ≠ E6 impl Done。 | 程序「ADR + BDD per leaf」 |
+| **E6-C19** | **ADR：** [ADR-0067](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md) **Accepted**（2026-07-20；Decision = 本节 E6-C*；OpenAPI/domain/indexes synced）。impl **Done** (`dcc42c81`). | 程序「ADR + BDD per leaf」 |
 | **E6-C20** | **门禁：** BE `mvn verify`；queued Docker deploy evidence。无强制 Playwright。若 OpenAPI 生成前端类型，FE type-check/test 按需绿，仍非 UI 交付。 | delivery constitution + API-first |
 | **E6-C21** | **完成边界：** E6 Done ≠ Wave E Done；≠ go-live；#3b/#5a 保持 CONDITIONAL；E7 / #119 不激活；**不**翻转 #3b/#5a。 | 队列政策 |
 
@@ -353,7 +353,7 @@ batch_recommendation:
 | [core-fortress-f1-rendering-correctness.md](./core-fortress-f1-rendering-correctness.md) F1-A2 | 空 pin fail-closed |
 | `ComputeDslLimits.MAX_NESTING_DEPTH=8` | 深度上限同构依据 |
 | permission-matrix §5.1 | 目录浏览 / where-used 授权 |
-| ADR-0067（Accepted） | Decision = E6-C*；OpenAPI/domain synced；≠ impl Done |
+| ADR-0067（Accepted） | Decision = E6-C*；OpenAPI/domain synced；impl **Done** (`dcc42c81` / `0e542c03`) |
 | E1–E5 BDD/ADR | 正交；不改写 |
 
 ---

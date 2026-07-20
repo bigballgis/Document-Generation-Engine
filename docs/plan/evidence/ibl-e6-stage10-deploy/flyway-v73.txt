@@ -1,0 +1,9 @@
+
+{"@timestamp":"2026-07-20T02:21:13.473109099Z","@version":"1","message":"Database: jdbc:postgresql://docgen-postgres:5432/docgen (PostgreSQL 16.14)","logger_name":"org.flywaydb.core.FlywayExecutor","thread_name":"main","level":"INFO","level_value":20000}
+{"@timestamp":"2026-07-20T02:21:13.766037844Z","@version":"1","message":"Successfully validated 73 migrations (execution time 00:00.133s)","logger_name":"org.flywaydb.core.internal.command.DbValidate","thread_name":"main","level":"INFO","level_value":20000}
+{"@timestamp":"2026-07-20T02:21:13.797521165Z","@version":"1","message":"Current version of schema \"public\": 73","logger_name":"org.flywaydb.core.internal.command.DbMigrate","thread_name":"main","level":"INFO","level_value":20000}
+{"@timestamp":"2026-07-20T02:21:13.822812248Z","@version":"1","message":"Schema \"public\" is up to date. No migration necessary.","logger_name":"org.flywaydb.core.internal.command.DbMigrate","thread_name":"main","level":"INFO","level_value":20000}
+
+
+--- flyway_schema_history ---
+ installed_rank | version |               description               | success |        installed_on         ----------------+---------+-----------------------------------------+---------+----------------------------              73 | 73      | content module nesting edge             | t       | 2026-07-20 02:16:01.981847              72 | 72      | document brand legal entity             | t       | 2026-07-19 23:46:24.251036              71 | 71      | approval matrix mode and legal reviewer | t       | 2026-07-19 21:31:42.643532 (3 rows) 

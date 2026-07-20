@@ -1,12 +1,12 @@
 {
   "result": "DEPLOY_OK",
-  "when": "2026-07-20T10:17:14+08:00",
+  "when": "2026-07-20T10:24:04+08:00",
   "slice": "ibl-e6-clause-nesting-governance",
   "worktree": "D:/working/DGE-ibl-e6-clause-nesting-governance",
   "branch": "feat/ibl-e6-clause-nesting-governance",
-  "git_tip": "65613c4be12e55ebfbc439078044ae436aa32c28",
+  "git_tip": "0e542c03f10b7b47afab392d0378ce0eab301c0b",
   "mode": "full",
-  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"IBL-E6 Stage 10 deploy evidence\"",
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"IBL-E6 stage10 full deploy tip 0e542c03\"",
   "compose_project": "documentgenerationengine",
   "frontend_ui_in_scope": false,
   "healthz_8080": {
@@ -14,11 +14,21 @@
     "body": "{\"status\":\"UP\"}"
   },
   "frontend_4173": {
-    "note": "captured optionally; healthz sufficient per frontend_ui_in_scope=false",
-    "status_code": 200
+    "note": "captured optionally; healthz sufficient per frontend_ui_in_scope=false"
+  },
+  "flyway_v73": {
+    "applied": true,
+    "version": "73",
+    "description": "content module nesting edge",
+    "success": true,
+    "installed_on": "2026-07-20 02:16:01.981847",
+    "backend_log": "Successfully validated 73 migrations; Current version of schema public: 73"
   },
   "images": {
-    "frontend": "sha256:a1ca7f9542feeba90aa64b87881238c8f87b392703846ee126539d523a3eeee7",
-    "backend": "sha256:1f6caae7f638b92b64d3e5cc68418340ac1d9636f5d4fbb60c4bd2bdd13ef192"
-  }
+    "backend": "sha256:02245661190b430b1dd7c440d666d3efac5edf86c8294c62883dff20da3e6516",
+    "frontend": "sha256:3a81dc62b91a494d6607ab1391dd8dfe82351ae4e5db9bc0c662084d32188f80"
+  },
+  "deploy_queue": "idle",
+  "ready_for_stage_11": "already_merged",
+  "placement_note": "Full queue deploy from worktree tip 0e542c03 succeeded; worktree subsequently removed. MAIN already contains merge dcc42c81 of feat/ibl-e6-clause-nesting-governance — stage 11 appears complete; evidence refreshed under docs/plan/evidence/ibl-e6-stage10-deploy/ for tip 0e542c03 digests."
 }

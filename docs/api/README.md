@@ -254,7 +254,7 @@ Governed CM↔CM nesting from `contentModuleRef`, depth/cycle fail-closed, deep 
 | Nested `referenceKey` missing as template pin | publish gate | `CONTENT_MODULE_NESTING_UNPINNED` |
 | Render expand encounters cycle | structured failure | `CONTENT_MODULE_NESTING_CYCLE` |
 
-Where-used row extensions: `referenceKind` (`DIRECT`\|`NESTED`), `nestingDepth`, optional `nestingPathSummary`. Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `ContentModuleWhereUsedTemplateView`, `ContentModuleWhereUsedReferenceKind`, `PublishGateCheckCode`, `ErrorCode`. Companion: [contract-outline.md](contract-outline.md) IBL-E6 bullet. Behavior SoT: [ibl-e6-clause-nesting-governance.md](../behavior/ibl-e6-clause-nesting-governance.md)（BDD-IBL-E6-001…018）. Accepted ADR ≠ E6 impl Done; formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
+Where-used row extensions: `referenceKind` (`DIRECT`\|`NESTED`), `nestingDepth`, optional `nestingPathSummary`. Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `ContentModuleWhereUsedTemplateView`, `ContentModuleWhereUsedReferenceKind`, `PublishGateCheckCode`, `ErrorCode`. Companion: [contract-outline.md](contract-outline.md) IBL-E6 bullet. Behavior SoT: [ibl-e6-clause-nesting-governance.md](../behavior/ibl-e6-clause-nesting-governance.md)（BDD-IBL-E6-001…018）. impl **Done** (`dcc42c81` / `0e542c03` / `32b62136`); formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
 
 ### Full-library export (CE-E03)
 

@@ -193,7 +193,7 @@ v1 正式业务出信由上游业务系统通过动态 API 间接触发；文档
 
 **IBL-E5 / F27 residual（2026-07-20）：** 模板发布前，若任一钉扎条款/内容模块版本的 `effectiveFrom` 尚未到达（UTC Instant），发布门禁硬阻断（`CONTENT_MODULE_EFFECTIVE_NOT_STARTED`；与 CE-K08 `effectiveTo` 过期门禁正交）。作者仍可在 CM **草稿**版本预填未来 `effectiveFrom`（「schedule」元数据）；**不**引入模板延迟发布 / `SCHEDULED` 生命周期。组范围提供管理 API 批量改钉草稿引用（dry-run + 审计；复用既有钉扎写校验）；管理 UI bulk 控制台非本叶必交付。详情：[ibl-e5-effectivefrom-bulk-repin.md](../behavior/ibl-e5-effectivefrom-bulk-repin.md)、[ADR-0066 Accepted](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)（2026-07-20；Decision = E5-C\*；impl **Done** `688f9e58` / `20ead1ce`）。**不**翻转 checklist **#3b** / **#5a**；**不**宣称 Wave E / go-live Done。
 
-**IBL-E6 / F28（2026-07-20）：** 条款套条款须成为可治理 CM↔CM 模块图（由 `contentModuleRef` 派生）；嵌套深度硬上限 **8**；环路 fail-closed；where-used 报告深度/嵌套引用；发布时传递钉扎完整。管理 API-first（嵌套图可视化 UI 非本叶必交付）。详情：[ibl-e6-clause-nesting-governance.md](../behavior/ibl-e6-clause-nesting-governance.md)、[ADR-0067 Accepted](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md)（2026-07-20；Decision = E6-C\*；Accepted ≠ impl Done；#133 In Progress）。**不**翻转 checklist **#3b** / **#5a**；**不**宣称 Wave E / go-live Done。
+**IBL-E6 / F28（2026-07-20）：** 条款套条款须成为可治理 CM↔CM 模块图（由 `contentModuleRef` 派生）；嵌套深度硬上限 **8**；环路 fail-closed；where-used 报告深度/嵌套引用；发布时传递钉扎完整。管理 API-first（嵌套图可视化 UI 非本叶必交付）。详情：[ibl-e6-clause-nesting-governance.md](../behavior/ibl-e6-clause-nesting-governance.md)、[ADR-0067 Accepted](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md)（2026-07-20；Decision = E6-C\*；impl **Done** `dcc42c81` / `0e542c03` / `32b62136`）。**不**翻转 checklist **#3b** / **#5a**；**不**宣称 Wave E / go-live Done。
 
 ### 6.4 锚点内容类型
 

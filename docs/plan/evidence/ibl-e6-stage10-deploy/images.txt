@@ -1,2 +1,3 @@
-backend: sha256:1f6caae7f638b92b64d3e5cc68418340ac1d9636f5d4fbb60c4bd2bdd13ef192
-frontend: sha256:a1ca7f9542feeba90aa64b87881238c8f87b392703846ee126539d523a3eeee7
+REPOSITORY                                                                     TAG                                                                           IMAGE ID       CREATED         SIZE
+documentgenerationengine-docgen-backend                                        latest                                                                        02245661190b   8 minutes ago   1.46GB
+documentgenerationengine-docgen-frontend                                       latest                                                                        3a81dc62b91a   3 hours ago     86MB
