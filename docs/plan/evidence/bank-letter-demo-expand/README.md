@@ -1,8 +1,8 @@
 # Evidence — bank-letter-demo-expand (#142 / Wave B)
 
-**Status:** Stage 4 gates + Stage 5/10 deploy evidence **archived** (2026-07-20) — **not merged** (Stage 11 not run)  
-**Placement:** `D:/working/DGE-bank-letter-demo-expand` · `feat/bank-letter-demo-expand`  
-**Agent:** build-deploy-agent (Stage 4 / 5 / 10)  
+**Status:** **Done** (2026-07-20) — Stage 11 merge `288ce98f` + Stage 12 MAIN doc-sync; worktree **REMOVED**  
+**Placement (historical):** `D:/working/DGE-bank-letter-demo-expand` · `feat/bank-letter-demo-expand`  
+**Agent:** build-deploy-agent (Stage 4 / 5 / 10) → integration-merger → post-task-doc-sync  
 **Date:** 2026-07-20
 
 ## Intent
@@ -29,6 +29,8 @@ Archive import → publish → generate evidence for the expanded demo registry 
 | `import-all-demos.ps1` | **OK** (8 Wave A + 7 Wave B packages + full-flow seed) |
 | `publish-all-demos.ps1` | **OK** — **20/20 PUBLISHED** |
 | `generate-all-demos.ps1` | **OK** — **20/20 SUCCESS** |
+| Architecture review | **merge_go** |
+| Stage 11 merge | **Done** — MAIN `288ce98f`; worktree **REMOVED** |
 
 ## Wave B externalIds (+7)
 
@@ -45,7 +47,7 @@ Archive import → publish → generate evidence for the expanded demo registry 
 ## Commands + results
 
 ```text
-# cwd: D:/working/DGE-bank-letter-demo-expand
+# cwd: D:/working/DGE-bank-letter-demo-expand (historical worktree)
 
 mvn -B -ntp -f backend/pom.xml verify "-Dsurefire.argLine=-Xmx1536m"
 # → Tests run: 2340, Failures: 0, Errors: 0, Skipped: 15 · BUILD SUCCESS
@@ -83,7 +85,8 @@ $env:COMPOSE_PROJECT_NAME = 'documentgenerationengine'
 - Ports: backend `8080`; frontend lab map `5173→8080` (not `4173` on this host config).
 - No SQL hotfix applied between import → publish → generate.
 
-## Closeout (not yet)
+## Closeout
 
-1. Stage 11 `integration-merger` → MAIN + worktree remove — **not run** (explicit Do NOT merge).
-2. Stage 12 MAIN doc-sync — **not Done**; do **not** flip **#3b/#5a GO**.
+1. Stage 11 `integration-merger` → MAIN `288ce98f` + worktree remove — **Done**.
+2. Stage 12 MAIN doc-sync — **Done**; sole-active **cleared**; do **not** flip **#3b/#5a GO** / CE-O02 / RTL.
+3. Stage 13 `post-task-commit-review` — handoff (push by default).

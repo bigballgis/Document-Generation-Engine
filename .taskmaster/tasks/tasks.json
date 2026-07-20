@@ -1938,8 +1938,8 @@
       {
         "id": "141",
         "title": "Demo refresh Wave A: bank-letter-demo-refresh (existing packages)",
-        "description": "DONE 2026-07-20. NON-CE ops-demo content leaf. Slice bank-letter-demo-refresh / task_id demo-refresh-wave-a. Wave A complete — clean shallow/padding demo + refresh 8 deploy/demo-* + DEMO-FULL-FLOW-LETTER; import/publish/generate 13/13. MAIN merge aa88170f (feature 5ae9575a); worktree REMOVED; sole-active cleared. Same-release publish supersede + DEACTIVATE_VERSION audit landed. BDD ready docs/behavior/bank-letter-demo-refresh.md. frontend_ui_in_scope=false. Batch split closed. Historical TM #4-#8 remain Done — do NOT reopen P22/P23. Formal phase None. Vetoes still in force: CE-O02 deferred; no #3b/#5a GO; no RTL. Wave B #142 activated as sole-active (bank-letter-demo-expand) after this Done closeout. Do NOT claim go-live / IBL program Done.",
-        "details": "COMPLETED 2026-07-20 (stage 12 MAIN doc-sync). Slice id: bank-letter-demo-refresh. Alias task_id: demo-refresh-wave-a. Merge: aa88170f (feat/bank-letter-demo-refresh → main); feature tip 5ae9575a; worktree DGE-bank-letter-demo-refresh REMOVED (stage 11). Batch recommendation split (member_task_ids: [\"demo-refresh-wave-a\"]; proposed_slice_id: bank-letter-demo-refresh) closed. Gates: mvn verify GREEN 2312; docker-deploy-queue DEPLOY_OK; import/publish/generate 13/13; architecture PASS_WITH_NOTES merge_go=true; FE/E2E N/A (frontend_ui_in_scope=false). Evidence: docs/plan/evidence/bank-letter-demo-refresh/. Behavior: demo content uplift + same-release publish supersede + DEACTIVATE_VERSION audit. Wave A → Done. Wave B next leaf bank-letter-demo-expand = TM #142 → activated sole-active after this Done. Umbrella #53/#106 registry-only. #119 remains Blocked. CE-O02 Deferred. Checklist #3b/#5a stay CONDITIONAL. Do NOT flip GO. Do NOT activate RTL/CE-O02.",
+        "description": "DONE 2026-07-20. NON-CE ops-demo content leaf. Slice bank-letter-demo-refresh / task_id demo-refresh-wave-a. Wave A complete — clean shallow/padding demo + refresh 8 deploy/demo-* + DEMO-FULL-FLOW-LETTER; import/publish/generate 13/13. MAIN merge aa88170f (feature 5ae9575a); worktree REMOVED; sole-active cleared. Same-release publish supersede + DEACTIVATE_VERSION audit landed. BDD ready docs/behavior/bank-letter-demo-refresh.md. frontend_ui_in_scope=false. Batch split closed. Historical TM #4-#8 remain Done — do NOT reopen P22/P23. Formal phase None. Vetoes still in force: CE-O02 deferred; no #3b/#5a GO; no RTL. Wave B #142 subsequently Done (288ce98f). Do NOT claim go-live / IBL program Done.",
+        "details": "COMPLETED 2026-07-20 (stage 12 MAIN doc-sync). Slice id: bank-letter-demo-refresh. Alias task_id: demo-refresh-wave-a. Merge: aa88170f (feat/bank-letter-demo-refresh → main); feature tip 5ae9575a; worktree DGE-bank-letter-demo-refresh REMOVED (stage 11). Batch recommendation split (member_task_ids: [\"demo-refresh-wave-a\"]; proposed_slice_id: bank-letter-demo-refresh) closed. Gates: mvn verify GREEN 2312; docker-deploy-queue DEPLOY_OK; import/publish/generate 13/13; architecture PASS_WITH_NOTES merge_go=true; FE/E2E N/A (frontend_ui_in_scope=false). Evidence: docs/plan/evidence/bank-letter-demo-refresh/. Behavior: demo content uplift + same-release publish supersede + DEACTIVATE_VERSION audit. Wave A → Done. Wave B TM #142 → Done (288ce98f). Umbrella #53/#106 registry-only. #119 remains Blocked. CE-O02 Deferred. Checklist #3b/#5a stay CONDITIONAL. Do NOT flip GO. Do NOT activate RTL/CE-O02.",
         "testStrategy": "1. BDD ready confirmed (docs/behavior/bank-letter-demo-refresh.md; BDD-DEMO-REFRESH-001..014). 2. Existing eight deploy/demo-* + DEMO-FULL-FLOW-LETTER uplifted to realistic bank-letter content (mock parties/amounts only). 3. Ops path: cleanup as needed → import-all-demos.ps1 → publish-all-demos.ps1 → generate-all-demos.ps1 with durable evidence 13/13. 4. Master asset regen via *MasterDocxAssetGeneratorTest where assets change. 5. Backend mvn verify GREEN 2312; FE/E2E N/A (frontend_ui_in_scope=false). 6. Queued docker-deploy DEPLOY_OK. 7. Stage 11 merge + MAIN doc-sync; Wave B not delivered; #3b/#5a GO not flipped; CE-O02/RTL not activated.",
         "priority": "high",
         "dependencies": [
@@ -1952,27 +1952,27 @@
       {
         "id": "142",
         "title": "Demo expand Wave B: bank-letter-demo-expand (new letter families)",
-        "description": "IN PROGRESS 2026-07-20 — sole-active NON-CE ops-demo content leaf. Slice bank-letter-demo-expand / TM #142 Wave B. Placement ISOLATED: worktree D:/working/DGE-bank-letter-demo-expand · feat/bank-letter-demo-expand. BDD ready docs/behavior/bank-letter-demo-expand.md (16 scenarios; 7 new families). frontend_ui_in_scope=false. Seven confirmed families: DEMO-FACILITY-AMENDMENT (CORP), DEMO-KYC-CDD-NOTICE (RETAIL), DEMO-ACCOUNT-CLOSURE (RETAIL), DEMO-COMMITMENT-LETTER (CORP; not FOL alias), DEMO-FORMAL-DEMAND (CORP), DEMO-COVENANT-WAIVER (CORP), DEMO-INSURANCE-ENDORSEMENT (RETAIL). Target registry Wave A 13 + Wave B 7 = 20. Dependency #141 Done (aa88170f). Formal phase None. Vetoes: do NOT flip #3b/#5a GO; do NOT activate CE-O02/RTL. Umbrella #53/#106 registry-only — not delivery leaves. Do NOT claim go-live / IBL program Done.",
-        "details": "ACTIVATED 2026-07-20 (plan-orchestrator stage 2). Slice id: bank-letter-demo-expand. Batch recommendation: solo (member_task_ids: [\"142\"]; proposed_slice_id: bank-letter-demo-expand); vetoes_applied: CE-O02, RTL, checklist-#3b/#5a-GO, FOL-alias-as-commitment, PRD-eight-rename. Scope: author 7 new deploy/demo-* packages + wire import-all/publish-all/generate-all; Meridian brand; CORP/RETAIL group model; bank-letter quality bar same as Wave A. Owners: doc-keeper → rendering-engineer (+ build-deploy-agent for queued Docker). Wave A #141 remains Done — do not reopen. Historical TM #4-#8 remain Done — do not reopen P22/P23. Worktree-only activation (No MAIN writes for this stage). Do NOT flip GO. Do NOT activate CE-O02/RTL.",
-        "testStrategy": "1. BDD ready confirmed (docs/behavior/bank-letter-demo-expand.md; BDD-DEMO-EXPAND-001..016). 2. Seven new DEMO-* packages with variables/bindings/SQL/fixtures/MasterDocxAssetGeneratorTest. 3. import-all → publish-all → generate-all evidence includes Wave A 13 + Wave B 7 = 20. 4. DEMO-COMMITMENT-LETTER must not be FOL/CORP-FOL-OFFER alias. 5. Backend mvn verify GREEN when code/assets touched; FE/E2E N/A (frontend_ui_in_scope=false). 6. Queued docker-deploy when acceptance surface requires. 7. Stage 11 merge + MAIN doc-sync before Done; #3b/#5a GO not flipped; CE-O02/RTL not activated.",
+        "description": "DONE 2026-07-20. NON-CE ops-demo content leaf. Slice bank-letter-demo-expand / TM #142 Wave B. Wave B complete — 7 new Meridian DEMO-* families; registry Wave A 13 + Wave B 7 = 20; import/publish/generate 20/20. MAIN merge 288ce98f; worktree REMOVED; sole-active cleared. BDD ready docs/behavior/bank-letter-demo-expand.md (16 scenarios). frontend_ui_in_scope=false. DEMO-COMMITMENT-LETTER is not FOL/CORP-FOL-OFFER alias. Dependency #141 Done (aa88170f). Formal phase None. Vetoes still in force: CE-O02 deferred; no #3b/#5a GO; no RTL. Umbrella #53/#106 registry-only. Do NOT claim go-live / IBL program Done.",
+        "details": "COMPLETED 2026-07-20 (stage 12 MAIN doc-sync). Slice id: bank-letter-demo-expand. Merge: 288ce98f (feat/bank-letter-demo-expand → main); worktree DGE-bank-letter-demo-expand REMOVED (stage 11). Batch recommendation solo (member_task_ids: [\"142\"]; proposed_slice_id: bank-letter-demo-expand) closed. Gates: mvn verify GREEN 2340; docker-deploy-queue DEPLOY_OK; generate 20/20; architecture merge_go; FE E2E N/A; vitest baseline RED unrelated (api.error catalog / openapi parity). Evidence: docs/plan/evidence/bank-letter-demo-expand/. Wave B → Done. Wave A #141 remains Done. Umbrella #53/#106 registry-only. #119 remains Blocked. CE-O02 Deferred. Checklist #3b/#5a stay CONDITIONAL. Do NOT flip GO. Do NOT activate RTL/CE-O02.",
+        "testStrategy": "1. BDD ready confirmed (docs/behavior/bank-letter-demo-expand.md; BDD-DEMO-EXPAND-001..016). 2. Seven new DEMO-* packages with variables/bindings/SQL/fixtures/MasterDocxAssetGeneratorTest. 3. import-all → publish-all → generate-all evidence includes Wave A 13 + Wave B 7 = 20. 4. DEMO-COMMITMENT-LETTER must not be FOL/CORP-FOL-OFFER alias. 5. Backend mvn verify GREEN 2340; FE/E2E N/A (frontend_ui_in_scope=false). 6. Queued docker-deploy DEPLOY_OK. 7. Stage 11 merge + MAIN doc-sync; #3b/#5a GO not flipped; CE-O02/RTL not activated.",
         "priority": "high",
         "dependencies": [
           "141"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T18:45:00.000Z"
+        "updatedAt": "2026-07-20T19:50:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-20T18:45:00.000Z",
+      "lastModified": "2026-07-20T19:50:00.000Z",
       "taskCount": 142,
-      "completedCount": 138,
+      "completedCount": 139,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-20T18:45:00.000Z"
+      "updated": "2026-07-20T19:50:00.000Z"
     }
   }
 }
