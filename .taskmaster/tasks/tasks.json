@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: cleared (prior NON-CE #139 PD-7 Done b966874a; OUT of IBL-E; pursue docs ADR-0069 + procurement; Accepted ≠ embedding Done; prior #138 PD-6 Done 73ab03cb); do not treat #53 as delivery leaf. Prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068; worktree REMOVED. Prior #133 IBL-E6 Done dcc42c81 / 0e542c03 / 32b62136 / docs a2501d48; F28 closed. Prior NON-CE #132 IBL-E5 Done 688f9e58 / 20ead1ce / docs 65613c4b (F27 closed). Prior NON-CE #131 IBL-E4 Done 4d810395 / 212c6be9. Prior NON-CE #127 IBL-D5 Done 6f672271 / 2e56787e (F23 legalhold half closed; Wave IBL-D → Done D1–D5; Playwright residual OUT). Prior NON-CE #126 IBL-D4 Done 94cc8eeb / 94526674 (F22 closed). Prior NON-CE #125 IBL-D3 Done 6b9b6487 / 0242084e. Prior NON-CE #124 IBL-D2 Done 21be3a99 / 4fd0c5da. Prior NON-CE #123 IBL-D1 Done 1a686938 / f399489c. Prior NON-CE #122 IBL-C3 Done bdfc285d / dbfff086. Prior NON-CE #121 IBL-C2 Done (1d357e4d / 767b4ceb+abf564dc). Prior NON-CE #120 IBL-C1 Done (55909dd2 / d2492fc4+5d89b606). Prior NON-CE #118 IBL-B6 Done (8722f4f1 / 8e8c62e6).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: cleared (prior NON-CE #139 PD-7 Done b966874a; OUT of IBL-E; pursue docs ADR-0069 + procurement; Accepted ≠ embedding Done; prior #138 PD-6 Done 73ab03cb; related CE-G06 #76 / IBL-A6 #112; prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068 Accepted; Wave IBL-D Done; Wave IBL-C Done; Wave IBL-B In Progress B7 Blocked residual; Wave IBL-A Done; residual Blocked = #119 B7 — do not activate). Do NOT claim program Done (CE-O02 deferred per D5).",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: cleared (prior NON-CE #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done; prior NON-CE #139 PD-7 Done b966874a; OUT of IBL-E; pursue docs ADR-0069 + procurement; Accepted ≠ embedding Done; prior #138 PD-6 Done 73ab03cb); do not treat #53 as delivery leaf. Prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068; worktree REMOVED. Prior #133 IBL-E6 Done dcc42c81 / 0e542c03 / 32b62136 / docs a2501d48; F28 closed. Prior NON-CE #132 IBL-E5 Done 688f9e58 / 20ead1ce / docs 65613c4b (F27 closed). Prior NON-CE #131 IBL-E4 Done 4d810395 / 212c6be9. Prior NON-CE #127 IBL-D5 Done 6f672271 / 2e56787e (F23 legalhold half closed; Wave IBL-D → Done D1–D5; Playwright residual OUT). Prior NON-CE #126 IBL-D4 Done 94cc8eeb / 94526674 (F22 closed). Prior NON-CE #125 IBL-D3 Done 6b9b6487 / 0242084e. Prior NON-CE #124 IBL-D2 Done 21be3a99 / 4fd0c5da. Prior NON-CE #123 IBL-D1 Done 1a686938 / f399489c. Prior NON-CE #122 IBL-C3 Done bdfc285d / dbfff086. Prior NON-CE #121 IBL-C2 Done (1d357e4d / 767b4ceb+abf564dc). Prior NON-CE #120 IBL-C1 Done (55909dd2 / d2492fc4+5d89b606). Prior NON-CE #118 IBL-B6 Done (8722f4f1 / 8e8c62e6).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: cleared (prior NON-CE #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done; prior NON-CE #139 PD-7 Done b966874a; OUT of IBL-E; pursue docs ADR-0069 + procurement; Accepted ≠ embedding Done; prior #138 PD-6 Done 73ab03cb; related CE-G06 #76 / IBL-A6 #112; prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068 Accepted; Wave IBL-D Done; Wave IBL-C Done; Wave IBL-B In Progress B7 Blocked residual; Wave IBL-A Done; residual Blocked = #119 B7 — do not activate). Do NOT claim program Done (CE-O02 deferred per D5).",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-20T05:50:00.000Z"
+        "updatedAt": "2026-07-20T06:40:00.000Z"
       },
       {
         "id": "54",
@@ -1924,27 +1924,27 @@
       {
         "id": "140",
         "title": "CD-3: CD-HARD-T06 audit list/export E2E + wave closeout",
-        "description": "Wave CD-3 sole-active leaf: CD-HARD-T06 list audit/export E2E (maps CD-BDD-T08 / audit-admin-query-journey.md BDD-CDP-AUDIT-001/002) + wave closeout when T06 Done. Note: CD-E2E-T11 already Done historically (merge 6e3f825) for audit admin query/export — T06 is CD-3 hardening re-evidence / residual closeout, not a greenfield audit console. Slice cdp-cd3-hard-t06. Placement ISOLATED. Do NOT invent scope beyond T06 + wave status flip. Do NOT flip #3b/#5a GO. Formal phase None.",
-        "details": "ACTIVATED 2026-07-20 (plan-orchestrator stage 2). Slice id: cdp-cd3-hard-t06. Status: in-progress (sole-active NON-CE delivery leaf). Worktree D:/working/DGE-cdp-cd3-hard-t06 · feat/cdp-cd3-hard-t06 (base origin/main). Batch solo (member_task_ids: [\"140\"]; proposed_slice_id: cdp-cd3-hard-t06). Wave CD-3 → In Progress (was Not Started / recommend only; user B4 activate). CD-HARD-T01–T05 Done (via LRP/OPS); CD-HARD-T06 was Not Started. Scope: re-evidence / residual closeout of list audit/export E2E per CD-BDD-T08 and docs/behavior/audit-admin-query-journey.md (BDD-CDP-AUDIT-001/002 ready). Historical: CD-E2E-T11 Done 2026-07-11 (slice cdp-e2e-t11-audit; merge 6e3f825) — do not reinvent audit admin; harden/re-prove as CD-3 exit residual. Owners: e2e-test-engineer (+ e2e-uiux-reviewer). frontend_ui_in_scope=true (E2E/UIUX mandatory). Formal phase remains None. Umbrella #53/#106 registry-only. #119 remains Blocked. Prior #139 PD-7 remains done. Do NOT flip checklist #3b/#5a GO. Do NOT claim go-live / CDP program Done until T06 gates + wave exit. Do NOT expand beyond T06 + CD-3 wave status flip.",
+        "description": "DONE 2026-07-20. Slice cdp-cd3-hard-t06 merged to main (b933965c; worktree removed). CD-HARD-T06 audit list/export E2E re-evidence (reuse CDP-E2E-T11). Wave CD-3 Done (T01–T06). Gates: E2E 2/2; UIUX PASS_WITH_NOTES; arch PASS_WITH_NOTES merge_go; Stage 5 DEPLOY_OK. Residual OUT (LR-C8): AUDIT_ADMIN tour→dashboard Forbidden. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim go-live. B3 CE-O02 remains product-blocked (5bc1fe2d — not Done).",
+        "details": "Completed 2026-07-20 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: cdp-cd3-hard-t06. Placement was ISOLATED D:/working/DGE-cdp-cd3-hard-t06 · feat/cdp-cd3-hard-t06 (removed). Merge b933965c. Delivered: CDP-E2E-T11 re-evidence harness + CD-HARD-T06 functional manifest + behavior pointer cd-hard-t06-audit-export-reevidence.md. Wave CD-3 → Done (CD-HARD-T01–T06). Sole-active cleared. Evidence: frontend/e2e/evidence/CD-HARD-T06-functional-manifest.md. Do NOT: claim production go-live; flip #3b/#5a GO; claim CE-O02 Done; invent LR-C8 product fix.",
         "testStrategy": "1. BDD ready confirmed (docs/behavior/audit-admin-query-journey.md; BDD-CDP-AUDIT-001/002). 2. Playwright docker --workers=1 functional covering list filter + export download (reuse/extend CDP-E2E-T11-audit-query.spec.ts or CD-HARD-T06 harness as needed). 3. UIUX manifest PASS Critical=0. 4. FE lint/type-check/test/build GREEN when UI touched; BE mvn verify N/A unless backend changes. 5. Stage 5/10 DEPLOY_OK via docker-deploy-queue. 6. Wave CD-3 Done only when CD-HARD-T01–T06 all Done + exit gate; this leaf closes T06 + wave. 7. Do NOT flip #3b/#5a GO; do NOT invent scope beyond T06; Done only after stage 11 merge + MAIN doc-sync.",
         "priority": "high",
         "dependencies": [
           "47"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T06:10:00.000Z"
+        "updatedAt": "2026-07-20T06:40:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-20T06:10:00.000Z",
+      "lastModified": "2026-07-20T06:40:00.000Z",
       "taskCount": 140,
-      "completedCount": 136,
+      "completedCount": 137,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-20T06:10:00.000Z"
+      "updated": "2026-07-20T06:40:00.000Z"
     }
   }
 }
