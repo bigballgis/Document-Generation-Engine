@@ -75,6 +75,23 @@ final class PublishGateCheckItemContentSupport {
         );
     }
 
+    PublishGateItemView contentModuleEffectiveNotStartedItem(UUID versionId) {
+        var notStarted = contentModuleReferenceService.evaluateEffectiveNotStarted(versionId);
+        boolean blocking = notStarted.blocking();
+        String detail = blocking
+                ? String.join(";", notStarted.notStartedDetails())
+                : "notStartedReferences=0";
+        return new PublishGateItemView(
+                PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_NOT_STARTED,
+                !blocking,
+                blocking,
+                blocking
+                        ? "api.publishGate.contentModuleEffectiveNotStarted.blocked"
+                        : "api.publishGate.contentModuleEffectiveNotStarted.ready",
+                detail
+        );
+    }
+
     PublishGateItemView contentModuleLocaleMismatchItem(UUID versionId) {
         var mismatch = contentModuleReferenceService.evaluateLocaleMismatch(versionId);
         boolean blocking = mismatch != null && mismatch.blocking();

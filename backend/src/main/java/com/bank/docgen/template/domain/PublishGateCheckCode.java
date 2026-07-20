@@ -12,6 +12,8 @@ public enum PublishGateCheckCode {
     API_POLICY,
     CONTENT_MODULE_REFERENCES,
     CONTENT_MODULE_EFFECTIVE_EXPIRED,
+    /** IBL-E5 / ADR-0066: pinned content-module version effectiveFrom not yet reached. */
+    CONTENT_MODULE_EFFECTIVE_NOT_STARTED,
     /** IBL-E1 / ADR-0061: pinned content-module locale incompatible with template locale. */
     CONTENT_MODULE_LOCALE_MISMATCH,
     /** IBL-E2 / ADR-0063: inclusion rule referenceKey not declared on the version. */

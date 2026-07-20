@@ -226,6 +226,19 @@ Runtime `context` whitelist adds optional `legalEntityCode` ([ADR-0065](../adr/t
 
 Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `Context`, `DocumentBrandView`, `LegalEntityView`, `ErrorCode`, template `allowedDocumentBrandCodes`, metadata `resolvedLegalEntityCode` / `resolvedDocumentBrandCode`. Companion: [contract-outline.md](contract-outline.md) IBL-E4 bullet + context whitelist table. Behavior SoT: [ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)（BDD-IBL-E4-001…017）. `frontend_ui_in_scope=true`. Accepted ADR ≠ impl Done; formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
 
+### Future `effectiveFrom` publish gate + bulk re-pin (IBL-E5)
+
+Publish hard gate for not-yet-effective CM pins + group-scoped bulk re-pin tooling ([ADR-0066](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)). Amends CE-K08 “future effectiveFrom does not block”. Management API-first (`frontend_ui_in_scope=false`).
+
+| Condition | Surface | Stable code |
+| --- | --- | --- |
+| Pinned CM `effectiveFrom` in the future | publish gate | `CONTENT_MODULE_EFFECTIVE_NOT_STARTED` |
+| Pinned CM `effectiveTo` expired | publish gate | `CONTENT_MODULE_EFFECTIVE_EXPIRED` (unchanged) |
+| Missing `dryRun` / invalid target XOR | 400/422 | validation / `BULK_REPIN_TARGET_INVALID` (per-item on apply preview) |
+| Unauthorized caller | 403/404 | existing `authorTemplates` convention |
+
+Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `PublishGateCheckCode`, `BulkRepinContentModuleReferencesRequest`, `BulkRepinContentModuleReferencesResultView`, `ErrorCode`. Path: `POST /api/management/v1/content-module-references/bulk-repin`. Companion: [contract-outline.md](contract-outline.md) IBL-E5 bullet. Behavior SoT: [ibl-e5-effectivefrom-bulk-repin.md](../behavior/ibl-e5-effectivefrom-bulk-repin.md)（BDD-IBL-E5-001…017）. Accepted ADR ≠ E5 impl Done; formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
+
 ### Full-library export (CE-E03)
 
 Management full-library export in [openapi-v1.yaml](openapi-v1.yaml) (`exportLibraryTemplates`) / [contract-outline.md](contract-outline.md) «模板导出/导入契约» CE-E03:

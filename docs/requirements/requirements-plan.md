@@ -393,7 +393,7 @@
 - v1 支持的引用节点包括条款或内容模块引用、图片引用、二维码/条码引用、签章/盖章引用、附件清单引用和样式引用。
 - v1 明确不支持任意 HTML/CSS、脚本、绝对定位、浮动、复杂分栏、在线任意修改页眉页脚/页边距/全局版式，以及未被平台模型识别的 Word 脏样式进入发布版本。
 - Word 或 HTML 粘贴内容必须清洗并转换为受控结构化节点后才能进入模板；不可识别内容不得作为原始格式直接进入发布契约，应按风险进入阻断项或警告项。
-- 已确认发布阻断项包括不支持节点、变量引用缺失、样式引用缺失、条款或内容模块引用缺失、**引用条款/内容模块版本已过 `effectiveTo`（CE-K08）**、表格组件引用缺失、母版锚点引用缺失、编号断裂且影响条款语义、表格无法可靠渲染、签章/盖章位置异常和 PDF 转换失败。
+- 已确认发布阻断项包括不支持节点、变量引用缺失、样式引用缺失、条款或内容模块引用缺失、**引用条款/内容模块版本已过 `effectiveTo`（CE-K08）**、**引用条款/内容模块版本 `effectiveFrom` 未到（IBL-E5）**、表格组件引用缺失、母版锚点引用缺失、编号断裂且影响条款语义、表格无法可靠渲染、签章/盖章位置异常和 PDF 转换失败。
 - **LR-A4（2026-07-10 确认）：**「不支持节点」= 未知 `type` ∪ **writer-unsupported**（矩阵已声明但当前无 DOCX 发射）。LR-A4 交付时 set = `{ qrBarcodeRef, attachmentListRef }`；对此类节点 **发布门禁硬阻断**；预览/运行时 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。完整 writer 另任务（**CE-K06b** 移除 `qrBarcodeRef`；**CE-K06c** 移除 `attachmentListRef`）。规格：[BDD-LRP-A4-FAIL-CLOSED-001](../behavior/lrp-a4-fail-closed-unsupported-nodes.md)。
 - 警告项用于提示不直接破坏文档语义或合规结果的较低风险保真问题；v1 不设置静默忽略阈值，任一已确认低风险保真问题都必须形成警告。
 - 警告项不会仅因数量自动阻断发布；如果问题影响文档语义、合规结果、签章/盖章、二维码/条码、附件完整性、变量或引用合法性、关键表格可读性或条款编号语义，则应归为阻断项。
@@ -472,7 +472,8 @@
 - 条款或内容模块停用或废弃后，已发布且已锁定该模块版本的模板仍按发布时锁定内容生成；模块停用或废弃只阻止后续新的模板发布候选引用该模块版本。
 - 如果业务需要立即停止使用包含问题条款或内容模块的已发布模板，必须通过停用对应模板或发布版本来阻断生成和 API 调用。
 - 条款或内容模块停用或废弃前的影响分析必须覆盖引用模板、引用发布版本、default 路由影响、近期调用摘要、是否需要停用模板或发布版本，以及可替代模块版本建议。
-- **CE-K08（2026-07-15 确认 / BDD `ready`）：** 内容模块**版本**可选法务元数据：`jurisdiction`、`effectiveFrom`、`effectiveTo`、`legalReviewRef`（均可选；日期为 UTC `date-time`）。仅草稿可写；`effectiveFrom`/`effectiveTo` 皆非空时须 `effectiveFrom <= effectiveTo`。`GET /api/management/v1/content-modules` 支持按上述字段筛选（匹配 catalog filter version：优先最新 `APPROVED`+`ACTIVE`，否则最新版本）。模板发布门禁新增硬项 `CONTENT_MODULE_EFFECTIVE_EXPIRED`：任一引用版本 `effectiveTo != null && utcNow.isAfter(effectiveTo)` 则阻断发布；空 `effectiveTo` 或相等时刻不过期；未来 `effectiveFrom` 不阻断；已发布锁定版本运行期不因事后过期失败。规格：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md) `BDD-CE-K08-LM-001…015`。
+- **CE-K08（2026-07-15 确认 / BDD `ready`；IBL-E5 修正 2026-07-20）：** 内容模块**版本**可选法务元数据：`jurisdiction`、`effectiveFrom`、`effectiveTo`、`legalReviewRef`（均可选；日期为 UTC `date-time`）。仅草稿可写；`effectiveFrom`/`effectiveTo` 皆非空时须 `effectiveFrom <= effectiveTo`。`GET /api/management/v1/content-modules` 支持按上述字段筛选（匹配 catalog filter version：优先最新 `APPROVED`+`ACTIVE`，否则最新版本）。模板发布门禁硬项 `CONTENT_MODULE_EFFECTIVE_EXPIRED`：任一引用版本 `effectiveTo != null && utcNow.isAfter(effectiveTo)` 则阻断发布；空 `effectiveTo` 或相等时刻不过期；已发布锁定版本运行期不因事后过期失败。**IBL-E5 / ADR-0066：** 未来 `effectiveFrom`（`effectiveFrom != null && utcNow.isBefore(effectiveFrom)`）由正交硬项 `CONTENT_MODULE_EFFECTIVE_NOT_STARTED` 阻断（取代「未来 effectiveFrom 不阻断」）。规格：[ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md) `BDD-CE-K08-LM-001…015`；[ibl-e5-effectivefrom-bulk-repin.md](../behavior/ibl-e5-effectivefrom-bulk-repin.md) `BDD-IBL-E5-001…017`。
+- **IBL-E5（2026-07-20 确认 / BDD `ready` / [ADR-0066 Accepted](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)）：** 发布门禁 `CONTENT_MODULE_EFFECTIVE_NOT_STARTED` + 管理 API `POST /api/management/v1/content-module-references/bulk-repin`（必填 `dryRun`；组范围草稿钉扎批量改钉；审计含 dry-run）。复用 `authorTemplates`；无新角色；无 `SCHEDULED` 发布生命周期；`frontend_ui_in_scope=false`。Accepted ADR ≠ E5 impl Done；**不**翻转 #3b/#5a。
 - **CE-G05（2026-07-17 确认 / BDD `ready`）：** 条款目录支持可选 `searchMode=FULL_TEXT`：对 catalog-filter 版本 `content_structure_json` 的 PostgreSQL tsvector（config `simple`）做正文全文检索；缺省 `NAME` 保持 LR-C5 ILIKE（不扫正文）。提供只读 `GET …/content-modules/{moduleId}/where-used`（授权范围内引用模板；无条款全文）。权限与 §5.1 目录浏览一致（无新 capability；`TEMPLATE_TESTER` 403）。完整 Given/When/Then：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md) `BDD-CE-G05-011…017`。
 
 ## 已确认：模板状态
@@ -536,6 +537,7 @@
 - 发布前检查发现阻断项时，模板不得发布。
 - 发布前检查、测试记录、生成预览、变更差异摘要和审批摘要需要纳入审计或可追溯记录；不得记录模板变量测试值中的敏感明文，敏感内容按审计脱敏规则处理。
 - **CE-K08（2026-07-15）：** 发布前检查清单必须包含「引用条款/内容模块版本已过 `effectiveTo`」硬阻断（`PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED`），与 `CONTENT_MODULE_REFERENCES` 正交。见 [ce-k08-clause-legal-metadata.md](../behavior/ce-k08-clause-legal-metadata.md)。
+- **IBL-E5（2026-07-20 / ADR-0066）：** 发布前检查清单必须包含「引用条款/内容模块版本 `effectiveFrom` 未到」硬阻断（`PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_NOT_STARTED`），与 `CONTENT_MODULE_EFFECTIVE_EXPIRED` / `CONTENT_MODULE_REFERENCES` 正交。见 [ibl-e5-effectivefrom-bulk-repin.md](../behavior/ibl-e5-effectivefrom-bulk-repin.md)。
 
 ## 已确认：模板版本
 

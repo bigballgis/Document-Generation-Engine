@@ -243,4 +243,12 @@ public class ContentModuleVersionEntity {
     public boolean isEffectiveExpired(Instant utcNow) {
         return effectiveTo != null && utcNow.isAfter(effectiveTo);
     }
+
+    /**
+     * IBL-E5 / E5-C2: not started when effectiveFrom is set and utcNow is strictly before it.
+     * Equal instant is already effective (same edge policy as {@link #isEffectiveExpired}).
+     */
+    public boolean isEffectiveNotStarted(Instant utcNow) {
+        return effectiveFrom != null && utcNow.isBefore(effectiveFrom);
+    }
 }

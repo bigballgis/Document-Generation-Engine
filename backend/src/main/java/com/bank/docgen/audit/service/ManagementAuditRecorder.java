@@ -5,6 +5,8 @@ import com.bank.docgen.audit.api.PolicyUpdateAuditDetail;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemTriggerType;
 import com.bank.docgen.legalhold.persistence.LegalHoldEntity;
+import com.bank.docgen.template.api.BulkRepinItemView;
+import com.bank.docgen.template.api.BulkRepinSummaryView;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import java.time.LocalDate;
 import java.util.List;
@@ -426,6 +428,33 @@ public class ManagementAuditRecorder {
         contentModuleAuditRecorder.recordContentModuleLifecycleOperation(
                 moduleId, groupCode, moduleCode, operation, semanticVersion, lifecycleState,
                 actorUsername, actorSummary
+        );
+    }
+
+    @Transactional
+    public void recordContentModuleBulkRepin(
+            UUID moduleId,
+            String groupCode,
+            String actorUsername,
+            String actorSummary,
+            boolean dryRun,
+            String fromSemanticVersion,
+            String toSemanticVersion,
+            boolean useLatestApproved,
+            BulkRepinSummaryView summary,
+            List<BulkRepinItemView> items
+    ) {
+        contentModuleAuditRecorder.recordContentModuleBulkRepin(
+                moduleId,
+                groupCode,
+                actorUsername,
+                actorSummary,
+                dryRun,
+                fromSemanticVersion,
+                toSemanticVersion,
+                useLatestApproved,
+                summary,
+                items
         );
     }
 

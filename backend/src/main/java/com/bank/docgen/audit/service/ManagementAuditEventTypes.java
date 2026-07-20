@@ -30,6 +30,8 @@ public final class ManagementAuditEventTypes {
     public static final String CONTENT_MODULE_SHARED_GROUP_CODES_UPDATED = "CONTENT_MODULE_SHARED_GROUP_CODES_UPDATED";
     public static final String CONTENT_MODULE_REVIEW_TRANSITION = "CONTENT_MODULE_REVIEW_TRANSITION";
     public static final String CONTENT_MODULE_LIFECYCLE_OPERATION = "CONTENT_MODULE_LIFECYCLE_OPERATION";
+    /** IBL-E5 / ADR-0066: bulk re-pin of template content-module references (includes dry-run). */
+    public static final String CONTENT_MODULE_BULK_REPIN = "CONTENT_MODULE_BULK_REPIN";
     public static final String TEMPLATE_EXPORTED = "TEMPLATE_EXPORTED";
     public static final String TEMPLATE_IMPORTED = "TEMPLATE_IMPORTED";
     public static final String TEMPLATE_IMPORT_DRY_RUN = "TEMPLATE_IMPORT_DRY_RUN";

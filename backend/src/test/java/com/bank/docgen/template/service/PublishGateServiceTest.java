@@ -161,6 +161,9 @@ class PublishGateServiceTest {
         lenient().when(contentModuleReferenceService.evaluateEffectiveExpiry(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView(
                         false, 0, 0, List.of()));
+        lenient().when(contentModuleReferenceService.evaluateEffectiveNotStarted(versionId))
+                .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveNotStartedSummaryView(
+                        false, 0, 0, List.of()));
         lenient().when(contentModuleReferenceService.evaluateLocaleMismatch(any()))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleLocaleMismatchSummaryView(
                         false, 0, 0, List.of()));
@@ -351,6 +354,39 @@ class PublishGateServiceTest {
                     assertThat(item.ready()).isFalse();
                     assertThat(item.messageKey()).isEqualTo("api.publishGate.contentModuleEffectiveExpired.blocked");
                     assertThat(item.summary()).contains("MOD-A@1.0.0");
+                });
+        assertThatThrownBy(() -> service.assertReady(templateId, admin))
+                .isInstanceOf(TemplateValidationException.class);
+    }
+
+    @Test
+    void publishGate_blocksContentModuleEffectiveNotStarted_e5001() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        when(contentModuleReferenceService.evaluateEffectiveNotStarted(versionId))
+                .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveNotStartedSummaryView(
+                        true,
+                        1,
+                        1,
+                        List.of("CLAUSE-A MOD-A@1.0.0 effectiveFrom=2027-01-01T00:00:00Z")
+                ));
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.ready()).isFalse();
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_NOT_STARTED)
+                .findFirst()
+                .orElseThrow())
+                .satisfies(item -> {
+                    assertThat(item.blocker()).isTrue();
+                    assertThat(item.ready()).isFalse();
+                    assertThat(item.messageKey())
+                            .isEqualTo("api.publishGate.contentModuleEffectiveNotStarted.blocked");
+                    assertThat(item.summary()).contains("CLAUSE-A");
+                    assertThat(item.summary()).contains("effectiveFrom=");
+                    assertThat(item.checkCode())
+                            .isNotEqualTo(PublishGateCheckCode.CONTENT_MODULE_EFFECTIVE_EXPIRED);
                 });
         assertThatThrownBy(() -> service.assertReady(templateId, admin))
                 .isInstanceOf(TemplateValidationException.class);
@@ -641,6 +677,9 @@ class PublishGateServiceTest {
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 0, 0));
         when(contentModuleReferenceService.evaluateEffectiveExpiry(publishedVersionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView(
+                        false, 0, 0, List.of()));
+        when(contentModuleReferenceService.evaluateEffectiveNotStarted(publishedVersionId))
+                .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveNotStartedSummaryView(
                         false, 0, 0, List.of()));
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(publishedVersionId))
                 .thenReturn(List.of());

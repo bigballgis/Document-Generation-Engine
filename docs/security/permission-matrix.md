@@ -18,6 +18,7 @@
 - [PRR-D01c Dashboard summary API](../behavior/prod-dashboard-summary-api.md)（BDD-PRR-D01C；#136 — 无新 capability；会话认证 + catalog 同款 group-scope；§13.1.3）
 - [IBL-E3 法务→合规审批矩阵](../behavior/ibl-e3-legal-approval-matrix.md)（BDD-IBL-E3；#130 — 新角色 `LEGAL_REVIEWER` + capability `decideLegalApprovals`；[ADR-0064 Accepted](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)）
 - [IBL-E4 法人实体文档品牌变体](../behavior/ibl-e4-entity-document-brands.md)（BDD-IBL-E4；#131 — **无新角色**；目录写 = 管理员；allow-list 写 = 既有模板编排写边界；[ADR-0065 Accepted](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)）
+- [IBL-E5 effectiveFrom 发布门禁 + bulk re-pin](../behavior/ibl-e5-effectivefrom-bulk-repin.md)（BDD-IBL-E5；#132 — **无新角色 / capability**；bulk-repin 与发布门禁评估复用 `authorTemplates`；[ADR-0066 Accepted](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)）
 
 ## 2. 权限设计原则
 
@@ -105,6 +106,7 @@
 | 完成模板年检 / 查看年到期待办（CE-G05） | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | **无新 capability bit。** 复用 `authorTemplates`（与 CE-U07 作者工作流同级）：组范围模板访问 **且** 具备编排权。列表 `GET …/author-workflow/annual-review-due-tasks`；完成 `POST …/templates/{templateId}/annual-review/complete`。测试人员 / 审批人员默认不可见待办、不可 complete（403）。不新建独立治理路由或角色。行为：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。 |
 | 配置审批矩阵模式 `approvalMatrixMode`（IBL-E3） | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 包级 `SINGLE_TRACK` \| `LEGAL_THEN_COMPLIANCE`；仅 `DRAFT` 或 `APPROVAL`+`PENDING_SUBMIT` 可写；进入 LEGAL/COMPLIANCE/`PENDING_DECISION`/待发布/已发布线后 **422** `APPROVAL_MATRIX_MODE_LOCKED`。默认与迁移值均为 `SINGLE_TRACK`。[ADR-0064](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)。测试/审批/法务角色无配置权。多级阶段判定见 §5.2。 |
 | 配置模板文档品牌 allow-list `allowedDocumentBrandCodes`（IBL-E4） | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 包级可选字符串数组；空/缺省 = 允许组内任一 ACTIVE DocumentBrand。可写窗口对齐既有包元数据草稿规则。解析品牌不在名单 → runtime **422** `DOCUMENT_BRAND_NOT_ALLOWED`。[ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)。测试/审批/法务角色无配置权。目录维护见 §5.3。 |
+| 批量改钉内容模块引用 bulk-repin（IBL-E5） | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | **无新 capability bit。** `POST …/content-module-references/bulk-repin`（dry-run 与 apply 同一端点）复用 `authorTemplates` 组边界；仅草稿可写钉扎；锁定/已发布跳过。测试/审批/法务角色无调用权（403/404 惯例）。[ADR-0066](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)。 |
 
 ### 5.1 条款或内容模块权限矩阵
 

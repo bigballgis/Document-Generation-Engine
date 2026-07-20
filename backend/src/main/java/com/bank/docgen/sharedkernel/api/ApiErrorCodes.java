@@ -179,6 +179,9 @@ public final class ApiErrorCodes {
     /** IBL-E4 / ADR-0065: document brand / legal entity code format invalid. */
     public static final String DOCUMENT_BRAND_CODE_INVALID = "DOCUMENT_BRAND_CODE_INVALID";
 
+    /** IBL-E5 / ADR-0066: bulk re-pin target version missing, wrong module, or not referencable. */
+    public static final String BULK_REPIN_TARGET_INVALID = "BULK_REPIN_TARGET_INVALID";
+
     private ApiErrorCodes() {
     }
 }

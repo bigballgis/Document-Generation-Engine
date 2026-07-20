@@ -1,0 +1,24 @@
+{
+  "result": "DEPLOY_OK",
+  "when": "2026-07-20T08:59:52+08:00",
+  "slice": "ibl-e5-effectivefrom-bulk-repin",
+  "worktree": "D:/working/DGE-ibl-e5-effectivefrom-bulk-repin",
+  "branch": "feat/ibl-e5-effectivefrom-bulk-repin",
+  "git_tip": "d9f02036f81622090ef5cb1742996b405ff13d22",
+  "mode": "full",
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"IBL-E5 stage10 full deploy\"",
+  "compose_project": "documentgenerationengine",
+  "frontend_ui_in_scope": false,
+  "healthz_8080": {
+    "status_code": 200,
+    "body": "{\"status\":\"UP\"}"
+  },
+  "frontend_4173": {
+    "note": "captured optionally; healthz sufficient per frontend_ui_in_scope=false",
+    "status_code": 200
+  },
+  "images": {
+    "backend": "sha256:eb8f23a15ea10f4607022647ef86168beaaeaf7f156c2eec215abf0d47adc3ae",
+    "frontend": "sha256:2e7700e777a71ff5a62a1ce712988fd82a742e380a0988817fd3832edb0dd162"
+  }
+}

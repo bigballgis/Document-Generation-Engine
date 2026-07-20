@@ -9,6 +9,7 @@ import com.bank.docgen.contentmodule.service.ContentModuleAccessService;
 import com.bank.docgen.sharedkernel.locale.LocaleLanguageCompatibility;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView;
+import com.bank.docgen.template.api.ContentModuleEffectiveNotStartedSummaryView;
 import com.bank.docgen.template.api.ContentModuleLocaleMismatchSummaryView;
 import com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
@@ -236,6 +237,45 @@ public class TemplateContentModuleReferenceService {
                 expiredDetails.size(),
                 resolved,
                 expiredDetails
+        );
+    }
+
+    /**
+     * IBL-E5: evaluate referenced content-module versions whose effectiveFrom is strictly after utcNow.
+     * Orthogonal to {@link #evaluateEffectiveExpiry} and CONTENT_MODULE_REFERENCES validity.
+     */
+    @Transactional(readOnly = true)
+    public ContentModuleEffectiveNotStartedSummaryView evaluateEffectiveNotStarted(UUID templateVersionId) {
+        return evaluateEffectiveNotStarted(templateVersionId, Instant.now());
+    }
+
+    @Transactional(readOnly = true)
+    public ContentModuleEffectiveNotStartedSummaryView evaluateEffectiveNotStarted(
+            UUID templateVersionId,
+            Instant utcNow
+    ) {
+        List<TemplateContentModuleReferenceEntity> references =
+                referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(templateVersionId);
+        List<String> notStartedDetails = new ArrayList<>();
+        int resolved = 0;
+        for (TemplateContentModuleReferenceEntity reference : references) {
+            ContentModuleVersionEntity version = contentModuleVersionRepository
+                    .findById(reference.getContentModuleVersionId())
+                    .orElse(null);
+            if (version == null) {
+                continue;
+            }
+            resolved++;
+            if (!version.isEffectiveNotStarted(utcNow)) {
+                continue;
+            }
+            notStartedDetails.add(referenceSupport.formatNotStartedEffectiveDetail(reference, version));
+        }
+        return new ContentModuleEffectiveNotStartedSummaryView(
+                !notStartedDetails.isEmpty(),
+                notStartedDetails.size(),
+                resolved,
+                notStartedDetails
         );
     }
 

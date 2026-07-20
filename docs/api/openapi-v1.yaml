@@ -1785,6 +1785,50 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/content-module-references/bulk-repin:
+    post:
+      tags: [Admin]
+      operationId: bulkRepinContentModuleReferences
+      summary: Bulk re-pin content-module references across draft templates (IBL-E5)
+      description: >-
+        ADR-0066 / IBL-E5. Group-scoped mass re-pin of draft template content-module
+        pins for one `contentModuleId`. Requires `authorTemplates` (no new role /
+        capability). `dryRun` is required: `true` previews with zero pin persistence;
+        `false` applies via the same validation as single-template upsertReference.
+        Target selection is `toSemanticVersion` XOR `useLatestApproved=true`.
+        Published/locked pins → SKIPPED_LOCKED; already at target →
+        SKIPPED_ALREADY_AT_TARGET; no matching pin → SKIPPED_NO_MATCH; invalid
+        target → FAILED with `BULK_REPIN_TARGET_INVALID`. Every call writes a
+        management audit event (`CONTENT_MODULE_BULK_REPIN`), including dry-run.
+        Behavior SoT: docs/behavior/ibl-e5-effectivefrom-bulk-repin.md
+        (BDD-IBL-E5-008…015). `frontend_ui_in_scope=false`.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRepinContentModuleReferencesRequest'
+      responses:
+        '200':
+          description: Bulk re-pin preview or apply result (partial success allowed).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkRepinContentModuleReferencesResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/author-workflow/annual-review-due-tasks:
     get:
       tags: [Admin]
@@ -7724,6 +7768,7 @@ components:
         - API_POLICY
         - CONTENT_MODULE_REFERENCES
         - CONTENT_MODULE_EFFECTIVE_EXPIRED
+        - CONTENT_MODULE_EFFECTIVE_NOT_STARTED
         - CONTENT_MODULE_LOCALE_MISMATCH
         - COMPOSITION_INCLUSION_REFERENCE_INVALID
         - UNSUPPORTED_STRUCTURED_NODES
@@ -10099,6 +10144,146 @@ components:
         updatedAt:
           type: string
           format: date-time
+    BulkRepinContentModuleReferencesRequest:
+      type: object
+      additionalProperties: false
+      description: >-
+        IBL-E5 / ADR-0066 bulk re-pin request. Exactly one of `toSemanticVersion`
+        or `useLatestApproved=true` must select the target. Omitting `dryRun` is
+        a validation failure (400/422).
+      required: [contentModuleId, dryRun]
+      properties:
+        groupCode:
+          type: string
+          description: >-
+            Optional when the authorized group context is unambiguous from the
+            session; required when the caller must disambiguate among multiple
+            authorized groups.
+        contentModuleId:
+          type: string
+          format: uuid
+        fromSemanticVersion:
+          type: string
+          description: Optional filter — only pins currently at this semantic version.
+        toSemanticVersion:
+          type: string
+          description: Target pin semantic version. Mutually exclusive with useLatestApproved=true.
+        useLatestApproved:
+          type: boolean
+          description: >-
+            When true, retarget to the latest referencable APPROVED+ACTIVE version
+            of contentModuleId. Mutually exclusive with toSemanticVersion.
+        templateIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Optional narrow set within the caller's authorTemplates visibility.
+        dryRun:
+          type: boolean
+          description: Required. true = preview only (zero pin persistence); false = apply.
+    BulkRepinItemStatus:
+      type: string
+      description: Per-template-version outcome for bulk re-pin (IBL-E5).
+      enum:
+        - WOULD_APPLY
+        - APPLIED
+        - SKIPPED_LOCKED
+        - SKIPPED_ALREADY_AT_TARGET
+        - SKIPPED_NO_MATCH
+        - FAILED
+    BulkRepinItemView:
+      type: object
+      additionalProperties: false
+      required: [templateId, status]
+      properties:
+        templateId:
+          type: string
+          format: uuid
+        templateVersionId:
+          type: string
+          format: uuid
+        referenceKey:
+          type: string
+        beforeSemanticVersion:
+          type: string
+          nullable: true
+        afterSemanticVersion:
+          type: string
+          nullable: true
+          description: Preview/apply target pin; null when skipped with no target resolution.
+        status:
+          $ref: '#/components/schemas/BulkRepinItemStatus'
+        errorCode:
+          type: string
+          nullable: true
+          description: >-
+            Present when status=FAILED. Stable codes include BULK_REPIN_TARGET_INVALID.
+    BulkRepinSummaryView:
+      type: object
+      additionalProperties: false
+      required:
+        - dryRun
+        - wouldApplyCount
+        - appliedCount
+        - skippedLockedCount
+        - skippedAlreadyAtTargetCount
+        - skippedNoMatchCount
+        - failedCount
+      properties:
+        dryRun:
+          type: boolean
+        wouldApplyCount:
+          type: integer
+          minimum: 0
+        appliedCount:
+          type: integer
+          minimum: 0
+        skippedLockedCount:
+          type: integer
+          minimum: 0
+        skippedAlreadyAtTargetCount:
+          type: integer
+          minimum: 0
+        skippedNoMatchCount:
+          type: integer
+          minimum: 0
+        failedCount:
+          type: integer
+          minimum: 0
+    BulkRepinContentModuleReferencesResultView:
+      type: object
+      additionalProperties: false
+      required: [contentModuleId, summary, items]
+      properties:
+        contentModuleId:
+          type: string
+          format: uuid
+        groupCode:
+          type: string
+        fromSemanticVersion:
+          type: string
+          nullable: true
+        toSemanticVersion:
+          type: string
+          nullable: true
+        useLatestApproved:
+          type: boolean
+        summary:
+          $ref: '#/components/schemas/BulkRepinSummaryView'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkRepinItemView'
+    BulkRepinContentModuleReferencesResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/BulkRepinContentModuleReferencesResultView'
     AnnualReviewDueAuthorTaskView:
       type: object
       additionalProperties: false
@@ -12200,3 +12385,4 @@ components:
         - DOCUMENT_BRAND_INACTIVE
         - DOCUMENT_BRAND_NOT_ALLOWED
         - DOCUMENT_BRAND_UNKNOWN
+        - BULK_REPIN_TARGET_INVALID
