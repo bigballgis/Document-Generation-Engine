@@ -3701,6 +3701,336 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/document-brands:
+    get:
+      tags: [Admin]
+      operationId: listDocumentBrands
+      summary: List group-scoped DocumentBrand catalog entries (IBL-E4)
+      description: >-
+        ADR-0065 / IBL-E4. Returns DocumentBrand rows for an authorized group.
+        Orthogonal to UI BrandPreset (REDBC/GREENBC). Read access for template
+        authors selecting allow-list / entity bind targets; writes require admin.
+      parameters:
+        - name: groupCode
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, ALL]
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: DocumentBrand page/list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentBrandListResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      tags: [Admin]
+      operationId: createDocumentBrand
+      summary: Create a DocumentBrand catalog entry (IBL-E4)
+      description: >-
+        ADR-0065. GROUP_ADMIN / GLOBAL_ADMIN only (group scope). Requires
+        logoObjectRef. documentBrandCode group-unique.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDocumentBrandRequest'
+      responses:
+        '201':
+          description: Created DocumentBrand.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentBrandResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/document-brands/{documentBrandCode}:
+    get:
+      tags: [Admin]
+      operationId: getDocumentBrand
+      summary: Get a DocumentBrand by code (IBL-E4)
+      parameters:
+        - name: documentBrandCode
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+        - name: groupCode
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: DocumentBrand detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentBrandResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    put:
+      tags: [Admin]
+      operationId: updateDocumentBrand
+      summary: Update a DocumentBrand catalog entry (IBL-E4)
+      parameters:
+        - name: documentBrandCode
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDocumentBrandRequest'
+      responses:
+        '200':
+          description: Updated DocumentBrand.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentBrandResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/legal-entities:
+    get:
+      tags: [Admin]
+      operationId: listLegalEntities
+      summary: List group-scoped LegalEntity catalog entries (IBL-E4)
+      description: >-
+        ADR-0065 / IBL-E4. Each entity binds exactly one documentBrandCode.
+      parameters:
+        - name: groupCode
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, ALL]
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: LegalEntity page/list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalEntityListResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      tags: [Admin]
+      operationId: createLegalEntity
+      summary: Create a LegalEntity with required documentBrandCode (IBL-E4)
+      description: >-
+        ADR-0065. GROUP_ADMIN / GLOBAL_ADMIN only. Missing documentBrandCode →
+        422. Unknown brand → 422 DOCUMENT_BRAND_UNKNOWN (or equivalent).
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLegalEntityRequest'
+      responses:
+        '201':
+          description: Created LegalEntity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalEntityResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/legal-entities/{legalEntityCode}:
+    get:
+      tags: [Admin]
+      operationId: getLegalEntity
+      summary: Get a LegalEntity by code (IBL-E4)
+      parameters:
+        - name: legalEntityCode
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+        - name: groupCode
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: LegalEntity detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalEntityResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    put:
+      tags: [Admin]
+      operationId: updateLegalEntity
+      summary: Update / re-bind LegalEntity document brand (IBL-E4)
+      description: >-
+        ADR-0065. Re-bind writes management audit (old→new documentBrandCode).
+      parameters:
+        - name: legalEntityCode
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLegalEntityRequest'
+      responses:
+        '200':
+          description: Updated LegalEntity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalEntityResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/groups/{groupCode}/default-legal-entity:
+    get:
+      tags: [Admin]
+      operationId: getGroupDefaultLegalEntity
+      summary: Get group defaultLegalEntityCode for document-brand fallback (IBL-E4)
+      parameters:
+        - name: groupCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Group default legal-entity setting.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupDefaultLegalEntityResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    put:
+      tags: [Admin]
+      operationId: putGroupDefaultLegalEntity
+      summary: Set group defaultLegalEntityCode (IBL-E4)
+      description: >-
+        ADR-0065. Admin-only. Null clears default (runtime omit → PLATFORM_DEFAULT
+        document brand). Invalid/inactive entity → 422.
+      parameters:
+        - name: groupCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutGroupDefaultLegalEntityRequest'
+      responses:
+        '200':
+          description: Persisted group default.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupDefaultLegalEntityResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/library/assets:
     get:
       tags: [Admin]
@@ -4939,10 +5269,12 @@ components:
       type: object
       additionalProperties: false
       description: >-
-        Safe whitelist (ADR-0013 amended by ADR-0063 / IBL-E2). Optional
-        `jurisdiction` / `product` plus existing `channel` may drive Composition
-        Inclusion Rules. Unknown fields → 400 REQUEST_BODY_INVALID. Must not
-        carry PII, amounts, or template variable plaintext.
+        Safe whitelist (ADR-0013 amended by ADR-0063 / IBL-E2 and ADR-0065 /
+        IBL-E4). Optional `jurisdiction` / `product` plus existing `channel` may
+        drive Composition Inclusion Rules. Optional `legalEntityCode` drives
+        document-brand resolve (not package selection; not UI chrome). Unknown
+        fields → 400 REQUEST_BODY_INVALID. Must not carry PII, amounts, or
+        template variable plaintext.
       properties:
         sourceSystem:
           type: string
@@ -4972,6 +5304,14 @@ components:
             Optional composition axis (ADR-0063). Same normalization/match rules
             as jurisdiction.
           maxLength: 128
+        legalEntityCode:
+          type: string
+          description: >-
+            Optional legal-entity axis (ADR-0065 / IBL-E4). Trim; blank → absent;
+            suggested maxLength 64; case-sensitive exact match against group
+            LegalEntity catalog. Resolves DocumentBrand for artifact brand slots.
+            Does not select template packages. Does not change UI BrandPreset.
+          maxLength: 64
     OutputOptions:
       type: object
       additionalProperties: false
@@ -5134,6 +5474,21 @@ components:
           type: string
         output:
           $ref: '#/components/schemas/OutputOptions'
+        resolvedLegalEntityCode:
+          type: string
+          nullable: true
+          description: >-
+            IBL-E4 / ADR-0065 — non-sensitive legal entity used for document-brand
+            resolve (request value or group default). Null when omitted and no
+            group default applied beyond PLATFORM_DEFAULT-only path without entity.
+          maxLength: 64
+        resolvedDocumentBrandCode:
+          type: string
+          nullable: true
+          description: >-
+            IBL-E4 / ADR-0065 — non-sensitive resolved DocumentBrand code applied
+            to artifact brand slots (never a UI REDBC/GREENBC chrome code).
+          maxLength: 64
     DownloadUrlResponse:
       type: object
       additionalProperties: false
@@ -5929,6 +6284,16 @@ components:
             CE-G06 — copy of template_version.master_file_hash (64-char lowercase
             hex SHA-256); null when snapshot id is null.
           pattern: '^[0-9a-f]{64}$'
+        resolvedLegalEntityCode:
+          type: string
+          nullable: true
+          description: IBL-E4 / ADR-0065 — non-sensitive legal entity on success path.
+          maxLength: 64
+        resolvedDocumentBrandCode:
+          type: string
+          nullable: true
+          description: IBL-E4 / ADR-0065 — non-sensitive resolved document brand on success path.
+          maxLength: 64
     ManagementInvocationAuditLinkHintView:
       type: object
       additionalProperties: false
@@ -9447,6 +9812,212 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/CompositionInclusionRuleView'
+    DocumentBrandStatus:
+      type: string
+      enum: [ACTIVE, INACTIVE]
+    DocumentBrandView:
+      type: object
+      additionalProperties: false
+      description: ADR-0065 / IBL-E4 group-scoped DocumentBrand (≠ UI BrandPreset).
+      required: [groupCode, documentBrandCode, displayName, status, logoObjectRef]
+      properties:
+        groupCode:
+          type: string
+        documentBrandCode:
+          type: string
+          maxLength: 64
+        displayName:
+          type: string
+          maxLength: 256
+        status:
+          $ref: '#/components/schemas/DocumentBrandStatus'
+        logoObjectRef:
+          type: string
+          description: Authorized object-storage reference (required).
+        defaultSealObjectRef:
+          type: string
+          nullable: true
+        letterheadLegalName:
+          type: string
+          nullable: true
+          maxLength: 256
+    CreateDocumentBrandRequest:
+      type: object
+      additionalProperties: false
+      required: [groupCode, documentBrandCode, displayName, logoObjectRef]
+      properties:
+        groupCode:
+          type: string
+        documentBrandCode:
+          type: string
+          maxLength: 64
+        displayName:
+          type: string
+          maxLength: 256
+        status:
+          $ref: '#/components/schemas/DocumentBrandStatus'
+        logoObjectRef:
+          type: string
+        defaultSealObjectRef:
+          type: string
+          nullable: true
+        letterheadLegalName:
+          type: string
+          nullable: true
+          maxLength: 256
+    UpdateDocumentBrandRequest:
+      type: object
+      additionalProperties: false
+      required: [groupCode]
+      properties:
+        groupCode:
+          type: string
+        displayName:
+          type: string
+          maxLength: 256
+        status:
+          $ref: '#/components/schemas/DocumentBrandStatus'
+        logoObjectRef:
+          type: string
+        defaultSealObjectRef:
+          type: string
+          nullable: true
+        letterheadLegalName:
+          type: string
+          nullable: true
+          maxLength: 256
+    DocumentBrandResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/DocumentBrandView'
+    DocumentBrandListResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [content]
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentBrandView'
+    LegalEntityView:
+      type: object
+      additionalProperties: false
+      description: ADR-0065 / IBL-E4 group-scoped LegalEntity with required brand bind.
+      required: [groupCode, legalEntityCode, displayName, status, documentBrandCode]
+      properties:
+        groupCode:
+          type: string
+        legalEntityCode:
+          type: string
+          maxLength: 64
+        displayName:
+          type: string
+          maxLength: 256
+        status:
+          $ref: '#/components/schemas/DocumentBrandStatus'
+        documentBrandCode:
+          type: string
+          maxLength: 64
+    CreateLegalEntityRequest:
+      type: object
+      additionalProperties: false
+      required: [groupCode, legalEntityCode, displayName, documentBrandCode]
+      properties:
+        groupCode:
+          type: string
+        legalEntityCode:
+          type: string
+          maxLength: 64
+        displayName:
+          type: string
+          maxLength: 256
+        status:
+          $ref: '#/components/schemas/DocumentBrandStatus'
+        documentBrandCode:
+          type: string
+          maxLength: 64
+    UpdateLegalEntityRequest:
+      type: object
+      additionalProperties: false
+      required: [groupCode]
+      properties:
+        groupCode:
+          type: string
+        displayName:
+          type: string
+          maxLength: 256
+        status:
+          $ref: '#/components/schemas/DocumentBrandStatus'
+        documentBrandCode:
+          type: string
+          maxLength: 64
+          description: Re-bind target; must reference same-group DocumentBrand.
+    LegalEntityResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/LegalEntityView'
+    LegalEntityListResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [content]
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/LegalEntityView'
+    PutGroupDefaultLegalEntityRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        defaultLegalEntityCode:
+          type: string
+          nullable: true
+          maxLength: 64
+          description: Null clears group default (omit path → PLATFORM_DEFAULT brand).
+    GroupDefaultLegalEntityView:
+      type: object
+      additionalProperties: false
+      required: [groupCode]
+      properties:
+        groupCode:
+          type: string
+        defaultLegalEntityCode:
+          type: string
+          nullable: true
+          maxLength: 64
+    GroupDefaultLegalEntityResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/GroupDefaultLegalEntityView'
     CompositionInclusionDecision:
       type: string
       enum: [INCLUDE, EXCLUDE]
@@ -10583,6 +11154,16 @@ components:
           format: uuid
           nullable: true
           description: IBL-E1 / ADR-0062 — optional locale-variant family id.
+        allowedDocumentBrandCodes:
+          type: array
+          description: >-
+            IBL-E4 / ADR-0065 — optional package allow-list of documentBrandCode
+            values. Empty/absent = any ACTIVE group DocumentBrand (incl.
+            PLATFORM_DEFAULT). Non-empty and resolved brand ∉ list → 422
+            DOCUMENT_BRAND_NOT_ALLOWED.
+          items:
+            type: string
+            maxLength: 64
     CreateTemplateRequest:
       type: object
       additionalProperties: false
@@ -10626,6 +11207,14 @@ components:
           description: >-
             IBL-E3 / ADR-0064 — optional package approval matrix mode on create.
             Omitted → SINGLE_TRACK.
+        allowedDocumentBrandCodes:
+          type: array
+          description: >-
+            IBL-E4 / ADR-0065 — optional package document-brand allow-list on
+            create. Omitted/empty = unrestricted ACTIVE brands.
+          items:
+            type: string
+            maxLength: 64
     UpdateTemplateRequest:
       type: object
       additionalProperties: false
@@ -10654,6 +11243,14 @@ components:
             IBL-E3 / ADR-0064 — package approval matrix mode. Writable only in
             DRAFT or APPROVAL+PENDING_SUBMIT; otherwise 422
             APPROVAL_MATRIX_MODE_LOCKED.
+        allowedDocumentBrandCodes:
+          type: array
+          description: >-
+            IBL-E4 / ADR-0065 — optional package document-brand allow-list.
+            Writable window aligns with package metadata draft rules.
+          items:
+            type: string
+            maxLength: 64
     TemplateSummaryResponse:
       type: object
       additionalProperties: false
@@ -10994,6 +11591,13 @@ components:
           format: uuid
           nullable: true
           description: IBL-E1 / ADR-0062 — optional locale-variant family id.
+        allowedDocumentBrandCodes:
+          type: array
+          description: >-
+            IBL-E4 / ADR-0065 — optional package document-brand allow-list echo.
+          items:
+            type: string
+            maxLength: 64
     TemplateImportResult:
       type: object
       additionalProperties: false
@@ -11591,3 +12195,8 @@ components:
         - COMPOSITION_INCLUSION_RULE_INVALID
         - COMPOSITION_INCLUSION_UNSATISFIED
         - CONTENT_MODULE_JURISDICTION_MISMATCH
+        - LEGAL_ENTITY_UNKNOWN
+        - LEGAL_ENTITY_INACTIVE
+        - DOCUMENT_BRAND_INACTIVE
+        - DOCUMENT_BRAND_NOT_ALLOWED
+        - DOCUMENT_BRAND_UNKNOWN

@@ -74,6 +74,10 @@ public class TemplateEntity {
     @Column(name = "approval_matrix_mode", nullable = false, length = 32)
     private ApprovalMatrixMode approvalMatrixMode;
 
+    /** IBL-E4 — optional package allow-list JSON array of documentBrandCode. */
+    @Column(name = "allowed_document_brand_codes_json")
+    private String allowedDocumentBrandCodesJson;
+
     protected TemplateEntity() {
     }
 
@@ -186,6 +190,14 @@ public class TemplateEntity {
         this.approvalMatrixMode = approvalMatrixMode == null
                 ? ApprovalMatrixMode.SINGLE_TRACK
                 : approvalMatrixMode;
+    }
+
+    public String getAllowedDocumentBrandCodesJson() {
+        return allowedDocumentBrandCodesJson;
+    }
+
+    public void setAllowedDocumentBrandCodesJson(String allowedDocumentBrandCodesJson) {
+        this.allowedDocumentBrandCodesJson = allowedDocumentBrandCodesJson;
     }
 
     public void setName(String name) {

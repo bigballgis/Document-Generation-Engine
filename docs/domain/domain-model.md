@@ -15,6 +15,7 @@
 - [综合演示包扩展行为规格](../requirements/demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；P22）
 - [CE-G04 Legal hold 行为规格](../behavior/ce-g04-legal-hold.md)（BDD-CE-G04；#75）
 - [CE-G05 模板年检 + 条款正文全文检索](../behavior/ce-g05-annual-review-fts.md)（BDD-CE-G05；#77）
+- [IBL-E4 法人实体文档品牌变体](../behavior/ibl-e4-entity-document-brands.md)（BDD-IBL-E4；#131；[ADR-0065 Accepted](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)）
 
 ## 2. 核心领域对象
 
@@ -83,7 +84,7 @@ ManagementUser 是后台治理与管理界面的本地账户对象，也是平�
 
 - 用户名全局唯一；创建重复用户名返回 `409 USERNAME_ALREADY_EXISTS`。
 - 分组管理员创建/编辑用户时，目标用户被授权组范围必须 ⊆ 分组管理员自身被授权组范围（否则 `403 GROUP_SCOPE_OUT_OF_RANGE`）。
-- 分组管理员只能分配运营类角色（`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_TESTER`、`TEMPLATE_APPROVER`），不得分配 `GLOBAL_ADMIN`、`AUDIT_ADMIN`、`GROUP_ADMIN`（否则 `403 ROLE_ASSIGNMENT_NOT_ALLOWED`）。
+- 分组管理员只能分配运营类角色（`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_TESTER`、`TEMPLATE_APPROVER`、`LEGAL_REVIEWER`），不得分配 `GLOBAL_ADMIN`、`AUDIT_ADMIN`、`GROUP_ADMIN`（否则 `403 ROLE_ASSIGNMENT_NOT_ALLOWED`）。
 - 逻辑删除用户仅全局管理员可执行（否则 `403 USER_DELETE_NOT_ALLOWED`）。
 
 ### 2.2 角色 Role
@@ -194,6 +195,30 @@ API 管理由全局管理员和分组管理员承担，不设置独立 API 管�
 - `groupCode` 全局唯一；创建重复编码返回 `409 GROUP_CODE_ALREADY_EXISTS`。
 - 分组不存在或不在请求方可见范围内时返回 `404 GROUP_NOT_FOUND`，不泄露存在性。
 - 分组管理员对分组的任何写操作均 fail-closed，返回 `403 GROUP_MANAGEMENT_NOT_ALLOWED`。
+
+### 2.3.1 文档品牌 DocumentBrand 与法人实体 LegalEntity（IBL-E4 / ADR-0065，2026-07-20）
+
+**正交分离：** **DocumentBrand**（文档产物品牌资产）≠ 管理 UI **BrandPreset**（`REDBC` / `GREENBC` 壳层主题）。壳层主题切换不得改写文档产物品牌；文档品牌解析不得改写 `html[data-brand]` / 壳层 logo。
+
+**DocumentBrand（组范围可治理目录）：**
+
+- `documentBrandCode`：组内唯一、trim、大小写敏感稳定码（建议 max 64）。
+- 显示名（English-first；实现固定一种并写入 OpenAPI）。
+- `status` ∈ {`ACTIVE`,`INACTIVE`}。
+- **必选** `logoObjectRef`（已授权对象存储引用）；可选 `defaultSealObjectRef`；可选 `letterheadLegalName`（非敏感短文本，max 256）。
+- 每组迁移/初始化具备种子 `documentBrandCode=PLATFORM_DEFAULT`（ACTIVE；平台占位 logo；**不是** UI `REDBC`/`GREENBC` 码）。
+
+**LegalEntity（组范围可治理目录）：**
+
+- `legalEntityCode`：组内唯一、trim、稳定码（建议 max 64）。
+- 显示名；`status` ∈ {`ACTIVE`,`INACTIVE`}。
+- **必填** `documentBrandCode`（引用同组存在的 DocumentBrand）。一实体同一时刻恰好绑定一个品牌；改绑可审计。
+
+**组默认回落：** 组可配置可选 `defaultLegalEntityCode`。Runtime 省略 `context.legalEntityCode` 时：默认实体存在且 ACTIVE → 用其绑定品牌；否则 → `PLATFORM_DEFAULT`。**禁止**回落到 UI `REDBC`/`GREENBC`。
+
+**解析与应用：** 非空白 `legalEntityCode` → 同组 LegalEntity → 绑定 DocumentBrand（未知/INACTIVE → **422** 稳定码）；解析成功后在 generate / preview / test-generation **同一路径**将 logo / 可选默认 seal / 信头法定名称应用到文档品牌槽位。显式 sealRef **优先于**品牌默认 seal；签章几何仍走 IBL-B5。模板包可选 `allowedDocumentBrandCodes`；空/缺省 = 允许组内任一 ACTIVE 文档品牌；非空且解析品牌不在名单 → **422** `DOCUMENT_BRAND_NOT_ALLOWED`。路径仍钉扎模板版本，**不**按法人自动选包。
+
+行为 SoT：[ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)；决策：[ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)。Accepted ≠ E4 impl Done；F27 的 `effectiveFrom`/bulk 半幅仍属 **IBL-E5**。
 
 ### 2.4 AD Group
 
@@ -521,6 +546,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - **CE-G05：** 下一年度复核到期日 `nextReviewDue`（API camelCase；DB `next_review_due`，UTC 日历日 DATE；可空）。挂在 **template 行**（非单 release 行）——年检是模板治理周期，不是单版本生命周期态。
 - **IBL-E1 / PD-4：** 正文语种 `locale`（BCP-47 字符串，挂在 **template 包行**，创建必填；存量迁移默认 `zh-CN`）与可选 `localeVariantFamilyId`（同组同家族内 locale 唯一）。每个 locale 变体仍是独立模板包，独立版本线/测试/审批/发布；**不**在一包内多正文，**不** runtime 按 locale 静默换包。运行时路径仍钉扎具体模板；非空 `context.locale` 须与模板 `locale` 语言兼容（primary language），否则 fail-closed。详情与场景见行为规格 / ADR-0062。
 - **IBL-E2 / PD-5：** 模板版本可挂载 Composition Inclusion Rules（辖区/产品/渠道驱动的钉扎 CM 纳入）；见 §2.9 与 [ADR-0063](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)。与 IBL-E1 locale **正交**。
+- **IBL-E4 / PD-9：** 模板包级可选 `allowedDocumentBrandCodes`（文档品牌 allow-list）；见 §2.3.1 与 [ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)。与 UI `REDBC`/`GREENBC` 壳层主题 **正交**；与 IBL-E1 locale / IBL-E2 inclusion / IBL-E3 审批矩阵 **正交**。
 
 已确认规则：
 
@@ -1267,7 +1293,7 @@ Sensitive Data Classification -- constrains --> API Response / Audit Log / Manag
 已确认规则：
 
 - 动态 API v1 请求字段命名基线采用 `output.format`、`output.mode`、`variables`、`encryption`、`requestId`、`idempotencyKey`、`items[].itemId` 和 `context`。
-- `context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`、`jurisdiction`、`product`；字段值均为字符串。其中 `jurisdiction` / `product` / `channel` 可作为组合纳入控制输入（IBL-E2 / ADR-0063；非 PII、非模板变量）；`locale` 仍用于 compute / 语言兼容（ADR-0062）。`context` 不得包含客户姓名、证件号、账号、金额、密码、模板变量原值、完整请求体、API secret、完整下载地址或完整 AD Group 成员等敏感内容；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。
+- `context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`、`jurisdiction`、`product`、`legalEntityCode`；字段值均为字符串。其中 `jurisdiction` / `product` / `channel` 可作为组合纳入控制输入（IBL-E2 / ADR-0063；非 PII、非模板变量）；`locale` 仍用于 compute / 语言兼容（ADR-0062）；`legalEntityCode` 用于法人→文档品牌解析（IBL-E4 / ADR-0065；非 PII、非选包）。`context` 不得包含客户姓名、证件号、账号、金额、密码、模板变量原值、完整请求体、API secret、完整下载地址或完整 AD Group 成员等敏感内容；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。
 - 模板标识和发布版本号只通过路径表达，生成请求体不得重复传入 `templateId` 或 `releaseVersion`。
 - 正式 API 契约 Schema 采用 OpenAPI 3.1 YAML 维护；Markdown 文档负责解释、索引、决策背景和示例说明。
 - v1 请求采用严格字段校验，契约 Schema 之外的未知字段返回 `400 REQUEST_BODY_INVALID`。

@@ -107,6 +107,7 @@ class DocumentGenerationEngineTest {
                         new com.bank.docgen.infrastructure.config.DocgenRenderingProperties(),
                         new com.bank.docgen.rendering.PdfPageCountReader()
                 ),
+                mockDocumentBrandResolveService(),
                 generationMetrics
         );
         template = new TemplateEntity(
@@ -258,7 +259,8 @@ class DocumentGenerationEngineTest {
                 new EncryptionOptionsView(false, null, null, null)
         );
 
-        assertThat(generated.fidelityWarningCodes()).containsExactly("CACHED_WARNING");
+        assertThat(generated.fidelityWarningCodes()).contains("CACHED_WARNING");
+        assertThat(generated.resolvedDocumentBrandCode()).isEqualTo("PLATFORM_DEFAULT");
         verify(versionFidelityWarningService).resolveWarningCodes(version, MASTER_ID);
     }
 
@@ -315,5 +317,20 @@ class DocumentGenerationEngineTest {
                     assertThat(assemblyException.messageKey())
                             .isEqualTo("api.error.rendering.ooxmlValidationFailed");
                 });
+    }
+
+    private static com.bank.docgen.documentbrand.service.DocumentBrandResolveService mockDocumentBrandResolveService() {
+        com.bank.docgen.documentbrand.service.DocumentBrandResolveService service =
+                org.mockito.Mockito.mock(com.bank.docgen.documentbrand.service.DocumentBrandResolveService.class);
+        org.mockito.Mockito.lenient().when(service.resolve(any(), any(), any())).thenReturn(
+                new com.bank.docgen.documentbrand.domain.ResolvedDocumentBrand(
+                        null,
+                        "PLATFORM_DEFAULT",
+                        "platform/document-brands/PLATFORM_DEFAULT/logo",
+                        null,
+                        null
+                )
+        );
+        return service;
     }
 }

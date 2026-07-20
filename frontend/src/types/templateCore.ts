@@ -97,6 +97,8 @@ export type TemplateDetail = Omit<
   approvalMatrixMode?: ApprovalMatrixMode
   /** IBL-E3 — current multi-stage stage when applicable. */
   approvalStage?: ApprovalStage | null
+  /** IBL-E4 — optional package document-brand allow-list. */
+  allowedDocumentBrandCodes?: string[] | null
 }
 
 /** CE-G05 — Dashboard Tasks projection for annual review due. */
@@ -193,4 +195,6 @@ export interface UpdateTemplateMetadataPayload {
   localeVariantFamilyId?: string | null
   /** IBL-E3 — optional package approval matrix mode update. */
   approvalMatrixMode?: ApprovalMatrixMode
+  /** IBL-E4 — optional package document-brand allow-list update. */
+  allowedDocumentBrandCodes?: string[] | null
 }

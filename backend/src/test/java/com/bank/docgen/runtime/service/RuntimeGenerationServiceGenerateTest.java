@@ -182,6 +182,7 @@ class RuntimeGenerationServiceGenerateTest {
                 any(),
                 anyString(),
                 any(),
+                any(),
                 any()
         )).thenReturn(generated);
         when(objectStoragePort.get(storageKey)).thenReturn(new ByteArrayInputStream(finalBytes));
@@ -224,7 +225,7 @@ class RuntimeGenerationServiceGenerateTest {
         when(idempotencyService.begin("idem-new-stream", TEMPLATE_ID, "hash-a", RELEASE_VERSION)).thenReturn(pending);
         when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, RELEASE_VERSION))
                 .thenReturn(Optional.of(version));
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any(), any())).thenReturn(generated);
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any(), any(), any())).thenReturn(generated);
         when(objectStoragePort.get(storageKey)).thenReturn(stream);
         doNothing().when(encryptionParameterValidator).validate(any(), any(), anyString());
 
@@ -380,7 +381,7 @@ class RuntimeGenerationServiceGenerateTest {
         when(idempotencyService.hashRequest(payloadCaptor.capture())).thenReturn("hash-a");
         when(idempotencyService.findExisting(any(), any(), any())).thenReturn(Optional.empty());
         when(idempotencyService.begin(any(), any(), any(), any())).thenReturn(pendingIdempotency(TEMPLATE_ID));
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any(), any()))
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any(), any(), any()))
                 .thenReturn(new DocumentGenerationEngine.GeneratedDocument(
                         "DOC-1",
                         "storage/doc.docx",

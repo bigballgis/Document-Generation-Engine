@@ -7,7 +7,10 @@ import com.bank.docgen.master.api.MasterDocumentDetailView;
 import com.bank.docgen.master.api.SubmitMasterReviewRequest;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.service.MasterDocumentService;
+import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
 import com.bank.docgen.rendering.service.BatchTestGenerationService;
+import com.bank.docgen.rendering.service.FidelityWarningJsonSupport;
+import com.bank.docgen.rendering.service.FidelityWarningViewedService;
 import com.bank.docgen.rendering.service.PreviewGenerationService;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
@@ -56,6 +59,9 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
             TestDataSetService testDataSetService,
             PreviewGenerationService previewGenerationService,
             BatchTestGenerationService batchTestGenerationService,
+            PreviewRecordRepository previewRecordRepository,
+            FidelityWarningJsonSupport fidelityWarningJsonSupport,
+            FidelityWarningViewedService fidelityWarningViewedService,
             TemplateLifecycleService templateLifecycleService,
             ApiManagementService apiManagementService
     ) {
@@ -68,6 +74,9 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
                 testDataSetService,
                 previewGenerationService,
                 batchTestGenerationService,
+                previewRecordRepository,
+                fidelityWarningJsonSupport,
+                fidelityWarningViewedService,
                 templateLifecycleService,
                 apiManagementService,
                 STRUCTURED_BINDING_JSON,

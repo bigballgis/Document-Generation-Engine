@@ -1,0 +1,25 @@
+{
+  "bddCoverage": [
+    "BDD-IBL-E4-001",
+    "BDD-IBL-E4-002",
+    "BDD-IBL-E4-003",
+    "BDD-IBL-E4-011",
+    "BDD-IBL-E4-012",
+    "BDD-IBL-E4-013",
+    "BDD-IBL-E4-014"
+  ],
+  "passed": 6,
+  "verdict": "PASS",
+  "api": "http://127.0.0.1:8080",
+  "failed": 0,
+  "baseURL": "http://127.0.0.1:4173",
+  "total": 6,
+  "stage": 6,
+  "spec": "frontend/e2e/ibl-e4-entity-document-brands.spec.ts",
+  "slice": "ibl-e4-entity-document-brands",
+  "timestamp": "2026-07-20T08:02:24.2379022+08:00",
+  "config": "playwright.docker.config.ts",
+  "task": "131",
+  "durationApprox": "1.9m",
+  "skipped": 0
+}

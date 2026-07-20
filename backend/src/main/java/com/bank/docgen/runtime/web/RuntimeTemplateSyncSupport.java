@@ -204,6 +204,12 @@ final class RuntimeTemplateSyncSupport {
         response.setHeader("output.mode", body.output().mode());
         response.setHeader("fidelityWarningCount", String.valueOf(result.fidelityWarningCodes().size()));
         response.setHeader("fidelityWarningCodes", String.join(",", result.fidelityWarningCodes()));
+        if (result.resolvedLegalEntityCode() != null && !result.resolvedLegalEntityCode().isBlank()) {
+            response.setHeader("resolvedLegalEntityCode", result.resolvedLegalEntityCode());
+        }
+        if (result.resolvedDocumentBrandCode() != null && !result.resolvedDocumentBrandCode().isBlank()) {
+            response.setHeader("resolvedDocumentBrandCode", result.resolvedDocumentBrandCode());
+        }
         if (result.artifactStream() != null) {
             try (var artifactStream = result.artifactStream()) {
                 artifactStream.transferTo(response.getOutputStream());

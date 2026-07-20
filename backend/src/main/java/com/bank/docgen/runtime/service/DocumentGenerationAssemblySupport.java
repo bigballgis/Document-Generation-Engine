@@ -2,6 +2,10 @@ package com.bank.docgen.runtime.service;
 
 import com.bank.docgen.authoring.structured.CallerRenderOverride;
 import com.bank.docgen.authoring.structured.RenderProfileService;
+import com.bank.docgen.documentbrand.domain.ResolvedDocumentBrand;
+import com.bank.docgen.documentbrand.service.AllowedDocumentBrandCodesJsonSupport;
+import com.bank.docgen.documentbrand.service.DocumentBrandResolveService;
+import com.bank.docgen.documentbrand.service.DocumentBrandSlotApplicationSupport;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
@@ -62,6 +66,7 @@ final class DocumentGenerationAssemblySupport {
     private final VariableComputeService variableComputeService;
     private final VariableSchemaValidationPort variableSchemaValidationPort;
     private final PaginationDeltaFidelitySupport paginationDeltaFidelitySupport;
+    private final DocumentBrandResolveService documentBrandResolveService;
 
     DocumentGenerationAssemblySupport(
             TemplateVersionRepository templateVersionRepository,
@@ -77,7 +82,8 @@ final class DocumentGenerationAssemblySupport {
             VersionFidelityWarningService versionFidelityWarningService,
             VariableComputeService variableComputeService,
             VariableSchemaValidationPort variableSchemaValidationPort,
-            PaginationDeltaFidelitySupport paginationDeltaFidelitySupport
+            PaginationDeltaFidelitySupport paginationDeltaFidelitySupport,
+            DocumentBrandResolveService documentBrandResolveService
     ) {
         this.templateVersionRepository = templateVersionRepository;
         this.anchorBindingRepository = anchorBindingRepository;
@@ -93,6 +99,7 @@ final class DocumentGenerationAssemblySupport {
         this.variableComputeService = variableComputeService;
         this.variableSchemaValidationPort = variableSchemaValidationPort;
         this.paginationDeltaFidelitySupport = paginationDeltaFidelitySupport;
+        this.documentBrandResolveService = documentBrandResolveService;
     }
 
     DocumentGenerationEngine.GeneratedDocument generate(
@@ -146,6 +153,30 @@ final class DocumentGenerationAssemblySupport {
             String localeTag,
             CompositionInclusionAxes inclusionAxes
     ) {
+        return generate(
+                template,
+                releaseVersion,
+                variables,
+                outputFormat,
+                encryption,
+                callerRenderOverride,
+                localeTag,
+                inclusionAxes,
+                null
+        );
+    }
+
+    DocumentGenerationEngine.GeneratedDocument generate(
+            TemplateEntity template,
+            String releaseVersion,
+            Map<String, Object> variables,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            CallerRenderOverride callerRenderOverride,
+            String localeTag,
+            CompositionInclusionAxes inclusionAxes,
+            String legalEntityCode
+    ) {
         TemplateVersionEntity version = templateVersionRepository
                 .findByTemplateIdAndReleaseVersion(template.getId(), releaseVersion)
                 .orElseThrow(TemplateNotFoundException::new);
@@ -157,6 +188,12 @@ final class DocumentGenerationAssemblySupport {
                 variables,
                 localeTag
         );
+        // IBL-E4 / ADR-0065: resolve document brand (fail-closed) then apply to brand slots.
+        ResolvedDocumentBrand resolvedBrand = documentBrandResolveService.resolve(
+                template.getGroupCode(),
+                legalEntityCode,
+                AllowedDocumentBrandCodesJsonSupport.parse(template.getAllowedDocumentBrandCodesJson())
+        );
         RenderProfile renderProfile = renderProfileService.resolveEffectiveProfile(
                 version,
                 callerRenderOverride == null ? CallerRenderOverride.empty() : callerRenderOverride
@@ -164,8 +201,11 @@ final class DocumentGenerationAssemblySupport {
         String masterStorageKey = resolveMasterStorageKey(template, version);
         List<AnchorBindingEntity> bindings = anchorBindingRepository
                 .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
-        Map<String, String> bindingJson = new LinkedHashMap<>();
-        bindings.forEach(binding -> bindingJson.put(binding.getAnchorId(), binding.getStructuredContentJson()));
+        Map<String, String> sourceBindings = new LinkedHashMap<>();
+        bindings.forEach(binding -> sourceBindings.put(binding.getAnchorId(), binding.getStructuredContentJson()));
+        DocumentBrandSlotApplicationSupport.Applied brandApplied =
+                DocumentBrandSlotApplicationSupport.apply(sourceBindings, resolvedBrand);
+        Map<String, String> bindingJson = new LinkedHashMap<>(brandApplied.bindingJson());
         Map<String, String> allPinned =
                 contentModuleReferenceService.resolvePinnedContentStructures(version.getId());
         CompositionInclusionAssemblySupport.AppliedInclusion applied =
@@ -217,6 +257,7 @@ final class DocumentGenerationAssemblySupport {
                     versionFidelityWarningService.resolveWarningCodes(version, template.getMasterId())
             );
             fidelityWarnings.addAll(artifact.pipelineWarningCodes());
+            fidelityWarnings.addAll(brandApplied.fidelityWarningCodes());
             if ("PDF".equalsIgnoreCase(outputFormat)) {
                 Integer pdfPageCount = paginationDeltaFidelitySupport.measurePdfPages(artifactBytes);
                 PaginationDeltaEvaluator.Evaluation paginationEval = paginationDeltaFidelitySupport.evaluate(
@@ -232,7 +273,9 @@ final class DocumentGenerationAssemblySupport {
                     null,
                     artifact.contentType(),
                     outputFormat,
-                    List.copyOf(fidelityWarnings)
+                    List.copyOf(fidelityWarnings),
+                    resolvedBrand.legalEntityCode(),
+                    resolvedBrand.documentBrandCode()
             );
         } catch (IOException ex) {
             throw new RenderingOperationException("api.error.rendering.generationFailed");

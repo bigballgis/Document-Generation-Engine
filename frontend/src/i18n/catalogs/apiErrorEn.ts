@@ -311,5 +311,16 @@ export const apiErrorEn = {
     payloadTooLarge: "The uploaded file exceeds the maximum allowed size of 5 MiB.",
     payloadEmpty: "The uploaded file is empty.",
     assetNotFound: "The asset library entry was not found."
+  },
+  documentBrand: {
+    legalEntityUnknown: "The legal entity code is unknown for this group.",
+    legalEntityInactive: "The legal entity is inactive.",
+    documentBrandInactive: "The document brand is inactive or unavailable.",
+    documentBrandNotAllowed: "The resolved document brand is not allowed for this template.",
+    documentBrandUnknown: "The document brand code is unknown for this group.",
+    codeInvalid: "The document brand or legal entity code format is invalid.",
+    codeConflict: "A catalog entry with this code already exists in the group.",
+    logoRequired: "A logo object reference is required for the document brand.",
+    documentBrandRequired: "A document brand code is required when creating a legal entity."
   }
 } as const

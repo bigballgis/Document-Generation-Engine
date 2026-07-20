@@ -16,6 +16,7 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelopeFactory;
+import com.bank.docgen.documentbrand.service.DocumentBrandResolveException;
 import com.bank.docgen.template.port.CompositionInclusionUnsatisfiedException;
 import com.bank.docgen.template.port.ContentModuleJurisdictionMismatchException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -130,6 +131,20 @@ public class RenderingExceptionAdvice {
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 ex.errorCode(),
                 ApiErrorCategories.TEMPLATE,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(DocumentBrandResolveException.class)
+    public ResponseEntity<ErrorEnvelope> handleDocumentBrandResolve(
+            HttpServletRequest request,
+            DocumentBrandResolveException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.errorCode(),
+                ApiErrorCategories.VALIDATION,
                 ex.messageKey()
         );
     }

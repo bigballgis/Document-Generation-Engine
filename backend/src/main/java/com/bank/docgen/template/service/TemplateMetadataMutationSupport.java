@@ -88,6 +88,13 @@ final class TemplateMetadataMutationSupport {
         template.setApprovalMatrixMode(request.approvalMatrixMode() == null
                 ? ApprovalMatrixMode.SINGLE_TRACK
                 : request.approvalMatrixMode());
+        if (request.allowedDocumentBrandCodes() != null) {
+            template.setAllowedDocumentBrandCodesJson(
+                    com.bank.docgen.documentbrand.service.AllowedDocumentBrandCodesJsonSupport.write(
+                            request.allowedDocumentBrandCodes()
+                    )
+            );
+        }
         templateRepository.save(template);
         TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), templateId, session.username());
         templateVersionRepository.save(version);
@@ -131,6 +138,13 @@ final class TemplateMetadataMutationSupport {
         if (request.approvalMatrixMode() != null) {
             assertApprovalMatrixModeWritable(template);
             template.setApprovalMatrixMode(request.approvalMatrixMode());
+        }
+        if (request.allowedDocumentBrandCodes() != null) {
+            template.setAllowedDocumentBrandCodesJson(
+                    com.bank.docgen.documentbrand.service.AllowedDocumentBrandCodesJsonSupport.write(
+                            request.allowedDocumentBrandCodes()
+                    )
+            );
         }
         template.setUpdatedBy(session.username());
         templateRepository.save(template);

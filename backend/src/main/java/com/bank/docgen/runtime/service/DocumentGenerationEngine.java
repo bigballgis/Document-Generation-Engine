@@ -2,6 +2,7 @@ package com.bank.docgen.runtime.service;
 
 import com.bank.docgen.authoring.structured.CallerRenderOverride;
 import com.bank.docgen.authoring.structured.RenderProfileService;
+import com.bank.docgen.documentbrand.service.DocumentBrandResolveService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
@@ -47,6 +48,7 @@ public class DocumentGenerationEngine {
             VariableComputeService variableComputeService,
             VariableSchemaValidationPort variableSchemaValidationPort,
             PaginationDeltaFidelitySupport paginationDeltaFidelitySupport,
+            DocumentBrandResolveService documentBrandResolveService,
             GenerationMetrics generationMetrics
     ) {
         this.assembly = new DocumentGenerationAssemblySupport(
@@ -63,7 +65,8 @@ public class DocumentGenerationEngine {
                 versionFidelityWarningService,
                 variableComputeService,
                 variableSchemaValidationPort,
-                paginationDeltaFidelitySupport
+                paginationDeltaFidelitySupport,
+                documentBrandResolveService
         );
         this.generationMetrics = generationMetrics;
     }
@@ -186,6 +189,32 @@ public class DocumentGenerationEngine {
             String localeTag,
             CompositionInclusionAxes inclusionAxes
     ) {
+        return generate(
+                template,
+                releaseVersion,
+                variables,
+                outputFormat,
+                encryption,
+                callerRenderOverride,
+                mode,
+                localeTag,
+                inclusionAxes,
+                null
+        );
+    }
+
+    public GeneratedDocument generate(
+            TemplateEntity template,
+            String releaseVersion,
+            Map<String, Object> variables,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            CallerRenderOverride callerRenderOverride,
+            String mode,
+            String localeTag,
+            CompositionInclusionAxes inclusionAxes,
+            String legalEntityCode
+    ) {
         Instant start = Instant.now();
         String format = GenerationMetrics.normalizeFormat(outputFormat);
         String invocationMode = mode == null || mode.isBlank() ? "sync" : mode;
@@ -198,7 +227,8 @@ public class DocumentGenerationEngine {
                     encryption,
                     callerRenderOverride,
                     localeTag,
-                    inclusionAxes == null ? CompositionInclusionAxes.empty() : inclusionAxes
+                    inclusionAxes == null ? CompositionInclusionAxes.empty() : inclusionAxes,
+                    legalEntityCode
             );
             generationMetrics.record(Duration.between(start, Instant.now()), "success", format, invocationMode);
             return result;
@@ -214,11 +244,34 @@ public class DocumentGenerationEngine {
             byte[] artifactBytes,
             String contentType,
             String outputFormat,
-            List<String> fidelityWarningCodes
+            List<String> fidelityWarningCodes,
+            String resolvedLegalEntityCode,
+            String resolvedDocumentBrandCode
     ) {
         public GeneratedDocument {
             artifactBytes = DefensiveCopies.copyBytes(artifactBytes);
             fidelityWarningCodes = DefensiveCopies.copyList(fidelityWarningCodes);
+        }
+
+        /** Compatibility constructor for callers that omit IBL-E4 resolved brand codes. */
+        public GeneratedDocument(
+                String documentId,
+                String storageKey,
+                byte[] artifactBytes,
+                String contentType,
+                String outputFormat,
+                List<String> fidelityWarningCodes
+        ) {
+            this(
+                    documentId,
+                    storageKey,
+                    artifactBytes,
+                    contentType,
+                    outputFormat,
+                    fidelityWarningCodes,
+                    null,
+                    null
+            );
         }
     }
 }

@@ -80,6 +80,18 @@ const router = createRouter({
       meta: { logicalRoute: ROUTE_KEYS.legalHoldAdministration },
     },
     {
+      path: '/governance/document-brands',
+      name: 'document-brand-administration',
+      component: () => import('@/views/documentBrands/DocumentBrandListView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.documentBrandAdministration },
+    },
+    {
+      path: '/governance/legal-entities',
+      name: 'legal-entity-administration',
+      component: () => import('@/views/legalEntities/LegalEntityListView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.documentBrandAdministration },
+    },
+    {
       path: '/masters',
       name: 'master-list',
       component: () => import('@/views/masters/MasterListView.vue'),
@@ -202,6 +214,8 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
   'master-package-hub': 'masters.hub.breadcrumbLabel',
   'audit-console': 'audit.title',
   'legal-hold-administration': 'legalHold.list.title',
+  'document-brand-administration': 'documentBrands.list.title',
+  'legal-entity-administration': 'legalEntities.list.title',
   'api-policy-management': 'apiPolicy.home.title',
   'entitlement-users': 'identity.usersPageTitle',
   'entitlement-groups': 'identity.groupsPageTitle',

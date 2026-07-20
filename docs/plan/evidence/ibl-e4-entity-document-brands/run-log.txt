@@ -1,0 +1,17 @@
+IBL-E4 Stage 6 E2E — 2026-07-20
+
+Command:
+  pnpm exec playwright test e2e/ibl-e4-entity-document-brands.spec.ts --config playwright.docker.config.ts --workers=1 --trace on
+  (cwd: frontend; E2E_TARGET=docker FRONTEND_PORT=4173 E2E_BASE_URL=http://127.0.0.1:4173)
+
+Result:
+  Running 6 tests using 1 worker
+  ok 1 BDD-IBL-E4-001 — admin creates DocumentBrand; not listed in UI chrome switcher (~22s)
+  ok 2 BDD-IBL-E4-002 / 013 — LegalEntity create uses ACTIVE document brand picker (~19s)
+  ok 3 BDD-IBL-E4-003 — admin rebinds LegalEntity document brand (~18s)
+  ok 4 BDD-IBL-E4-012 — UI chrome REDBC/GREENBC orthogonal to entity→document brand bind (~26s)
+  ok 5 BDD-IBL-E4-011 — template author configures document brand allow-list (~5s)
+  ok 6 BDD-IBL-E4-014 — TEMPLATE_AUTHOR cannot open catalog write surfaces (~18s)
+  6 passed (1.9m)
+
+Verdict: PASS

@@ -102,6 +102,7 @@ class DocumentGenerationAssemblyPinningTest {
                         new com.bank.docgen.infrastructure.config.DocgenRenderingProperties(),
                         new com.bank.docgen.rendering.PdfPageCountReader()
                 ),
+                mockDocumentBrandResolveService(),
                 new GenerationMetrics(new SimpleMeterRegistry())
         );
         template = new TemplateEntity(TEMPLATE_ID, "TPL-001", "RETAIL", "Sample", null, MASTER_ID, "10000001");
@@ -284,5 +285,24 @@ class DocumentGenerationAssemblyPinningTest {
                 id, MASTER_ID, storageKey, "master.docx",
                 1, MasterDocumentStatus.APPROVED, current ? 1 : 2, current, "change", "10000001"
         );
+    }
+
+    private static com.bank.docgen.documentbrand.service.DocumentBrandResolveService mockDocumentBrandResolveService() {
+        com.bank.docgen.documentbrand.service.DocumentBrandResolveService service =
+                org.mockito.Mockito.mock(com.bank.docgen.documentbrand.service.DocumentBrandResolveService.class);
+        org.mockito.Mockito.lenient().when(service.resolve(
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any()
+        )).thenReturn(
+                new com.bank.docgen.documentbrand.domain.ResolvedDocumentBrand(
+                        null,
+                        "PLATFORM_DEFAULT",
+                        "platform/document-brands/PLATFORM_DEFAULT/logo",
+                        null,
+                        null
+                )
+        );
+        return service;
     }
 }

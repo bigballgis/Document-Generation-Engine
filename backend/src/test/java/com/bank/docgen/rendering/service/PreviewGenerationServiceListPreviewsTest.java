@@ -102,7 +102,8 @@ class PreviewGenerationServiceListPreviewsTest {
                 new com.bank.docgen.rendering.PaginationDeltaFidelitySupport(
                         new com.bank.docgen.infrastructure.config.DocgenRenderingProperties(),
                         new com.bank.docgen.rendering.PdfPageCountReader()
-                )
+                ),
+                org.mockito.Mockito.mock(com.bank.docgen.documentbrand.service.DocumentBrandResolveService.class)
         );
         templateId = UUID.randomUUID();
         session = new ManagementSessionClaims(

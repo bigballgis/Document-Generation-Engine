@@ -14,6 +14,7 @@ import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.document.compute.VariableComputeException;
+import com.bank.docgen.documentbrand.service.DocumentBrandResolveException;
 import com.bank.docgen.runtime.service.TemplateLocaleMismatchException;
 import com.bank.docgen.template.port.CompositionInclusionUnsatisfiedException;
 import com.bank.docgen.template.port.ContentModuleJurisdictionMismatchException;
@@ -52,6 +53,15 @@ final class FailedSyncInvocationErrorMapper {
             return envelope(
                     ex.errorCode(),
                     ApiErrorCategories.TEMPLATE,
+                    ex.messageKey(),
+                    false,
+                    messageResolver
+            );
+        }
+        if (throwable instanceof DocumentBrandResolveException ex) {
+            return envelope(
+                    ex.errorCode(),
+                    ApiErrorCategories.VALIDATION,
                     ex.messageKey(),
                     false,
                     messageResolver

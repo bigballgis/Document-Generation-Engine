@@ -166,6 +166,19 @@ public final class ApiErrorCodes {
     /** IBL-E3 / ADR-0064: requested approvalStage does not match current sub-state. */
     public static final String APPROVAL_STAGE_MISMATCH = "APPROVAL_STAGE_MISMATCH";
 
+    /** IBL-E4 / ADR-0065: legal entity code unknown in group catalog. */
+    public static final String LEGAL_ENTITY_UNKNOWN = "LEGAL_ENTITY_UNKNOWN";
+    /** IBL-E4 / ADR-0065: legal entity exists but INACTIVE. */
+    public static final String LEGAL_ENTITY_INACTIVE = "LEGAL_ENTITY_INACTIVE";
+    /** IBL-E4 / ADR-0065: bound / resolved document brand missing or INACTIVE. */
+    public static final String DOCUMENT_BRAND_INACTIVE = "DOCUMENT_BRAND_INACTIVE";
+    /** IBL-E4 / ADR-0065: resolved brand not in template allow-list. */
+    public static final String DOCUMENT_BRAND_NOT_ALLOWED = "DOCUMENT_BRAND_NOT_ALLOWED";
+    /** IBL-E4 / ADR-0065: document brand code unknown in group catalog. */
+    public static final String DOCUMENT_BRAND_UNKNOWN = "DOCUMENT_BRAND_UNKNOWN";
+    /** IBL-E4 / ADR-0065: document brand / legal entity code format invalid. */
+    public static final String DOCUMENT_BRAND_CODE_INVALID = "DOCUMENT_BRAND_CODE_INVALID";
+
     private ApiErrorCodes() {
     }
 }

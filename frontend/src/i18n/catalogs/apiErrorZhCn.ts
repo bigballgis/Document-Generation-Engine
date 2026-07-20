@@ -289,5 +289,16 @@ export const apiErrorZhCn = {
     payloadTooLarge: "上传文件超过最大允许大小 5 MiB。",
     payloadEmpty: "上传文件为空。",
     assetNotFound: "未找到资产库条目。"
+  },
+  documentBrand: {
+    legalEntityUnknown: "该法人实体代码在本组中未知。",
+    legalEntityInactive: "该法人实体已停用。",
+    documentBrandInactive: "该文档品牌已停用或不可用。",
+    documentBrandNotAllowed: "解析得到的文档品牌不在本模板允许名单中。",
+    documentBrandUnknown: "该文档品牌代码在本组中未知。",
+    codeInvalid: "文档品牌或法人实体代码格式无效。",
+    codeConflict: "本组中已存在相同代码的目录条目。",
+    logoRequired: "文档品牌必须提供 logo 对象引用。",
+    documentBrandRequired: "创建法人实体时必须绑定文档品牌代码。"
   }
 } as const

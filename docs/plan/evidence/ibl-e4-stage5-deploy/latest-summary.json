@@ -1,0 +1,22 @@
+{
+  "result": "DEPLOY_OK",
+  "when": "2026-07-20T07:47:09+08:00",
+  "slice": "ibl-e4-entity-document-brands",
+  "worktree": "D:/working/DGE-ibl-e4-entity-document-brands",
+  "branch": "feat/ibl-e4-entity-document-brands",
+  "git_tip": "3bd2cd87b78341dc28f3918603f9c8cdbc1f23e8",
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"ibl-e4 stage5 E2E stack prep (JWT synced)\"",
+  "compose_project": "documentgenerationengine",
+  "healthz_8080": {
+    "status_code": 200,
+    "body": "{\"status\":\"UP\"}"
+  },
+  "frontend_4173": {
+    "status_code": 200
+  },
+  "jwt_secret": "synced from MAIN (len=64, non-insecure; value not recorded)",
+  "notes": [
+    "Attempt 1: FAIL — worktree .env from .env.example insecure JWT default (BDD-OPS-JWT-SECRET-001).",
+    "Attempt 2: SUCCESS — JWT synced from MAIN; canonical compose project."
+  ]
+}

@@ -25,7 +25,14 @@ public class TemplatePreviewAuthorizationAdapter implements TemplatePreviewAutho
     @Override
     public RenderableTemplateSnapshot requireReadableSnapshot(UUID templateId, ManagementSessionClaims session) {
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
-        return new RenderableTemplateSnapshot(template.getId(), template.getMasterId(), template.getGroupCode());
+        return new RenderableTemplateSnapshot(
+                template.getId(),
+                template.getMasterId(),
+                template.getGroupCode(),
+                com.bank.docgen.documentbrand.service.AllowedDocumentBrandCodesJsonSupport.parse(
+                        template.getAllowedDocumentBrandCodesJson()
+                )
+        );
     }
 
     @Override

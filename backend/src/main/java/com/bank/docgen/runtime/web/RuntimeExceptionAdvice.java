@@ -14,6 +14,7 @@ import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
 import com.bank.docgen.runtime.service.RuntimeDownloadExpiredException;
 import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
 import com.bank.docgen.runtime.service.SyncBatchFailureException;
+import com.bank.docgen.documentbrand.service.DocumentBrandResolveException;
 import com.bank.docgen.runtime.service.TemplateLocaleMismatchException;
 import com.bank.docgen.template.port.CompositionInclusionUnsatisfiedException;
 import com.bank.docgen.template.port.ContentModuleJurisdictionMismatchException;
@@ -109,6 +110,20 @@ public class RuntimeExceptionAdvice {
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 ex.errorCode(),
                 ApiErrorCategories.TEMPLATE,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(DocumentBrandResolveException.class)
+    public ResponseEntity<ErrorEnvelope> handleDocumentBrandResolve(
+            HttpServletRequest request,
+            DocumentBrandResolveException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.errorCode(),
+                ApiErrorCategories.VALIDATION,
                 ex.messageKey()
         );
     }
