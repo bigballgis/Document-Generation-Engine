@@ -1938,22 +1938,22 @@
       {
         "id": "141",
         "title": "Demo refresh Wave A: bank-letter-demo-refresh (existing packages)",
-        "description": "IN PROGRESS 2026-07-20. NON-CE ops-demo content leaf (sole-active). Slice bank-letter-demo-refresh / task_id demo-refresh-wave-a. Clean shallow/padding demo content; refresh 8 existing deploy/demo-* packages + DEMO-FULL-FLOW-LETTER to 100% realistic bank letters; import/publish/generate evidence. Wave B expand OUT OF SCOPE (queued #142). Placement ISOLATED D:/working/DGE-bank-letter-demo-refresh feat/bank-letter-demo-refresh. BDD ready docs/behavior/bank-letter-demo-refresh.md (BDD-DEMO-REFRESH-001..014). frontend_ui_in_scope=false. Batch split closed into this leaf. Historical TM #4-#8 remain Done — this is a NEW post-remediation refresh (do NOT reopen P22/P23). Formal phase None. Vetoes: CE-O02 deferred; no #3b/#5a GO; no RTL; Wave B deferred. Do NOT claim go-live / IBL program Done.",
-        "details": "Activated 2026-07-20 (plan-orchestrator stage 2). Slice id: bank-letter-demo-refresh. Alias task_id: demo-refresh-wave-a. Placement ISOLATED worktree D:/working/DGE-bank-letter-demo-refresh · feat/bank-letter-demo-refresh (base origin/main). Batch recommendation split (member_task_ids: [\"demo-refresh-wave-a\"]; proposed_slice_id: bank-letter-demo-refresh; on_red_split_hint: Peel CORP vs RETAIL vs TRADE). Owners: doc-keeper then rendering-engineer. Plan detail: docs/plan/detail/bank-letter-demo-refresh.md. Related Done history: TM #4-#8 (P23-era rewrite/publish/generate/evidence). Wave B next leaf bank-letter-demo-expand = TM #142 pending — do NOT activate. Umbrella #53/#106 registry-only. #119 remains Blocked. CE-O02 Deferred. Checklist #3b/#5a stay CONDITIONAL. Do NOT flip GO. Do NOT activate RTL/CE-O02/Wave B.",
-        "testStrategy": "1. BDD ready confirmed (docs/behavior/bank-letter-demo-refresh.md; BDD-DEMO-REFRESH-001..014). 2. Existing eight deploy/demo-* + DEMO-FULL-FLOW-LETTER uplifted to realistic bank-letter content (mock parties/amounts only). 3. Ops path: cleanup as needed → import-all-demos.ps1 → publish-all-demos.ps1 → generate-all-demos.ps1 with durable evidence. 4. Master asset regen via *MasterDocxAssetGeneratorTest where assets change. 5. Backend mvn verify GREEN when code/assets tests change; FE/E2E N/A unless UI touched (frontend_ui_in_scope=false). 6. Queued docker-deploy when acceptance stack required. 7. Done only after stage 11 merge + MAIN doc-sync; do NOT deliver Wave B; do NOT flip #3b/#5a GO; do NOT activate CE-O02/RTL.",
+        "description": "DONE 2026-07-20. NON-CE ops-demo content leaf. Slice bank-letter-demo-refresh / task_id demo-refresh-wave-a. Wave A complete — clean shallow/padding demo + refresh 8 deploy/demo-* + DEMO-FULL-FLOW-LETTER; import/publish/generate 13/13. MAIN merge aa88170f (feature 5ae9575a); worktree REMOVED; sole-active cleared. Same-release publish supersede + DEACTIVATE_VERSION audit landed. BDD ready docs/behavior/bank-letter-demo-refresh.md. frontend_ui_in_scope=false. Batch split closed. Historical TM #4-#8 remain Done — do NOT reopen P22/P23. Formal phase None. Vetoes still in force: CE-O02 deferred; no #3b/#5a GO; no RTL. Wave B #142 remains pending (next sole-active candidate — not activated). Do NOT claim go-live / IBL program Done.",
+        "details": "COMPLETED 2026-07-20 (stage 12 MAIN doc-sync). Slice id: bank-letter-demo-refresh. Alias task_id: demo-refresh-wave-a. Merge: aa88170f (feat/bank-letter-demo-refresh → main); feature tip 5ae9575a; worktree DGE-bank-letter-demo-refresh REMOVED (stage 11). Batch recommendation split (member_task_ids: [\"demo-refresh-wave-a\"]; proposed_slice_id: bank-letter-demo-refresh) closed. Gates: mvn verify GREEN 2312; docker-deploy-queue DEPLOY_OK; import/publish/generate 13/13; architecture PASS_WITH_NOTES merge_go=true; FE/E2E N/A (frontend_ui_in_scope=false). Evidence: docs/plan/evidence/bank-letter-demo-refresh/. Behavior: demo content uplift + same-release publish supersede + DEACTIVATE_VERSION audit. Wave A → Done. Wave B next leaf bank-letter-demo-expand = TM #142 pending — do NOT auto-activate. Umbrella #53/#106 registry-only. #119 remains Blocked. CE-O02 Deferred. Checklist #3b/#5a stay CONDITIONAL. Do NOT flip GO. Do NOT activate RTL/CE-O02.",
+        "testStrategy": "1. BDD ready confirmed (docs/behavior/bank-letter-demo-refresh.md; BDD-DEMO-REFRESH-001..014). 2. Existing eight deploy/demo-* + DEMO-FULL-FLOW-LETTER uplifted to realistic bank-letter content (mock parties/amounts only). 3. Ops path: cleanup as needed → import-all-demos.ps1 → publish-all-demos.ps1 → generate-all-demos.ps1 with durable evidence 13/13. 4. Master asset regen via *MasterDocxAssetGeneratorTest where assets change. 5. Backend mvn verify GREEN 2312; FE/E2E N/A (frontend_ui_in_scope=false). 6. Queued docker-deploy DEPLOY_OK. 7. Stage 11 merge + MAIN doc-sync; Wave B not delivered; #3b/#5a GO not flipped; CE-O02/RTL not activated.",
         "priority": "high",
         "dependencies": [
           "8"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T08:22:00.000Z"
+        "updatedAt": "2026-07-20T10:30:00.000Z"
       },
       {
         "id": "142",
         "title": "Demo expand Wave B: bank-letter-demo-expand (new letter families)",
-        "description": "PENDING / QUEUED 2026-07-20. Wave B after Wave A (#141). Slice bank-letter-demo-expand — new bank-letter demo families / catalogue expand. NOT In Progress. Do NOT activate while #141 sole-active. Batch split sibling of demo-refresh-wave-a. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT activate CE-O02/RTL.",
-        "details": "Registered 2026-07-20 as queued next leaf only (plan-orchestrator stage 2). Depends on #141 Wave A Done. Scope TBD from BDD/expand behavior when activated. Placement will be a new ISOLATED worktree when stage 0 runs. Do NOT fold into #141. Do NOT mark In Progress until orchestrator starts bank-letter-demo-expand.",
+        "description": "PENDING / QUEUED 2026-07-20. Wave B after Wave A (#141 Done). Slice bank-letter-demo-expand — new bank-letter demo families / catalogue expand. NOT In Progress. Next sole-active candidate after #141 closeout — do NOT auto-activate. Batch split sibling of demo-refresh-wave-a. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT activate CE-O02/RTL.",
+        "details": "Registered 2026-07-20 as queued next leaf only (plan-orchestrator stage 2). Dependency #141 Wave A → Done (merge aa88170f). Scope TBD from BDD/expand behavior when activated. Placement will be a new ISOLATED worktree when stage 0 runs. Do NOT fold into #141. Do NOT mark In Progress until orchestrator starts bank-letter-demo-expand.",
         "testStrategy": "Define BDD + acceptance when activated after #141 Done. Import/publish/generate evidence for new families. Same vetoes as Wave A for GO/CE-O02/RTL unless product reopens.",
         "priority": "medium",
         "dependencies": [
@@ -1961,18 +1961,18 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-20T08:22:00.000Z"
+        "updatedAt": "2026-07-20T10:30:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-20T08:22:00.000Z",
+      "lastModified": "2026-07-20T10:30:00.000Z",
       "taskCount": 142,
-      "completedCount": 137,
+      "completedCount": 138,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-20T08:22:00.000Z"
+      "updated": "2026-07-20T10:30:00.000Z"
     }
   }
 }

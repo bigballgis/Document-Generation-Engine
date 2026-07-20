@@ -5,7 +5,7 @@
 **Authored:** 2026-07-08  
 **Phase:** P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE (**P23-T16**); taskmaster **#8** (**Done**)  
 **BDD (historical):** `BDD-DEMO-TYP-011`…`013`, `BDD-DEMO-TYP-015`, `BDD-DEMO-TYP-020`  
-**Post-remediation refresh:** Wave A **In Progress** — TM **#141** / [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) (`BDD-DEMO-REFRESH-001`…`014`); plan [detail](../plan/detail/bank-letter-demo-refresh.md); evidence stub [plan/evidence/bank-letter-demo-refresh/](../plan/evidence/bank-letter-demo-refresh/README.md). **Do not** claim Wave A Done until refreshed generate artifacts are archived. Wave B expand (**#142**) **OUT**.
+**Post-remediation refresh:** Wave A **Done** — TM **#141** / [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) (`BDD-DEMO-REFRESH-001`…`014`); MAIN merge `aa88170f` / feature `5ae9575a`; plan [detail](../plan/detail/bank-letter-demo-refresh.md); evidence [plan/evidence/bank-letter-demo-refresh/](../plan/evidence/bank-letter-demo-refresh/README.md) (**13/13**). Wave B expand (**#142**) remains **pending** (not activated).
 
 ---
 
@@ -114,14 +114,14 @@ docs/evidence/
 
 | Document | Relationship |
 | --- | --- |
-| [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) | Wave A content refresh BDD — **In Progress** (not Done) |
-| [bank-letter-demo-refresh plan](../plan/detail/bank-letter-demo-refresh.md) | Wave A exit criteria + vetoes |
-| [plan/evidence/bank-letter-demo-refresh/](../plan/evidence/bank-letter-demo-refresh/README.md) | Stub for Wave A generate artifacts (later) |
+| [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) | Wave A content refresh BDD — **Done** (`aa88170f`) |
+| [bank-letter-demo-refresh plan](../plan/detail/bank-letter-demo-refresh.md) | Wave A exit criteria + vetoes (Wave A Done) |
+| [plan/evidence/bank-letter-demo-refresh/](../plan/evidence/bank-letter-demo-refresh/README.md) | Wave A generate artifacts **13/13** |
 | [demo-typography-layout-behavior-spec.md](../requirements/demo-typography-layout-behavior-spec.md) | Observable evidence §12 (P23 — **Done**; do not reopen) |
 | [P23 detail plan](../plan/detail/P23-demo-typography-layout-excellence.md) | P23-T14/T15/T16 |
 | [deploy/demo-shared/README.md](../../deploy/demo-shared/README.md) | Publish + generate orchestration + Wave A cleanup path |
 | `.taskmaster/tasks/tasks.json` task **#8** | Historical fundraising evidence bundle (**Done**) |
-| `.taskmaster/tasks/tasks.json` task **#141** | Wave A refresh (**in-progress**) |
+| `.taskmaster/tasks/tasks.json` task **#141** | Wave A refresh (**done**) |
 
 ---
 
@@ -129,5 +129,6 @@ docs/evidence/
 
 | Version | Date | Description |
 | --- | --- | --- |
+| 1.1.1 | 2026-07-20 | Wave A **Done** (`aa88170f`); evidence 13/13; Wave B #142 still pending |
 | 1.1.0 | 2026-07-20 | Wave A In Progress cross-links; ops-safe cleanup note; 13-ID coverage unchanged; **not** claiming refresh Done |
 | 1.0.0 | 2026-07-08 | Initial evidence index — 13 templates; P23-T16 |
