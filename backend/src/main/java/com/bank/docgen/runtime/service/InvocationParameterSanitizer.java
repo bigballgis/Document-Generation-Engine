@@ -248,6 +248,7 @@ public class InvocationParameterSanitizer {
         putIfNonBlank(summary, "locale", context.locale());
         putIfNonBlank(summary, "jurisdiction", context.jurisdiction());
         putIfNonBlank(summary, "product", context.product());
+        putIfNonBlank(summary, "legalEntityCode", context.legalEntityCode());
         return summary;
     }
 

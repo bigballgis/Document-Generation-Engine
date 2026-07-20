@@ -89,7 +89,8 @@ class IblA1PreviewVariableValidationTest {
                 new com.bank.docgen.rendering.PaginationDeltaFidelitySupport(
                         new DocgenRenderingProperties(),
                         new com.bank.docgen.rendering.PdfPageCountReader()
-                )
+                ),
+                mockDocumentBrandResolveService()
         );
     }
 
@@ -125,5 +126,24 @@ class IblA1PreviewVariableValidationTest {
 
         verify(variableComputePort, never()).applyCompute(any(), any(), any());
         verify(objectStoragePort, never()).put(anyString(), any(), anyLong(), anyString());
+    }
+
+    private static com.bank.docgen.documentbrand.service.DocumentBrandResolveService mockDocumentBrandResolveService() {
+        com.bank.docgen.documentbrand.service.DocumentBrandResolveService service =
+                org.mockito.Mockito.mock(com.bank.docgen.documentbrand.service.DocumentBrandResolveService.class);
+        org.mockito.Mockito.lenient().when(service.resolve(
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any()
+        )).thenReturn(
+                new com.bank.docgen.documentbrand.domain.ResolvedDocumentBrand(
+                        null,
+                        "PLATFORM_DEFAULT",
+                        "platform/document-brands/PLATFORM_DEFAULT/logo",
+                        null,
+                        null
+                )
+        );
+        return service;
     }
 }

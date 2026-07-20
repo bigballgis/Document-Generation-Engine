@@ -51,6 +51,17 @@ public final class ManagementAuditEventTypes {
     /** CE-G05: template annual review completed (nextReviewDue rolled). */
     public static final String TEMPLATE_ANNUAL_REVIEW_COMPLETED = "TEMPLATE_ANNUAL_REVIEW_COMPLETED";
 
+    /** IBL-E4 / ADR-0065: DocumentBrand catalog create. */
+    public static final String DOCUMENT_BRAND_CREATED = "DOCUMENT_BRAND_CREATED";
+    /** IBL-E4 / ADR-0065: DocumentBrand catalog update / deactivate. */
+    public static final String DOCUMENT_BRAND_UPDATED = "DOCUMENT_BRAND_UPDATED";
+    /** IBL-E4 / ADR-0065: LegalEntity catalog create. */
+    public static final String LEGAL_ENTITY_CREATED = "LEGAL_ENTITY_CREATED";
+    /** IBL-E4 / ADR-0065: LegalEntity update / re-bind. */
+    public static final String LEGAL_ENTITY_UPDATED = "LEGAL_ENTITY_UPDATED";
+    /** IBL-E4 / ADR-0065: group defaultLegalEntityCode change. */
+    public static final String GROUP_DEFAULT_LEGAL_ENTITY_UPDATED = "GROUP_DEFAULT_LEGAL_ENTITY_UPDATED";
+
     private ManagementAuditEventTypes() {
     }
 }

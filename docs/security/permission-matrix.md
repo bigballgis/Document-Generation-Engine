@@ -17,6 +17,7 @@
 - [CE-G05 模板年检 + 条款正文全文检索](../behavior/ce-g05-annual-review-fts.md)（BDD-CE-G05；#77 — 无新 capability；复用 `authorTemplates` / §5.1 目录浏览）
 - [PRR-D01c Dashboard summary API](../behavior/prod-dashboard-summary-api.md)（BDD-PRR-D01C；#136 — 无新 capability；会话认证 + catalog 同款 group-scope；§13.1.3）
 - [IBL-E3 法务→合规审批矩阵](../behavior/ibl-e3-legal-approval-matrix.md)（BDD-IBL-E3；#130 — 新角色 `LEGAL_REVIEWER` + capability `decideLegalApprovals`；[ADR-0064 Accepted](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)）
+- [IBL-E4 法人实体文档品牌变体](../behavior/ibl-e4-entity-document-brands.md)（BDD-IBL-E4；#131 — **无新角色**；目录写 = 管理员；allow-list 写 = 既有模板编排写边界；[ADR-0065 Accepted](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)）
 
 ## 2. 权限设计原则
 
@@ -103,6 +104,7 @@
 | 更新模板基础信息 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 普通模板基础信息更新由全局管理员和分组管理员执行；全局管理员可更新全部普通模板基础信息，分组管理员可更新被授权组范围内普通模板基础信息。 |
 | 完成模板年检 / 查看年到期待办（CE-G05） | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | **无新 capability bit。** 复用 `authorTemplates`（与 CE-U07 作者工作流同级）：组范围模板访问 **且** 具备编排权。列表 `GET …/author-workflow/annual-review-due-tasks`；完成 `POST …/templates/{templateId}/annual-review/complete`。测试人员 / 审批人员默认不可见待办、不可 complete（403）。不新建独立治理路由或角色。行为：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。 |
 | 配置审批矩阵模式 `approvalMatrixMode`（IBL-E3） | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 包级 `SINGLE_TRACK` \| `LEGAL_THEN_COMPLIANCE`；仅 `DRAFT` 或 `APPROVAL`+`PENDING_SUBMIT` 可写；进入 LEGAL/COMPLIANCE/`PENDING_DECISION`/待发布/已发布线后 **422** `APPROVAL_MATRIX_MODE_LOCKED`。默认与迁移值均为 `SINGLE_TRACK`。[ADR-0064](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)。测试/审批/法务角色无配置权。多级阶段判定见 §5.2。 |
+| 配置模板文档品牌 allow-list `allowedDocumentBrandCodes`（IBL-E4） | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 包级可选字符串数组；空/缺省 = 允许组内任一 ACTIVE DocumentBrand。可写窗口对齐既有包元数据草稿规则。解析品牌不在名单 → runtime **422** `DOCUMENT_BRAND_NOT_ALLOWED`。[ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)。测试/审批/法务角色无配置权。目录维护见 §5.3。 |
 
 ### 5.1 条款或内容模块权限矩阵
 
@@ -139,6 +141,22 @@
 | 错阶段 / 跳级 | — | — | — | — | 错阶段 payload → **409/422** `APPROVAL_STAGE_MISMATCH`；跳过 LEGAL → 4xx；状态不变。 |
 
 Capability：`decideLegalApprovals` = {`GLOBAL_ADMIN`,`GROUP_ADMIN`,`LEGAL_REVIEWER`}；`decideApprovals` 仍 = {`GLOBAL_ADMIN`,`GROUP_ADMIN`,`TEMPLATE_APPROVER`}（COMPLIANCE / 单级）。行为 SoT：[ibl-e3-legal-approval-matrix.md](../behavior/ibl-e3-legal-approval-matrix.md)。
+
+### 5.3 IBL-E4 文档品牌与法人实体目录（ADR-0065）
+
+**已确认（2026-07-20 / PD-9 / BDD-IBL-E4）：** DocumentBrand / LegalEntity 为组范围主数据目录；**无新角色**、**无新 capability bit**。壳层 `REDBC`/`GREENBC` 主题切换权不变（UI-only）。Accepted ADR ≠ impl Done；**不**翻转 #3b/#5a。
+
+| 操作 | 全局管理员 | 分组管理员 | 母版设计人员 | 模板编排人员 | 测试/审批/法务 | 说明 |
+| --- | --- | --- | --- | --- | --- | --- |
+| DocumentBrand 目录 list/get | 是 | 被授权组范围内 | 是（只读） | 是（只读） | 否（除非兼管理员） | 只读供选择器/allow-list 配置；写见下行。 |
+| DocumentBrand 创建/更新/启停 | 是 | 被授权组范围内 | **否**（403/404） | **否** | **否** | 含 logo/可选 seal/letterheadLegalName；种子 `PLATFORM_DEFAULT` 由迁移保障。 |
+| LegalEntity 目录 list/get | 是 | 被授权组范围内 | 是（只读） | 是（只读） | 否（除非兼管理员） | 详情回显绑定 `documentBrandCode`。 |
+| LegalEntity 创建/更新/改绑/启停 | 是 | 被授权组范围内 | **否** | **否** | **否** | 创建必须绑定品牌；改绑写管理审计（旧→新 code）。 |
+| 组 `defaultLegalEntityCode` 读写 | 是 | 被授权组范围内 | **否** | **否** | **否** | 省略 runtime `legalEntityCode` 时的回落；无效/缺省 → `PLATFORM_DEFAULT`。 |
+| 模板 `allowedDocumentBrandCodes` | 是 | 被授权组范围内 | 是 | 是 | 否 | 复用既有模板编排写边界；见 §5 表行。 |
+| Runtime/preview 提交 `context.legalEntityCode` | — | — | — | — | — | API 调用方/测试生成路径；解析失败 **422**；摘要回显 resolved codes。非目录写权限。 |
+
+行为 SoT：[ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)；决策：[ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)。
 
 ## 6. API 权限矩阵
 

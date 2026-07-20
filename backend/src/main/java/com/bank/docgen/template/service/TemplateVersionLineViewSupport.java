@@ -124,7 +124,8 @@ final class TemplateVersionLineViewSupport {
                 detail.locale(),
                 detail.localeVariantFamilyId(),
                 detail.approvalMatrixMode(),
-                detail.approvalStage()
+                detail.approvalStage(),
+                detail.allowedDocumentBrandCodes()
         );
     }
 

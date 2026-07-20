@@ -36,12 +36,14 @@ public record TemplateDetailView(
         String locale,
         String localeVariantFamilyId,
         ApprovalMatrixMode approvalMatrixMode,
-        ApprovalStage approvalStage
+        ApprovalStage approvalStage,
+        List<String> allowedDocumentBrandCodes
 ) {
     public TemplateDetailView {
         variables = DefensiveCopies.copyList(variables);
         bindings = DefensiveCopies.copyList(bindings);
         rules = DefensiveCopies.copyList(rules);
+        allowedDocumentBrandCodes = DefensiveCopies.copyList(allowedDocumentBrandCodes);
         if (approvalMatrixMode == null) {
             approvalMatrixMode = ApprovalMatrixMode.SINGLE_TRACK;
         }
@@ -96,7 +98,8 @@ public record TemplateDetailView(
                 ComputeDslLimits.DEFAULT_LOCALE,
                 null,
                 ApprovalMatrixMode.SINGLE_TRACK,
-                null
+                null,
+                List.of()
         );
     }
 
@@ -151,7 +154,66 @@ public record TemplateDetailView(
                 locale,
                 localeVariantFamilyId,
                 ApprovalMatrixMode.SINGLE_TRACK,
-                null
+                null,
+                List.of()
+        );
+    }
+
+    /** Compatibility constructor for callers that omit allow-list. */
+    public TemplateDetailView(
+            String id,
+            String externalId,
+            String groupCode,
+            String name,
+            String description,
+            String masterId,
+            TemplateLifecycleStatus lifecycleStatus,
+            ApprovalSubState approvalSubState,
+            String releaseVersion,
+            String devVersionId,
+            int devVersionNumber,
+            List<VariableSchemaView> variables,
+            List<AnchorBindingView> bindings,
+            List<CompositionRuleView> rules,
+            Instant createdAt,
+            Instant updatedAt,
+            String updatedBy,
+            String updatedByDisplayName,
+            boolean readOnly,
+            TemplateExportMasterPinView masterPin,
+            LocalDate nextReviewDue,
+            String locale,
+            String localeVariantFamilyId,
+            ApprovalMatrixMode approvalMatrixMode,
+            ApprovalStage approvalStage
+    ) {
+        this(
+                id,
+                externalId,
+                groupCode,
+                name,
+                description,
+                masterId,
+                lifecycleStatus,
+                approvalSubState,
+                releaseVersion,
+                devVersionId,
+                devVersionNumber,
+                variables,
+                bindings,
+                rules,
+                createdAt,
+                updatedAt,
+                updatedBy,
+                updatedByDisplayName,
+                readOnly,
+                masterPin,
+                nextReviewDue,
+                locale,
+                localeVariantFamilyId,
+                approvalMatrixMode,
+                approvalStage,
+                List.of()
         );
     }
 }

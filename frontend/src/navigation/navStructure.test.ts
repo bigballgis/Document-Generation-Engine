@@ -364,6 +364,16 @@ describe('navStructure', () => {
           routeKey: ROUTE_KEYS.legalHoldAdministration,
           path: '/governance/legal-holds',
         },
+        {
+          id: 'document-brands',
+          routeKey: ROUTE_KEYS.documentBrandAdministration,
+          path: '/governance/document-brands',
+        },
+        {
+          id: 'legal-entities',
+          routeKey: ROUTE_KEYS.documentBrandAdministration,
+          path: '/governance/legal-entities',
+        },
       ])
     })
 

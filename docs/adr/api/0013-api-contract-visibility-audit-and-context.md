@@ -11,6 +11,8 @@ topic: api
 related:
 	- docs/api/contract-outline.md
 	- docs/security/permission-matrix.md
+	- docs/adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md
+	- docs/adr/template-lifecycle/0065-legal-entity-document-brand-variants.md
 ---
 
 # ADR 0013: API Contract Visibility, Audit Summary, and Context Fields
@@ -61,6 +63,10 @@ The v1 `context` object uses a strict safe whitelist. Allowed fields are `source
 ### Amendment (2026-07-20) — IBL-E2 / ADR-0063
 
 **Amends** the `context` whitelist above: optional `jurisdiction` and `product` (strings) are added. Existing `channel` additionally participates in **composition inclusion** matching (field name unchanged). Non-blank values of `jurisdiction` / `product` / `channel` may be recorded in `contextSummary` and consumed by Composition Inclusion Rules ([ADR-0063](../template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)). `sourceSystem` / `businessRequestId` / `upstreamTraceId` / `scenario` do **not** enter inclusion matching. Sensitive-content prohibitions and unknown-field `400 REQUEST_BODY_INVALID` are unchanged. Normative scenarios: [ibl-e2-jurisdiction-rule-engine.md](../../behavior/ibl-e2-jurisdiction-rule-engine.md).
+
+### Amendment (2026-07-20) — IBL-E4 / ADR-0065
+
+**Amends** the `context` whitelist above: optional `legalEntityCode` (string) is added. Non-blank values may be recorded in `contextSummary` and drive **document brand** resolution (LegalEntity → DocumentBrand) per [ADR-0065](../template-lifecycle/0065-legal-entity-document-brand-variants.md). `legalEntityCode` does **not** participate in Composition Inclusion matching and does **not** select template packages. Sensitive-content prohibitions and unknown-field `400 REQUEST_BODY_INVALID` are unchanged. Normative scenarios: [ibl-e4-entity-document-brands.md](../../behavior/ibl-e4-entity-document-brands.md).
 
 Asynchronous accepted responses return `task.queryPath`, a relative task-query path. `task.queryPath` is not an unauthenticated or signed URL; later task query calls still require API credential, AD Group, and template-level authorization.
 

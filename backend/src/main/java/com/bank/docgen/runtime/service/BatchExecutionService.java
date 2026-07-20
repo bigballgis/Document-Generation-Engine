@@ -80,6 +80,7 @@ public class BatchExecutionService {
         int failureCount = 0;
 
         String requestLocale = request.context() == null ? null : request.context().locale();
+        String legalEntityCode = request.context() == null ? null : request.context().legalEntityCode();
         TemplateLocaleCompatibilitySupport.assertRequestLocaleCompatible(template, requestLocale);
         com.bank.docgen.template.port.CompositionInclusionAxes inclusionAxes =
                 request.context() == null
@@ -102,7 +103,8 @@ public class BatchExecutionService {
                         com.bank.docgen.authoring.structured.CallerRenderOverride.empty(),
                         mode,
                         requestLocale,
-                        inclusionAxes
+                        inclusionAxes,
+                        legalEntityCode
                 );
                 if (continueOnItemFailure) {
                     idempotencyService.registerDownloadableDocument(

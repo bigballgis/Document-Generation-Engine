@@ -3,6 +3,9 @@ package com.bank.docgen.rendering.service;
 import com.bank.docgen.authoring.structured.CallerRenderOverride;
 import com.bank.docgen.authoring.structured.FidelityValidationService;
 import com.bank.docgen.authoring.structured.RenderProfileService;
+import com.bank.docgen.documentbrand.domain.ResolvedDocumentBrand;
+import com.bank.docgen.documentbrand.service.DocumentBrandResolveService;
+import com.bank.docgen.documentbrand.service.DocumentBrandSlotApplicationSupport;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
@@ -52,6 +55,7 @@ final class PreviewGenerationAssemblySupport {
     private final VariableComputePort variableComputePort;
     private final VariableSchemaValidationPort variableSchemaValidationPort;
     private final PaginationDeltaFidelitySupport paginationDeltaFidelitySupport;
+    private final DocumentBrandResolveService documentBrandResolveService;
 
     PreviewGenerationAssemblySupport(
             AnchorBindingRepository anchorBindingRepository,
@@ -64,7 +68,8 @@ final class PreviewGenerationAssemblySupport {
             FidelityValidationService fidelityValidationService,
             VariableComputePort variableComputePort,
             VariableSchemaValidationPort variableSchemaValidationPort,
-            PaginationDeltaFidelitySupport paginationDeltaFidelitySupport
+            PaginationDeltaFidelitySupport paginationDeltaFidelitySupport,
+            DocumentBrandResolveService documentBrandResolveService
     ) {
         this.anchorBindingRepository = anchorBindingRepository;
         this.masterDocumentRepository = masterDocumentRepository;
@@ -77,6 +82,7 @@ final class PreviewGenerationAssemblySupport {
         this.variableComputePort = variableComputePort;
         this.variableSchemaValidationPort = variableSchemaValidationPort;
         this.paginationDeltaFidelitySupport = paginationDeltaFidelitySupport;
+        this.documentBrandResolveService = documentBrandResolveService;
     }
 
     record AssembledPreview(
@@ -122,6 +128,18 @@ final class PreviewGenerationAssemblySupport {
             String localeTag,
             CompositionInclusionAxes inclusionAxes
     ) throws IOException {
+        return assembleAndStore(template, version, previewId, variables, localeTag, inclusionAxes, null);
+    }
+
+    AssembledPreview assembleAndStore(
+            RenderableTemplateSnapshot template,
+            TemplateVersionEntity version,
+            UUID previewId,
+            Map<String, Object> variables,
+            String localeTag,
+            CompositionInclusionAxes inclusionAxes,
+            String legalEntityCode
+    ) throws IOException {
         // IBL-A1: preview aligned with runtime — fail-closed before compute/assemble.
         variableSchemaValidationPort.validateForAssembly(version.getId(), variables);
         MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.masterId())
@@ -131,10 +149,19 @@ final class PreviewGenerationAssemblySupport {
                 variables,
                 localeTag
         );
+        // IBL-E4 / ADR-0065: same document-brand resolve/apply as runtime.
+        ResolvedDocumentBrand resolvedBrand = documentBrandResolveService.resolve(
+                template.groupCode(),
+                legalEntityCode,
+                template.allowedDocumentBrandCodes()
+        );
         List<AnchorBindingEntity> bindings = anchorBindingRepository
                 .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
-        Map<String, String> bindingJson = new LinkedHashMap<>();
-        bindings.forEach(binding -> bindingJson.put(binding.getAnchorId(), binding.getStructuredContentJson()));
+        Map<String, String> sourceBindings = new LinkedHashMap<>();
+        bindings.forEach(binding -> sourceBindings.put(binding.getAnchorId(), binding.getStructuredContentJson()));
+        DocumentBrandSlotApplicationSupport.Applied brandApplied =
+                DocumentBrandSlotApplicationSupport.apply(sourceBindings, resolvedBrand);
+        Map<String, String> bindingJson = new LinkedHashMap<>(brandApplied.bindingJson());
         // ADR-0063 / E2-C9: same evaluator + real axes as runtime generate.
         Map<String, String> pinnedModuleStructures =
                 renderContextPort.resolvePinnedContentStructures(
@@ -191,6 +218,9 @@ final class PreviewGenerationAssemblySupport {
                         template.masterId()
                 )
         );
+        for (String code : brandApplied.fidelityWarningCodes()) {
+            warnings.add(new FidelityWarningView(code, "api.fidelity.documentBrandSlotsAbsent"));
+        }
         PaginationDeltaEvaluator.Evaluation paginationEval = paginationDeltaFidelitySupport.evaluate(
                 version.getAuthorWordPageCount(),
                 pdfPageCount

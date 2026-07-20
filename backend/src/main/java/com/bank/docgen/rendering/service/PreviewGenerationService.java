@@ -2,6 +2,8 @@ package com.bank.docgen.rendering.service;
 
 import com.bank.docgen.authoring.structured.FidelityValidationService;
 import com.bank.docgen.authoring.structured.RenderProfileService;
+import com.bank.docgen.documentbrand.service.DocumentBrandResolveException;
+import com.bank.docgen.documentbrand.service.DocumentBrandResolveService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.rendering.DocxAssembler;
@@ -69,7 +71,8 @@ public class PreviewGenerationService {
             FidelityWarningJsonSupport fidelityWarningJsonSupport,
             VariableComputePort variableComputePort,
             VariableSchemaValidationPort variableSchemaValidationPort,
-            PaginationDeltaFidelitySupport paginationDeltaFidelitySupport
+            PaginationDeltaFidelitySupport paginationDeltaFidelitySupport,
+            DocumentBrandResolveService documentBrandResolveService
     ) {
         this.previewAuthorizationPort = previewAuthorizationPort;
         this.testDataSetEvidencePort = testDataSetEvidencePort;
@@ -95,7 +98,8 @@ public class PreviewGenerationService {
                 fidelityValidationService,
                 variableComputePort,
                 variableSchemaValidationPort,
-                paginationDeltaFidelitySupport
+                paginationDeltaFidelitySupport,
+                documentBrandResolveService
         );
     }
 
@@ -165,6 +169,7 @@ public class PreviewGenerationService {
         renderProfileService.applyPreviewRenderProfileVersion(preview, version);
         previewRecordRepository.save(preview);
         CompositionInclusionAxes inclusionAxes = inclusionAxesFrom(request.context());
+        String legalEntityCode = request.context() == null ? null : request.context().legalEntityCode();
         try {
             PreviewGenerationAssemblySupport.AssembledPreview assembled =
                     assembly.assembleAndStore(
@@ -173,7 +178,8 @@ public class PreviewGenerationService {
                             preview.getId(),
                             variables,
                             null,
-                            inclusionAxes
+                            inclusionAxes,
+                            legalEntityCode
                     );
             preview.markSucceeded(
                     assembled.storageKey(),
@@ -210,6 +216,15 @@ public class PreviewGenerationService {
             previewRecordRepository.save(preview);
             if (throwOnFailure) {
                 throw inclusionEx;
+            }
+            return mapping.toView(preview, List.of(), List.of());
+        } catch (DocumentBrandResolveException brandEx) {
+            LOG.warn("Preview document-brand resolve failed for template {} preview {}: {}",
+                    templateId, preview.getId(), brandEx.getMessage());
+            preview.markFailed();
+            previewRecordRepository.save(preview);
+            if (throwOnFailure) {
+                throw brandEx;
             }
             return mapping.toView(preview, List.of(), List.of());
         } catch (IOException | RuntimeException ex) {

@@ -3,8 +3,14 @@ package com.bank.docgen.demo;
 import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
 import com.bank.docgen.apimgmt.service.ApiManagementService;
 import com.bank.docgen.rendering.api.BatchTestGenerateRequest;
+import com.bank.docgen.rendering.api.FidelityWarningView;
 import com.bank.docgen.rendering.api.TestGenerateRequest;
+import com.bank.docgen.rendering.domain.PreviewStatus;
+import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
+import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
 import com.bank.docgen.rendering.service.BatchTestGenerationService;
+import com.bank.docgen.rendering.service.FidelityWarningJsonSupport;
+import com.bank.docgen.rendering.service.FidelityWarningViewedService;
 import com.bank.docgen.rendering.service.PreviewGenerationService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
@@ -32,6 +38,9 @@ final class DemoFullFlowPublishSupport {
     private final TestDataSetService testDataSetService;
     private final PreviewGenerationService previewGenerationService;
     private final BatchTestGenerationService batchTestGenerationService;
+    private final PreviewRecordRepository previewRecordRepository;
+    private final FidelityWarningJsonSupport fidelityWarningJsonSupport;
+    private final FidelityWarningViewedService fidelityWarningViewedService;
     private final TemplateLifecycleService templateLifecycleService;
     private final ApiManagementService apiManagementService;
     private final String structuredBindingJson;
@@ -42,6 +51,9 @@ final class DemoFullFlowPublishSupport {
             TestDataSetService testDataSetService,
             PreviewGenerationService previewGenerationService,
             BatchTestGenerationService batchTestGenerationService,
+            PreviewRecordRepository previewRecordRepository,
+            FidelityWarningJsonSupport fidelityWarningJsonSupport,
+            FidelityWarningViewedService fidelityWarningViewedService,
             TemplateLifecycleService templateLifecycleService,
             ApiManagementService apiManagementService,
             String structuredBindingJson,
@@ -51,6 +63,9 @@ final class DemoFullFlowPublishSupport {
         this.testDataSetService = testDataSetService;
         this.previewGenerationService = previewGenerationService;
         this.batchTestGenerationService = batchTestGenerationService;
+        this.previewRecordRepository = previewRecordRepository;
+        this.fidelityWarningJsonSupport = fidelityWarningJsonSupport;
+        this.fidelityWarningViewedService = fidelityWarningViewedService;
         this.templateLifecycleService = templateLifecycleService;
         this.apiManagementService = apiManagementService;
         this.structuredBindingJson = structuredBindingJson;
@@ -84,6 +99,9 @@ final class DemoFullFlowPublishSupport {
                 new BatchTestGenerateRequest(List.of(testDataSet.testDataSetId())),
                 author
         );
+        // IBL-E4: resolve/apply may emit DOCUMENT_BRAND_SLOTS_ABSENT; gate requires viewed.
+        // Batch creates the latest SUCCEEDED preview used by publish-gate evidence.
+        markAllSucceededPreviewFidelityWarningsViewed(templateId, author);
 
         templateLifecycleService.submitForTest(
                 templateId,
@@ -159,6 +177,30 @@ final class DemoFullFlowPublishSupport {
                 new PublishTemplateRequest(releaseVersion, true),
                 DemoCatalogSessions.groupAdminSession()
         );
+    }
+
+    private void markAllSucceededPreviewFidelityWarningsViewed(
+            UUID templateId,
+            ManagementSessionClaims author
+    ) {
+        for (PreviewRecordEntity preview : previewRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId)) {
+            if (preview.getStatus() != PreviewStatus.SUCCEEDED) {
+                continue;
+            }
+            List<FidelityWarningView> warnings = fidelityWarningJsonSupport.readWarnings(
+                    preview.getFidelityWarningsJson()
+            );
+            for (int index = 0; index < warnings.size(); index++) {
+                if (!Boolean.TRUE.equals(warnings.get(index).viewed())) {
+                    fidelityWarningViewedService.markWarningViewed(
+                            templateId,
+                            preview.getId(),
+                            index,
+                            author
+                    );
+                }
+            }
+        }
     }
 
     private void configurePublishableTemplate(UUID templateId, ManagementSessionClaims author) {

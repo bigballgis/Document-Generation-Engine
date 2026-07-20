@@ -55,6 +55,10 @@ class ManagementOpenApiPathSanityTest {
         if (path.startsWith("/api/management/v1/dashboard")) {
             return java.util.Optional.of("com.bank.docgen.dashboard");
         }
+        if (path.startsWith("/api/management/v1/document-brands")
+                || path.startsWith("/api/management/v1/legal-entities")) {
+            return java.util.Optional.of("com.bank.docgen.documentbrand");
+        }
         if (path.startsWith("/api/management/v1/library/")) {
             return java.util.Optional.of("com.bank.docgen.library");
         }

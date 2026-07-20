@@ -212,6 +212,20 @@ Runtime `context` whitelist adds optional `jurisdiction` / `product`; existing `
 
 Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `Context`, `CompositionInclusionRuleView`, `PublishGateCheckCode`, `ErrorCode`. Companion: [contract-outline.md](contract-outline.md) IBL-E2 bullet + context whitelist table. Behavior SoT: [ibl-e2-jurisdiction-rule-engine.md](../behavior/ibl-e2-jurisdiction-rule-engine.md)（BDD-IBL-E2-001…016）. `frontend_ui_in_scope=false`. Accepted ADR ≠ impl Done; formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
 
+### Per-legal-entity document brand variants (IBL-E4)
+
+Runtime `context` whitelist adds optional `legalEntityCode` ([ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md) / ADR-0013 Amendment). Management catalog APIs: DocumentBrand + LegalEntity + group `defaultLegalEntityCode`. Template package optional `allowedDocumentBrandCodes`. Resolve applies to **document artifact** brand slots only — orthogonal to UI `REDBC`/`GREENBC` chrome.
+
+| Condition | HTTP | `error.code` (stable) |
+| --- | --- | --- |
+| Unknown `context` field | 400 | `REQUEST_BODY_INVALID` |
+| Unknown legal entity | 422 | `LEGAL_ENTITY_UNKNOWN` |
+| Inactive legal entity | 422 | `LEGAL_ENTITY_INACTIVE` |
+| Bound document brand inactive/missing | 422 | `DOCUMENT_BRAND_INACTIVE` |
+| Resolved brand ∉ template allow-list | 422 | `DOCUMENT_BRAND_NOT_ALLOWED` |
+
+Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `Context`, `DocumentBrandView`, `LegalEntityView`, `ErrorCode`, template `allowedDocumentBrandCodes`, metadata `resolvedLegalEntityCode` / `resolvedDocumentBrandCode`. Companion: [contract-outline.md](contract-outline.md) IBL-E4 bullet + context whitelist table. Behavior SoT: [ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)（BDD-IBL-E4-001…017）. `frontend_ui_in_scope=true`. Accepted ADR ≠ impl Done; formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
+
 ### Full-library export (CE-E03)
 
 Management full-library export in [openapi-v1.yaml](openapi-v1.yaml) (`exportLibraryTemplates`) / [contract-outline.md](contract-outline.md) «模板导出/导入契约» CE-E03:

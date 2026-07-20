@@ -86,7 +86,8 @@ class IblE2PreviewInclusionAxesWiringTest {
                 fidelityValidationService,
                 variableComputePort,
                 variableSchemaValidationPort,
-                new PaginationDeltaFidelitySupport(new DocgenRenderingProperties(), new PdfPageCountReader())
+                new PaginationDeltaFidelitySupport(new DocgenRenderingProperties(), new PdfPageCountReader()),
+                mockDocumentBrandResolveService()
         );
     }
 
@@ -116,5 +117,24 @@ class IblE2PreviewInclusionAxesWiringTest {
         assertThat(axesCaptor.getValue().jurisdiction()).isEqualTo("Hong Kong");
         assertThat(axesCaptor.getValue().product()).isEqualTo("TRADE-LC");
         assertThat(axesCaptor.getValue().channel()).isEqualTo("API");
+    }
+
+    private static com.bank.docgen.documentbrand.service.DocumentBrandResolveService mockDocumentBrandResolveService() {
+        com.bank.docgen.documentbrand.service.DocumentBrandResolveService service =
+                org.mockito.Mockito.mock(com.bank.docgen.documentbrand.service.DocumentBrandResolveService.class);
+        org.mockito.Mockito.lenient().when(service.resolve(
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any()
+        )).thenReturn(
+                new com.bank.docgen.documentbrand.domain.ResolvedDocumentBrand(
+                        null,
+                        "PLATFORM_DEFAULT",
+                        "platform/document-brands/PLATFORM_DEFAULT/logo",
+                        null,
+                        null
+                )
+        );
+        return service;
     }
 }

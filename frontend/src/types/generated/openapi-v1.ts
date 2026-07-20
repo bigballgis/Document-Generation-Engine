@@ -1522,6 +1522,114 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/document-brands": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List group-scoped DocumentBrand catalog entries (IBL-E4)
+         * @description ADR-0065 / IBL-E4. Returns DocumentBrand rows for an authorized group. Orthogonal to UI BrandPreset (REDBC/GREENBC). Read access for template authors selecting allow-list / entity bind targets; writes require admin.
+         */
+        get: operations["listDocumentBrands"];
+        put?: never;
+        /**
+         * Create a DocumentBrand catalog entry (IBL-E4)
+         * @description ADR-0065. GROUP_ADMIN / GLOBAL_ADMIN only (group scope). Requires logoObjectRef. documentBrandCode group-unique.
+         */
+        post: operations["createDocumentBrand"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/document-brands/{documentBrandCode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a DocumentBrand by code (IBL-E4) */
+        get: operations["getDocumentBrand"];
+        /** Update a DocumentBrand catalog entry (IBL-E4) */
+        put: operations["updateDocumentBrand"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/legal-entities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List group-scoped LegalEntity catalog entries (IBL-E4)
+         * @description ADR-0065 / IBL-E4. Each entity binds exactly one documentBrandCode.
+         */
+        get: operations["listLegalEntities"];
+        put?: never;
+        /**
+         * Create a LegalEntity with required documentBrandCode (IBL-E4)
+         * @description ADR-0065. GROUP_ADMIN / GLOBAL_ADMIN only. Missing documentBrandCode → 422. Unknown brand → 422 DOCUMENT_BRAND_UNKNOWN (or equivalent).
+         */
+        post: operations["createLegalEntity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/legal-entities/{legalEntityCode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a LegalEntity by code (IBL-E4) */
+        get: operations["getLegalEntity"];
+        /**
+         * Update / re-bind LegalEntity document brand (IBL-E4)
+         * @description ADR-0065. Re-bind writes management audit (old→new documentBrandCode).
+         */
+        put: operations["updateLegalEntity"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/groups/{groupCode}/default-legal-entity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get group defaultLegalEntityCode for document-brand fallback (IBL-E4) */
+        get: operations["getGroupDefaultLegalEntity"];
+        /**
+         * Set group defaultLegalEntityCode (IBL-E4)
+         * @description ADR-0065. Admin-only. Null clears default (runtime omit → PLATFORM_DEFAULT document brand). Invalid/inactive entity → 422.
+         */
+        put: operations["putGroupDefaultLegalEntity"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/library/assets": {
         parameters: {
             query?: never;
@@ -1915,7 +2023,7 @@ export interface components {
         BatchItemStatus: "SUCCEEDED" | "FAILED" | "SKIPPED";
         /** @enum {string} */
         Permission: "ALLOW_PRINT" | "ALLOW_COPY" | "ALLOW_EDIT" | "ALLOW_ANNOTATE" | "ALLOW_FORM_FILL";
-        /** @description Safe whitelist (ADR-0013 amended by ADR-0063 / IBL-E2). Optional `jurisdiction` / `product` plus existing `channel` may drive Composition Inclusion Rules. Unknown fields → 400 REQUEST_BODY_INVALID. Must not carry PII, amounts, or template variable plaintext. */
+        /** @description Safe whitelist (ADR-0013 amended by ADR-0063 / IBL-E2 and ADR-0065 / IBL-E4). Optional `jurisdiction` / `product` plus existing `channel` may drive Composition Inclusion Rules. Optional `legalEntityCode` drives document-brand resolve (not package selection; not UI chrome). Unknown fields → 400 REQUEST_BODY_INVALID. Must not carry PII, amounts, or template variable plaintext. */
         Context: {
             sourceSystem?: string;
             /** @description Call-channel tracing/stats; also a composition inclusion match axis (ADR-0063). Not outbound delivery channel (PD-1). */
@@ -1929,6 +2037,8 @@ export interface components {
             jurisdiction?: string;
             /** @description Optional composition axis (ADR-0063). Same normalization/match rules as jurisdiction. */
             product?: string;
+            /** @description Optional legal-entity axis (ADR-0065 / IBL-E4). Trim; blank → absent; suggested maxLength 64; case-sensitive exact match against group LegalEntity catalog. Resolves DocumentBrand for artifact brand slots. Does not select template packages. Does not change UI BrandPreset. */
+            legalEntityCode?: string;
         };
         OutputOptions: {
             format: components["schemas"]["OutputFormat"];
@@ -1987,6 +2097,10 @@ export interface components {
             routeType?: components["schemas"]["RouteType"];
             resolvedReleaseVersion?: string;
             output?: components["schemas"]["OutputOptions"];
+            /** @description IBL-E4 / ADR-0065 — non-sensitive legal entity used for document-brand resolve (request value or group default). Null when omitted and no group default applied beyond PLATFORM_DEFAULT-only path without entity. */
+            resolvedLegalEntityCode?: string | null;
+            /** @description IBL-E4 / ADR-0065 — non-sensitive resolved DocumentBrand code applied to artifact brand slots (never a UI REDBC/GREENBC chrome code). */
+            resolvedDocumentBrandCode?: string | null;
         };
         DownloadUrlResponse: {
             metadata: components["schemas"]["Metadata"];
@@ -2319,6 +2433,10 @@ export interface components {
             releaseBundleSnapshotId?: string | null;
             /** @description CE-G06 — copy of template_version.master_file_hash (64-char lowercase hex SHA-256); null when snapshot id is null. */
             releaseBundleHash?: string | null;
+            /** @description IBL-E4 / ADR-0065 — non-sensitive legal entity on success path. */
+            resolvedLegalEntityCode?: string | null;
+            /** @description IBL-E4 / ADR-0065 — non-sensitive resolved document brand on success path. */
+            resolvedDocumentBrandCode?: string | null;
         };
         ManagementInvocationAuditLinkHintView: {
             requestId: string;
@@ -3809,6 +3927,90 @@ export interface components {
             };
         };
         /** @enum {string} */
+        DocumentBrandStatus: "ACTIVE" | "INACTIVE";
+        /** @description ADR-0065 / IBL-E4 group-scoped DocumentBrand (≠ UI BrandPreset). */
+        DocumentBrandView: {
+            groupCode: string;
+            documentBrandCode: string;
+            displayName: string;
+            status: components["schemas"]["DocumentBrandStatus"];
+            /** @description Authorized object-storage reference (required). */
+            logoObjectRef: string;
+            defaultSealObjectRef?: string | null;
+            letterheadLegalName?: string | null;
+        };
+        CreateDocumentBrandRequest: {
+            groupCode: string;
+            documentBrandCode: string;
+            displayName: string;
+            status?: components["schemas"]["DocumentBrandStatus"];
+            logoObjectRef: string;
+            defaultSealObjectRef?: string | null;
+            letterheadLegalName?: string | null;
+        };
+        UpdateDocumentBrandRequest: {
+            groupCode: string;
+            displayName?: string;
+            status?: components["schemas"]["DocumentBrandStatus"];
+            logoObjectRef?: string;
+            defaultSealObjectRef?: string | null;
+            letterheadLegalName?: string | null;
+        };
+        DocumentBrandResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["DocumentBrandView"];
+        };
+        DocumentBrandListResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: {
+                content: components["schemas"]["DocumentBrandView"][];
+            };
+        };
+        /** @description ADR-0065 / IBL-E4 group-scoped LegalEntity with required brand bind. */
+        LegalEntityView: {
+            groupCode: string;
+            legalEntityCode: string;
+            displayName: string;
+            status: components["schemas"]["DocumentBrandStatus"];
+            documentBrandCode: string;
+        };
+        CreateLegalEntityRequest: {
+            groupCode: string;
+            legalEntityCode: string;
+            displayName: string;
+            status?: components["schemas"]["DocumentBrandStatus"];
+            documentBrandCode: string;
+        };
+        UpdateLegalEntityRequest: {
+            groupCode: string;
+            displayName?: string;
+            status?: components["schemas"]["DocumentBrandStatus"];
+            /** @description Re-bind target; must reference same-group DocumentBrand. */
+            documentBrandCode?: string;
+        };
+        LegalEntityResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["LegalEntityView"];
+        };
+        LegalEntityListResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: {
+                content: components["schemas"]["LegalEntityView"][];
+            };
+        };
+        PutGroupDefaultLegalEntityRequest: {
+            /** @description Null clears group default (omit path → PLATFORM_DEFAULT brand). */
+            defaultLegalEntityCode?: string | null;
+        };
+        GroupDefaultLegalEntityView: {
+            groupCode: string;
+            defaultLegalEntityCode?: string | null;
+        };
+        GroupDefaultLegalEntityResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["GroupDefaultLegalEntityView"];
+        };
+        /** @enum {string} */
         CompositionInclusionDecision: "INCLUDE" | "EXCLUDE";
         /** @description Non-sensitive audit/invocation summary entry (ADR-0063). No clause body or variables. Default include (no targeting rules) uses matchedRuleId literal NONE_DEFAULT. */
         CompositionInclusionSummaryEntry: {
@@ -4356,6 +4558,8 @@ export interface components {
              * @description IBL-E1 / ADR-0062 — optional locale-variant family id.
              */
             localeVariantFamilyId?: string | null;
+            /** @description IBL-E4 / ADR-0065 — optional package allow-list of documentBrandCode values. Empty/absent = any ACTIVE group DocumentBrand (incl. PLATFORM_DEFAULT). Non-empty and resolved brand ∉ list → 422 DOCUMENT_BRAND_NOT_ALLOWED. */
+            allowedDocumentBrandCodes?: string[];
         };
         CreateTemplateRequest: {
             /** @description Stable business template identifier (path/runtime addressing). */
@@ -4380,6 +4584,8 @@ export interface components {
              * @enum {string}
              */
             approvalMatrixMode?: "SINGLE_TRACK" | "LEGAL_THEN_COMPLIANCE";
+            /** @description IBL-E4 / ADR-0065 — optional package document-brand allow-list on create. Omitted/empty = unrestricted ACTIVE brands. */
+            allowedDocumentBrandCodes?: string[];
         };
         UpdateTemplateRequest: {
             name?: string;
@@ -4396,6 +4602,8 @@ export interface components {
              * @enum {string}
              */
             approvalMatrixMode?: "SINGLE_TRACK" | "LEGAL_THEN_COMPLIANCE";
+            /** @description IBL-E4 / ADR-0065 — optional package document-brand allow-list. Writable window aligns with package metadata draft rules. */
+            allowedDocumentBrandCodes?: string[];
         };
         /** @description Single-template summary envelope (CE-G05 annual-review complete and other summary-returning management operations). */
         TemplateSummaryResponse: {
@@ -4537,6 +4745,8 @@ export interface components {
              * @description IBL-E1 / ADR-0062 — optional locale-variant family id.
              */
             localeVariantFamilyId?: string | null;
+            /** @description IBL-E4 / ADR-0065 — optional package document-brand allow-list echo. */
+            allowedDocumentBrandCodes?: string[];
         };
         TemplateImportResult: {
             importSummary: components["schemas"]["TemplateImportSummaryView"];
@@ -4773,7 +4983,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "RENDERING" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED" | "LOCALE_VARIANT_CONFLICT" | "TEMPLATE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_RULE_INVALID" | "COMPOSITION_INCLUSION_UNSATISFIED" | "CONTENT_MODULE_JURISDICTION_MISMATCH";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED" | "LOCALE_VARIANT_CONFLICT" | "TEMPLATE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_RULE_INVALID" | "COMPOSITION_INCLUSION_UNSATISFIED" | "CONTENT_MODULE_JURISDICTION_MISMATCH" | "LEGAL_ENTITY_UNKNOWN" | "LEGAL_ENTITY_INACTIVE" | "DOCUMENT_BRAND_INACTIVE" | "DOCUMENT_BRAND_NOT_ALLOWED" | "DOCUMENT_BRAND_UNKNOWN";
     };
     responses: {
         /** @description Async task accepted. */
@@ -7850,6 +8060,319 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listDocumentBrands: {
+        parameters: {
+            query: {
+                groupCode: string;
+                status?: "ACTIVE" | "INACTIVE" | "ALL";
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description DocumentBrand page/list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentBrandListResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    createDocumentBrand: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDocumentBrandRequest"];
+            };
+        };
+        responses: {
+            /** @description Created DocumentBrand. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentBrandResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getDocumentBrand: {
+        parameters: {
+            query: {
+                groupCode: string;
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                documentBrandCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description DocumentBrand detail. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentBrandResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    updateDocumentBrand: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                documentBrandCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDocumentBrandRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated DocumentBrand. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentBrandResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listLegalEntities: {
+        parameters: {
+            query: {
+                groupCode: string;
+                status?: "ACTIVE" | "INACTIVE" | "ALL";
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description LegalEntity page/list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalEntityListResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    createLegalEntity: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLegalEntityRequest"];
+            };
+        };
+        responses: {
+            /** @description Created LegalEntity. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalEntityResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getLegalEntity: {
+        parameters: {
+            query: {
+                groupCode: string;
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                legalEntityCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description LegalEntity detail. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalEntityResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    updateLegalEntity: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                legalEntityCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLegalEntityRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated LegalEntity. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalEntityResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getGroupDefaultLegalEntity: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                groupCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Group default legal-entity setting. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupDefaultLegalEntityResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    putGroupDefaultLegalEntity: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                groupCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutGroupDefaultLegalEntityRequest"];
+            };
+        };
+        responses: {
+            /** @description Persisted group default. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupDefaultLegalEntityResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };

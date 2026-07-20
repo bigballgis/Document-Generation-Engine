@@ -117,14 +117,14 @@ class CeC06DocxPermissionsBoundaryTest {
                 List.of("ALLOW_PRINT")
         );
         when(documentGenerationEngine.generate(
-                any(), anyString(), any(), eq("DOCX"), any(), any(), anyString(), any(), any()))
+                any(), anyString(), any(), eq("DOCX"), any(), any(), anyString(), any(), any(), any()))
                 .thenReturn(generated(
                         "DOC-DOCX",
                         "DOCX",
                         List.of(FidelityWarningCode.DOCX_PERMISSIONS_NOT_APPLIED.name())
                 ));
         when(documentGenerationEngine.generate(
-                any(), anyString(), any(), eq("PDF"), any(), any(), anyString(), any(), any()))
+                any(), anyString(), any(), eq("PDF"), any(), any(), anyString(), any(), any(), any()))
                 .thenReturn(generated("DOC-PDF", "PDF", List.of()));
 
         BatchGenerateRequestBody request = new BatchGenerateRequestBody(

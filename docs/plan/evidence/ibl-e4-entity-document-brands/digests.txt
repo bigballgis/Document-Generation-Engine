@@ -1,0 +1,4 @@
+=== frontend :4173 ===
+200
+=== healthz :8080 ===
+{"status":"UP"}

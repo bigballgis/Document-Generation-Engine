@@ -138,7 +138,10 @@ public class TemplateViewMapper {
                         ? null
                         : template.getLocaleVariantFamilyId().toString(),
                 template.getApprovalMatrixMode(),
-                inFlight ? approvalSubStateResolver.resolveStage(template) : null
+                inFlight ? approvalSubStateResolver.resolveStage(template) : null,
+                com.bank.docgen.documentbrand.service.AllowedDocumentBrandCodesJsonSupport.parse(
+                        template.getAllowedDocumentBrandCodesJson()
+                )
         );
     }
 
