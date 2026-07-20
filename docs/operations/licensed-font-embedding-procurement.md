@@ -16,7 +16,7 @@ Authority:
   still cites ADR-0041
 - Behavior readiness: [pd7-licensed-font-embedding.md](../behavior/pd7-licensed-font-embedding.md)
   (`bdd_readiness: not-applicable`)
-- Slice: `pd7-licensed-font-embedding` (Task Master **#139** sole-active)
+- Slice: `pd7-licensed-font-embedding` (Task Master **#139** → **Done** pursue docs `b966874a`; sole-active **cleared**; **Accepted ≠ embedding Done**)
 
 **This checklist is not a go-live authorization.** Completing docs here does **not** flip
 launch checklist **#3b GO** / **#5a GO**, does **not** mark licensed embedding Done, and
@@ -125,4 +125,5 @@ Cross-link: [launch-readiness-checklist.md](./launch-readiness-checklist.md) ·
 
 | Date | Change |
 | --- | --- |
+| 2026-07-20 | **#139 pursue docs → Done** (`b966874a`; sole-active **cleared**). Checklist remains operational; license/delivery gates still **Pending**. **Accepted ≠ embedding Done**. No **#3b/#5a GO** flips. |
 | 2026-07-20 | Initial checklist (slice `pd7-licensed-font-embedding` / PD-7 pursue; [ADR-0069](../adr/rendering-authoring/0069-licensed-font-embedding-pursue.md)). All procurement gates **Pending**. No GO flips. |

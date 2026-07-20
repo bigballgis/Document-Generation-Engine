@@ -76,13 +76,13 @@ Leaf Done when **all** of the following hold (docs/governance evidence — not G
 
 | Artifact | Role |
 | --- | --- |
-| IBL §8 **PD-7** | Product confirmation — pursue licensed embedding; OUT of Wave E; leaf **In Progress** (#139) |
+| IBL §8 **PD-7** | Product confirmation — pursue licensed embedding; OUT of Wave E; pursue docs leaf **Done** (#139 `b966874a`; **Accepted ≠ embedding Done**) |
 | [ADR-0041](../adr/rendering-authoring/0041-rendering-font-baseline.md) | Shipped font baseline (Carlito/Caladea + CJK) — not licensed Calibri |
 | [ADR-0069](../adr/rendering-authoring/0069-licensed-font-embedding-pursue.md) | Pursue path + procurement gate (**Accepted ≠ embedding Done**) |
 | [ADR-0060](../adr/rendering-authoring/0060-legal-reproducibility-freeze.md) | Legal freeze still reaffirms ADR-0041 fonts until post-procurement re-cut |
 | [licensed-font-embedding-procurement.md](../operations/licensed-font-embedding-procurement.md) | Procurement checklist — pending vs confirmed separated |
 | LRP LR-A2 / LR-A5 / checklist font items | Pairing surface; no **#3b/#5a GO** flip from this leaf |
-| Slice `pd7-licensed-font-embedding` | Isolated worktree delivery leaf (B2) |
+| Slice `pd7-licensed-font-embedding` | Isolated worktree delivery leaf — **Done** (`b966874a`; sole-active cleared) |
 
 ```
 bdd_readiness: not-applicable
