@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
-import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
+import { GROUPS_CATALOG_PATH, useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { useSessionStore } from '@/stores/session'
 import type { ManagementSession } from '@/types/session'
 
@@ -43,5 +43,29 @@ describe('useEntityLinkTargets', () => {
     const { masterDetailLink, contentModuleDetailLink } = useEntityLinkTargets()
     expect(masterDetailLink('master-1')).toBe('/masters/master-1')
     expect(contentModuleDetailLink('mod-1')).toBe('/content-modules/mod-1')
+  })
+
+  it('returns group catalog link when identity administration is visible', () => {
+    patchSession([ROUTE_KEYS.identityAdministration])
+    const { groupCatalogLink } = useEntityLinkTargets()
+    expect(groupCatalogLink('RETAIL')).toEqual({
+      path: GROUPS_CATALOG_PATH,
+      query: { q: 'RETAIL' },
+    })
+    expect(groupCatalogLink('*')).toBeUndefined()
+    expect(groupCatalogLink('')).toBe(GROUPS_CATALOG_PATH)
+  })
+
+  it('omits group catalog link when identity administration is not visible', () => {
+    patchSession([ROUTE_KEYS.dashboardHome])
+    const { groupCatalogLink } = useEntityLinkTargets()
+    expect(groupCatalogLink('RETAIL')).toBeUndefined()
+  })
+
+  it('returns task entity link gated by source domain (N1)', () => {
+    patchSession([ROUTE_KEYS.masterManagement])
+    const { taskEntityLink } = useEntityLinkTargets()
+    expect(taskEntityLink({ path: '/masters/m-1', source: 'master' })).toBe('/masters/m-1')
+    expect(taskEntityLink({ path: '/templates/t-1', source: 'template' })).toBeUndefined()
   })
 })

@@ -21,6 +21,7 @@ export const apiErrorZhCn = {
     fieldPatternInvalid: "此字段格式无效。",
     fieldUnknown: "未知字段。",
     contentModuleStructureMissing: "引用的内容模块没有固定的结构。",
+    contentModuleNestingCycle: "内容模块嵌套展开时检测到循环。",
     variableValidationFailed: "一个或多个模板变量未通过 VariableSchema 校验。",
   },
   storage: {
@@ -122,6 +123,11 @@ export const apiErrorZhCn = {
     importConflict: "模板导入与现有模板冲突。",
     importFailed: "模板导入未能完成。",
     importDependenciesUnsatisfied: "模板导入依赖未满足。",
+    bulkRepin: {
+      dryRunRequired: "批量重新固定母版时必须提供 dryRun。",
+      groupCodeRequired: "授权组上下文不明确时必须提供 groupCode。",
+      targetXor: "必须且只能提供 toSemanticVersion 或 useLatestApproved=true 之一。",
+    },
     dep: {
       bundleFormatOk: "导入包格式受支持。",
       masterPinAbsent: "导入包缺少母版锁定指纹。",
@@ -235,7 +241,8 @@ export const apiErrorZhCn = {
     releaseBundleHashMismatch: "发布包哈希与锁定的母版对象不匹配。",
     invocationKindNotRegenerable: "此调用类型不可重新生成；请使用 SINGLE、BATCH_ITEM 或 ASYNC_TASK 记录。",
     invocationRecordExpired: "调用记录已过期。",
-    specimenWatermarkFailed: "无法应用 SPECIMEN 水印。"
+    specimenWatermarkFailed: "无法应用 SPECIMEN 水印。",
+    productionReissueReasonRequired: "生产重发必须提供非空原因。",
   },
   batch: {
     originalBatchNotFound: "未找到原始批次。"
@@ -273,7 +280,11 @@ export const apiErrorZhCn = {
     impactConfirmationRequired: "执行此生命周期操作前，必须审阅影响摘要并进行二次确认。",
     invalidEffectiveRange: "effectiveFrom 必须小于或等于 effectiveTo。",
     searchTooLong: "搜索字符串最多 200 个字符。",
-    searchModeInvalid: "不支持的 searchMode 值。"
+    searchModeInvalid: "不支持的 searchMode 值。",
+    nestingCycle: "内容模块嵌套形成循环。",
+    nestingDepthExceeded: "内容模块嵌套深度超过最大限制 8。",
+    nestingTargetUnresolved: "嵌套内容模块引用无法解析为可见模块。",
+    nestingStructureInvalid: "内容模块结构 JSON 格式错误，无法用于嵌套治理。",
   },
   collaboration: {
     accessDenied: "您无权查看协作待办事项。",

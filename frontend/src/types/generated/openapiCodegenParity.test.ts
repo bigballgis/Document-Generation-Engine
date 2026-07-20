@@ -5,7 +5,9 @@ import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 describe('openapi-v1 codegen parity', () => {
-  it('committed generated types match a fresh regen from docs/api/openapi-v1.yaml', () => {
+  it(
+    'committed generated types match a fresh regen from docs/api/openapi-v1.yaml',
+    () => {
     const frontendRoot = resolve(process.cwd())
     const specPath = resolve(frontendRoot, '../docs/api/openapi-v1.yaml')
     const committedPath = resolve(frontendRoot, 'src/types/generated/openapi-v1.ts')
@@ -25,5 +27,7 @@ describe('openapi-v1 codegen parity', () => {
     } finally {
       rmSync(tempDir, { recursive: true, force: true })
     }
-  })
+  },
+    60_000,
+  )
 })

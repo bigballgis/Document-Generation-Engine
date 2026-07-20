@@ -2,9 +2,11 @@
 import { toRef } from 'vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
+import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TaskHubCollaborationColumns from '@/components/dashboard/TaskHubCollaborationColumns.vue'
 import { useTaskHubPartitionSection } from '@/components/dashboard/useTaskHubPartitionSection'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import type { TaskPartition, WorkflowTask } from '@/composables/useWorkflowTasks'
 import type { CollaborationTimeoutConfig } from '@/types/collaboration'
 
@@ -43,6 +45,8 @@ const {
   groupTimeoutConfigs: toRef(props, 'groupTimeoutConfigs'),
   emitOpen: (path) => emit('open', path),
 })
+
+const { groupCatalogLink, taskEntityLink } = useEntityLinkTargets()
 </script>
 
 <template>
@@ -86,7 +90,7 @@ const {
             />
           </template>
           <template #default="{ row }">
-            {{ row.entityName }}
+            <EntityLinkCell :label="row.entityName" :to="taskEntityLink(row)" />
           </template>
         </el-table-column>
 
@@ -98,7 +102,12 @@ const {
             />
           </template>
           <template #default="{ row }">
-            {{ row.groupCode ?? '—' }}
+            <EntityLinkCell
+              v-if="row.groupCode"
+              :label="row.groupCode"
+              :to="groupCatalogLink(row.groupCode)"
+            />
+            <span v-else>—</span>
           </template>
         </el-table-column>
 

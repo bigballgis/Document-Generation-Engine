@@ -48,9 +48,9 @@ experience baselines). It does not replace permission rules or API contracts.
    - Use the [Filter control matrix](#filter-control-matrix) — enum → select, entity → async
      search select, free-text only when full-text search is the intended query model.
 
-4. **Layout variant must match page type.**
-   - Table-heavy catalog/list pages use **fluid** width (full content region).
-   - Form, wizard, and detail/workspace pages use **contained** width (1440px max).
+4. **Management layout is fluid system-wide (SYS-NORM Wave 1).**
+   - All management pages using `AppPageLayout` default to **fluid** (full shell content width).
+   - **`contained`** (1440px max) is an **opt-in exception** only when a slice explicitly requires a centered narrow form/wizard rhythm — do not use it as the management default.
 
 5. **Reuse shared primitives before inventing page-local patterns.**
    - Building a one-off link cell, filter bar, or fixed 1440px wrapper when a shared
@@ -102,15 +102,17 @@ Anti-patterns:
 
 | Page intent | `AppPageLayout` variant | Max width | Examples |
 | --- | --- | --- | --- |
-| Catalog / list / audit table-heavy | `fluid` | None (100% of shell content) | Template list, master list, audit console, API package hub tables |
-| Form / wizard / detail / workspace | `contained` | `1440px` | Template detail tabs, master revision workspace, create/edit dialogs context, dashboard cards |
+| **Management default (system-wide)** | `fluid` (default) | None (100% of shell content) | Catalogs, hubs, detail/workspace, dashboard, audit, identity |
+| Opt-in narrow form/wizard only | `contained` | `1440px` | Explicit exception when a slice requires centered narrow rhythm |
 
-Implementation note: `AppPageLayout` accepts `layoutVariant` (`contained` | `fluid`). When
-`fluid`, omit max-width constraint; when `contained`, apply `1440px` centered content.
-Existing pages may pass `maxWidth` until migrated — new work must use `layoutVariant`.
+Implementation note: `AppPageLayout` accepts `layoutVariant` (`contained` | `fluid`).
+**Default is `fluid`** (SYS-NORM Wave 1 / Confirmed 2026-07-21). When `fluid`, omit
+max-width; when `contained`, apply `1440px` centered content. Prefer omitting the prop
+(inherit fluid) over repeating `layout-variant="fluid"` on every call site.
 
-Table-heavy pages must not waste horizontal space: tables expand to available width;
-sticky header and horizontal scroll only when column count genuinely exceeds viewport.
+Management pages must not waste horizontal space: tables and workspaces expand to
+available width; sticky header and horizontal scroll only when column count genuinely
+exceeds viewport.
 
 ## Review Checklist
 
@@ -120,7 +122,7 @@ sticky header and horizontal scroll only when column count genuinely exceeds vie
 - [ ] Entity primary columns use `EntityLinkCell` (or documented equivalent) with correct route.
 - [ ] Links omitted or disabled when session lacks read access; no data leak.
 - [ ] Filters follow the matrix; entity filters use async `AppSearchSelect`.
-- [ ] Catalog pages use `layoutVariant="fluid"`; detail/form pages use `contained`.
+- [ ] Management pages use fluid layout (default); `contained` only when explicitly justified.
 - [ ] Subtitle pattern applied where secondary identifiers help operators.
 - [ ] i18n keys for labels, placeholders, empty states; English base in `en.ts`.
 - [ ] Unit tests cover link vs non-link branches and filter wiring where non-trivial.
@@ -130,8 +132,8 @@ sticky header and horizontal scroll only when column count genuinely exceeds vie
 - [ ] Screenshot catalog tables at 1440×900 — no UUID columns visible.
 - [ ] Click entity link navigates to expected detail; forbidden user sees no link/leak.
 - [ ] Filter row shows select for enums, search select for entities — not mismatched controls.
-- [ ] Fluid catalog pages use horizontal space; no excessive empty margin on wide tables.
-- [ ] Contained detail pages respect 1440px rhythm; no overflow/overlap in entity cells.
+- [ ] Fluid management pages use horizontal space; no excessive empty margin on wide viewports.
+- [ ] Entity cells have no overflow/overlap at target desktop widths.
 - [ ] Both REDBC and GREENBC verified on changed views.
 
 ## Traceability

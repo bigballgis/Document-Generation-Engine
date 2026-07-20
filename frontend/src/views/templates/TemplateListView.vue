@@ -15,6 +15,7 @@ const {
   authorTemplates,
   exportTemplates,
   templateDetailLink,
+  groupCatalogLink,
   activeWorkflowFilter,
   createDialogOpen,
   importDialogOpen,
@@ -87,6 +88,7 @@ const {
         :page-size="templatesStore.templateListSize"
         :total="templatesStore.templateListTotalElements"
         :template-detail-link="templateDetailLink"
+        :group-catalog-link="groupCatalogLink"
         @clear="clearAll"
         @remove-chip="removeFilterChip"
         @row-click="activateTemplateRow"

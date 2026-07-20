@@ -27,7 +27,7 @@ export function useTemplateListCatalog() {
   const templatesStore = useTemplatesStore()
   const { authorTemplates, exportTemplates, decideTests, decideApprovals, publishTemplates } =
     useCapabilities()
-  const { templateDetailLink } = useEntityLinkTargets()
+  const { templateDetailLink, groupCatalogLink } = useEntityLinkTargets()
 
   const activeWorkflowFilter = ref<WorkflowFilterKey | null>(null)
   const createDialogOpen = ref(false)
@@ -128,6 +128,7 @@ export function useTemplateListCatalog() {
     authorTemplates,
     exportTemplates,
     templateDetailLink,
+    groupCatalogLink,
     activeWorkflowFilter,
     createDialogOpen,
     importDialogOpen,

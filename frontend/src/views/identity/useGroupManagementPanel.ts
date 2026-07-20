@@ -1,5 +1,6 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { rowSortMethod } from '@/composables/useDataTableFilters'
 import { canManageGroups } from '@/auth/identityRoles'
@@ -11,6 +12,7 @@ export type GroupMoreAction = 'toggleEnabled'
 
 export function useGroupManagementPanel() {
   const { t, te } = useI18n()
+  const route = useRoute()
   const identityStore = useIdentityStore()
   const sessionStore = useSessionStore()
 
@@ -28,7 +30,8 @@ export function useGroupManagementPanel() {
   })
 
   const currentPage = ref(1)
-  const searchQuery = ref('')
+  const initialQuery = typeof route.query.q === 'string' ? route.query.q : ''
+  const searchQuery = ref(initialQuery)
 
   const filteredGroups = computed(() => {
     const query = searchQuery.value.trim().toLowerCase()

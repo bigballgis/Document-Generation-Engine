@@ -21,6 +21,7 @@ export const apiErrorEn = {
     fieldPatternInvalid: "This field format is invalid.",
     fieldUnknown: "Unknown field.",
     contentModuleStructureMissing: "The referenced content module has no pinned structure.",
+    contentModuleNestingCycle: "Content module nesting cycle detected during expansion.",
     variableValidationFailed:
       "One or more template variables failed VariableSchema validation.",
   },
@@ -135,6 +136,11 @@ export const apiErrorEn = {
     importConflict: "The template import conflicts with an existing template.",
     importFailed: "The template import could not be completed.",
     importDependenciesUnsatisfied: "Template import dependencies are not satisfied.",
+    bulkRepin: {
+      dryRunRequired: "dryRun is required for bulk re-pin.",
+      groupCodeRequired: "groupCode is required when the authorized group context is ambiguous.",
+      targetXor: "Provide exactly one of toSemanticVersion or useLatestApproved=true.",
+    },
     dep: {
       bundleFormatOk: "The import bundle format is supported.",
       masterPinAbsent: "The import bundle is missing a master pin fingerprint.",
@@ -256,7 +262,8 @@ export const apiErrorEn = {
     invocationKindNotRegenerable:
       "This invocation kind cannot be regenerated; use a SINGLE, BATCH_ITEM, or ASYNC_TASK record.",
     invocationRecordExpired: "Invocation record has expired.",
-    specimenWatermarkFailed: "SPECIMEN watermark could not be applied."
+    specimenWatermarkFailed: "SPECIMEN watermark could not be applied.",
+    productionReissueReasonRequired: "A non-blank reason is required for production re-issue.",
   },
   batch: {
     originalBatchNotFound: "Original batch was not found."
@@ -295,7 +302,13 @@ export const apiErrorEn = {
     impactConfirmationRequired: "Impact summary review and secondary confirmation are required for this lifecycle operation.",
     invalidEffectiveRange: "effectiveFrom must be less than or equal to effectiveTo.",
     searchTooLong: "The search string must be at most 200 characters.",
-    searchModeInvalid: "The searchMode value is not supported."
+    searchModeInvalid: "The searchMode value is not supported.",
+    nestingCycle: "Content module nesting forms a cycle.",
+    nestingDepthExceeded: "Content module nesting depth exceeds the maximum of 8.",
+    nestingTargetUnresolved:
+      "A nested content module reference could not be resolved to a visible module.",
+    nestingStructureInvalid:
+      "Content module structure JSON is malformed and cannot be used for nesting governance.",
   },
   collaboration: {
     accessDenied: "You do not have permission to view collaboration work items.",

@@ -424,6 +424,36 @@ describe('ManagementShell', () => {
     expect(findNavItemButton(wrapper, 'Legal holds')).toBeUndefined()
   })
 
+  it('hides document brands and legal entities from sidebar (BDD-SYS-NORM-W1-004/005)', async () => {
+    const wrapper = mountShell({
+      username: '10000001',
+      displayName: 'Global Admin',
+      email: 'admin@example.com',
+      authSource: 'LOCAL',
+      roles: ['GLOBAL_ADMIN'],
+      authorizedGroupCodes: ['*'],
+      defaultRoute: ROUTE_KEYS.dashboardHome,
+      visibleRoutes: [
+        ROUTE_KEYS.dashboardHome,
+        ROUTE_KEYS.auditConsole,
+        ROUTE_KEYS.legalHoldAdministration,
+        ROUTE_KEYS.documentBrandAdministration,
+      ],
+      capabilities: {
+        ...globalAdminCapabilities,
+        manageLegalHold: true,
+      },
+      expiresAt: new Date().toISOString(),
+    })
+
+    await flushPromises()
+
+    expect(findNavItemButton(wrapper, 'Activity log')).toBeDefined()
+    expect(findNavItemButton(wrapper, 'Legal holds')).toBeDefined()
+    expect(findNavItemButton(wrapper, 'Document brands')).toBeUndefined()
+    expect(findNavItemButton(wrapper, 'Legal entities')).toBeUndefined()
+  })
+
   it('keeps sibling nav icons after asset-library and legal-holds mapping (BDD-NAV-ICON-004)', async () => {
     const wrapper = mountShell({
       username: '10000001',
