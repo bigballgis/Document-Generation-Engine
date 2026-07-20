@@ -1,0 +1,18 @@
+{
+  "catalogMarker": "insurance-endorsement-demo-v1-wave-b",
+  "groupCode": "RETAIL",
+  "pageNumberingProfile": "GLOBAL_ONLY",
+  "masterName": "Meridian Insurance Endorsement Master",
+  "masterLayoutVersion": "insurance-endorsement-layout-v1-eight-anchors",
+  "masterDescription": "P23 bank-grade insurance endorsement master — eight anchors",
+  "templateExternalId": "DEMO-INSURANCE-ENDORSEMENT",
+  "templateName": "Insurance Endorsement / Security Insurance Notice",
+  "templateDescription": "Mortgage-adjacent insurance endorsement / security insurance notice with bank as loss payee (Wave B)",
+  "masterDocx": "assets/insurance-endorsement-master.docx",
+  "generatedCatalogFiles": {
+    "variables": "config/insurance-endorsement-variables.json",
+    "bindingOverlays": "config/insurance-endorsement-binding-overlays.json",
+    "demoTestVariables": "config/insurance-endorsement-demo-test-variables.json",
+    "catalogManifest": "config/insurance-endorsement-catalog-manifest.json"
+  }
+}

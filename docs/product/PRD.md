@@ -15,7 +15,8 @@
 - [模板创作与渲染一阶原则审查](authoring-rendering-first-principles-review.md)
 - [综合演示包扩展行为规格](../requirements/demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；P22 **Done**）
 - [演示文档排版与版式卓越行为规格](../requirements/demo-typography-layout-behavior-spec.md)（BDD-DEMO-TYP；P23 **Done**）
-- [银行信函演示内容刷新 Wave A](../behavior/bank-letter-demo-refresh.md)（BDD-DEMO-REFRESH；**In Progress** — 未宣称 Done；Wave B 新族 OUT）
+- [银行信函演示内容刷新 Wave A](../behavior/bank-letter-demo-refresh.md)（BDD-DEMO-REFRESH；**Done**）
+- [银行信函演示目录扩展 Wave B](../behavior/bank-letter-demo-expand.md)（BDD-DEMO-EXPAND；**In Progress** — 未宣称 Done；目录扩展不替换 §6.7 既有八类）
 
 ## 2. 记录原则
 
@@ -695,7 +696,9 @@ API 需要支持批量生成。
 
 **运行时 FOL `externalId`（实现契约，不改产品类型名）：** 上表「批发 FOL」产品族仍以 PRD 历史行表述为准；验收栈 / `import-all` / publish 注册表运行时主键为 `CORP-FOL-OFFER`（见 [deploy/demo-shared/README.md](../../deploy/demo-shared/README.md)）。本叶**不**发明新产品名，**不**把 `DEMO-FOL-WHOLESALE` 改写成新的产品类型。
 
-**Post-remediation 内容刷新（Wave A，2026-07-20 — In Progress，未宣称 Done）：** 深度系统整改后，清理浅层/填充/测试味 demo，并将**既有八类 + `DEMO-FULL-FLOW-LETTER`** 提升为 100% 仿真国际/公司银行信函质量；编排仍为 ops-safe cleanup（既有 FOL cleanup 脚本）→ `import-all-demos.ps1` 幂等覆盖 → `publish-all-demos.ps1` → `generate-all-demos.ps1`。行为规格 [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md)。**Wave B 新信函族 OUT**（串行下一叶）。**不** reopen P22/P23 阶段状态；**不**翻转 checklist **#3b/#5a GO**；**不** reopen RTL / CE-O02。
+**Post-remediation 内容刷新（Wave A，2026-07-20 — Done）：** 深度系统整改后，清理浅层/填充/测试味 demo，并将**既有八类 + `DEMO-FULL-FLOW-LETTER`** 提升为 100% 仿真国际/公司银行信函质量；编排仍为 ops-safe cleanup（既有 FOL cleanup 脚本）→ `import-all-demos.ps1` 幂等覆盖 → `publish-all-demos.ps1` → `generate-all-demos.ps1`。行为规格 [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md)。**不** reopen P22/P23 阶段状态；**不**翻转 checklist **#3b/#5a GO**；**不** reopen RTL / CE-O02。
+
+**Catalogue expand（Wave B，2026-07-20 — In Progress，未宣称 Done）：** 在 Wave A 质量条之上，**新增**七个真实银行实务信函族（facility amendment、KYC/CDD、account closure、commitment（独立于 FOL）、formal demand、covenant waiver、insurance endorsement），并将 publish/runtime 注册表从 **13** 扩展为 **20**（+7）。行为规格 [bank-letter-demo-expand.md](../behavior/bank-letter-demo-expand.md)；注册表见 [deploy/demo-shared/README.md](../../deploy/demo-shared/README.md)。**Confirmed：** 本扩展是**目录扩展（catalogue expand）**——**不**重命名、**不**替换、**不**改写上表既有八类产品契约与历史 `DEMO-FOL-WHOLESALE` 产品族表述；Commitment **不是** FOL / `CORP-FOL-OFFER` 别名。**不**翻转 checklist **#3b/#5a GO**；**不** reopen RTL / CE-O02；**不**宣称 go-live。
 
 演示导入与验收以平台工程师自动化脚本为主（`import-all-demos.ps1`、构建期母版资产生成器）；模板作者/测试人员通过管理面预览与全量测试验收 DOCX/PDF 保真。运行期 API 调用方对已发布演示模板的权限与既有模板级 AD Group + API 凭证模型一致；**无新增调用方请求字段**。
 

@@ -1,0 +1,45 @@
+{
+  "catalogMarker": "formal-demand-demo-v1-wave-b",
+  "name": "Formal Demand — Harbour Logistics",
+  "required": true,
+  "variables": {
+    "bankName": "Meridian Global Banking Corporation",
+    "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+    "bankBranch": "Wholesale Banking — Special Assets / Corporate Recoveries",
+    "letterDate": "2026-07-20",
+    "borrowerName": "Harbour Logistics Group Ltd.",
+    "borrowerAddress": "Unit 12, Mersey Wharf Industrial Estate, Liverpool L3 4BP",
+    "borrowerCountry": "United Kingdom",
+    "facilityReference": "CORP-FAC-2024-77102",
+    "defaultDescription": "Failure to pay interest due on 30 June 2026 and breach of the Maximum Leverage Ratio covenant as at 30 June 2026",
+    "eventOfDefaultDate": "2026-07-01",
+    "paymentDeadline": "2026-07-30",
+    "currency": "GBP",
+    "principalDemanded": "12,500,000.00",
+    "interestDemanded": "287,450.00",
+    "feesDemanded": "45,000.00",
+    "totalDemanded": "12,832,450.00",
+    "governingLaw": "English law",
+    "jurisdiction": "England and Wales",
+    "signatoryName": "Helena Vogt",
+    "signatoryTitle": "Director, Special Assets — Wholesale Banking",
+    "amountsSchedule": [
+      {
+        "description": "Outstanding principal",
+        "amount": "GBP 12,500,000.00"
+      },
+      {
+        "description": "Accrued interest to letter date",
+        "amount": "GBP 287,450.00"
+      },
+      {
+        "description": "Default interest and fees",
+        "amount": "GBP 45,000.00"
+      },
+      {
+        "description": "Total Sums Demanded",
+        "amount": "GBP 12,832,450.00"
+      }
+    ]
+  }
+}

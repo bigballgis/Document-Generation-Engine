@@ -1,0 +1,46 @@
+{
+  "anchorIds": [
+    "CW_PARTIES",
+    "CW_DEFINED_TERMS",
+    "CW_WAIVER",
+    "CW_SCOPE",
+    "CW_CONDITIONS",
+    "CW_RESERVATION",
+    "CW_GOVERNING_LAW",
+    "CW_SIGNATURE"
+  ],
+  "sections": [
+    {
+      "anchorId": "CW_PARTIES",
+      "title": "Parties"
+    },
+    {
+      "anchorId": "CW_DEFINED_TERMS",
+      "title": "Defined Terms"
+    },
+    {
+      "anchorId": "CW_WAIVER",
+      "title": "Waiver Particulars"
+    },
+    {
+      "anchorId": "CW_SCOPE",
+      "title": "Scope and Duration"
+    },
+    {
+      "anchorId": "CW_CONDITIONS",
+      "title": "Consent Conditions"
+    },
+    {
+      "anchorId": "CW_RESERVATION",
+      "title": "Reservation of Rights"
+    },
+    {
+      "anchorId": "CW_GOVERNING_LAW",
+      "title": "Governing Law"
+    },
+    {
+      "anchorId": "CW_SIGNATURE",
+      "title": "Signatures"
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "catalogMarker": "kyc-cdd-demo-v1-wave-b",
+  "variables": [
+    {
+      "key": "bankName",
+      "label": "Bank Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankAddress",
+      "label": "Bank Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankBranch",
+      "label": "Bank Branch",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "letterDate",
+      "label": "Letter Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "customerName",
+      "label": "Customer Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "customerAddress",
+      "label": "Customer Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "customerReference",
+      "label": "Customer Reference",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "accountNumberMasked",
+      "label": "Masked Account Number",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "responseDeadline",
+      "label": "Response Deadline",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "caseReference",
+      "label": "Case Reference",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "governingLaw",
+      "label": "Governing Law",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "jurisdiction",
+      "label": "Jurisdiction",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryName",
+      "label": "Signatory Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryTitle",
+      "label": "Signatory Title",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "documentChecklist",
+      "label": "Document Checklist",
+      "type": "LIST",
+      "required": false
+    }
+  ]
+}

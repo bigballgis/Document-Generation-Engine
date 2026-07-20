@@ -1,0 +1,51 @@
+{
+  "anchorIds": [
+    "FA_PARTIES",
+    "FA_DEFINED_TERMS",
+    "FA_EXISTING_FACILITY",
+    "FA_VARIATIONS",
+    "FA_OPERATIVE",
+    "FA_COVENANTS",
+    "FA_SCHEDULE",
+    "FA_GOVERNING_LAW",
+    "FA_SIGNATURE"
+  ],
+  "sections": [
+    {
+      "anchorId": "FA_PARTIES",
+      "title": "Parties and Recital"
+    },
+    {
+      "anchorId": "FA_DEFINED_TERMS",
+      "title": "Defined Terms"
+    },
+    {
+      "anchorId": "FA_EXISTING_FACILITY",
+      "title": "Existing Facility"
+    },
+    {
+      "anchorId": "FA_VARIATIONS",
+      "title": "Variation Terms"
+    },
+    {
+      "anchorId": "FA_OPERATIVE",
+      "title": "Operative Amendment"
+    },
+    {
+      "anchorId": "FA_COVENANTS",
+      "title": "Continuing Covenants"
+    },
+    {
+      "anchorId": "FA_SCHEDULE",
+      "title": "Variation Schedule"
+    },
+    {
+      "anchorId": "FA_GOVERNING_LAW",
+      "title": "Governing Law"
+    },
+    {
+      "anchorId": "FA_SIGNATURE",
+      "title": "Signatures"
+    }
+  ]
+}

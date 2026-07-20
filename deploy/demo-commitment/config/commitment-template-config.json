@@ -1,0 +1,18 @@
+{
+  "catalogMarker": "commitment-demo-v1-wave-b",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "masterName": "Meridian Commitment Letter Master",
+  "masterLayoutVersion": "commitment-layout-v1-nine-anchors",
+  "masterDescription": "P23 bank-grade commitment letter master — nine anchors; not a FOL alias",
+  "templateExternalId": "DEMO-COMMITMENT-LETTER",
+  "templateName": "Commitment Letter / Offer to Commit",
+  "templateDescription": "Short-form corporate commitment / offer to lend commitment with CPs — distinct from FOL wholesale offer (Wave B)",
+  "masterDocx": "assets/commitment-master.docx",
+  "generatedCatalogFiles": {
+    "variables": "config/commitment-variables.json",
+    "bindingOverlays": "config/commitment-binding-overlays.json",
+    "demoTestVariables": "config/commitment-demo-test-variables.json",
+    "catalogManifest": "config/commitment-catalog-manifest.json"
+  }
+}

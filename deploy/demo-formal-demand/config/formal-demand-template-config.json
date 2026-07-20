@@ -1,0 +1,18 @@
+{
+  "catalogMarker": "formal-demand-demo-v1-wave-b",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "masterName": "Meridian Formal Demand Master",
+  "masterLayoutVersion": "formal-demand-layout-v1-eight-anchors",
+  "masterDescription": "P23 bank-grade formal demand master — eight anchors; escalates beyond retail overdue",
+  "templateExternalId": "DEMO-FORMAL-DEMAND",
+  "templateName": "Formal Demand Letter under Facility",
+  "templateDescription": "Corporate formal demand / payment demand under a facility with acceleration reservation (Wave B)",
+  "masterDocx": "assets/formal-demand-master.docx",
+  "generatedCatalogFiles": {
+    "variables": "config/formal-demand-variables.json",
+    "bindingOverlays": "config/formal-demand-binding-overlays.json",
+    "demoTestVariables": "config/formal-demand-demo-test-variables.json",
+    "catalogManifest": "config/formal-demand-catalog-manifest.json"
+  }
+}

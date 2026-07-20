@@ -1,0 +1,705 @@
+{
+  "catalogMarker": "formal-demand-demo-v1-wave-b",
+  "bindings": {
+    "FD_PARTIES": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Date: "
+            },
+            {
+              "type": "variable",
+              "key": "letterDate"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "To: "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "borrowerName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "variable",
+              "key": "borrowerAddress"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "variable",
+              "key": "borrowerCountry"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Dear Sirs,"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Re: Formal Demand under Facility Reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "facilityReference"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "STRICTLY PRIVATE AND CONFIDENTIAL — FORMAL DEMAND"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "We, "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "bankName"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " of "
+            },
+            {
+              "type": "variable",
+              "key": "bankAddress"
+            },
+            {
+              "type": "textRun",
+              "value": " (the Bank / Agent), acting through "
+            },
+            {
+              "type": "variable",
+              "key": "bankBranch"
+            },
+            {
+              "type": "textRun",
+              "value": ", refer to the Facility Agreement identified by reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "facilityReference"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " between the Bank and "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "borrowerName"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " (the Borrower)."
+            }
+          ]
+        }
+      ]
+    },
+    "FD_DEFINED_TERMS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Defined Terms"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Facility Agreement\""
+            },
+            {
+              "type": "textRun",
+              "value": " means the facility agreement identified by reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "facilityReference"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Payment Deadline\""
+            },
+            {
+              "type": "textRun",
+              "value": " means "
+            },
+            {
+              "type": "variable",
+              "key": "paymentDeadline"
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Sums Demanded\""
+            },
+            {
+              "type": "textRun",
+              "value": " means the aggregate of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "currency"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "totalDemanded"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": ", as particularised in Schedule 1 (Amounts Demanded)."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Event of Default\""
+            },
+            {
+              "type": "textRun",
+              "value": " has the meaning given in the Facility Agreement; the Event(s) of Default relied upon are described in this letter."
+            }
+          ]
+        }
+      ]
+    },
+    "FD_DEFAULT": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Default Particulars"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "An Event of Default occurred on or about "
+            },
+            {
+              "type": "variable",
+              "key": "eventOfDefaultDate"
+            },
+            {
+              "type": "textRun",
+              "value": " in respect of: "
+            },
+            {
+              "type": "variable",
+              "key": "defaultDescription"
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "As a result, amounts have become due and payable under the Facility Agreement. This letter constitutes a formal demand for payment under the Facility Agreement and is without prejudice to any other notice previously given."
+            }
+          ]
+        }
+      ]
+    },
+    "FD_DEMAND": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Formal Demand for Payment"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The Bank hereby demands payment of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "currency"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "totalDemanded"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " (comprising principal "
+            },
+            {
+              "type": "variable",
+              "key": "principalDemanded"
+            },
+            {
+              "type": "textRun",
+              "value": ", interest "
+            },
+            {
+              "type": "variable",
+              "key": "interestDemanded"
+            },
+            {
+              "type": "textRun",
+              "value": " and fees "
+            },
+            {
+              "type": "variable",
+              "key": "feesDemanded"
+            },
+            {
+              "type": "textRun",
+              "value": ") no later than "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "paymentDeadline"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "FORMAL-DEMAND-OPERATIVE"
+        }
+      ]
+    },
+    "FD_RESERVATION": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Reservation of Acceleration and Enforcement Rights"
+            }
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "FORMAL-DEMAND-RESERVATION"
+        }
+      ]
+    },
+    "FD_SCHEDULE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Amounts Demanded"
+            }
+          ]
+        },
+        {
+          "type": "sectionHeading",
+          "styleRef": "ScheduleTitle",
+          "children": [
+            {
+              "type": "text",
+              "value": "Schedule 1 — Amounts Demanded"
+            }
+          ]
+        },
+        {
+          "type": "tableComponentRef",
+          "tableComponent": {
+            "componentKey": "FORMAL-DEMAND-TBL-AMOUNTS",
+            "columnSchema": [
+              {
+                "columnKey": "description",
+                "widthPct": 60
+              },
+              {
+                "columnKey": "amount",
+                "widthPct": 40
+              }
+            ],
+            "headerRows": [
+              [
+                {
+                  "columnKey": "description",
+                  "value": "Description"
+                },
+                {
+                  "columnKey": "amount",
+                  "value": "Amount"
+                }
+              ]
+            ],
+            "loopRow": {
+              "loopVariable": "amountsSchedule",
+              "cells": [
+                {
+                  "columnKey": "description",
+                  "variableKey": "description"
+                },
+                {
+                  "columnKey": "amount",
+                  "variableKey": "amount"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "FD_GOVERNING_LAW": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Governing Law and Jurisdiction"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "This letter and any non-contractual obligations arising out of or in connection with it are governed by "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "governingLaw"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The courts of "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "jurisdiction"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " have exclusive jurisdiction to settle any dispute arising out of or in connection with this letter. Nothing in this clause limits the right of the Bank to take proceedings in any other court of competent jurisdiction."
+            }
+          ]
+        }
+      ]
+    },
+    "FD_SIGNATURE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Authorised Signatory"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Please acknowledge receipt of this letter by countersigning and returning an executed copy within ten Business Days of the date of this letter."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Yours faithfully,"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "For and on behalf of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "bankName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "_____________________________"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "signatoryName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "variable",
+              "key": "signatoryTitle"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "variable",
+              "key": "bankAddress"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

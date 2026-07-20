@@ -1,0 +1,51 @@
+{
+  "anchorIds": [
+    "CM_PARTIES",
+    "CM_DEFINED_TERMS",
+    "CM_COMMITMENT",
+    "CM_CPS",
+    "CM_AVAILABILITY",
+    "CM_COVENANTS",
+    "CM_RESERVATION",
+    "CM_GOVERNING_LAW",
+    "CM_SIGNATURE"
+  ],
+  "sections": [
+    {
+      "anchorId": "CM_PARTIES",
+      "title": "Parties and Recital"
+    },
+    {
+      "anchorId": "CM_DEFINED_TERMS",
+      "title": "Defined Terms"
+    },
+    {
+      "anchorId": "CM_COMMITMENT",
+      "title": "Commitment Particulars"
+    },
+    {
+      "anchorId": "CM_CPS",
+      "title": "Conditions Precedent"
+    },
+    {
+      "anchorId": "CM_AVAILABILITY",
+      "title": "Availability and Expiry"
+    },
+    {
+      "anchorId": "CM_COVENANTS",
+      "title": "Indicative Covenants"
+    },
+    {
+      "anchorId": "CM_RESERVATION",
+      "title": "Reservation and Non-FOL Notice"
+    },
+    {
+      "anchorId": "CM_GOVERNING_LAW",
+      "title": "Governing Law"
+    },
+    {
+      "anchorId": "CM_SIGNATURE",
+      "title": "Signatures"
+    }
+  ]
+}

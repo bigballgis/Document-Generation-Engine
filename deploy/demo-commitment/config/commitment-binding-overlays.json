@@ -1,0 +1,768 @@
+{
+  "catalogMarker": "commitment-demo-v1-wave-b",
+  "bindings": {
+    "CM_PARTIES": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Date: "
+            },
+            {
+              "type": "variable",
+              "key": "letterDate"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "To: "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "borrowerName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "variable",
+              "key": "borrowerAddress"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "variable",
+              "key": "borrowerCountry"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Dear Sirs,"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Re: Commitment Letter / Offer to Commit — Reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "commitmentReference"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "We, "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "bankName"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " of "
+            },
+            {
+              "type": "variable",
+              "key": "bankAddress"
+            },
+            {
+              "type": "textRun",
+              "value": " (the Bank), acting through "
+            },
+            {
+              "type": "variable",
+              "key": "bankBranch"
+            },
+            {
+              "type": "textRun",
+              "value": ", are pleased to set out the terms on which the Bank is prepared to commit to lend to "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "borrowerName"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " (the Borrower)."
+            }
+          ]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeGuarantor} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {
+                  "type": "textRun",
+                  "value": "It is a condition that the obligations of the Borrower are guaranteed by "
+                },
+                {
+                  "type": "emphasis",
+                  "variant": "bold",
+                  "children": [
+                    {
+                      "type": "variable",
+                      "key": "guarantorName"
+                    }
+                  ]
+                },
+                {
+                  "type": "textRun",
+                  "value": " (the Guarantor) pursuant to a guarantee and indemnity in form satisfactory to the Bank."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "This letter is a short-form commitment / offer to commit. It is not a Facility Offer Letter and is not wholesale facility offer documentation."
+            }
+          ]
+        }
+      ]
+    },
+    "CM_DEFINED_TERMS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Defined Terms"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Commitment Amount\""
+            },
+            {
+              "type": "textRun",
+              "value": " means "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "currency"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "commitmentAmount"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Commitment Expiry Date\""
+            },
+            {
+              "type": "textRun",
+              "value": " means "
+            },
+            {
+              "type": "variable",
+              "key": "commitmentExpiryDate"
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Commitment Letter\""
+            },
+            {
+              "type": "textRun",
+              "value": " means this letter, including the Conditions Precedent schedule."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Facility\""
+            },
+            {
+              "type": "textRun",
+              "value": " means the proposed senior facility to be documented in definitive Finance Documents for the purpose of "
+            },
+            {
+              "type": "variable",
+              "key": "facilityPurpose"
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Finance Documents\""
+            },
+            {
+              "type": "textRun",
+              "value": " means the facility agreement, security documents, guarantee and any other document designated as a Finance Document by the Bank and the Borrower."
+            }
+          ]
+        }
+      ]
+    },
+    "CM_COMMITMENT": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Commitment Particulars"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Subject to the terms of this Commitment Letter, the Bank offers to commit "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "currency"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "commitmentAmount"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " (the Commitment Amount) for "
+            },
+            {
+              "type": "variable",
+              "key": "facilityPurpose"
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Indicative pricing: Margin "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "indicativeMarginBps"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " bps; arrangement fee "
+            },
+            {
+              "type": "variable",
+              "key": "arrangementFeeBps"
+            },
+            {
+              "type": "textRun",
+              "value": " bps; commitment fee on undrawn amounts "
+            },
+            {
+              "type": "variable",
+              "key": "commitmentFeeBps"
+            },
+            {
+              "type": "textRun",
+              "value": " bps per annum."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Commitment Reference: "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "commitmentReference"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "COMMITMENT-OPERATIVE"
+        }
+      ]
+    },
+    "CM_CPS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Conditions Precedent"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The Bank's commitment is subject to satisfaction (or waiver by the Bank) of the following Conditions Precedent, each in form and substance satisfactory to the Bank:"
+            }
+          ]
+        },
+        {
+          "type": "loopBlock",
+          "loopVariable": "conditionsPrecedent",
+          "children": [
+            {
+              "type": "list",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "conditionText"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "CM_AVAILABILITY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Availability and Expiry"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The proposed Availability Period is "
+            },
+            {
+              "type": "variable",
+              "key": "availabilityPeriod"
+            },
+            {
+              "type": "textRun",
+              "value": ". This Commitment Letter expires on the Commitment Expiry Date of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "commitmentExpiryDate"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " unless definitive Finance Documents have been executed or the Bank extends expiry in writing."
+            }
+          ]
+        }
+      ]
+    },
+    "CM_COVENANTS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Indicative Covenants"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Definitive Finance Documents will include customary affirmative, negative and financial covenants for a facility of this type, including leverage and interest cover testing, information undertakings, and restrictions on disposals, financial indebtedness and change of control, each as negotiated in good faith."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The Borrower shall procure that the Group maintains insurance and complies with applicable sanctions, anti-bribery and anti-money-laundering laws."
+            }
+          ]
+        }
+      ]
+    },
+    "CM_RESERVATION": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Reservation of Rights and Nature of this Letter"
+            }
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "COMMITMENT-RESERVATION"
+        }
+      ]
+    },
+    "CM_GOVERNING_LAW": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Governing Law and Jurisdiction"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "This letter and any non-contractual obligations arising out of or in connection with it are governed by "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "governingLaw"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The courts of "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "jurisdiction"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " have exclusive jurisdiction to settle any dispute arising out of or in connection with this letter. Nothing in this clause limits the right of the Bank to take proceedings in any other court of competent jurisdiction."
+            }
+          ]
+        }
+      ]
+    },
+    "CM_SIGNATURE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Authorised Signatory"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Please acknowledge receipt of this letter by countersigning and returning an executed copy within ten Business Days of the date of this letter."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Yours faithfully,"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "For and on behalf of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "bankName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "_____________________________"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "signatoryName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "variable",
+              "key": "signatoryTitle"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "variable",
+              "key": "bankAddress"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -25,7 +25,14 @@ public final class DemoPackageContractSupport {
             "demo-trade-lc",
             "demo-collection",
             "demo-annual-review",
-            "demo-wealth"
+            "demo-wealth",
+            "demo-facility-amendment",
+            "demo-kyc-cdd",
+            "demo-account-closure",
+            "demo-commitment",
+            "demo-formal-demand",
+            "demo-covenant-waiver",
+            "demo-insurance-endorsement"
     );
 
     private DemoPackageContractSupport() {

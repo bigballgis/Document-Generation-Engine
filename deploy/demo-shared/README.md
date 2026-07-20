@@ -2,20 +2,33 @@
 
 Canonical Word style catalog and layout baseline for all `deploy/demo-*` master DOCX assets.
 
-## Post-remediation content refresh (Wave A — In Progress)
+## Post-remediation content refresh (Wave A — Done)
 
-**Status:** **In Progress** (Task Master **#141** / slice `bank-letter-demo-refresh`) — **do not** treat as Done until import → publish → generate evidence is archived.
+**Status:** **Done** (Task Master **#141** / slice `bank-letter-demo-refresh`) — MAIN merge `aa88170f`; evidence **13/13**.
 
 | Item | Value |
 | --- | --- |
 | Intent | Clean shallow/padding/test-flavored demo content; uplift **existing** eight `deploy/demo-*` packages + `DEMO-FULL-FLOW-LETTER` to 100% realistic bank-letter quality (mock parties/amounts only) |
 | Behavior SoT | [bank-letter-demo-refresh.md](../../docs/behavior/bank-letter-demo-refresh.md) (`BDD-DEMO-REFRESH-001`…`014`) |
 | Plan | [bank-letter-demo-refresh.md](../../docs/plan/detail/bank-letter-demo-refresh.md) |
-| Evidence stub | [docs/plan/evidence/bank-letter-demo-refresh/](../../docs/plan/evidence/bank-letter-demo-refresh/README.md) |
-| Wave B | **OUT** this leaf — queued as TM **#142** / `bank-letter-demo-expand` (new letter families) |
+| Evidence | [docs/plan/evidence/bank-letter-demo-refresh/](../../docs/plan/evidence/bank-letter-demo-refresh/README.md) |
 | Hard vetoes | Do **not** flip checklist **#3b/#5a GO**; do **not** reopen RTL / CE-O02; do **not** invent Word-host evidence |
 
-Template coverage table below remains the **publish/runtime registry** (13 `externalId`s). Wave A rewrites content **inside** those packages; it does **not** add new product families.
+Wave A rewrote content **inside** the historical eight families (+ full-flow); it did **not** replace PRD §6.7 product rows.
+
+## Catalogue expand (Wave B — In Progress)
+
+**Status:** **In Progress** (Task Master **#142** / slice `bank-letter-demo-expand`) — **do not** treat as Done until import → publish → generate evidence for the expanded registry is archived. **Do not** flip **#3b/#5a GO**.
+
+| Item | Value |
+| --- | --- |
+| Intent | Add **seven** real bank-practice letter families (new `deploy/demo-*` packages) and expand the publish/runtime registry **13 → 20** (`+7`); **does not** rename or replace PRD §6.7 eight families |
+| Behavior SoT | [bank-letter-demo-expand.md](../../docs/behavior/bank-letter-demo-expand.md) (`BDD-DEMO-EXPAND-001`…`016`) |
+| Evidence stub | [docs/plan/evidence/bank-letter-demo-expand/](../../docs/plan/evidence/bank-letter-demo-expand/README.md) |
+| Registry target | Wave A **13** + Wave B **7** = **20** runtime `externalId`s |
+| Hard vetoes | Do **not** pretend Commitment is FOL / `CORP-FOL-OFFER`; do **not** flip **#3b/#5a GO**; do **not** reopen RTL / CE-O02; do **not** invent Word-host evidence |
+
+Template coverage table below is the **publish/runtime registry** target (**20** `externalId`s).
 
 ## Style keys
 
@@ -58,7 +71,9 @@ Bindings must reference style keys from this manifest via `styleRef` or `section
 
 ## Related
 
-- [bank-letter-demo-refresh.md](../../docs/behavior/bank-letter-demo-refresh.md) — Wave A content refresh BDD (**In Progress**; not Done)
+- [bank-letter-demo-refresh.md](../../docs/behavior/bank-letter-demo-refresh.md) — Wave A content refresh BDD (**Done**)
+- [bank-letter-demo-expand.md](../../docs/behavior/bank-letter-demo-expand.md) — Wave B catalogue expand BDD (**In Progress**; not Done)
+- [docs/plan/evidence/bank-letter-demo-expand/](../../docs/plan/evidence/bank-letter-demo-expand/README.md) — Wave B evidence stub
 - [demo-typography-layout-behavior-spec.md](../../docs/requirements/demo-typography-layout-behavior-spec.md) — P23 typography (**Done**; do not reopen)
 - [demo-expansion-behavior-spec.md](../../docs/requirements/demo-expansion-behavior-spec.md) — P22 engine + scaffolds (**Done**; do not reopen)
 - [P23 detail plan](../../docs/plan/detail/P23-demo-typography-layout-excellence.md) — task **P23-T03**
@@ -96,14 +111,14 @@ Prefer **idempotent re-import overwrite** over destructive database surgery. **F
 | `deploy/demo-fol/cleanup-fol-test-data-sets.ps1` | Remove duplicate FOL executive test data sets; keep one canonical row | Prefer with `-WhatIf` first |
 | `deploy/demo-fol/cleanup-catalog-except-fol.ps1` | Narrow catalog strip (non-FOL leftovers) | **Not** the default full Wave A path |
 | `deploy/demo-import-shared.ps1` DRAFT reset | Local-demo lifecycle reset so bindings/variables can refresh | Invoked by package import; not a DB DROP |
-| `deploy/import-all-demos.ps1` | **Primary** overwrite of all eight packages | Full-flow via existing seeder path |
-| `deploy/publish-all-demos.ps1` / `generate-all-demos.ps1` | Lifecycle + DOCX evidence | Same 13-ID registry as coverage table |
+| `deploy/import-all-demos.ps1` | **Primary** overwrite of demo packages | Wave A eight packages + Wave B seven new packages; full-flow via existing seeder |
+| `deploy/publish-all-demos.ps1` / `generate-all-demos.ps1` | Lifecycle + DOCX evidence | Same **20**-ID registry as coverage table (13 Wave A + 7 Wave B) |
 
-BDD: `BDD-DEMO-REFRESH-001`…`004`.
+BDD: `BDD-DEMO-REFRESH-001`…`004` (Wave A); `BDD-DEMO-EXPAND-001`…`004` (Wave B registry).
 
 ## Publish orchestration (P23-T12)
 
-After bank-grade package content is ready (P23 historical rewrite **or** Wave A refresh), import then publish all runtime-callable demo templates:
+After bank-grade package content is ready (P23 historical rewrite, Wave A refresh, **or** Wave B catalogue expand), import then publish all runtime-callable demo templates:
 
 ```powershell
 # From repo root — backend must be healthy on :8080
@@ -113,11 +128,13 @@ After bank-grade package content is ready (P23 historical rewrite **or** Wave A 
 
 | Step | Script | Templates |
 | --- | --- | --- |
-| Import | `deploy/import-all-demos.ps1` | 8 packages → 12 external IDs from `*-template-config.json` |
+| Import | `deploy/import-all-demos.ps1` | Wave A 8 packages + Wave B 7 packages → template IDs from `*-template-config.json` |
 | Full-flow seed | `DemoFullFlowCatalogSeeder` (when `docgen.demo-catalog.seed-enabled=true`) | `DEMO-FULL-FLOW-LETTER` |
-| Publish | `deploy/publish-all-demos.ps1` | All **13** external IDs via `Get-DemoPublishExternalIds` |
+| Publish | `deploy/publish-all-demos.ps1` | All **20** external IDs via `Get-DemoPublishExternalIds` |
 
 ### Template coverage (publish registry)
+
+**Wave A (13 — retained; PRD §6.7 eight families + full-flow):**
 
 | externalId | groupCode | API policy AD group |
 | --- | --- | --- |
@@ -131,6 +148,20 @@ After bank-grade package content is ready (P23 historical rewrite **or** Wave A 
 | `DEMO-ANNUAL-REVIEW` / `FACILITY-RENEWAL` | CORP | `CORP_API` |
 | `DEMO-WEALTH-STATEMENT` | WEALTH | `RETAIL_API` |
 
+**Wave B (+7 — catalogue expand; does not replace eight families):**
+
+| externalId | groupCode | API policy AD group |
+| --- | --- | --- |
+| `DEMO-FACILITY-AMENDMENT` | CORP | `CORP_API` |
+| `DEMO-KYC-CDD-NOTICE` | RETAIL | `RETAIL_API` |
+| `DEMO-ACCOUNT-CLOSURE` | RETAIL | `RETAIL_API` |
+| `DEMO-COMMITMENT-LETTER` | CORP | `CORP_API` |
+| `DEMO-FORMAL-DEMAND` | CORP | `CORP_API` |
+| `DEMO-COVENANT-WAIVER` | CORP | `CORP_API` |
+| `DEMO-INSURANCE-ENDORSEMENT` | RETAIL | `RETAIL_API` |
+
+**Total registry:** **20** runtime `externalId`s (13 + 7). Commitment (`DEMO-COMMITMENT-LETTER`) is **independent** of FOL (`CORP-FOL-OFFER`).
+
 Runtime callers `svc-caller` and `e2e-runtime-caller` are granted **both** `RETAIL_API` and `CORP_API` in `application.yml`.
 
 ### Outputs
@@ -140,7 +171,7 @@ Runtime callers `svc-caller` and `e2e-runtime-caller` are granted **both** `RETA
 
 ### Runtime generate (P23-T14)
 
-After publish, generate executive DOCX artifacts for all **13** templates:
+After publish, generate executive DOCX artifacts for all **20** templates:
 
 ```powershell
 .\deploy\generate-all-demos.ps1
@@ -154,4 +185,4 @@ After publish, generate executive DOCX artifacts for all **13** templates:
 
 Manifest source: `deploy/demo-shared/demo-runtime-generate-manifest.json` (mirrors `DEMO_RUNTIME_CASES` / `demoRuntimeRegistry.ts`).
 
-Contract tests: `DemoPublishOrchestrationContractTest` (BDD-DEMO-TYP-011), `DemoGenerateOrchestrationContractTest` (BDD-DEMO-TYP-012/013).
+Contract tests: `DemoPublishOrchestrationContractTest` (BDD-DEMO-TYP-011), `DemoGenerateOrchestrationContractTest` (BDD-DEMO-TYP-012/013) — extend for Wave B IDs per `BDD-DEMO-EXPAND-003`/`004`.

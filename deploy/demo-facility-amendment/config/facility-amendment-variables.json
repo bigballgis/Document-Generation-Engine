@@ -1,0 +1,161 @@
+{
+  "catalogMarker": "facility-amendment-demo-v1-wave-b",
+  "variables": [
+    {
+      "key": "bankName",
+      "label": "Bank Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankAddress",
+      "label": "Bank Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankBranch",
+      "label": "Bank Branch",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "letterDate",
+      "label": "Letter Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "borrowerName",
+      "label": "Borrower Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "borrowerAddress",
+      "label": "Borrower Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "borrowerCountry",
+      "label": "Borrower Country",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "guarantorName",
+      "label": "Guarantor Name",
+      "type": "TEXT",
+      "required": false
+    },
+    {
+      "key": "includeGuarantor",
+      "label": "Include Guarantor",
+      "type": "BOOLEAN",
+      "required": false
+    },
+    {
+      "key": "facilityReference",
+      "label": "Facility Reference",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "originalFacilityDate",
+      "label": "Original Facility Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "amendmentEffectiveDate",
+      "label": "Amendment Effective Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "amendmentReference",
+      "label": "Amendment Reference",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "originalCommitment",
+      "label": "Original Commitment",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "amendedCommitment",
+      "label": "Amended Commitment",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "originalMarginBps",
+      "label": "Original Margin (bps)",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "amendedMarginBps",
+      "label": "Amended Margin (bps)",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "originalExpiryDate",
+      "label": "Original Expiry Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "amendedExpiryDate",
+      "label": "Amended Expiry Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "amendmentFee",
+      "label": "Amendment Fee",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "governingLaw",
+      "label": "Governing Law",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "jurisdiction",
+      "label": "Jurisdiction",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryName",
+      "label": "Signatory Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryTitle",
+      "label": "Signatory Title",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "variationSchedule",
+      "label": "Variation Schedule",
+      "type": "LIST",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,671 @@
+{
+  "catalogMarker": "covenant-waiver-demo-v1-wave-b",
+  "bindings": {
+    "CW_PARTIES": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Date: "
+            },
+            {
+              "type": "variable",
+              "key": "letterDate"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "To: "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "borrowerName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "variable",
+              "key": "borrowerAddress"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "variable",
+              "key": "borrowerCountry"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Dear Sirs,"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Re: Covenant Waiver / Consent Letter — Facility Reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "facilityReference"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "We, "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "bankName"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " of "
+            },
+            {
+              "type": "variable",
+              "key": "bankAddress"
+            },
+            {
+              "type": "textRun",
+              "value": " (the Bank), acting through "
+            },
+            {
+              "type": "variable",
+              "key": "bankBranch"
+            },
+            {
+              "type": "textRun",
+              "value": ", refer to the Facility Agreement identified by reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "facilityReference"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " with "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "borrowerName"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " (the Borrower)."
+            }
+          ]
+        }
+      ]
+    },
+    "CW_DEFINED_TERMS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Defined Terms"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Specified Covenant Breach\""
+            },
+            {
+              "type": "textRun",
+              "value": " means the breach of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "waivedCovenant"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " described as: "
+            },
+            {
+              "type": "variable",
+              "key": "breachDescription"
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Waiver Period\""
+            },
+            {
+              "type": "textRun",
+              "value": " means the period from the Waiver Effective Date of "
+            },
+            {
+              "type": "variable",
+              "key": "waiverEffectiveDate"
+            },
+            {
+              "type": "textRun",
+              "value": " to the Waiver End Date of "
+            },
+            {
+              "type": "variable",
+              "key": "waiverEndDate"
+            },
+            {
+              "type": "textRun",
+              "value": " (inclusive)."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Waiver Letter\""
+            },
+            {
+              "type": "textRun",
+              "value": " means this covenant waiver / consent letter."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Facility Agreement\""
+            },
+            {
+              "type": "textRun",
+              "value": " means the facility agreement identified by reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "facilityReference"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        }
+      ]
+    },
+    "CW_WAIVER": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Waiver Particulars"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The Borrower has notified the Bank that, as at the Testing Date of "
+            },
+            {
+              "type": "variable",
+              "key": "testingDate"
+            },
+            {
+              "type": "textRun",
+              "value": ", a breach occurred in respect of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "waivedCovenant"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": ": "
+            },
+            {
+              "type": "variable",
+              "key": "breachDescription"
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Subject to the Consent Conditions, the Bank grants a limited waiver of the Specified Covenant Breach as set out below."
+            }
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "COVENANT-WAIVER-OPERATIVE"
+        }
+      ]
+    },
+    "CW_SCOPE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Scope and Duration"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "This waiver applies solely to the Specified Covenant Breach for the Waiver Period ending "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "waiverEndDate"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": ". It does not waive any future testing period, any other covenant, or any Default other than the Specified Covenant Breach."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The waiver fee of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "currency"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "waiverFee"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " is payable on or before the Waiver Effective Date."
+            }
+          ]
+        }
+      ]
+    },
+    "CW_CONDITIONS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Consent Conditions"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "This waiver is conditional upon each of the following Consent Conditions:"
+            }
+          ]
+        },
+        {
+          "type": "loopBlock",
+          "loopVariable": "consentConditions",
+          "children": [
+            {
+              "type": "list",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "conditionText"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "CW_RESERVATION": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Reservation of Rights / Non-Waiver of Other Defaults"
+            }
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "COVENANT-WAIVER-RESERVATION"
+        }
+      ]
+    },
+    "CW_GOVERNING_LAW": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Governing Law and Jurisdiction"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "This letter and any non-contractual obligations arising out of or in connection with it are governed by "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "governingLaw"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The courts of "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "jurisdiction"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " have exclusive jurisdiction to settle any dispute arising out of or in connection with this letter. Nothing in this clause limits the right of the Bank to take proceedings in any other court of competent jurisdiction."
+            }
+          ]
+        }
+      ]
+    },
+    "CW_SIGNATURE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Authorised Signatory"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Please acknowledge receipt of this letter by countersigning and returning an executed copy within ten Business Days of the date of this letter."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Yours faithfully,"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "For and on behalf of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "bankName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "_____________________________"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "signatoryName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "variable",
+              "key": "signatoryTitle"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "variable",
+              "key": "bankAddress"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

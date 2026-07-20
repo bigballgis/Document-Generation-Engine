@@ -1,0 +1,18 @@
+{
+  "catalogMarker": "facility-amendment-demo-v1-wave-b",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "masterName": "Meridian Facility Amendment Master",
+  "masterLayoutVersion": "facility-amendment-layout-v1-nine-anchors",
+  "masterDescription": "P23 bank-grade facility amendment master — nine anchors, dual-page footer",
+  "templateExternalId": "DEMO-FACILITY-AMENDMENT",
+  "templateName": "Facility Amendment / Variation Letter",
+  "templateDescription": "Corporate facility amendment — variation of amount, tenor, pricing and covenants (Wave B)",
+  "masterDocx": "assets/facility-amendment-master.docx",
+  "generatedCatalogFiles": {
+    "variables": "config/facility-amendment-variables.json",
+    "bindingOverlays": "config/facility-amendment-binding-overlays.json",
+    "demoTestVariables": "config/facility-amendment-demo-test-variables.json",
+    "catalogManifest": "config/facility-amendment-catalog-manifest.json"
+  }
+}

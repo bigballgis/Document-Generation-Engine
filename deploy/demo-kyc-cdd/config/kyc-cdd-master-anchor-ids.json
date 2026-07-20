@@ -1,0 +1,46 @@
+{
+  "anchorIds": [
+    "KYC_PARTIES",
+    "KYC_PURPOSE",
+    "KYC_DEFINED_TERMS",
+    "KYC_REQUEST",
+    "KYC_CHECKLIST",
+    "KYC_CONSEQUENCES",
+    "KYC_GOVERNING_LAW",
+    "KYC_SIGNATURE"
+  ],
+  "sections": [
+    {
+      "anchorId": "KYC_PARTIES",
+      "title": "Parties"
+    },
+    {
+      "anchorId": "KYC_PURPOSE",
+      "title": "Purpose of Notice"
+    },
+    {
+      "anchorId": "KYC_DEFINED_TERMS",
+      "title": "Defined Terms"
+    },
+    {
+      "anchorId": "KYC_REQUEST",
+      "title": "Information Request"
+    },
+    {
+      "anchorId": "KYC_CHECKLIST",
+      "title": "Document Checklist"
+    },
+    {
+      "anchorId": "KYC_CONSEQUENCES",
+      "title": "Consequences and Timeline"
+    },
+    {
+      "anchorId": "KYC_GOVERNING_LAW",
+      "title": "Governing Law"
+    },
+    {
+      "anchorId": "KYC_SIGNATURE",
+      "title": "Signatures"
+    }
+  ]
+}

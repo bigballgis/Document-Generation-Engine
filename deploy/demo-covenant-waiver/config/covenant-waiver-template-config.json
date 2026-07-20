@@ -1,0 +1,18 @@
+{
+  "catalogMarker": "covenant-waiver-demo-v1-wave-b",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "masterName": "Meridian Covenant Waiver Master",
+  "masterLayoutVersion": "covenant-waiver-layout-v1-eight-anchors",
+  "masterDescription": "P23 bank-grade covenant waiver master — eight anchors",
+  "templateExternalId": "DEMO-COVENANT-WAIVER",
+  "templateName": "Covenant Waiver / Consent Letter",
+  "templateDescription": "One-off covenant waiver / consent with limited scope, duration and reservation of rights (Wave B)",
+  "masterDocx": "assets/covenant-waiver-master.docx",
+  "generatedCatalogFiles": {
+    "variables": "config/covenant-waiver-variables.json",
+    "bindingOverlays": "config/covenant-waiver-binding-overlays.json",
+    "demoTestVariables": "config/covenant-waiver-demo-test-variables.json",
+    "catalogManifest": "config/covenant-waiver-catalog-manifest.json"
+  }
+}

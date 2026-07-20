@@ -1,0 +1,40 @@
+{
+  "catalogMarker": "covenant-waiver-demo-v1-wave-b",
+  "name": "Covenant Waiver — Northgate Manufacturing",
+  "required": true,
+  "variables": {
+    "bankName": "Meridian Global Banking Corporation",
+    "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+    "bankBranch": "Wholesale Banking — Corporate Credit",
+    "letterDate": "2026-07-20",
+    "borrowerName": "Northgate Manufacturing Ltd.",
+    "borrowerAddress": "Unit 7, Trident Industrial Park, Leeds LS10 1TT",
+    "borrowerCountry": "United Kingdom",
+    "facilityReference": "CORP-CL-2026-88421",
+    "waivedCovenant": "Maximum Leverage Ratio (Total Financial Indebtedness to EBITDA)",
+    "breachDescription": "Leverage Ratio of 3.72:1.00 against a covenant maximum of 3.50:1.00 as at the Testing Date",
+    "testingDate": "2026-06-30",
+    "waiverEffectiveDate": "2026-07-20",
+    "waiverEndDate": "2026-09-30",
+    "waiverFee": "25,000.00",
+    "currency": "GBP",
+    "governingLaw": "English law",
+    "jurisdiction": "England and Wales",
+    "signatoryName": "Jonathan A. Whitmore",
+    "signatoryTitle": "Director, Corporate Credit — Wholesale Banking",
+    "consentConditions": [
+      {
+        "conditionText": "Payment of the waiver fee of GBP 25,000.00 on or before the Waiver Effective Date."
+      },
+      {
+        "conditionText": "Delivery of a board-approved remediation plan restoring leverage compliance by the Waiver End Date."
+      },
+      {
+        "conditionText": "No other Event of Default is continuing on the Waiver Effective Date."
+      },
+      {
+        "conditionText": "Guarantor acknowledgement (if any) confirming the guarantee remains in full force and effect."
+      }
+    ]
+  }
+}

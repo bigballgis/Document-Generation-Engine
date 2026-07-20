@@ -19,7 +19,7 @@ class DemoPublishOrchestrationContractTest {
     @Test
     void bddDemoTyp011_publishRegistryCoversAllPackageTemplates() throws Exception {
         assertThat(DemoPublishRegistry.allPublishExternalIds())
-                .hasSize(13)
+                .hasSize(20)
                 .containsExactly(
                         "CORP-FOL-OFFER",
                         DemoFullFlowCatalogSeeder.DEMO_FULL_FLOW_EXTERNAL_ID,
@@ -33,10 +33,17 @@ class DemoPublishOrchestrationContractTest {
                         "DEMO-OVERDUE-COLLECTION",
                         "DEMO-ANNUAL-REVIEW",
                         "DEMO-FACILITY-RENEWAL",
-                        "DEMO-WEALTH-STATEMENT"
+                        "DEMO-WEALTH-STATEMENT",
+                        "DEMO-FACILITY-AMENDMENT",
+                        "DEMO-KYC-CDD-NOTICE",
+                        "DEMO-ACCOUNT-CLOSURE",
+                        "DEMO-COMMITMENT-LETTER",
+                        "DEMO-FORMAL-DEMAND",
+                        "DEMO-COVENANT-WAIVER",
+                        "DEMO-INSURANCE-ENDORSEMENT"
                 );
         assertThat(DemoPublishRegistry.externalIdsFromPackages())
-                .hasSize(12)
+                .hasSize(19)
                 .doesNotContain(DemoFullFlowCatalogSeeder.DEMO_FULL_FLOW_EXTERNAL_ID);
     }
 
@@ -50,7 +57,7 @@ class DemoPublishOrchestrationContractTest {
     }
 
     @Test
-    void bddDemoTyp011_importChainListsAllEightPackages() throws Exception {
+    void bddDemoTyp011_importChainListsAllDemoPackages() throws Exception {
         Path script = DemoPackageContractSupport.deployRoot().resolve("import-all-demos.ps1");
         String content = Files.readString(script);
         for (String packageCode : DemoPackageContractSupport.packageCodes()) {

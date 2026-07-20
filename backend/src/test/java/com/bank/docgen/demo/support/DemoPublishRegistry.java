@@ -66,7 +66,14 @@ public final class DemoPublishRegistry {
                 "DEMO-OVERDUE-COLLECTION",
                 "DEMO-ANNUAL-REVIEW",
                 "DEMO-FACILITY-RENEWAL",
-                "DEMO-WEALTH-STATEMENT"
+                "DEMO-WEALTH-STATEMENT",
+                "DEMO-FACILITY-AMENDMENT",
+                "DEMO-KYC-CDD-NOTICE",
+                "DEMO-ACCOUNT-CLOSURE",
+                "DEMO-COMMITMENT-LETTER",
+                "DEMO-FORMAL-DEMAND",
+                "DEMO-COVENANT-WAIVER",
+                "DEMO-INSURANCE-ENDORSEMENT"
         };
         for (String externalId : preferred) {
             if (ids.contains(externalId)) {

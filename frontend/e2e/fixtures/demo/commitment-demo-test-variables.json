@@ -1,0 +1,46 @@
+{
+  "catalogMarker": "commitment-demo-v1-wave-b",
+  "name": "Commitment Letter — Aurora Industrial Partners",
+  "required": true,
+  "variables": {
+    "bankName": "Meridian Global Banking Corporation",
+    "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+    "bankBranch": "Wholesale Banking — Corporate Credit",
+    "letterDate": "2026-07-20",
+    "borrowerName": "Aurora Industrial Partners Ltd.",
+    "borrowerAddress": "The Shard, 32 London Bridge Street, London SE1 9SG",
+    "borrowerCountry": "United Kingdom",
+    "guarantorName": "Aurora Holdings plc",
+    "includeGuarantor": true,
+    "commitmentReference": "CORP-CML-2026-44107",
+    "commitmentAmount": "40,000,000.00",
+    "currency": "GBP",
+    "facilityPurpose": "Refinancing of existing senior debt and general corporate purposes",
+    "commitmentExpiryDate": "2026-09-30",
+    "availabilityPeriod": "6 months from signing of the facility agreement",
+    "indicativeMarginBps": "175",
+    "arrangementFeeBps": "75",
+    "commitmentFeeBps": "35",
+    "governingLaw": "English law",
+    "jurisdiction": "England and Wales",
+    "signatoryName": "Marcus J. Feldmann",
+    "signatoryTitle": "Director, Corporate Credit Commitments — Wholesale Banking",
+    "conditionsPrecedent": [
+      {
+        "conditionText": "Execution of a facility agreement and related Finance Documents in form and substance satisfactory to the Bank."
+      },
+      {
+        "conditionText": "Corporate authorisations of the Borrower and Guarantor, including board resolutions approving the Facility."
+      },
+      {
+        "conditionText": "Legal opinion from counsel of recognised standing in the Borrower's jurisdiction."
+      },
+      {
+        "conditionText": "Satisfactory know-your-customer, sanctions and anti-money-laundering clearance for all Obligors."
+      },
+      {
+        "conditionText": "Evidence that existing security to be refinanced will be released concurrently with first utilisation, or that new security will be perfected as agreed."
+      }
+    ]
+  }
+}

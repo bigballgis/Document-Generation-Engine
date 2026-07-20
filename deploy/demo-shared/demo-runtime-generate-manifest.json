@@ -1,6 +1,14 @@
 {
-  "manifestVersion": "wave-a-demo-refresh-v1",
-  "bddIds": ["BDD-DEMO-TYP-011", "BDD-DEMO-TYP-012", "BDD-DEMO-TYP-013", "BDD-DEMO-REFRESH-004", "BDD-DEMO-REFRESH-011"],
+  "manifestVersion": "wave-b-demo-expand-v1",
+  "bddIds": [
+    "BDD-DEMO-TYP-011",
+    "BDD-DEMO-TYP-012",
+    "BDD-DEMO-TYP-013",
+    "BDD-DEMO-REFRESH-004",
+    "BDD-DEMO-REFRESH-011",
+    "BDD-DEMO-EXPAND-003",
+    "BDD-DEMO-EXPAND-004"
+  ],
   "forbiddenPatterns": [
     "LOREM",
     "{{",
@@ -97,6 +105,48 @@
       "minDocxBytes": 5120,
       "contentMarkers": ["Ashford Family Trust", "PWM-UK-2026", "Meridian Private Wealth"],
       "variablesFixture": "deploy/demo-wealth/config/wealth-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-FACILITY-AMENDMENT",
+      "minDocxBytes": 6144,
+      "contentMarkers": ["Pacific Rim Holdings", "AMD-2026-FAC-77102", "Variation"],
+      "variablesFixture": "deploy/demo-facility-amendment/config/facility-amendment-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-KYC-CDD-NOTICE",
+      "minDocxBytes": 4096,
+      "contentMarkers": ["Helen Cartwright", "CDD-2026-77841", "Customer Due Diligence"],
+      "variablesFixture": "deploy/demo-kyc-cdd/config/kyc-cdd-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-ACCOUNT-CLOSURE",
+      "minDocxBytes": 4096,
+      "contentMarkers": ["Thomas Nguyen", "Closure Effective Date", "Meridian Everyday Current Account"],
+      "variablesFixture": "deploy/demo-account-closure/config/account-closure-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-COMMITMENT-LETTER",
+      "minDocxBytes": 6144,
+      "contentMarkers": ["Aurora Industrial Partners", "CORP-CML-2026-44107", "Conditions Precedent"],
+      "variablesFixture": "deploy/demo-commitment/config/commitment-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-FORMAL-DEMAND",
+      "minDocxBytes": 5120,
+      "contentMarkers": ["Harbour Logistics", "Sums Demanded", "CORP-FAC-2024-77102"],
+      "variablesFixture": "deploy/demo-formal-demand/config/formal-demand-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-COVENANT-WAIVER",
+      "minDocxBytes": 5120,
+      "contentMarkers": ["Northgate Manufacturing", "Specified Covenant Breach", "Waiver Period"],
+      "variablesFixture": "deploy/demo-covenant-waiver/config/covenant-waiver-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-INSURANCE-ENDORSEMENT",
+      "minDocxBytes": 4096,
+      "contentMarkers": ["Oliver Hartley", "loss payee", "MORT-2026-UHF-55201"],
+      "variablesFixture": "deploy/demo-insurance-endorsement/config/insurance-endorsement-demo-test-variables.json"
     }
   ]
 }
