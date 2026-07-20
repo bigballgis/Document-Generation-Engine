@@ -14,7 +14,7 @@
 
 **DESCOPE** full RTL / bidirectional product support from the IBL program and v1 go-live.
 
-Recorded durably via **Accepted** [ADR-0068](../../../adr/rendering-authoring/0068-rtl-bidi-out-of-scope-until-market.md) (doc-keeper stage 3, 2026-07-20). **F15 closed by descope.** Do **not** schedule an implementation leaf until reopen criteria in that ADR are met. **Accepted ≠ #134 leaf Done.**
+Recorded durably via **Accepted** [ADR-0068](../../../adr/rendering-authoring/0068-rtl-bidi-out-of-scope-until-market.md) (doc-keeper stage 3, 2026-07-20). **F15 closed by descope.** Do **not** schedule an implementation leaf until reopen criteria in that ADR are met. **#134 leaf Done** (MAIN merge `37239d68` / tip `68abc7c3`; Wave IBL-E → Done).
 
 | Option | Chosen? | Why |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ Recorded durably via **Accepted** [ADR-0068](../../../adr/rendering-authoring/00
 | Full design ADR + implement RTL now | No | Would invent product scope without market confirmation; conflicts with “no full RTL product impl” spike charter |
 | Silent drop of F15 | No | Finding must stay honest; descope + ADR is the durable close |
 
-**Does not:** flip checklist **#3b** / **#5a**; remove SPECIMEN (**PD-6 OUT**); embed licensed fonts (**PD-7 OUT**); invent Word / pixel baselines; claim Wave E / IBL program Done / go-live.
+**Does not:** flip checklist **#3b** / **#5a**; remove SPECIMEN (**PD-6 OUT**); embed licensed fonts (**PD-7 OUT**); invent Word / pixel baselines; claim IBL program Done / go-live (Wave E closed by this descope leaf).
 
 ## Feasibility summary
 
