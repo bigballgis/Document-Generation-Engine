@@ -4,11 +4,11 @@
 **BDD ID 前缀:** `BDD-PTA`  
 **编写日期:** 2026-07-21  
 **Slice:** `published-template-test-artifacts`  
-**Task ids:** `["published-template-test-artifacts"]` · Task Master **#144** (**In Progress** / sole-active)  
+**Task ids:** `["published-template-test-artifacts"]` · Task Master **#144** (**Done** — MAIN `ac36ecbc` / feature `6bc74ff1`; sole-active **cleared**)  
 **Formal phase:** **None**  
-**Placement:** ISOLATED `D:/working/DGE-published-template-test-artifacts` · `feat/published-template-test-artifacts`  
+**Placement:** merged to MAIN; worktree **REMOVED**  
 **Plan detail:** [published-template-test-artifacts.md](../plan/detail/published-template-test-artifacts.md)  
-**完成声明约束:** 关闭「已发布模板无法查看测试时生成的文件」缺口；**不**翻转 checklist **#3b** / **#5a**；**不** reopen RTL；CE-O02 **保持 Deferred**；**不**宣称 go-live；**不**在激活时标 Done
+**完成声明约束:** 关闭「已发布模板无法查看测试时生成的文件」缺口 — **已交付**；**不**翻转 checklist **#3b** / **#5a**；**不** reopen RTL；CE-O02 **保持 Deferred**；**不**宣称 go-live
 
 ---
 
