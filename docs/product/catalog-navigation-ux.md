@@ -8,6 +8,23 @@
 
 **Package list pagination (LR-C5, 2026-07-11):** Templates / Masters / Content-modules **package lists** use server-side `PageView` pagination + filter/search (default `size=20`, max 100; default sort group-first `groupCode ASC, updatedAt DESC`). Contract: [openapi-v1.yaml](../api/openapi-v1.yaml) `listTemplates` / `listMasters` / `listContentModules`; behavior [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md). Does not change package-hub version/revision-line pagination already specified below. Does **not** define LR-C6 command-palette API.
 
+### SYS-NORM Confirmed intent (2026-07-21) — Implementation Not Started / queued waves
+
+> Locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.1–2.3.
+> Historical hub-tab copy below remains as shipped baseline until the named waves land.
+> Program: [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md).
+
+| Intent | Confirmed decision | Implementation status | Wave |
+| --- | --- | --- | --- |
+| **Layout** | All management pages are **fluid** (system-wide; supersedes catalog=fluid / detail=contained for management `AppPageLayout`) | **Not Started** | 1 `sys-norm-shell-fluid-nav` |
+| **Hub primary** | Version lines only (fluid) | **Not Started** | 2 `sys-norm-hub-ia` |
+| **Properties** | Hub header control → **right drawer** (content formerly Overview tab) | **Not Started** | 2 |
+| **Remove hub tabs** | Overview, Dependencies, External access | **Not Started** | 2 |
+| **Dependencies** | Live on **per-version** surfaces (release / dev detail), not package hub tab | **Not Started** | 2 |
+| **API model A** | Package-level API settings SoT under External services; hub **API settings** jump; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities | **Not Started** | 2 (+ 3 for settings home) |
+| **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **Not Started** | 3 `sys-norm-external-ops` |
+| **D1 brands/entities nav** | Retire Document brands + Legal entities **product surfaces** from management nav ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); keep Legal holds; shell REDBC/GREENBC UI-only | **Not Started** | 1 (nav hide) / 6 (runtime) |
+
 ## Design principle
 
 The management shell exposes **Masters** and **Templates** as top-level catalog entries—not “master versions” or “template versions” as menu labels.

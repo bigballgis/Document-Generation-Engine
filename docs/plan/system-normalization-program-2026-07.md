@@ -1,0 +1,150 @@
+# System Normalization Program (SYS-NORM) — 2026-07
+
+| Field | Value |
+| --- | --- |
+| **Program ID** | `SYS-NORM` |
+| **Created** | 2026-07-21 |
+| **Status** | **In Progress** — Wave **0** TM **#143** `sys-norm-charter` (docs/ADR SoT) |
+| **Formal phase** | **None** (not a P-phase; tracked here + ledger) |
+| **First leaf / sole-active** | TM **#143** · `sys-norm-charter` · `feat/sys-norm-charter` · `D:/working/DGE-sys-norm-charter` |
+| **Batch** | **split** · `member_task_ids: ["143"]` · docs-only amortization |
+| **Queue (Waves 1–8)** | Program-plan **Not Started** only — **no** TM pending stubs (NON-CE `#141/#142` pattern; register next free TM id at each wave activation) |
+| **CE umbrella** | TM **#53** remains **in-progress** registry-only — **not** this program's delivery leaf |
+| **Behavior SoT** | [system-normalization-program.md](../behavior/system-normalization-program.md) |
+| **Role ADR** | [ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md) (**Accepted**) |
+| **D1 ADR** | [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) (**Accepted**) |
+
+---
+
+## 1. North star / mission
+
+Normalize the **whole management system** so layout, Template Package Hub IA, External
+services, testing artifacts, navigation/governance (including D1 brand/entity retirement),
+roles, UAT→PROD promotion, and L1 terminology are consistent with the **confirmed** remedi
+decisions of **2026-07-21** — and fold similar issues **N1–N23** into the same serial wave
+queue without reopening locked forks.
+
+**Wave 0 mission:** durable program SoT + Accepted ADRs + index/activation notes.
+**No** production code, `mvn`/`pnpm` gates, E2E, or deploy for the charter leaf itself.
+
+---
+
+## 2. Confirmed decisions (LOCKED — 2026-07-21)
+
+> Do not reopen in delivery. Implementation waves realize these facts.
+
+| Area | Confirmed decision |
+| --- | --- |
+| **Layout** | All management pages are **fluid** (system-wide). Prior catalog=fluid / detail=contained default for management `AppPageLayout` is superseded by this program. |
+| **Hub IA** | Hub primary = **Version lines** only (fluid). **Properties** → right drawer (former Overview). **Remove** hub tabs: Overview, Dependencies, External access. **Dependencies** on per-version surfaces. **API model A:** package-level API settings SoT under External services; hub **API settings** jump; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities. |
+| **External services** | Invocation records = **separate page** (dashboard-like). Package API settings = single edit surface (off hub External access tab). |
+| **Testing artifacts** | On published + history Testing: download DOCX/PDF; durable `previewId` / artifact keys; read-only ≠ no download for authorized viewers. |
+| **D1 brands/entities** | **Retire** Document brands + Legal entities **product surfaces**. Letterhead/logo/seal live in **Letterhead (master)**. Keep **Legal holds**. Shell REDBC/GREENBC remain UI-only. No brand/entity sidecar in promotion pack. Runtime simplify = Wave 6; nav removal may start Wave 1 after ADR-0071 Accepted. Supersedes ADR-0065 **product surface** (historical impl retained). |
+| **Roles (6-role compression)** | Keep: `TEMPLATE_TESTER`, `LEGAL_REVIEWER`, `AUDIT_ADMIN`, `GLOBAL_ADMIN`, `GROUP_ADMIN` (absorbs `TEMPLATE_APPROVER`). Merge: `TEMPLATE_APPROVER` → `GROUP_ADMIN` (privilege accept). Merge: `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` → `DOCUMENT_AUTHOR` (ID locked; **L1 display name finalizable** — Pending). Matrix + BDD before code (Wave 5). See ADR-0070. |
+| **Export / promotion pack** | Dependency closure; two-phase P2 masters (no skip APPROVED); no brand/entity sidecar; no secrets; import as DRAFT on PROD; re-test/re-approve/re-publish; dry-run UI in Wave 7. |
+| **Terminology** | L1 EN **Letterhead** / ZH **母版**; purge user-facing Master mix on L1; API/L3 may keep `masterId`. Sweep Done = Wave 8 (intent Confirmed in Wave 0). |
+| **Other UX** | Dev editor blank whiteboard → redirects + honest empty; asset library empty → seed or honest empty; Users Authorized groups → EntityLink; table Actions Edit/More alignment; clause locale metadata de-duplication. |
+
+**Pending (not confirmed — do not promote):** see behavior charter §3 (e.g. `DOCUMENT_AUTHOR` L1 labels; Wave 1 nav-hide vs Wave 6 hard-delete cutover detail; promotion dry-run UX; per-capability matrix cells).
+
+---
+
+## 3. Wave table (0–8)
+
+| Wave | TM | Slice id | Status | Focus | Evidence / gates |
+| --- | --- | --- | --- | --- | --- |
+| **0** | **#143** | `sys-norm-charter` | **In Progress** (sole-active) → **Done** after merge | Program plan + ADR-0070/0071 + indexes; decision lock | Docs-only — no code gates |
+| **1** | *(register at activate)* | `sys-norm-shell-fluid-nav` | **Not Started** | Fluid all pages; nav icons + contract; Security = audit + legal holds; brands/entities nav hide if ADR locked; Edit/More; EntityLink N1/N2/N3 | FE gates + E2E when UI |
+| **2** | *(register at activate)* | `sys-norm-hub-ia` | **Not Started** | Template (+ Master parity) Hub Properties drawer; remove wrong tabs; version Dependencies; API jump model A; Dev blank-surface; locale de-dupe; legacy apiAccess | FE + E2E |
+| **3** | *(register at activate)* | `sys-norm-external-ops` | **Not Started** | External services dashboard; invocation records page; package API settings route; hub redirects | FE + E2E |
+| **4** | *(register at activate)* | `sys-norm-test-artifacts` | **Not Started** | Batch test history handles; download on published/history Testing | BE/FE + E2E as scoped |
+| **5** | *(register at activate)* | `sys-norm-roles` | **Not Started** | Implement ADR-0070; matrix rewrite + FE role labels + migration | Matrix + Wave 5 BDD **ready** before code |
+| **6** | *(register at activate)* | `sys-norm-d1-brands` | **Not Started** | Runtime/management retirement per ADR-0071 | Wave 6 BDD **ready** before code |
+| **7** | *(register at activate)* | `sys-norm-promotion-pack` | **Not Started** | UAT→PROD pack + dry-run UI per §2 promotion facts | Wave 7 BDD |
+| **8** | *(register at activate)* | `sys-norm-demo-seed-terms` | **Not Started** | Asset seed / honest empty; L1 terminology sweep; remaining N* | Wave 8 BDD |
+
+Per-wave implementation BDD stubs are **pending-wave** until authored at wave start
+([behavior charter §8](../behavior/system-normalization-program.md)).
+
+---
+
+## 4. Similar-issue backlog (N1–N23) → waves
+
+| ID | Theme | Wave |
+| --- | --- | --- |
+| N1 | EntityLink — Task hub `entityName` / `groupCode` | 1 |
+| N2 | EntityLink — Catalog `groupCode` columns | 1 |
+| N3 | Actions — Users/Groups Edit+More | 1 |
+| N4 | Metadata dup — Template overview locale variants | 2 |
+| N5 | Metadata dup — Release detail status / lifecycle | 2 |
+| N6 | Dual surface — Legacy `#apiAccess` vs hub External access | 2 (redirect) / 3 (settings home) |
+| N7–N9 | EntityLink / redundancy — Overview groupCode; hub header; External ID column | 2 |
+| N10 | Nav contract — every nav item maps to icon | 1 |
+| N11 | Route key — legal-entities (moot after D1) | 1 (nav hide) / 6 (retire) |
+| N12 | Filter toolbar — Brand list (moot after D1) | 1 / 6 |
+| N13 | Seed — Legal hold empty catalog story | 8 |
+| N14 | Hub IA parity — Master hub same debt | 2 |
+| N15 | Empty design — Master revision empty design summary | 2 / 8 |
+| N16–N17 | Terminology — EN Master mix; EN/ZH L1 | 8 |
+| N18–N20 | EntityLink — Legal hold actor; where-used; MasterImpact | 1 / 2 |
+| N21 | Journey — Role journey timeline silent empty | 1 / 8 |
+| N22 | Actions — Catalog row action pattern | 1 |
+| N23 | Docs/seed — `demo-images` bypass vs managed asset | 8 |
+
+---
+
+## 5. Done criteria
+
+### 5.1 Per wave
+
+| Wave | Done when |
+| --- | --- |
+| **0** | Behavior charter + this plan + ADR-0070/0071 **Accepted** + indexes/ledger activation; Wave 0 leaf merged; **no** product code required |
+| **1** | Fluid layout + nav/security IA + EntityLink/Actions targets green; FE gates + E2E; doc-sync |
+| **2** | Hub IA model A + Properties drawer + tab removals + version Dependencies; Master parity as scoped; E2E |
+| **3** | External services invocation page + package API settings surface; hub redirects |
+| **4** | Published/history Testing downloads durable artifacts |
+| **5** | Six-role catalog live; migration audited; matrix rewritten; ROLE BDD green |
+| **6** | Brand/entity product surfaces + runtime simplify per ADR-0071; Legal holds kept |
+| **7** | Promotion pack + dry-run UI per confirmed design facts |
+| **8** | Seed/honest empty + L1 Letterhead/母版 sweep + remaining N* closed or explicitly deferred with evidence |
+
+### 5.2 Program Done
+
+All Waves **0–8** **Done**; N1–N23 closed or explicitly deferred with evidence; ADR-0070/0071
+still governing; checklist **#3b** / **#5a** **not** flipped by this program; **not** go-live.
+
+---
+
+## 6. Hard caps / serial single-lane
+
+- **Batch Recommendation caps (prefer split):** ≤ **3** `member_task_ids` per leaf;
+  ≤ **2** domains (e.g. FE+BE) per leaf; avoid leaves touching **>25** files — prefer
+  further **split** over mega-merge.
+- **Single-lane serial:** at most **one** delivery leaf heavy work
+  (`mvn verify` / full FE gates / `docker-deploy-queue` / E2E) at a time on this host.
+- Waves **0→8** execute **serially**; Batch Recommendation **split** — do **not** mega-merge
+  FE/BE domains into Wave 0.
+- Do **not** fold new work into an In Progress leaf; park sibling worktrees must not absorb
+  this queue.
+- Wave 0 is **docs-only** — no production backend/frontend code; runtime evidence **N/A**.
+- Do **not** flip go-live checklist **#3b** / **#5a**.
+- Role matrix rewrite = **Wave 5** only (Wave 0 records Confirmed intent + ADR).
+- D1 runtime delete = **Wave 6**; FE nav hide may start **Wave 1** after ADR-0071 Accepted.
+- Do **not** invent NFR SLOs in this program.
+
+---
+
+## 7. Links
+
+| Doc | Role |
+| --- | --- |
+| [system-normalization-program.md](../behavior/system-normalization-program.md) | Behavior / decision-acceptance SoT |
+| [0070-role-compression-six-roles.md](../adr/authorization-security/0070-role-compression-six-roles.md) | Role compression (Accepted) |
+| [0071-retire-document-brand-legal-entity-surfaces.md](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) | D1 retire product surfaces (Accepted) |
+| [0065-legal-entity-document-brand-variants.md](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md) | Historical IBL-E4; product surface superseded by 0071 |
+| [permission-matrix.md](../security/permission-matrix.md) | Current 8-role baseline until Wave 5 |
+| [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) | Hub IA intent (Confirmed 2026-07-21) |
+| [business-terminology-guide.md](../product/business-terminology-guide.md) | L1 Letterhead/母版 intent |
+| [execution-sync-ledger.md](./execution-sync-ledger.md) | Activation / evidence mirror |
+| [docs/README.md](../README.md) | Index |

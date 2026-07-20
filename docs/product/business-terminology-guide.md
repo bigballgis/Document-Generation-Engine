@@ -4,6 +4,21 @@
 **Owner phase:** [P21 — Role-journey frontend redesign & business-friendly terminology](../plan/detail/P21-role-journey-frontend-redesign.md) (**Done** 2026-06-30)
 **Primary persona source:** user confirmation 2026-06-29 (two rounds).
 
+### SYS-NORM Confirmed intent (2026-07-21) — Implementation Not Started
+
+> Product direction locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.8.
+> **Do not claim L1 sweep Done** until Wave 8 `sys-norm-demo-seed-terms`.
+
+| Topic | Confirmed | Pending | Wave |
+| --- | --- | --- | --- |
+| L1 English primary object label | **Letterhead** (purge user-facing mixed “Master” on L1 primary surfaces) | — | Intent Wave 0; sweep **Wave 8** |
+| L1 Chinese primary object label | **母版** | — | Intent Wave 0; sweep **Wave 8** |
+| API / L3 identifiers | May keep `masterId`, `MasterDocument`, routes | — | Unchanged |
+| Role `DOCUMENT_AUTHOR` | Role **ID** direction locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md)) | EN/ZH **display label** finalizable | Labels with Wave 5 / 8 |
+| Role merge (catalog) | Six-role compression direction locked (ADR-0070) | Runtime catalog + matrix still 8-role until Wave 5 | **Wave 5** `sys-norm-roles` |
+
+§4.5 below remains the P21 canonical glossary baseline; SYS-NORM Wave 8 reconciles residual “Master” mix on L1.
+
 > This guide is the **single source of truth (SSOT)** for user-facing label wording on L1
 > primary surfaces. It governs message **values** only; it never changes stable i18n keys, API
 > paths, enum codes, or audit field names. English is the baseline; zh-CN aligns to business

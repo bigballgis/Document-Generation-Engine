@@ -2,7 +2,7 @@
 id: ADR-0065
 type: ADR
 status: Accepted
-sourceOfTruth: true
+sourceOfTruth: false
 date: 2026-07-20
 deciders: architecture, template-governance, api, frontend, rendering, doc-keeper
 owners:
@@ -19,6 +19,8 @@ related:
   - docs/api/contract-outline.md
   - docs/adr/api/0013-api-contract-visibility-audit-and-context.md
   - docs/behavior/ibl-b5-seal-geometry.md
+  - docs/adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md
+  - docs/behavior/system-normalization-program.md
 ---
 
 # ADR 0065: Per-Legal-Entity Document Brand Variants
@@ -27,13 +29,22 @@ related:
 
 **Accepted** (2026-07-20) — IBL-E4 / Task Master **#131** / F27 (document-brand half) / **PD-9**.
 
+> **Supersession (product surface) — 2026-07-21:** Ongoing **DocumentBrand / LegalEntity
+> management UX and dual-catalog product-surface requirement** is **superseded / withdrawn**
+> by **[ADR-0071](./0071-retire-document-brand-legal-entity-surfaces.md)** (System Normalization
+> D1). Letterhead/logo/seal live in **Letterhead (master)**. Legal holds kept. Shell
+> REDBC/GREENBC remain UI-only. **Decision body below is preserved** as historical IBL-E4
+> authority — do **not** silently rewrite it. `sourceOfTruth: false` for product-surface
+> direction (ADR-0071 owns forward product SoT). Historical impl evidence (#131) remains valid.
+
 | Gate | Note |
 | --- | --- |
 | PD-9 user confirmation | **Yes** — per-legal-entity document brands vs UI theming only（**2026-07-19**） |
 | BDD lock | [ibl-e4-entity-document-brands.md](../../behavior/ibl-e4-entity-document-brands.md) **ready** — **BDD-IBL-E4-001…017** lock **E4-C\*** defaults; **no remaining product fork** for this leaf |
 | File status | **Accepted** (2026-07-20) — doc-keeper stage 3; Decision = E4-C\* |
+| Product surface (2026-07-21+) | **Superseded** by ADR-0071 — see banner above |
 
-`sourceOfTruth: true` while Accepted.
+Historical `sourceOfTruth` for IBL-E4 delivery; forward product-surface SoT → ADR-0071.
 
 This ADR does **not** claim IBL-E4 implementation Done, flip checklist **#3b** / **#5a**, remove SPECIMEN (PD-6), embed licensed fonts (PD-7), activate IBL-E5…E7 / #119, close F27 `effectiveFrom` / bulk re-pin (→ **IBL-E5**), rewrite shell `REDBC`/`GREENBC` as document brands, or claim Wave E / IBL program Done / go-live.
 
@@ -143,3 +154,12 @@ Normative behavior scenarios: **BDD-IBL-E4-001…017** in [ibl-e4-entity-documen
 - Permissions: [permission-matrix.md](../../security/permission-matrix.md)
 - PRD: [PRD.md](../../product/PRD.md)
 - API: [contract-outline.md](../../api/contract-outline.md), [openapi-v1.yaml](../../api/openapi-v1.yaml)
+
+## Amendment / Supersession footer (product surface — 2026-07-21)
+
+**Does not rewrite Decision § above.** Ongoing DocumentBrand / LegalEntity **management UX /
+dual-catalog product-surface requirement** is **superseded / withdrawn** by
+**[ADR-0071](./0071-retire-document-brand-legal-entity-surfaces.md)** (SYS-NORM D1). Forward
+product SoT for letterhead/logo/seal = Letterhead (master). Legal holds kept. Shell
+REDBC/GREENBC remain UI-only. See Status banner and
+[system-normalization-program.md](../../behavior/system-normalization-program.md) §7.

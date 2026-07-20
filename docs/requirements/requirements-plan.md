@@ -40,6 +40,7 @@
 - `REDBC` 和 `GREENBC` logo 资产必须来自官方批准的品牌资产来源或由用户提供的已授权文件，不将公开网页抓取结果自动视为可入库资产。
 - 品牌 logo 采用可配置资产槽位接入，主题切换时同步切换 logo；切换主题不改变页面信息架构、布局层级和组件结构。
 - **IBL-E4 / PD-9（正交）：** 上述 `REDBC`/`GREENBC` 仅为管理 UI 壳层主题；文档产物品牌（信头/logo/可选默认签章）由组范围 DocumentBrand + LegalEntity 绑定驱动，见 [ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md) 与 [ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)。二者互不覆盖。
+- **SYS-NORM D1（2026-07-21，Confirmed）：** 上述 DocumentBrand / LegalEntity **管理面产品要求**由 [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) **supersede / withdraw**（信头/logo/签章归 Letterhead/母版；保留 Legal holds；壳层主题仍 UI-only）。ADR-0065 历史 Decision 与 IBL-E4 交付证据保留；前进方向以 D1 为准（见 [system-normalization-program.md](../behavior/system-normalization-program.md)）。
 - 后台治理与管理界面主语言确认为英文。
 - 后台治理与管理界面视觉基线确认为白色背景、经典 OA 桌面优先布局、整体观感大气稳重，不采用过度紧凑的小气排布。
 - 平台 API 返回稳定错误码、`messageKey`、保真警告摘要、`traceId` 或 `auditId` 等定位信息；面向信贷客户经理的业务可读提示由上游业务系统承接展示。
