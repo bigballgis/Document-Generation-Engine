@@ -17,7 +17,9 @@ related:
   - docs/adr/rendering-authoring/0058-pdfa-2b-archival-output.md
   - docs/adr/rendering-authoring/0059-verapdf-pdfa-verify-gate.md
   - docs/adr/rendering-authoring/0019-structured-authoring-and-rendering-boundary.md
+  - docs/adr/rendering-authoring/0069-licensed-font-embedding-pursue.md
   - docs/operations/legal-reproducibility-freeze.md
+  - docs/operations/licensed-font-embedding-procurement.md
   - docs/behavior/ibl-b6-repro-freeze.md
   - docs/behavior/ibl-c1-layout-metric-pdf.md
   - docs/plan/intl-bank-letter-readiness-program.md
@@ -97,6 +99,13 @@ Build gates (`fc-cache`, `fc-list :lang=zh`, Carlito presence) and
 `RenderingFontSmokeTest` remain the regression contract. Licensed Microsoft fonts stay
 out of images. This ADR does **not** amend ADR-0041 decision text.
 
+> **PD-7 honesty (2026-07-20):** Product is **pursuing** licensed embedding via
+> [ADR-0069](./0069-licensed-font-embedding-pursue.md) +
+> [licensed-font-embedding-procurement.md](../../operations/licensed-font-embedding-procurement.md).
+> Until procurement gates clear and a freeze **re-cut** explicitly adopts a new package
+> set, legal reproducibility **continues to freeze ADR-0041 substitutes** — not Calibri.
+> ADR-0069 does **not** change this section’s font authority.
+
 ### 3. Content-hash baseline procedure (PDF primary; DOCX optional)
 
 1. **Algorithm:** SHA-256 over the **raw artifact bytes** (hex lowercase, no basename
@@ -153,6 +162,7 @@ out of images. This ADR does **not** amend ADR-0041 decision text.
 - Behavior readiness (BDD N/A): [ibl-b6-repro-freeze.md](../../behavior/ibl-b6-repro-freeze.md)
 - Layout-metric day-to-day (BDD N/A; **not** pixel): [ibl-c1-layout-metric-pdf.md](../../behavior/ibl-c1-layout-metric-pdf.md) — `PAGE_COUNT` / `TEXT_POSITION` under this freeze; `PIXEL_*` still rejected
 - Font baseline: [ADR-0041](./0041-rendering-font-baseline.md)
+- Licensed font pursue (procurement; **not** freeze set today): [ADR-0069](./0069-licensed-font-embedding-pursue.md)
 - Pagination / Word residual: [ADR-0042](./0042-pagination-delta-budget.md)
 - Golden corpus: [backend/.../golden-corpus/README.md](../../../backend/src/test/resources/golden-corpus/README.md)
 - IBL program F16 / IBL-B6 (+ F17 / IBL-C1 layout-metric): [intl-bank-letter-readiness-program.md](../../plan/intl-bank-letter-readiness-program.md)

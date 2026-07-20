@@ -18,6 +18,9 @@ related:
   - docs/plan/detail/LRP-A-rendering-trust-hardening.md
   - docs/plan/detail/CDP-industry-pitfall-registry.md
   - docs/plan/detail/P23-demo-typography-layout-excellence.md
+  - docs/adr/rendering-authoring/0060-legal-reproducibility-freeze.md
+  - docs/adr/rendering-authoring/0069-licensed-font-embedding-pursue.md
+  - docs/operations/licensed-font-embedding-procurement.md
   - backend/Dockerfile
   - backend/Dockerfile.packaged
 ---
@@ -56,6 +59,13 @@ required metric-compatible substitutes). Build stages may still use Alpine Maven
 > change the font package decision above — only the JRE major line.
 
 Licensed Microsoft fonts must not be baked into images (tech-stack / dependency policy).
+
+> **Pursue path (PD-7 / 2026-07-20):** Product confirmed pursuing licensed embedding via
+> procurement. That path is recorded in
+> **[ADR-0069](./0069-licensed-font-embedding-pursue.md)** +
+> [licensed-font-embedding-procurement.md](../../operations/licensed-font-embedding-procurement.md).
+> **This ADR’s Decision below remains the shipped baseline** (Carlito/Caladea + CJK).
+> ADR-0069 does **not** supersede this Decision and does **not** claim Calibri is shipped.
 
 ## Decision
 
@@ -127,4 +137,6 @@ the production baseline.
 - Pitfall: CD-PIT-01 (missing fonts in conversion container).
 - LRP task: LR-A2 (implementation Done); LR-A5 (this ADR).
 - CDP task: CD-HARD-T01 (executed-by-LR-A2 / P23-T02).
-- Related: ADR-0042 (pagination delta — Proposed); ADR-0019 (rendering boundary).
+- Related: ADR-0042 (pagination delta — Accepted with Path X residual); ADR-0019 (rendering boundary).
+- Pursue licensed embedding (procurement gate; **not** shipped here): [ADR-0069](./0069-licensed-font-embedding-pursue.md).
+- Legal freeze reaffirms this font set: [ADR-0060](./0060-legal-reproducibility-freeze.md).

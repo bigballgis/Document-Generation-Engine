@@ -12,7 +12,10 @@ program [IBL-B6](../plan/intl-bank-letter-readiness-program.md).
 
 **Not in scope:** Microsoft Word baselines / Path E page deltas (**IBL-B7** — Blocked);
 pixel/visual PDF compare (`PIXEL_*` remains rejected); go-live or checklist **#3b** /
-**#5a** flips.
+**#5a** flips; licensed Calibri/Cambria embedding (**PD-7** pursue —
+[ADR-0069](../adr/rendering-authoring/0069-licensed-font-embedding-pursue.md) /
+[licensed-font-embedding-procurement.md](./licensed-font-embedding-procurement.md) —
+freeze fonts remain **ADR-0041** until a post-procurement re-cut).
 
 ## Freeze triad
 

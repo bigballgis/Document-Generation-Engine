@@ -1896,7 +1896,7 @@
         "id": "138",
         "title": "PD-6: True non-SPECIMEN production re-issue",
         "description": "DONE 2026-07-20. Dedicated PD-6 leaf (OUT of IBL-E / Wave E): controlled opt-in production re-issue on regenerate — explicit productionReissue=true + non-empty reason; GLOBAL_ADMIN/GROUP_ADMIN skip SPECIMEN (specimen=false); AUDIT_ADMIN / missing reason fail-closed; default regenerate / preview / test-generate keep SPECIMEN. Slice pd6-true-non-specimen-reissue. MAIN FF merge 73ab03cb; worktree REMOVED. BDD ready docs/behavior/pd6-true-non-specimen-reissue.md (BDD-PD6-001…018). frontend_ui_in_scope=false. Batch solo closed. Sole-active cleared. Formal phase None. Wave IBL-E remains Done. #119 remains Blocked. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done / go-live. Do NOT activate B2/B3/B4 here (next recommend B2 PD-7).",
-        "details": "COMPLETED 2026-07-20 (post-task-doc-sync stage 12 on MAIN). Slice id: pd6-true-non-specimen-reissue. Status: done. Merge: 73ab03cb (FF feat/pd6-true-non-specimen-reissue → main); worktree DGE-pd6-true-non-specimen-reissue REMOVED. Batch solo (member_task_ids: ["138"]) closed. BDD ready: docs/behavior/pd6-true-non-specimen-reissue.md (BDD-PD6-001…018). Behavior: same regenerate API; productionReissue=true + reason → no SPECIMEN / specimen=false for GLOBAL_ADMIN/GROUP_ADMIN; default paths keep SPECIMEN; AUDIT_ADMIN opt-in 403; PRODUCTION_REISSUE_REASON_REQUIRED when reason missing. Extends CE-G06 (#76) + IBL-A6 (#112); closes F6 true re-issue residual. Gates: mvn verify GREEN 2309; architecture PASS_WITH_SUGGESTIONS Critical=0 merge_go=true; Stage 10 DEPLOY_OK (docs/plan/evidence/pd6-stage10-deploy/); FE/E2E/UIUX N/A. Formal phase remains None. Wave IBL-E stays Done. Wave IBL-B stays In Progress (B7 #119 Blocked). Umbrella #106 registry-only pending. Sole-active cleared. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done / go-live. Next recommend: B2 PD-7 (orchestrator starts next leaf — not activated here).",
+        "details": "COMPLETED 2026-07-20 (post-task-doc-sync stage 12 on MAIN). Slice id: pd6-true-non-specimen-reissue. Status: done. Merge: 73ab03cb (FF feat/pd6-true-non-specimen-reissue → main); worktree DGE-pd6-true-non-specimen-reissue REMOVED. Batch solo (member_task_ids: [\"138\"]) closed. BDD ready: docs/behavior/pd6-true-non-specimen-reissue.md (BDD-PD6-001…018). Behavior: same regenerate API; productionReissue=true + reason → no SPECIMEN / specimen=false for GLOBAL_ADMIN/GROUP_ADMIN; default paths keep SPECIMEN; AUDIT_ADMIN opt-in 403; PRODUCTION_REISSUE_REASON_REQUIRED when reason missing. Extends CE-G06 (#76) + IBL-A6 (#112); closes F6 true re-issue residual. Gates: mvn verify GREEN 2309; architecture PASS_WITH_SUGGESTIONS Critical=0 merge_go=true; Stage 10 DEPLOY_OK (docs/plan/evidence/pd6-stage10-deploy/); FE/E2E/UIUX N/A. Formal phase remains None. Wave IBL-E stays Done. Wave IBL-B stays In Progress (B7 #119 Blocked). Umbrella #106 registry-only pending. Sole-active cleared. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done / go-live. Next recommend: B2 PD-7 (orchestrator starts next leaf — not activated here).",
         "testStrategy": "1. BDD-PD6-001…018 ready (docs/behavior/pd6-true-non-specimen-reissue.md). 2. TDD: default regenerate SPECIMEN retained; productionReissue=true + reason + admin roles → specimen=false / no SPECIMEN stamp; AUDIT_ADMIN / missing reason → 403/fail-closed; preview/test-generate unchanged. 3. mvn -B -ntp -f backend/pom.xml verify GREEN. 4. FE/E2E N/A (frontend_ui_in_scope=false). 5. Stage 5/10 DEPLOY_OK when acceptance surface requires. 6. Do NOT flip #3b/#5a GO; do NOT claim IBL program Done / go-live; Done only after stage 11 merge + MAIN doc-sync.",
         "priority": "high",
         "dependencies": [
@@ -1906,17 +1906,31 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-20T05:15:00.000Z"
+      },
+      {
+        "id": "139",
+        "title": "PD-7: Pursue licensed font embedding (procurement/LRP)",
+        "description": "IN PROGRESS 2026-07-20 — sole-active NON-CE delivery leaf (OUT of IBL-E / Wave E). Docs-first pursue path for licensed font embedding (true Calibri etc.): ADR amendment/successor + procurement checklist + LRP pairing; honest cannot-ship without licensed assets. Slice pd7-licensed-font-embedding. ISOLATED D:/working/DGE-pd7-licensed-font-embedding · feat/pd7-licensed-font-embedding (base origin/main). BDD not-applicable docs/behavior/pd7-licensed-font-embedding.md. frontend_ui_in_scope=false. No binary fonts in repo. Do NOT invent fonts. Do NOT flip LRP checklist #3b/#5a GO. Formal phase None. Wave IBL-E remains Done. #119 remains Blocked. Do NOT claim IBL program Done / go-live. Prior #138 PD-6 Done.",
+        "details": "ACTIVATED 2026-07-20 (plan-orchestrator stage 2). Slice id: pd7-licensed-font-embedding. Status: in-progress (sole-active). Placement ISOLATED; worktree D:/working/DGE-pd7-licensed-font-embedding · branch feat/pd7-licensed-font-embedding (base origin/main). Batch solo (member_task_ids: [\"139\"]; proposed_slice_id: pd7-licensed-font-embedding; vetoes: B3-CE-O02, B4-CD3, RTL, #119, umbrella-106, checklist-#3b/#5a-GO, invent-fonts). Scope: docs-first — ADR amendment or successor vs ADR-0041 honesty; procurement checklist (license/vendor/redistribution into conversion images); LRP pairing without GO flip; cannot-ship statement. OUT of IBL-E (no IBL-E task). No font binaries (.ttf/.otf). Owners: doc-keeper (primary) + architecture-reviewer as needed. BDD not-applicable. Formal phase remains None. Wave IBL-E stays Done. Wave IBL-B stays In Progress (B7 #119 Blocked). Umbrella #106 registry-only pending. #138 remains done. Do NOT flip #3b/#5a GO. Do NOT invent fonts. Do NOT claim IBL program Done / go-live. Done only after stage 11 merge + MAIN doc-sync with ADR + procurement checklist evidence.",
+        "testStrategy": "1. BDD not-applicable confirmed (docs/behavior/pd7-licensed-font-embedding.md). 2. ADR amendment or successor indexed against ADR-0041 (substitutes ≠ licensed Calibri). 3. Procurement checklist exists (ops or plan-linked) covering license acquisition + redistribution into conversion images + LRP font baseline pairing. 4. Explicit durable cannot-ship-without-licensed-assets statement. 5. LRP pairing documented; checklist #3b/#5a remain not GO. 6. No font binaries committed. Docs review / architecture-reviewer as needed; FE/E2E N/A. 7. Done only after stage 11 merge + MAIN doc-sync; do NOT flip #3b/#5a GO; do NOT claim IBL program Done / go-live.",
+        "priority": "high",
+        "dependencies": [
+          "138"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-20T05:35:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-20T05:15:00.000Z",
-      "taskCount": 138,
-      "completedCount": 133,
+      "lastModified": "2026-07-20T05:35:00.000Z",
+      "taskCount": 139,
+      "completedCount": 135,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-20T05:15:00.000Z"
+      "updated": "2026-07-20T05:35:00.000Z"
     }
   }
 }
