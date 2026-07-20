@@ -957,6 +957,7 @@ API 管理配置展示字段 v1 基线确认为 `apiPolicy.policyVersion`、`api
 - **调用记录**独立于合规审计；调用方可查询自身历史与完整参数（encryption 密码不落库）；包级可配是否保存生成文档及记录/文档留存（默认 save 开 / 90d / 30d；最长 7y / 1y 预设）。
 - 运行时 `GET …/invocations` 支持 logical（真实调用）与 flat（平铺 item 级）视图。
 - **CE-G06（2026-07-16）：** 成功解析到已发布 release 的调用记录持久化发布包快照 ID + bundle hash，供内控证明当时钉扎母版。授权管理员可通过管理端受控再生 API 按 invocation 重放装配，产出带 **SPECIMEN** 水印的审计样件并写入管理审计；正式对外 runtime 生成路径仍无水印。管理端不暴露调用方 variables；本片不交付管理 UI「再生」按钮。`parameters_storage` 留存例外见 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)。行为规格：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。
+- **PD-6（2026-07-19 确认意图 / 2026-07-20 BDD）：** 在同一 regenerate API 上，经显式 `productionReissue=true` 与必填 `reason`，`GLOBAL_ADMIN` / 同组 `GROUP_ADMIN` 可受控生产重发（产物无 SPECIMEN，`specimen=false`）；默认 regenerate 与 preview/test 仍强制 SPECIMEN；`AUDIT_ADMIN` 不可走生产重发。不交付管理 UI CTA；不翻转 go-live checklist #3b/#5a。行为规格：[pd6-true-non-specimen-reissue.md](../behavior/pd6-true-non-specimen-reissue.md)。
 
 API 凭证生命周期、轮换、吊销、过期、到期提醒和相关审计策略已确认；API 凭证到期提醒是生命周期专门通知，不改变其他 API 管理配置变更不主动通知调用方或管理员的基线。
 

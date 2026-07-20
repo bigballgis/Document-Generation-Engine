@@ -50,6 +50,10 @@ public class InvocationRegenerationEntity {
     @Column(name = "actor_username", nullable = false, length = 128)
     private String actorUsername;
 
+    /** PD-6 production re-issue accountability reason; null for specimen regenerations. */
+    @Column(length = 500)
+    private String reason;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -70,7 +74,8 @@ public class InvocationRegenerationEntity {
             boolean specimen,
             boolean encryptionReapplied,
             String actorUsername,
-            Instant createdAt
+            Instant createdAt,
+            String reason
     ) {
         this.id = id;
         this.regenerationExternalId = regenerationExternalId;
@@ -86,6 +91,7 @@ public class InvocationRegenerationEntity {
         this.encryptionReapplied = encryptionReapplied;
         this.actorUsername = actorUsername;
         this.createdAt = createdAt;
+        this.reason = reason;
     }
 
     public UUID getId() {
@@ -138,6 +144,10 @@ public class InvocationRegenerationEntity {
 
     public String getActorUsername() {
         return actorUsername;
+    }
+
+    public String getReason() {
+        return reason;
     }
 
     public Instant getCreatedAt() {

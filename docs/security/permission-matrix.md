@@ -197,7 +197,8 @@ API 管理配置按配置域独立保存；每个配置域操作动线为编辑�
 | 配置调用记录与文档留存 | 是 | 被授权组范围内 | 否 | 否 | 包级 `saveGeneratedDocuments`、`invocationRecordRetentionDays`、`documentRetentionDays`（预设选项；max 7y/1y）；`changedAreas` 含 `INVOCATION_RETENTION`；仅影响新产生的记录 TTL。 |
 | 查看包级调用记录摘要 | 是 | 被授权组范围内 | 是（只读摘要） | 否 | 包 Hub L2 最近调用列表；**无** variables 明文；合规明细仍仅审计角色。 |
 | 查看包级生成审计摘要 | 是 | 被授权组范围内 | 否 | 否 | `GET /api/management/v1/audit/generation?templateExternalId=`；需 `readAudit` + 可读模板组范围；返回 `eventAt/eventType/requestId/outcome/status/accessAccountSummary` 等非敏感摘要；**不得**返回变量明文、完整请求体或下载地址。 |
-| 按 invocation 受控再生（审计样件） | 是 | 被授权组范围内 | 否 | 否（`AUDIT_ADMIN`：是，模板可见/`readAudit` 范围内） | CE-G06：`POST …/templates/{templateId}/api/invocations/{invocationId}/regenerate`；仅指纹齐全且未过期的 `SINGLE`/`BATCH_ITEM`/`ASYNC_TASK`；产物强制 SPECIMEN 水印；**禁止**响应/审计返回 variables 或加密密码；写管理审计 `INVOCATION_REGENERATED`；不新建调用方 runtime SUCCESS 记录。BDD：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。 |
+| 按 invocation 受控再生（审计样件） | 是 | 被授权组范围内 | 否 | 否（`AUDIT_ADMIN`：是，模板可见/`readAudit` 范围内） | CE-G06：`POST …/templates/{templateId}/api/invocations/{invocationId}/regenerate`（默认 / `productionReissue` 缺省或 `false`）；仅指纹齐全且未过期的 `SINGLE`/`BATCH_ITEM`/`ASYNC_TASK`；产物强制 SPECIMEN 水印；**禁止**响应/审计返回 variables 或加密密码；写管理审计 `INVOCATION_REGENERATED`；不新建调用方 runtime SUCCESS 记录。BDD：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。 |
+| 按 invocation 生产重发（无 SPECIMEN） | 是 | 被授权组范围内 | 否 | 否（`AUDIT_ADMIN`：**否** — 403 fail-closed） | PD-6：同一 regenerate 路径；显式 `productionReissue=true` **且** `reason` trim 后非空（建议 max 500）；装配**跳过** SPECIMEN；响应/元数据 `specimen=false`；审计须含 `productionReissue` + `reason` + `specimen`；**无**新 capability bit；缺 reason → 400 `PRODUCTION_REISSUE_REASON_REQUIRED`；preview/test-generate **不可**走此模式。BDD：[pd6-true-non-specimen-reissue.md](../behavior/pd6-true-non-specimen-reissue.md)。**不**翻转 checklist #3b/#5a。 |
 
 ## 8. API 授权规则
 
@@ -583,6 +584,14 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - `TEMPLATE_AUTHOR` / `TEMPLATE_TESTER` / `TEMPLATE_APPROVER` / `MASTER_DESIGNER` / 调用方 **禁止** regenerate（403 fail-closed）。
 - 再生**内部**可读 `parametersStorage`（ADR-0057 授权的留存例外，含 IBL-A5 收窄后形态）；响应、审计、管理 UI **仍禁止** variables / 加密密码明文（HIST C6 不放宽）。见 §11 ADR-0057 条。
 - 行为 SoT：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)；ADR：[0057-invocation-parameters-retention-for-regenerate.md](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)。
+
+**PD-6 真·无 SPECIMEN 生产重发（2026-07-20；扩展 CE-G06，非新 ADR）：**
+
+- **无新 capability bit / 无新角色。** 仍走同一 regenerate API；默认模式（无 opt-in）权限与 SPECIMEN 强制**不变**（G06-C8 / G06-C13）。
+- **生产重发角色收窄：** 仅 `GLOBAL_ADMIN` 与同组 `GROUP_ADMIN`。`AUDIT_ADMIN` 可继续默认 SPECIMEN regenerate，但 `productionReissue=true` → **403** fail-closed。
+- **Fail-closed opt-in：** `productionReissue=true` 时必须非空 `reason`；否则 400 `PRODUCTION_REISSUE_REASON_REQUIRED`（`api.error.audit.productionReissueReasonRequired`）。缺 flag / `false` → 审计样件路径。
+- Preview / test-generate / runtime formal generate：**零放宽**（preview/test 仍强制 SPECIMEN；formal 仍无水印且本叶不改）。
+- 行为 SoT：[pd6-true-non-specimen-reissue.md](../behavior/pd6-true-non-specimen-reissue.md) `BDD-PD6-001…018`；契约：[contract-outline.md](../api/contract-outline.md) «审计可复现受控再生» / OpenAPI `ManagementInvocationRegenerateRequest`。**不**翻转 #3b/#5a；**不**宣称 go-live。
 
 **IBL-A5 PII 留存脱敏（2026-07-18）：**
 

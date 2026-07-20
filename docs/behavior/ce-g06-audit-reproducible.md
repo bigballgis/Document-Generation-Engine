@@ -12,9 +12,11 @@
 | **Formal phase** | **None**（CE 程序切片；不发明 sole-active 正式 P-phase） |
 | **Placement** | MAIN（merged） |
 | **上游** | CE-K01 (#57) **Done**（发布包钉扎）；CE-G02 (#73) **Done**（SPECIMEN 水印可复用） |
-| **Owning docs** | 本文件（行为 SoT）；计划映射 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md)；权限 [permission-matrix.md](../security/permission-matrix.md) §11；敏感数据例外 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)（修订 ADR-0020）；领域 [domain-model.md](../domain/domain-model.md) §2.12.2 / §2.17；钉扎上游 [ce-k01-release-bundle-pinning.md](./ce-k01-release-bundle-pinning.md)；水印上游 [ce-g02-specimen-watermark.md](./ce-g02-specimen-watermark.md)；管理端调用历史约束 [management-invocation-history.md](./management-invocation-history.md) |
+| **Owning docs** | 本文件（行为 SoT — **默认 SPECIMEN regenerate**）；计划映射 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md)；权限 [permission-matrix.md](../security/permission-matrix.md) §7 / §11；敏感数据例外 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md)（修订 ADR-0020）；领域 [domain-model.md](../domain/domain-model.md) §2.12.2 / §2.17；钉扎上游 [ce-k01-release-bundle-pinning.md](./ce-k01-release-bundle-pinning.md)；水印上游 [ce-g02-specimen-watermark.md](./ce-g02-specimen-watermark.md)；管理端调用历史约束 [management-invocation-history.md](./management-invocation-history.md)；**下游扩展** [pd6-true-non-specimen-reissue.md](./pd6-true-non-specimen-reissue.md)（显式生产重发 opt-in；**不**改写本文件 G06-C* 默认语义） |
 
 **完成声明约束：** 本切片关闭内控缺口「审计不可复现」的最小闭环（invocation 钉扎指纹 + 受控再生 API + SPECIMEN）；**不**宣称 go-live；**不**激活 CD-3；**不**实现 CE-G04 legal hold / CE-G05 年检 / CE-E01 导出包；**不**交付管理端「再生」按钮或 E2E/UIUX（API-first）。
+
+**下游（PD-6，2026-07-20）：** 同一 regenerate 入口可显式 `productionReissue=true` + `reason` 跳过 SPECIMEN（角色收窄至 `GLOBAL_ADMIN`/`GROUP_ADMIN`）。**默认 regenerate / preview / test 仍强制 SPECIMEN**——本文件 G06-C8/C13 默认路径继续有效；生产重发行为 SoT = [pd6-true-non-specimen-reissue.md](./pd6-true-non-specimen-reissue.md)。**无新 ADR**。
 
 ---
 
@@ -342,7 +344,7 @@
 | Q2 | 过期记录错误用 410 还是 404？ | **已钉死 410**（`INVOCATION_RECORD_EXPIRED`）；见 G06-C19 + contract-outline |
 | Q3 | 是否持久化独立 `invocation_regeneration` 表？ | **建议是**（id、source、actor、created_at、storage keys、outcome）；允许首版仅审计+对象键若实现更小 |
 | Q4 | FE 是否在 Drawer 只读展示 snapshot/hash？ | **本片不强制**；API 字段先落地，UI 展示可后续 CE-U 小片 |
-| Q5 | AUDIT_ADMIN 是否必须排除出再生权、仅 GLOBAL/GROUP？ | **否**；默认含 AUDIT_ADMIN（合规复现主角色），仍受模板可见范围约束 |
+| Q5 | AUDIT_ADMIN 是否必须排除出再生权、仅 GLOBAL/GROUP？ | **否**（对本片默认 SPECIMEN 路径）；默认含 AUDIT_ADMIN（合规复现主角色），仍受模板可见范围约束。**PD-6 澄清：** 生产重发（`productionReissue=true`）角色收窄至 GLOBAL/GROUP；AUDIT_ADMIN **禁止**无水印路径（见 [pd6-true-non-specimen-reissue.md](./pd6-true-non-specimen-reissue.md) PD6-C4） |
 | Q6 | `parameters_storage` 是否必须列级/应用层 encryption-at-rest？ | **本片否**（ADR-0057 deferred）；补偿控制 = 访问边界 + 调用记录 TTL 清理 + 管理端不暴露。待 KMS 后再评估 |
 
 ---

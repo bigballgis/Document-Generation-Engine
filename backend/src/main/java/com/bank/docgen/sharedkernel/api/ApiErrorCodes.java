@@ -121,6 +121,8 @@ public final class ApiErrorCodes {
     public static final String SPECIMEN_WATERMARK_FAILED = "SPECIMEN_WATERMARK_FAILED";
     /** CE-G06: regenerate outputFormat outside DOCX/PDF allow-list. */
     public static final String OUTPUT_FORMAT_NOT_ALLOWED = "OUTPUT_FORMAT_NOT_ALLOWED";
+    /** PD-6: production re-issue requested without a non-blank reason. */
+    public static final String PRODUCTION_REISSUE_REASON_REQUIRED = "PRODUCTION_REISSUE_REASON_REQUIRED";
 
     /** CE-E02: asset key grammar invalid. */
     public static final String ASSET_LIBRARY_ASSET_KEY_INVALID = "ASSET_LIBRARY_ASSET_KEY_INVALID";

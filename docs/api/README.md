@@ -76,9 +76,13 @@ Stable English-first fail-closed keys (implement in `messages_en.properties` + f
 
 Behavior SoT: [ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md). Storage ruling: [data-storage-view.md](../architecture/data-storage-view.md).
 
-### Audit-reproducible regenerate (CE-G06)
+### Audit-reproducible regenerate (CE-G06) + production re-issue (PD-6)
 
-Management regenerate-by-invocation is a **management-API** contract (documented in [contract-outline.md](contract-outline.md) «审计可复现受控再生（CE-G06）」 and [openapi-v1.yaml](openapi-v1.yaml) `regenerateTemplateManagementInvocation`). Caller-facing generate paths stay watermark-free. FE regenerate CTA is out of scope. Sanitized `parameters_storage` retention for replay is authorized by [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md); management APIs still must not expose variables.
+Management regenerate-by-invocation is a **management-API** contract (documented in [contract-outline.md](contract-outline.md) «审计可复现受控再生（CE-G06）+ 生产重发（PD-6）」 and [openapi-v1.yaml](openapi-v1.yaml) `regenerateTemplateManagementInvocation`). Caller-facing generate paths stay watermark-free. FE regenerate CTA is out of scope. Sanitized `parameters_storage` retention for replay is authorized by [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md); management APIs still must not expose variables.
+
+**Default (CE-G06):** omit `productionReissue` or set `false` → forced SPECIMEN; roles `GLOBAL_ADMIN` / in-scope `GROUP_ADMIN` / in-scope `AUDIT_ADMIN`.
+
+**Production re-issue (PD-6):** `productionReissue=true` + non-blank `reason` → skip SPECIMEN; `specimen=false`; roles narrowed to `GLOBAL_ADMIN` / in-scope `GROUP_ADMIN` only (`AUDIT_ADMIN` → 403). Preview / test-generate must not accept `productionReissue`. No new ADR (behavior extension of CE-G06). Do **not** flip checklist **#3b** / **#5a**.
 
 ### PII-category retention redaction (IBL-A5)
 
@@ -95,9 +99,11 @@ Stable English-first fail-closed keys (implement in `messages_en.properties`):
 | Pinned master unavailable | (K01) | `api.error.rendering.pinnedMasterUnavailable` |
 | Unsupported invocation kind | 422 | `api.error.audit.invocationKindNotRegenerable` |
 | Expired invocation record | 410 | `api.error.audit.invocationRecordExpired` |
-| SPECIMEN watermark failure | 500 | `api.error.audit.specimenWatermarkFailed` |
+| SPECIMEN watermark failure (specimen path only) | 500 | `api.error.audit.specimenWatermarkFailed` |
+| Production re-issue missing/blank reason | 400 | `api.error.audit.productionReissueReasonRequired` |
+| Production re-issue forbidden role (incl. `AUDIT_ADMIN`) | 403 | `api.error.authorization.forbidden` (or management equivalent) |
 
-Behavior SoT: [ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md).
+Behavior SoT: [ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md); [pd6-true-non-specimen-reissue.md](../behavior/pd6-true-non-specimen-reissue.md).
 
 ### Legal hold administration (CE-G04)
 

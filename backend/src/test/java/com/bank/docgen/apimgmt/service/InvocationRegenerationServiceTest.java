@@ -335,6 +335,157 @@ class InvocationRegenerationServiceTest {
         assertThat(audit.getValue().templateId()).isEqualTo(TEMPLATE_ID);
         assertThat(audit.getValue().groupCode()).isEqualTo("GRP-A");
         assertThat(audit.getValue().outcome()).isEqualTo("SUCCESS");
+        assertThat(audit.getValue().productionReissue()).isFalse();
+        assertThat(audit.getValue().specimen()).isTrue();
+        assertThat(audit.getValue().reason()).isNull();
+    }
+
+    @Test
+    void bddPd6_001_defaultRegenerateKeepsSpecimenTrue() {
+        ApiInvocationRecordEntity invocation = regenerableInvocation(InvocationKind.SINGLE);
+        stubAuthorizedInvocation(invocation);
+        when(assemblySupport.assembleSpecimen(any(), any(), eq("PDF"), any(UUID.class)))
+                .thenReturn(new InvocationRegenerationAssemblySupport.AssembledRegeneration(
+                        "regenerations/regen-1/output.pdf",
+                        "application/pdf"
+                ));
+        when(regenerationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ManagementInvocationRegenerateView view = service.regenerate(
+                TEMPLATE_ID,
+                "INV-OK01",
+                new ManagementInvocationRegenerateRequest("PDF", false, null),
+                globalAdmin
+        );
+
+        assertThat(view.specimen()).isTrue();
+        verify(assemblySupport).assembleSpecimen(any(), any(), eq("PDF"), any(UUID.class));
+        verify(assemblySupport, never()).assembleProductionReissue(any(), any(), any(), any());
+        ArgumentCaptor<InvocationRegenerationEntity> saved = ArgumentCaptor.forClass(
+                InvocationRegenerationEntity.class
+        );
+        verify(regenerationRepository).save(saved.capture());
+        assertThat(saved.getValue().isSpecimen()).isTrue();
+        assertThat(saved.getValue().getReason()).isNull();
+    }
+
+    @Test
+    void bddPd6_005_productionReissueOmitsSpecimenAndRecordsReason() {
+        ApiInvocationRecordEntity invocation = regenerableInvocation(InvocationKind.SINGLE);
+        stubAuthorizedInvocation(invocation);
+        when(groupAccessService.canProductionReissueInvocation(globalAdmin)).thenReturn(true);
+        when(assemblySupport.assembleProductionReissue(any(), any(), eq("PDF"), any(UUID.class)))
+                .thenReturn(new InvocationRegenerationAssemblySupport.AssembledRegeneration(
+                        "regenerations/regen-prod/output.pdf",
+                        "application/pdf"
+                ));
+        when(regenerationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        String reason = "Reprint for customer — case 42";
+        ManagementInvocationRegenerateView view = service.regenerate(
+                TEMPLATE_ID,
+                "INV-OK01",
+                new ManagementInvocationRegenerateRequest("PDF", true, reason),
+                globalAdmin
+        );
+
+        assertThat(view.specimen()).isFalse();
+        verify(assemblySupport).assembleProductionReissue(any(), any(), eq("PDF"), any(UUID.class));
+        verify(assemblySupport, never()).assembleSpecimen(any(), any(), any(), any());
+        ArgumentCaptor<InvocationRegenerationEntity> saved = ArgumentCaptor.forClass(
+                InvocationRegenerationEntity.class
+        );
+        verify(regenerationRepository).save(saved.capture());
+        assertThat(saved.getValue().isSpecimen()).isFalse();
+        assertThat(saved.getValue().getReason()).isEqualTo(reason);
+        ArgumentCaptor<InvocationRegeneratedAuditDetail> audit =
+                ArgumentCaptor.forClass(InvocationRegeneratedAuditDetail.class);
+        verify(managementAuditRecorder).recordInvocationRegenerated(audit.capture());
+        assertThat(audit.getValue().productionReissue()).isTrue();
+        assertThat(audit.getValue().specimen()).isFalse();
+        assertThat(audit.getValue().reason()).isEqualTo(reason);
+        assertThat(audit.getValue().outcome()).isEqualTo("SUCCESS");
+    }
+
+    @Test
+    void bddPd6_009_productionReissueBlankReasonRejected() {
+        ApiInvocationRecordEntity invocation = regenerableInvocation(InvocationKind.SINGLE);
+        stubAuthorizedInvocation(invocation);
+        when(groupAccessService.canProductionReissueInvocation(globalAdmin)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.regenerate(
+                TEMPLATE_ID,
+                "INV-OK01",
+                new ManagementInvocationRegenerateRequest("PDF", true, "   "),
+                globalAdmin
+        )).isInstanceOf(InvocationRegenerationException.class)
+                .extracting(ex -> ((InvocationRegenerationException) ex).errorCode())
+                .isEqualTo(ApiErrorCodes.PRODUCTION_REISSUE_REASON_REQUIRED);
+
+        verify(assemblySupport, never()).assembleSpecimen(any(), any(), any(), any());
+        verify(assemblySupport, never()).assembleProductionReissue(any(), any(), any(), any());
+        verify(regenerationRepository, never()).save(any());
+        ArgumentCaptor<InvocationRegeneratedAuditDetail> audit =
+                ArgumentCaptor.forClass(InvocationRegeneratedAuditDetail.class);
+        verify(managementAuditRecorder).recordInvocationRegenerated(audit.capture());
+        assertThat(audit.getValue().outcome()).isEqualTo("FAILURE");
+        assertThat(audit.getValue().productionReissue()).isTrue();
+        assertThat(audit.getValue().errorCode()).isEqualTo(ApiErrorCodes.PRODUCTION_REISSUE_REASON_REQUIRED);
+    }
+
+    @Test
+    void bddPd6_010_auditAdminCannotProductionReissue() {
+        ManagementSessionClaims auditAdmin = session(List.of("AUDIT_ADMIN"), List.of("GRP-A"));
+        ApiInvocationRecordEntity invocation = regenerableInvocation(InvocationKind.SINGLE);
+        when(groupAccessService.canRegenerateInvocation(auditAdmin)).thenReturn(true);
+        when(groupAccessService.canProductionReissueInvocation(auditAdmin)).thenReturn(false);
+        when(templateService.requireReadableTemplate(TEMPLATE_ID, auditAdmin)).thenReturn(template);
+        when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(
+                com.bank.docgen.apimgmt.persistence.ApiPolicyEntity.createSkeleton(TEMPLATE_ID, "U0000001")
+        ));
+        when(invocationRecordRepository.findByInvocationExternalId("INV-OK01"))
+                .thenReturn(Optional.of(invocation));
+
+        assertThatThrownBy(() -> service.regenerate(
+                TEMPLATE_ID,
+                "INV-OK01",
+                new ManagementInvocationRegenerateRequest("PDF", true, "need clean copy"),
+                auditAdmin
+        )).isInstanceOf(ApiManagementAccessDeniedException.class);
+
+        verify(assemblySupport, never()).assembleSpecimen(any(), any(), any(), any());
+        verify(assemblySupport, never()).assembleProductionReissue(any(), any(), any(), any());
+        verify(regenerationRepository, never()).save(any());
+    }
+
+    @Test
+    void bddPd6_002_auditAdminDefaultRegenerateStillAllowed() {
+        ManagementSessionClaims auditAdmin = session(List.of("AUDIT_ADMIN"), List.of("GRP-A"));
+        ApiInvocationRecordEntity invocation = regenerableInvocation(InvocationKind.SINGLE);
+        when(groupAccessService.canRegenerateInvocation(auditAdmin)).thenReturn(true);
+        when(templateService.requireReadableTemplate(TEMPLATE_ID, auditAdmin)).thenReturn(template);
+        when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(
+                com.bank.docgen.apimgmt.persistence.ApiPolicyEntity.createSkeleton(TEMPLATE_ID, "U0000001")
+        ));
+        when(invocationRecordRepository.findByInvocationExternalId("INV-OK01"))
+                .thenReturn(Optional.of(invocation));
+        when(assemblySupport.assembleSpecimen(any(), any(), eq("PDF"), any(UUID.class)))
+                .thenReturn(new InvocationRegenerationAssemblySupport.AssembledRegeneration(
+                        "regenerations/regen-1/output.pdf",
+                        "application/pdf"
+                ));
+        when(regenerationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ManagementInvocationRegenerateView view = service.regenerate(
+                TEMPLATE_ID,
+                "INV-OK01",
+                new ManagementInvocationRegenerateRequest("PDF"),
+                auditAdmin
+        );
+
+        assertThat(view.specimen()).isTrue();
+        verify(assemblySupport).assembleSpecimen(any(), any(), eq("PDF"), any(UUID.class));
+        verify(groupAccessService, never()).canProductionReissueInvocation(any());
     }
 
     private void stubAuthorizedInvocation(ApiInvocationRecordEntity invocation) {

@@ -83,6 +83,12 @@ class GroupAccessServiceTest {
         assertThat(service.canRegenerateInvocation(groupAdmin)).isTrue();
         assertThat(service.canRegenerateInvocation(session(List.of("AUDIT_ADMIN"), List.of()))).isTrue();
         assertThat(service.canRegenerateInvocation(author)).isFalse();
+        assertThat(service.canProductionReissueInvocation(groupAdmin)).isTrue();
+        assertThat(service.canProductionReissueInvocation(session(List.of("GLOBAL_ADMIN"), List.of())))
+                .isTrue();
+        assertThat(service.canProductionReissueInvocation(session(List.of("AUDIT_ADMIN"), List.of())))
+                .isFalse();
+        assertThat(service.canProductionReissueInvocation(author)).isFalse();
     }
 
     @Test

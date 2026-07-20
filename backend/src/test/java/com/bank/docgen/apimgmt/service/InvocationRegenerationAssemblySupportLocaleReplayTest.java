@@ -258,6 +258,26 @@ class InvocationRegenerationAssemblySupportLocaleReplayTest {
     }
 
     @Test
+    void bddPd6_006_productionReissueDocxOmitsSpecimenWatermark() throws Exception {
+        ApiInvocationRecordEntity invocation = invocationWithParameters(
+                InvocationKind.SINGLE,
+                """
+                {"variables":{"name":"Alice"},"contextSummary":{"locale":"en-US"}}
+                """
+        );
+        stubSuccessfulDocxAssembly();
+
+        support.assembleProductionReissue(template, invocation, "DOCX", UUID.randomUUID());
+
+        ArgumentCaptor<InputStream> putStream = ArgumentCaptor.forClass(InputStream.class);
+        verify(objectStoragePort).put(anyString(), putStream.capture(), anyLong(), anyString());
+        byte[] stored = putStream.getValue().readAllBytes();
+        assertThat(anyZipPartContains(stored, "word/header", "SPECIMEN")).isFalse();
+        assertThat(anyZipPartContains(stored, "word/footer", "SPECIMEN")).isFalse();
+        verify(variableComputeService).applyCompute(eq(VERSION_ID), any(), eq("en-US"));
+    }
+
+    @Test
     void bddIblA6_007_batchItemWithRetainedLocaleReplaysEnUs() throws Exception {
         ApiInvocationRecordEntity invocation = invocationWithParameters(
                 InvocationKind.BATCH_ITEM,

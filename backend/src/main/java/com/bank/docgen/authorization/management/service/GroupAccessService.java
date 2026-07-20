@@ -95,6 +95,15 @@ public class GroupAccessService {
                 || session.roles().contains("AUDIT_ADMIN");
     }
 
+    /**
+     * PD-6: production re-issue (no SPECIMEN) — GLOBAL_ADMIN or GROUP_ADMIN only.
+     * AUDIT_ADMIN may regenerate specimens but not production re-issue.
+     */
+    public boolean canProductionReissueInvocation(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN");
+    }
+
     public boolean canDeleteTemplate(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN");
     }

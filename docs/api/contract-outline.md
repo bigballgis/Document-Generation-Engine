@@ -1191,13 +1191,13 @@ Asynchronous accepted response draft
 | GET | `/api/management/v1/templates/{templateId}/api/routes-summary` | 包 externalId、默认 generate 路径、explicit 路径列表 |
 | GET | `/api/management/v1/templates/{templateId}/api/invocations` | 分页列表；筛选 `status`、`invocationKind`、`requestId`、`createdAfter`/`createdBefore`、`credentialId`；摘要可含 `releaseBundleSnapshotId`/`releaseBundleHash`（CE-G06，可空） |
 | GET | `/api/management/v1/templates/{templateId}/api/invocations/{invocationId}` | 单条摘要详情（无 parameters；CE-G06 可含指纹字段） |
-| POST | `/api/management/v1/templates/{templateId}/api/invocations/{invocationId}/regenerate` | CE-G06 受控再生 SPECIMEN；见下方专节 |
+| POST | `/api/management/v1/templates/{templateId}/api/invocations/{invocationId}/regenerate` | CE-G06 受控再生 SPECIMEN（默认）；PD-6 显式生产重发可选；见下方专节 |
 | GET | `/api/management/v1/api-access/alerts` | 跨包待关注项（缺 AD 组含 PENDING_RELEASE；凭证类仍仅 PUBLISHED） |
 | GET | `/api/management/v1/api-access/summary` | Overview 轻量就绪计数（published / attention / pending-setup；非 catalog） |
 
-### 审计可复现受控再生（CE-G06）
+### 审计可复现受控再生（CE-G06）+ 生产重发（PD-6）
 
-管理面契约（**不**扩展 caller-facing runtime generate 路径语义；正式 runtime **不**施加 SPECIMEN）。权威行为：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。上游钉扎：[ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)；水印复用：[ce-g02-specimen-watermark.md](../behavior/ce-g02-specimen-watermark.md)。
+管理面契约（**不**扩展 caller-facing runtime generate 路径语义；正式 runtime **不**施加 SPECIMEN）。权威行为：默认样件 [ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)；生产重发 opt-in [pd6-true-non-specimen-reissue.md](../behavior/pd6-true-non-specimen-reissue.md)。上游钉扎：[ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)；水印复用：[ce-g02-specimen-watermark.md](../behavior/ce-g02-specimen-watermark.md)。**无新 ADR**（水印策略为产品行为扩展，非栈决策）。
 
 #### 指纹落库（runtime write path）
 
@@ -1212,20 +1212,24 @@ Asynchronous accepted response draft
 
 | 项 | 已确认 |
 | --- | --- |
-| 路径 | `POST /api/management/v1/templates/{templateId}/api/invocations/{invocationId}/regenerate` |
-| Body | 可选 `{ "outputFormat": "DOCX" \| "PDF" }`；缺省 = 原 invocation `output_format`，若空则 `PDF` |
-| 授权 | `GLOBAL_ADMIN`；同组 `GROUP_ADMIN`；模板可见范围内 `AUDIT_ADMIN`（`readAudit` + 组范围）。其他角色 403。跨组探测对齐既有 403/404 惯例 |
+| 路径 | `POST /api/management/v1/templates/{templateId}/api/invocations/{invocationId}/regenerate`（**同一入口**；不新建平行 formal-reissue 端点） |
+| Body | 可选 `{ "outputFormat": "DOCX" \| "PDF", "productionReissue"?: boolean, "reason"?: string }`；`outputFormat` 缺省 = 原 invocation `output_format`，若空则 `PDF` |
+| 默认模式（审计样件） | `productionReissue` 缺省或 `false` → CE-G06：强制 SPECIMEN；`specimen=true` |
+| 生产重发模式（PD-6） | `productionReissue=true` **且** `reason` trim 后非空（建议 max **500**；超长 → 400 validation）→ **跳过** SPECIMEN stamper；`specimen=false` |
+| 授权（默认样件） | `GLOBAL_ADMIN`；同组 `GROUP_ADMIN`；模板可见范围内 `AUDIT_ADMIN`（`readAudit` + 组范围）。其他角色 403。跨组探测对齐既有 403/404 惯例 |
+| 授权（生产重发） | **仅** `GLOBAL_ADMIN` / 同组 `GROUP_ADMIN`。`AUDIT_ADMIN` + `productionReissue=true` → **403**。无新 capability bit |
 | 可再生 kind | 仅 `SINGLE` / `BATCH_ITEM` / `ASYNC_TASK` |
-| Drift | 再生前重算钉扎 `master_revision_id` 对象 SHA-256，与 invocation.`releaseBundleHash` 比对；不一致 fail-closed |
-| 水印 | 复用 CE-G02 DOCX 眉脚 + PDF 对角 `SPECIMEN`；失败 fail-closed，不落无水印成功件 |
+| Drift / 过期 / 指纹 | 与 CE-G06 相同闸门；生产重发**不**放宽 |
+| 水印 | 默认：复用 CE-G02 DOCX 眉脚 + PDF 对角 `SPECIMEN`；失败 fail-closed，不落无水印成功件。生产重发：**不** stamp；**不得**因「未 stamp」触发 `SPECIMEN_WATERMARK_FAILED` |
 | 加密 | 再生件一律不加密；`encryptionReapplied=false` |
-| 审计 | 终态必写 `INVOCATION_REGENERATED`（成功/失败）；**禁止** variables / 密码明文 |
+| 审计 | 终态必写 `INVOCATION_REGENERATED`（成功/失败）；摘要须可区分模式：至少 `productionReissue`、`specimen`、`reason`（生产重发时非空；样件模式可空）+ 既有 source/regeneration/outcome/actor；**禁止** variables / 密码明文 |
 | 参数留存 | 内部重放读 `parameters_storage`（IBL-A5 脱敏后形态：非脱敏字段可重放；脱敏字段按未提供）；授权依据 [ADR-0057](../adr/authorization-security/0057-invocation-parameters-retention-for-regenerate.md) Amendment 2026-07-18；管理端响应仍禁 variables；**不**因 PII 脱敏本身拒绝再生 |
-| 边界 | **不**新建调用方 runtime SUCCESS 记录；**不**消耗调用方幂等键；**不**要求 regenerate `idempotencyKey` |
-| FE | 再生 CTA / E2E/UIUX **out of scope** |
+| 边界 | **不**新建调用方 runtime SUCCESS 记录；**不**消耗调用方幂等键；**不**要求 regenerate `idempotencyKey`；**不**把 `productionReissue` 接到 preview / test-generate |
+| FE | 再生 / 生产重发 CTA / E2E/UIUX **out of scope**（`frontend_ui_in_scope=false`） |
 | 过期 | `record_expires_at` 已过 → **410**（契约钉死；与 BDD Q2 默认一致） |
+| Go-live 护栏 | **不**翻转 checklist **#3b** / **#5a**；**不**宣称 IBL program Done |
 
-成功 `result` 至少含：`regenerationId`、`sourceInvocationId`、`releaseBundleSnapshotId`、`releaseBundleHash`、`outputFormat`、`specimen=true`、`encryptionReapplied=false`、artifact 引用（`downloadUrl` 和/或 `artifactPath`）。
+成功 `result` 至少含：`regenerationId`、`sourceInvocationId`、`releaseBundleSnapshotId`、`releaseBundleHash`、`outputFormat`、`specimen`（默认 `true`；生产重发 `false`）、`encryptionReapplied=false`、artifact 引用（`downloadUrl` 和/或 `artifactPath`）。
 
 #### Fail-closed messageKeys（English-first；management regenerate surface）
 
@@ -1236,7 +1240,9 @@ Asynchronous accepted response draft
 | 钉扎母版不可用 | 422/500 对齐 K01 运行时语义 | `RENDERING` | `PINNED_MASTER_UNAVAILABLE` | `api.error.rendering.pinnedMasterUnavailable` | Pinned master revision is unavailable. |
 | `BATCH_ROOT` 等不可再生 kind | 422 | `VALIDATION` | `INVOCATION_KIND_NOT_REGENERABLE` | `api.error.audit.invocationKindNotRegenerable` | This invocation kind cannot be regenerated; use a SINGLE, BATCH_ITEM, or ASYNC_TASK record. |
 | 记录过期 / 已清理 | 410 | `API_POLICY` | `INVOCATION_RECORD_EXPIRED` | `api.error.audit.invocationRecordExpired` | Invocation record has expired. |
-| SPECIMEN 水印失败 | 500 | `GENERATION` | `SPECIMEN_WATERMARK_FAILED` | `api.error.audit.specimenWatermarkFailed` | SPECIMEN watermark could not be applied. |
+| SPECIMEN 水印失败（**仅样件路径**） | 500 | `GENERATION` | `SPECIMEN_WATERMARK_FAILED` | `api.error.audit.specimenWatermarkFailed` | SPECIMEN watermark could not be applied. |
+| 生产重发缺 / 空白 reason | 400 | `VALIDATION` | `PRODUCTION_REISSUE_REASON_REQUIRED` | `api.error.audit.productionReissueReasonRequired` | A non-blank reason is required for production re-issue. |
+| 生产重发角色不足（含 `AUDIT_ADMIN`） | 403 | `AUTHORIZATION` | （既有 forbidden） | `api.error.authorization.forbidden`（或管理端等价） | （既有英文） |
 
 说明：`api.error.audit.*` 为 **management** messageKey 命名空间（对齐 `api.error.template.*` / `api.error.master.*`）；envelope `error.category` 仍取固定 11 类之一，**不**新增 `AUDIT` 类别。钉扎母版键 **复用 K01**（G06-C12 契约钉死，不用并行 `api.error.audit.pinnedMasterUnavailable`）。
 

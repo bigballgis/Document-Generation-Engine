@@ -3342,18 +3342,27 @@ paths:
     post:
       tags: [Admin]
       operationId: regenerateTemplateManagementInvocation
-      summary: Controlled regenerate SPECIMEN artifact by invocation (CE-G06)
+      summary: Controlled regenerate by invocation (CE-G06 SPECIMEN; PD-6 opt-in production re-issue)
       description: >-
-        Permissioned audit regenerate for a SINGLE / BATCH_ITEM / ASYNC_TASK
+        Permissioned regenerate for a SINGLE / BATCH_ITEM / ASYNC_TASK
         invocation that has non-null release-bundle fingerprint fields and is
         within retention. Replays stored parameters against the K01-pinned
-        master, applies CE-G02 SPECIMEN watermark, writes management audit
-        INVOCATION_REGENERATED, and never returns variables or encryption
-        passwords. Does not create a caller-facing runtime SUCCESS invocation
-        or consume caller idempotency keys. No idempotencyKey required.
-        Authorized roles: GLOBAL_ADMIN, in-scope GROUP_ADMIN, in-scope
-        AUDIT_ADMIN (readAudit + template visibility). FE regenerate CTA is
-        out of scope for this leaf.
+        master, writes management audit INVOCATION_REGENERATED, and never
+        returns variables or encryption passwords. Does not create a
+        caller-facing runtime SUCCESS invocation or consume caller idempotency
+        keys. No idempotencyKey required.
+
+        Default mode (productionReissue absent or false): CE-G06 audit specimen
+        — applies CE-G02 SPECIMEN watermark; specimen=true. Authorized roles:
+        GLOBAL_ADMIN, in-scope GROUP_ADMIN, in-scope AUDIT_ADMIN (readAudit +
+        template visibility).
+
+        Production re-issue mode (PD-6): productionReissue=true AND non-blank
+        reason (trim; max 500). Skips SPECIMEN stampers; specimen=false.
+        Authorized roles narrowed to GLOBAL_ADMIN and in-scope GROUP_ADMIN only;
+        AUDIT_ADMIN → 403. Missing/blank reason → 400
+        PRODUCTION_REISSUE_REASON_REQUIRED. Preview/test-generate must not
+        accept productionReissue. FE regenerate CTA remains out of scope.
       parameters:
         - name: templateId
           in: path
@@ -3375,7 +3384,9 @@ paths:
               $ref: '#/components/schemas/ManagementInvocationRegenerateRequest'
       responses:
         '200':
-          description: SPECIMEN regeneration accepted and artifact available.
+          description: >-
+            Regeneration accepted and artifact available (specimen=true for
+            default CE-G06 path; specimen=false for PD-6 production re-issue).
           content:
             application/json:
               schema:
@@ -6441,6 +6452,21 @@ components:
           description: >-
             Optional. Defaults to the source invocation output_format; when that
             is null/empty, defaults to PDF.
+        productionReissue:
+          type: boolean
+          description: >-
+            Optional. Default false / absent = CE-G06 audit specimen path
+            (SPECIMEN forced). When true, requests PD-6 production re-issue
+            (no SPECIMEN); requires non-blank reason; roles narrowed to
+            GLOBAL_ADMIN / in-scope GROUP_ADMIN (AUDIT_ADMIN forbidden).
+        reason:
+          type: string
+          maxLength: 500
+          description: >-
+            Required when productionReissue=true (trim after; blank → 400
+            PRODUCTION_REISSUE_REASON_REQUIRED). Ignored / optional for default
+            specimen regenerate. Persisted for audit accountability; never
+            contains variables.
     ManagementInvocationRegenerateView:
       type: object
       additionalProperties: false
@@ -6469,12 +6495,15 @@ components:
           enum: [DOCX, PDF]
         specimen:
           type: boolean
-          description: Always true for CE-G06 regenerate artifacts.
+          description: >-
+            true for default CE-G06 SPECIMEN regenerate; false for PD-6
+            production re-issue (productionReissue=true success path).
         encryptionReapplied:
           type: boolean
           description: >-
             Always false — original encryption passwords are not retained;
-            regenerate artifacts are unencrypted SPECIMEN samples.
+            regenerate artifacts are unencrypted (specimen or production
+            re-issue).
         downloadUrl:
           type: string
           nullable: true
@@ -12395,6 +12424,7 @@ components:
         - IMPORT_DEPENDENCIES_UNSATISFIED
         - INVOCATION_KIND_NOT_REGENERABLE
         - SPECIMEN_WATERMARK_FAILED
+        - PRODUCTION_REISSUE_REASON_REQUIRED
         - INVOCATION_RECORD_EXPIRED
         - ASSET_LIBRARY_ASSET_KEY_INVALID
         - ASSET_LIBRARY_ASSET_KEY_CONFLICT

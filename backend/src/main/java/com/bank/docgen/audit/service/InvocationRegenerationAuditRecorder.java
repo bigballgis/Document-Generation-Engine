@@ -29,6 +29,11 @@ class InvocationRegenerationAuditRecorder {
         payload.put("outcome", detail.outcome());
         payload.put("errorCode", detail.errorCode());
         payload.put("encryptionReapplied", detail.encryptionReapplied());
+        payload.put("productionReissue", detail.productionReissue());
+        payload.put("specimen", detail.specimen());
+        if (detail.reason() != null && !detail.reason().isBlank()) {
+            payload.put("reason", detail.reason());
+        }
         String status = "INVOCATION_REGENERATED outcome=" + detail.outcome()
                 + " source=" + detail.sourceInvocationId()
                 + " regen=" + detail.regenerationId();

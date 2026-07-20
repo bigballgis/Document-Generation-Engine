@@ -318,7 +318,10 @@ class ManagementAuditRecorderTest {
                 "10000002",
                 false,
                 templateId,
-                "GRP-A"
+                "GRP-A",
+                false,
+                true,
+                null
         ));
 
         ArgumentCaptor<ManagementAuditEventEntity> captor = ArgumentCaptor.forClass(ManagementAuditEventEntity.class);
@@ -335,6 +338,38 @@ class ManagementAuditRecorderTest {
         assertThat(payload.get("regenerationId").asText()).isEqualTo("regen-1");
         assertThat(payload.get("outcome").asText()).isEqualTo("SUCCESS");
         assertThat(payload.get("encryptionReapplied").asBoolean()).isFalse();
+        assertThat(payload.get("productionReissue").asBoolean()).isFalse();
+        assertThat(payload.get("specimen").asBoolean()).isTrue();
+        assertThat(payload.has("reason")).isFalse();
+        assertThat(payload.has("variables")).isFalse();
+    }
+
+    @Test
+    void invocationRegenerated_productionReissueRecordsReasonAndSpecimenFalse() throws Exception {
+        UUID templateId = UUID.randomUUID();
+        recorder.recordInvocationRegenerated(new com.bank.docgen.apimgmt.api.InvocationRegeneratedAuditDetail(
+                "INV-1",
+                "regen-prod",
+                templateId.toString(),
+                "b".repeat(64),
+                "PDF",
+                "SUCCESS",
+                null,
+                "10000002",
+                false,
+                templateId,
+                "GRP-A",
+                true,
+                false,
+                "Customer reprint after courier loss"
+        ));
+
+        ArgumentCaptor<ManagementAuditEventEntity> captor = ArgumentCaptor.forClass(ManagementAuditEventEntity.class);
+        verify(repository).save(captor.capture());
+        JsonNode payload = objectMapper.readTree(captor.getValue().getWarningCodesJson());
+        assertThat(payload.get("productionReissue").asBoolean()).isTrue();
+        assertThat(payload.get("specimen").asBoolean()).isFalse();
+        assertThat(payload.get("reason").asText()).isEqualTo("Customer reprint after courier loss");
         assertThat(payload.has("variables")).isFalse();
     }
 

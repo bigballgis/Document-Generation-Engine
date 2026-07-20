@@ -521,7 +521,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 模板是基于母版进行锚点内容编排后形成的文档生成资产。
 
-**Wave E / locale-variant（IBL-E1 / PD-4，2026-07-19）：** Product-boundary **PD-4** Confirmed — locale-variant template/clause model via ADR + **IBL-E1**（#128）。行为 SoT：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)；架构 [ADR-0062](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)（**Accepted** 2026-07-19；impl still In Progress）。SPECIMEN 去水印（PD-6）与授权字体（PD-7）**OUT of E1**。
+**Wave E / locale-variant（IBL-E1 / PD-4，2026-07-19）：** Product-boundary **PD-4** Confirmed — locale-variant template/clause model via ADR + **IBL-E1**（#128）。行为 SoT：[ibl-e1-locale-variant-model.md](../behavior/ibl-e1-locale-variant-model.md)；架构 [ADR-0062](../adr/template-lifecycle/0062-locale-variant-template-clause-model.md)（**Accepted** 2026-07-19；impl still In Progress）。SPECIMEN 去水印（PD-6）与授权字体（PD-7）**OUT of E1**；PD-6 由 dedicated leaf **#138** 落地（见 [pd6-true-non-specimen-reissue.md](../behavior/pd6-true-non-specimen-reissue.md)）。
 
 已确认属性：
 
@@ -898,7 +898,8 @@ Template Collaboration Work Item 用于站内待办和状态提示，不是 Temp
 - 与 `RuntimeGenerationAuditEvent` 并存：审计摘要合规；invocation 产品化查询/备份。
 - 四层时钟：下载 URL 15m、幂等 7d、document artifact（包级）、record（包级）。
 - **CE-G06（2026-07-16）：** 成功解析到 PUBLISHED release 的生成行持久化 `release_bundle_snapshot_id`（=`template_version.id`）与 `release_bundle_hash`（=`master_file_hash` 拷贝；落库时不重算对象字节）。`SINGLE` / `BATCH_ITEM` / `ASYNC_TASK` 有解析 release 时必须写；`BATCH_ROOT` 不要求；解析失败行保持 NULL；**不**回填历史行。
-- **CE-G06 受控再生：** 管理端 `POST …/templates/{templateId}/api/invocations/{invocationId}/regenerate` 按 invocation 内部重放 parameters + 钉扎母版，强制 CE-G02 SPECIMEN 水印，写 `INVOCATION_REGENERATED` 审计；**不得**新建调用方 runtime SUCCESS 记录；管理查询仍禁止返回 parameters 明文，可返回 snapshot id + hash。再生元数据可独立表或对象键+审计（实现选型，须可按 `regenerationId` 取回）。行为规格：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。
+- **CE-G06 受控再生：** 管理端 `POST …/templates/{templateId}/api/invocations/{invocationId}/regenerate` 按 invocation 内部重放 parameters + 钉扎母版，默认强制 CE-G02 SPECIMEN 水印，写 `INVOCATION_REGENERATED` 审计；**不得**新建调用方 runtime SUCCESS 记录；管理查询仍禁止返回 parameters 明文，可返回 snapshot id + hash。再生元数据可独立表或对象键+审计（实现选型，须可按 `regenerationId` 取回）。行为规格：[ce-g06-audit-reproducible.md](../behavior/ce-g06-audit-reproducible.md)。
+- **PD-6 生产重发（2026-07-20）：** 同一 regenerate 入口；显式 `productionReissue=true` + 非空 `reason` 时跳过 SPECIMEN（`specimen=false`）；角色收窄为 `GLOBAL_ADMIN` / 同组 `GROUP_ADMIN`；审计摘要须含 mode/`reason`/`specimen`。默认 regenerate 与 preview/test 仍强制 SPECIMEN。行为规格：[pd6-true-non-specimen-reissue.md](../behavior/pd6-true-non-specimen-reissue.md)。
 - **CE-G04 Legal hold 叠加：** ACTIVE hold 可在调用记录产物清理与行删除前豁免匹配行（见 §2.15.1）；**不**改写 `record_expires_at` / 包级 retention 天数；默认 ADR-0040 硬删语义不变。
 
 模板发布后需要生成：
@@ -1109,7 +1110,7 @@ API 管理侧审计事件包括：
 - 批量上限配置变更。
 - DOCX/PDF 动态加密配置变更。
 - default 路径目标发布版本配置变更。
-- **CE-G06：** 按 invocation 受控再生终态 `INVOCATION_REGENERATED`（成功与失败；摘要含 sourceInvocationId、regenerationId、fingerprint、outcome、actor；禁止 variables 明文）。
+- **CE-G06 / PD-6：** 按 invocation 受控再生终态 `INVOCATION_REGENERATED`（成功与失败；摘要含 sourceInvocationId、regenerationId、fingerprint、outcome、actor；PD-6 另含 `productionReissue` / `specimen` / `reason`（生产重发时）；禁止 variables 明文）。
 - **CE-G04：** `LEGAL_HOLD_CREATED` / `LEGAL_HOLD_RELEASED`（摘要含 hold id / external id、scopeType、status、templateId（若有）、invocationCount（若有）、reason、actorUsername；**禁止** variables、凭证、完整 invocation 参数体）。
 - **CE-G05：** `TEMPLATE_ANNUAL_REVIEW_COMPLETED`（摘要含 templateId/externalId、previousNextReviewDue、newNextReviewDue、actorUsername；**禁止** variables、凭证、条款全文）。
 

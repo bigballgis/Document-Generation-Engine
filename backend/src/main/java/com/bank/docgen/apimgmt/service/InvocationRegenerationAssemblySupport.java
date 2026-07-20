@@ -46,6 +46,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * CE-G06 controlled regenerate assembly — pinned master + SPECIMEN watermark (reuse G02).
+ * PD-6 production re-issue reuses the same pinned path but skips SPECIMEN stampers.
  * Formal runtime generation path is untouched.
  */
 @Component
@@ -102,6 +103,29 @@ public class InvocationRegenerationAssemblySupport {
             String outputFormat,
             UUID regenerationId
     ) {
+        return assemble(template, invocation, outputFormat, regenerationId, true);
+    }
+
+    /**
+     * PD-6 production re-issue — same pinned master / locale / PII replay as specimen path,
+     * but does not apply DOCX/PDF SPECIMEN stampers.
+     */
+    public AssembledRegeneration assembleProductionReissue(
+            TemplateEntity template,
+            ApiInvocationRecordEntity invocation,
+            String outputFormat,
+            UUID regenerationId
+    ) {
+        return assemble(template, invocation, outputFormat, regenerationId, false);
+    }
+
+    private AssembledRegeneration assemble(
+            TemplateEntity template,
+            ApiInvocationRecordEntity invocation,
+            String outputFormat,
+            UUID regenerationId,
+            boolean applySpecimenWatermark
+    ) {
         TemplateVersionEntity version = templateVersionRepository
                 .findById(invocation.getReleaseBundleSnapshotId())
                 .orElseThrow(this::pinnedMasterUnavailable);
@@ -147,10 +171,12 @@ public class InvocationRegenerationAssemblySupport {
             throw new RenderingOperationException("api.error.rendering.generationFailed");
         }
 
-        try {
-            docx = DocxSpecimenWatermarkStamper.apply(docx);
-        } catch (RuntimeException ex) {
-            throw specimenWatermarkFailed();
+        if (applySpecimenWatermark) {
+            try {
+                docx = DocxSpecimenWatermarkStamper.apply(docx);
+            } catch (RuntimeException ex) {
+                throw specimenWatermarkFailed();
+            }
         }
 
         String format = outputFormat == null || outputFormat.isBlank()
@@ -185,10 +211,12 @@ public class InvocationRegenerationAssemblySupport {
             try (InputStream pdfStream = pdfArtifact.spooled().openInputStream()) {
                 pdfBytes = pdfStream.readAllBytes();
             }
-            try {
-                pdfBytes = PdfSpecimenWatermarkStamper.apply(pdfBytes);
-            } catch (RuntimeException ex) {
-                throw specimenWatermarkFailed();
+            if (applySpecimenWatermark) {
+                try {
+                    pdfBytes = PdfSpecimenWatermarkStamper.apply(pdfBytes);
+                } catch (RuntimeException ex) {
+                    throw specimenWatermarkFailed();
+                }
             }
             String storageKey = "regenerations/" + regenerationId + "/output.pdf";
             objectStoragePort.put(

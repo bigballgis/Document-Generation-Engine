@@ -36,6 +36,7 @@ public class InvocationRegenerationService {
             InvocationKind.ASYNC_TASK
     );
     private static final Set<String> ALLOWED_OUTPUT_FORMATS = Set.of("DOCX", "PDF");
+    private static final int PRODUCTION_REISSUE_REASON_MAX_LENGTH = 500;
     private static final String PINNED_MASTER_UNAVAILABLE_KEY = "api.error.rendering.pinnedMasterUnavailable";
     private static final String SPECIMEN_WATERMARK_FAILED_KEY = "api.error.audit.specimenWatermarkFailed";
 
@@ -84,16 +85,29 @@ public class InvocationRegenerationService {
             throw new ApiManagementNotFoundException();
         }
 
+        boolean productionReissue = request != null && request.productionReissueRequested();
+        if (productionReissue && !groupAccessService.canProductionReissueInvocation(session)) {
+            throw new ApiManagementAccessDeniedException();
+        }
+
         UUID regenerationId = UUID.randomUUID();
         String outputFormat = null;
+        boolean specimen = !productionReissue;
+        String productionReason = null;
         try {
+            if (productionReissue) {
+                productionReason = resolveProductionReissueReason(request);
+            }
             outputFormat = resolveOutputFormat(request, invocation);
             assertNotExpired(invocation);
             assertRegenerableKind(invocation);
             assertFingerprintPresent(invocation);
 
-            InvocationRegenerationAssemblySupport.AssembledRegeneration assembled =
-                    assemblySupport.assembleSpecimen(template, invocation, outputFormat, regenerationId);
+            InvocationRegenerationAssemblySupport.AssembledRegeneration assembled = productionReissue
+                    ? assemblySupport.assembleProductionReissue(
+                            template, invocation, outputFormat, regenerationId)
+                    : assemblySupport.assembleSpecimen(
+                            template, invocation, outputFormat, regenerationId);
 
             regenerationRepository.save(new InvocationRegenerationEntity(
                     regenerationId,
@@ -106,31 +120,65 @@ public class InvocationRegenerationService {
                     "SUCCESS",
                     null,
                     assembled.artifactStorageKey(),
-                    true,
+                    specimen,
                     false,
                     session.username() == null ? "unknown" : session.username(),
-                    Instant.now()
+                    Instant.now(),
+                    productionReason
             ));
-            recordAudit(template, invocation, regenerationId, outputFormat, "SUCCESS", null, session.username());
+            recordAudit(
+                    template,
+                    invocation,
+                    regenerationId,
+                    outputFormat,
+                    "SUCCESS",
+                    null,
+                    session.username(),
+                    productionReissue,
+                    specimen,
+                    productionReason
+            );
             return new ManagementInvocationRegenerateView(
                     regenerationId,
                     invocation.getInvocationExternalId(),
                     invocation.getReleaseBundleSnapshotId(),
                     invocation.getReleaseBundleHash(),
                     outputFormat,
-                    true,
+                    specimen,
                     false,
                     null,
                     assembled.artifactStorageKey()
             );
         } catch (InvocationRegenerationException ex) {
-            recordAudit(template, invocation, regenerationId, outputFormat, "FAILURE", ex.errorCode(), session.username());
+            recordAudit(
+                    template,
+                    invocation,
+                    regenerationId,
+                    outputFormat,
+                    "FAILURE",
+                    ex.errorCode(),
+                    session.username(),
+                    productionReissue,
+                    specimen,
+                    productionReason
+            );
             throw ex;
         } catch (ApiManagementNotFoundException | ApiManagementAccessDeniedException ex) {
             throw ex;
         } catch (DocxAssemblyException ex) {
             String code = ex.errorCode() == null ? ApiErrorCodes.RENDERING_FAILED : ex.errorCode();
-            recordAudit(template, invocation, regenerationId, outputFormat, "FAILURE", code, session.username());
+            recordAudit(
+                    template,
+                    invocation,
+                    regenerationId,
+                    outputFormat,
+                    "FAILURE",
+                    code,
+                    session.username(),
+                    productionReissue,
+                    specimen,
+                    productionReason
+            );
             throw new InvocationRegenerationException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     code,
@@ -139,7 +187,7 @@ public class InvocationRegenerationService {
             );
         } catch (RenderingOperationException ex) {
             boolean pinned = PINNED_MASTER_UNAVAILABLE_KEY.equals(ex.messageKey());
-            boolean specimen = SPECIMEN_WATERMARK_FAILED_KEY.equals(ex.messageKey());
+            boolean watermarkFailed = SPECIMEN_WATERMARK_FAILED_KEY.equals(ex.messageKey());
             String code;
             String messageKey;
             HttpStatus status;
@@ -149,7 +197,7 @@ public class InvocationRegenerationService {
                 messageKey = ex.messageKey();
                 status = HttpStatus.UNPROCESSABLE_ENTITY;
                 category = ApiErrorCategories.RENDERING;
-            } else if (specimen) {
+            } else if (watermarkFailed) {
                 code = ApiErrorCodes.SPECIMEN_WATERMARK_FAILED;
                 messageKey = SPECIMEN_WATERMARK_FAILED_KEY;
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -160,12 +208,34 @@ public class InvocationRegenerationService {
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
                 category = ApiErrorCategories.GENERATION;
             }
-            recordAudit(template, invocation, regenerationId, outputFormat, "FAILURE", code, session.username());
+            recordAudit(
+                    template,
+                    invocation,
+                    regenerationId,
+                    outputFormat,
+                    "FAILURE",
+                    code,
+                    session.username(),
+                    productionReissue,
+                    specimen,
+                    productionReason
+            );
             throw new InvocationRegenerationException(status, code, category, messageKey);
         } catch (RuntimeException ex) {
             // Do not map arbitrary failures to SPECIMEN_WATERMARK_FAILED (arch remediation).
             String code = ApiErrorCodes.INTERNAL_ERROR;
-            recordAudit(template, invocation, regenerationId, outputFormat, "FAILURE", code, session.username());
+            recordAudit(
+                    template,
+                    invocation,
+                    regenerationId,
+                    outputFormat,
+                    "FAILURE",
+                    code,
+                    session.username(),
+                    productionReissue,
+                    specimen,
+                    productionReason
+            );
             throw new InvocationRegenerationException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     code,
@@ -173,6 +243,36 @@ public class InvocationRegenerationService {
                     "api.error.generation.internalError"
             );
         }
+    }
+
+    private String resolveProductionReissueReason(ManagementInvocationRegenerateRequest request) {
+        String raw = request == null ? null : request.reason();
+        if (raw == null || raw.isBlank()) {
+            throw new InvocationRegenerationException(
+                    HttpStatus.BAD_REQUEST,
+                    ApiErrorCodes.PRODUCTION_REISSUE_REASON_REQUIRED,
+                    ApiErrorCategories.VALIDATION,
+                    "api.error.audit.productionReissueReasonRequired"
+            );
+        }
+        String trimmed = raw.trim();
+        if (trimmed.isEmpty()) {
+            throw new InvocationRegenerationException(
+                    HttpStatus.BAD_REQUEST,
+                    ApiErrorCodes.PRODUCTION_REISSUE_REASON_REQUIRED,
+                    ApiErrorCategories.VALIDATION,
+                    "api.error.audit.productionReissueReasonRequired"
+            );
+        }
+        if (trimmed.length() > PRODUCTION_REISSUE_REASON_MAX_LENGTH) {
+            throw new InvocationRegenerationException(
+                    HttpStatus.BAD_REQUEST,
+                    ApiErrorCodes.PRODUCTION_REISSUE_REASON_REQUIRED,
+                    ApiErrorCategories.VALIDATION,
+                    "api.error.validation.fieldSizeInvalid"
+            );
+        }
+        return trimmed;
     }
 
     private void assertNotExpired(ApiInvocationRecordEntity invocation) {
@@ -240,7 +340,10 @@ public class InvocationRegenerationService {
             String outputFormat,
             String outcome,
             String errorCode,
-            String actorUsername
+            String actorUsername,
+            boolean productionReissue,
+            boolean specimen,
+            String reason
     ) {
         managementAuditRecorder.recordInvocationRegenerated(new InvocationRegeneratedAuditDetail(
                 invocation.getInvocationExternalId(),
@@ -255,7 +358,10 @@ public class InvocationRegenerationService {
                 actorUsername,
                 false,
                 template.getId(),
-                template.getGroupCode()
+                template.getGroupCode(),
+                productionReissue,
+                specimen,
+                reason
         ));
     }
 }

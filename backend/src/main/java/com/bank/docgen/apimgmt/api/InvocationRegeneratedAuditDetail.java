@@ -5,6 +5,7 @@ import java.util.UUID;
 /**
  * Safe audit summary for {@code INVOCATION_REGENERATED} (no variables).
  * Template/group scope enables management audit filtering (CE-G06 arch suggestion).
+ * PD-6 adds {@code productionReissue}/{@code specimen}/{@code reason}.
  */
 public record InvocationRegeneratedAuditDetail(
         String sourceInvocationId,
@@ -17,6 +18,9 @@ public record InvocationRegeneratedAuditDetail(
         String actorUsername,
         boolean encryptionReapplied,
         UUID templateId,
-        String groupCode
+        String groupCode,
+        boolean productionReissue,
+        boolean specimen,
+        String reason
 ) {
 }
