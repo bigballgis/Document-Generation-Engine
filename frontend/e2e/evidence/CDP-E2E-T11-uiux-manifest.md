@@ -8,6 +8,7 @@
 **Placement:** ISOLATED `D:/working/DGE-cdp-e2e-t11-audit` / `feat/cdp-e2e-t11-audit`  
 **Spec:** `frontend/e2e/CDP-E2E-T11-uiux-evidence.spec.ts`  
 **Functional baseline:** `frontend/e2e/CDP-E2E-T11-audit-query.spec.ts` (Stage 6 — 2/2)  
+**CD-3 / CD-HARD-T06:** Stage 6 functional re-evidence **2026-07-20** — **2/2 passed** (docker workers=1); manifest `frontend/e2e/evidence/CD-HARD-T06-functional-manifest.md` (pointer `docs/behavior/cd-hard-t06-audit-export-reevidence.md`). UIUX screenshots below remain T11 baseline unless Stage 7 re-captures.  
 **Verdict:** **PASS** (5/5 screenshots; REDBC @1920 Activity log filters + table/empty + view-only + export confirm; bank OA OK; no Critical UIUX blockers)
 
 ## Capture method

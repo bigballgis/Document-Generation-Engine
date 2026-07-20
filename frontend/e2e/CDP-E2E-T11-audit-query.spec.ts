@@ -13,8 +13,13 @@ const MANAGEMENT_EVENTS_PATH = '/admin/audit/management-events'
 const MANAGEMENT_EXPORT_PATH = '/admin/audit/management-events/export'
 
 /**
- * CD-E2E-T11 — Audit admin Activity log filter + export smoke.
+ * CD-E2E-T11 / CD-HARD-T06 re-evidence — Audit admin Activity log filter + export smoke.
  * BDD: docs/behavior/audit-admin-query-journey.md (BDD-CDP-AUDIT-001…002)
+ * Pointer: docs/behavior/cd-hard-t06-audit-export-reevidence.md
+ *
+ * Harness: seed onboarding-tour dismiss for AUDIT_ADMIN so LR-C8 auto-open does not
+ * `router.push('/dashboard')` (AUDIT_ADMIN has no dashboard route → Forbidden).
+ * Product fix for that tour anchor belongs to frontend-engineer; out of T06 scope.
  */
 test.describe('CDP-E2E-T11 Audit admin query smoke (BDD-CDP-AUDIT-001…002)', () => {
   test.describe.configure({ mode: 'serial', timeout: 180_000 })
@@ -24,6 +29,10 @@ test.describe('CDP-E2E-T11 Audit admin query smoke (BDD-CDP-AUDIT-001…002)', (
       frontendBaseUrl: FRONTEND_BASE_URL,
       skipMessage: `Docker stack required (${FRONTEND_BASE_URL} + backend :8080). Start with .\\scripts\\docker-deploy-queue.ps1`,
     })
+  })
+
+  test.beforeEach(async ({ page }) => {
+    await seedAuditAdminTourDismiss(page)
   })
 
   test('BDD-CDP-AUDIT-001 — filter by event type updates list; view-only; no My to-dos', async ({
@@ -111,6 +120,13 @@ test.describe('CDP-E2E-T11 Audit admin query smoke (BDD-CDP-AUDIT-001…002)', (
     ).toBeVisible({ timeout: 15_000 })
   })
 })
+
+async function seedAuditAdminTourDismiss(page: Page) {
+  await page.goto('/login', { waitUntil: 'domcontentloaded' })
+  await page.evaluate((username) => {
+    localStorage.setItem(`docgen.onboardingTour.dismissed.v1:${username}`, '1')
+  }, E2E_AUDIT_ADMIN.username)
+}
 
 async function openActivityLogManagement(page: Page) {
   await page.goto('/audit')

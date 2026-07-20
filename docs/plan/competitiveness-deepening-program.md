@@ -2,7 +2,7 @@
 
 **Program ID:** `CDP`  
 **Created:** 2026-07-04  
-**Status:** **In Progress** (Wave **CD-2 Done** 2026-07-11 — T01/T01b + T02–T13; merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825` / `f12b193` / `b2b0899`; CD-0 **Done**; CD-3 **Not Started** — recommend only, do not auto-activate)  
+**Status:** **In Progress** (Wave **CD-3 In Progress** 2026-07-20 — sole-active **CD-HARD-T06** / Task Master **#140** / slice `cdp-cd3-hard-t06`; Wave **CD-2 Done** 2026-07-11 — T01/T01b + T02–T13; merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825` / `f12b193` / `b2b0899`; CD-0 **Done**; CD-HARD-T01–T05 **Done**)  
 **North star:** Close the gap between **「功能齐全」** and **「银行敢用、业务愿用、集成方信得过」** by making rendering fidelity, verifiable publish, role-complete journeys, and documentation truth **provably solid** before production launch.
 
 **Authoritative entry for lower-tier implementers:** Read this file first, then the wave detail doc for your task ID prefix.
@@ -24,9 +24,9 @@
 | --- | --- | --- |
 | **P22** (P22-T01…T15, rendering + demos) | **Done** (2026-07-04) — track via [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) | **Nothing.** Do not reopen P22 from CDP. |
 | **LRP** (`LR-*`, Wave LR-A) | **Wave LR-A Done** (2026-07-10 — A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed) | **Nothing.** Do not execute `LR-*` / virus scan / audit-governance from CDP session. |
-| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **Sibling program** — Wave **CD-2 Done** (T01–T13); CD-3 Not Started | CD-0 **Done** → CD-2 **Done** → CD-3 later (recommend only). |
+| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **Sibling program** — Wave **CD-2 Done** (T01–T13); Wave **CD-3 In Progress** (CD-HARD-T06 / #140) | CD-0 **Done** → CD-2 **Done** → **CD-3 In Progress**. |
 
-**Formal phase note:** `master-plan.md` has formal phase **None** (2026-07-09+). CDP Wave **CD-2** is **Done** (2026-07-11). No CDP wave currently `In Progress`. **CDP implementers follow task IDs prefixed `CD-*` only.**
+**Formal phase note:** `master-plan.md` has formal phase **None** (2026-07-09+). CDP Wave **CD-2** is **Done** (2026-07-11). Wave **CD-3** is **In Progress** (sole-active **CD-HARD-T06** / Task Master **#140**). **CDP implementers follow task IDs prefixed `CD-*` only.**
 
 
 ## 0. Executive summary
@@ -100,7 +100,7 @@ Only **one CDP wave** may be `In Progress` at a time (same discipline as phase p
 
 **Removed from CDP:** former «CD-1 = P22 code» — that work is **only** in the P22 session, not delegated via CDP task IDs.
 
-**Current wave (this session):** **CD-2** — **Done** (2026-07-11). **CD-0 Done**. **CD-E2E-T01** + **T01b** → **Done** (merge `1930842`). **CD-E2E-T02** + **T03** + **T04** → **Done** (slice `cdp-e2e-cd2-t02`; merge `6821f45`). **CD-E2E-T05 → Done** (slice `cdp-e2e-t05-publish`; merge `895f16e`). **CD-E2E-T06 → Done** (slice `cdp-e2e-t06-master`; merge `3aed175`). **CD-E2E-T08 → Done** (slice `cdp-e2e-t08-preview`; merge `c62b1a1`). **CD-E2E-T07 → Done** (slice `cdp-e2e-t07-api-policy`; merge `1eb230b`). **CD-E2E-T09 → Done** (slice `cdp-e2e-t09-compare`; merge `55a6ab6`; BDD-CDP-CMP-001). **CD-E2E-T10 → Done** (slice `cdp-e2e-t10-fidelity`; merge `b16e52a`; BDD-CDP-FID-001…004). **CD-E2E-T11 → Done** (slice `cdp-e2e-t11-audit`; merge `6e3f825`; Audit admin query/filter + export; BDD-CDP-AUDIT-001/002). **CD-E2E-T12 → Done** (slice `cdp-e2e-t12-i18n-brands`; merge `f12b193`; zh-CN + dual-brand golden screenshots; BDD-CDP-I18N-001/002). **CD-E2E-T13 → Done** (slice `cdp-e2e-t13-materialize`; merge `b2b0899`; package materialize re-evidence + wave closeout). **No sole-active CDP E2E slice.** Sibling LRP: **LR-C10 Done** (merge `bdaf95d`). Recommend next: **LR-C11** or **LR-C12** or **CD-3** — do **not** auto-activate any.
+**Current wave (this session):** **CD-3** — **In Progress** (2026-07-20). Sole-active: **CD-HARD-T06** / Task Master **#140** / slice `cdp-cd3-hard-t06` (`D:/working/DGE-cdp-cd3-hard-t06` · `feat/cdp-cd3-hard-t06`). CD-HARD-T01–T05 **Done**; CD-HARD-T06 **In Progress** (list audit/export E2E re-evidence / residual closeout — maps CD-BDD-T08 / [audit-admin-query-journey.md](../behavior/audit-admin-query-journey.md); **note:** CD-E2E-T11 already **Done** historically merge `6e3f825` — T06 is CD-3 hardening re-evidence, not greenfield). Prior Wave **CD-2** — **Done** (2026-07-11; T01–T13; merge tip `b2b0899`). **CD-0 Done**. Do **not** invent scope beyond T06 + wave status flip. Do **not** flip checklist **#3b/#5a GO**. Formal phase remains **None**.
 
 ---
 
@@ -214,8 +214,8 @@ Each task pairs: `*.spec.ts` + `evidence/*-uiux-manifest.md` + `e2e-uiux-reviewe
 | CD-HARD-T02 | LibreOffice conversion pool (async) | backend-engineer | CD-PIT-06, OPT-F6 | Done (OPT-F6 / COR-P02 lineage) |
 | CD-HARD-T03 | OOXML output validation test (LO 24 open) | backend-engineer | CD-PIT-03 | **Done** (2026-07-10 — executed-by-LR-A6; merge `122d6d1`; `OoxmlOutputValidator` fail-closed; LO24 / ECMA-376 XSD deferred; ADR-0043 remains Proposed) |
 | CD-HARD-T04 | Pagination delta budget doc + sample corpus | doc-keeper | CD-PIT-02 | **Done** (2026-07-10 — executed-by-LR-A7; Docker PDF corpus ≥5 + FOL; Word/delta n/a — `ms-word-unavailable-on-host`; ADR-0042 remains Proposed) |
-| CD-HARD-T05 | Paste cleaning **wired** to binding / publish fail-closed (edit-time-only ADR escape **rejected**) | backend-engineer | P18-T07 seam; checklist #5b; [ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md) | **Done** (2026-07-12) — Task Master **#47** / `ops-paste-binding-seam`; merge `f1f00da`; checklist #5b → **GO**; wire path (ADR-0019 residue + PublishGate); do **not** activate CD-3 wave |
-| CD-HARD-T06 | List audit/export E2E | e2e-test-engineer | CD-BDD-T08 | Not Started |
+| CD-HARD-T05 | Paste cleaning **wired** to binding / publish fail-closed (edit-time-only ADR escape **rejected**) | backend-engineer | P18-T07 seam; checklist #5b; [ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md) | **Done** (2026-07-12) — Task Master **#47** / `ops-paste-binding-seam`; merge `f1f00da`; checklist #5b → **GO**; wire path (ADR-0019 residue + PublishGate) |
+| CD-HARD-T06 | List audit/export E2E | e2e-test-engineer | CD-BDD-T08; [audit-admin-query-journey.md](../behavior/audit-admin-query-journey.md) | **In Progress** (2026-07-20) — Task Master **#140** / slice `cdp-cd3-hard-t06`; CD-3 hardening **re-evidence / residual closeout** (CD-E2E-T11 already Done historically `6e3f825` — not greenfield) |
 
 ---
 
@@ -265,7 +265,7 @@ Mark CD-0 **Done** only when ALL true:
 
 **CD-0 status:** **Done** (2026-07-10) — required checklist met; optional ADR drafts do not block wave close.
 
-**Next wave (this session):** **CD-2 Done** (2026-07-11) — **T01/T01b Done** (merge `1930842`); **T02/T03/T04 Done** (2026-07-10; merge `6821f45`); **T05 Done** (2026-07-10; merge `895f16e`); **T06 Done** (2026-07-10; merge `3aed175`); **T08 Done** (2026-07-10; merge `c62b1a1`); **T07 Done** (2026-07-11; merge `1eb230b`); **T09 Done** (2026-07-11; merge `55a6ab6`); **T10 Done** (2026-07-11; merge `b16e52a`); **T11 Done** (2026-07-11; merge `6e3f825`); **T12 Done** (2026-07-11; merge `f12b193`); **T13 Done** (2026-07-11; merge `b2b0899`). Sibling LRP: **LR-C11 Done** (2026-07-11; merge `44fcf40`; **no sole-active**). Recommend next: **LR-C12** or **CD-3** or pause (do **not** auto-activate).
+**Next wave (this session):** **CD-3 In Progress** (2026-07-20) — sole-active **CD-HARD-T06** / **#140** / `cdp-cd3-hard-t06`. Prior **CD-2 Done** (2026-07-11; T01–T13; merge tip `b2b0899`).
 
 ---
 
@@ -294,4 +294,4 @@ Mark CD-0 **Done** only when ALL true:
 
 ---
 
-**Next action (this session):** **Wave CD-2 → Done** (2026-07-11; T01–T13; merge tip `b2b0899`). **CD-HARD-T05 → Done** under Task Master **#47** / slice `ops-paste-binding-seam` (merge `f1f00da`; wire path; checklist #5b → **GO**; **not** CD-3 wave activation). Formal phase remains **None**. **no sole-active**. Do **not** auto-activate CD-3.
+**Next action (this session):** **Wave CD-3 → In Progress** — sole-active **CD-HARD-T06** / Task Master **#140** / slice `cdp-cd3-hard-t06` (worktree `D:/working/DGE-cdp-cd3-hard-t06` · `feat/cdp-cd3-hard-t06`). CD-HARD-T01–T05 **Done**; T06 = list audit/export E2E **re-evidence / residual closeout** (CD-E2E-T11 historical Done `6e3f825`; maps CD-BDD-T08 / BDD-CDP-AUDIT-001/002). Formal phase remains **None**. Do **not** invent scope beyond T06 + wave flip. Do **not** flip checklist **#3b/#5a GO**. Do **not** claim go-live / CDP program Done until T06 gates + wave exit.

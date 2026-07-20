@@ -2,10 +2,11 @@
 
 **文件状态:** `ready`  
 **BDD ID 前缀:** `BDD-CDP-AUDIT`  
-**CDP:** CD-BDD-T08 → **CD-E2E-T11**  
+**CDP:** CD-BDD-T08 → **CD-E2E-T11**（历史 Done `6e3f825`）→ **CD-HARD-T06** re-evidence（#140 / CD-3 closeout）  
 **编写日期:** 2026-07-11（CD-E2E-T11 readiness；对齐 plan acceptance + 主线 AuditConsole）  
 **程序:** [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)  
-**计划任务:** [CDP-e2e-full-chain-evidence.md](../plan/detail/CDP-e2e-full-chain-evidence.md) § CD-E2E-T11
+**计划任务:** [CDP-e2e-full-chain-evidence.md](../plan/detail/CDP-e2e-full-chain-evidence.md) § CD-E2E-T11  
+**CD-3 pointer:** [cd-hard-t06-audit-export-reevidence.md](./cd-hard-t06-audit-export-reevidence.md)（re-evidence only；不扩产品范围）
 
 ---
 
@@ -138,15 +139,15 @@
 | Prior E2E | `frontend/e2e/P21-T11-audit-journey.spec.ts`（IA/旅程；非筛选导出） |
 | Product surface | `frontend/src/views/audit/AuditConsoleView.vue`（主线） |
 
-**Task IDs:** `CD-E2E-T11`  
+**Task IDs:** `CD-E2E-T11`（历史）；`CD-HARD-T06` / Task Master `#140`（CD-3 re-evidence）  
 **Formal phase:** None（不改变）  
-**Wave:** CD-2 保持 In Progress；本文件不将 T11/wave 标 Done
+**Wave:** CD-E2E-T11 / CD-2 已历史关闭；CD-HARD-T06 为 CD-3 hardening re-evidence，场景仍为本文件 001/002
 
 ---
 
 ## 11. BDD readiness
 
-- **bdd_readiness:** `ready`
-- **Scenario IDs:** `BDD-CDP-AUDIT-001`, `BDD-CDP-AUDIT-002`
+- **bdd_readiness:** `ready`（CD-HARD-T06 / #140 原样复用；见 [cd-hard-t06-audit-export-reevidence.md](./cd-hard-t06-audit-export-reevidence.md)）
+- **Scenario IDs:** `BDD-CDP-AUDIT-001`, `BDD-CDP-AUDIT-002`（不新增）
 - **open_questions:** 无（management **或** lifecycle 任一页签即可满足 smoke；实现任选其一或两者各一条用例）
-- **Next:** `plan-orchestrator` → `e2e-test-engineer`（+ `e2e-uiux-reviewer`）在 worktree 实现证据；勿改 plan Done
+- **Next:** `plan-orchestrator` → `e2e-test-engineer`（+ `e2e-uiux-reviewer`）对 CD-HARD-T06 做 re-evidence；勿扩产品范围

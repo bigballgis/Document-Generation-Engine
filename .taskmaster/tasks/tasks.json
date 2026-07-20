@@ -1920,17 +1920,31 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-20T05:50:00.000Z"
+      },
+      {
+        "id": "140",
+        "title": "CD-3: CD-HARD-T06 audit list/export E2E + wave closeout",
+        "description": "Wave CD-3 sole-active leaf: CD-HARD-T06 list audit/export E2E (maps CD-BDD-T08 / audit-admin-query-journey.md BDD-CDP-AUDIT-001/002) + wave closeout when T06 Done. Note: CD-E2E-T11 already Done historically (merge 6e3f825) for audit admin query/export — T06 is CD-3 hardening re-evidence / residual closeout, not a greenfield audit console. Slice cdp-cd3-hard-t06. Placement ISOLATED. Do NOT invent scope beyond T06 + wave status flip. Do NOT flip #3b/#5a GO. Formal phase None.",
+        "details": "ACTIVATED 2026-07-20 (plan-orchestrator stage 2). Slice id: cdp-cd3-hard-t06. Status: in-progress (sole-active NON-CE delivery leaf). Worktree D:/working/DGE-cdp-cd3-hard-t06 · feat/cdp-cd3-hard-t06 (base origin/main). Batch solo (member_task_ids: [\"140\"]; proposed_slice_id: cdp-cd3-hard-t06). Wave CD-3 → In Progress (was Not Started / recommend only; user B4 activate). CD-HARD-T01–T05 Done (via LRP/OPS); CD-HARD-T06 was Not Started. Scope: re-evidence / residual closeout of list audit/export E2E per CD-BDD-T08 and docs/behavior/audit-admin-query-journey.md (BDD-CDP-AUDIT-001/002 ready). Historical: CD-E2E-T11 Done 2026-07-11 (slice cdp-e2e-t11-audit; merge 6e3f825) — do not reinvent audit admin; harden/re-prove as CD-3 exit residual. Owners: e2e-test-engineer (+ e2e-uiux-reviewer). frontend_ui_in_scope=true (E2E/UIUX mandatory). Formal phase remains None. Umbrella #53/#106 registry-only. #119 remains Blocked. Prior #139 PD-7 remains done. Do NOT flip checklist #3b/#5a GO. Do NOT claim go-live / CDP program Done until T06 gates + wave exit. Do NOT expand beyond T06 + CD-3 wave status flip.",
+        "testStrategy": "1. BDD ready confirmed (docs/behavior/audit-admin-query-journey.md; BDD-CDP-AUDIT-001/002). 2. Playwright docker --workers=1 functional covering list filter + export download (reuse/extend CDP-E2E-T11-audit-query.spec.ts or CD-HARD-T06 harness as needed). 3. UIUX manifest PASS Critical=0. 4. FE lint/type-check/test/build GREEN when UI touched; BE mvn verify N/A unless backend changes. 5. Stage 5/10 DEPLOY_OK via docker-deploy-queue. 6. Wave CD-3 Done only when CD-HARD-T01–T06 all Done + exit gate; this leaf closes T06 + wave. 7. Do NOT flip #3b/#5a GO; do NOT invent scope beyond T06; Done only after stage 11 merge + MAIN doc-sync.",
+        "priority": "high",
+        "dependencies": [
+          "47"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-20T06:10:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-20T05:50:00.000Z",
-      "taskCount": 139,
+      "lastModified": "2026-07-20T06:10:00.000Z",
+      "taskCount": 140,
       "completedCount": 136,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-20T05:35:00.000Z"
+      "updated": "2026-07-20T06:10:00.000Z"
     }
   }
 }

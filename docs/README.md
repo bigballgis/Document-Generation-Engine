@@ -170,7 +170,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[Preview success + artifact download](./behavior/preview-success-artifact-download-journey.md)** | **ready** | CD-BDD-T08 → **CD-E2E-T08** (closes P12 T13 preview-success manifest gap; CD-PIT-08 final-path download) |
 | [Preview comparison journey](./behavior/preview-comparison-journey.md) | **ready** | CD-BDD-T07 → CD-E2E-T09 |
 | **[Fidelity viewed confirmation](./behavior/fidelity-viewed-confirmation-journey.md)** | **ready** | **CD-E2E-T10** — BDD-CDP-FID-001…004 (Pass/Approve/Publish fail-closed) |
-| [Audit admin query journey](./behavior/audit-admin-query-journey.md) | **ready** | CD-BDD-T08 → CD-E2E-T11 |
+| [Audit admin query journey](./behavior/audit-admin-query-journey.md) | **ready** | CD-BDD-T08 → CD-E2E-T11（历史 Done）；CD-HARD-T06 / #140 re-evidence |
+| [CD-HARD-T06 audit export re-evidence](./behavior/cd-hard-t06-audit-export-reevidence.md) | **ready** | CD-3 closeout pointer → reuse BDD-CDP-AUDIT-001/002；不扩产品范围 |
 | **[zh-CN + dual-brand golden screenshots](./behavior/zh-cn-dual-brand-golden-screenshots.md)** | **ready** | **CD-E2E-T12** — BDD-CDP-I18N-001/002（≥3 key surfaces zh-CN；REDBC+GREENBC @1920） |
 | [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12 2026-07-03) | P12 template testing tab |
 | [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **Done** (P12 2026-07-03) | Package-first API access |
