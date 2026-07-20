@@ -119,11 +119,14 @@ Create an ADR when a decision affects future design or implementation, including
 | [0065-legal-entity-document-brand-variants.md](./template-lifecycle/0065-legal-entity-document-brand-variants.md) | Accepted | Per-legal-entity document brand variants (IBL-E4 / #131 / F27 document-brand half / PD-9, 2026-07-20). BDD [ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md) **ready** (BDD-IBL-E4-001…017 / E4-C*); amends ADR-0013 context whitelist (`legalEntityCode`); DocumentBrand ≠ UI BrandPreset; `frontend_ui_in_scope=true`; impl **Done** (`4d810395` / `212c6be9`); does not flip #3b/#5a |
 | [0066-effectivefrom-publish-and-bulk-repin.md](./template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md) | Accepted | Future `effectiveFrom` publish hard-block + bulk re-pin dry-run/audit (IBL-E5 / #132 / F27 residual, 2026-07-20). BDD [ibl-e5-effectivefrom-bulk-repin.md](../behavior/ibl-e5-effectivefrom-bulk-repin.md) **ready** (BDD-IBL-E5-001…017 / E5-C*); amends CE-K08 K08-C6/LM-011; OpenAPI `CONTENT_MODULE_EFFECTIVE_NOT_STARTED` + `POST …/content-module-references/bulk-repin`; `frontend_ui_in_scope=false`; impl **Done** (`688f9e58` / `20ead1ce`); does not flip #3b/#5a |
 | [0067-clause-nesting-module-graph-governance.md](./template-lifecycle/0067-clause-nesting-module-graph-governance.md) | Accepted | Clause nesting module-graph governance (IBL-E6 / #133 / F28, 2026-07-20). BDD [ibl-e6-clause-nesting-governance.md](../behavior/ibl-e6-clause-nesting-governance.md) **ready** (BDD-IBL-E6-001…018 / E6-C1…C21); CM↔CM graph; max depth **8**; cycle fail-closed; deep where-used; transitive pins; OpenAPI codes locked; `frontend_ui_in_scope=false`; impl **Done** (`dcc42c81` / `0e542c03`); does not flip #3b/#5a |
+| [0068-rtl-bidi-out-of-scope-until-market.md](./rendering-authoring/0068-rtl-bidi-out-of-scope-until-market.md) | Accepted | RTL / bidirectional scripts **descope** until market confirmation (IBL-E7 / #134 / F15, 2026-07-20). Evidence [ibl-e7-rtl-bidi-spike/SPIKE-REPORT.md](../plan/evidence/ibl-e7-rtl-bidi-spike/SPIKE-REPORT.md) **DESCOPE**; F15 closed by descope; BDD not-applicable; Accepted ≠ #134 Done; does not flip #3b/#5a; PD-6/7 OUT; no Word invent; no product RTL impl |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
 ### Proposed (not yet Accepted)
 
-_None at this time._
+| ADR | Status | Topic |
+| --- | --- | --- |
+| *(none)* | — | — |
 
 ### LR-A5 triad (0041/0042/0043 Accepted — 0042 Path X residual; 0043 slice B residual)
 

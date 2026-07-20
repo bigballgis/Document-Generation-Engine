@@ -1,0 +1,11 @@
+IBL-E7 / #134 inventory probe — 2026-07-20
+
+Command:
+  mvn -B -ntp -f backend/pom.xml -Pdev-fast test -Dtest=RtlBidiInventoryProbeTest
+
+Result:
+  Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+  BUILD SUCCESS
+
+Class:
+  backend/src/test/java/com/bank/docgen/rendering/RtlBidiInventoryProbeTest.java
