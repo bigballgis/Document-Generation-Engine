@@ -78,6 +78,13 @@ function Get-TemplateDetail {
     return $content | Where-Object { $_.externalId -eq $ExternalId } | Select-Object -First 1
 }
 
+function Get-DemoFullFlowWaveABindingJson {
+    # Keep in sync with DemoFullFlowCatalogSeeder.STRUCTURED_BINDING_JSON (Wave A Meridian letter).
+    return (@'
+{"schemaVersion":"1.0","nodes":[{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Meridian Retail Banking"}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"42 High Street, Manchester M1 1AA"}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Date: 6 July 2026"}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Our ref: MRB-FF-2026-001042"}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Dear "},{"type":"emphasis","variant":"bold","children":[{"type":"variable","key":"customerName"}]},{"type":"textRun","value":","}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Re: Confirmation of recent account correspondence — Meridian Everyday Current Account"}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"We write to confirm that we have received and processed your recent instructions relating to your retail banking relationship with Meridian Retail Banking. This letter is issued for your records and does not amend the Account terms and conditions unless expressly stated below."}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Account details: sort code 60-16-13; account number ending 6819. Please quote our reference above in any further correspondence."}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"If any detail in this letter is incorrect, please contact Customer Service on 0800 123 4567 within 14 days of the date of this letter."}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Governing law: This letter and your Account are governed by the laws of England and Wales. Eligible deposits are protected by the Financial Services Compensation Scheme up to the applicable limit."}]},{"type":"paragraph","styleRef":"SignatureBlock","children":[{"type":"textRun","value":"Yours sincerely,"}]},{"type":"paragraph","styleRef":"SignatureBlock","children":[{"type":"textRun","value":"Customer Service — Meridian Retail Banking"}]}]}
+'@).Trim()
+}
+
 function Ensure-DemoFullFlowCatalogContent {
     param(
         [string]$TemplateId,
@@ -103,7 +110,7 @@ AND anchor_id = 'BODY';
     $body = @{
         anchorId = 'HEADER'
         declaredContentType = 'TEXT'
-        structuredContentJson = '{"nodes":[{"type":"paragraph","children":[{"type":"variable","key":"customerName"}]}]}'
+        structuredContentJson = (Get-DemoFullFlowWaveABindingJson)
     }
     if ($existing -and $existing.updatedAt) {
         $utc = [datetime]$existing.updatedAt
@@ -223,9 +230,10 @@ function Ensure-PendingRelease {
         Invoke-MgmtApi POST "/templates/$TemplateId/lifecycle/approval-decision" $ApproverToken @{
             decision = 'APPROVED'
             commentSummary = 'Demo publish-all-demos approval'
+            fidelityViewedConfirmed = $true
             keyEvidenceConfirmed = $true
         } | Out-Null
-    }
+}
 }
 
 function Ensure-DemoApiPolicy {
@@ -306,7 +314,9 @@ function Ensure-DemoRuntimeCredential {
 
 function Resolve-DemoPublishApproverToken {
     param([string]$GroupCode, [string]$DefaultApproverToken)
-    if ($GroupCode -in @('TRADE', 'WEALTH')) { return $script:GlobalAdminToken }
+    # TRADE/WEALTH templates are not visible to retail approver 10000007; group-admin
+    # can decide. Access token for those groups is GLOBAL_ADMIN (submitter) → distinct actor.
+    if ($GroupCode -in @('TRADE', 'WEALTH')) { return $script:GroupAdminToken }
     return $DefaultApproverToken
 }
 
@@ -342,6 +352,7 @@ function Publish-DemoTemplate {
         Ensure-DemoApiPolicy -TemplateId $templateId -GroupCode $groupCode -GroupAdminToken $GroupAdminToken | Out-Null
         Invoke-MgmtApi POST "/templates/$templateId/lifecycle/publish" $GroupAdminToken @{
             releaseVersion = $ReleaseVersion
+            fidelityViewedConfirmed = $true
         } | Out-Null
     } else {
         Write-PublishStep "$ExternalId already PUBLISHED — ensuring API policy ..."
@@ -378,7 +389,8 @@ Ensure-DemoLocalPublishGateRelaxations
 $ApiBase = "$BackendUrl/api/management/v1"
 $script:GlobalAdminToken = Get-DemoApiToken -ApiBase $ApiBase -Username '10000001' -Password 'ChangeMe123!'
 $script:AuthorToken = Get-DemoApiToken -ApiBase $ApiBase -Username '10000003' -Password 'ChangeMe123!'
-$GroupAdminToken = Get-DemoApiToken -ApiBase $ApiBase -Username '10000002' -Password 'ChangeMe123!'
+$script:GroupAdminToken = Get-DemoApiToken -ApiBase $ApiBase -Username '10000002' -Password 'ChangeMe123!'
+$GroupAdminToken = $script:GroupAdminToken
 $ApproverToken = Get-DemoApiToken -ApiBase $ApiBase -Username '10000007' -Password 'ChangeMe123!'
 $script:TesterToken = Get-DemoApiToken -ApiBase $ApiBase -Username '10000006' -Password 'ChangeMe123!'
 

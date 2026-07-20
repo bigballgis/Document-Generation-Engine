@@ -1,0 +1,165 @@
+{
+  "generatedAt": "2026-07-20T10:17:31.5095490Z",
+  "backendUrl": "http://localhost:8080",
+  "releaseVersion": "1.0.0",
+  "templateCount": 13,
+  "expectedCount": 13,
+  "templates": [
+    {
+      "externalId": "CORP-FOL-OFFER",
+      "templateId": "e13956f5-c003-446b-bef5-68a1c4ed6dac",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-DAEA3880",
+      "catalogMarker": null
+    },
+    {
+      "externalId": "DEMO-FULL-FLOW-LETTER",
+      "templateId": "959fb33a-1333-4839-8395-f3019b9da6e3",
+      "groupCode": "RETAIL",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "RETAIL_API"
+      ],
+      "credentialExternalId": "CRED-D0A90DA7",
+      "catalogMarker": null
+    },
+    {
+      "externalId": "DEMO-RETAIL-ACCOUNT-OPEN",
+      "templateId": "1d075681-e94e-4358-81ff-84c01875dd04",
+      "groupCode": "RETAIL",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "RETAIL_API"
+      ],
+      "credentialExternalId": "CRED-8AFCAF5B",
+      "catalogMarker": "retail-account-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-RETAIL-ACCOUNT-BALANCE",
+      "templateId": "02e05813-a68e-4801-856b-ae14f7a280bf",
+      "groupCode": "RETAIL",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "RETAIL_API"
+      ],
+      "credentialExternalId": "CRED-83DB9260",
+      "catalogMarker": "retail-account-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-MORTGAGE-APPROVAL",
+      "templateId": "9701dd79-0cb4-4354-aa47-a5260fc4ab75",
+      "groupCode": "RETAIL",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "RETAIL_API"
+      ],
+      "credentialExternalId": "CRED-EE34A5F1",
+      "catalogMarker": "mortgage-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-CREDIT-LIMIT-CONFIRM",
+      "templateId": "1d21ee00-85a3-48f9-b839-6cc2e2ec7100",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-3F50C210",
+      "catalogMarker": "credit-limit-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-TRADE-LC-NOTICE",
+      "templateId": "049e5ebf-8895-4a8d-812e-98a0f63258e1",
+      "groupCode": "TRADE",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "RETAIL_API"
+      ],
+      "credentialExternalId": "CRED-B42590D5",
+      "catalogMarker": "trade-lc-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-TRADE-GUARANTEE-NOTICE",
+      "templateId": "fa177b08-e808-4b12-b81e-2ce2940b9187",
+      "groupCode": "TRADE",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "RETAIL_API"
+      ],
+      "credentialExternalId": "CRED-9A212CFC",
+      "catalogMarker": "trade-lc-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-RATE-CHANGE-NOTICE",
+      "templateId": "6adad239-f85b-4092-b698-b75d2eedb213",
+      "groupCode": "RETAIL",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "RETAIL_API"
+      ],
+      "credentialExternalId": "CRED-4704425E",
+      "catalogMarker": "collection-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-OVERDUE-COLLECTION",
+      "templateId": "cae4b514-aecf-4271-846e-5fcd28215440",
+      "groupCode": "RETAIL",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "RETAIL_API"
+      ],
+      "credentialExternalId": "CRED-B068C775",
+      "catalogMarker": "collection-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-ANNUAL-REVIEW",
+      "templateId": "89fd9a75-c437-4320-9588-9c72ae577e80",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-B8124755",
+      "catalogMarker": "annual-review-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-FACILITY-RENEWAL",
+      "templateId": "6a176474-0dc4-426e-b38f-d1cf3a127332",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-9F46097E",
+      "catalogMarker": "annual-review-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-WEALTH-STATEMENT",
+      "templateId": "97a85021-3722-41aa-923f-a3ea0598f68c",
+      "groupCode": "WEALTH",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "RETAIL_API"
+      ],
+      "credentialExternalId": "CRED-3430AE27",
+      "catalogMarker": "wealth-demo-v4-wave-a"
+    }
+  ]
+}

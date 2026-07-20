@@ -1,43 +1,66 @@
-# Evidence stub — bank-letter-demo-refresh (Wave A / #141)
+# Evidence — bank-letter-demo-refresh (#141 / Wave A)
 
-**Status:** Stub only — **not** Done. Artifacts will be captured after rendering uplift + queued Docker + `import-all` → `publish-all` → `generate-all`.
+**Placement:** `D:/working/DGE-bank-letter-demo-refresh` · `feat/bank-letter-demo-refresh`  
+**Agent:** build-deploy-agent (Stage 4/10 follow-up after Java fix)  
+**Date:** 2026-07-20
 
-| Field | Value |
+## Status (honest)
+
+| Step | Result |
 | --- | --- |
-| Slice | `bank-letter-demo-refresh` |
-| Task Master | **#141** (`demo-refresh-wave-a`) — **in-progress** |
-| Branch / worktree | `feat/bank-letter-demo-refresh` · `D:/working/DGE-bank-letter-demo-refresh` |
-| BDD | [bank-letter-demo-refresh.md](../../../behavior/bank-letter-demo-refresh.md) (`BDD-DEMO-REFRESH-001`…`014`) |
-| Plan | [bank-letter-demo-refresh.md](../../detail/bank-letter-demo-refresh.md) |
-| Ops path | [deploy/demo-shared/README.md](../../../../deploy/demo-shared/README.md) — cleanup → import overwrite → publish → generate |
-| Wave B | **OUT** — TM **#142** `bank-letter-demo-expand` |
+| Backend `mvn verify` | **GREEN** — 2312 tests, 0 fail, 15 skipped (`-Dsurefire.argLine=-Xmx1536m`); includes `TemplateLifecyclePublishVersionSelectionTest` 2/2 |
+| Frontend | **N/A this leaf** — `frontend_ui_in_scope=false`; no `frontend/` diffs in Java-fix change set (lint/type-check/build not re-run) |
+| Docker `docker-deploy-queue.ps1` | **DEPLOY_OK** — backend image rebuilt+recreated; healthz UP; UI :4173 200 |
+| Ops wipe | **import overwrite** — **not** DROP; **no SQL hotfix** |
+| `import-all-demos.ps1` | **OK** (8 packages + FOL) |
+| `publish-all-demos.ps1` | **OK** — 13/13 PUBLISHED |
+| `generate-all-demos.ps1` | **OK** — **13/13 SUCCESS** (no SQL hotfix) |
 
-## Expected later artifacts (do not invent)
+**Do not merge** from this agent. Durable generate path proven post-redeploy.
 
-Place generate / deploy evidence here when available (examples — not yet claimed):
+## Commands + results
 
 ```text
-docs/plan/evidence/bank-letter-demo-refresh/
-  README.md                          # this stub
-  # later:
-  # generated-docx-manifest.json     # copy or pointer from .tmp/evidence/
-  # all-demos-publish-summary.json
-  # spot-check notes (CORP / RETAIL / TRADE / WEALTH)
-  # stage5-or-stage10 deploy notes (if queued deploy required)
+# cwd: D:/working/DGE-bank-letter-demo-refresh
+
+mvn -B -ntp -f backend/pom.xml verify "-Dsurefire.argLine=-Xmx1536m"
+# → Tests run: 2312, Failures: 0, Errors: 0, Skipped: 15
+# → TemplateLifecyclePublishVersionSelectionTest: 2, Failures: 0
+# → BUILD SUCCESS
+
+# FE skipped (no frontend/ changes; frontend_ui_in_scope=false)
+
+.\scripts\docker-deploy-queue.ps1 -Reason "Wave A #141 Java fix redeploy bank-letter-demo-refresh"
+# → DEPLOY_OK; backend sha256:0c1ebf9735464da326293463dfb6e273877e5528410c9288d252fe7b6daf57e0
+# → healthz {"status":"UP"} · UI http://localhost:4173 → 200
+
+.\deploy\import-all-demos.ps1     # OK
+.\deploy\publish-all-demos.ps1    # 13/13
+.\deploy\generate-all-demos.ps1   # 13/13 SUCCESS  (exit 0)
 ```
 
-Runtime outputs remain under `.tmp/` per fundraising matrix:
+## Evidence files
 
-- `.tmp/generated_<externalId>.docx`
-- `.tmp/evidence/generated-docx-manifest.json`
-- `.tmp/evidence/all-demos-publish-summary.json`
-- `.tmp/credentials/<externalId>.json`
+| File | Purpose |
+| --- | --- |
+| [CONTENT-SPOTCHECK.md](./CONTENT-SPOTCHECK.md) | Per-template sizeBytes + Meridian / placeholder scan |
+| [generated-docx-manifest.json](./generated-docx-manifest.json) | Full generate run machine output (13/13) |
+| [all-demos-publish-summary.json](./all-demos-publish-summary.json) | 13/13 publish |
+| [spotcheck-sizes.json](./spotcheck-sizes.json) | Compact size + Meridian/placeholder scan |
+| [import-all-demos.log](./import-all-demos.log) | Import log |
+| [publish-all-demos.log](./publish-all-demos.log) | Publish log |
+| [generate-all-demos.log](./generate-all-demos.log) | Generate log |
+| [compose-ps.txt](./compose-ps.txt) / [images.txt](./images.txt) / [healthz.json](./healthz.json) | Stack evidence |
+| `generated_*.docx` | 13 DOCX artifacts |
 
-Cross-index: [fundraising-demo-summary.md](../../../evidence/fundraising-demo-summary.md) (13-template matrix; Wave A refreshes content, does not add IDs).
+## Deploy notes
 
-## Hard vetoes (evidence discipline)
+- Backend image rebuilt from worktree JAR (publish STOP + release_version finder).
+- Frontend image unchanged (cached package) — expected for this leaf.
+- Canonical compose project `documentgenerationengine`; ports 8080 / 4173.
+- No SQL hotfix applied between import → publish → generate.
 
-- Do **not** claim Wave A Done from this stub alone
-- Do **not** invent Word-host / pixel evidence
-- Do **not** flip checklist **#3b/#5a GO**
-- Do **not** archive Wave B new-family artifacts in this leaf
+## Next (orchestrator / not this agent)
+
+1. Stage 11 `integration-merger` when parent ready (this agent: **Do NOT merge**).
+2. MAIN doc-sync + commit-review after merge.

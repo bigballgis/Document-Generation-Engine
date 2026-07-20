@@ -1,0 +1,132 @@
+[
+  {
+    "externalId": "CORP-FOL-OFFER",
+    "sizeBytes": 30162,
+    "sha256": "02197fab0b6c324ef28d26c3337db2e6cfc893cf58e657306df8768563019439",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-FULL-FLOW-LETTER",
+    "sizeBytes": 4775,
+    "sha256": "301cacaceb845eb78947cc635ea939a63beb6cdb00e47d65af9a698a796174a6",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-RETAIL-ACCOUNT-OPEN",
+    "sizeBytes": 6866,
+    "sha256": "49b392c39752f7a054136f1b9468558fca852725aa3d620f81e2c51e7e21236c",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-RETAIL-ACCOUNT-BALANCE",
+    "sizeBytes": 6359,
+    "sha256": "b0d382319b706ccc518a94c74ec3317dcf6057f33570af0ac4a59b8b788dbbbc",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-MORTGAGE-APPROVAL",
+    "sizeBytes": 9053,
+    "sha256": "98bfb9960c1f90e0154c95ccbdb22f0220f5ba89ffcb423d7db8ef1528527ee1",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-CREDIT-LIMIT-CONFIRM",
+    "sizeBytes": 9710,
+    "sha256": "3f6874761248b842744ff24b3cb8da6e54b950d3cf5fa2e6bbcedf9e3d19cc2b",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-TRADE-LC-NOTICE",
+    "sizeBytes": 8018,
+    "sha256": "315f1b3ff525b74f697a4df9d69da11b9c839f2482829a669b0a7730afd0d38d",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-TRADE-GUARANTEE-NOTICE",
+    "sizeBytes": 6960,
+    "sha256": "e1dff865a74da140a2893753a510a21bc794fb5c41ef5d598656f89cabec4564",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-RATE-CHANGE-NOTICE",
+    "sizeBytes": 6190,
+    "sha256": "464628b5e41dc7dafa0faca03f9d713e0e6f98ec3dc16cb1c1d5e1f2a8c5feb8",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-OVERDUE-COLLECTION",
+    "sizeBytes": 6485,
+    "sha256": "193a3d41b714aa5b3bb14831949f722f6b87af8b61212ba5c04f1dd326a0e1fe",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-ANNUAL-REVIEW",
+    "sizeBytes": 7218,
+    "sha256": "d9d1239c73aff621ce58bf98cabbad800d5658f01ca75daf0e0f52a4fd791ce7",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-FACILITY-RENEWAL",
+    "sizeBytes": 7057,
+    "sha256": "bdd04a33bb6e3ff74a7a93a8bcbe5d683ceff2596f8429d21ddd0b522e531737",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  },
+  {
+    "externalId": "DEMO-WEALTH-STATEMENT",
+    "sizeBytes": 8733,
+    "sha256": "5e69ce82d33436da751ab218545082c0487a0810ceec5d0165c750dabb262724",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true
+  }
+]

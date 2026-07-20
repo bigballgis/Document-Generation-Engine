@@ -16,7 +16,17 @@ public interface TemplateVersionRepository extends JpaRepository<TemplateVersion
 
     List<TemplateVersionEntity> findByTemplateIdOrderByDevVersionNumberDesc(UUID templateId);
 
-    Optional<TemplateVersionEntity> findByTemplateIdAndReleaseVersion(UUID templateId, String releaseVersion);
+    /**
+     * Resolves a release version row. When historical re-publish left duplicate
+     * {@code release_version} values, prefer the highest {@code dev_version_number}
+     * so runtime generate does not fail with NonUniqueResultException.
+     */
+    Optional<TemplateVersionEntity> findFirstByTemplateIdAndReleaseVersionOrderByDevVersionNumberDesc(
+            UUID templateId, String releaseVersion);
+
+    default Optional<TemplateVersionEntity> findByTemplateIdAndReleaseVersion(UUID templateId, String releaseVersion) {
+        return findFirstByTemplateIdAndReleaseVersionOrderByDevVersionNumberDesc(templateId, releaseVersion);
+    }
 
     List<TemplateVersionEntity> findByMasterRevisionIdAndDeletedAtIsNull(UUID masterRevisionId);
 

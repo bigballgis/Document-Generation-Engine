@@ -350,6 +350,19 @@ And   no MS Word host visual baseline evidence is invented
 | Accidental Wave B content added | Review reject；移出本叶或改排队 expand 叶 |
 | Parallel docker-deploy | Forbidden；必须排队 |
 | Unauthorized generate | Fail-closed（既有模型） |
+| Same-release republish (demo re-import / clone-then-publish reuses `releaseVersion`) | Prior `PUBLISHED` row for that release is `STOPPED` and its `release_version` cleared so runtime resolution stays unique；lifecycle audit records `DEACTIVATE_VERSION` (`PUBLISHED` → `STOPPED`) consistent with explicit version deactivate, then the new candidate publishes normally |
+
+### BDD-DEMO-REFRESH-015 — Same-release republish supersedes prior PUBLISHED row
+
+```gherkin
+Given a template already has a PUBLISHED version row for release "1.0.0"
+And   a newer DRAFT candidate is ready to publish as the same release "1.0.0"
+When  publish succeeds with releaseVersion "1.0.0"
+Then  the prior row is STOPPED with release_version cleared
+And   a lifecycle audit record with action DEACTIVATE_VERSION
+      (from PUBLISHED to STOPPED, releaseVersion "1.0.0") is written
+And   the candidate becomes the sole PUBLISHED row for "1.0.0"
+```
 
 ---
 
