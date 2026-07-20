@@ -4,10 +4,12 @@
 | --- | --- |
 | **Program ID** | `SYS-NORM` |
 | **Created** | 2026-07-21 |
-| **Status** | **In Progress** — Wave **0** TM **#143** `sys-norm-charter` (docs/ADR SoT) |
+| **Status** | **In Progress** — Wave **0 Done**; Waves **1–8 Not Started** (program SoT + ADRs landed) |
 | **Formal phase** | **None** (not a P-phase; tracked here + ledger) |
-| **First leaf / sole-active** | TM **#143** · `sys-norm-charter` · `feat/sys-norm-charter` · `D:/working/DGE-sys-norm-charter` |
-| **Batch** | **split** · `member_task_ids: ["143"]` · docs-only amortization |
+| **Wave 0 leaf** | TM **#143** · `sys-norm-charter` → **Done** (MAIN merge `f8e898ad` / feature `28d4abe1`; worktree **REMOVED**) |
+| **Sole-active** | **cleared** (ready for Wave 1 next session) |
+| **Batch (Wave 0)** | **split** · `member_task_ids: ["143"]` · docs-only amortization — **closed** |
+| **Next queue head** | `sys-norm-shell-fluid-nav` (Wave 1) — **Not Started** / not activated this sync |
 | **Queue (Waves 1–8)** | Program-plan **Not Started** only — **no** TM pending stubs (NON-CE `#141/#142` pattern; register next free TM id at each wave activation) |
 | **CE umbrella** | TM **#53** remains **in-progress** registry-only — **not** this program's delivery leaf |
 | **Behavior SoT** | [system-normalization-program.md](../behavior/system-normalization-program.md) |
@@ -53,7 +55,7 @@ queue without reopening locked forks.
 
 | Wave | TM | Slice id | Status | Focus | Evidence / gates |
 | --- | --- | --- | --- | --- | --- |
-| **0** | **#143** | `sys-norm-charter` | **In Progress** (sole-active) → **Done** after merge | Program plan + ADR-0070/0071 + indexes; decision lock | Docs-only — no code gates |
+| **0** | **#143** | `sys-norm-charter` | **Done** (`f8e898ad` / `28d4abe1`) | Program plan + ADR-0070/0071 + indexes; decision lock | Docs-only — gates N/A |
 | **1** | *(register at activate)* | `sys-norm-shell-fluid-nav` | **Not Started** | Fluid all pages; nav icons + contract; Security = audit + legal holds; brands/entities nav hide if ADR locked; Edit/More; EntityLink N1/N2/N3 | FE gates + E2E when UI |
 | **2** | *(register at activate)* | `sys-norm-hub-ia` | **Not Started** | Template (+ Master parity) Hub Properties drawer; remove wrong tabs; version Dependencies; API jump model A; Dev blank-surface; locale de-dupe; legacy apiAccess | FE + E2E |
 | **3** | *(register at activate)* | `sys-norm-external-ops` | **Not Started** | External services dashboard; invocation records page; package API settings route; hub redirects | FE + E2E |

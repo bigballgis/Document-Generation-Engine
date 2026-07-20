@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: NON-CE #143 SYS-NORM Wave 0 (sys-norm-charter) — docs/ADR program charter; do not treat #53 as delivery leaf. Prior NON-CE #142 Wave B Done 288ce98f; #141 Wave A Done aa88170f; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done; prior NON-CE #139 PD-7 Done b966874a; OUT of IBL-E; pursue docs ADR-0069 + procurement; Accepted ≠ embedding Done; prior #138 PD-6 Done 73ab03cb. Prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068; worktree REMOVED. Prior #133 IBL-E6 Done dcc42c81 / 0e542c03 / 32b62136 / docs a2501d48; F28 closed. Do NOT auto-activate CE-O02.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: NON-CE #143 SYS-NORM Wave 0 (sys-norm-charter) — docs/ADR only; #53 remains registry-only. Prior NON-CE #142/#141 bank-letter demo Done; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done. Do NOT claim program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02.",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: cleared (prior NON-CE #143 SYS-NORM Wave 0 Done f8e898ad / 28d4abe1; prior #142 Wave B Done 288ce98f; #141 Wave A Done aa88170f; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done; prior NON-CE #139 PD-7 Done b966874a; OUT of IBL-E; pursue docs ADR-0069 + procurement; Accepted ≠ embedding Done; prior #138 PD-6 Done 73ab03cb. Prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068; worktree REMOVED. Prior #133 IBL-E6 Done dcc42c81 / 0e542c03 / 32b62136 / docs a2501d48; F28 closed). Do NOT treat #53 as delivery leaf. Do NOT auto-activate CE-O02.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: cleared (prior NON-CE #143 SYS-NORM Wave 0 Done f8e898ad / 28d4abe1; next queue head sys-norm-shell-fluid-nav not activated). Prior NON-CE #142/#141 bank-letter demo Done; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done. Do NOT claim program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-21T01:30:00.000Z"
+        "updatedAt": "2026-07-21T02:00:00.000Z"
       },
       {
         "id": "54",
@@ -1966,25 +1966,25 @@
       {
         "id": "143",
         "title": "SYS-NORM Wave 0 — program charter + ADRs (sys-norm-charter)",
-        "description": "IN PROGRESS 2026-07-21. NON-CE System Normalization Program Wave 0 — sole-active delivery leaf on this host. Slice sys-norm-charter; placement ISOLATED D:/working/DGE-sys-norm-charter · feat/sys-norm-charter. Batch recommendation split (member_task_ids: [\"143\"]; proposed_slice_id: sys-norm-charter; evidence_amortization: docs-only). Scope: program plan + ADR-0070 (role compression) + ADR-0071 (D1 retire DocumentBrand/LegalEntity surfaces) + indexes. BDD ready docs/behavior/system-normalization-program.md (Wave 0 plan+ADR acceptance). frontend_ui_in_scope=false. Waves 1–8 Not Started in program plan only (no TM pending stubs; #141/#142 NON-CE pattern). Umbrella #53 CE remains in-progress registry-only — do NOT treat #53 as delivery leaf. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT auto-activate CE-O02 / RTL. Do NOT claim go-live.",
-        "details": "ACTIVATED 2026-07-21 (stage 2 plan-orchestrator). Slice id: sys-norm-charter. Batch recommendation split closed into this leaf only (member_task_ids:[\"143\"]). Waves 1–8 queued in program plan as Not Started (no TM flood — register next free id at each wave activation; next queue head slice sys-norm-shell-fluid-nav). Wave 0 Done = durable program SoT + ADR-0070/0071 Accepted + plan activation — no mvn/pnpm/E2E/deploy for charter leaf. Owners: doc-keeper (program file + ADRs) then post-task gates on MAIN after merge. Program: docs/plan/system-normalization-program-2026-07.md. Behavior: docs/behavior/system-normalization-program.md. Vetoes: CE-O02; checklist-#3b/#5a-GO; RTL; fold-parked-hub-worktrees; mega-merge Waves 1–8 into Wave 0. Formal phase remains None. Serial queue: only #143 is sole-active writer leaf.",
-        "testStrategy": "1. BDD ready confirmed (docs/behavior/system-normalization-program.md; BDD-SYS-NORM-W0-001…006 + ROLE/D1 decision scenarios). 2. Program plan docs/plan/system-normalization-program-2026-07.md with wave table 0→8 + N1–N23 backlog (Waves 1–8 Not Started). 3. ADR-0070 Accepted (six management roles) + ADR-0071 Accepted (D1 supersede ADR-0065 product surface; keep Legal holds). 4. Indexes/ledger discoverable; no production code in Wave 0 commit set. 5. FE/E2E/mvn/deploy N/A (docs-only). 6. Stage 11 merge + MAIN doc-sync before Done. 7. Do NOT flip #3b/#5a GO; do NOT activate CE-O02; do NOT register/activate Wave 1 TM until #143 Done.",
+        "description": "DONE 2026-07-21. NON-CE System Normalization Program Wave 0 — docs/ADR charter leaf closed. Slice sys-norm-charter; MAIN merge f8e898ad (includes feature 28d4abe1); worktree REMOVED. Batch recommendation split (member_task_ids: [\"143\"]) closed. Scope delivered: program plan + ADR-0070 Accepted + ADR-0071 Accepted + indexes. BDD ready docs/behavior/system-normalization-program.md. frontend_ui_in_scope=false. Gates: docs-only N/A (no mvn/pnpm/E2E/deploy). Wave 0 → Done; Waves 1–8 remain Not Started in program plan only (no TM stubs; next queue head sys-norm-shell-fluid-nav — not activated). Sole-active cleared. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT auto-activate CE-O02 / RTL / Wave 1. Do NOT claim go-live / SYS-NORM program Done.",
+        "details": "COMPLETED 2026-07-21 (stage 12 post-task-doc-sync on MAIN). Slice id: sys-norm-charter. Merge: f8e898ad (includes feature 28d4abe1); worktree removed (stage 11). Batch split closed. Delivered: durable program SoT docs/plan/system-normalization-program-2026-07.md; ADR-0070 Accepted; ADR-0071 Accepted; behavior ready; indexes/ledger. Gates: docs-only — N/A. Sole-active cleared. Next leaf (notes only, not activated): sys-norm-shell-fluid-nav (Wave 1). Vetoes held: CE-O02; checklist-#3b/#5a-GO; RTL; fold-parked-hub-worktrees; mega-merge Waves 1–8; do not mark #53 Done. Formal phase remains None.",
+        "testStrategy": "1. BDD ready confirmed (docs/behavior/system-normalization-program.md; BDD-SYS-NORM-W0-001…006 + ROLE/D1 decision scenarios). 2. Program plan docs/plan/system-normalization-program-2026-07.md with wave table 0→8 + N1–N23 backlog (Wave 0 Done; Waves 1–8 Not Started). 3. ADR-0070 Accepted + ADR-0071 Accepted. 4. Indexes/ledger discoverable; no production code in Wave 0 commit set. 5. FE/E2E/mvn/deploy N/A (docs-only). 6. Stage 11 merge f8e898ad / 28d4abe1 + MAIN doc-sync before Done. 7. Do NOT flip #3b/#5a GO; do NOT activate CE-O02; do NOT register/activate Wave 1 TM in this closeout.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-21T01:50:00.000Z"
+        "updatedAt": "2026-07-21T02:00:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-21T01:50:00.000Z",
+      "lastModified": "2026-07-21T02:00:00.000Z",
       "taskCount": 143,
-      "completedCount": 139,
+      "completedCount": 140,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-21T01:50:00.000Z"
+      "updated": "2026-07-21T02:00:00.000Z"
     }
   }
 }
