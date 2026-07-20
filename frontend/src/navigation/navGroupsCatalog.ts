@@ -91,18 +91,8 @@ export const NAV_GROUPS: NavGroupDefinition[] = [
         path: '/governance/legal-holds',
         labelKey: 'nav.items.legalHolds',
       },
-      {
-        id: 'document-brands',
-        routeKey: ROUTE_KEYS.documentBrandAdministration,
-        path: '/governance/document-brands',
-        labelKey: 'nav.items.documentBrands',
-      },
-      {
-        id: 'legal-entities',
-        routeKey: ROUTE_KEYS.documentBrandAdministration,
-        path: '/governance/legal-entities',
-        labelKey: 'nav.items.legalEntities',
-      },
+      // ADR-0071: Document brands + Legal entities retired from product nav (Wave 1 hide;
+      // Wave 6 hard runtime retire). Security = audit + legal holds only.
     ],
   },
 ]

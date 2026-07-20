@@ -10,7 +10,8 @@ const props = withDefaults(
   }>(),
   {
     maxWidth: '1440px',
-    layoutVariant: 'contained',
+    // SYS-NORM Wave 1: management pages are fluid system-wide; contained is opt-in.
+    layoutVariant: 'fluid',
     contentSurface: 'panel',
   },
 )

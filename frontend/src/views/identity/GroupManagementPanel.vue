@@ -5,6 +5,7 @@ import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import TableEditMoreActions from '@/components/common/TableEditMoreActions.vue'
 import {
   useGroupManagementPanel,
   type GroupMoreAction,
@@ -91,21 +92,19 @@ const {
         </el-table-column>
         <el-table-column v-if="canManage" :label="t('identity.groups.columns.actions')" width="160">
           <template #default="{ row }">
-            <el-button link size="small" type="primary" @click="openEdit(row)">
-              {{ t('identity.groups.edit') }}
-            </el-button>
-            <el-dropdown trigger="click" @command="(command: GroupMoreAction) => handleMoreAction(command, row)">
-              <el-button link size="small">
-                {{ t('common.more') }}
-              </el-button>
-              <template #dropdown>
+            <TableEditMoreActions
+              :edit-label="t('identity.groups.edit')"
+              @edit="openEdit(row)"
+              @command="(command) => handleMoreAction(command as GroupMoreAction, row)"
+            >
+              <template #more>
                 <el-dropdown-menu>
                   <el-dropdown-item command="toggleEnabled">
                     {{ row.enabled ? t('identity.groups.disable') : t('identity.groups.enable') }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
-            </el-dropdown>
+            </TableEditMoreActions>
           </template>
         </el-table-column>
       </AppDataTable>

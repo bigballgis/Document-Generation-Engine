@@ -1,5 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -54,8 +55,15 @@ describe('GroupManagementView', () => {
 
   it('renders group management without user tabs', async () => {
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/entitlement/groups', component: { template: '<div />' } }],
+    })
+    await router.push('/entitlement/groups')
+    await router.isReady()
+
     const wrapper = mount(GroupManagementView, {
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [i18n, ElementPlus, router] },
     })
     await flushPromises()
 

@@ -16,6 +16,7 @@ const {
   formatDateTime,
   contentModulesStore,
   contentModuleDetailLink,
+  groupCatalogLink,
   createDialogOpen,
   currentPage,
   allModules,
@@ -99,7 +100,14 @@ const {
             prop="groupCode"
             :label="t('contentModules.list.columns.group')"
             width="140"
-          />
+          >
+            <template #default="{ row }">
+              <EntityLinkCell
+                :label="row.groupCode"
+                :to="groupCatalogLink(row.groupCode)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column
             prop="moduleCode"
             :label="t('contentModules.list.columns.moduleCode')"

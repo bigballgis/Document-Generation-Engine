@@ -21,7 +21,7 @@ export function useMasterListView() {
   const masterStatusFilterOptions = useMasterStatusFilterOptions()
   const router = useRouter()
   const mastersStore = useMastersStore()
-  const { masterDetailLink } = useEntityLinkTargets()
+  const { masterDetailLink, groupCatalogLink } = useEntityLinkTargets()
 
   const uploadDialogOpen = ref(false)
   const uploadFailurePending = ref(false)
@@ -173,6 +173,7 @@ export function useMasterListView() {
     formatDateTime,
     mastersStore,
     masterDetailLink,
+    groupCatalogLink,
     uploadDialogOpen,
     currentPage,
     allMasters,

@@ -27,6 +27,7 @@ defineProps<{
   pageSize: number
   total: number
   templateDetailLink: (id: string) => RouteLocationRaw | undefined
+  groupCatalogLink: (groupCode?: string | null) => RouteLocationRaw | undefined
 }>()
 
 const searchQuery = defineModel<string>('searchQuery', { required: true })
@@ -63,7 +64,14 @@ const { formatDateTime } = useLocaleFormatters()
         prop="groupCode"
         :label="t('templates.list.columns.group')"
         width="140"
-      />
+      >
+        <template #default="{ row }">
+          <EntityLinkCell
+            :label="row.groupCode"
+            :to="groupCatalogLink(row.groupCode)"
+          />
+        </template>
+      </el-table-column>
       <el-table-column
         :label="t('templates.list.columns.name')"
         min-width="220"

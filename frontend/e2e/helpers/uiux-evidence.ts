@@ -1827,3 +1827,34 @@ export async function captureTm144PtaLocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** SYS-NORM Wave 1 — shell fluid + nav trim + EditMore + EntityLink — 1440×900 dual-brand. */
+export const SYS_NORM_W1_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'SYS-NORM-W1')
+export const SYS_NORM_W1_SCREENSHOT_DIR = path.join(SYS_NORM_W1_EVIDENCE_ROOT, 'screenshots')
+export const SYS_NORM_W1_VIEWPORT = { width: 1440, height: 900 } as const
+export const SYS_NORM_W1_WIDE_VIEWPORT = { width: 1800, height: 900 } as const
+
+export function ensureSysNormW1EvidenceDirs(): void {
+  fs.mkdirSync(SYS_NORM_W1_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function sysNormW1ScreenshotPath(filename: string): string {
+  return path.join(SYS_NORM_W1_SCREENSHOT_DIR, filename)
+}
+
+export async function captureSysNormW1Screenshot(page: Page, filename: string): Promise<string> {
+  ensureSysNormW1EvidenceDirs()
+  const target = sysNormW1ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureSysNormW1LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureSysNormW1EvidenceDirs()
+  const target = sysNormW1ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

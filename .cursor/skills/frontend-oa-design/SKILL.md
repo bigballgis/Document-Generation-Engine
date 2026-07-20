@@ -40,8 +40,8 @@ when a shared wrapper exists is a review blocker.
   spacious desktop-first content region.
 - Desktop-first; consistent spacing scale (e.g. 4/8/12/16/24).
 - **`AppPageLayout` variants** (`frontend/src/components/layout/AppPageLayout.vue`):
-  - **`fluid`** — catalog/list/audit table-heavy pages; no max-width; tables use full content width.
-  - **`contained`** — forms, wizards, detail/workspace pages; `1440px` centered max width.
+  - **`fluid` (default)** — all management pages (SYS-NORM Wave 1); no max-width; full shell content width.
+  - **`contained` (opt-in)** — explicit exception only; `1440px` centered max width.
 - Logo and brand assets come from the shared slot and switch with theme; no page-local branding.
 - Entity display + filter rules: `.cursor/skills/frontend-entity-display/SKILL.md`.
 

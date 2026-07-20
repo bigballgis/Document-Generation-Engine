@@ -20,7 +20,7 @@ Pair with `.cursor/skills/frontend-oa-design/SKILL.md` (visual tokens) and
 | Component | Location | Use |
 | --- | --- | --- |
 | `EntityLinkCell` | `frontend/src/components/common/EntityLinkCell.vue` | Primary entity column: label + optional subtitle + router link when allowed |
-| `AppPageLayout` | `frontend/src/components/layout/AppPageLayout.vue` | `layoutVariant="fluid"` (catalog) or `"contained"` (detail/form) |
+| `AppPageLayout` | `frontend/src/components/layout/AppPageLayout.vue` | **Default `fluid`** for all management pages (SYS-NORM Wave 1); `"contained"` only as explicit opt-in |
 | `AppSearchSelect` | `frontend/src/components/common/AppSearchSelect.vue` | Async entity filter/search; extend with remote method + options slot |
 | `CatalogFilterToolbar` | `frontend/src/components/common/CatalogFilterToolbar.vue` | Standard catalog filter row (search + filters + sort + chips) |
 | `ScopedGroupSelect` | `frontend/src/components/common/ScopedGroupSelect.vue` | Group scope filter for global admins |
@@ -32,7 +32,7 @@ Supporting composables: `useCatalogTableControls`, `useTableFilterOptions`, `use
 
 ```
 1. Read behavior spec + permission matrix for read routes on referenced entities.
-2. Choose AppPageLayout layoutVariant="fluid" for catalog pages.
+2. Use AppPageLayout (fluid by default). Do not set contained for management pages unless justified.
 3. Define columns: primary entity fields via EntityLinkCell; status in separate column.
 4. Wire CatalogFilterToolbar:
    - enums → type: 'select' + composable options
@@ -58,18 +58,19 @@ Supporting composables: `useCatalogTableControls`, `useTableFilterOptions`, `use
 
 | Variant | Prop | When |
 | --- | --- | --- |
-| `fluid` | No max-width on content | List/catalog/audit tables |
-| `contained` | `1440px` centered | Detail, workspace, forms, dashboard card grids |
+| `fluid` (default) | No max-width on content | **All management pages** (catalogs, hubs, detail, dashboard) |
+| `contained` (opt-in) | `1440px` centered | Explicit exception only — narrow form/wizard rhythm |
 
 ```vue
-<!-- Catalog -->
-<AppPageLayout layout-variant="fluid">...</AppPageLayout>
+<!-- Management default (fluid) -->
+<AppPageLayout>...</AppPageLayout>
 
-<!-- Detail -->
+<!-- Explicit opt-in only -->
 <AppPageLayout layout-variant="contained">...</AppPageLayout>
 ```
 
-Legacy: `maxWidth="1440px"` is equivalent to `contained` — migrate when touching the file.
+Confirmed (SYS-NORM Wave 1, 2026-07-21): management UI is fluid-everywhere; prior
+catalog=fluid / detail=contained default is superseded.
 
 ## Anti-patterns (blockers)
 
@@ -77,7 +78,7 @@ Legacy: `maxWidth="1440px"` is equivalent to `contained` — migrate when touchi
 - `<el-button link>` duplicating EntityLinkCell per view with inconsistent truncate/a11y.
 - Lifecycle status filter as free-text input.
 - Template/master filter as paste-UUID text field.
-- Catalog list wrapped in 1440px container leaving wide empty gutters on 1920px displays.
+- Management page forced to `contained` / 1440px leaving wide empty gutters on 1920px displays.
 - Link to detail when `canAccessRoute` is false (permission leak or confusing 403).
 - Hardcoded entity type labels — use i18n keys under domain namespaces.
 
@@ -86,7 +87,7 @@ Legacy: `maxWidth="1440px"` is equivalent to `contained` — migrate when touchi
 - [ ] Constitution rules satisfied (`docs/architecture/ux-entity-display-constitution.md`).
 - [ ] Entity columns use `EntityLinkCell`; no raw UUID visible at 1440×900.
 - [ ] Filters match matrix; entity filters use async `AppSearchSelect`.
-- [ ] Correct `layoutVariant` on `AppPageLayout`.
+- [ ] `AppPageLayout` fluid (default) for management pages; contained only if justified.
 - [ ] i18n English keys for new labels/placeholders.
 - [ ] Unit tests for display + link gating where non-trivial.
 - [ ] `frontend-engineer` full gates green; UIUX evidence includes filter row + table width.

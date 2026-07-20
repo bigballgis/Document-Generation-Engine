@@ -364,17 +364,14 @@ describe('navStructure', () => {
           routeKey: ROUTE_KEYS.legalHoldAdministration,
           path: '/governance/legal-holds',
         },
-        {
-          id: 'document-brands',
-          routeKey: ROUTE_KEYS.documentBrandAdministration,
-          path: '/governance/document-brands',
-        },
-        {
-          id: 'legal-entities',
-          routeKey: ROUTE_KEYS.documentBrandAdministration,
-          path: '/governance/legal-entities',
-        },
       ])
+    })
+
+    it('hides Document brands and Legal entities from Security nav (BDD-SYS-NORM-W1-003)', () => {
+      const security = NAV_GROUPS.find((group) => group.id === 'security')
+      expect(security?.items.map((item) => item.id)).toEqual(['audit', 'legal-holds'])
+      expect(security?.items.some((item) => item.id === 'document-brands')).toBe(false)
+      expect(security?.items.some((item) => item.id === 'legal-entities')).toBe(false)
     })
 
     it('shows legal holds only when route is visible', () => {

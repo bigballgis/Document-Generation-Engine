@@ -29,3 +29,10 @@
 .role-tag {
   margin-right: 0.25rem;
 }
+
+.authorized-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}

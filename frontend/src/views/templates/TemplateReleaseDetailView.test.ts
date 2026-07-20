@@ -188,12 +188,12 @@ describe('TemplateReleaseDetailView', () => {
     expect(wrapper.text()).not.toContain('customerName')
   })
 
-  it('uses contained panel page layout', async () => {
+  it('uses fluid panel page layout (BDD-SYS-NORM-W1-002)', async () => {
     const wrapper = mountView()
     await flushPromises()
 
     const layout = wrapper.find('.app-page-layout')
-    expect(layout.classes()).toContain('app-page-layout--contained')
+    expect(layout.classes()).toContain('app-page-layout--fluid')
     expect(layout.classes()).toContain('app-page-layout--panel')
   })
 

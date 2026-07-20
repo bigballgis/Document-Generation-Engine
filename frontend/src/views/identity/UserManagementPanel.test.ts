@@ -1,5 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
+import { createRouter, createMemoryHistory } from 'vue-router'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -62,10 +63,19 @@ function patchSession(roles: string[], authorizedGroupCodes: string[]) {
   sessionStore.$patch({ accessToken: 'token', session })
 }
 
-function mountPanel() {
+async function mountPanel() {
   const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/entitlement/users', component: { template: '<div />' } },
+      { path: '/entitlement/groups', component: { template: '<div />' } },
+    ],
+  })
+  await router.push('/entitlement/users')
+  await router.isReady()
   return mount(UserManagementPanel, {
-    global: { plugins: [i18n, ElementPlus] },
+    global: { plugins: [i18n, ElementPlus, router] },
   })
 }
 
@@ -99,19 +109,31 @@ describe('UserManagementPanel', () => {
 
   it('renders users after load', async () => {
     patchSession(['GLOBAL_ADMIN'], ['*'])
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     expect(wrapper.text()).toContain('10000001')
     expect(wrapper.text()).toContain('Retail Operator')
   })
 
-  it('shows delete action for global admins in more menu', { timeout: 20000 }, async () => {
+  it('uses shared Edit/More actions and group EntityLink (BDD-SYS-NORM-W1-007/014)', async () => {
     patchSession(['GLOBAL_ADMIN'], ['*'])
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
-    const moreButton = wrapper.findAll('button').find((button) => button.text().includes('More'))
+    expect(wrapper.find('[data-testid="table-edit-more-actions"]').exists()).toBe(true)
+    expect(wrapper.find('.entity-link-cell__link').exists()).toBe(true)
+    expect(wrapper.text()).toContain('RETAIL')
+  })
+
+  it('shows delete action for global admins in more menu', { timeout: 20000 }, async () => {
+    patchSession(['GLOBAL_ADMIN'], ['RETAIL'])
+    const wrapper = await mountPanel()
+    await flushPromises()
+
+    const actions = wrapper.find('[data-testid="table-edit-more-actions"]')
+    expect(actions.exists()).toBe(true)
+    const moreButton = actions.findAll('button').find((button) => button.text().includes('More'))
     expect(moreButton).toBeDefined()
     await moreButton!.trigger('click')
     await flushPromises()
@@ -121,7 +143,7 @@ describe('UserManagementPanel', () => {
 
   it('hides delete action for group admins', async () => {
     patchSession(['GROUP_ADMIN'], ['RETAIL'])
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     expect(wrapper.find('.delete-action').exists()).toBe(false)
@@ -129,7 +151,7 @@ describe('UserManagementPanel', () => {
 
   it('restricts role filter options to operational roles for group admins', async () => {
     patchSession(['GROUP_ADMIN'], ['RETAIL'])
-    mountPanel()
+    await mountPanel()
     await flushPromises()
 
     const optionText = document.body.textContent ?? ''
@@ -140,7 +162,7 @@ describe('UserManagementPanel', () => {
 
   it('exposes administrative roles to global admins', async () => {
     patchSession(['GLOBAL_ADMIN'], ['*'])
-    mountPanel()
+    await mountPanel()
     await flushPromises()
 
     const optionText = document.body.textContent ?? ''
@@ -154,7 +176,7 @@ describe('UserManagementPanel', () => {
       id: 'user-2',
       username: '10000002',
     })
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     const vm = wrapper.vm as unknown as {
@@ -200,7 +222,7 @@ describe('UserManagementPanel', () => {
         message: 'Not allowed.',
       }),
     )
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     expect(wrapper.text()).toContain('Unable to load users.')
@@ -209,7 +231,7 @@ describe('UserManagementPanel', () => {
   it('LR-C9-B: empty user list shows create CTA for admins', async () => {
     patchSession(['GLOBAL_ADMIN'], ['*'])
     vi.mocked(identityApi.listUsers).mockResolvedValue(userPage([]))
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     const emptyActions = wrapper.find('[data-testid="empty-state-actions"]')
@@ -222,7 +244,7 @@ describe('UserManagementPanel', () => {
     vi.mocked(identityApi.listUsers)
       .mockRejectedValueOnce(new Error('load failed'))
       .mockResolvedValueOnce(userPage([sampleUser]))
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     const errorPanel = wrapper.findComponent({ name: 'LoadErrorPanel' })

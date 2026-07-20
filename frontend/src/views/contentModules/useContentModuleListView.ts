@@ -22,7 +22,7 @@ export function useContentModuleListView() {
   const router = useRouter()
   const contentModulesStore = useContentModulesStore()
   const { authorContentModules } = useCapabilities()
-  const { contentModuleDetailLink } = useEntityLinkTargets()
+  const { contentModuleDetailLink, groupCatalogLink } = useEntityLinkTargets()
   const statusFilterOptions = useContentModuleStatusFilterOptions()
 
   const createDialogOpen = ref(false)
@@ -224,6 +224,7 @@ export function useContentModuleListView() {
     formatDateTime,
     contentModulesStore,
     contentModuleDetailLink,
+    groupCatalogLink,
     createDialogOpen,
     currentPage,
     allModules,

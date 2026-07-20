@@ -1,41 +1,17 @@
-import { computed, ref, type Component } from 'vue'
+import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import {
-  HomeFilled,
-  Postcard,
-  Document,
-  Collection,
-  Connection,
-  Histogram,
-  User,
-  UserFilled,
-  FolderOpened,
-  Lock,
-} from '@element-plus/icons-vue'
 import { useOnboardingTour } from '@/composables/useOnboardingTour'
 import { useSessionRenewal } from '@/composables/useSessionRenewal'
 import { BRAND_REGISTRY } from '@/config/brands'
 import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
 import { buildBreadcrumbTrail } from '@/navigation/breadcrumbTrail'
+import { getNavIcon } from '@/navigation/navIcons'
 import { buildVisibleNavGroups, resolveNavItemTarget, type NavItemDefinition } from '@/navigation/navStructure'
 import { useAppStore } from '@/stores/app'
 import { useSessionStore } from '@/stores/session'
 import type { BrandPreset } from '@/theme/tokens'
-
-const NAV_ICON_MAP: Record<string, Component> = {
-  dashboard: HomeFilled,
-  users: User,
-  groups: UserFilled,
-  masters: Postcard,
-  templates: Document,
-  'content-modules': Collection,
-  'asset-library': FolderOpened,
-  'api-policies': Connection,
-  audit: Histogram,
-  'legal-holds': Lock,
-}
 
 export function useManagementShell() {
   const { t } = useI18n()
@@ -67,10 +43,6 @@ export function useManagementShell() {
   function toggleCollapsed() {
     navCollapsed.value = !navCollapsed.value
     localStorage.setItem(COLLAPSED_KEY, String(navCollapsed.value))
-  }
-
-  function getNavIcon(itemId: string): Component | undefined {
-    return NAV_ICON_MAP[itemId]
   }
 
   const brandConfig = computed(

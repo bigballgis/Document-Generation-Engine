@@ -4,8 +4,11 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
+import TableEditMoreActions from '@/components/common/TableEditMoreActions.vue'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { rowSortMethod } from '@/composables/useDataTableFilters'
 import type { ManagementRole, ManagementUserView } from '@/types/identity'
 
@@ -40,6 +43,7 @@ const filterRoleModel = defineModel<string>('filterRole', { required: true })
 const currentPageModel = defineModel<number>('currentPage', { required: true })
 
 const { t, te } = useI18n()
+const { groupCatalogLink } = useEntityLinkTargets()
 
 function roleLabel(role: string): string {
   return te(`identity.roles.${role}`) ? t(`identity.roles.${role}`) : role
@@ -113,7 +117,14 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
           </el-table-column>
           <el-table-column min-width="160" :label="t('identity.users.columns.groups')">
             <template #default="{ row }: { row: ManagementUserView }">
-              {{ row.authorizedGroupCodes.join(', ') }}
+              <div class="authorized-groups">
+                <EntityLinkCell
+                  v-for="groupCode in row.authorizedGroupCodes"
+                  :key="groupCode"
+                  :label="groupCode"
+                  :to="groupCatalogLink(groupCode)"
+                />
+              </div>
             </template>
           </el-table-column>
           <el-table-column
@@ -130,17 +141,12 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
           </el-table-column>
           <el-table-column :label="t('identity.users.columns.actions')" width="160">
             <template #default="{ row }: { row: ManagementUserView }">
-              <el-button link size="small" type="primary" @click="emit('edit', row)">
-                {{ t('identity.users.edit') }}
-              </el-button>
-              <el-dropdown
-                trigger="click"
-                @command="(command: UserMoreAction) => emit('moreAction', command, row)"
+              <TableEditMoreActions
+                :edit-label="t('identity.users.edit')"
+                @edit="emit('edit', row)"
+                @command="(command) => emit('moreAction', command as UserMoreAction, row)"
               >
-                <el-button link size="small">
-                  {{ t('common.more') }}
-                </el-button>
-                <template #dropdown>
+                <template #more>
                   <el-dropdown-menu>
                     <el-dropdown-item command="toggleEnabled">
                       {{ row.enabled ? t('identity.users.disable') : t('identity.users.enable') }}
@@ -153,7 +159,7 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
                     </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
-              </el-dropdown>
+              </TableEditMoreActions>
             </template>
           </el-table-column>
         </AppDataTable>

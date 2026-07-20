@@ -435,7 +435,7 @@ governance moves to **Letterhead (master)**. Legal holds **kept**. Shell REDBC/G
 
 | Wave | Slice id (suggested) | Stub readiness | Focus |
 | --- | --- | --- | --- |
-| 1 | `sys-norm-shell-fluid-nav` | **pending-wave** | Fluid all management pages; nav icons + contract test; Security = audit + legal holds; brands/entities nav hide if ADR locked; Edit/More; EntityLink N1/N2/N3/users groups |
+| 1 | `sys-norm-shell-fluid-nav` | **ready** — [sys-norm-shell-fluid-nav.md](./sys-norm-shell-fluid-nav.md) | Fluid all management pages; nav icons + contract test; Security = audit + legal holds; brands/entities nav hide (ADR-0071); Edit/More; EntityLink N1/N2/N3/users groups |
 | 2 | `sys-norm-hub-ia` | **pending-wave** | Template (+ Master parity) Hub Properties drawer; remove wrong tabs; version Dependencies; API jump model A; Dev blank-surface; locale de-dupe; legacy apiAccess |
 | 3 | `sys-norm-external-ops` | **pending-wave** | External services dashboard; invocation records page; package API settings route; hub redirects |
 | 4 | `sys-norm-test-artifacts` | **pending-wave** | Batch test history handles; download on published/history Testing |

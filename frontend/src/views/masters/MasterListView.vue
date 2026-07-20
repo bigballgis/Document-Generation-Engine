@@ -16,6 +16,7 @@ const {
   formatDateTime,
   mastersStore,
   masterDetailLink,
+  groupCatalogLink,
   uploadDialogOpen,
   currentPage,
   allMasters,
@@ -82,7 +83,14 @@ const {
             prop="groupCode"
             :label="t('masters.list.columns.group')"
             width="140"
-          />
+          >
+            <template #default="{ row }">
+              <EntityLinkCell
+                :label="row.groupCode"
+                :to="groupCatalogLink(row.groupCode)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column
             :label="t('masters.list.columns.name')"
             min-width="220"

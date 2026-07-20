@@ -1,5 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
+import { createRouter, createMemoryHistory } from 'vue-router'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -53,10 +54,16 @@ function patchSession(roles: string[]) {
   sessionStore.$patch({ accessToken: 'token', session })
 }
 
-function mountPanel() {
+async function mountPanel(query: Record<string, string> = {}) {
   const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [{ path: '/entitlement/groups', component: { template: '<div />' } }],
+  })
+  await router.push({ path: '/entitlement/groups', query })
+  await router.isReady()
   return mount(GroupManagementPanel, {
-    global: { plugins: [i18n, ElementPlus] },
+    global: { plugins: [i18n, ElementPlus, router] },
   })
 }
 
@@ -75,7 +82,7 @@ describe('GroupManagementPanel', () => {
 
   it('renders groups after load', async () => {
     patchSession(['GLOBAL_ADMIN'])
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     expect(wrapper.text()).toContain('RETAIL')
@@ -99,7 +106,7 @@ describe('GroupManagementPanel', () => {
       totalElements: 2,
       totalPages: 1,
     })
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     const vm = wrapper.vm as unknown as { searchQuery: string }
@@ -110,9 +117,19 @@ describe('GroupManagementPanel', () => {
     expect(wrapper.text()).not.toContain('Retail banking')
   })
 
+  it('uses shared Edit/More actions primitive (BDD-SYS-NORM-W1-007)', async () => {
+    patchSession(['GLOBAL_ADMIN'])
+    const wrapper = await mountPanel()
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="table-edit-more-actions"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Edit')
+    expect(wrapper.text()).toContain('More')
+  })
+
   it('shows write controls for global admins', async () => {
     patchSession(['GLOBAL_ADMIN'])
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     expect(wrapper.text()).toContain('Create group')
@@ -121,7 +138,7 @@ describe('GroupManagementPanel', () => {
 
   it('hides write controls and shows read-only hint for group admins', async () => {
     patchSession(['GROUP_ADMIN'])
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     expect(wrapper.text()).not.toContain('Create group')
@@ -135,7 +152,7 @@ describe('GroupManagementPanel', () => {
       id: 'group-2',
       groupCode: 'CORPORATE',
     })
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     const vm = wrapper.vm as unknown as {
@@ -162,7 +179,7 @@ describe('GroupManagementPanel', () => {
   it('P1-2-A: list load failure shows only LoadErrorPanel without el-alert dual track', async () => {
     patchSession(['GLOBAL_ADMIN'])
     vi.mocked(identityApi.listGroups).mockRejectedValue(new Error('load failed'))
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     expect(wrapper.findComponent({ name: 'LoadErrorPanel' }).exists()).toBe(true)
@@ -181,7 +198,7 @@ describe('GroupManagementPanel', () => {
         totalElements: 1,
         totalPages: 1,
       })
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     const errorPanel = wrapper.findComponent({ name: 'LoadErrorPanel' })
@@ -203,7 +220,7 @@ describe('GroupManagementPanel', () => {
       totalElements: 0,
       totalPages: 0,
     })
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     const emptyActions = wrapper.find('[data-testid="empty-state-actions"]')
@@ -220,10 +237,11 @@ describe('GroupManagementPanel', () => {
       totalElements: 0,
       totalPages: 0,
     })
-    const wrapper = mountPanel()
+    const wrapper = await mountPanel()
     await flushPromises()
 
     expect(wrapper.find('[data-testid="empty-state-actions"]').exists()).toBe(false)
     expect(wrapper.text()).toContain('No groups available.')
   })
 })
+
