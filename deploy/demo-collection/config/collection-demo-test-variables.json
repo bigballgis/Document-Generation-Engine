@@ -1,9 +1,9 @@
 {
-  "catalogMarker": "collection-demo-v3-bank-grade",
+  "catalogMarker": "collection-demo-v4-wave-a",
   "testDataSets": [
     {
       "id": "rate-change-executive",
-      "label": "Rate Change Notice — P23 Executive Sample",
+      "label": "Variable Rate Change Notice — Personal Savings",
       "variables": {
         "bankName": "Meridian Retail Banking",
         "bankAddress": "PO Box 1200, London EC2N 1DB, United Kingdom",
@@ -33,7 +33,7 @@
     },
     {
       "id": "overdue-collection-executive",
-      "label": "Overdue Collection Notice — P23 Executive Sample",
+      "label": "Overdue Balance Collection Notice — Treating Customers Fairly",
       "variables": {
         "bankName": "Meridian Retail Banking",
         "bankAddress": "PO Box 1200, London EC2N 1DB, United Kingdom",

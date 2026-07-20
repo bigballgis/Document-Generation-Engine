@@ -4,7 +4,10 @@
 **版本**: 1.0.0  
 **编写日期**: 2026-07-03  
 **BDD ID 前缀**: `BDD-DEMO-EXP`  
-**交付切片**: 单次交付（ONE delivery slice）— 渲染保真 + 双页码 + 八类银行信函演示包
+**交付切片**: 单次交付（ONE delivery slice）— 渲染保真 + 双页码 + 八类银行信函演示包  
+**Phase status**: **P22 Done** (2026-07-04) — **do not reopen**
+
+> **Post-Done ops note (2026-07-20):** Content-quality uplift of the **same** eight packages + `DEMO-FULL-FLOW-LETTER` is owned by ad-hoc Wave A [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) (TM **#141** **In Progress** — not Done). New letter families → Wave B (`bank-letter-demo-expand` / **#142**). This EXP spec remains the **engine + scaffold** SoT.
 
 ---
 
@@ -461,6 +464,7 @@ backend/src/test/java/.../<Code>MasterDocxAssetGeneratorTest.java
 | `FolMasterDocxAssetGeneratorTest.java` | 母版生成模式参考 |
 | [Domain model §2.6.10–2.6.11、§2.18](../domain/domain-model.md) | StructuredContentDocxWriter、页码语义、演示包契约 |
 | `DocxAssembler.java` / `PdfPageNumberStamper.java` | 当前实现待扩展点 |
+| [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) | Wave A 既有包内容刷新（**In Progress**；不 reopen P22） |
 
 ---
 
@@ -469,3 +473,4 @@ backend/src/test/java/.../<Code>MasterDocxAssetGeneratorTest.java
 | 版本 | 日期 | 说明 |
 |------|------|------|
 | 1.0.0 | 2026-07-03 | 初始行为规格 — 用户确认综合演示扩展单次交付切片 |
+| — | 2026-07-20 | Post-Done ops note → Wave A `bank-letter-demo-refresh`；P22 状态仍为 Done |

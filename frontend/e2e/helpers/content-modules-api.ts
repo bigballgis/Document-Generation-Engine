@@ -1077,7 +1077,7 @@ export async function attachReferenceToDemoTemplate(
   )
 }
 
-export const DEMO_FULL_FLOW_RELEASE_VERSION = '1.0.0'
+export const DEMO_FULL_FLOW_RELEASE_VERSION = '1.1.0'
 
 export interface DemoFullFlowFixture {
   templateId: string

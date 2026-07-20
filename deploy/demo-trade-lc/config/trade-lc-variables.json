@@ -1,5 +1,5 @@
 {
-  "catalogMarker": "trade-lc-demo-v3-bank-grade",
+  "catalogMarker": "trade-lc-demo-v4-wave-a",
   "variables": [
     {"key": "issuingBankName", "label": "Issuing Bank Name", "type": "TEXT", "required": true},
     {"key": "issuingBankAddress", "label": "Issuing Bank Address", "type": "TEXT", "required": true},

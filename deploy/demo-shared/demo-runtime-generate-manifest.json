@@ -1,18 +1,27 @@
 {
-  "manifestVersion": "p23-t14-v1",
-  "bddIds": ["BDD-DEMO-TYP-011", "BDD-DEMO-TYP-012", "BDD-DEMO-TYP-013"],
-  "forbiddenPatterns": ["LOREM", "{{", "}}", "PLACEHOLDER", "TODO"],
+  "manifestVersion": "wave-a-demo-refresh-v1",
+  "bddIds": ["BDD-DEMO-TYP-011", "BDD-DEMO-TYP-012", "BDD-DEMO-TYP-013", "BDD-DEMO-REFRESH-004", "BDD-DEMO-REFRESH-011"],
+  "forbiddenPatterns": [
+    "LOREM",
+    "{{",
+    "}}",
+    "PLACEHOLDER",
+    "TODO",
+    "For the executive demonstration dataset",
+    "will be expanded in the final documentation set",
+    "executive test data set"
+  ],
   "templates": [
     {
       "externalId": "CORP-FOL-OFFER",
       "minDocxBytes": 20480,
-      "contentMarkers": ["Pacific Rim Holdings", "Meridian Global Banking Corporation", "Borrower"],
+      "contentMarkers": ["Pacific Rim Holdings", "Meridian Global Banking Corporation", "Borrower", "Conditions Precedent"],
       "variablesFixture": "deploy/demo-fol/config/fol-demo-test-variables.json"
     },
     {
       "externalId": "DEMO-FULL-FLOW-LETTER",
       "minDocxBytes": 2560,
-      "contentMarkers": ["Margaret Sinclair"],
+      "contentMarkers": ["Margaret Sinclair", "Meridian Retail Banking"],
       "variablesFixture": "frontend/e2e/fixtures/demo/full-flow-demo-test-variables.json"
     },
     {

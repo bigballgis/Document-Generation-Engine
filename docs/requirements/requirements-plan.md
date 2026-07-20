@@ -12,6 +12,7 @@
 - [文档治理规则](../governance.md)
 - [综合演示包扩展行为规格](demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；渲染保真 + 双页码 + 八类银行信函演示 — **P22 Done**）
 - [演示文档排版与版式卓越行为规格](demo-typography-layout-behavior-spec.md)（BDD-DEMO-TYP-001…020 — **ready** 2026-07-08；实现计划 [P23](../plan/detail/P23-demo-typography-layout-excellence.md) **Done** 2026-07-08）
+- [银行信函演示内容刷新 Wave A](../behavior/bank-letter-demo-refresh.md)（BDD-DEMO-REFRESH-001…014 — **ready**；TM **#141** **In Progress** — 未宣称 Done；计划 [bank-letter-demo-refresh.md](../plan/detail/bank-letter-demo-refresh.md)；Wave B **#142** OUT）
 
 ## 记录原则
 
@@ -854,6 +855,16 @@
 - **视觉验收：** POI 断言（样式 ID、`document.xml` 字体）+ Playwright 运行时生成 E2E + 可选人工排版检查清单（募资/演示证据）。
 - **覆盖范围：** 全部八类演示包（含 FOL / full-flow 抛光）达到「foreign bank letter grade」；与 taskmaster tasks 4–8（重写、发布、生成、证据包）一致。
 - **退出标准：** 见 P23 详细计划 §3；LR-A7 分页语料库依赖 P23 至少五类信函级演示完成。
+
+## 已确认：银行信函演示内容刷新 Wave A（2026-07-20）
+
+> 用户确认（深度系统整改后）：清理验收栈与 `deploy/demo-*` 中浅层/填充/测试味 demo，并将**既有八类包 + `DEMO-FULL-FLOW-LETTER`** 提升为 100% 仿真国际/公司银行信函（仅当事人、账号、金额、日期等为 mock）。行为规格：[bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md)（**ready** — `BDD-DEMO-REFRESH-001`…`014`）；计划：[bank-letter-demo-refresh.md](../plan/detail/bank-letter-demo-refresh.md)；编排说明：[deploy/demo-shared/README.md](../../deploy/demo-shared/README.md)。Task Master **#141** **In Progress** — **未宣称 Done**。
+
+- **与 P22/P23 关系：** **不 reopen** P22/P23 阶段状态；历史 TM **#4–#8** 保持 Done。本叶为 post-remediation **内容刷新**，非新正式 P 阶段。
+- **覆盖：** 仍为 PRD §6.7 八类 + full-flow；运行时 FOL 主键 `CORP-FOL-OFFER`（见 demo-shared 发布注册表）；**不**发明新产品名。
+- **Ops 路径（已确认偏好）：** 优先 `import-all-demos.ps1` 幂等覆盖；可选既有 `cleanup-fol-test-data-sets.ps1`（`-WhatIf`）与 `demo-import-shared` DRAFT reset；**禁止**鲁莽整库 `DROP`。
+- **Wave B：** 新信函族（commitment / KYC / closure 等）**OUT** → 串行下一叶 TM **#142** `bank-letter-demo-expand`（pending）。
+- **硬否决：** **不**翻转 checklist **#3b/#5a GO**；**不** reopen RTL（ADR-0068）；**不**激活 / 宣称 CE-O02 Done；**不**编造 Word 主机证据。
 
 ## 待确认：设计优化议题
 

@@ -104,12 +104,26 @@ function Count-StructuredFeatures([string]$Json) {
     return @{ conditionBlocks = $conditionBlocks; loopBlocks = $loopBlocks; tableComponentRefs = $tableRefs }
 }
 
+function Format-BindingExpectedUpdatedAt([object]$UpdatedAt) {
+    if ($null -eq $UpdatedAt) { return $null }
+    if ($UpdatedAt -is [string]) { return [string]$UpdatedAt }
+    $utc = [datetime]$UpdatedAt
+    if ($utc.Kind -ne [DateTimeKind]::Utc) { $utc = $utc.ToUniversalTime() }
+    return $utc.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'")
+}
+
 function Set-Binding([string]$TemplateId, [string]$Token, [string]$AnchorId, [object]$StructuredContent) {
-    Invoke-Api PUT "/templates/$TemplateId/bindings/$AnchorId" $Token -Body @{
+    $detail = Invoke-Api GET "/templates/$TemplateId" $Token
+    $existing = @($detail.result.bindings) | Where-Object { $_.anchorId -eq $AnchorId } | Select-Object -First 1
+    $body = @{
         anchorId = $AnchorId
         declaredContentType = 'TEXT'
         structuredContentJson = ($StructuredContent | ConvertTo-Json -Depth 100 -Compress)
-    } | Out-Null
+    }
+    if ($existing -and $existing.updatedAt) {
+        $body.expectedUpdatedAt = Format-BindingExpectedUpdatedAt $existing.updatedAt
+    }
+    Invoke-Api PUT "/templates/$TemplateId/bindings/$AnchorId" $Token -Body $body | Out-Null
 }
 
 function Merge-ClauseBinding([string]$AnchorId, [string]$ReferenceKey, [object]$Overlay) {
@@ -406,16 +420,19 @@ Write-Step "Master ready: $($Config.masterName) ($masterId)"
 
 # --- Template ---
 $needsDescriptionPatch = $false
-$templates = Invoke-Api GET '/templates?size=200' $AuthorToken
-$template = Get-ApiListItems $templates.result | Where-Object { $_.externalId -eq $Config.templateExternalId } | Select-Object -First 1
+$folExternalId = [string]$Config.templateExternalId
+$templates = Invoke-Api GET "/templates?search=$([uri]::EscapeDataString($folExternalId))&searchMode=EXTERNAL_ID&size=20" $AuthorToken
+$template = Get-ApiListItems $templates.result | Where-Object { $_.externalId -eq $folExternalId } | Select-Object -First 1
 if (-not $template) {
     Write-Step "Creating FOL template $($Config.templateExternalId)..."
+    $folLocale = if ($Config.PSObject.Properties['locale'] -and $Config.locale) { [string]$Config.locale } else { 'zh-CN' }
     $created = Invoke-Api POST '/templates' $AuthorToken -Body @{
         externalId = $Config.templateExternalId
         groupCode = $Config.groupCode
         name = $Config.templateName
         description = $Config.templateDescription
         masterId = $masterId
+        locale = $folLocale
     }
     $templateId = $created.result.id
 } else {

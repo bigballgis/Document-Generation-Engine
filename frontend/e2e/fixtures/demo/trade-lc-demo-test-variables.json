@@ -1,9 +1,9 @@
 {
-  "catalogMarker": "trade-lc-demo-v3-bank-grade",
+  "catalogMarker": "trade-lc-demo-v4-wave-a",
   "testDataSets": [
     {
       "id": "trade-lc-executive",
-      "label": "Documentary Credit Advice — Executive Sample",
+      "label": "Irrevocable Documentary Credit Advice — UCP 600",
       "variables": {
         "issuingBankName": "Meridian Global Banking Corporation — Trade Services",
         "issuingBankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
@@ -49,7 +49,7 @@
     },
     {
       "id": "trade-guarantee-executive",
-      "label": "Bank Guarantee Notice — Executive Sample",
+      "label": "Demand Guarantee Advice — URDG 758",
       "variables": {
         "issuingBankName": "Meridian Global Banking Corporation — Trade Services",
         "issuingBankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",

@@ -1,5 +1,5 @@
 {
-  "catalogMarker": "retail-account-demo-v3-bank-grade",
+  "catalogMarker": "retail-account-demo-v4-wave-a",
   "variables": [
     {"key": "bankName", "label": "Bank Name", "type": "TEXT", "required": true},
     {"key": "bankAddress", "label": "Bank Address", "type": "TEXT", "required": true},

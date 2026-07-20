@@ -12,9 +12,11 @@ SELECT 'f2000001-0001-4000-8000-000000000003', cm.id, '3.0.0', 'APPROVED', 'ACTI
          {"type":"paragraph","text":"Our review considered the financial performance and position of the Group, the quality and sufficiency of security, the conduct of the account, compliance with all covenants (financial and general), and any material events notified to us during the review period. Save as disclosed in the Material Findings section, no breaches, defaults or material adverse changes were identified."},
          {"type":"paragraph","text":"Pricing adjustment: The margin has been set in accordance with the pricing grid set out in Schedule 1 of the facility agreement, based on the leverage ratio as at the review date. The revised margin takes effect from the renewal date and applies to all outstanding and future utilisations until the next review date."},
          {"type":"paragraph","text":"Continued availability: Availability under the Facility is confirmed for the renewed term, subject to the conditions precedent having been satisfied and the representations being true and correct on each utilisation date. The Bank reserves the right to review the Facility at any time upon the occurrence of a material adverse change or any event of default."},
-         {"type":"paragraph","text":"Your relationship manager will contact you to discuss any pricing or structural adjustments, and to arrange delivery of the renewed facility documentation, ahead of the next review cycle."}
+         {"type":"paragraph","text":"Your relationship manager will contact you to discuss any pricing or structural adjustments, and to arrange delivery of the renewed facility documentation, ahead of the next review cycle."},
+         {"type":"paragraph","text":"Governing law: The facility agreement and this review letter are governed by English law. Capitalised terms have the meanings given in the facility agreement."},
+         {"type":"paragraph","text":"Please acknowledge receipt of this review outcome by signing and returning the enclosed acknowledgement within ten Business Days."}
        ]}',
-       'Annual review demo v3 bank-grade import', '10000003', '10000007'
+       'Annual review demo Wave A bank-grade import', '10000003', '10000007'
 FROM content_module cm WHERE cm.module_code = 'ANNUAL-REVIEW-STD' AND cm.deleted_at IS NULL
   AND NOT EXISTS (SELECT 1 FROM content_module_version v WHERE v.module_id = cm.id AND v.semantic_version = '3.0.0');
 

@@ -1,6 +1,6 @@
 {
 
-  "catalogMarker": "credit-limit-demo-v3-bank-grade",
+  "catalogMarker": "credit-limit-demo-v4-wave-a",
 
   "groupCode": "CORP",
 
@@ -16,7 +16,7 @@
 
   "templateName": "Credit Facility Confirmation",
 
-  "templateDescription": "Foreign-bank credit facility confirmation — parties, defined terms, facility, covenants, repayment schedule, EOD, governing law, signatures (credit-limit-demo-v3-bank-grade)",
+  "templateDescription": "Foreign-bank credit facility confirmation — parties, defined terms, facility, covenants, repayment schedule, EOD, governing law, signatures (credit-limit-demo-v4-wave-a)",
 
   "masterDocx": "assets/credit-limit-master.docx",
 

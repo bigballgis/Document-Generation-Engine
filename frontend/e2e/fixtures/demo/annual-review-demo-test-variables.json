@@ -1,9 +1,9 @@
 {
-  "catalogMarker": "annual-review-demo-v3-bank-grade",
+  "catalogMarker": "annual-review-demo-v4-wave-a",
   "testDataSets": [
     {
       "id": "annual-review-executive",
-      "label": "Annual Credit Review — Real Executive Sample",
+      "label": "Annual Credit Review Outcome — Harbour Logistics",
       "variables": {
         "bankName": "Meridian Global Banking Corporation",
         "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
@@ -49,7 +49,7 @@
     },
     {
       "id": "facility-renewal-executive",
-      "label": "Facility Renewal — Real Executive Sample",
+      "label": "Facility Renewal Confirmation — Harbour Logistics",
       "variables": {
         "bankName": "Meridian Global Banking Corporation",
         "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",

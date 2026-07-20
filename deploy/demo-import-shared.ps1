@@ -281,6 +281,15 @@ function Expand-DemoCatalogVariablesFromBindings {
     return @($known.Values)
 }
 
+function Format-DemoBindingExpectedUpdatedAt {
+    param([object]$UpdatedAt)
+    if ($null -eq $UpdatedAt) { return $null }
+    if ($UpdatedAt -is [string]) { return [string]$UpdatedAt }
+    $utc = [datetime]$UpdatedAt
+    if ($utc.Kind -ne [DateTimeKind]::Utc) { $utc = $utc.ToUniversalTime() }
+    return $utc.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'")
+}
+
 function Set-DemoBinding {
     param(
         [string]$ApiBase,
@@ -289,11 +298,17 @@ function Set-DemoBinding {
         [string]$AnchorId,
         [object]$StructuredContent
     )
-    Invoke-DemoApi -ApiBase $ApiBase -Method PUT -Path "/templates/$TemplateId/bindings/$AnchorId" -Token $Token -Body @{
+    $detail = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path "/templates/$TemplateId" -Token $Token
+    $existing = @($detail.result.bindings) | Where-Object { $_.anchorId -eq $AnchorId } | Select-Object -First 1
+    $body = @{
         anchorId = $AnchorId
         declaredContentType = 'TEXT'
         structuredContentJson = ($StructuredContent | ConvertTo-Json -Depth 100 -Compress)
-    } | Out-Null
+    }
+    if ($existing -and $existing.updatedAt) {
+        $body.expectedUpdatedAt = Format-DemoBindingExpectedUpdatedAt $existing.updatedAt
+    }
+    Invoke-DemoApi -ApiBase $ApiBase -Method PUT -Path "/templates/$TemplateId/bindings/$AnchorId" -Token $Token -Body $body | Out-Null
 }
 
 function Get-DemoMasterList {
@@ -541,17 +556,26 @@ function Import-DemoPackage {
         $master = Ensure-DemoMaster -ApiBase $ApiBase -Config $Config -MasterDocxRelative $templateDef.masterDocx -AdminToken $AdminToken -GroupAdminToken $GroupAdminToken -MasterNameOverride $masterNameOverride -SkipRefresh:$SkipMasterRefresh
         $masterId = Resolve-DemoMasterId $master
 
-        $templatesResp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path '/templates?size=200' -Token $AuthorToken
+        $searchPath = "/templates?search=$([uri]::EscapeDataString($externalId))&searchMode=EXTERNAL_ID&size=20"
+        $templatesResp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path $searchPath -Token $AuthorToken
         $templateList = Get-DemoApiResultItems -Response $templatesResp
         $template = $templateList | Where-Object { $_.externalId -eq $externalId } | Select-Object -First 1
         if (-not $template) {
             Write-DemoStep "Creating template $externalId ..."
+            $templateLocale = if ($templateDef.PSObject.Properties['locale'] -and $templateDef.locale) {
+                [string]$templateDef.locale
+            } elseif ($Config.PSObject.Properties['locale'] -and $Config.locale) {
+                [string]$Config.locale
+            } else {
+                'zh-CN'
+            }
             $created = Invoke-DemoApi -ApiBase $ApiBase -Method POST -Path '/templates' -Token $AuthorToken -Body @{
                 externalId = $externalId
                 groupCode = $Config.groupCode
                 name = $templateDef.name
                 description = "$($templateDef.description) [$marker]"
                 masterId = $masterId
+                locale = $templateLocale
             }
             $templateId = $created.result.id
         } else {

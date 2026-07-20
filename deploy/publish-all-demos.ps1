@@ -72,7 +72,8 @@ function Invoke-MgmtApi {
 
 function Get-TemplateDetail {
     param([string]$ExternalId, [string]$AccessToken)
-    $list = Invoke-MgmtApi GET '/templates?size=200' $AccessToken
+    $searchPath = "/templates?search=$([uri]::EscapeDataString($ExternalId))&searchMode=EXTERNAL_ID&size=20"
+    $list = Invoke-MgmtApi GET $searchPath $AccessToken
     $content = Get-DemoApiResultItems -Response $list
     return $content | Where-Object { $_.externalId -eq $ExternalId } | Select-Object -First 1
 }
@@ -97,11 +98,19 @@ AND anchor_id = 'BODY';
         required = $true
         description = 'Customer Name'
     } | Out-Null
-    Invoke-MgmtApi PUT "/templates/$TemplateId/bindings/HEADER" $AccessToken @{
+    $detail = Invoke-MgmtApi GET "/templates/$TemplateId" $AccessToken
+    $existing = @($detail.result.bindings) | Where-Object { $_.anchorId -eq 'HEADER' } | Select-Object -First 1
+    $body = @{
         anchorId = 'HEADER'
         declaredContentType = 'TEXT'
         structuredContentJson = '{"nodes":[{"type":"paragraph","children":[{"type":"variable","key":"customerName"}]}]}'
-    } | Out-Null
+    }
+    if ($existing -and $existing.updatedAt) {
+        $utc = [datetime]$existing.updatedAt
+        if ($utc.Kind -ne [DateTimeKind]::Utc) { $utc = $utc.ToUniversalTime() }
+        $body.expectedUpdatedAt = $utc.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'")
+    }
+    Invoke-MgmtApi PUT "/templates/$TemplateId/bindings/HEADER" $AccessToken $body | Out-Null
 }
 
 function Ensure-DemoFullFlowTestDataSet {

@@ -13,9 +13,10 @@ SELECT 'e2000001-0001-4000-8000-000000000004', cm.id, '3.0.0', 'APPROVED', 'ACTI
          {"type":"paragraph","text":"Fixed-rate products: If you hold a fixed-rate product, this notice does not apply to the fixed-rate period; the rate for the fixed-rate period remains unchanged. The change will take effect only on reversion to a variable rate at the end of the fixed-rate period, and we will write to you separately at that time."},
          {"type":"paragraph","text":"Interest calculation: Interest on the Account is calculated daily on the cleared credit balance and applied monthly. The Annual Equivalent Rate (AER) illustrates what the interest rate would be if interest was paid and compounded once each year. The gross rate is the contractual rate of interest payable before the deduction of income tax at the rate specified by law."},
          {"type":"paragraph","text":"Tax: Interest is paid gross. You may be liable to pay tax on the interest you receive in accordance with the laws of the United Kingdom. It is your responsibility to disclose any interest to the relevant tax authority."},
-         {"type":"paragraph","text":"Contact us: If you have any questions about this notice or wish to discuss your options, please contact your Relationship Manager using the details set out at the foot of this letter, or call us on 0800 224 482 (lines open 8am to 8pm, Monday to Saturday)."}
+         {"type":"paragraph","text":"Contact us: If you have any questions about this notice or wish to discuss your options, please contact your Relationship Manager using the details set out at the foot of this letter, or call us on 0800 224 482 (lines open 8am to 8pm, Monday to Saturday)."},
+         {"type":"paragraph","text":"Governing law: Your Account terms and this notice are governed by the laws of England and Wales. Meridian Retail Banking is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority."}
        ]}',
-       'Collection demo v3 bank-grade import', '10000003', '10000007'
+       'Collection demo Wave A bank-grade import', '10000003', '10000007'
 FROM content_module cm WHERE cm.module_code = 'COLLECTION-RATE-STD' AND cm.deleted_at IS NULL
   AND NOT EXISTS (SELECT 1 FROM content_module_version v WHERE v.module_id = cm.id AND v.semantic_version = '3.0.0');
 
@@ -30,9 +31,10 @@ SELECT 'e2000001-0001-4000-8000-000000000005', cm.id, '3.0.0', 'APPROVED', 'ACTI
          {"type":"paragraph","text":"Consequences of non-payment: Failure to bring your Account up to date may result in additional charges, the suspension of further credit, default interest being applied at the rate specified in your agreement, and a record of the arrears being placed on your credit file held by credit reference agencies, which may affect your ability to obtain credit in future. Persistent default may ultimately lead to referral to an external collections agency or, in the case of secured lending, to recovery proceedings."},
          {"type":"paragraph","text":"Financial difficulty: If you are experiencing financial difficulty, please contact us as soon as possible so that we may work with you to find a suitable solution. Free, impartial debt advice is available from StepChange Debt Charity (0800 138 1111, stepchange.org), Citizens Advice (citizensadvice.org.uk), and the Money Helper (0800 138 7777, moneyhelper.org.uk)."},
          {"type":"paragraph","text":"Complaints: If you are dissatisfied with the way we have handled your Account, please contact our Customer Relations team. If we cannot resolve your complaint, you may refer it to the Financial Ombudsman Service, Exchange Tower, London E14 9SR (0800 023 4567, financial-ombudsman.org.uk)."},
-         {"type":"paragraph","text":"Vulnerability: If there are any circumstances we should be aware of that may affect your ability to deal with this matter (including health, bereavement or other vulnerability), please tell us so that we can offer appropriate support."}
+         {"type":"paragraph","text":"Vulnerability: If there are any circumstances we should be aware of that may affect your ability to deal with this matter (including health, bereavement or other vulnerability), please tell us so that we can offer appropriate support."},
+         {"type":"paragraph","text":"This notice does not affect any other rights or remedies available to us under your agreement or applicable law. Please treat this matter as urgent and contact us before the payment deadline stated on the first page."}
        ]}',
-       'Collection demo v3 bank-grade import', '10000003', '10000007'
+       'Collection demo Wave A bank-grade import', '10000003', '10000007'
 FROM content_module cm WHERE cm.module_code = 'COLLECTION-OVERDUE-STD' AND cm.deleted_at IS NULL
   AND NOT EXISTS (SELECT 1 FROM content_module_version v WHERE v.module_id = cm.id AND v.semantic_version = '3.0.0');
 

@@ -29,9 +29,10 @@ SELECT '82000001-0001-4000-8000-000000000002', cm.id, '3.0.0', 'APPROVED', 'ACTI
          {"type":"paragraph","text":"Tax: You are responsible for any tax arising from your investments. It is your responsibility to disclose any income, gains or losses to the relevant tax authority in accordance with the laws applicable to you. If you are in any doubt about your tax position, you should consult a professional tax adviser."},
          {"type":"paragraph","text":"Regulation: Meridian Private Wealth is authorised and regulated by the Financial Conduct Authority. This statement is issued in accordance with the FCA Client Assets Sourcebook (CASS) and the Conduct of Business Sourcebook (COBS)."},
          {"type":"paragraph","text":"Complaints: If you are dissatisfied with any aspect of our service, please contact your Relationship Manager in the first instance. If the matter is not resolved to your satisfaction, you may refer your complaint to the Financial Ombudsman Service."},
-         {"type":"paragraph","text":"Compensation: Meridian Private Wealth is covered by the Financial Services Compensation Scheme (FSCS). Eligibility for compensation depends on the type of product and circumstances of the claim. Further details are available on request or at www.fscs.org.uk."}
+         {"type":"paragraph","text":"Compensation: Meridian Private Wealth is covered by the Financial Services Compensation Scheme (FSCS). Eligibility for compensation depends on the type of product and circumstances of the claim. Further details are available on request or at www.fscs.org.uk."},
+         {"type":"paragraph","text":"Governing law: The custody and advisory arrangements summarised in this statement are governed by the laws of England and Wales. This statement forms part of your periodic reporting under the Client Assets Sourcebook."}
        ]}',
-       'Wealth demo v3 bank-grade import', '10000003', '10000007'
+       'Wealth demo Wave A bank-grade import', '10000003', '10000007'
 FROM content_module cm WHERE cm.module_code = 'WEALTH-REGULATORY-STD' AND cm.deleted_at IS NULL
   AND NOT EXISTS (SELECT 1 FROM content_module_version v WHERE v.module_id = cm.id AND v.semantic_version = '3.0.0');
 

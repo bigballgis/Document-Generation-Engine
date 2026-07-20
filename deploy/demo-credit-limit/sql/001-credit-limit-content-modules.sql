@@ -13,11 +13,30 @@ SELECT 'c2000001-0001-4000-8000-000000000001', cm.id, '1.0.0', 'APPROVED', 'ACTI
          {"type":"paragraph","text":"Repayment and Prepayment: The Borrower shall repay the Facility in the instalments and on the dates set out in the Repayment Schedule, subject to mandatory prepayment on the occurrence of any mandatory prepayment event (including change of control, illegality and asset disposal proceeds). Voluntary prepayment is permitted on three Business Days notice, together with any Break Costs."},
          {"type":"paragraph","text":"Representations: The Borrower represents that it is duly incorporated, has power to enter into and perform the Finance Documents, and that the Finance Documents constitute legal, valid and binding obligations. No Event of Default is continuing or would result from the making of any utilisation."},
          {"type":"paragraph","text":"Assignments and Transfers: The Bank may assign, transfer or sub-participate all or any part of its rights and obligations under the Finance Documents to any Eligible Institution, subject to compliance with know-your-customer requirements. The Borrower may not assign or transfer any of its rights without the prior written consent of the Bank."},
-         {"type":"paragraph","text":"Confidentiality: Each party shall keep confidential all Confidential Information disclosed under the Finance Documents, save for permitted disclosures to professional advisers, regulators, assignees and as required by law, court order or applicable regulation."}
+         {"type":"paragraph","text":"Confidentiality: Each party shall keep confidential all Confidential Information disclosed under the Finance Documents, save for permitted disclosures to professional advisers, regulators, assignees and as required by law, court order or applicable regulation."},
+         {"type":"paragraph","text":"Governing law: This confirmation and the Finance Documents are governed by English law. The courts of England have exclusive jurisdiction, subject to the Agent''s right to bring proceedings in any other court of competent jurisdiction."},
+         {"type":"paragraph","text":"Defined terms: Capitalised terms used in this confirmation have the meanings given in the facility agreement or, if not defined there, in Schedule 1 (Definitions) to that agreement."}
        ]}',
-       'Credit limit demo v3 bank-grade import', '10000003', '10000007'
+       'Credit limit demo Wave A bank-grade import', '10000003', '10000007'
 FROM content_module cm WHERE cm.module_code = 'CREDIT-LIMIT-STD' AND cm.deleted_at IS NULL
   AND NOT EXISTS (SELECT 1 FROM content_module_version v WHERE v.module_id = cm.id AND v.semantic_version = '1.0.0');
+
+UPDATE content_module_version v
+SET content_structure_json = '{"blocks":[
+         {"type":"paragraph","text":"Utilisation: Each utilisation must be made by notice to the Agent no later than 10:00 a.m. (London time) on the proposed utilisation date, in the form of a Utilisation Request, specifying the amount, currency and proposed utilisation date. Each utilisation is subject to the satisfaction of the conditions precedent and the representations being true and correct on the utilisation date."},
+         {"type":"paragraph","text":"Availability: Limits are reviewed annually and may be reduced, cancelled or withdrawn by the Bank on reasonable written notice if there is a material adverse change in the financial condition of the Borrower or the Group, or if the Borrower breaches any covenant, representation or undertaking under the Finance Documents."},
+         {"type":"paragraph","text":"Repayment and Prepayment: The Borrower shall repay the Facility in the instalments and on the dates set out in the Repayment Schedule, subject to mandatory prepayment on the occurrence of any mandatory prepayment event (including change of control, illegality and asset disposal proceeds). Voluntary prepayment is permitted on three Business Days notice, together with any Break Costs."},
+         {"type":"paragraph","text":"Representations: The Borrower represents that it is duly incorporated, has power to enter into and perform the Finance Documents, and that the Finance Documents constitute legal, valid and binding obligations. No Event of Default is continuing or would result from the making of any utilisation."},
+         {"type":"paragraph","text":"Assignments and Transfers: The Bank may assign, transfer or sub-participate all or any part of its rights and obligations under the Finance Documents to any Eligible Institution, subject to compliance with know-your-customer requirements. The Borrower may not assign or transfer any of its rights without the prior written consent of the Bank."},
+         {"type":"paragraph","text":"Confidentiality: Each party shall keep confidential all Confidential Information disclosed under the Finance Documents, save for permitted disclosures to professional advisers, regulators, assignees and as required by law, court order or applicable regulation."},
+         {"type":"paragraph","text":"Governing law: This confirmation and the Finance Documents are governed by English law. The courts of England have exclusive jurisdiction, subject to the Agent''s right to bring proceedings in any other court of competent jurisdiction."},
+         {"type":"paragraph","text":"Defined terms: Capitalised terms used in this confirmation have the meanings given in the facility agreement or, if not defined there, in Schedule 1 (Definitions) to that agreement."}
+       ]}',
+    change_description = 'Wave A refresh - credit limit standard terms',
+    updated_at = (NOW() AT TIME ZONE 'UTC'),
+    updated_by = '10000007'
+FROM content_module cm
+WHERE v.module_id = cm.id AND cm.module_code = 'CREDIT-LIMIT-STD' AND cm.deleted_at IS NULL AND v.semantic_version = '1.0.0';
 
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'c1000001-0001-4000-8000-000000000002', 'CREDIT-LIMIT-COV', 'CORP', 'Credit Limit Covenants', 'Financial covenant summary and reporting requirements', '[]', '10000003', '10000003'

@@ -4,7 +4,10 @@
 **Version:** 1.0.0  
 **Authored:** 2026-07-08  
 **BDD ID prefix:** `BDD-DEMO-TYP`  
-**Delivery phase:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE** (extends [demo-expansion-behavior-spec.md](./demo-expansion-behavior-spec.md); does **not** duplicate `BDD-DEMO-EXP-001`…`015`)
+**Delivery phase:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE** (extends [demo-expansion-behavior-spec.md](./demo-expansion-behavior-spec.md); does **not** duplicate `BDD-DEMO-EXP-001`…`015`)  
+**Phase status:** **P23 Done** (2026-07-08; T01–T16) — **do not reopen**
+
+> **Post-Done ops note (2026-07-20):** Post-remediation **content** refresh (remove shallow/meta-padding; 100% realistic bank letters on existing packages) is Wave A [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) (`BDD-DEMO-REFRESH-*`; TM **#141** **In Progress** — not Done). Style/layout baseline in this TYP spec + `demo-bank-style-manifest.json` still applies. Wave B expand **OUT**. Do **not** flip **#3b/#5a GO**.
 
 ---
 
@@ -523,6 +526,7 @@ Scenario: BDD-DEMO-TYP-020 human typography review covers >=2 CORP and >=2 RETAI
 | [LRP-A rendering trust](../plan/detail/LRP-A-rendering-trust-hardening.md) | LR-A2 font, LR-A7 pagination corpus |
 | [domain-model.md](../domain/domain-model.md) | StructuredContentDocxWriter, demo package contract |
 | [PRD.md](../product/PRD.md) | §6.5.1 anchors, §6.7 demo packages |
+| [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) | Wave A content refresh (**In Progress**; not Done) — does not reopen P23 |
 
 ### 14.2 BDD scenario → P23 task mapping
 

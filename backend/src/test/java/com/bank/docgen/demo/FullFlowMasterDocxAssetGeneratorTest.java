@@ -30,6 +30,7 @@ class FullFlowMasterDocxAssetGeneratorTest {
                 .containsExactly(ANCHOR_ID);
 
         DemoMasterDocxStyleSupport.assertSharedBankStylesPresent(docx);
+        DemoMasterDocxTestAssertions.assertNoPlaceholderMarkers(docx);
         String stylesXml = DemoMasterDocxAssertions.readStylesXml(docx);
         assertThat(stylesXml)
                 .contains("w:styleId=\"ClauseBody\"")

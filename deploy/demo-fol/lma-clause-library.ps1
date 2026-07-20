@@ -138,8 +138,8 @@ function Build-LmaSectionParagraphs {
             "and any side letter or term sheet provisions agreed at mandate stage. Any deviation from the LMA baseline is recorded in the execution version of the Finance Documents."
         )
         $paragraphs.Add(
-            "Worked example (illustrative only): where $topic applies to the Facility offered to Pacific Rim Holdings Ltd., the Agent will coordinate with the Borrower and the Security Agent to ensure " +
-            "timelines, document versions and evidence standards match those set out in Schedule 2 (Conditions Precedent) and the internal checklist maintained by Meridian Global Banking Corporation."
+            "Operational application: where $topic applies to the Facility offered to Pacific Rim Holdings Ltd., the Agent will coordinate with the Borrower and the Security Agent to ensure " +
+            "timelines, document versions and evidence standards match those set out in Schedule 2 (Conditions Precedent) and Meridian Global Banking Corporation wholesale credit operations standards."
         )
         $subIndex++
     }
@@ -176,46 +176,249 @@ function Build-ScheduleParagraphs {
 
     $paragraphs = [System.Collections.Generic.List[string]]::new()
     $paragraphs.Add(
-        "$Title forms an integral part of this Facility Offer Letter and shall be read together with the operative clauses. The tables and forms set out below are illustrative of a fully negotiated documentation set prepared on LMA recommended forms."
+        "$Title forms an integral part of this Facility Offer Letter and shall be read together with the operative clauses. " +
+        "Capitalised terms used in this Schedule have the meanings given in Clause 1 (Definitions and Interpretation) unless the context otherwise requires."
     )
     foreach ($extra in $ExtraParagraphs) {
         $paragraphs.Add($extra)
     }
 
-    $items = @(
-        'parties and roles (Borrower, Guarantors, Agent, Security Agent, Arrangers and Lenders)'
-        'commercial terms (commitments, currency, margin, fees, maturity and amortisation profile)'
-        'operational mechanics (utilisation, repayment, interest periods and business day conventions)'
-        'conditions precedent and conditions subsequent customary for cross-border syndicated facilities'
-        'representations, undertakings, events of default and enforcement provisions'
-        'transfer and assignment mechanics, yank-a-bank provisions and permitted disposals of commitments'
-        'tax gross-up, increased costs, illegality and market disruption fallback provisions'
-        'confidentiality, sanctions and anti-bribery compliance undertakings'
-        'governing law, jurisdiction, process agent and waiver of immunity provisions'
-        'schedules of security, insurance, hedging and ESG KPI metrics where applicable'
-        'reference rate terms, benchmark fallback and screen rate replacement mechanics'
-        'Hedge arrangements and approved hedge counterparty criteria'
-        'Intercreditor and subordination principles for secured facilities'
-        'agency fee letters, confidentiality letters and no-front-running undertakings'
-        'know-your-customer and anti-money laundering documentation standards'
-        'tax clearance, stamp duty and registration of security instruments'
-        'dispute resolution, arbitration alternatives and judgment enforcement'
-        'sanctions and export control representations and ongoing screening'
-        'environmental, social and governance reporting and margin ratchet mechanics'
-    )
-
-    $itemIndex = 1
-    foreach ($item in $items) {
-        $paragraphs.Add(
-            "Schedule $ScheduleNumber, Part $itemIndex. This part addresses $item. For the executive demonstration dataset, representative values are populated from the approved test data set and rendered through structured template bindings, including conditional blocks, repeating list variables and tabular components mirroring bank-standard term sheets."
-        )
-        $paragraphs.Add(
-            "The parties expect that Part $itemIndex of Schedule $ScheduleNumber will be expanded in the final documentation set to include executed forms, signature pages, and annexes consistent with the LMA recommended form library and Meridian Global Banking Corporation wholesale documentation standards."
-        )
-        $itemIndex++
+    switch ($ScheduleNumber) {
+        '1' { Add-Schedule1FacilityParticulars $paragraphs }
+        '2' { Add-Schedule2ConditionsPrecedent $paragraphs }
+        '3' { Add-Schedule3Representations $paragraphs }
+        '4' { Add-Schedule4UtilisationRequest $paragraphs }
+        '5' { Add-Schedule5Fees $paragraphs }
+        '6' { Add-Schedule6SecurityPrinciples $paragraphs }
+        Default {
+            throw "Unsupported schedule number for LMA clause library: $ScheduleNumber"
+        }
     }
 
     return ,@($paragraphs)
+}
+
+function Add-Schedule1FacilityParticulars([System.Collections.Generic.List[string]]$paragraphs) {
+    $paragraphs.Add(
+        'Part 1 - Parties. Borrower: Pacific Rim Holdings Ltd. (Cayman Islands company number CR-284719). Original Guarantor: Pacific Rim Group Holdings Ltd. ' +
+        'Agent and Security Agent: Meridian Global Banking Corporation. Mandated Lead Arranger: Meridian Global Banking Corporation. Original Lenders: Meridian Global Banking Corporation, ' +
+        'Continental Capital Bank AG and Pacific Trade Finance Ltd., with Commitments as set out in the lender matrix forming part of this Schedule.'
+    )
+    $paragraphs.Add(
+        'Part 2 - Facility overview. Facility type: multicurrency term loan facility. Total Commitments: USD 250,000,000. Reference Currency: USD. ' +
+        'Availability Period: from the Signing Date to the date falling six months thereafter. Final Maturity Date: 1 July 2031. Purpose: refinancing of existing Financial Indebtedness ' +
+        'and general corporate purposes of the Group, excluding any Sanctioned activity.'
+    )
+    $paragraphs.Add(
+        'Part 3 - Pricing. Margin: 1.85 per cent. per annum over Term SOFR (or the applicable Compounded Rate fallback under Schedule 13 (Reference Rate Terms)). ' +
+        'Commitment fee: 35 per cent. of the applicable Margin on the undrawn and uncancelled amount of each Lender''s Commitment. Default interest: Margin plus 2.00 per cent. per annum. ' +
+        'A pricing grid linked to Net Leverage Ratio shall apply after the first Compliance Certificate Date, with step-ups and step-downs as agreed in the Fee Letter.'
+    )
+    $paragraphs.Add(
+        'Part 4 - Amortisation. Subject to Clause 6 (Repayment), the Borrower shall repay the Loans in semi-annual instalments of USD 12,500,000 on each Repayment Date commencing ' +
+        'on 1 January 2028, with the balance of the Loans (together with accrued interest and all other amounts then due) payable in full on the Final Maturity Date. ' +
+        'Voluntary prepayments under Clause 7 (Prepayment and Cancellation) shall be applied against remaining amortisation instalments in inverse order of maturity unless the Agent and the Borrower otherwise agree.'
+    )
+    $paragraphs.Add(
+        'Part 5 - Financial covenants (summary). The Borrower shall ensure that: (a) Net Leverage Ratio does not exceed 3.50:1.00; (b) Interest Cover Ratio is not less than 3.00:1.00; and ' +
+        '(c) Minimum Liquidity is not less than USD 25,000,000, each tested quarterly by reference to the Compliance Certificate. Equity cure rights are limited to two cures in any rolling four-quarter period.'
+    )
+    $paragraphs.Add(
+        'Part 6 - Lender matrix. Commitments are several. Meridian Global Banking Corporation: USD 100,000,000. Continental Capital Bank AG: USD 85,000,000. Pacific Trade Finance Ltd.: USD 65,000,000. ' +
+        'Any Transfer Certificate or Assignment Agreement shall update this Part without requiring a formal amendment of this letter, provided the Total Commitments remain unchanged except as cancelled or increased in accordance with Clause 2 (The Facility).'
+    )
+    $paragraphs.Add(
+        'Part 7 - Business Day and payment conventions. Payments in USD shall be made for value on a day on which banks are open in London and New York. Interest Periods of one, three or six months ' +
+        'may be selected by the Borrower, subject to market disruption and Agent consent for non-standard periods. Broken funding compensation and Break Costs apply as set out in Clause 8 (Interest) and Clause 7 (Prepayment and Cancellation).'
+    )
+    $paragraphs.Add(
+        'Part 8 - Notices for Facility Particulars. Any update to contact details for Utilisation Requests, Compliance Certificates or mandatory prepayment notices shall be given under Clause 29 (Notices) ' +
+        'and shall not take effect until acknowledged by the Agent. The Agent may rely on the most recent notice without further enquiry as to authority of the sender.'
+    )
+    foreach ($supplement in @(
+            'The Facility Particulars prevail over any inconsistent description in a term sheet dated on or about the Signing Date, except where the Fee Letter expressly states otherwise.'
+            'Currency equivalents for non-USD utilisations shall be determined using the Agent''s Spot Rate of Exchange two Business Days before the Utilisation Date.'
+            'Accordion increases up to an additional USD 50,000,000 may be offered on terms substantially identical to the original Facility, subject to Majority Lender consent and updated Commitments in this Schedule.'
+            'ESG KPI margin ratchet mechanics, if activated by written notice of the Agent, shall adjust Margin by not more than 5 basis points in either direction based on independently verified KPIs.'
+            'Any stamp duty, registration or similar Tax arising on the Finance Documents in England and Wales or the Cayman Islands shall be for the account of the Borrower.'
+        )) {
+        $paragraphs.Add($supplement)
+    }
+}
+
+function Add-Schedule2ConditionsPrecedent([System.Collections.Generic.List[string]]$paragraphs) {
+    $paragraphs.Add(
+        'Part 1 - Corporate documents. A certified copy of the constitutional documents of each Obligor; a certified copy of board resolutions approving the Finance Documents and authorising specified signatories; ' +
+        'a specimen signature list; and a certificate of an authorised signatory confirming that borrowing or guaranteeing the Total Commitments would not cause any borrowing, guaranteeing or similar limit binding on that Obligor to be exceeded.'
+    )
+    $paragraphs.Add(
+        'Part 2 - Finance Documents. Executed counterparts of this letter, each Fee Letter, each Security Document required on or before first Utilisation, any Accession Letter for an Additional Guarantor, ' +
+        'and evidence that all conditions to the effectiveness of each such document (other than conditions expressed to be satisfied on Utilisation) have been satisfied or waived by the Agent.'
+    )
+    $paragraphs.Add(
+        'Part 3 - Legal opinions. A legal opinion of English counsel to the Agent as to English law enforceability; a legal opinion of Cayman Islands counsel as to capacity and due execution of the Borrower and Guarantor; ' +
+        'and, if any Security Document is governed by another law, a capacity and enforceability opinion from counsel acceptable to the Agent in that jurisdiction.'
+    )
+    $paragraphs.Add(
+        'Part 4 - KYC, sanctions and AML. Completion of all know-your-customer, anti-money-laundering and sanctions screening procedures reasonably required by each Finance Party in relation to each Obligor and each person ' +
+        'purporting to act on behalf of an Obligor, including delivery of beneficial ownership information and evidence that no Obligor is a Sanctioned Person.'
+    )
+    $paragraphs.Add(
+        'Part 5 - Financial and commercial evidence. The Group''s latest audited consolidated financial statements; the most recent quarterly management accounts; a structure chart; ' +
+        'evidence of insurance covering material assets with the Security Agent''s interest noted where required; and a funds flow statement for the first Utilisation.'
+    )
+    $paragraphs.Add(
+        'Part 6 - Conditions subsequent. Within 30 days of the Signing Date (or such later date as the Agent may agree), the Borrower shall deliver evidence of registration or perfection of each Security Document ' +
+        'required to be registered, and any other condition subsequent listed in the closing checklist agreed with the Agent.'
+    )
+    $paragraphs.Add(
+        'Part 7 - Repeating conditions for each Utilisation. On the date of each Utilisation Request and each Utilisation Date: (a) no Default is continuing or would result from the proposed Utilisation; ' +
+        '(b) the Repeating Representations are true in all material respects; (c) the Utilisation is within the Availability Period and does not exceed available Commitments; and (d) the Agent has received a duly completed Utilisation Request.'
+    )
+    foreach ($item in @(
+            'The Agent shall notify the Borrower and the Lenders promptly upon satisfaction or waiver of the conditions in Parts 1 to 5.'
+            'Any waiver of a condition precedent may be given by the Agent acting on the instructions of the Majority Lenders, or by all Lenders where the Finance Documents so require.'
+            'Documents delivered under this Schedule shall be in English or accompanied by a certified English translation.'
+            'Electronic copies are acceptable if originally signed wet-ink or e-signed counterparts follow within five Business Days where a Finance Party so requires.'
+            'Failure to satisfy a condition subsequent by its long-stop date shall constitute an Event of Default unless remedied or waived in accordance with Clause 22 (Events of Default).'
+            'The Borrower shall pay all reasonable legal fees of the Agent''s counsel incurred in reviewing Conditions Precedent deliveries, as set out in the Fee Letter.'
+        )) {
+        $paragraphs.Add($item)
+    }
+}
+
+function Add-Schedule3Representations([System.Collections.Generic.List[string]]$paragraphs) {
+    $paragraphs.Add(
+        'Part 1 - Status. Each Obligor is a limited liability company, duly incorporated and validly existing under the law of its jurisdiction of incorporation, and has the power to own its assets and carry on its business as it is being conducted.'
+    )
+    $paragraphs.Add(
+        'Part 2 - Binding obligations. The obligations expressed to be assumed by each Obligor in each Finance Document to which it is a party are legal, valid, binding and enforceable obligations, subject to general principles of equity and insolvency laws affecting creditors'' rights generally.'
+    )
+    $paragraphs.Add(
+        'Part 3 - Non-conflict. The entry into and performance by each Obligor of the Finance Documents do not and will not conflict with any law or regulation applicable to it, its constitutional documents, or any agreement or instrument binding upon it or any of its assets, in a manner that would reasonably be expected to have a Material Adverse Effect.'
+    )
+    $paragraphs.Add(
+        'Part 4 - Power and authority. Each Obligor has the power to enter into, perform and deliver, and has taken all necessary action to authorise its entry into, performance and delivery of, the Finance Documents to which it is a party and the transactions contemplated by those Finance Documents.'
+    )
+    $paragraphs.Add(
+        'Part 5 - No default. No Event of Default is continuing or might reasonably be expected to result from the making of any Utilisation or the entry into, performance of, or any transaction contemplated by, any Finance Document.'
+    )
+    $paragraphs.Add(
+        'Part 6 - Financial statements. The most recent audited financial statements of the Group were prepared in accordance with IFRS consistently applied and give a true and fair view of the financial condition of the Group as at the date to which they were prepared.'
+    )
+    $paragraphs.Add(
+        'Part 7 - Sanctions and anti-corruption. No Obligor, nor any of its directors, officers or, to its knowledge, employees or agents, is a Sanctioned Person. Each Obligor has conducted its businesses in compliance with applicable anti-bribery and anti-corruption laws and has instituted and maintained policies and procedures designed to promote such compliance.'
+    )
+    $paragraphs.Add(
+        'Part 8 - Pari passu ranking. The payment obligations of each Obligor under the Finance Documents rank at least pari passu with the claims of all its other unsecured and unsubordinated creditors, except for obligations mandatorily preferred by law applying to companies generally.'
+    )
+    foreach ($item in @(
+            'Repeating Representations are made on the Signing Date, on each Utilisation Date and on the first day of each Interest Period.'
+            'Any representation that is qualified by reference to Material Adverse Effect or materiality shall be construed accordingly for enforcement purposes.'
+            'The Borrower shall promptly notify the Agent if any Representation ceases to be true in any material respect.'
+            'Litigation disclosures above a USD 5,000,000 threshold shall be updated in each Compliance Certificate.'
+            'Tax representations include that each Obligor is resident for Tax purposes only in the jurisdiction of its incorporation, unless otherwise disclosed to the Agent in writing before the Signing Date.'
+            'Environmental representations confirm that each Obligor has complied with applicable environmental laws where failure to do so would reasonably be expected to have a Material Adverse Effect.'
+        )) {
+        $paragraphs.Add($item)
+    }
+}
+
+function Add-Schedule4UtilisationRequest([System.Collections.Generic.List[string]]$paragraphs) {
+    $paragraphs.Add(
+        'Part 1 - Form. Each Utilisation Request shall be substantially in the form of this Schedule, addressed to the Agent, signed by an authorised signatory of the Borrower, and delivered not later than 10:00 a.m. (London time) ' +
+        'three Business Days before the proposed Utilisation Date (or such shorter period as the Agent may agree).'
+    )
+    $paragraphs.Add(
+        'Part 2 - Mandatory content. The Utilisation Request shall specify: (a) the proposed Utilisation Date; (b) the currency and amount of the proposed Loan; (c) the Interest Period; (d) the account to which funds are to be credited; ' +
+        'and (e) confirmation that each condition in Clause 4 (Conditions of Utilisation) is satisfied on the date of the Utilisation Request.'
+    )
+    $paragraphs.Add(
+        'Part 3 - Minimum amounts. Unless the Agent otherwise agrees, each Loan shall be in a minimum amount of USD 5,000,000 (or its equivalent) and an integral multiple of USD 1,000,000 (or its equivalent).'
+    )
+    $paragraphs.Add(
+        'Part 4 - Irrevocability. A Utilisation Request is irrevocable once delivered, except with the prior written consent of the Agent (acting on the instructions of the Majority Lenders where a change would alter Commitments or pricing).'
+    )
+    $paragraphs.Add(
+        'Part 5 - Agent notification. Promptly upon receipt of a duly completed Utilisation Request, the Agent shall notify each Lender of the amount of its participation and the account details for funding.'
+    )
+    $paragraphs.Add(
+        'Part 6 - Transfer Certificate cross-reference. Where a Lender has transferred part of its Commitment, Utilisation Requests shall be processed by reference to Commitments recorded in the Agent''s register, which prevails over outdated matrices in Schedule 1 for operational purposes.'
+    )
+    foreach ($item in @(
+            'If a Utilisation Request is defective, the Agent shall notify the Borrower of the defect as soon as practicable and the Borrower may submit a corrected request.'
+            'Currency conversions for multicurrency utilisations shall use the Agent''s Spot Rate of Exchange as defined in Clause 1.'
+            'The Borrower represents, on delivery of each Utilisation Request, that the proceeds will be applied solely for a Purpose permitted under Clause 3 (Purpose).'
+            'Same-day utilisations are not available unless all Lenders consent in writing.'
+            'A Utilisation Request may not be delivered during a market disruption period notified under Clause 10 (Changes to the Calculation of Interest) without Agent guidance on rate setting.'
+            'Electronic delivery by encrypted email to the Agent''s published utilisation desk address constitutes delivery for the purposes of this Schedule.'
+        )) {
+        $paragraphs.Add($item)
+    }
+}
+
+function Add-Schedule5Fees([System.Collections.Generic.List[string]]$paragraphs) {
+    $paragraphs.Add(
+        'Part 1 - Arrangement fee. The Borrower shall pay to the Arranger an arrangement fee in the amount and on the dates set out in the Fee Letter between the Arranger and the Borrower dated on or about the Signing Date.'
+    )
+    $paragraphs.Add(
+        'Part 2 - Commitment fee. The Borrower shall pay to the Agent (for the account of each Lender) a commitment fee computed at the rate specified in Schedule 1 (Facility Particulars) on that Lender''s Available Commitment, ' +
+        'accruing from the Signing Date and payable quarterly in arrear and on the date the relevant Commitment is cancelled in full.'
+    )
+    $paragraphs.Add(
+        'Part 3 - Agency fee. The Borrower shall pay to the Agent an agency fee in the amount and at the times agreed in the Agency Fee Letter. The fee is payable for the Agent''s own account and is non-refundable.'
+    )
+    $paragraphs.Add(
+        'Part 4 - Security agency fee. Where a Security Agent is appointed, the Borrower shall pay the security agency fee set out in the relevant Fee Letter, together with reasonable out-of-pocket expenses properly incurred in connection with the Security Documents.'
+    )
+    $paragraphs.Add(
+        'Part 5 - Utilisation and front-end fees. Any utilisation fee or front-end fee agreed in a Fee Letter shall be payable on the first Utilisation Date (or such other date specified in that Fee Letter) and shall not be refundable whether or not the Facility is utilised in full.'
+    )
+    $paragraphs.Add(
+        'Part 6 - Fee Letter prevalence. If there is any conflict between this Schedule and a Fee Letter, the Fee Letter prevails in respect of the quantum and timing of the relevant fee, without prejudice to the Borrower''s payment obligations under Clause 11 (Fees).'
+    )
+    foreach ($item in @(
+            'Fees are exclusive of any VAT, which shall be paid in addition if chargeable.'
+            'The Agent may deduct unpaid fees from amounts otherwise payable to the Borrower under the Finance Documents.'
+            'No fee sharing with the Borrower or any Obligor is permitted except as disclosed in a Fee Letter.'
+            'Amendment and waiver fees, if any, shall be agreed at the time of the relevant consent request.'
+            'Breakage and funding indemnities under Clause 7 and Clause 14 are in addition to the fees in this Schedule.'
+            'Evidence of fee payment may be required as a condition subsequent under Schedule 2 (Conditions Precedent).'
+        )) {
+        $paragraphs.Add($item)
+    }
+}
+
+function Add-Schedule6SecurityPrinciples([System.Collections.Generic.List[string]]$paragraphs) {
+    $paragraphs.Add(
+        'Part 1 - Transaction Security. The Obligors shall grant Transaction Security in favour of the Security Agent (as trustee or agent for the Finance Parties) comprising: (a) a charge over shares in the Borrower; ' +
+        '(b) fixed and floating charges or equivalent over material bank accounts; (c) assignments of material receivables; and (d) such other Security as the Majority Lenders reasonably require to implement the agreed security package.'
+    )
+    $paragraphs.Add(
+        'Part 2 - Perfection. Each Obligor shall execute all documents and do all acts reasonably required to perfect and protect the Transaction Security, including registrations, notices to account banks and delivery of share certificates and blank stock transfer forms.'
+    )
+    $paragraphs.Add(
+        'Part 3 - Accession. An Additional Guarantor shall accede by delivering an Accession Letter substantially in the form agreed with the Agent, together with the corporate documents and legal opinions listed in Schedule 2 (Conditions Precedent) as applicable to that Additional Guarantor.'
+    )
+    $paragraphs.Add(
+        'Part 4 - Intercreditor. If any Intercreditor Agreement is entered into, the ranking, enforcement standstill and turnover provisions of that agreement shall regulate the relative rights of the Finance Parties and other creditors party to it.'
+    )
+    $paragraphs.Add(
+        'Part 5 - Release. Subject to the Finance Documents, Transaction Security shall be released when all amounts outstanding under the Finance Documents have been irrevocably paid and discharged in full and the Commitments have been cancelled.'
+    )
+    $paragraphs.Add(
+        'Part 6 - Further assurance. Each Obligor shall, at its own expense, promptly execute any further document and take any further action that the Security Agent may reasonably require to give effect to the security principles in this Schedule.'
+    )
+    foreach ($item in @(
+            'Security Documents shall be governed by the law most appropriate for the asset location, as advised by counsel to the Agent.'
+            'Account charges shall require blocked or controlled account mechanics only to the extent specified in the agreed term sheet.'
+            'Insurance proceeds in respect of secured assets shall be applied in accordance with Clause 7 (Prepayment and Cancellation) unless reinvested as Permitted Security exceptions allow.'
+            'The Security Agent may appoint delegates and co-agents in accordance with Clause 24 (The Agent and the Arrangers).'
+            'Whitewash, financial assistance and corporate benefit analysis shall be completed before any English or Cayman share security is taken.'
+            'No Obligor shall create Permitted Security except as expressly allowed under Clause 21 (General Undertakings).'
+        )) {
+        $paragraphs.Add($item)
+    }
 }
 
 function Get-LmaSectionCatalog {
@@ -398,14 +601,14 @@ function Get-LmaSectionCatalog {
         ) }
         @{ Code = 'MOD-FOL-SCH-01'; Name = 'Schedule 1 - Facility Particulars'; Schedule = '1'; Extra = @(
             'Borrower: Pacific Rim Holdings Ltd. Total Commitments: USD 250,000,000. Margin: 185 bps over Term SOFR. Maturity: 1 July 2031.'
-            'Syndicated lender matrix, tranche structure, amortisation schedule and pricing grid are populated from structured list variables in the executive test data set.'
+            'The syndicated lender matrix, tranche structure, amortisation profile and pricing grid in this Schedule are binding commercial terms of the Facility Offer Letter and prevail for Commitments, Margin and repayment calculations.'
         ) }
         @{ Code = 'MOD-FOL-SCH-02'; Name = 'Schedule 2 - Conditions Precedent'; Schedule = '2' }
         @{ Code = 'MOD-FOL-SCH-03'; Name = 'Schedule 3 - Representations'; Schedule = '3' }
         @{ Code = 'MOD-FOL-SCH-04'; Name = 'Schedule 4 - Form of Utilisation Request'; Schedule = '4' }
         @{ Code = 'MOD-FOL-SCH-05'; Name = 'Schedule 5 - Fees'; Schedule = '5' }
         @{ Code = 'MOD-FOL-SCH-06'; Name = 'Schedule 6 - Security Principles'; Schedule = '6'; Extra = @(
-            'Security over shares in the Borrower, account charges, receivables assignments and intercreditor arrangements are described in the security package list variables.'
+            'Security over shares in the Borrower, account charges, receivables assignments and intercreditor arrangements form the agreed Transaction Security package and shall be documented in the Security Documents listed with the Agent.'
         ) }
     )
 }
