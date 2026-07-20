@@ -288,7 +288,7 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 | ID | 标题 | 级/量 | 要点 | 依赖 |
 | --- | --- | --- | --- | --- |
 | CE-O01 | PDF/A 输出选项 | P2·M · `Done` | render profile 加 `pdfArchivalProfile`（NONE/PDF_A_2B）；LibreOffice 过滤器参数切换；与加密互斥校验；小 ADR 记录选型；veraPDF 或最小自校验进金标。**Done (2026-07-16)** — Task Master **#81**; slice `ce-o01-pdfa-output`; BDD **ready** ([ce-o01-pdfa-output.md](../behavior/ce-o01-pdfa-output.md) `BDD-CE-O01-001…016`); [ADR-0058 Accepted](../adr/rendering-authoring/0058-pdfa-2b-archival-output.md)（D6=A-2b）；**FE/E2E out of scope**（API/render-only）。**Merge:** `e081bcfa`；worktree removed。**Gates:** `mvn verify` **GREEN** (**1804** tests); architecture **PASS** (Critical=0); Stage 10 **DEPLOY_OK** (`dge-ce-o01-pdfa-output`; `:8080` 200; frontend 200)。Formal phase **None**；**not** go-live；**not** CD-3。 | K07 |
-| CE-O02 | addressBlock / 多文档包 | P3·— | **待产品拍板后再细化**（见 §10） | — |
+| CE-O02 | addressBlock / 多文档包 | P3·— · **Deferred** | **D5 本期不做**（2026-07-14）仍有效；产品 **2026-07-20** 确认「暂时不做」— **不**激活实现叶 / **不** `bdd_readiness: ready`。未来偏好（若再立项）：运行时多产物 ZIP（非 CE-E0x）；addressBlock 按通用地址标准（待具名标准/工作坊）；**仅一种**地址格式。窗口信封 / 面（API vs UI）仍开放。Stub：[ce-o02-addressblock-package.md](../behavior/ce-o02-addressblock-package.md) | — |
 
 ---
 
@@ -339,7 +339,7 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 | D2 | 定时发布/生效日 | ADR-0007 immediate-only | 维持；监管有"预先公告生效日"要求时再立项 |
 | D3 | 异步 webhook 回调 | ADR-0008 poll-only | 维持否决 |
 | D4 | `SYNC_DOWNLOAD_URL` 完整实现 + 下载重签 | ADR-0038 deferred | 维持 defer；先做契约文档与实现对齐（"不重签"写明） |
-| D5 | addressBlock 节点 + 多文档包 | 无需求确认 | 待产品确认是否覆盖窗口信封/组合包场景 |
+| D5 | addressBlock 节点 + 多文档包 | **Deferred — 本期不做**（2026-07-14；**2026-07-20 复确认「暂时不做」**） | 维持 defer；**不**排期实现。未来若再立项见下方「未来偏好」；窗口信封 / 面仍开放 |
 | D6 | PDF/A 目标级别（A-1b vs A-2b） | **[ADR-0058 Accepted](../adr/rendering-authoring/0058-pdfa-2b-archival-output.md)** | 选 **A-2b**（LibreOffice 支持好）；CE-O01 落 ADR（2026-07-16） |
 | D7 | 停用版本对在途异步任务 | release-locked（跑完） | 维持，运维手册写清语义即可 |
 
@@ -352,6 +352,16 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 - **D5**：按推荐默认（本期不做 addressBlock / 多文档包；后续如有窗口信封/组合包需求再立项）
 - **D6**：按推荐默认（选 **PDF/A-2b**；在 CE-O01 单独落 ADR）
 - **D7**：按推荐默认（release-locked：停用不取消在途异步任务；运维手册写清语义）
+
+**产品确认补充（2026-07-20）— D5 / CE-O02（不推翻 deferral；不授权实现）：**
+
+- **D5 复确认：** 「暂时不做」— **2026-07-14 D5 deferral 仍有效**；**不**激活 CE-O02 实现叶；**不**将 [ce-o02-addressblock-package.md](../behavior/ce-o02-addressblock-package.md) 的 `bdd_readiness` 改为 `ready`；**不**注册 Task Master In Progress。
+- **未来偏好（仅当日后显式 reopen D5 时适用；≠ 本期排期）：**
+  1. 多文档包 = **运行时多产物 ZIP**（信函 + companions）— **不是** CE-E0x 库导出包。
+  2. addressBlock 字段按 **通用地址标准**（「按通用标准」）— **尚未**具名具体标准 / 工作坊产出；**禁止**现在发明 JSON schema / 节点矩阵。
+  3. 地址格式 **只按一种格式**（single-format）— **不**发明多 locale 地址规则。
+- **仍开放（defer 期间非阻塞；reopen 前阻塞 ready BDD）：** 窗口信封（窗口信封）是否覆盖 — **未明确回答**；Surface（runtime API / 管理 UI / 两者）— **未回答**。
+- Owning stub: [ce-o02-addressblock-package.md](../behavior/ce-o02-addressblock-package.md)（`blocked` / Deferred）。
 
 ---
 

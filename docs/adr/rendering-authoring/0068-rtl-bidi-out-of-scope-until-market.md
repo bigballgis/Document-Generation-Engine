@@ -37,7 +37,9 @@ BDD: **not-applicable** (spike). `sourceOfTruth: true` while Accepted.
 | Spike lock | [SPIKE-REPORT.md](../../plan/evidence/ibl-e7-rtl-bidi-spike/SPIKE-REPORT.md) — LO/POI/font/fidelity gaps; no product RTL impl |
 | File status | **Accepted** (2026-07-20) — doc-keeper stage 3; Decision = DESCOPE + reopen criteria |
 
-**Accepted ≠ IBL-E7 leaf Done** — #134 remains **In Progress** until pipeline gates / merge / MAIN doc-sync. No full RTL product implementation in this leaf.
+**IBL-E7 / #134 → Done** (`37239d68` / `68abc7c3`) — Wave E closed by DESCOPE; **no** full RTL product implementation.
+
+**Product reconfirmation (2026-07-20):** User explicitly confirmed **不做 RTL** — reinforces this ADR Decision and IBL-E7 DESCOPE. **Do not** reopen a product RTL implementation leaf without a new market-gated program (see Decision §4 reopen criteria).
 
 This ADR does **not** flip checklist **#3b** / **#5a**, remove SPECIMEN (**PD-6**), embed licensed fonts (**PD-7**), invent Word/pixel baselines, claim Wave E / IBL program Done, or authorize a product RTL implementation leaf.
 
