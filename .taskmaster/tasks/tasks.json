@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: NON-CE #138 PD-6 true non-SPECIMEN re-issue (in-progress; slice pd6-true-non-specimen-reissue; OUT of IBL-E; related CE-G06 #76); do not treat #53 as delivery leaf. Prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068; worktree REMOVED. Prior #133 IBL-E6 Done dcc42c81 / 0e542c03 / 32b62136 / docs a2501d48; F28 closed. Prior NON-CE #132 IBL-E5 Done 688f9e58 / 20ead1ce / docs 65613c4b (F27 closed). Prior NON-CE #131 IBL-E4 Done 4d810395 / 212c6be9. Prior NON-CE #127 IBL-D5 Done 6f672271 / 2e56787e (F23 legalhold half closed; Wave IBL-D → Done D1–D5; Playwright residual OUT). Prior NON-CE #126 IBL-D4 Done 94cc8eeb / 94526674 (F22 closed). Prior NON-CE #125 IBL-D3 Done 6b9b6487 / 0242084e. Prior NON-CE #124 IBL-D2 Done 21be3a99 / 4fd0c5da. Prior NON-CE #123 IBL-D1 Done 1a686938 / f399489c. Prior NON-CE #122 IBL-C3 Done bdfc285d / dbfff086. Prior NON-CE #121 IBL-C2 Done (1d357e4d / 767b4ceb+abf564dc). Prior NON-CE #120 IBL-C1 Done (55909dd2 / d2492fc4+5d89b606). Prior NON-CE #118 IBL-B6 Done (8722f4f1 / 8e8c62e6).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: NON-CE #138 PD-6 (pd6-true-non-specimen-reissue; OUT of IBL-E; related CE-G06 #76 / IBL-A6 #112; prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068 Accepted; prior NON-CE #133 IBL-E6 Done dcc42c81 / 0e542c03 / 32b62136 / docs a2501d48; prior NON-CE #132 IBL-E5 Done 688f9e58 / 20ead1ce / 65613c4b; Wave IBL-D Done; Wave IBL-C Done; Wave IBL-B In Progress B7 Blocked residual; Wave IBL-A Done; residual Blocked = #119 B7 — do not activate). Do NOT claim program Done (CE-O02 deferred per D5).",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active: cleared (prior NON-CE #138 PD-6 Done 73ab03cb; OUT of IBL-E; F6 opt-in re-issue; related CE-G06 #76); do not treat #53 as delivery leaf. Prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068; worktree REMOVED. Prior #133 IBL-E6 Done dcc42c81 / 0e542c03 / 32b62136 / docs a2501d48; F28 closed. Prior NON-CE #132 IBL-E5 Done 688f9e58 / 20ead1ce / docs 65613c4b (F27 closed). Prior NON-CE #131 IBL-E4 Done 4d810395 / 212c6be9. Prior NON-CE #127 IBL-D5 Done 6f672271 / 2e56787e (F23 legalhold half closed; Wave IBL-D → Done D1–D5; Playwright residual OUT). Prior NON-CE #126 IBL-D4 Done 94cc8eeb / 94526674 (F22 closed). Prior NON-CE #125 IBL-D3 Done 6b9b6487 / 0242084e. Prior NON-CE #124 IBL-D2 Done 21be3a99 / 4fd0c5da. Prior NON-CE #123 IBL-D1 Done 1a686938 / f399489c. Prior NON-CE #122 IBL-C3 Done bdfc285d / dbfff086. Prior NON-CE #121 IBL-C2 Done (1d357e4d / 767b4ceb+abf564dc). Prior NON-CE #120 IBL-C1 Done (55909dd2 / d2492fc4+5d89b606). Prior NON-CE #118 IBL-B6 Done (8722f4f1 / 8e8c62e6).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: cleared (prior NON-CE #138 PD-6 Done 73ab03cb; OUT of IBL-E; related CE-G06 #76 / IBL-A6 #112; prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068 Accepted; prior NON-CE #133 IBL-E6 Done dcc42c81 / 0e542c03 / 32b62136 / docs a2501d48; prior NON-CE #132 IBL-E5 Done 688f9e58 / 20ead1ce / 65613c4b; Wave IBL-D Done; Wave IBL-C Done; Wave IBL-B In Progress B7 Blocked residual; Wave IBL-A Done; residual Blocked = #119 B7 — do not activate). Do NOT claim program Done (CE-O02 deferred per D5).",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-20T03:25:00.000Z"
+        "updatedAt": "2026-07-20T05:15:00.000Z"
       },
       {
         "id": "54",
@@ -1475,7 +1475,7 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-20T03:20:00.000Z"
+        "updatedAt": "2026-07-20T03:20:00Z"
       },
       {
         "id": "107",
@@ -1563,7 +1563,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T03:43:00.000Z"
+        "updatedAt": "2026-07-19T03:43:00Z"
       },
       {
         "id": "114",
@@ -1577,7 +1577,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T03:43:00.000Z"
+        "updatedAt": "2026-07-19T03:43:00Z"
       },
       {
         "id": "115",
@@ -1591,7 +1591,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T04:30:00.000Z"
+        "updatedAt": "2026-07-19T04:30:00Z"
       },
       {
         "id": "116",
@@ -1605,7 +1605,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T05:20:00.000Z"
+        "updatedAt": "2026-07-19T05:20:00Z"
       },
       {
         "id": "117",
@@ -1619,7 +1619,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T06:20:00.000Z"
+        "updatedAt": "2026-07-19T06:20:00Z"
       },
       {
         "id": "118",
@@ -1633,7 +1633,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T06:45:00.000Z"
+        "updatedAt": "2026-07-19T06:45:00Z"
       },
       {
         "id": "119",
@@ -1660,7 +1660,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T07:20:00.000Z"
+        "updatedAt": "2026-07-19T07:20:00Z"
       },
       {
         "id": "121",
@@ -1674,7 +1674,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T05:50:00.000Z"
+        "updatedAt": "2026-07-19T05:50:00Z"
       },
       {
         "id": "122",
@@ -1689,7 +1689,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T06:35:00.000Z"
+        "updatedAt": "2026-07-19T06:35:00Z"
       },
       {
         "id": "123",
@@ -1703,7 +1703,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T07:45:00.000Z"
+        "updatedAt": "2026-07-19T07:45:00Z"
       },
       {
         "id": "124",
@@ -1731,7 +1731,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T09:24:00.000Z"
+        "updatedAt": "2026-07-19T09:24:00Z"
       },
       {
         "id": "126",
@@ -1745,7 +1745,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T09:46:00.000Z"
+        "updatedAt": "2026-07-19T09:46:00Z"
       },
       {
         "id": "127",
@@ -1759,7 +1759,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-19T11:20:00.000Z"
+        "updatedAt": "2026-07-19T11:20:00Z"
       },
       {
         "id": "128",
@@ -1771,7 +1771,7 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T02:40:00.000Z"
+        "updatedAt": "2026-07-20T02:40:00Z"
       },
       {
         "id": "129",
@@ -1783,7 +1783,7 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T02:40:00.000Z"
+        "updatedAt": "2026-07-20T02:40:00Z"
       },
       {
         "id": "130",
@@ -1795,7 +1795,7 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T06:15:00.000Z"
+        "updatedAt": "2026-07-20T06:15:00Z"
       },
       {
         "id": "131",
@@ -1807,7 +1807,7 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T08:26:00.000Z"
+        "updatedAt": "2026-07-20T08:26:00Z"
       },
       {
         "id": "132",
@@ -1822,7 +1822,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T01:20:00.000Z"
+        "updatedAt": "2026-07-20T01:20:00Z"
       },
       {
         "id": "133",
@@ -1836,7 +1836,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T02:30:00.000Z"
+        "updatedAt": "2026-07-20T02:30:00Z"
       },
       {
         "id": "134",
@@ -1848,7 +1848,7 @@
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T03:20:00.000Z"
+        "updatedAt": "2026-07-20T03:20:00Z"
       },
       {
         "id": "135",
@@ -1895,28 +1895,28 @@
       {
         "id": "138",
         "title": "PD-6: True non-SPECIMEN production re-issue",
-        "description": "IN PROGRESS 2026-07-20. Dedicated PD-6 leaf (OUT of IBL-E / Wave E): controlled opt-in production re-issue on regenerate — explicit productionReissue + reason; GLOBAL_ADMIN/GROUP_ADMIN only; omit SPECIMEN on success; default regenerate / preview / test-generate keep SPECIMEN. Related CE-G06 (#76 Done) + IBL-A6 (#112 Done) F6 watermark residual. Slice pd6-true-non-specimen-reissue. BDD ready docs/behavior/pd6-true-non-specimen-reissue.md (BDD-PD6-001…018). frontend_ui_in_scope=false. Batch solo. Sole-active NON-CE delivery leaf. Formal phase None. Wave IBL-E remains Done. #119 remains Blocked. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done / go-live. Do NOT activate B2/B3/B4 (PD-7 / CE-O02 / CD-3).",
-        "details": "ACTIVATED 2026-07-20 (plan-orchestrator stage 2). Slice id: pd6-true-non-specimen-reissue. Placement ISOLATED: D:/working/DGE-pd6-true-non-specimen-reissue · feat/pd6-true-non-specimen-reissue (base origin/main). Batch recommendation solo (member_task_ids: [\"138\"]; proposed_slice_id: pd6-true-non-specimen-reissue; vetoes: B2-PD7, B3-CE-O02, B4-CD3, RTL, #119, umbrella-106, checklist-#3b/#5a-GO). Parent/dependency notes: OUT of IBL-E (no Wave E leaf); extends CE-G06 regenerate (#76 Done) + IBL-A6 locale replay (#112 Done); closes F6 SPECIMEN / true re-issue residual per IBL §8 PD-6. Owners: doc-keeper (permission-matrix / API contract if required) → backend-engineer. BDD ready (BDD-PD6-001…018). frontend_ui_in_scope=false (API-first; no FE regenerate CTA / E2E/UIUX). Status in-progress — sole-active delivery leaf. Formal phase remains None. Wave IBL-E stays Done (E1–E7). Wave IBL-B stays In Progress (B7 #119 Blocked residual). Umbrella #106 registry-only pending — not sole-active. Do NOT mark Done until green gates + merge + MAIN doc-sync. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done / go-live. Do NOT activate #119 / PD-7 / CE-O02 / CD-3.",
+        "description": "DONE 2026-07-20. Dedicated PD-6 leaf (OUT of IBL-E / Wave E): controlled opt-in production re-issue on regenerate — explicit productionReissue=true + non-empty reason; GLOBAL_ADMIN/GROUP_ADMIN skip SPECIMEN (specimen=false); AUDIT_ADMIN / missing reason fail-closed; default regenerate / preview / test-generate keep SPECIMEN. Slice pd6-true-non-specimen-reissue. MAIN FF merge 73ab03cb; worktree REMOVED. BDD ready docs/behavior/pd6-true-non-specimen-reissue.md (BDD-PD6-001…018). frontend_ui_in_scope=false. Batch solo closed. Sole-active cleared. Formal phase None. Wave IBL-E remains Done. #119 remains Blocked. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done / go-live. Do NOT activate B2/B3/B4 here (next recommend B2 PD-7).",
+        "details": "COMPLETED 2026-07-20 (post-task-doc-sync stage 12 on MAIN). Slice id: pd6-true-non-specimen-reissue. Status: done. Merge: 73ab03cb (FF feat/pd6-true-non-specimen-reissue → main); worktree DGE-pd6-true-non-specimen-reissue REMOVED. Batch solo (member_task_ids: ["138"]) closed. BDD ready: docs/behavior/pd6-true-non-specimen-reissue.md (BDD-PD6-001…018). Behavior: same regenerate API; productionReissue=true + reason → no SPECIMEN / specimen=false for GLOBAL_ADMIN/GROUP_ADMIN; default paths keep SPECIMEN; AUDIT_ADMIN opt-in 403; PRODUCTION_REISSUE_REASON_REQUIRED when reason missing. Extends CE-G06 (#76) + IBL-A6 (#112); closes F6 true re-issue residual. Gates: mvn verify GREEN 2309; architecture PASS_WITH_SUGGESTIONS Critical=0 merge_go=true; Stage 10 DEPLOY_OK (docs/plan/evidence/pd6-stage10-deploy/); FE/E2E/UIUX N/A. Formal phase remains None. Wave IBL-E stays Done. Wave IBL-B stays In Progress (B7 #119 Blocked). Umbrella #106 registry-only pending. Sole-active cleared. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done / go-live. Next recommend: B2 PD-7 (orchestrator starts next leaf — not activated here).",
         "testStrategy": "1. BDD-PD6-001…018 ready (docs/behavior/pd6-true-non-specimen-reissue.md). 2. TDD: default regenerate SPECIMEN retained; productionReissue=true + reason + admin roles → specimen=false / no SPECIMEN stamp; AUDIT_ADMIN / missing reason → 403/fail-closed; preview/test-generate unchanged. 3. mvn -B -ntp -f backend/pom.xml verify GREEN. 4. FE/E2E N/A (frontend_ui_in_scope=false). 5. Stage 5/10 DEPLOY_OK when acceptance surface requires. 6. Do NOT flip #3b/#5a GO; do NOT claim IBL program Done / go-live; Done only after stage 11 merge + MAIN doc-sync.",
         "priority": "high",
         "dependencies": [
           "76",
           "112"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-20T04:22:00.000Z"
+        "updatedAt": "2026-07-20T05:15:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-20T04:22:00.000Z",
+      "lastModified": "2026-07-20T05:15:00.000Z",
       "taskCount": 138,
-      "completedCount": 132,
+      "completedCount": 133,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-20T04:22:00.000Z"
+      "updated": "2026-07-20T05:15:00.000Z"
     }
   }
 }

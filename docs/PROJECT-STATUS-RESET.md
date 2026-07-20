@@ -24,7 +24,7 @@ same gate bar (backend `mvn verify` 114 tests green / JaCoCo met; frontend lint/
 
 **Active formal phase (repo-wide):** **None** (2026-07-09+). **CORE-FORTRESS Done** (F1–F8); **CODE-QUALITY Done**. See [master-plan.md](./plan/master-plan.md).
 
-**Delivery focus note (2026-07-20):** **#134** IBL-E7 → **Done** (`37239d68` / `68abc7c3`; F15 closed by descope; ADR-0068 Accepted; spike DESCOPE; probe GREEN; arch merge_go; Wave IBL-E → Done E1–E7; **sole-active cleared**; #119 Blocked; do not flip #3b/#5a GO; do not claim IBL program Done).
+**Delivery focus note (2026-07-20):** **#138** PD-6 → **Done** (`73ab03cb`; OUT of IBL-E; F6 opt-in production re-issue; `mvn verify` GREEN 2309; arch PASS_WITH_SUGGESTIONS merge_go; Stage 10 DEPLOY_OK; **sole-active cleared**; #119 Blocked; do not flip #3b/#5a GO; do not claim IBL program Done; next recommend B2 PD-7). Prior **#134** IBL-E7 → **Done** (`37239d68` / `68abc7c3`; F15 closed by descope; ADR-0068 Accepted; Wave IBL-E → Done E1–E7).
 
 **Latest gate evidence (authoritative):** backend `mvn verify` BUILD SUCCESS (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL);
 frontend **643** Vitest (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL); Playwright T13 **8+1** passed, **3** skipped (documented); UIUX manifest **PASS**; see [execution-sync-ledger.md](./plan/execution-sync-ledger.md).
