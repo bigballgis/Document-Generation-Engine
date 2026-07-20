@@ -81,6 +81,7 @@ defineExpose({
     <VersionLinesTable
       v-else
       v-model:current-page="currentPage"
+      :template-id="templateId"
       :version-lines="versionLines"
       :show-pagination="showPagination"
       :page-size="pageSize"

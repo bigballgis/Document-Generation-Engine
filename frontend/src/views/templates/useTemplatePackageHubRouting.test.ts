@@ -3,20 +3,14 @@ import { resolveHubSecondaryTab } from '@/views/templates/useTemplatePackageHubR
 import en from '@/i18n/locales/en'
 import zhCN from '@/i18n/locales/zh-CN'
 
-describe('useTemplatePackageHubRouting', () => {
-  it('BDD-CE-U19-DRV-001 — accepts dependencies hub secondary tab', () => {
-    expect(resolveHubSecondaryTab('dependencies')).toBe('dependencies')
-    expect(resolveHubSecondaryTab('overview')).toBe('overview')
-    expect(resolveHubSecondaryTab('apiAccess')).toBe('apiAccess')
+describe('useTemplatePackageHubRouting (Wave 2 hub IA)', () => {
+  it('BDD-SYS-NORM-W2-002 — hub secondary tabs are no longer valid surfaces', () => {
+    expect(resolveHubSecondaryTab('dependencies')).toBeUndefined()
+    expect(resolveHubSecondaryTab('overview')).toBeUndefined()
+    expect(resolveHubSecondaryTab('apiAccess')).toBeUndefined()
   })
 
-  it('rejects unknown hub tab values', () => {
-    expect(resolveHubSecondaryTab('authoring')).toBeUndefined()
-    expect(resolveHubSecondaryTab('invalid')).toBeUndefined()
-    expect(resolveHubSecondaryTab(undefined)).toBeUndefined()
-  })
-
-  it('exposes English-first Dependencies tab labels', () => {
+  it('keeps English-first Dependencies labels for per-version surfaces', () => {
     expect(en.templates.detail.tabs.dependencies).toBe('Dependencies')
     expect(zhCN.templates.detail.tabs.dependencies).toBe('依赖')
   })

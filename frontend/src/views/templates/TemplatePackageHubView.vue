@@ -4,6 +4,7 @@ import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataE
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
 import TemplatePackageHubActions from '@/views/templates/hub/TemplatePackageHubActions.vue'
 import TemplatePackageHubWorkspace from '@/views/templates/hub/TemplatePackageHubWorkspace.vue'
 import { useTemplatePackageHub } from '@/views/templates/useTemplatePackageHub'
@@ -15,44 +16,29 @@ const {
   authorTemplates,
   manageReleaseVersionState,
   metadataEditOpen,
+  propertiesOpen,
+  dependenciesGuidanceVisible,
   loadFailed,
-  selectedContractEnvironment,
   workspaceRef,
   templateId,
   template,
   showDetailSkeleton,
-  showPolicyPanel,
-  policyLoadFailed,
-  apiPolicy,
-  loadingPolicy,
-  policySubmitting,
-  policyLoadErrorKey,
-  credentialColumnFilters,
-  credentialsCurrentPage,
-  paginatedCredentials,
-  credentialStatusFilterOptions,
-  totalCredentialRows,
-  sortCredentialsByCreatedAt,
-  CLIENT_TABLE_PAGE_SIZE,
   showMetadataEdit,
   showDeleteTemplateAction,
   showExportActions,
-  hubWorkspaceTabs,
-  activeHubTab,
+  showApiSettingsAction,
   loadTemplate,
-  loadPolicyData,
   backToList,
   handleMetadataUpdate,
   handleDeleteTemplate,
-  handleCreateCredential,
-  handleRotateCredential,
-  handleRevokeCredential,
   handleVersionLinesChanged,
+  openProperties,
+  openApiSettings,
 } = useTemplatePackageHub()
 </script>
 
 <template>
-  <AppPageLayout>
+  <AppPageLayout data-testid="template-package-hub">
     <TemplateWorkspaceHeader
       :template-name="template?.name ?? t('templates.packageHub.loadingTitle')"
       :group-label="template ? t('templates.packageHub.groupLabel', { groupCode: template.groupCode }) : undefined"
@@ -69,15 +55,14 @@ const {
           :show-export-actions="showExportActions"
           :show-delete-template-action="showDeleteTemplateAction"
           :show-metadata-edit="showMetadataEdit"
+          :show-api-settings-action="showApiSettingsAction"
           @delete="handleDeleteTemplate"
           @edit-metadata="metadataEditOpen = true"
+          @open-properties="openProperties"
+          @open-api-settings="openApiSettings"
         />
       </template>
     </TemplateWorkspaceHeader>
-
-    <p v-if="template" class="header-extra">
-      {{ t('templates.packageHub.externalIdLabel', { externalId: template.externalId }) }}
-    </p>
 
     <LoadErrorPanel
       v-if="loadFailed"
@@ -96,34 +81,28 @@ const {
     <TemplatePackageHubWorkspace
       v-else-if="template"
       ref="workspaceRef"
-      v-model:active-hub-tab="activeHubTab"
-      v-model:credential-column-filters="credentialColumnFilters"
-      v-model:credentials-current-page="credentialsCurrentPage"
-      v-model:selected-contract-environment="selectedContractEnvironment"
+      v-model:dependencies-guidance-visible="dependenciesGuidanceVisible"
       :template-id="templateId"
-      :template="template"
       :can-clone="authorTemplates"
       :can-manage-versions="manageReleaseVersionState"
-      :hub-workspace-tabs="hubWorkspaceTabs"
-      :show-policy-panel="showPolicyPanel"
-      :loading-policy="loadingPolicy"
-      :api-policy="apiPolicy"
-      :policy-load-failed="policyLoadFailed"
-      :policy-load-error-key="policyLoadErrorKey"
-      :paginated-credentials="paginatedCredentials"
-      :credential-status-filter-options="credentialStatusFilterOptions"
-      :page-size="CLIENT_TABLE_PAGE_SIZE"
-      :total-credential-rows="totalCredentialRows"
-      :submitting="policySubmitting"
-      :format-date-time="formatDateTime"
-      :sort-credentials-by-created-at="sortCredentialsByCreatedAt"
       @cloned="handleVersionLinesChanged"
       @changed="handleVersionLinesChanged"
-      @create-credential="handleCreateCredential"
-      @rotate-credential="handleRotateCredential"
-      @revoke-credential="handleRevokeCredential"
-      @retry-policy-load="loadPolicyData"
     />
+
+    <el-drawer
+      v-model="propertiesOpen"
+      direction="rtl"
+      size="480px"
+      destroy-on-close
+      data-testid="template-properties-drawer"
+      :title="t('templates.packageHub.properties')"
+    >
+      <TemplateDetailOverviewTab
+        v-if="template"
+        :template="template"
+        :format-date-time="formatDateTime"
+      />
+    </el-drawer>
 
     <TemplateMetadataEditDialog
       v-if="template"
@@ -135,11 +114,3 @@ const {
     />
   </AppPageLayout>
 </template>
-
-<style scoped lang="scss">
-.header-extra {
-  margin: calc(-1 * var(--space-4)) 0 var(--space-6);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-}
-</style>

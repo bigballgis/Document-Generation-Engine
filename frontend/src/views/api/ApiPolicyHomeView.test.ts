@@ -123,7 +123,7 @@ describe('ApiPolicyHomeView', () => {
     expect(wrapper.text()).toContain('RETAIL-ACCOUNT-OPEN')
   })
 
-  it('navigates to hub api access tab on alert row click', async () => {
+  it('navigates to package API settings shell on alert row click', async () => {
     vi.mocked(apiPolicyApi.fetchAlerts).mockResolvedValue(sampleAlerts)
     const wrapper = mountHome()
     await flushPromises()
@@ -131,7 +131,7 @@ describe('ApiPolicyHomeView', () => {
     const table = wrapper.findComponent({ name: 'AppDataTable' })
     await table.vm.$emit('row-click', sampleAlerts[0])
 
-    expect(routerPush).toHaveBeenCalledWith('/templates/tpl-1?tab=apiAccess')
+    expect(routerPush).toHaveBeenCalledWith('/api/packages/tpl-1/settings')
   })
 
   it('shows LoadErrorPanel instead of empty alerts table when fetch fails', async () => {

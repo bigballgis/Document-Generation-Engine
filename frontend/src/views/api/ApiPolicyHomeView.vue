@@ -11,7 +11,8 @@ import PageHeader from '@/components/layout/PageHeader.vue'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, templatePackageHubPath } from '@/routing/routeKeys'
+import { apiPackageSettingsPath } from '@/routing/apiPackageSettings'
+import { ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
 import { useSessionStore } from '@/stores/session'
 import type { ApiAccessAlert, ApiAccessAlertKind } from '@/types/template'
@@ -58,7 +59,7 @@ onMounted(async () => {
 })
 
 function openPackageAccess(templateId: string) {
-  router.push(templatePackageHubPath(templateId, 'apiAccess'))
+  router.push(apiPackageSettingsPath(templateId))
 }
 
 function openTemplateCatalog() {
@@ -190,7 +191,7 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
               <EntityLinkCell
                 :label="row.templateName"
                 :subtitle="row.templateExternalId"
-                :to="templatePackageHubPath(row.templateId, 'apiAccess')"
+                :to="apiPackageSettingsPath(row.templateId)"
               />
             </template>
           </el-table-column>

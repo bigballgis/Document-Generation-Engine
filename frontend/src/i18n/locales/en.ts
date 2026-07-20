@@ -515,6 +515,12 @@ export default {
       breadcrumbLabel: 'Package',
       notFoundTitle: 'Letterhead not found',
       notFoundDescription: 'The requested letterhead could not be loaded.',
+      properties: 'Properties',
+      propertiesName: 'Name',
+      propertiesGroup: 'Group',
+      propertiesFile: 'Source file',
+      propertiesDescription: 'Description',
+      propertiesNoDescription: 'No description',
     },
     revisionLines: {
       title: 'Revision lines',
@@ -879,6 +885,10 @@ export default {
       groupLabel: 'Group: {groupCode}',
       externalIdLabel: 'External ID: {externalId}',
       breadcrumbLabel: 'Package',
+      properties: 'Properties',
+      apiSettings: 'API settings',
+      dependenciesGuidance:
+        'Dependencies are available on each version line (release or development). Open a version to inspect them.',
       lifecycleHint:
         'Workflow actions apply to the current in-flight dev line. Open the dev editor to submit tests, record decisions, or publish.',
       openDevWorkflow: 'Open dev workflow',
@@ -944,6 +954,13 @@ export default {
     devEditor: {
       actionsHint: 'Actions apply to this in-flight dev version line.',
       breadcrumbLabel: 'Dev editor',
+      wrongSurfaceTitle: 'This development editor is not available for the current version',
+      wrongSurfaceDescription:
+        'The line may already be published or is no longer in flight. Open the package hub or the published release detail instead.',
+      openCorrectSurface: 'Open correct surface',
+      blankWhiteboardTitle: 'No design content yet',
+      blankWhiteboardDescription:
+        'This development line has no variables or layout bindings yet. Add design content here — the canvas is intentionally empty.',
       testWorkflowRedirect:
         'Run preview generation per data set, batch-run all samples, and submit for testing from the Template testing tab. Pass/fail test decisions appear there when the template is in testing.',
       openTestPreviewTab: 'Open Template testing',
@@ -958,6 +975,7 @@ export default {
     devWorkspace: {
       tabs: {
         design: 'Template design',
+        dependencies: 'Dependencies',
         testing: 'Template testing',
         approval: 'Template approval',
       },
@@ -998,6 +1016,10 @@ export default {
       publishedBadge: 'Published',
       defaultRouteBadge: 'Default route',
       status: 'Workflow status',
+      apiPerspective: 'API perspective',
+      apiPerspectiveDefault: 'Default route target',
+      apiPerspectiveRouted: 'Package API routing',
+      apiSettingsLink: 'API settings',
       devVersionNumber: 'Dev version #',
       updatedAt: 'Last updated',
       updatedBy: 'Last updated by',
@@ -1031,6 +1053,7 @@ export default {
       updatedBy: 'Last updated by',
       tabs: {
         basics: 'Basics',
+        dependencies: 'Dependencies',
         testing: 'Testing',
         approval: 'Approval',
         variables: 'Variables',
@@ -2571,14 +2594,25 @@ export default {
     },
   },
   apiPolicy: {
+    packageSettings: {
+      title: 'API settings — {name}',
+      loadingTitle: 'Loading package API settings…',
+      interimDescription:
+        'Package-level external access settings (API model A). Invocation ops dashboard panels arrive in a later wave.',
+      interimBanner:
+        'Settings home shell — configure AD groups, routes, retention, and access keys below. Full External services ops dashboard is coming later.',
+      backToHub: 'Back to template package',
+      backToExternalServices: 'External services overview',
+      releaseContext: 'Version perspective: release {releaseVersion}',
+    },
     home: {
       title: 'External services overview',
       description:
-        'Monitor cross-package external access. Configure AD groups, routes, retention, and access keys on each template package hub.',
+        'Monitor cross-package external access. Configure AD groups, routes, retention, and access keys on each template package.',
       empty: 'No published templates in your authorized scope.',
       groupCode: 'Group',
       monitoringHint:
-        'External access is configured per template package. Open a package hub External access tab to edit settings.',
+        'External access is configured per template package. Open package API settings to edit configuration.',
       summary: {
         title: 'API readiness summary',
         description:

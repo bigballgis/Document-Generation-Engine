@@ -504,6 +504,12 @@ export default {
       breadcrumbLabel: '包详情',
       notFoundTitle: '未找到母版',
       notFoundDescription: '无法加载请求的母版。',
+      properties: '属性',
+      propertiesName: '名称',
+      propertiesGroup: '分组',
+      propertiesFile: '源文件',
+      propertiesDescription: '描述',
+      propertiesNoDescription: '暂无描述',
     },
     revisionLines: {
       title: '修订线',
@@ -863,6 +869,9 @@ export default {
       groupLabel: '分组：{groupCode}',
       externalIdLabel: '外部 ID：{externalId}',
       breadcrumbLabel: '模板包',
+      properties: '属性',
+      apiSettings: 'API 设置',
+      dependenciesGuidance: '依赖信息在各版本线（发布或开发）详情中查看。请打开某一版本以检查依赖。',
       lifecycleHint: '工作流操作针对当前在途开发线。请打开开发编辑器以提交测试、记录决策或发布。',
       openDevWorkflow: '打开开发工作流',
     },
@@ -927,6 +936,13 @@ export default {
     devEditor: {
       actionsHint: '以下操作针对当前在途开发版本线。',
       breadcrumbLabel: '开发编辑器',
+      wrongSurfaceTitle: '当前版本不可使用开发编辑器',
+      wrongSurfaceDescription:
+        '该版本线可能已发布或不再处于在途状态。请打开模板包或已发布版本详情。',
+      openCorrectSurface: '打开正确页面',
+      blankWhiteboardTitle: '尚无设计内容',
+      blankWhiteboardDescription:
+        '此开发线尚未配置变量或版式绑定。请在此添加设计内容 — 空白状态为有意展示，并非隐藏错误。',
       testWorkflowRedirect: '试生成与提交测试已移至「模板测试」标签页。',
       openTestPreviewTab: '打开模板测试',
       testWorkflowRedirectHelpTitle: '在哪里测试',
@@ -940,6 +956,7 @@ export default {
     devWorkspace: {
       tabs: {
         design: '模板设计',
+        dependencies: '依赖',
         testing: '模板测试',
         approval: '模板审批',
       },
@@ -979,6 +996,10 @@ export default {
       publishedBadge: '已发布',
       defaultRouteBadge: '默认路由',
       status: '流程状态',
+      apiPerspective: 'API 视角',
+      apiPerspectiveDefault: '默认路由目标',
+      apiPerspectiveRouted: '包级 API 路由',
+      apiSettingsLink: 'API 设置',
       devVersionNumber: '开发版本号',
       updatedAt: '最后更新',
       updatedBy: '最后更新人',
@@ -1012,6 +1033,7 @@ export default {
       updatedBy: '最后更新人',
       tabs: {
         basics: '基础信息',
+        dependencies: '依赖',
         testing: '测试',
         approval: '审批',
         variables: '变量',
@@ -2526,13 +2548,22 @@ export default {
     },
   },
   apiPolicy: {
+    packageSettings: {
+      title: 'API 设置 — {name}',
+      loadingTitle: '正在加载包级 API 设置…',
+      interimDescription: '包级对外接入设置（API 模型 A）。调用运维仪表盘面板将在后续波次提供。',
+      interimBanner:
+        '设置首页壳层 — 请在下方配置 AD 组、路由、留存与接入密钥。完整的对外服务运维仪表盘稍后提供。',
+      backToHub: '返回模板包',
+      backToExternalServices: '对外服务概览',
+      releaseContext: '版本视角：发布 {releaseVersion}',
+    },
     home: {
       title: '对外服务概览',
-      description:
-        '跨包监控对外接入。请在各模板包 Hub 的「对外接入」页签配置 AD 组、路由、留存与接入账号。',
+      description: '跨包监控对外接入。请在各模板包的 API 设置页配置 AD 组、路由、留存与接入账号。',
       empty: '授权范围内暂无已发布模板。',
       groupCode: '分组',
-      monitoringHint: '对外接入按模板包配置。请打开包 Hub 的「对外接入」页签进行编辑。',
+      monitoringHint: '对外接入按模板包配置。请打开包级 API 设置进行编辑。',
       summary: {
         title: 'API 就绪摘要',
         description: '仅统计您授权范围内的包。本页为监控视图，不是模板目录。',

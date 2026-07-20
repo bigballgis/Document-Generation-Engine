@@ -39,7 +39,9 @@ export function useTemplateReleaseDetailView() {
   const releaseVersion = computed(() => String(route.params.releaseVersion ?? ''))
 
   const workspaceTabs = computed(() =>
-    (['basics', 'testing', 'approval', 'variables', 'bindings', 'rules'] as const).map((name) => ({
+    (
+      ['basics', 'dependencies', 'testing', 'approval', 'variables', 'bindings', 'rules'] as const
+    ).map((name) => ({
       name,
       labelKey: TEMPLATE_RELEASE_WORKSPACE_TAB_LABEL_KEYS[name],
     })),

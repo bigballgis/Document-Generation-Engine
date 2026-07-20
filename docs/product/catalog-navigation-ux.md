@@ -8,23 +8,24 @@
 
 **Package list pagination (LR-C5, 2026-07-11):** Templates / Masters / Content-modules **package lists** use server-side `PageView` pagination + filter/search (default `size=20`, max 100; default sort group-first `groupCode ASC, updatedAt DESC`). Contract: [openapi-v1.yaml](../api/openapi-v1.yaml) `listTemplates` / `listMasters` / `listContentModules`; behavior [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md). Does not change package-hub version/revision-line pagination already specified below. Does **not** define LR-C6 command-palette API.
 
-### SYS-NORM Confirmed intent (2026-07-21) — Wave 1 Done; Waves 2+ queued
+### SYS-NORM Confirmed intent (2026-07-21) — Wave 1 Done; Wave 2 BDD ready; Waves 3+ queued
 
 > Locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.1–2.3.
-> Historical hub-tab copy below remains as shipped baseline until the named waves land.
+> Historical hub-tab copy below remains as shipped baseline until Wave 2 implementation lands.
 > Program: [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md).
 > Wave 1 leaf TM **#145** `sys-norm-shell-fluid-nav` → **Done** (`7a62be44`).
+> Wave 2 BDD **ready** — [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md) (**BDD-SYS-NORM-W2-001…018**; TM **#146**); implementation **Not Started**.
 
 | Intent | Confirmed decision | Implementation status | Wave |
 | --- | --- | --- | --- |
 | **Layout** | All management pages are **fluid** (system-wide; supersedes catalog=fluid / detail=contained for management `AppPageLayout`) | **Done** (2026-07-21; `#145` / `7a62be44`) | 1 `sys-norm-shell-fluid-nav` |
 | **Security nav trim + D1 nav hide** | Security = Audit + Legal holds; Document brands + Legal entities absent from nav catalog ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); routes may still resolve until Wave 6 | **Done** (nav hide; 2026-07-21) | 1 (nav hide) / 6 (runtime) |
 | **Nav icon contract + Edit/More + EntityLink N1–N3** | Every remaining nav item has an icon; Users/Groups Edit+More shared primitive; task-hub + catalog `groupCode` EntityLink | **Done** (2026-07-21); **N18** Legal-hold actor EntityLink **deferred** | 1 |
-| **Hub primary** | Version lines only (fluid) | **Not Started** | 2 `sys-norm-hub-ia` |
-| **Properties** | Hub header control → **right drawer** (content formerly Overview tab) | **Not Started** | 2 |
-| **Remove hub tabs** | Overview, Dependencies, External access | **Not Started** | 2 |
-| **Dependencies** | Live on **per-version** surfaces (release / dev detail), not package hub tab | **Not Started** | 2 |
-| **API model A** | Package-level API settings SoT under External services; hub **API settings** jump; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities | **Not Started** | 2 (+ 3 for settings home) |
+| **Hub primary** | Version lines only (fluid) | **BDD ready** / impl **Not Started** | 2 `sys-norm-hub-ia` |
+| **Properties** | Hub header control → **right drawer** (content formerly Overview tab) | **BDD ready** / impl **Not Started** | 2 |
+| **Remove hub tabs** | Overview, Dependencies, External access | **BDD ready** / impl **Not Started** | 2 |
+| **Dependencies** | Live on **per-version** surfaces (release / dev detail), not package hub tab | **BDD ready** / impl **Not Started** | 2 |
+| **API model A** | Package-level API settings SoT under External services; hub **API settings** jump to `/api/packages/:templateId/settings` shell; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities; legacy `?tab=apiAccess` / `#apiAccess` / `/api/policies/:templateId` → settings shell | **BDD ready** / impl **Not Started** (Wave 3 fills full settings home + invocation dashboard) | 2 (+ 3 for dashboard) |
 | **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **Not Started** | 3 `sys-norm-external-ops` |
 | **D1 brands/entities runtime** | Full product-surface + runtime retirement per ADR-0071 (beyond nav hide) | **Not Started** | 6 `sys-norm-d1-brands` |
 
@@ -164,15 +165,26 @@ Package-level surface (BDD-TEMPLATE-PACKAGE-NAV-001). **Default primary surface:
 1. **Package header** — name, external ID, group, package-level workflow status
 2. **Package actions** — export/import, metadata edit (when permitted)
 3. **Version lines** — paginated table: dev version number, release version (when published), lifecycle status, approval sub-state (when `APPROVAL`), updated at/by, **default-route indicator** (published only), **explicit generate path summary** (published only)
-4. **Secondary tabs (hub-retained)** — overview, **External access** (primary API configuration surface per BDD-API-PACKAGE-ACCESS-INVOCATION-001), workflow/journey panels as needed
+4. **Secondary tabs (hub-retained — historical shipped baseline)** — overview, **External access** (primary API configuration surface per BDD-API-PACKAGE-ACCESS-INVOCATION-001), workflow/journey panels as needed
 
-**External access tab (target IA, 2026-07-03; C10 / api-ops-discoverability 2026-07-14):**
+**SYS-NORM Wave 2 target IA (Confirmed; BDD ready — [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md)):**
+
+- Hub primary remains **Version lines** only; **remove** hub tabs Overview, Dependencies, External access.
+- Former Overview content → hub header **Properties** → **right drawer**.
+- **Dependencies** move to per-version release + development surfaces.
+- **API model A:** hub header **API settings** → package settings route shell
+  `/api/packages/:templateId/settings` (optional `?panel=` / `?releaseVersion=`); per-version API
+  perspective + deep-link; **no** per-version ApiPolicy entities. Full invocation dashboard = Wave 3.
+- Legacy `?tab=apiAccess`, `#apiAccess`, and `/api/policies/:templateId` → redirect to settings shell.
+- Master hub **N14** parity: Properties drawer + revision-lines primary; no Template External access on Master.
+
+**External access tab (historical target IA, 2026-07-03; C10 / api-ops-discoverability 2026-07-14 — superseded as hub tab by Wave 2; content migrates to package settings route):**
 
 - L1: package `externalId`; default + explicit route summary; AD Group; default route selector (governed change); retention presets (save documents, record/doc days); credentials; read-only recent invocation summary for admins.
 - Advanced (collapsed): output formats/modes, batch limits, encryption overrides.
 - **No** «API not configured» empty state once skeleton policy exists from `PENDING_RELEASE`.
-- **Pre-publish setup (C10):** with `canManageApiPolicy`, the tab is registered and editable for **`PENDING_RELEASE` ∪ `PUBLISHED`** (skeleton AD Group / access pre-config before go-live). Other lifecycle statuses stay hub-authoring only — not an External access editor.
-- Standalone sidebar «API management» template catalog **deprecated**. Cross-package home `/api/policies` remains **package-first monitoring only** (ADR-0040): optional readiness **summary cards** + **alerts** table + hub deep links — **not** a second paginated template catalog (see [api-ops-discoverability.md](../behavior/api-ops-discoverability.md), SCEN-ALERT-04).
+- **Pre-publish setup (C10):** with `canManageApiPolicy`, settings are editable for **`PENDING_RELEASE` ∪ `PUBLISHED`** (skeleton AD Group / access pre-config before go-live). Other lifecycle statuses stay hub-authoring only — not an API settings editor.
+- Standalone sidebar «API management» template catalog **deprecated**. Cross-package home `/api/policies` remains **package-first monitoring only** (ADR-0040): optional readiness **summary cards** + **alerts** table + settings/hub deep links — **not** a second paginated template catalog (see [api-ops-discoverability.md](../behavior/api-ops-discoverability.md), SCEN-ALERT-04).
 
 Does **not** host full authoring (variables, bindings, structured content editor); those live on the dev version route.
 

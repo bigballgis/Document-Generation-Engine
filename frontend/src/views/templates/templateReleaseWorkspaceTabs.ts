@@ -2,6 +2,7 @@ import type { LocationQuery } from 'vue-router'
 
 const TEMPLATE_RELEASE_WORKSPACE_TABS = [
   'basics',
+  'dependencies',
   'testing',
   'approval',
   'variables',
@@ -18,6 +19,7 @@ export const TEMPLATE_RELEASE_WORKSPACE_TAB_LABEL_KEYS: Record<
   string
 > = {
   basics: 'templates.releaseDetail.tabs.basics',
+  dependencies: 'templates.releaseDetail.tabs.dependencies',
   testing: 'templates.releaseDetail.tabs.testing',
   approval: 'templates.releaseDetail.tabs.approval',
   variables: 'templates.releaseDetail.tabs.variables',

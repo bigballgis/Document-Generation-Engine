@@ -22,6 +22,7 @@ export function useMasterPackageHub() {
   const { manageMasters, reviewMasters } = useCapabilities()
 
   const metadataEditOpen = ref(false)
+  const propertiesOpen = ref(false)
   const replaceFileOpen = ref(false)
   const submitReviewOpen = ref(false)
   const reviewDialogOpen = ref(false)
@@ -210,6 +211,7 @@ export function useMasterPackageHub() {
     t,
     mastersStore,
     metadataEditOpen,
+    propertiesOpen,
     replaceFileOpen,
     submitReviewOpen,
     reviewDialogOpen,

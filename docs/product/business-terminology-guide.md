@@ -73,7 +73,7 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | API policy / API policies | API management | API 管理 | `nav.items.apiPolicies` | mental model is "manage integration & calls" |
 | API policy management | Manage API access | API 接入管理 | `apiPolicy.landing.title` | shorter page title |
 | API access (nav group) | External services | 对外服务 | `nav.groups.apiAccess` | outward business capability |
-| Package hub API tab | External access | 对外接入 | `templates.policy.title` / package hub tab | primary config surface (2026-07-03); not a separate catalog |
+| Package hub API tab | External access | 对外接入 | `templates.policy.title` / package hub tab | **Historical** hub-tab label (2026-07-03). **SYS-NORM Wave 2 Confirmed:** migrate off hub tab to package API **settings** route under External services ([sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md)); L1 wording for settings shell may keep “API settings” / 接入设置 — Wave 3 completes settings home |
 | Invocation records | Call history | 调用记录 | `apiPolicy.invocation.*` (TBD keys at implement) | caller backup + audit complement; not compliance audit console |
 | API credentials | Access keys / Connection accounts | 接入账号 | (credential surfaces) | avoid "credential" |
 | Access & identity | Users & permissions | 用户与权限 | `nav.groups.entitlement` | "entitlement" too IT |

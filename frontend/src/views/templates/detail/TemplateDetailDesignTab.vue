@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import TemplateVariableTreePanel from '@/components/templates/TemplateVariableTreePanel.vue'
 import TemplateAuthoringBindingsPanel from '@/components/templates/TemplateAuthoringBindingsPanel.vue'
 import TemplateClauseAuthoringPanel from '@/components/templates/TemplateClauseAuthoringPanel.vue'
@@ -50,6 +51,9 @@ const activeSubTab = ref<TemplateAuthoringSubTab>(resolveDesignSubTabFromQuery(r
 const entry = computed(() => panelDataStore.getEntry(props.templateId))
 const contentModuleReferences = computed(() =>
   props.groupCode ? entry.value.contentModuleReferences : [],
+)
+const showHonestEmptyWhiteboard = computed(
+  () => props.variables.length === 0 && props.bindings.length === 0,
 )
 
 watch(
@@ -116,6 +120,14 @@ onMounted(() => {
         :content="t('templates.authoring.helpContent')"
       />
     </div>
+
+    <EmptyStatePanel
+      v-if="showHonestEmptyWhiteboard"
+      class="design-empty"
+      data-testid="dev-design-honest-empty"
+      title-key="templates.devEditor.blankWhiteboardTitle"
+      description-key="templates.devEditor.blankWhiteboardDescription"
+    />
 
     <el-tabs v-model="activeSubTab" class="design-sub-tabs">
       <el-tab-pane :label="t(templateAuthoringSubTabLabelKey('variables'))" name="variables">
