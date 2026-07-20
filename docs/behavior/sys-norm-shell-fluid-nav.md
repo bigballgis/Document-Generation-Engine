@@ -6,7 +6,7 @@ readiness: ready
 program: SYS-NORM
 wave: 1
 slice: sys-norm-shell-fluid-nav
-taskMaster: 144
+taskMaster: 145
 related:
   - docs/behavior/system-normalization-program.md
   - docs/plan/system-normalization-program-2026-07.md
@@ -15,6 +15,9 @@ related:
 ---
 
 # SYS-NORM Wave 1 — Shell fluid + nav + EntityLink / Actions
+
+> **TM id note:** Wave 1 leaf is Task Master **#145**. Handoff/BDD briefly cited `#144`, but
+> `#144` remains **published-template-test-artifacts** (Done). Do not overwrite `#144`.
 
 ## Actor / goal
 
@@ -133,3 +136,9 @@ navigable EntityLink cells for task-hub entities/groups and catalog group codes.
 
 Hub Properties / External ops pages / test artifact BE / role matrix rewrite /
 D1 runtime API kill / promotion pack (later waves).
+
+## Explicitly deferred (with evidence)
+
+| ID | Item | Disposition |
+| --- | --- | --- |
+| **N18** | EntityLink — Legal hold actor | **Deferred** from Wave 1 — not implemented in `sys-norm-shell-fluid-nav`; remains queued for a later SYS-NORM wave (Wave 2+ / N* sweep) with dedicated BDD before code. Wave 1 Done **does not** claim N18. |

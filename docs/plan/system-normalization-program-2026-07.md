@@ -4,15 +4,18 @@
 | --- | --- |
 | **Program ID** | `SYS-NORM` |
 | **Created** | 2026-07-21 |
-| **Status** | **In Progress** — Wave **0 Done**; Waves **1–8 Not Started** (program SoT + ADRs landed) |
+| **Status** | **In Progress** — Waves **0–1 Done**; Waves **2–8 Not Started** |
 | **Formal phase** | **None** (not a P-phase; tracked here + ledger) |
 | **Wave 0 leaf** | TM **#143** · `sys-norm-charter` → **Done** (MAIN merge `f8e898ad` / feature `28d4abe1`; worktree **REMOVED**) |
-| **Sole-active** | **cleared** (ready for Wave 1 next session) |
-| **Batch (Wave 0)** | **split** · `member_task_ids: ["143"]` · docs-only amortization — **closed** |
-| **Next queue head** | `sys-norm-shell-fluid-nav` (Wave 1) — **Not Started** / not activated this sync |
-| **Queue (Waves 1–8)** | Program-plan **Not Started** only — **no** TM pending stubs (NON-CE `#141/#142` pattern; register next free TM id at each wave activation) |
+| **Wave 1 leaf** | TM **#145** · `sys-norm-shell-fluid-nav` → **Done** (MAIN merge `7a62be44` / feature `f1594f2a` + e2e `ce2cb9f0`; worktree **REMOVED**). Handoff briefly cited `#144` — **#144** remains PTA Done; Wave 1 = **#145**. |
+| **Sole-active** | **cleared** (ready for Wave 2 next session — **not** activated this sync) |
+| **Batch (Wave 1)** | **solo** · `member_task_ids: ["145"]` · `proposed_slice_id: sys-norm-shell-fluid-nav` — **closed** |
+| **Next queue head** | `sys-norm-hub-ia` (Wave 2) — **Not Started** / not activated this sync |
+| **Queue (Waves 2–8)** | Program-plan **Not Started** only — **no** TM pending stubs (NON-CE `#141/#142` pattern; register next free TM id at each wave activation) |
+| **Parked worktrees** | `D:/working/DGE-mgmt-hub-ia-fluid-properties` (`feat/mgmt-hub-ia-fluid-properties`) — **parked** Wave-2-ish hub IA WIP; **status note only** — do **not** fold into Wave 1 closeout or auto-activate Wave 2 |
 | **CE umbrella** | TM **#53** remains **in-progress** registry-only — **not** this program's delivery leaf |
 | **Behavior SoT** | [system-normalization-program.md](../behavior/system-normalization-program.md) |
+| **Wave 1 BDD** | [sys-norm-shell-fluid-nav.md](../behavior/sys-norm-shell-fluid-nav.md) (**ready**; **BDD-SYS-NORM-W1-001…016**) |
 | **Role ADR** | [ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md) (**Accepted**) |
 | **D1 ADR** | [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) (**Accepted**) |
 
@@ -28,6 +31,10 @@ queue without reopening locked forks.
 
 **Wave 0 mission:** durable program SoT + Accepted ADRs + index/activation notes.
 **No** production code, `mvn`/`pnpm` gates, E2E, or deploy for the charter leaf itself.
+
+**Wave 1 mission (Done):** system-wide fluid management layout; Security nav trim + D1
+nav hide (ADR-0071); nav icon contract; Edit/More; EntityLink N1/N2/N3 (+ users groups).
+**N18** Legal-hold actor EntityLink **explicitly deferred** (not claimed Done).
 
 ---
 
@@ -56,7 +63,7 @@ queue without reopening locked forks.
 | Wave | TM | Slice id | Status | Focus | Evidence / gates |
 | --- | --- | --- | --- | --- | --- |
 | **0** | **#143** | `sys-norm-charter` | **Done** (`f8e898ad` / `28d4abe1`) | Program plan + ADR-0070/0071 + indexes; decision lock | Docs-only — gates N/A |
-| **1** | *(register at activate)* | `sys-norm-shell-fluid-nav` | **Not Started** | Fluid all pages; nav icons + contract; Security = audit + legal holds; brands/entities nav hide if ADR locked; Edit/More; EntityLink N1/N2/N3 | FE gates + E2E when UI |
+| **1** | **#145** | `sys-norm-shell-fluid-nav` | **Done** (`7a62be44` / `f1594f2a` / `ce2cb9f0`) | Fluid all pages; nav icons + contract; Security = audit + legal holds; brands/entities nav hide (ADR-0071); Edit/More; EntityLink N1/N2/N3; **N18 deferred** | FE gates + E2E 7/7 + UIUX PASS + Stage 5/10 DEPLOY_OK |
 | **2** | *(register at activate)* | `sys-norm-hub-ia` | **Not Started** | Template (+ Master parity) Hub Properties drawer; remove wrong tabs; version Dependencies; API jump model A; Dev blank-surface; locale de-dupe; legacy apiAccess | FE + E2E |
 | **3** | *(register at activate)* | `sys-norm-external-ops` | **Not Started** | External services dashboard; invocation records page; package API settings route; hub redirects | FE + E2E |
 | **4** | *(register at activate)* | `sys-norm-test-artifacts` | **Not Started** | Batch test history handles; download on published/history Testing | BE/FE + E2E as scoped |
@@ -66,7 +73,8 @@ queue without reopening locked forks.
 | **8** | *(register at activate)* | `sys-norm-demo-seed-terms` | **Not Started** | Asset seed / honest empty; L1 terminology sweep; remaining N* | Wave 8 BDD |
 
 Per-wave implementation BDD stubs are **pending-wave** until authored at wave start
-([behavior charter §8](../behavior/system-normalization-program.md)).
+([behavior charter §8](../behavior/system-normalization-program.md)), except Wave 1
+(**ready** — [sys-norm-shell-fluid-nav.md](../behavior/sys-norm-shell-fluid-nav.md)).
 
 ---
 
@@ -74,23 +82,24 @@ Per-wave implementation BDD stubs are **pending-wave** until authored at wave st
 
 | ID | Theme | Wave |
 | --- | --- | --- |
-| N1 | EntityLink — Task hub `entityName` / `groupCode` | 1 |
-| N2 | EntityLink — Catalog `groupCode` columns | 1 |
-| N3 | Actions — Users/Groups Edit+More | 1 |
+| N1 | EntityLink — Task hub `entityName` / `groupCode` | **1 Done** |
+| N2 | EntityLink — Catalog `groupCode` columns | **1 Done** |
+| N3 | Actions — Users/Groups Edit+More | **1 Done** |
 | N4 | Metadata dup — Template overview locale variants | 2 |
 | N5 | Metadata dup — Release detail status / lifecycle | 2 |
 | N6 | Dual surface — Legacy `#apiAccess` vs hub External access | 2 (redirect) / 3 (settings home) |
 | N7–N9 | EntityLink / redundancy — Overview groupCode; hub header; External ID column | 2 |
-| N10 | Nav contract — every nav item maps to icon | 1 |
-| N11 | Route key — legal-entities (moot after D1) | 1 (nav hide) / 6 (retire) |
-| N12 | Filter toolbar — Brand list (moot after D1) | 1 / 6 |
+| N10 | Nav contract — every nav item maps to icon | **1 Done** |
+| N11 | Route key — legal-entities (moot after D1) | **1 Done** (nav hide) / 6 (retire) |
+| N12 | Filter toolbar — Brand list (moot after D1) | **1 Done** (nav hide) / 6 |
 | N13 | Seed — Legal hold empty catalog story | 8 |
 | N14 | Hub IA parity — Master hub same debt | 2 |
 | N15 | Empty design — Master revision empty design summary | 2 / 8 |
 | N16–N17 | Terminology — EN Master mix; EN/ZH L1 | 8 |
-| N18–N20 | EntityLink — Legal hold actor; where-used; MasterImpact | 1 / 2 |
+| N18 | EntityLink — Legal hold actor | **Deferred** (explicit; not in Wave 1 Done claim) — later wave + BDD |
+| N19–N20 | EntityLink — where-used; MasterImpact | 1 / 2 (residual) |
 | N21 | Journey — Role journey timeline silent empty | 1 / 8 |
-| N22 | Actions — Catalog row action pattern | 1 |
+| N22 | Actions — Catalog row action pattern | **1** (partial via Edit/More primitive; catalog-wide pattern may continue) |
 | N23 | Docs/seed — `demo-images` bypass vs managed asset | 8 |
 
 ---
@@ -102,7 +111,7 @@ Per-wave implementation BDD stubs are **pending-wave** until authored at wave st
 | Wave | Done when |
 | --- | --- |
 | **0** | Behavior charter + this plan + ADR-0070/0071 **Accepted** + indexes/ledger activation; Wave 0 leaf merged; **no** product code required |
-| **1** | Fluid layout + nav/security IA + EntityLink/Actions targets green; FE gates + E2E; doc-sync |
+| **1** | Fluid layout + nav/security IA + EntityLink/Actions targets green; FE gates + E2E; doc-sync — **met 2026-07-21** (`7a62be44`); N18 deferred with evidence |
 | **2** | Hub IA model A + Properties drawer + tab removals + version Dependencies; Master parity as scoped; E2E |
 | **3** | External services invocation page + package API settings surface; hub redirects |
 | **4** | Published/history Testing downloads durable artifacts |
@@ -132,7 +141,7 @@ still governing; checklist **#3b** / **#5a** **not** flipped by this program; **
 - Wave 0 is **docs-only** — no production backend/frontend code; runtime evidence **N/A**.
 - Do **not** flip go-live checklist **#3b** / **#5a**.
 - Role matrix rewrite = **Wave 5** only (Wave 0 records Confirmed intent + ADR).
-- D1 runtime delete = **Wave 6**; FE nav hide may start **Wave 1** after ADR-0071 Accepted.
+- D1 runtime delete = **Wave 6**; FE nav hide may start **Wave 1** after ADR-0071 Accepted (**Wave 1 nav hide Done**).
 - Do **not** invent NFR SLOs in this program.
 
 ---
@@ -142,11 +151,12 @@ still governing; checklist **#3b** / **#5a** **not** flipped by this program; **
 | Doc | Role |
 | --- | --- |
 | [system-normalization-program.md](../behavior/system-normalization-program.md) | Behavior / decision-acceptance SoT |
+| [sys-norm-shell-fluid-nav.md](../behavior/sys-norm-shell-fluid-nav.md) | Wave 1 BDD (**ready** / delivered) |
 | [0070-role-compression-six-roles.md](../adr/authorization-security/0070-role-compression-six-roles.md) | Role compression (Accepted) |
 | [0071-retire-document-brand-legal-entity-surfaces.md](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) | D1 retire product surfaces (Accepted) |
 | [0065-legal-entity-document-brand-variants.md](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md) | Historical IBL-E4; product surface superseded by 0071 |
-| [permission-matrix.md](../security/permission-matrix.md) | Current 8-role baseline until Wave 5 |
-| [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) | Hub IA intent (Confirmed 2026-07-21) |
+| [permission-matrix.md](../security/permission-matrix.md) | Current 8-role baseline until Wave 5; Wave 1 ADR-0071 nav-hide cross-ref |
+| [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) | Hub IA intent + Wave 1 layout/nav-hide status |
 | [business-terminology-guide.md](../product/business-terminology-guide.md) | L1 Letterhead/母版 intent |
 | [execution-sync-ledger.md](./execution-sync-ledger.md) | Activation / evidence mirror |
 | [docs/README.md](../README.md) | Index |

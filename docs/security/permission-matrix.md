@@ -12,6 +12,14 @@
 > Until then, §3 / §13 / capability tables below remain the **current 8-role runtime baseline**.
 > Do **not** treat Wave 0 as having rewritten these tables. `DOCUMENT_AUTHOR` L1 display
 > labels remain **Pending** finalize.
+>
+> **ADR-0071 cross-ref (Wave 1 nav hide Done — 2026-07-21):** Management **Security** nav no
+> longer lists Document brands / Legal entities product surfaces
+> ([ADR-0071 Accepted](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md);
+> SYS-NORM Wave 1 TM **#145** `sys-norm-shell-fluid-nav`, merge `7a62be44`). **Legal holds**
+> remain. This does **not** rewrite capability cells below; full D1 runtime/API retirement =
+> Wave 6; role-catalog rewrite still Wave 5. Historical IBL-E4 / ADR-0065 rows remain as
+> runtime baseline until Wave 6.
 
 ## 相关文档
 
@@ -21,6 +29,7 @@
 - [领域模型](../domain/domain-model.md)
 - [文档治理规则](../governance.md)
 - [ADR-0070 Role compression (six roles)](../adr/authorization-security/0070-role-compression-six-roles.md)（Accepted — Wave 5 impl）
+- [ADR-0071 Retire document brand / legal entity surfaces](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)（Accepted — Wave 1 nav hide Done `#145`; Wave 6 runtime）
 - [System Normalization program](../plan/system-normalization-program-2026-07.md)
 - [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
 - [LR-D1 行为规格](../behavior/lrp-d1-audit-retention.md)

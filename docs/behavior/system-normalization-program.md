@@ -10,7 +10,7 @@
 | **Branch** | `feat/sys-norm-charter` |
 | **Worktree** | `D:/working/DGE-sys-norm-charter` |
 | **Placement** | ISOLATED |
-| **Task / leaf** | TM **#143** `sys-norm-charter`（Batch Recommendation **split**；`member_task_ids: ["143"]`；Waves 1–8 **Not Started** in program plan — no TM stubs） |
+| **Task / leaf** | Wave 0 TM **#143** `sys-norm-charter` → **Done**；Wave 1 TM **#145** `sys-norm-shell-fluid-nav` → **Done**（handoff briefly cited `#144` — `#144` remains PTA）；Waves 2–8 **Not Started** in program plan — register next free TM id at activate |
 | **Formal phase** | None invented — program tracked via plan doc (doc-keeper) + this charter |
 | **Frontend UI** | Wave 0：**`frontend_ui_in_scope=false`**（docs/ADR only）。Waves 1–4 / 6–8 UI 另立波次 BDD |
 | **Owning docs** | **本文件（程序行为 / 决策接受 SoT）**；计划纲领 → [`docs/plan/system-normalization-program-2026-07.md`](../plan/system-normalization-program-2026-07.md)；角色压缩 → **[ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md)**（**Accepted**）；D1 退役 → **[ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)**（**Accepted**；**supersedes** ADR-0065 **product-surface**） |
@@ -191,7 +191,7 @@ starting Wave 0 `sys-norm-charter`.
 | N14 | Hub IA parity | Master hub same IA debt as template hub |
 | N15 | Empty design | Master revision empty design summary |
 | N16–N17 | Terminology | EN Master mix; EN/ZH L1 split |
-| N18–N20 | EntityLink | Legal hold actor; where-used groupCode; MasterImpact links |
+| N18–N20 | EntityLink | **N18 Legal hold actor — Deferred** (Wave 1 closeout 2026-07-21; not claimed Done); N19–N20 where-used groupCode / MasterImpact — later waves |
 | N21 | Journey | Role journey timeline silent empty |
 | N22 | Actions | Catalog row action pattern inconsistency |
 | N23 | Docs/seed | `demo-images` bypass vs managed asset story |
@@ -435,7 +435,7 @@ governance moves to **Letterhead (master)**. Legal holds **kept**. Shell REDBC/G
 
 | Wave | Slice id (suggested) | Stub readiness | Focus |
 | --- | --- | --- | --- |
-| 1 | `sys-norm-shell-fluid-nav` | **ready** — [sys-norm-shell-fluid-nav.md](./sys-norm-shell-fluid-nav.md) | Fluid all management pages; nav icons + contract test; Security = audit + legal holds; brands/entities nav hide (ADR-0071); Edit/More; EntityLink N1/N2/N3/users groups |
+| 1 | `sys-norm-shell-fluid-nav` | **ready** / **Done** (`7a62be44`; TM **#145**) — [sys-norm-shell-fluid-nav.md](./sys-norm-shell-fluid-nav.md) | Fluid all management pages; nav icons + contract test; Security = audit + legal holds; brands/entities nav hide (ADR-0071); Edit/More; EntityLink N1/N2/N3/users groups; **N18 deferred** |
 | 2 | `sys-norm-hub-ia` | **pending-wave** | Template (+ Master parity) Hub Properties drawer; remove wrong tabs; version Dependencies; API jump model A; Dev blank-surface; locale de-dupe; legacy apiAccess |
 | 3 | `sys-norm-external-ops` | **pending-wave** | External services dashboard; invocation records page; package API settings route; hub redirects |
 | 4 | `sys-norm-test-artifacts` | **pending-wave** | Batch test history handles; download on published/history Testing |

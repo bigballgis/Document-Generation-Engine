@@ -8,22 +8,25 @@
 
 **Package list pagination (LR-C5, 2026-07-11):** Templates / Masters / Content-modules **package lists** use server-side `PageView` pagination + filter/search (default `size=20`, max 100; default sort group-first `groupCode ASC, updatedAt DESC`). Contract: [openapi-v1.yaml](../api/openapi-v1.yaml) `listTemplates` / `listMasters` / `listContentModules`; behavior [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md). Does not change package-hub version/revision-line pagination already specified below. Does **not** define LR-C6 command-palette API.
 
-### SYS-NORM Confirmed intent (2026-07-21) — Implementation Not Started / queued waves
+### SYS-NORM Confirmed intent (2026-07-21) — Wave 1 Done; Waves 2+ queued
 
 > Locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.1–2.3.
 > Historical hub-tab copy below remains as shipped baseline until the named waves land.
 > Program: [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md).
+> Wave 1 leaf TM **#145** `sys-norm-shell-fluid-nav` → **Done** (`7a62be44`).
 
 | Intent | Confirmed decision | Implementation status | Wave |
 | --- | --- | --- | --- |
-| **Layout** | All management pages are **fluid** (system-wide; supersedes catalog=fluid / detail=contained for management `AppPageLayout`) | **Not Started** | 1 `sys-norm-shell-fluid-nav` |
+| **Layout** | All management pages are **fluid** (system-wide; supersedes catalog=fluid / detail=contained for management `AppPageLayout`) | **Done** (2026-07-21; `#145` / `7a62be44`) | 1 `sys-norm-shell-fluid-nav` |
+| **Security nav trim + D1 nav hide** | Security = Audit + Legal holds; Document brands + Legal entities absent from nav catalog ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); routes may still resolve until Wave 6 | **Done** (nav hide; 2026-07-21) | 1 (nav hide) / 6 (runtime) |
+| **Nav icon contract + Edit/More + EntityLink N1–N3** | Every remaining nav item has an icon; Users/Groups Edit+More shared primitive; task-hub + catalog `groupCode` EntityLink | **Done** (2026-07-21); **N18** Legal-hold actor EntityLink **deferred** | 1 |
 | **Hub primary** | Version lines only (fluid) | **Not Started** | 2 `sys-norm-hub-ia` |
 | **Properties** | Hub header control → **right drawer** (content formerly Overview tab) | **Not Started** | 2 |
 | **Remove hub tabs** | Overview, Dependencies, External access | **Not Started** | 2 |
 | **Dependencies** | Live on **per-version** surfaces (release / dev detail), not package hub tab | **Not Started** | 2 |
 | **API model A** | Package-level API settings SoT under External services; hub **API settings** jump; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities | **Not Started** | 2 (+ 3 for settings home) |
 | **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **Not Started** | 3 `sys-norm-external-ops` |
-| **D1 brands/entities nav** | Retire Document brands + Legal entities **product surfaces** from management nav ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); keep Legal holds; shell REDBC/GREENBC UI-only | **Not Started** | 1 (nav hide) / 6 (runtime) |
+| **D1 brands/entities runtime** | Full product-surface + runtime retirement per ADR-0071 (beyond nav hide) | **Not Started** | 6 `sys-norm-d1-brands` |
 
 ## Design principle
 

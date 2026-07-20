@@ -1986,17 +1986,31 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-21T03:25:00.000Z"
+      },
+      {
+        "id": "145",
+        "title": "SYS-NORM Wave 1 — shell fluid + nav + EntityLink/Actions (sys-norm-shell-fluid-nav)",
+        "description": "DONE 2026-07-21. NON-CE System Normalization Program Wave 1 — FE shell/nav leaf closed. Slice sys-norm-shell-fluid-nav; MAIN merge 7a62be44 (includes feature f1594f2a + e2e evidence ce2cb9f0); worktree REMOVED. Batch recommendation solo (member_task_ids: [\"145\"]; proposed_slice_id sys-norm-shell-fluid-nav) closed. NOTE: delivery handoff/BDD initially cited #144 but #144 remains published-template-test-artifacts Done — Wave 1 registered as #145. Scope: fluid AppPageLayout system-wide; Security nav hide Document brands + Legal entities (ADR-0071 nav hide; Wave 6 runtime OOS); nav icon contract; TableEditMoreActions; EntityLink N1/N2/N3 (+ users authorized groups); N18 Legal-hold actor EntityLink explicitly deferred. BDD ready docs/behavior/sys-norm-shell-fluid-nav.md BDD-SYS-NORM-W1-001…016. frontend_ui_in_scope=true. Gates: FE lint/type-check/test/build PASS; Stage 5+10 DEPLOY_OK :8080/:4173; E2E 7/7 PASS; UIUX PASS; architecture PASS; CQ PASS. Wave 1 → Done; Waves 2–8 remain Not Started (next queue head sys-norm-hub-ia — not activated). Sole-active cleared. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT auto-activate Wave 2 / CE-O02 / RTL. Do NOT claim go-live / SYS-NORM program Done. Parked worktree DGE-mgmt-hub-ia-fluid-properties left untouched (status note only).",
+        "details": "COMPLETED 2026-07-21 (stage 12 post-task-doc-sync on MAIN). Slice id: sys-norm-shell-fluid-nav. Merge: 7a62be44 → origin/main; worktree removed (stage 11). Batch solo closed. Delivered: fluid management layout; D1 nav hide; Security trim to audit + legal holds; navIcons contract; Edit/More; EntityLink targets. N18 deferred with evidence. Gates: FE lint/type-check/test/build PASS; docker-deploy-queue Stage 5+10 DEPLOY_OK; E2E SYS-NORM-W1 7/7; UIUX PASS (frontend/e2e/evidence/SYS-NORM-W1*); architecture PASS; CQ PASS. Sole-active cleared. Next leaf (notes only, not activated): sys-norm-hub-ia (Wave 2). Vetoes held: CE-O02; checklist-#3b/#5a-GO; RTL; fold-parked-hub-worktrees; mega-merge Waves 2–8; do not mark #53 Done. Formal phase remains None. TM id remap: handoff said 144 → registered 145 (144=PTA).",
+        "testStrategy": "1. BDD ready confirmed (docs/behavior/sys-norm-shell-fluid-nav.md; BDD-SYS-NORM-W1-001…016). 2. Program plan Wave 1 Done; next Wave 2 Not Started. 3. FE gates + E2E 7/7 + UIUX PASS + arch/CQ PASS + Stage 5/10 DEPLOY_OK. 4. Evidence frontend/e2e/evidence/SYS-NORM-W1*. 5. N18 deferred documented. 6. Stage 11 merge 7a62be44 + MAIN doc-sync before Done. 7. Do NOT flip #3b/#5a GO; do NOT activate Wave 2; do NOT fold parked DGE-mgmt-hub-ia-fluid-properties.",
+        "priority": "high",
+        "dependencies": [
+          "143"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-20T20:32:26.741Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-21T03:25:00.000Z",
-      "taskCount": 144,
-      "completedCount": 141,
+      "lastModified": "2026-07-20T20:32:26.741Z",
+      "taskCount": 145,
+      "completedCount": 142,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-21T03:25:00.000Z"
+      "updated": "2026-07-20T20:32:26.741Z"
     }
   }
 }
