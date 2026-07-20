@@ -73,7 +73,8 @@ class ContentModuleLegalMetadataServiceTest {
                 groupAccessService,
                 accessSupport,
                 auditRecorder,
-                org.mockito.Mockito.mock(com.bank.docgen.contentmodule.service.ContentModuleFullTextIndexWriter.class)
+                org.mockito.Mockito.mock(com.bank.docgen.contentmodule.service.ContentModuleFullTextIndexWriter.class),
+                org.mockito.Mockito.mock(com.bank.docgen.contentmodule.service.ContentModuleNestingService.class)
         );
         module = new ContentModuleEntity(
                 MODULE_ID,

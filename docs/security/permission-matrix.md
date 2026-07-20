@@ -19,6 +19,7 @@
 - [IBL-E3 法务→合规审批矩阵](../behavior/ibl-e3-legal-approval-matrix.md)（BDD-IBL-E3；#130 — 新角色 `LEGAL_REVIEWER` + capability `decideLegalApprovals`；[ADR-0064 Accepted](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)）
 - [IBL-E4 法人实体文档品牌变体](../behavior/ibl-e4-entity-document-brands.md)（BDD-IBL-E4；#131 — **无新角色**；目录写 = 管理员；allow-list 写 = 既有模板编排写边界；[ADR-0065 Accepted](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)）
 - [IBL-E5 effectiveFrom 发布门禁 + bulk re-pin](../behavior/ibl-e5-effectivefrom-bulk-repin.md)（BDD-IBL-E5；#132 — **无新角色 / capability**；bulk-repin 与发布门禁评估复用 `authorTemplates`；[ADR-0066 Accepted](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)）
+- [IBL-E6 条款嵌套模块图治理](../behavior/ibl-e6-clause-nesting-governance.md)（BDD-IBL-E6；#133 — **无新角色 / capability**；结构写复用 `authorContentModules`；深度 where-used 复用 §5.1 目录浏览；发布嵌套硬项复用既有模板编排边界；[ADR-0067 Accepted](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md)）
 
 ## 2. 权限设计原则
 
@@ -129,7 +130,7 @@
 | 废弃模块或版本 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 废弃由管理员执行；执行前必须进行影响分析、二次确认并记录审计；影响分析必须覆盖引用模板、引用发布版本、default 路由影响、近期调用摘要、是否需要停用模板或发布版本，以及可替代模块版本建议。 |
 | 导出模块 | 是 | 被授权组范围内 | 所属或被授权组范围内 | 所属或被授权组范围内 | 否 | 否 | 导出范围不得越过角色、分组和对象访问范围；导出内容按敏感数据脱敏规则处理。 |
 | 查看模块审计 | 是 | 被授权组范围内 | 否 | 否 | 否 | 否 | 模块审计查看沿用后台审计查看边界；审计管理员可按审计权限查看全部审计记录。 |
-| 浏览目录 / 正文全文检索 / where-used（CE-G05） | 是 | 被授权组范围内 | 是 | 是 | 否 | 是 | **无新 capability bit。** 与条款目录 list/get 相同浏览边界：`GLOBAL_ADMIN` / `GROUP_ADMIN` / `MASTER_DESIGNER` / `TEMPLATE_AUTHOR` / `TEMPLATE_APPROVER` 可调用 `searchMode=FULL_TEXT` 与 `GET …/where-used`；`TEMPLATE_TESTER` **无**目录浏览 → **403**。跨组仅共享/授权可见模块；where-used **不得**返回调用方不可见模板。`contentStructureJson` 响应策略不变；where-used **不含**条款全文。行为：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。 |
+| 浏览目录 / 正文全文检索 / where-used（CE-G05 / IBL-E6） | 是 | 被授权组范围内 | 是 | 是 | 否 | 是 | **无新 capability bit。** 与条款目录 list/get 相同浏览边界：`GLOBAL_ADMIN` / `GROUP_ADMIN` / `MASTER_DESIGNER` / `TEMPLATE_AUTHOR` / `TEMPLATE_APPROVER` 可调用 `searchMode=FULL_TEXT` 与 `GET …/where-used`（含 IBL-E6 嵌套深度命中）；`TEMPLATE_TESTER` **无**目录浏览 → **403**。跨组仅共享/授权可见模块；where-used **不得**返回调用方不可见模板。`contentStructureJson` 响应策略不变；where-used **不含**条款全文。行为：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)；[ibl-e6-clause-nesting-governance.md](../behavior/ibl-e6-clause-nesting-governance.md)。 |
 
 ### 5.2 IBL-E3 法务→合规多级审批（ADR-0064）
 
@@ -605,9 +606,16 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - **无新 capability bit / 无新角色 / 无独立年检治理路由。**
 - **年检：** 完成与到期待办列表要求组范围模板访问 **且** `authorTemplates`（`GLOBAL_ADMIN` / `GROUP_ADMIN` / `MASTER_DESIGNER` / `TEMPLATE_AUTHOR`）；对齐 CE-U07。`TEMPLATE_TESTER` / `TEMPLATE_APPROVER`（默认无 `authorTemplates`）→ 待办不可见 / complete **403**。
 - **FTS / where-used：** 与 §5.1 条款目录 list/get 浏览边界相同（含 `TEMPLATE_APPROVER`；**不含** `TEMPLATE_TESTER`）。跨组 fail-closed；where-used 不得泄露不可见模板行。
+- **IBL-E6 深度 where-used / 嵌套写路径：** **无新 capability bit。** where-used 授权与上同；CM 结构写含嵌套校验仍复用 `authorContentModules`；publish 嵌套硬项复用既有模板编排边界。Accepted ADR ≠ E6 impl Done。[ibl-e6-clause-nesting-governance.md](../behavior/ibl-e6-clause-nesting-governance.md)；[ADR-0067](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md)。
 - 管理审计：`TEMPLATE_ANNUAL_REVIEW_COMPLETED`；禁止 variables / 凭证 / 条款全文。
 - **Out of scope：** CD-3；CE-O02；go-live；#50；协作新 `queue_type`；独立 `/governance/annual-review` 路由；中文分词插件；高亮 snippet 作为 Done 门槛。
 - 行为 SoT：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md) `BDD-CE-G05-001…019`；领域：[domain-model.md](../domain/domain-model.md) §2.7 / §2.9.2；契约：[contract-outline.md](../api/contract-outline.md) «模板年检与条款正文全文检索（CE-G05）」。
+
+**IBL-E6 条款嵌套模块图治理（2026-07-20 / ADR-0067 Accepted）：**
+
+- **无新角色 / capability。** 结构写 = `authorContentModules`；深度 where-used = §5.1 目录浏览（同 CE-G05）；发布嵌套硬项评估 = 既有模板编排 / publish-gate 边界。
+- **不**因嵌套深度命中放宽跨组可见性；`TEMPLATE_TESTER` where-used 仍 **403**。
+- 行为 SoT：[ibl-e6-clause-nesting-governance.md](../behavior/ibl-e6-clause-nesting-governance.md) `BDD-IBL-E6-001…018`；领域：[domain-model.md](../domain/domain-model.md) §2.9.2；契约：[contract-outline.md](../api/contract-outline.md) IBL-E6 节；[ADR-0067](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md)。Accepted ≠ E6 impl Done；**不**翻转 #3b/#5a。
 
 **PRR-D01c Dashboard summary（2026-07-18）：**
 

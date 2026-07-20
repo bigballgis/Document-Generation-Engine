@@ -53,13 +53,16 @@ class ContentModuleWhereUsedServiceTest {
 
     @BeforeEach
     void setUp() {
+        ContentModuleNestingService nestingService = org.mockito.Mockito.mock(ContentModuleNestingService.class);
+        org.mockito.Mockito.lenient().when(nestingService.findNestingAncestors(MODULE_ID)).thenReturn(List.of());
         service = new ContentModuleWhereUsedService(
                 accessSupport,
                 groupAccessService,
                 versionRepository,
                 referenceRepository,
                 templateVersionRepository,
-                templateRepository
+                templateRepository,
+                nestingService
         );
         author = new ManagementSessionClaims(
                 "10000003", "Author", "a@example.com", AuthSource.LOCAL,
@@ -105,6 +108,9 @@ class ContentModuleWhereUsedServiceTest {
         assertThat(page.content()).hasSize(1);
         assertThat(page.content().getFirst().externalId()).isEqualTo("TPL-1");
         assertThat(page.content().getFirst().pinnedSemanticVersion()).isEqualTo("1.0.0");
+        assertThat(page.content().getFirst().referenceKind())
+                .isEqualTo(com.bank.docgen.contentmodule.domain.ContentModuleWhereUsedReferenceKind.DIRECT);
+        assertThat(page.content().getFirst().nestingDepth()).isZero();
     }
 
     @Test

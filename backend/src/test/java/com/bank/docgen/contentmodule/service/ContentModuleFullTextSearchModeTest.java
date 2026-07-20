@@ -61,7 +61,8 @@ class ContentModuleFullTextSearchModeTest {
                 groupAccessService,
                 accessSupport,
                 auditRecorder,
-                fullTextIndexWriter
+                fullTextIndexWriter,
+                org.mockito.Mockito.mock(com.bank.docgen.contentmodule.service.ContentModuleNestingService.class)
         );
         module = new ContentModuleEntity(
                 MODULE_ID, "MOD-FTS", "RETAIL", "FTS Module", "d", "[]", "10000003"

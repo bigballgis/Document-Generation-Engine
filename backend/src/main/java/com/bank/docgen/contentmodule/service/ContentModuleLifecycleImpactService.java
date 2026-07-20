@@ -42,6 +42,7 @@ public class ContentModuleLifecycleImpactService {
     private final TemplateRepository templateRepository;
     private final ApiPolicyRepository apiPolicyRepository;
     private final RuntimeGenerationAuditEventRepository runtimeAuditRepository;
+    private final ContentModuleNestingService nestingService;
 
     public ContentModuleLifecycleImpactService(
             ContentModuleAccessService accessSupport,
@@ -51,7 +52,8 @@ public class ContentModuleLifecycleImpactService {
             TemplateVersionRepository templateVersionRepository,
             TemplateRepository templateRepository,
             ApiPolicyRepository apiPolicyRepository,
-            RuntimeGenerationAuditEventRepository runtimeAuditRepository
+            RuntimeGenerationAuditEventRepository runtimeAuditRepository,
+            ContentModuleNestingService nestingService
     ) {
         this.accessSupport = accessSupport;
         this.groupAccessService = groupAccessService;
@@ -61,6 +63,7 @@ public class ContentModuleLifecycleImpactService {
         this.templateRepository = templateRepository;
         this.apiPolicyRepository = apiPolicyRepository;
         this.runtimeAuditRepository = runtimeAuditRepository;
+        this.nestingService = nestingService;
     }
 
     @Transactional(readOnly = true)
@@ -79,8 +82,13 @@ public class ContentModuleLifecycleImpactService {
             return emptyImpact();
         }
 
+        Set<UUID> closureVersionIds = new LinkedHashSet<>(versionIds);
+        for (var ancestor : nestingService.findNestingAncestors(module.getId())) {
+            closureVersionIds.add(ancestor.ancestorVersionId());
+        }
+
         List<TemplateContentModuleReferenceEntity> references =
-                referenceRepository.findByContentModuleVersionIdIn(versionIds);
+                referenceRepository.findByContentModuleVersionIdIn(closureVersionIds);
         Set<String> templateExternalIds = new LinkedHashSet<>();
         Set<UUID> publishedTemplateIds = new LinkedHashSet<>();
         Set<String> releaseVersions = new LinkedHashSet<>();

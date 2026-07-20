@@ -5,8 +5,10 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -29,6 +31,7 @@ final class StructuredContentDocxExpandSupport {
     private final int[] numberingCounters;
     private final BiConsumer<JsonNode, XWPFParagraph> writeBlockNodesReuseFirst;
     private final BiConsumer<JsonNode, XWPFParagraph> writeBlockNode;
+    private final Set<String> expansionStack = new HashSet<>();
 
     @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     StructuredContentDocxExpandSupport(
@@ -59,20 +62,32 @@ final class StructuredContentDocxExpandSupport {
 
     void expandContentModule(JsonNode node, XWPFParagraph paragraph) {
         String referenceKey = node.path("referenceKey").asText("").trim().toUpperCase(Locale.ROOT);
-        String pinnedStructure = pinnedModuleStructures.get(referenceKey);
-        if (pinnedStructure == null || pinnedStructure.isBlank()) {
+        if (!expansionStack.add(referenceKey)) {
             throw new DocxAssemblyException(
-                    ApiErrorCodes.CONTENT_MODULE_STRUCTURE_MISSING,
+                    ApiErrorCodes.CONTENT_MODULE_NESTING_CYCLE,
                     ApiErrorCategories.VALIDATION,
-                    "api.error.validation.contentModuleStructureMissing",
-                    "Content module pinned structure is missing for reference: " + referenceKey
+                    "api.error.validation.contentModuleNestingCycle",
+                    "Content module nesting cycle detected at reference: " + referenceKey
             );
         }
         try {
-            JsonNode root = objectMapper.readTree(pinnedStructure);
-            writeBlockNodesReuseFirst.accept(StructuredContentDocxWriter.resolveRootNodes(root), paragraph);
-        } catch (IOException ex) {
-            throw new DocxAssemblyException(ex);
+            String pinnedStructure = pinnedModuleStructures.get(referenceKey);
+            if (pinnedStructure == null || pinnedStructure.isBlank()) {
+                throw new DocxAssemblyException(
+                        ApiErrorCodes.CONTENT_MODULE_STRUCTURE_MISSING,
+                        ApiErrorCategories.VALIDATION,
+                        "api.error.validation.contentModuleStructureMissing",
+                        "Content module pinned structure is missing for reference: " + referenceKey
+                );
+            }
+            try {
+                JsonNode root = objectMapper.readTree(pinnedStructure);
+                writeBlockNodesReuseFirst.accept(StructuredContentDocxWriter.resolveRootNodes(root), paragraph);
+            } catch (IOException ex) {
+                throw new DocxAssemblyException(ex);
+            }
+        } finally {
+            expansionStack.remove(referenceKey);
         }
     }
 

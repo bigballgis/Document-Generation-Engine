@@ -69,6 +69,8 @@ class ContentModuleLifecycleImpactServiceTest {
                 groupAccessService,
                 new ObjectMapper()
         );
+        ContentModuleNestingService nestingService = org.mockito.Mockito.mock(ContentModuleNestingService.class);
+        org.mockito.Mockito.lenient().when(nestingService.findNestingAncestors(MODULE_ID)).thenReturn(List.of());
         service = new ContentModuleLifecycleImpactService(
                 accessSupport,
                 groupAccessService,
@@ -77,7 +79,8 @@ class ContentModuleLifecycleImpactServiceTest {
                 templateVersionRepository,
                 templateRepository,
                 apiPolicyRepository,
-                runtimeAuditRepository
+                runtimeAuditRepository,
+                nestingService
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",

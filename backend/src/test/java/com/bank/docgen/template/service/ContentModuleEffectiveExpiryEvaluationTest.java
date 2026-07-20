@@ -73,7 +73,8 @@ class ContentModuleEffectiveExpiryEvaluationTest {
                 contentModuleVersionRepository,
                 accessSupport,
                 templateCurrentVersionResolver,
-                groupAccessService
+                groupAccessService,
+                org.mockito.Mockito.mock(com.bank.docgen.contentmodule.service.ContentModuleNestingService.class)
         );
         moduleVersion = new ContentModuleVersionEntity(
                 MODULE_VERSION_ID,

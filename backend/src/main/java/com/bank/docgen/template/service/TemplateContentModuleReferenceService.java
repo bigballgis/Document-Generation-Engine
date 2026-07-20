@@ -5,7 +5,9 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
+import com.bank.docgen.contentmodule.api.ContentModuleNestingPublishSummaryView;
 import com.bank.docgen.contentmodule.service.ContentModuleAccessService;
+import com.bank.docgen.contentmodule.service.ContentModuleNestingService;
 import com.bank.docgen.sharedkernel.locale.LocaleLanguageCompatibility;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView;
@@ -45,6 +47,7 @@ public class TemplateContentModuleReferenceService {
     private final TemplateCurrentVersionResolver templateVersionSupport;
     private final TemplateContentModuleReferenceSupport referenceSupport;
     private final GroupAccessService groupAccessService;
+    private final ContentModuleNestingService nestingService;
 
     public TemplateContentModuleReferenceService(
             TemplateService templateService,
@@ -55,7 +58,8 @@ public class TemplateContentModuleReferenceService {
             ContentModuleVersionRepository contentModuleVersionRepository,
             ContentModuleAccessService ContentModuleAccessService,
             TemplateCurrentVersionResolver templateVersionSupport,
-            GroupAccessService groupAccessService
+            GroupAccessService groupAccessService,
+            ContentModuleNestingService nestingService
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -65,6 +69,7 @@ public class TemplateContentModuleReferenceService {
         this.contentModuleVersionRepository = contentModuleVersionRepository;
         this.templateVersionSupport = templateVersionSupport;
         this.groupAccessService = groupAccessService;
+        this.nestingService = nestingService;
         this.referenceSupport = new TemplateContentModuleReferenceSupport(
                 contentModuleRepository,
                 contentModuleVersionRepository,
@@ -364,6 +369,14 @@ public class TemplateContentModuleReferenceService {
                     ));
         }
         return pinnedStructures;
+    }
+
+    /**
+     * IBL-E6 / ADR-0067 — nesting cycle / depth / unpinned summary for publish-gate.
+     */
+    @Transactional(readOnly = true)
+    public ContentModuleNestingPublishSummaryView evaluateNestingClosure(UUID templateVersionId) {
+        return nestingService.evaluatePublishClosure(resolvePinnedContentStructures(templateVersionId));
     }
 
     @Transactional(readOnly = true)

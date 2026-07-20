@@ -522,6 +522,28 @@ class StructuredContentDocxWriterTest {
     }
 
     @Test
+    void failsClosedWhenContentModuleNestingCycleDetected() {
+        String structured = """
+                {"nodes":[{"type":"contentModuleRef","referenceKey":"A"}]}
+                """;
+        Map<String, String> pinned = Map.of(
+                "A",
+                "{\"nodes\":[{\"type\":\"contentModuleRef\",\"referenceKey\":\"B\"}]}",
+                "B",
+                "{\"nodes\":[{\"type\":\"contentModuleRef\",\"referenceKey\":\"A\"}]}"
+        );
+
+        assertThatThrownBy(() -> render(structured, Map.of(), pinned))
+                .isInstanceOf(DocxAssemblyException.class)
+                .satisfies(ex -> {
+                    DocxAssemblyException assemblyException = (DocxAssemblyException) ex;
+                    assertThat(assemblyException.errorCode()).isEqualTo("CONTENT_MODULE_NESTING_CYCLE");
+                    assertThat(assemblyException.messageKey())
+                            .isEqualTo("api.error.validation.contentModuleNestingCycle");
+                });
+    }
+
+    @Test
     void failsClosedWhenPinnedStructureBlank() {
         String structured = """
                 {"nodes":[{"type":"contentModuleRef","referenceKey":"CLAUSE-1"}]}

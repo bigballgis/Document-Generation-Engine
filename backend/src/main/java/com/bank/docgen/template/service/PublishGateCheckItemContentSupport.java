@@ -109,6 +109,53 @@ final class PublishGateCheckItemContentSupport {
         );
     }
 
+    List<PublishGateItemView> contentModuleNestingItems(UUID versionId) {
+        var nesting = contentModuleReferenceService.evaluateNestingClosure(versionId);
+        return List.of(
+                nestingItem(
+                        PublishGateCheckCode.CONTENT_MODULE_NESTING_CYCLE,
+                        nesting.cycleBlocking(),
+                        nesting.cycleDetails(),
+                        "nestingCycles=0",
+                        "api.publishGate.contentModuleNestingCycle.blocked",
+                        "api.publishGate.contentModuleNestingCycle.ready"
+                ),
+                nestingItem(
+                        PublishGateCheckCode.CONTENT_MODULE_NESTING_DEPTH_EXCEEDED,
+                        nesting.depthBlocking(),
+                        nesting.depthDetails(),
+                        "nestingDepthExceeded=0",
+                        "api.publishGate.contentModuleNestingDepthExceeded.blocked",
+                        "api.publishGate.contentModuleNestingDepthExceeded.ready"
+                ),
+                nestingItem(
+                        PublishGateCheckCode.CONTENT_MODULE_NESTING_UNPINNED,
+                        nesting.unpinnedBlocking(),
+                        nesting.unpinnedDetails(),
+                        "nestingUnpinned=0",
+                        "api.publishGate.contentModuleNestingUnpinned.blocked",
+                        "api.publishGate.contentModuleNestingUnpinned.ready"
+                )
+        );
+    }
+
+    private static PublishGateItemView nestingItem(
+            PublishGateCheckCode code,
+            boolean blocking,
+            List<String> details,
+            String clearDetail,
+            String blockedKey,
+            String readyKey
+    ) {
+        return new PublishGateItemView(
+                code,
+                !blocking,
+                blocking,
+                blocking ? blockedKey : readyKey,
+                blocking ? String.join(";", details) : clearDetail
+        );
+    }
+
     PublishGateItemView compositionInclusionReferenceItem(TemplateVersionEntity version) {
         List<String> dangling = danglingInclusionReferenceKeys(version);
         boolean blocking = !dangling.isEmpty();

@@ -83,7 +83,8 @@ class TemplateContentModuleReferenceServiceTest {
                 contentModuleVersionRepository,
                 accessSupport,
                 templateCurrentVersionResolver,
-                groupAccessService
+                groupAccessService,
+                org.mockito.Mockito.mock(com.bank.docgen.contentmodule.service.ContentModuleNestingService.class)
         );
         template = new TemplateEntity(
                 TEMPLATE_ID,
