@@ -4,6 +4,15 @@
 
 本文档用于整理金融信函低代码文档生成平台的角色、分组、对象权限和权限边界。当前内容仅基于已确认需求，不自行扩展未确认权限。
 
+> **SYS-NORM Confirmed intent (2026-07-21) — Pending implementation (Wave 5):** Management
+> role catalog compression to **six** roles is **Confirmed** — see
+> [ADR-0070 Accepted](../adr/authorization-security/0070-role-compression-six-roles.md)
+> and [system-normalization-program.md](../behavior/system-normalization-program.md) §2.6 / §6.
+> **Matrix table rewrite = Wave 5** `sys-norm-roles` (after Wave 5 BDD `ready`).
+> Until then, §3 / §13 / capability tables below remain the **current 8-role runtime baseline**.
+> Do **not** treat Wave 0 as having rewritten these tables. `DOCUMENT_AUTHOR` L1 display
+> labels remain **Pending** finalize.
+
 ## 相关文档
 
 - [文档索引](../README.md)
@@ -11,6 +20,8 @@
 - [产品需求说明](../product/PRD.md)
 - [领域模型](../domain/domain-model.md)
 - [文档治理规则](../governance.md)
+- [ADR-0070 Role compression (six roles)](../adr/authorization-security/0070-role-compression-six-roles.md)（Accepted — Wave 5 impl）
+- [System Normalization program](../plan/system-normalization-program-2026-07.md)
 - [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
 - [LR-D1 行为规格](../behavior/lrp-d1-audit-retention.md)
 - [CE-G04 Legal hold 行为规格](../behavior/ce-g04-legal-hold.md)（BDD-CE-G04；#75 — retention 豁免叠加，不改 ADR-0040/0048 正文）
@@ -48,6 +59,13 @@
 - 全局管理员可管理全部 API 管理配置；分组管理员只能管理被授权组范围内的 API 管理配置。
 
 ## 3. 角色清单
+
+> **Pending implementation (Wave 5):** Assignable catalog compression to six roles is
+> **Confirmed** by [ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md)
+> (`TEMPLATE_APPROVER` → `GROUP_ADMIN`; `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` →
+> `DOCUMENT_AUTHOR`; keep `TEMPLATE_TESTER` / `LEGAL_REVIEWER` / `AUDIT_ADMIN` /
+> `GLOBAL_ADMIN` / `GROUP_ADMIN`). **Do not** rewrite the tables below in Wave 0 — full
+> capability remap lands with Wave 5 BDD + matrix rewrite.
 
 | 角色 | 已确认说明 |
 | --- | --- |

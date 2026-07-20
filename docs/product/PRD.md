@@ -122,7 +122,7 @@ v1 正式业务出信由上游业务系统通过动态 API 间接触发；文档
 - 品牌资产槽位标识（`logoSlotLabel`）使用品牌代码 `REDBC` / `GREENBC` 作为专有名词，不进入 i18n 词条；面向用户的品牌显示名通过 `labelKey` 本地化。
 - `REDBC` 和 `GREENBC` logo 资产来源必须是官方批准的品牌资产包、企业内部品牌库或用户明确提供的已授权文件；公开网页抓取到的图片地址不能直接视为可入库正式资产。
 - logo 使用基线为：保持官方宽高比、不重绘、不拉伸、不擅自改色；默认放置在顶部全局头部品牌区，在白色或近白色背景上展示，并保留充足留白。
-- **正交声明（IBL-E4 / PD-9）：** 本节 `REDBC` / `GREENBC` 仅为**管理 UI 壳层主题**（BrandPreset）。文档产物信头/logo/默认签章等品牌资产由组范围 **DocumentBrand** + **LegalEntity** 绑定驱动，见 §6.3 IBL-E4；二者互不覆盖。
+- **正交声明（IBL-E4 / PD-9）：** 本节 `REDBC` / `GREENBC` 仅为**管理 UI 壳层主题**（BrandPreset）。文档产物信头/logo/默认签章等品牌资产历史由组范围 **DocumentBrand** + **LegalEntity** 绑定驱动（见 §6.3 IBL-E4 / ADR-0065）；二者互不覆盖。**SYS-NORM D1（2026-07-21）：** 前进方向见 [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) — 信头/logo/签章归 Letterhead/母版；壳层主题仍 UI-only。
 - 后台治理与管理界面主语言确认为英文。
 - 后台治理与管理界面采用白色背景作为默认版面基底。
 - 后台治理与管理界面采用经典 OA 桌面优先布局，基线包含顶部全局头部、左侧稳定导航和主工作区。
@@ -193,6 +193,12 @@ v1 正式业务出信由上游业务系统通过动态 API 间接触发；文档
 **IBL-E3 / PD-8（2026-07-20）：** 模板包可配置审批矩阵模式 `approvalMatrixMode`：`SINGLE_TRACK`（默认，兼容一级审批）或 `LEGAL_THEN_COMPLIANCE`（有序法务→合规两级；LEGAL 强制由法务审阅人 `LEGAL_REVIEWER` 判定）。管理 UI 须支持模式配置、阶段指示与分角色决策；Dashboard 分 LEGAL / APPROVAL 队列。CE-K08 法务元数据**仍可选**；母版/条款审批轨不改为多级。详情：[ibl-e3-legal-approval-matrix.md](../behavior/ibl-e3-legal-approval-matrix.md)、[ADR-0064 Accepted](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)（2026-07-20；Decision = E3-C\*；impl **Done** `233342d3` / `e81a6bac`）。**不**翻转 checklist **#3b** / **#5a**；**不**宣称 Wave E / go-live Done。
 
 **IBL-E4 / PD-9（2026-07-20）：** 组内可治理 **DocumentBrand**（文档品牌）与 **LegalEntity**（法人实体）目录；每法人实体必选绑定一个 ACTIVE 文档品牌。Runtime / preview / test-generation 可选 `context.legalEntityCode` 解析文档品牌并应用于产物信头/logo/可选默认签章；省略时走组默认法人或种子 `PLATFORM_DEFAULT`。模板可选 `allowedDocumentBrandCodes` allow-list。管理 UI 须支持品牌/实体目录、实体→品牌选择器、组默认与解析回显；壳层 `REDBC`/`GREENBC` 主题保持 UI-only。详情：[ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)、[ADR-0065 Accepted](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)（2026-07-20；Decision = E4-C\*；impl **Done** `4d810395` / `212c6be9`）。F27 的 `effectiveFrom`/bulk 半幅仍属 **IBL-E5**。**不**翻转 checklist **#3b** / **#5a**；**不**宣称 Wave E / go-live Done。
+
+> **SYS-NORM D1 supersession (2026-07-21):** Ongoing **DocumentBrand / LegalEntity management UX**
+> requirement above is **superseded** by [ADR-0071 Accepted](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)
+> (letterhead/logo/seal in Letterhead/master; keep Legal holds; shell themes UI-only).
+> ADR-0065 Decision body + IBL-E4 impl evidence remain historical. Forward product surface
+> follows D1 (Wave 6 runtime; nav may Wave 1). See [system-normalization-program.md](../behavior/system-normalization-program.md).
 
 **IBL-E5 / F27 residual（2026-07-20）：** 模板发布前，若任一钉扎条款/内容模块版本的 `effectiveFrom` 尚未到达（UTC Instant），发布门禁硬阻断（`CONTENT_MODULE_EFFECTIVE_NOT_STARTED`；与 CE-K08 `effectiveTo` 过期门禁正交）。作者仍可在 CM **草稿**版本预填未来 `effectiveFrom`（「schedule」元数据）；**不**引入模板延迟发布 / `SCHEDULED` 生命周期。组范围提供管理 API 批量改钉草稿引用（dry-run + 审计；复用既有钉扎写校验）；管理 UI bulk 控制台非本叶必交付。详情：[ibl-e5-effectivefrom-bulk-repin.md](../behavior/ibl-e5-effectivefrom-bulk-repin.md)、[ADR-0066 Accepted](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)（2026-07-20；Decision = E5-C\*；impl **Done** `688f9e58` / `20ead1ce`）。**不**翻转 checklist **#3b** / **#5a**；**不**宣称 Wave E / go-live Done。
 
