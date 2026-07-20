@@ -1,10 +1,11 @@
 # Demo Typography & Layout — Human Review Checklist
 
 **Document status:** `ready` (template — reviewer sign-off **pending**)  
-**Version:** 1.0.0  
+**Version:** 1.0.1  
 **Authored:** 2026-07-08  
-**Phase:** P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE (**P23-T16**)  
-**BDD:** `BDD-DEMO-TYP-015` (pilot samples), `BDD-DEMO-TYP-020` (breadth — ≥2 CORP + ≥2 RETAIL)
+**Phase:** P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE (**P23-T16** — phase **Done**; checklist execution still operational)  
+**BDD:** `BDD-DEMO-TYP-015` (pilot samples), `BDD-DEMO-TYP-020` (breadth — ≥2 CORP + ≥2 RETAIL)  
+**Wave A:** After content refresh, re-spot-check against [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) quality bar (Q1–Q8) — TM **#141** **In Progress** (not Done). Do **not** invent Word-host evidence.
 
 ---
 
@@ -12,7 +13,7 @@
 
 This checklist is the **human typography acceptance gate** for fundraising and demo evidence. It complements automated POI/JUnit assertions (**P23-T15**) and Playwright runtime generate E2E (**P23-T13**). A typography reviewer opens generated DOCX samples in Microsoft Word (or equivalent) and confirms bank-letter-grade visual quality.
 
-**Non-goals:** Management UI review; perfect Word↔PDF pagination parity (see ADR-0042 / LR-A7).
+**Non-goals:** Management UI review; perfect Word↔PDF pagination parity (see ADR-0042 / LR-A7). Wave A content refresh does **not** reopen P23 task status.
 
 ---
 

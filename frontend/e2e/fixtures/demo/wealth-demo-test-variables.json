@@ -1,6 +1,6 @@
 {
-  "catalogMarker": "wealth-demo-v3-bank-grade",
-  "name": "Private Wealth Investment Statement — Executive Sample",
+  "catalogMarker": "wealth-demo-v4-wave-a",
+  "name": "Private Wealth Investment Statement — Ashford Family Trust",
   "required": true,
   "variables": {
     "bankName": "Meridian Private Wealth",

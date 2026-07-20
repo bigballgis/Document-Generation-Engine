@@ -79,9 +79,9 @@ final class DemoFullFlowPublishSupport {
         var testDataSet = testDataSetService.create(
                 templateId,
                 new UpsertTestDataSetRequest(
-                        "Demo full-flow required sample",
-                        "Automated demo catalog seed",
-                        Map.of("customerName", "Alice"),
+                        "Retail customer correspondence — Margaret Sinclair",
+                        "Wave A full-flow bank letter seed",
+                        Map.of("customerName", "Margaret Sinclair"),
                         true,
                         null,
                         null
@@ -91,7 +91,7 @@ final class DemoFullFlowPublishSupport {
 
         previewGenerationService.testGenerate(
                 templateId,
-                new TestGenerateRequest(Map.of("customerName", "Alice"), testDataSet.testDataSetId()),
+                new TestGenerateRequest(Map.of("customerName", "Margaret Sinclair"), testDataSet.testDataSetId()),
                 author
         );
         batchTestGenerationService.runBatch(

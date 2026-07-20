@@ -63,7 +63,7 @@ foreach ($Clause in ($Clauses | Sort-Object { $_.Code })) {
     $Lines.Add("-- $($Clause.Code) -> $anchorId ($(@($Clause.Paragraphs).Count) paragraphs)")
     $Lines.Add(@"
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
-SELECT '$ModuleId', '$(Escape-Sql $Clause.Code)', 'CORP', '$(Escape-Sql $Clause.Name)', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
+SELECT '$ModuleId', '$(Escape-Sql $Clause.Code)', 'CORP', '$(Escape-Sql $Clause.Name)', 'Wholesale FOL LMA-style standard clause', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
     SELECT 1 FROM content_module WHERE module_code = '$(Escape-Sql $Clause.Code)' AND deleted_at IS NULL
 );
@@ -74,7 +74,7 @@ INSERT INTO content_module_version (
 )
 SELECT '$VersionId', cm.id, '1.0.0', 'APPROVED', 'ACTIVE',
        '$(Escape-Sql $Json)',
-       'Executive demo import', '10000003', '10000007'
+       'Wholesale FOL LMA-style import', '10000003', '10000007'
 FROM content_module cm
 WHERE cm.module_code = '$(Escape-Sql $Clause.Code)' AND cm.deleted_at IS NULL
   AND NOT EXISTS (
@@ -84,7 +84,7 @@ WHERE cm.module_code = '$(Escape-Sql $Clause.Code)' AND cm.deleted_at IS NULL
 
 UPDATE content_module_version v
 SET content_structure_json = '$(Escape-Sql $Json)',
-    change_description = 'Executive demo refresh — LMA-style expanded clauses',
+    change_description = 'Wave A refresh - LMA-style operative clauses',
     updated_at = (NOW() AT TIME ZONE 'UTC'),
     updated_by = '10000007'
 FROM content_module cm

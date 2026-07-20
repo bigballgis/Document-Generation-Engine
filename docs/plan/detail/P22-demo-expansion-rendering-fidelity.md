@@ -1,11 +1,13 @@
 # P22 — Demo Expansion & Rendering Fidelity (Detailed Plan)
 
 **Phase ID:** `P22-DEMO-EXPANSION`  
-**Phase status:** **Done** (closed 2026-07-04; T01–T15 complete; gates **GREEN**) — **honest carry-forward:** T05–T11 delivered **package scaffolds** («scaffold; rich bindings/catalog generation pending»); bank-grade typography, rich bindings, and foreign-bank-letter content → **[P23](./P23-demo-typography-layout-excellence.md)** (activated 2026-07-08) | **Depends on:** P3, P4, P18 (authoring model Done; **rendering-side gap** closed)  
+**Phase status:** **Done** (closed 2026-07-04; T01–T15 complete; gates **GREEN**) — **honest carry-forward:** T05–T11 delivered **package scaffolds** («scaffold; rich bindings/catalog generation pending»); bank-grade typography, rich bindings, and foreign-bank-letter content → **[P23](./P23-demo-typography-layout-excellence.md)** (**Done** 2026-07-08) | **Depends on:** P3, P4, P18 (authoring model Done; **rendering-side gap** closed)  
 **BDD:** [demo-expansion-behavior-spec.md](../../requirements/demo-expansion-behavior-spec.md) (`BDD-DEMO-EXP-001`…`015`, readiness **ready**)  
 **Gate status:** **GREEN** — `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (2026-07-03); `pnpm -C frontend lint`, `type-check`, `test` (**646**), `build` ✓; BDD-DEMO-EXP-001…015 regression tests green.
 
-> **Single-active-phase invariant:** **P23** is the sole formal phase `In Progress` (activated 2026-07-08). **P22 Done** (engine + scaffold). **LRP** Wave LR-A `In Progress` as cross-cutting program. **CDP** runs in parallel — see [competitiveness-deepening-program.md](../competitiveness-deepening-program.md).
+> **Post-Done ops refresh (2026-07-20 — does not reopen P22):** ad-hoc NON-CE leaf **#141** `bank-letter-demo-refresh` Wave A uplifts **existing** package content after remediations — see [bank-letter-demo-refresh.md](./bank-letter-demo-refresh.md). Do **not** flip P22 status out of **Done**.
+
+> **Historical note:** P23 was the sole formal phase when activated (2026-07-08); P22/P23 are both **Done**. Formal phase now **None**; host sole-active is NON-CE Wave A (ops-demo).
 
 ## 1. Purpose
 

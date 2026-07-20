@@ -48,7 +48,8 @@ function Invoke-MgmtApi {
 
 function Get-TemplateDetailByExternalId {
     param([string]$ExternalId, [string]$AccessToken)
-    $list = Invoke-MgmtApi GET '/templates?size=200' $AccessToken
+    $searchPath = "/templates?search=$([uri]::EscapeDataString($ExternalId))&searchMode=EXTERNAL_ID&size=20"
+    $list = Invoke-MgmtApi GET $searchPath $AccessToken
     $content = Get-DemoApiResultItems -Response $list
     return $content | Where-Object { $_.externalId -eq $ExternalId } | Select-Object -First 1
 }

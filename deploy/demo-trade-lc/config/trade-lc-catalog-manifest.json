@@ -1,5 +1,5 @@
 {
-  "catalogMarker": "trade-lc-demo-v3-bank-grade",
+  "catalogMarker": "trade-lc-demo-v4-wave-a",
   "packageCode": "trade-lc",
   "groupCode": "TRADE",
   "pageNumberingProfile": "GLOBAL_ONLY",
@@ -35,7 +35,7 @@
     }
   ],
   "contentModuleRefs": [
-    {"referenceKey": "TRADE-LC-UCP-CLAUSE", "moduleCode": "TRADE-LC-STD", "semanticVersion": "2.0.0"},
-    {"referenceKey": "TRADE-GUARANTEE-URDG-CLAUSE", "moduleCode": "TRADE-GUARANTEE-STD", "semanticVersion": "2.0.0"}
+    {"referenceKey": "TRADE-LC-UCP-CLAUSE", "moduleCode": "TRADE-LC-STD", "semanticVersion": "4.0.0"},
+    {"referenceKey": "TRADE-GUARANTEE-URDG-CLAUSE", "moduleCode": "TRADE-GUARANTEE-STD", "semanticVersion": "4.0.0"}
   ]
 }

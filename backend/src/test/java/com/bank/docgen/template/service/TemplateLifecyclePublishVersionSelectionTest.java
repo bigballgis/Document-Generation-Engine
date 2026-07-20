@@ -2,6 +2,7 @@ package com.bank.docgen.template.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,8 +21,10 @@ import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.PublishTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
+import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
@@ -36,6 +39,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -158,10 +162,50 @@ class TemplateLifecyclePublishVersionSelectionTest {
         assertThat(candidateVersion.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
         assertThat(candidateVersion.getMasterRevisionId()).isEqualTo(revisionId);
         assertThat(publishedVersion.getReleaseVersion()).isEqualTo("1.0.0");
+        assertThat(publishedVersion.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
         verify(templateVersionRepository).save(candidateVersion);
         verify(contentModuleReferenceService).lockReferencesForPublish(candidateVersion.getId());
         verify(renderProfileService).lockForPublish(candidateVersion);
         verify(collaborationWorkItemWriter).resolveOpenPendingReleaseWorkItems(template, groupAdmin);
+    }
+
+    @Test
+    void publishSameReleaseVersionStopsPriorPublishedRow() {
+        TemplateVersionEntity priorPublished = version(1, "1.0.0", TemplateLifecycleStatus.PUBLISHED);
+        TemplateVersionEntity candidateVersion = version(2, null, TemplateLifecycleStatus.DRAFT);
+
+        when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
+        org.mockito.Mockito.doNothing().when(publishGateService).assertReady(templateId, groupAdmin);
+        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
+                .thenReturn(List.of(candidateVersion, priorPublished));
+        when(templateService.toDetail(template)).thenReturn(detail());
+        when(messageResolver.resolve(any(), any())).thenReturn("Published release 1.0.0");
+        stubApprovedMasterPin();
+
+        service.publish(templateId, new PublishTemplateRequest("1.0.0", true), groupAdmin);
+
+        assertThat(candidateVersion.getReleaseVersion()).isEqualTo("1.0.0");
+        assertThat(candidateVersion.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
+        assertThat(priorPublished.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.STOPPED);
+        assertThat(priorPublished.getReleaseVersion()).isNull();
+        verify(templateVersionRepository).save(priorPublished);
+        verify(templateVersionRepository).save(candidateVersion);
+
+        ArgumentCaptor<TemplateLifecycleRecordEntity> recordCaptor =
+                ArgumentCaptor.forClass(TemplateLifecycleRecordEntity.class);
+        verify(lifecycleRecordRepository, atLeastOnce()).save(recordCaptor.capture());
+        assertThat(recordCaptor.getAllValues())
+                .extracting(TemplateLifecycleRecordEntity::getAction)
+                .contains(LifecycleAction.DEACTIVATE_VERSION, LifecycleAction.PUBLISH);
+        TemplateLifecycleRecordEntity deactivate = recordCaptor.getAllValues().stream()
+                .filter(record -> record.getAction() == LifecycleAction.DEACTIVATE_VERSION)
+                .findFirst()
+                .orElseThrow();
+        assertThat(deactivate.getFromStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
+        assertThat(deactivate.getToStatus()).isEqualTo(TemplateLifecycleStatus.STOPPED);
+        assertThat(deactivate.getReleaseVersion()).isEqualTo("1.0.0");
+        assertThat(deactivate.getActorUsername()).isEqualTo(groupAdmin.username());
     }
 
     private void stubApprovedMasterPin() {

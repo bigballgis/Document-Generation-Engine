@@ -13,11 +13,30 @@ SELECT 'b2000001-0001-4000-8000-000000000003', cm.id, '3.0.0', 'APPROVED', 'ACTI
          {"type":"paragraph","text":"Early Repayment: If you repay all or part of the Loan during the fixed-rate period, an early repayment charge may apply as set out in this offer. Overpayments of up to the maximum annual overpayment percentage may be made without charge. After the fixed-rate period, no early repayment charge applies unless otherwise stated."},
          {"type":"paragraph","text":"Fees: An arrangement fee and valuation fee may apply as disclosed in the European Standardised Information Sheet (ESIS) provided to you. No undisclosed fees will be charged under this mortgage."},
          {"type":"paragraph","text":"Complaints: If you are dissatisfied with our service, please contact Meridian Home Finance Customer Relations, PO Box 4400, Manchester M1 4HQ, or call 0800 123 4567. If your complaint is not resolved, you may refer it to the Financial Ombudsman Service, Exchange Tower, London E14 9SR."},
-         {"type":"paragraph","text":"Regulation: This mortgage is regulated by the Financial Conduct Authority under the Mortgage Conduct of Business rules. Your home may be repossessed if you do not keep up repayments on your mortgage."}
+         {"type":"paragraph","text":"Regulation: This mortgage is regulated by the Financial Conduct Authority under the Mortgage Conduct of Business rules. Your home may be repossessed if you do not keep up repayments on your mortgage."},
+         {"type":"paragraph","text":"Governing law: This offer and the mortgage deed are governed by the laws of England and Wales. The courts of England and Wales have exclusive jurisdiction over disputes arising from the mortgage."},
+         {"type":"paragraph","text":"Acceptance: To accept this offer, sign and return the enclosed acceptance form by the offer expiry date. No binding mortgage contract arises until we receive your acceptance and all conditions precedent are satisfied."}
        ]}',
-       'Mortgage demo v3 bank-grade import', '10000003', '10000007'
+       'Mortgage demo Wave A bank-grade import', '10000003', '10000007'
 FROM content_module cm WHERE cm.module_code = 'MORTGAGE-STD-TERMS' AND cm.deleted_at IS NULL
   AND NOT EXISTS (SELECT 1 FROM content_module_version v WHERE v.module_id = cm.id AND v.semantic_version = '3.0.0');
+
+UPDATE content_module_version v
+SET content_structure_json = '{"blocks":[
+         {"type":"paragraph","text":"Interest: Interest is calculated daily on the outstanding balance of the Loan and applied monthly. The interest rate applicable to the Loan is set out in the Mortgage Particulars. After the fixed-rate period, the rate will revert to the reversion rate stated in this offer, which may vary from time to time."},
+         {"type":"paragraph","text":"Repayments: You must pay the monthly instalment on the first day of each calendar month by direct debit. Each instalment comprises principal and interest calculated so that the Loan is repaid in full by the end of the Term, assuming all payments are made on time and no overpayments are made."},
+         {"type":"paragraph","text":"Early Repayment: If you repay all or part of the Loan during the fixed-rate period, an early repayment charge may apply as set out in this offer. Overpayments of up to the maximum annual overpayment percentage may be made without charge. After the fixed-rate period, no early repayment charge applies unless otherwise stated."},
+         {"type":"paragraph","text":"Fees: An arrangement fee and valuation fee may apply as disclosed in the European Standardised Information Sheet (ESIS) provided to you. No undisclosed fees will be charged under this mortgage."},
+         {"type":"paragraph","text":"Complaints: If you are dissatisfied with our service, please contact Meridian Home Finance Customer Relations, PO Box 4400, Manchester M1 4HQ, or call 0800 123 4567. If your complaint is not resolved, you may refer it to the Financial Ombudsman Service, Exchange Tower, London E14 9SR."},
+         {"type":"paragraph","text":"Regulation: This mortgage is regulated by the Financial Conduct Authority under the Mortgage Conduct of Business rules. Your home may be repossessed if you do not keep up repayments on your mortgage."},
+         {"type":"paragraph","text":"Governing law: This offer and the mortgage deed are governed by the laws of England and Wales. The courts of England and Wales have exclusive jurisdiction over disputes arising from the mortgage."},
+         {"type":"paragraph","text":"Acceptance: To accept this offer, sign and return the enclosed acceptance form by the offer expiry date. No binding mortgage contract arises until we receive your acceptance and all conditions precedent are satisfied."}
+       ]}',
+    change_description = 'Wave A refresh - mortgage standard terms',
+    updated_at = (NOW() AT TIME ZONE 'UTC'),
+    updated_by = '10000007'
+FROM content_module cm
+WHERE v.module_id = cm.id AND cm.module_code = 'MORTGAGE-STD-TERMS' AND cm.deleted_at IS NULL AND v.semantic_version = '3.0.0';
 
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'b1000001-0001-4000-8000-000000000002', 'MORTGAGE-PROP-COV', 'RETAIL', 'Mortgage Property Covenants', 'Property maintenance, insurance and occupancy covenants', '[]', '10000003', '10000003'

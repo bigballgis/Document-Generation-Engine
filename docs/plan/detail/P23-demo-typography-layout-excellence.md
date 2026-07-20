@@ -3,10 +3,12 @@
 **Phase ID:** `P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE`  
 **Phase status:** **Done** (closed 2026-07-08; T01–T16 complete; automated acceptance green; human checklist template published — reviewer sign-off operational follow-up)  
 **Depends on:** P22 (**Done** — rendering engine + package scaffold), P18/P4 (authoring + pipeline Done), LRP Wave LR-A (font baseline **LR-A2**; pagination corpus **LR-A7**)  
-**Task Master mirror:** `.taskmaster/tasks/tasks.json` tasks **4–8** (foreign-bank-letter grade rewrites + publish + generate + evidence)  
+**Task Master mirror:** `.taskmaster/tasks/tasks.json` tasks **4–8** (foreign-bank-letter grade rewrites + publish + generate + evidence) — **Done**  
 **BDD:** `docs/requirements/demo-typography-layout-behavior-spec.md` — **ready** (P23-T01 Done 2026-07-08; `BDD-DEMO-TYP-001`…`020`; see §6)
 
 > **Single-active-phase invariant:** **P23 closed Done** (2026-07-08). No formal phase `In Progress` until next activation. **P22 remains Done** with honest carry-forward note (T05–T11 scaffold-only → P23 closed). **LRP** Wave LR-A **Done** (2026-07-10; A1–A7; not a formal phase). **LR-A7** pagination corpus was unblocked by P23 demo pack.
+>
+> **Post-Done ops refresh (2026-07-20 — does not reopen P23):** ad-hoc NON-CE leaf **#141** `bank-letter-demo-refresh` Wave A is the host **sole-active** delivery leaf after remediations — see [bank-letter-demo-refresh.md](./bank-letter-demo-refresh.md) + BDD [bank-letter-demo-refresh.md](../../behavior/bank-letter-demo-refresh.md). Wave B expand queued as **#142** pending. Do **not** flip P23 status out of **Done**.
 
 ---
 

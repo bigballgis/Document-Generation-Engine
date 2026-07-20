@@ -1,6 +1,6 @@
 {
-  "catalogMarker": "full-flow-layout-v2-bank-style-manifest",
-  "name": "Demo Full-Flow Retail Letter — Executive Sample",
+  "catalogMarker": "full-flow-layout-v3-wave-a",
+  "name": "Retail Customer Correspondence — Account Confirmation",
   "required": true,
   "variables": {
     "customerName": "Margaret Sinclair"

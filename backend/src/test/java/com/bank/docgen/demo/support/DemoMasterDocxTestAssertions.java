@@ -10,7 +10,10 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 public final class DemoMasterDocxTestAssertions {
 
     private static final Pattern FORBIDDEN_PLACEHOLDER_PATTERN = Pattern.compile(
-            "LOREM|TODO|\\{\\{placeholder|placeholder text",
+            "LOREM|TODO|\\{\\{placeholder|placeholder text|"
+                    + "for the executive demonstration dataset|"
+                    + "will be expanded in the final documentation set|"
+                    + "executive test data set",
             Pattern.CASE_INSENSITIVE
     );
 

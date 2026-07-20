@@ -24,7 +24,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 public final class DemoRetailLetterheadDocxBuilder {
 
   /** Bump when page layout / header / footer / style catalog changes. */
-  public static final String MASTER_LAYOUT_VERSION = "full-flow-layout-v2-bank-style-manifest";
+  public static final String MASTER_LAYOUT_VERSION = "full-flow-layout-v3-wave-a";
 
   private DemoRetailLetterheadDocxBuilder() {
   }
@@ -60,6 +60,11 @@ public final class DemoRetailLetterheadDocxBuilder {
       DemoMasterDocxPageNumberSupport.addGlobalPageNumberFields(pageLine);
 
       addCenteredTitle(document, "Customer Correspondence");
+      XWPFParagraph intro = document.createParagraph();
+      XWPFRun introRun = intro.createRun();
+      introRun.setFontFamily("Calibri");
+      introRun.setFontSize(10);
+      introRun.setText("Meridian Everyday Current Account — correspondence confirmation");
       XWPFParagraph anchorParagraph = document.createParagraph();
       XWPFRun anchorRun = anchorParagraph.createRun();
       anchorRun.setFontFamily("Calibri");
@@ -110,7 +115,7 @@ public final class DemoRetailLetterheadDocxBuilder {
       footerRun.setColor("888888");
       footerRun.setFontFamily("Calibri");
       footerRun.setText(
-          "Demo Retail Bank is a fictitious entity for automated testing only. This is not legal or financial advice."
+          "Meridian Retail Banking — authorised by the PRA and regulated by the FCA and PRA. FSCS protected deposits."
       );
 
       DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);

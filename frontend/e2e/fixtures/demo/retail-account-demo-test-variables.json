@@ -1,9 +1,9 @@
 {
-  "catalogMarker": "retail-account-demo-v3-bank-grade",
+  "catalogMarker": "retail-account-demo-v4-wave-a",
   "testDataSets": [
     {
       "id": "retail-open-executive",
-      "label": "Retail Account Opening — P23 Executive Sample",
+      "label": "Retail Account Opening Confirmation — Meridian Everyday",
       "variables": {
         "bankName": "Meridian Retail Banking",
         "bankAddress": "42 High Street, Manchester M1 1AA, United Kingdom",
@@ -40,7 +40,7 @@
     },
     {
       "id": "retail-balance-executive",
-      "label": "Retail Balance Confirmation — P23 Executive Sample",
+      "label": "Retail Balance Confirmation — Meridian Reward Saver",
       "variables": {
         "bankName": "Meridian Retail Banking",
         "bankAddress": "42 High Street, Manchester M1 1AA, United Kingdom",

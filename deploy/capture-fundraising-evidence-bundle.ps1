@@ -35,7 +35,8 @@ function Get-Sha256Hex([string]$FilePath) {
 
 function Get-TemplateByExternalId {
     param([string]$ExternalId, [string]$Token)
-    $list = Invoke-MgmtApi GET '/templates?size=200' $Token
+    $searchPath = "/templates?search=$([uri]::EscapeDataString($ExternalId))&searchMode=EXTERNAL_ID&size=20"
+    $list = Invoke-MgmtApi GET $searchPath $Token
     $content = Get-DemoApiResultItems -Response $list
     return $content | Where-Object { $_.externalId -eq $ExternalId } | Select-Object -First 1
 }

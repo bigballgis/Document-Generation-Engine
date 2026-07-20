@@ -40,10 +40,41 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
 
     public static final String DEMO_FULL_FLOW_EXTERNAL_ID = "DEMO-FULL-FLOW-LETTER";
     static final String DEMO_FULL_FLOW_NAME = "Demo Full-Flow Retail Letter";
-    static final String DEMO_FULL_FLOW_RELEASE_VERSION = "1.0.0";
+    static final String DEMO_FULL_FLOW_RELEASE_VERSION = "1.1.0";
     static final String DEMO_FULL_FLOW_MASTER_LAYOUT_VERSION = DemoRetailLetterheadDocxBuilder.MASTER_LAYOUT_VERSION;
+    /**
+     * Bank-grade retail correspondence binding for DEMO-FULL-FLOW-LETTER (Wave A).
+     * Keeps {@code customerName} as the sole required variable for E2E compatibility.
+     */
     private static final String STRUCTURED_BINDING_JSON =
-            "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"variable\",\"key\":\"customerName\"}]}]}";
+            "{\"schemaVersion\":\"1.0\",\"nodes\":["
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"Meridian Retail Banking\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"42 High Street, Manchester M1 1AA\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"Date: 6 July 2026\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"Our ref: MRB-FF-2026-001042\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"Dear \"},"
+                    + "{\"type\":\"emphasis\",\"variant\":\"bold\",\"children\":[{\"type\":\"variable\",\"key\":\"customerName\"}]},"
+                    + "{\"type\":\"textRun\",\"value\":\",\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"Re: Confirmation of recent account correspondence — Meridian Everyday Current Account\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"We write to confirm that we have received and processed your recent instructions relating to your retail banking relationship with Meridian Retail Banking. This letter is issued for your records and does not amend the Account terms and conditions unless expressly stated below.\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"Account details: sort code 60-16-13; account number ending 6819. Please quote our reference above in any further correspondence.\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"If any detail in this letter is incorrect, please contact Customer Service on 0800 123 4567 within 14 days of the date of this letter.\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"Governing law: This letter and your Account are governed by the laws of England and Wales. Eligible deposits are protected by the Financial Services Compensation Scheme up to the applicable limit.\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"SignatureBlock\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"Yours sincerely,\"}]},"
+                    + "{\"type\":\"paragraph\",\"styleRef\":\"SignatureBlock\",\"children\":["
+                    + "{\"type\":\"textRun\",\"value\":\"Customer Service — Meridian Retail Banking\"}]}"
+                    + "]}";
 
     private final MasterDocumentRepository masterDocumentRepository;
     private final MasterDocumentService masterDocumentService;

@@ -1,6 +1,6 @@
 {
-  "catalogMarker": "credit-limit-demo-v3-bank-grade",
-  "name": "Credit Limit Confirmation — Executive Sample",
+  "catalogMarker": "credit-limit-demo-v4-wave-a",
+  "name": "Revolving Credit Limit Confirmation — Northgate Manufacturing",
   "required": true,
   "variables": {
     "bankName": "Meridian Global Banking Corporation",

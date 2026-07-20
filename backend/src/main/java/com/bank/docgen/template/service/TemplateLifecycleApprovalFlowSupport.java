@@ -261,6 +261,10 @@ final class TemplateLifecycleApprovalFlowSupport {
         template.setUpdatedBy(session.username());
         templateRepository.save(template);
         TemplateVersionEntity version = eligibility.requireReleaseCandidateVersion(templateId);
+        // Demo re-import / clone-then-publish may reuse the same releaseVersion string.
+        // Stop any older PUBLISHED row with that version so runtime resolution stays unique.
+        supersedePublishedVersionsWithSameRelease(
+                templateId, version.getId(), request.releaseVersion(), template, session);
         version.setReleaseVersion(request.releaseVersion());
         version.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
         renderProfileService.lockForPublish(version);
@@ -277,6 +281,52 @@ final class TemplateLifecycleApprovalFlowSupport {
                 request.releaseVersion(), session);
         collaborationWorkItemWriter.resolveOpenPendingReleaseWorkItems(template, session);
         return templateService.toDetail(template);
+    }
+
+    private void supersedePublishedVersionsWithSameRelease(
+            UUID templateId,
+            UUID keepVersionId,
+            String releaseVersion,
+            TemplateEntity template,
+            ManagementSessionClaims session
+    ) {
+        if (releaseVersion == null || releaseVersion.isBlank()) {
+            return;
+        }
+        for (TemplateVersionEntity other : templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId)) {
+            if (other.getId().equals(keepVersionId)) {
+                continue;
+            }
+            if (other.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED) {
+                continue;
+            }
+            if (!releaseVersion.equals(other.getReleaseVersion())) {
+                continue;
+            }
+            other.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
+            // Clear release_version so legacy Optional finders cannot NonUnique-match
+            // STOPPED + PUBLISHED rows that share the same version string.
+            other.setReleaseVersion(null);
+            templateVersionRepository.save(other);
+            // Same audit shape as TemplateLifecycleVersionSupport.deactivateVersion:
+            // DEACTIVATE_VERSION / PUBLISHED → STOPPED, releaseVersion retained on the record.
+            transitions.recordLifecycle(
+                    template,
+                    LifecycleAction.DEACTIVATE_VERSION,
+                    TemplateLifecycleStatus.PUBLISHED,
+                    TemplateLifecycleStatus.STOPPED,
+                    null,
+                    messageResolver.resolve("api.audit.lifecycle.supersededSameRelease", releaseVersion),
+                    releaseVersion,
+                    session
+            );
+            LOG.info(
+                    "Superseded prior PUBLISHED template_version {} for template {} release {}",
+                    other.getId(),
+                    templateId,
+                    releaseVersion
+            );
+        }
     }
 
     private PinnedMasterSnapshot resolvePinnedMaster(TemplateEntity template) {

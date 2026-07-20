@@ -1,10 +1,11 @@
 # Fundraising Demo — Evidence Summary
 
 **Document status:** `ready`  
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Authored:** 2026-07-08  
-**Phase:** P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE (**P23-T16**); taskmaster **#8**  
-**BDD:** `BDD-DEMO-TYP-011`…`013`, `BDD-DEMO-TYP-015`, `BDD-DEMO-TYP-020`
+**Phase:** P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE (**P23-T16**); taskmaster **#8** (**Done**)  
+**BDD (historical):** `BDD-DEMO-TYP-011`…`013`, `BDD-DEMO-TYP-015`, `BDD-DEMO-TYP-020`  
+**Post-remediation refresh:** Wave A **In Progress** — TM **#141** / [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) (`BDD-DEMO-REFRESH-001`…`014`); plan [detail](../plan/detail/bank-letter-demo-refresh.md); evidence stub [plan/evidence/bank-letter-demo-refresh/](../plan/evidence/bank-letter-demo-refresh/README.md). **Do not** claim Wave A Done until refreshed generate artifacts are archived. Wave B expand (**#142**) **OUT**.
 
 ---
 
@@ -12,11 +13,15 @@
 
 Human-readable index mapping each published demo template to its **evidence artifacts**: deploy package, generate script output, E2E coverage, POI/JUnit tests, and manifest paths. Use with [demo-typography-review-checklist.md](./demo-typography-review-checklist.md) for fundraising sign-off.
 
-**Prerequisite commands** (host compile; Docker runtime):
+**Coverage unchanged:** still the **13** runtime `externalId`s (eight packages + `DEMO-FULL-FLOW-LETTER`). Wave A uplifts **content quality** of those same templates; it does **not** add new letter families.
+
+**Prerequisite commands** (host compile; Docker runtime — prefer queued deploy):
 
 ```powershell
-.\scripts\docker-deploy.ps1
-.\deploy\import-all-demos.ps1 -BackendUrl http://localhost:8080 -SkipSql
+.\scripts\docker-deploy-queue.ps1
+# Optional ops-safe cleanup (see deploy/demo-shared/README.md) — not a DB DROP
+.\deploy\demo-fol\cleanup-fol-test-data-sets.ps1 -WhatIf
+.\deploy\import-all-demos.ps1 -BackendUrl http://localhost:8080
 .\deploy\publish-all-demos.ps1 -BackendUrl http://localhost:8080
 .\deploy\generate-all-demos.ps1 -BackendUrl http://localhost:8080
 .\deploy\capture-fundraising-evidence-bundle.ps1 -BackendUrl http://localhost:8080 -ContinueOnGenerateFailure
@@ -109,10 +114,14 @@ docs/evidence/
 
 | Document | Relationship |
 | --- | --- |
-| [demo-typography-layout-behavior-spec.md](../requirements/demo-typography-layout-behavior-spec.md) | Observable evidence §12 |
+| [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md) | Wave A content refresh BDD — **In Progress** (not Done) |
+| [bank-letter-demo-refresh plan](../plan/detail/bank-letter-demo-refresh.md) | Wave A exit criteria + vetoes |
+| [plan/evidence/bank-letter-demo-refresh/](../plan/evidence/bank-letter-demo-refresh/README.md) | Stub for Wave A generate artifacts (later) |
+| [demo-typography-layout-behavior-spec.md](../requirements/demo-typography-layout-behavior-spec.md) | Observable evidence §12 (P23 — **Done**; do not reopen) |
 | [P23 detail plan](../plan/detail/P23-demo-typography-layout-excellence.md) | P23-T14/T15/T16 |
-| [deploy/demo-shared/README.md](../../deploy/demo-shared/README.md) | Publish + generate orchestration |
-| `.taskmaster/tasks/tasks.json` task **#8** | Fundraising evidence bundle |
+| [deploy/demo-shared/README.md](../../deploy/demo-shared/README.md) | Publish + generate orchestration + Wave A cleanup path |
+| `.taskmaster/tasks/tasks.json` task **#8** | Historical fundraising evidence bundle (**Done**) |
+| `.taskmaster/tasks/tasks.json` task **#141** | Wave A refresh (**in-progress**) |
 
 ---
 
@@ -120,4 +129,5 @@ docs/evidence/
 
 | Version | Date | Description |
 | --- | --- | --- |
+| 1.1.0 | 2026-07-20 | Wave A In Progress cross-links; ops-safe cleanup note; 13-ID coverage unchanged; **not** claiming refresh Done |
 | 1.0.0 | 2026-07-08 | Initial evidence index — 13 templates; P23-T16 |

@@ -39,12 +39,48 @@ function Invoke-DemoApi {
         }
         $raw = curl.exe @curlArgs
         if ($LASTEXITCODE -ne 0) { throw "curl failed ($Method $Path): $raw" }
-        return ($raw | ConvertFrom-Json)
+        $parsed = $raw | ConvertFrom-Json
+        if ($parsed.PSObject.Properties['error'] -and $parsed.error) {
+            $code = [string]$parsed.error.code
+            $msg = [string]$parsed.error.message
+            throw "API $Method $Path failed ($code): $msg"
+        }
+        return $parsed
     }
+    $parsed = $null
     if ($Body -ne $null) {
-        return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers -ContentType 'application/json' -Body (ConvertTo-DemoApiJson -Body $Body)
+        $jsonBody = ConvertTo-DemoApiJson -Body $Body
+        try {
+            $parsed = Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers -ContentType 'application/json' -Body $jsonBody -SkipHttpErrorCheck
+        } catch {
+            # Fallback when -SkipHttpErrorCheck is unavailable
+            try {
+                return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers -ContentType 'application/json' -Body $jsonBody
+            } catch {
+                $errMsg = $_.Exception.Message
+                if ($_.ErrorDetails -and $_.ErrorDetails.Message) { $errMsg = $_.ErrorDetails.Message }
+                throw "API $Method $Path failed: $errMsg"
+            }
+        }
+    } else {
+        try {
+            $parsed = Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers -SkipHttpErrorCheck
+        } catch {
+            try {
+                return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers
+            } catch {
+                $errMsg = $_.Exception.Message
+                if ($_.ErrorDetails -and $_.ErrorDetails.Message) { $errMsg = $_.ErrorDetails.Message }
+                throw "API $Method $Path failed: $errMsg"
+            }
+        }
     }
-    return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $Headers
+    if ($parsed -and $parsed.PSObject.Properties['error'] -and $parsed.error) {
+        $code = [string]$parsed.error.code
+        $msg = [string]$parsed.error.message
+        throw "API $Method $Path failed ($code): $msg"
+    }
+    return $parsed
 }
 
 function Get-DemoApiToken {
@@ -201,13 +237,19 @@ function Resolve-DemoContentModuleId {
         [string]$GroupCode,
         [string]$ModuleCode
     )
-    $resp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path "/content-modules?groupCode=$GroupCode&size=200" -Token $Token
+    $searchPath = "/content-modules?groupCode=$GroupCode&search=$([uri]::EscapeDataString($ModuleCode))&size=50"
+    $resp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path $searchPath -Token $Token
     $modules = Get-DemoApiResultItems -Response $resp
     $match = $modules | Where-Object { [string]$_.moduleCode -eq $ModuleCode } | Select-Object -First 1
     if (-not $match) {
+        # Fallback: SQL-backed lookup when list pagination/search misses the module.
+        $sql = "SELECT id::text FROM content_module WHERE module_code = '$ModuleCode' AND group_code = '$GroupCode' AND deleted_at IS NULL LIMIT 1;"
+        $id = (docker exec docgen-postgres psql -U docgen -d docgen -t -A -c $sql).Trim()
+        if ($id) { return $id }
         throw "Content module not found for moduleCode=$ModuleCode (groupCode=$GroupCode)"
     }
-    return [string]$match.moduleId
+    $idProp = if ($match.PSObject.Properties['moduleId'] -and $match.moduleId) { 'moduleId' } else { 'id' }
+    return [string]$match.$idProp
 }
 
 function Resolve-DemoContentModuleSemanticVersion {
@@ -261,24 +303,47 @@ function Expand-DemoCatalogVariablesFromBindings {
         [object[]]$CatalogVariables,
         [hashtable]$Bindings
     )
-    $known = @{}
-    foreach ($var in @($CatalogVariables)) { $known[[string]$var.key] = $var }
+    # Multi-template packages share one variables catalog — only attach keys referenced by
+    # this template's bindings (plus discovered loop vars). Avoids LC required vars on
+    # guarantee templates (and similar cross-contamination).
+    $needed = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $loopNeeded = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($entry in $Bindings.GetEnumerator()) {
         $json = ($entry.Value | ConvertTo-Json -Depth 100 -Compress)
         $scan = Get-DemoStructuredContentVariableKeys -StructuredContentJson $json
-        foreach ($loopVar in @($scan.loopVariables)) {
-            if (-not $known.ContainsKey($loopVar)) {
-                $known[$loopVar] = [ordered]@{ key = $loopVar; label = $loopVar; type = 'LIST'; required = $false }
-            }
+        foreach ($loopVar in @($scan.loopVariables)) { [void]$loopNeeded.Add([string]$loopVar) }
+        foreach ($key in @($scan.keys)) { [void]$needed.Add([string]$key) }
+    }
+    $catalogByKey = @{}
+    foreach ($var in @($CatalogVariables)) { $catalogByKey[[string]$var.key] = $var }
+    $known = @{}
+    foreach ($key in @($needed)) {
+        if ($catalogByKey.ContainsKey($key)) {
+            $known[$key] = $catalogByKey[$key]
+        } else {
+            $varType = if ($key -like 'include*' -or $key -like 'has*') { 'BOOLEAN' } else { 'TEXT' }
+            $known[$key] = [ordered]@{ key = $key; label = $key; type = $varType; required = $false }
         }
-        foreach ($key in @($scan.keys)) {
-            if (-not $known.ContainsKey($key)) {
-                $varType = if ($key -like 'include*' -or $key -like 'has*') { 'BOOLEAN' } else { 'TEXT' }
-                $known[$key] = [ordered]@{ key = $key; label = $key; type = $varType; required = $false }
+    }
+    foreach ($loopVar in @($loopNeeded)) {
+        if (-not $known.ContainsKey($loopVar)) {
+            if ($catalogByKey.ContainsKey($loopVar)) {
+                $known[$loopVar] = $catalogByKey[$loopVar]
+            } else {
+                $known[$loopVar] = [ordered]@{ key = $loopVar; label = $loopVar; type = 'LIST'; required = $false }
             }
         }
     }
     return @($known.Values)
+}
+
+function Format-DemoBindingExpectedUpdatedAt {
+    param([object]$UpdatedAt)
+    if ($null -eq $UpdatedAt) { return $null }
+    if ($UpdatedAt -is [string]) { return [string]$UpdatedAt }
+    $utc = [datetime]$UpdatedAt
+    if ($utc.Kind -ne [DateTimeKind]::Utc) { $utc = $utc.ToUniversalTime() }
+    return $utc.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'")
 }
 
 function Set-DemoBinding {
@@ -289,11 +354,17 @@ function Set-DemoBinding {
         [string]$AnchorId,
         [object]$StructuredContent
     )
-    Invoke-DemoApi -ApiBase $ApiBase -Method PUT -Path "/templates/$TemplateId/bindings/$AnchorId" -Token $Token -Body @{
+    $detail = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path "/templates/$TemplateId" -Token $Token
+    $existing = @($detail.result.bindings) | Where-Object { $_.anchorId -eq $AnchorId } | Select-Object -First 1
+    $body = @{
         anchorId = $AnchorId
         declaredContentType = 'TEXT'
         structuredContentJson = ($StructuredContent | ConvertTo-Json -Depth 100 -Compress)
-    } | Out-Null
+    }
+    if ($existing -and $existing.updatedAt) {
+        $body.expectedUpdatedAt = Format-DemoBindingExpectedUpdatedAt $existing.updatedAt
+    }
+    Invoke-DemoApi -ApiBase $ApiBase -Method PUT -Path "/templates/$TemplateId/bindings/$AnchorId" -Token $Token -Body $body | Out-Null
 }
 
 function Get-DemoMasterList {
@@ -326,6 +397,42 @@ function Resolve-DemoMasterId {
     return $null
 }
 
+function Find-DemoMasterByName {
+    param(
+        [string]$ApiBase,
+        [string]$Token,
+        [string]$Name
+    )
+    $searchPath = "/masters?search=$([uri]::EscapeDataString($Name))&size=50"
+    $mastersResp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path $searchPath -Token $Token
+    $masterList = Get-DemoMasterList $mastersResp
+    return $masterList |
+        Where-Object { [string]$_.name.Trim() -eq $Name } |
+        Sort-Object { [datetime]$_.updatedAt } -Descending |
+        Select-Object -First 1
+}
+
+function Complete-DemoMasterReview {
+    param(
+        [string]$ApiBase,
+        [string]$MasterId,
+        [string]$GroupAdminToken,
+        [string]$AdminToken
+    )
+    $detail = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path "/masters/$MasterId" -Token $GroupAdminToken
+    $status = [string]$detail.result.status
+    if ($status -eq 'APPROVED') { return $detail.result }
+    if ($status -eq 'DRAFT') {
+        Invoke-DemoApi -ApiBase $ApiBase -Method POST -Path "/masters/$MasterId/submit-review" -Token $GroupAdminToken -Body @{ changeSummary = 'Demo layout refresh' } | Out-Null
+        $detail = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path "/masters/$MasterId" -Token $GroupAdminToken
+        $status = [string]$detail.result.status
+    }
+    if ($status -eq 'PENDING_REVIEW' -or $status -eq 'IN_REVIEW') {
+        return (Invoke-DemoApi -ApiBase $ApiBase -Method POST -Path "/masters/$MasterId/review" -Token $AdminToken -Body @{ decision = 'APPROVED'; commentSummary = 'Demo approved' }).result
+    }
+    return (Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path "/masters/$MasterId" -Token $GroupAdminToken).result
+}
+
 function Ensure-DemoMaster {
     param(
         [string]$ApiBase,
@@ -348,9 +455,7 @@ function Ensure-DemoMaster {
     } else {
         [System.IO.Path]::GetFileNameWithoutExtension($MasterDocxRelative)
     }
-    $mastersResp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path '/masters?size=200' -Token $GroupAdminToken
-    $masterList = Get-DemoMasterList $mastersResp
-    $master = $masterList | Where-Object { $_.name -eq $masterName } | Sort-Object { [datetime]$_.updatedAt } -Descending | Select-Object -First 1
+    $master = Find-DemoMasterByName -ApiBase $ApiBase -Token $GroupAdminToken -Name $masterName
     if (-not $master) {
         Write-DemoStep "Uploading master $masterName ..."
         $created = Invoke-DemoApi -ApiBase $ApiBase -Method POST -Path '/masters' -Token $GroupAdminToken -MultipartFields @{
@@ -360,32 +465,44 @@ function Ensure-DemoMaster {
             file = (Get-Item $DocxPath)
         }
         $masterId = [string]$created.result.id.Trim()
-        Invoke-DemoApi -ApiBase $ApiBase -Method POST -Path "/masters/$masterId/submit-review" -Token $GroupAdminToken -Body @{ changeSummary = 'Demo import' }
-        $master = (Invoke-DemoApi -ApiBase $ApiBase -Method POST -Path "/masters/$masterId/review" -Token $AdminToken -Body @{ decision = 'APPROVED'; commentSummary = 'Demo approved' }).result
+        $master = Complete-DemoMasterReview -ApiBase $ApiBase -MasterId $masterId -GroupAdminToken $GroupAdminToken -AdminToken $AdminToken
     } else {
-        $needsRefresh = (-not $SkipRefresh) -and ($master.description -notlike "*$($Config.masterLayoutVersion)*")
-        if ($needsRefresh) {
-            Write-DemoStep "Refreshing master layout $masterName ($($Config.masterLayoutVersion)) ..."
-            $currentMasterId = [string]$master.id.Trim()
+        $currentMasterId = [string]$master.id.Trim()
+        $detail = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path "/masters/$currentMasterId" -Token $GroupAdminToken
+        # Wave A / content uplift: always overwrite master DOCX unless -SkipMasterRefresh.
+        if (-not $SkipRefresh) {
+            Write-DemoStep "Refreshing master layout $masterName ($($Config.masterLayoutVersion) / $($Config.catalogMarker)) ..."
+            $previousEap = $ErrorActionPreference
+            $ErrorActionPreference = 'Continue'
             try {
-                Invoke-DemoApi -ApiBase $ApiBase -Method PUT -Path "/masters/$currentMasterId/file" -Token $GroupAdminToken -MultipartFields @{ file = (Get-Item $DocxPath) }
-                Invoke-DemoApi -ApiBase $ApiBase -Method POST -Path "/masters/$currentMasterId/submit-review" -Token $GroupAdminToken -Body @{ changeSummary = 'Demo layout refresh' }
-                $reviewed = (Invoke-DemoApi -ApiBase $ApiBase -Method POST -Path "/masters/$currentMasterId/review" -Token $AdminToken -Body @{ decision = 'APPROVED'; commentSummary = 'Demo approved' }).result
-                if ($reviewed -and (Resolve-DemoMasterId $reviewed)) {
-                    $master = $reviewed
+                # File replace requires APPROVED/DRAFT; settle any leftover PENDING_REVIEW first.
+                $preStatus = [string]$detail.result.status
+                if ($preStatus -eq 'PENDING_REVIEW' -or $preStatus -eq 'IN_REVIEW') {
+                    $null = Complete-DemoMasterReview -ApiBase $ApiBase -MasterId $currentMasterId -GroupAdminToken $GroupAdminToken -AdminToken $AdminToken
                 }
+                Invoke-DemoApi -ApiBase $ApiBase -Method PUT -Path "/masters/$currentMasterId/file" -Token $GroupAdminToken -MultipartFields @{ file = (Get-Item $DocxPath) }
+                $master = Complete-DemoMasterReview -ApiBase $ApiBase -MasterId $currentMasterId -GroupAdminToken $GroupAdminToken -AdminToken $AdminToken
             } catch {
                 Write-Warning "Master layout refresh skipped for ${masterName}: $($_.Exception.Message)"
+                try {
+                    $master = Complete-DemoMasterReview -ApiBase $ApiBase -MasterId $currentMasterId -GroupAdminToken $GroupAdminToken -AdminToken $AdminToken
+                } catch {
+                    $master = Find-DemoMasterByName -ApiBase $ApiBase -Token $GroupAdminToken -Name $masterName
+                }
+            } finally {
+                $ErrorActionPreference = $previousEap
             }
-            $mastersResp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path '/masters?size=200' -Token $GroupAdminToken
-            $master = Get-DemoMasterList $mastersResp | Where-Object { [string]$_.name.Trim() -eq $masterName } | Sort-Object { [datetime]$_.updatedAt } -Descending | Select-Object -First 1
         } else {
-            Write-DemoStep "SKIP master upload (layout unchanged): $masterName"
+            Write-DemoStep "SKIP master upload (-SkipMasterRefresh): $masterName"
+            if ([string]$detail.result.status -ne 'APPROVED') {
+                $master = Complete-DemoMasterReview -ApiBase $ApiBase -MasterId $currentMasterId -GroupAdminToken $GroupAdminToken -AdminToken $AdminToken
+            } else {
+                $master = $detail.result
+            }
         }
     }
     if (-not $master -or -not (Resolve-DemoMasterId $master)) {
-        $mastersResp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path '/masters?size=200' -Token $GroupAdminToken
-        $master = Get-DemoMasterList $mastersResp | Where-Object { $_.name -eq $masterName } | Sort-Object { [datetime]$_.updatedAt } -Descending | Select-Object -First 1
+        $master = Find-DemoMasterByName -ApiBase $ApiBase -Token $GroupAdminToken -Name $masterName
     }
     $resolvedId = Resolve-DemoMasterId $master
     if (-not $resolvedId) {
@@ -541,17 +658,26 @@ function Import-DemoPackage {
         $master = Ensure-DemoMaster -ApiBase $ApiBase -Config $Config -MasterDocxRelative $templateDef.masterDocx -AdminToken $AdminToken -GroupAdminToken $GroupAdminToken -MasterNameOverride $masterNameOverride -SkipRefresh:$SkipMasterRefresh
         $masterId = Resolve-DemoMasterId $master
 
-        $templatesResp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path '/templates?size=200' -Token $AuthorToken
+        $searchPath = "/templates?search=$([uri]::EscapeDataString($externalId))&searchMode=EXTERNAL_ID&size=20"
+        $templatesResp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path $searchPath -Token $AuthorToken
         $templateList = Get-DemoApiResultItems -Response $templatesResp
         $template = $templateList | Where-Object { $_.externalId -eq $externalId } | Select-Object -First 1
         if (-not $template) {
             Write-DemoStep "Creating template $externalId ..."
+            $templateLocale = if ($templateDef.PSObject.Properties['locale'] -and $templateDef.locale) {
+                [string]$templateDef.locale
+            } elseif ($Config.PSObject.Properties['locale'] -and $Config.locale) {
+                [string]$Config.locale
+            } else {
+                'zh-CN'
+            }
             $created = Invoke-DemoApi -ApiBase $ApiBase -Method POST -Path '/templates' -Token $AuthorToken -Body @{
                 externalId = $externalId
                 groupCode = $Config.groupCode
                 name = $templateDef.name
                 description = "$($templateDef.description) [$marker]"
                 masterId = $masterId
+                locale = $templateLocale
             }
             $templateId = $created.result.id
         } else {
@@ -559,26 +685,47 @@ function Import-DemoPackage {
             if ([string](Resolve-DemoMasterId $master) -and [string]$template.masterId -ne [string]$masterId) {
                 Set-DemoTemplateMasterId -TemplateId $templateId -MasterId $masterId -ExternalId $externalId -MasterName ([string]$master.name).Trim() -PostgresContainer $PostgresContainer
             }
-            if ($template.description -and $template.description.Contains("[$marker]")) {
-                Write-DemoStep "SKIP template create (catalogMarker present): $externalId"
-            } else {
-                Invoke-DemoApi -ApiBase $ApiBase -Method PATCH -Path "/templates/$templateId" -Token $AuthorToken -Body @{
-                    description = "$($templateDef.description) [$marker]"
-                } | Out-Null
-            }
         }
 
+        # DRAFT reset before metadata PATCH / bindings — PUBLISHED templates reject PATCH.
         Ensure-DemoTemplateDraftForImport -ApiBase $ApiBase -TemplateId $templateId -ExternalId $externalId -Token $AuthorToken -PostgresContainer $PostgresContainer
+
+        if ($template -and (-not ($template.description -and $template.description.Contains("[$marker]")))) {
+            Invoke-DemoApi -ApiBase $ApiBase -Method PATCH -Path "/templates/$templateId" -Token $AuthorToken -Body @{
+                description = "$($templateDef.description) [$marker]"
+            } | Out-Null
+        } elseif ($template -and $template.description -and $template.description.Contains("[$marker]")) {
+            Write-DemoStep "SKIP template description patch (catalogMarker present): $externalId"
+        }
 
         $bindings = Get-DemoBindingsForTemplate -BindingOverlays $BindingOverlays -Manifest $Manifest -TemplateExternalId $externalId -DemoRoot $DemoRoot
         $anchorIds = @($bindings.Keys)
         Remove-DemoStaleBindings -TemplateId $templateId -AllowedAnchorIds $anchorIds -PostgresContainer $PostgresContainer
         $allVariables = Expand-DemoCatalogVariablesFromBindings -CatalogVariables @($CatalogVariables) -Bindings $bindings
+        $allowedKeys = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+        foreach ($var in @($allVariables)) { [void]$allowedKeys.Add([string]$var.key) }
+        # Drop stale cross-template variables left from prior imports (shared package catalogs).
+        try {
+            $schemaDetail = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path "/templates/$templateId" -Token $AuthorToken
+            foreach ($existingVar in @($schemaDetail.result.variables)) {
+                $existingKey = [string]$existingVar.variableKey
+                if ($existingKey -and -not $allowedKeys.Contains($existingKey)) {
+                    try {
+                        Invoke-DemoApi -ApiBase $ApiBase -Method DELETE -Path "/templates/$templateId/variables/$existingKey" -Token $AuthorToken | Out-Null
+                    } catch {
+                        Write-Warning "Could not delete stale variable ${existingKey} on ${externalId}: $($_.Exception.Message)"
+                    }
+                }
+            }
+        } catch {
+            Write-Warning "Stale variable cleanup skipped for ${externalId}: $($_.Exception.Message)"
+        }
         Write-DemoStep "Upserting $($allVariables.Count) variables for $externalId ..."
         foreach ($var in @($allVariables)) {
+            $varType = if ($var.PSObject.Properties['type'] -and $var.type) { [string]$var.type } else { 'TEXT' }
             Invoke-DemoApi -ApiBase $ApiBase -Method PUT -Path "/templates/$templateId/variables/$($var.key)" -Token $AuthorToken -Body @{
                 variableKey = $var.key
-                variableType = $var.type
+                variableType = $varType
                 required = [bool]$var.required
                 description = if ($var.PSObject.Properties['label']) { $var.label } else { $var.key }
             } | Out-Null
@@ -607,6 +754,22 @@ function Import-DemoPackage {
 
         $testSets = Get-DemoTestDataSets -TestDataConfig $TestDataConfig -TemplateExternalId $externalId -DeployRoot (Split-Path -Parent $DemoRoot)
         foreach ($set in $testSets) {
+            # Ensure every test-data key exists on the template schema (Wave A fixtures may add loops/tables).
+            if ($set.variables) {
+                foreach ($prop in @($set.variables.PSObject.Properties)) {
+                    $key = [string]$prop.Name
+                    $val = $prop.Value
+                    $varType = if ($val -is [bool]) { 'BOOLEAN' }
+                        elseif ($val -is [System.Array] -or ($val -is [System.Collections.IEnumerable] -and -not ($val -is [string]))) { 'LIST' }
+                        else { 'TEXT' }
+                    Invoke-DemoApi -ApiBase $ApiBase -Method PUT -Path "/templates/$templateId/variables/$key" -Token $AuthorToken -Body @{
+                        variableKey = $key
+                        variableType = $varType
+                        required = $false
+                        description = $key
+                    } | Out-Null
+                }
+            }
             $body = @{
                 name = if ($set.label) { $set.label } else { $set.name }
                 required = $true

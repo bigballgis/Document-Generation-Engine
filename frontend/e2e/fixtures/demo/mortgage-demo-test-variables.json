@@ -1,6 +1,6 @@
 {
-  "catalogMarker": "mortgage-demo-v3-bank-grade",
-  "name": "Residential Mortgage Approval — Executive Sample",
+  "catalogMarker": "mortgage-demo-v4-wave-a",
+  "name": "Residential Mortgage Offer — Meridian Home Finance",
   "required": true,
   "variables": {
     "lenderName": "Meridian Home Finance (a division of Meridian Bank plc)",

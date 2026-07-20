@@ -13,7 +13,9 @@
 - [权限矩阵](../security/permission-matrix.md)
 - [文档治理规则](../governance.md)
 - [模板创作与渲染一阶原则审查](authoring-rendering-first-principles-review.md)
-- [综合演示包扩展行为规格](../requirements/demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；P22）
+- [综合演示包扩展行为规格](../requirements/demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；P22 **Done**）
+- [演示文档排版与版式卓越行为规格](../requirements/demo-typography-layout-behavior-spec.md)（BDD-DEMO-TYP；P23 **Done**）
+- [银行信函演示内容刷新 Wave A](../behavior/bank-letter-demo-refresh.md)（BDD-DEMO-REFRESH；**In Progress** — 未宣称 Done；Wave B 新族 OUT）
 
 ## 2. 记录原则
 
@@ -690,6 +692,10 @@ API 需要支持批量生成。
 | 8 | 财富/私人银行投资结单 | `deploy/demo-wealth/` | `DEMO-WEALTH-STATEMENT` | WEALTH | 全局（多表续页） |
 
 视觉逼真度（已确认）：每类须使用真实银行信函版式；仅客户名、账号、金额、日期等为 mock 变量。批发 FOL 升级保持 executive 规模（≥100 页目标、40 锚点），并在绑定中覆盖多种结构化节点以验证保真。
+
+**运行时 FOL `externalId`（实现契约，不改产品类型名）：** 上表「批发 FOL」产品族仍以 PRD 历史行表述为准；验收栈 / `import-all` / publish 注册表运行时主键为 `CORP-FOL-OFFER`（见 [deploy/demo-shared/README.md](../../deploy/demo-shared/README.md)）。本叶**不**发明新产品名，**不**把 `DEMO-FOL-WHOLESALE` 改写成新的产品类型。
+
+**Post-remediation 内容刷新（Wave A，2026-07-20 — In Progress，未宣称 Done）：** 深度系统整改后，清理浅层/填充/测试味 demo，并将**既有八类 + `DEMO-FULL-FLOW-LETTER`** 提升为 100% 仿真国际/公司银行信函质量；编排仍为 ops-safe cleanup（既有 FOL cleanup 脚本）→ `import-all-demos.ps1` 幂等覆盖 → `publish-all-demos.ps1` → `generate-all-demos.ps1`。行为规格 [bank-letter-demo-refresh.md](../behavior/bank-letter-demo-refresh.md)。**Wave B 新信函族 OUT**（串行下一叶）。**不** reopen P22/P23 阶段状态；**不**翻转 checklist **#3b/#5a GO**；**不** reopen RTL / CE-O02。
 
 演示导入与验收以平台工程师自动化脚本为主（`import-all-demos.ps1`、构建期母版资产生成器）；模板作者/测试人员通过管理面预览与全量测试验收 DOCX/PDF 保真。运行期 API 调用方对已发布演示模板的权限与既有模板级 AD Group + API 凭证模型一致；**无新增调用方请求字段**。
 

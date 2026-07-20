@@ -20,7 +20,7 @@ class DemoGenerateOrchestrationContractTest {
     @Test
     void bddDemoTyp013_generateManifestCoversAllPublishRegistryTemplates() throws Exception {
         JsonNode manifest = DemoRuntimeGenerateManifest.load();
-        assertThat(manifest.path("manifestVersion").asText()).isEqualTo("p23-t14-v1");
+        assertThat(manifest.path("manifestVersion").asText()).isEqualTo("wave-a-demo-refresh-v1");
         assertThat(DemoRuntimeGenerateManifest.templateExternalIds(manifest))
                 .containsExactlyElementsOf(DemoPublishRegistry.allPublishExternalIds());
     }
@@ -60,6 +60,10 @@ class DemoGenerateOrchestrationContractTest {
         assertThat(manifest.path("forbiddenPatterns").isArray()).isTrue();
         assertThat(manifest.path("forbiddenPatterns").toString()).contains("LOREM");
         assertThat(manifest.path("forbiddenPatterns").toString()).contains("{{");
+        assertThat(manifest.path("forbiddenPatterns").toString())
+                .contains("For the executive demonstration dataset");
+        assertThat(manifest.path("forbiddenPatterns").toString())
+                .contains("will be expanded in the final documentation set");
     }
 
     private static java.util.stream.Stream<JsonNode> templateEntries() throws Exception {
