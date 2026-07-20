@@ -1,0 +1,6 @@
+backend=documentgenerationengine-docgen-backend:latest
+backend_id=sha256:d0c2b8f9bc5cbdefaf0c0c63634e13c0b4195890254525dc69da5d24856d3955
+backend_created=2026-07-20T19:02:43.81921465Z
+frontend=documentgenerationengine-docgen-frontend:latest
+frontend_id=sha256:9d462f7cb6292c347d94fa05f8c4985e97fe46ed1c07f638ecceb4e24ebd7dbf
+frontend_created=2026-07-20T18:11:30.610554357Z

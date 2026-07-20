@@ -75,8 +75,9 @@ final class AsyncBatchTestExecutionSupport {
 
                 boolean success;
                 String errorDetail = null;
+                PreviewRecordView preview = null;
                 try {
-                    PreviewRecordView preview = previewGenerationService.runTestGenerateForBatch(
+                    preview = previewGenerationService.runTestGenerateForBatch(
                             templateId, dataSetId, runId, session
                     );
                     success = preview.status() == PreviewStatus.SUCCEEDED;
@@ -88,7 +89,14 @@ final class AsyncBatchTestExecutionSupport {
 
                 if (success) {
                     succeededCount++;
-                    results.add(new AsyncBatchTestOrchestrator.SampleResult(dataSetId, true, null, null, null));
+                    results.add(new AsyncBatchTestOrchestrator.SampleResult(
+                            dataSetId,
+                            true,
+                            null,
+                            preview.previewId(),
+                            preview.artifactStorageKey(),
+                            preview.pdfArtifactStorageKey()
+                    ));
                     batchSseRegistry.send(runId, "sample_done", Map.of(
                             "sampleIndex", i + 1,
                             "success", true,
@@ -96,7 +104,9 @@ final class AsyncBatchTestExecutionSupport {
                     ));
                 } else {
                     failedCount++;
-                    results.add(new AsyncBatchTestOrchestrator.SampleResult(dataSetId, false, errorDetail, null, null));
+                    results.add(new AsyncBatchTestOrchestrator.SampleResult(
+                            dataSetId, false, errorDetail, null, null, null
+                    ));
                     String msg = errorDetail != null ? errorDetail : "Generation failed";
                     batchSseRegistry.send(runId, "sample_done", Map.of(
                             "sampleIndex", i + 1,

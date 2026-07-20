@@ -632,8 +632,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List templates that reference a content module (CE-G05)
-         * @description Returns a management `PageView` of template summaries that reference the given content module within the caller's authorized template visibility (CE-G05 / BDD-CE-G05-014…015). Reuses `template_content_module_reference` (and published lock relations); does not scan binding JSON. Does **not** return clause body text. Cross-group templates invisible to the caller are omitted (fail-closed). Empty references → 200 empty page. Requires the same catalog browse access as content-module get (§5.1); `TEMPLATE_TESTER` → 403. Behavior SoT: docs/behavior/ce-g05-annual-review-fts.md.
+         * List templates that reference a content module (CE-G05 / IBL-E6)
+         * @description Returns a management `PageView` of template summaries that reference the given content module within the caller's authorized template visibility (CE-G05 / BDD-CE-G05-014…015; IBL-E6 deep nesting / BDD-IBL-E6-006…009). Direct hits reuse `template_content_module_reference` (and published lock relations). Nested hits use the governed CM↔CM nesting-edge graph plus ancestor template pins — does **not** scan binding JSON. Each row exposes `referenceKind` (`DIRECT`|`NESTED`), `nestingDepth`, and optional `nestingPathSummary` (non-sensitive `moduleCode` chain; never clause body). Cross-group templates invisible to the caller are omitted (fail-closed). Empty references → 200 empty page. Requires the same catalog browse access as content-module get (§5.1); `TEMPLATE_TESTER` → 403. Behavior SoT: docs/behavior/ce-g05-annual-review-fts.md; docs/behavior/ibl-e6-clause-nesting-governance.md; ADR-0067.
          */
         get: operations["listContentModuleWhereUsed"];
         put?: never;
@@ -752,6 +752,26 @@ export interface paths {
         get: operations["listOutdatedClauseReferenceAuthorTasks"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/content-module-references/bulk-repin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk re-pin content-module references across draft templates (IBL-E5)
+         * @description ADR-0066 / IBL-E5. Group-scoped mass re-pin of draft template content-module pins for one `contentModuleId`. Requires `authorTemplates` (no new role / capability). `dryRun` is required: `true` previews with zero pin persistence; `false` applies via the same validation as single-template upsertReference. Target selection is `toSemanticVersion` XOR `useLatestApproved=true`. Published/locked pins → SKIPPED_LOCKED; already at target → SKIPPED_ALREADY_AT_TARGET; no matching pin → SKIPPED_NO_MATCH; invalid target → FAILED with `BULK_REPIN_TARGET_INVALID`. Every call writes a management audit event (`CONTENT_MODULE_BULK_REPIN`), including dry-run. Behavior SoT: docs/behavior/ibl-e5-effectivefrom-bulk-repin.md (BDD-IBL-E5-008…015). `frontend_ui_in_scope=false`.
+         */
+        post: operations["bulkRepinContentModuleReferences"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1368,8 +1388,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Controlled regenerate SPECIMEN artifact by invocation (CE-G06)
-         * @description Permissioned audit regenerate for a SINGLE / BATCH_ITEM / ASYNC_TASK invocation that has non-null release-bundle fingerprint fields and is within retention. Replays stored parameters against the K01-pinned master, applies CE-G02 SPECIMEN watermark, writes management audit INVOCATION_REGENERATED, and never returns variables or encryption passwords. Does not create a caller-facing runtime SUCCESS invocation or consume caller idempotency keys. No idempotencyKey required. Authorized roles: GLOBAL_ADMIN, in-scope GROUP_ADMIN, in-scope AUDIT_ADMIN (readAudit + template visibility). FE regenerate CTA is out of scope for this leaf.
+         * Controlled regenerate by invocation (CE-G06 SPECIMEN; PD-6 opt-in production re-issue)
+         * @description Permissioned regenerate for a SINGLE / BATCH_ITEM / ASYNC_TASK invocation that has non-null release-bundle fingerprint fields and is within retention. Replays stored parameters against the K01-pinned master, writes management audit INVOCATION_REGENERATED, and never returns variables or encryption passwords. Does not create a caller-facing runtime SUCCESS invocation or consume caller idempotency keys. No idempotencyKey required.
+         *     Default mode (productionReissue absent or false): CE-G06 audit specimen — applies CE-G02 SPECIMEN watermark; specimen=true. Authorized roles: GLOBAL_ADMIN, in-scope GROUP_ADMIN, in-scope AUDIT_ADMIN (readAudit + template visibility).
+         *     Production re-issue mode (PD-6): productionReissue=true AND non-blank reason (trim; max 500). Skips SPECIMEN stampers; specimen=false. Authorized roles narrowed to GLOBAL_ADMIN and in-scope GROUP_ADMIN only; AUDIT_ADMIN → 403. Missing/blank reason → 400 PRODUCTION_REISSUE_REASON_REQUIRED. Preview/test-generate must not accept productionReissue. FE regenerate CTA remains out of scope.
          */
         post: operations["regenerateTemplateManagementInvocation"];
         delete?: never;
@@ -1387,9 +1409,49 @@ export interface paths {
         };
         /**
          * List recent template batch-test history (CE-U18 sampleResults)
-         * @description Returns the most recent non-hidden batch-test runs for a template (default limit 5; P12 soft-hide retention). Each summary includes coverage/gate fields and CE-U18 `sampleResults` derived from persisted `sampleResultsJson` so the management UI can expand per-sample detail without reading the database. Authorization reuses `requireReadableSnapshot` (fail-closed 403/404). Alternative allowed by BDD CE-U18: expose the same `sampleResults` on `GET .../batch-tests/{runId}` detail instead of (or in addition to) embedding on this list — implement exactly one primary FE-consumable surface and lock with tests. Sync `POST .../previews/batch-test` remains out of the management UI journey (may stay for demo/seed service calls).
+         * @description Returns the most recent non-hidden batch-test runs for a template (default limit 5; P12 soft-hide retention). Each summary includes coverage/gate fields and CE-U18 `sampleResults` derived from persisted `sampleResultsJson` so the management UI can expand per-sample detail without reading the database. PTA (BDD-PTA-004): async success samples that produced a preview MUST persist non-null `previewId` (and `docxKey` / `pdfKey` when those artifacts were stored) so Open preview drill-down works on authoring and published release Testing surfaces. Authorization reuses `requireReadableSnapshot` (fail-closed 403/404). Alternative allowed by BDD CE-U18: expose the same `sampleResults` on `GET .../batch-tests/{runId}` detail instead of (or in addition to) embedding on this list — implement exactly one primary FE-consumable surface and lock with tests. Sync `POST .../previews/batch-test` remains out of the management UI journey (may stay for demo/seed service calls).
          */
         get: operations["listTemplateBatchTestRuns"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates/{templateId}/previews/{previewId}/artifacts/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download SUCCEEDED preview DOCX artifact
+         * @description Streams the stored DOCX bytes for a SUCCEEDED preview run. Not wrapped in the JSON success envelope; uses `Content-Disposition: attachment`. Authorization reuses `requireReadableSnapshot` (fail-closed 403/404). **Lifecycle (PTA / BDD-PTA-008):** this path is NOT gated on template `lifecycleStatus` — downloads remain available for prior test artifacts when the package is PUBLISHED, STOPPED, or DEPRECATED. Failure causes remain: missing read permission, preview not SUCCEEDED, missing/expired storage object (or equivalent existing artifact-unavailable errors). Do not invent a second download API for published-release Testing.
+         */
+        get: operations["downloadTemplatePreviewDocx"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates/{templateId}/previews/{previewId}/artifacts/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download SUCCEEDED preview PDF artifact
+         * @description Streams the PDF bytes for a SUCCEEDED preview run (stored PDF key or on-demand materialization from DOCX per existing preview download service). Not wrapped in the JSON success envelope; uses `Content-Disposition: attachment`. Authorization reuses `requireReadableSnapshot` (fail-closed 403/404). **Lifecycle (PTA / BDD-PTA-008):** NOT gated on `lifecycleStatus` PUBLISHED / STOPPED / DEPRECATED — same availability as authoring Testing downloads. Do not add a PUBLISHED-only block on this path.
+         */
+        get: operations["downloadTemplatePreviewPdf"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2480,6 +2542,10 @@ export interface components {
              * @enum {string}
              */
             outputFormat?: "DOCX" | "PDF";
+            /** @description Optional. Default false / absent = CE-G06 audit specimen path (SPECIMEN forced). When true, requests PD-6 production re-issue (no SPECIMEN); requires non-blank reason; roles narrowed to GLOBAL_ADMIN / in-scope GROUP_ADMIN (AUDIT_ADMIN forbidden). */
+            productionReissue?: boolean;
+            /** @description Required when productionReissue=true (trim after; blank → 400 PRODUCTION_REISSUE_REASON_REQUIRED). Ignored / optional for default specimen regenerate. Persisted for audit accountability; never contains variables. */
+            reason?: string;
         };
         ManagementInvocationRegenerateView: {
             /** Format: uuid */
@@ -2490,9 +2556,9 @@ export interface components {
             releaseBundleHash: string;
             /** @enum {string} */
             outputFormat: "DOCX" | "PDF";
-            /** @description Always true for CE-G06 regenerate artifacts. */
+            /** @description true for default CE-G06 SPECIMEN regenerate; false for PD-6 production re-issue (productionReissue=true success path). */
             specimen: boolean;
-            /** @description Always false — original encryption passwords are not retained; regenerate artifacts are unencrypted SPECIMEN samples. */
+            /** @description Always false — original encryption passwords are not retained; regenerate artifacts are unencrypted (specimen or production re-issue). */
             encryptionReapplied: boolean;
             /** @description Short-lived download URL when issued; may be omitted in favor of artifactPath. */
             downloadUrl?: string | null;
@@ -3074,7 +3140,7 @@ export interface components {
             result: components["schemas"]["ChangeDiffView"];
         };
         /** @enum {string} */
-        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "CONTENT_MODULE_EFFECTIVE_EXPIRED" | "CONTENT_MODULE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_REFERENCE_INVALID" | "UNSUPPORTED_STRUCTURED_NODES" | "PASTE_CLEANING_BLOCKERS" | "PAGINATION_DELTA_BUDGET" | "BLOCKER_STATUS" | "FIDELITY_WARNINGS_VIEWED";
+        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "CONTENT_MODULE_EFFECTIVE_EXPIRED" | "CONTENT_MODULE_EFFECTIVE_NOT_STARTED" | "CONTENT_MODULE_LOCALE_MISMATCH" | "CONTENT_MODULE_NESTING_CYCLE" | "CONTENT_MODULE_NESTING_DEPTH_EXCEEDED" | "CONTENT_MODULE_NESTING_UNPINNED" | "COMPOSITION_INCLUSION_REFERENCE_INVALID" | "UNSUPPORTED_STRUCTURED_NODES" | "PASTE_CLEANING_BLOCKERS" | "PAGINATION_DELTA_BUDGET" | "BLOCKER_STATUS" | "FIDELITY_WARNINGS_VIEWED";
         PublishGateItemView: {
             checkCode: components["schemas"]["PublishGateCheckCode"];
             ready: boolean;
@@ -4054,6 +4120,64 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        /** @description IBL-E5 / ADR-0066 bulk re-pin request. Exactly one of `toSemanticVersion` or `useLatestApproved=true` must select the target. Omitting `dryRun` is a validation failure (400/422). */
+        BulkRepinContentModuleReferencesRequest: {
+            /** @description Optional when the authorized group context is unambiguous from the session; required when the caller must disambiguate among multiple authorized groups. */
+            groupCode?: string;
+            /** Format: uuid */
+            contentModuleId: string;
+            /** @description Optional filter — only pins currently at this semantic version. */
+            fromSemanticVersion?: string;
+            /** @description Target pin semantic version. Mutually exclusive with useLatestApproved=true. */
+            toSemanticVersion?: string;
+            /** @description When true, retarget to the latest referencable APPROVED+ACTIVE version of contentModuleId. Mutually exclusive with toSemanticVersion. */
+            useLatestApproved?: boolean;
+            /** @description Optional narrow set within the caller's authorTemplates visibility. */
+            templateIds?: string[];
+            /** @description Required. true = preview only (zero pin persistence); false = apply. */
+            dryRun: boolean;
+        };
+        /**
+         * @description Per-template-version outcome for bulk re-pin (IBL-E5).
+         * @enum {string}
+         */
+        BulkRepinItemStatus: "WOULD_APPLY" | "APPLIED" | "SKIPPED_LOCKED" | "SKIPPED_ALREADY_AT_TARGET" | "SKIPPED_NO_MATCH" | "FAILED";
+        BulkRepinItemView: {
+            /** Format: uuid */
+            templateId: string;
+            /** Format: uuid */
+            templateVersionId?: string;
+            referenceKey?: string;
+            beforeSemanticVersion?: string | null;
+            /** @description Preview/apply target pin; null when skipped with no target resolution. */
+            afterSemanticVersion?: string | null;
+            status: components["schemas"]["BulkRepinItemStatus"];
+            /** @description Present when status=FAILED. Stable codes include BULK_REPIN_TARGET_INVALID. */
+            errorCode?: string | null;
+        };
+        BulkRepinSummaryView: {
+            dryRun: boolean;
+            wouldApplyCount: number;
+            appliedCount: number;
+            skippedLockedCount: number;
+            skippedAlreadyAtTargetCount: number;
+            skippedNoMatchCount: number;
+            failedCount: number;
+        };
+        BulkRepinContentModuleReferencesResultView: {
+            /** Format: uuid */
+            contentModuleId: string;
+            groupCode?: string;
+            fromSemanticVersion?: string | null;
+            toSemanticVersion?: string | null;
+            useLatestApproved?: boolean;
+            summary: components["schemas"]["BulkRepinSummaryView"];
+            items: components["schemas"]["BulkRepinItemView"][];
+        };
+        BulkRepinContentModuleReferencesResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["BulkRepinContentModuleReferencesResultView"];
+        };
         /** @description CE-G05 Dashboard Tasks projection item for template annual review due (`GET …/author-workflow/annual-review-due-tasks`). */
         AnnualReviewDueAuthorTaskView: {
             /** Format: uuid */
@@ -4078,7 +4202,12 @@ export interface components {
              */
             nextReviewDue?: string;
         };
-        /** @description CE-G05 where-used row — authorized template that references the module. No clause body. */
+        /**
+         * @description IBL-E6 / ADR-0067 — how the template references the queried content module. `DIRECT` = template pin/lock on the module; `NESTED` = via CM↔CM nesting closure under an ancestor pin.
+         * @enum {string}
+         */
+        ContentModuleWhereUsedReferenceKind: "DIRECT" | "NESTED";
+        /** @description CE-G05 / IBL-E6 where-used row — authorized template that references the module (direct pin or nested closure). No clause body. */
         ContentModuleWhereUsedTemplateView: {
             /** Format: uuid */
             id: string;
@@ -4088,8 +4217,13 @@ export interface components {
             lifecycleStatus: components["schemas"]["TemplateLifecycleStatus"];
             /** @description Pinned content-module semantic version when a lock/reference pin exists; null/omitted when not pinned. */
             pinnedSemanticVersion?: string | null;
+            referenceKind: components["schemas"]["ContentModuleWhereUsedReferenceKind"];
+            /** @description `0` when `referenceKind=DIRECT`. When `NESTED`, edge count along the nesting path from the ancestor pin root to the queried module (≥ 1). */
+            nestingDepth: number;
+            /** @description Non-sensitive `moduleCode` chain for `NESTED` hits (e.g. `PARENT>CHILD`). Null/omitted for `DIRECT`. Never includes clause body or variables. */
+            nestingPathSummary?: string | null;
         };
-        /** @description CE-G05 where-used list envelope for `GET /api/management/v1/content-modules/{moduleId}/where-used`. */
+        /** @description CE-G05 / IBL-E6 where-used list envelope for `GET /api/management/v1/content-modules/{moduleId}/where-used`. */
         ContentModuleWhereUsedPageResponse: {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["PageView"] & {
@@ -4638,7 +4772,7 @@ export interface components {
                 content: components["schemas"]["MasterDocumentSummaryView"][];
             };
         };
-        /** @description Per-sample result for management batch-test history drill-down (CE-U18). Canonical async shape (written by AsyncBatchTestOrchestrator): `dataSetExternalId`, `success`, optional `errorDetail` / `docxKey` / `pdfKey`. Historical rows may still contain legacy sync-shaped objects (`testDataSetId`, `previewId`, `status`, …). Frontend MUST normalize either shape to one display model; API MUST NOT require FE to read DB. */
+        /** @description Per-sample result for management batch-test history drill-down (CE-U18; PTA persist alignment / BDD-PTA-004). Canonical async shape (persisted into `sampleResultsJson` by AsyncBatchTestOrchestrator / AsyncBatchTestExecutionSupport): `dataSetExternalId`, `success`, optional `errorDetail`, and — when the sample produced a preview — non-null `previewId` plus `docxKey` / `pdfKey` when those artifacts were stored (mapped from PreviewRecordView storage keys). Failed samples may omit preview/artifact keys. Historical rows may still contain legacy sync-shaped objects (`testDataSetId`, `status`, …) and pre-PTA async rows that dropped `previewId` (null keys). Frontend MUST normalize either shape to one display model; API MUST NOT require FE to read DB. Schema fields stay optional for legacy/partial rows; the persist rule above is the confirmed write contract for new async runs. */
         BatchTestHistorySampleResultView: {
             /** @description Canonical async dataset external id. */
             dataSetExternalId?: string;
@@ -4646,11 +4780,13 @@ export interface components {
             success?: boolean;
             /** @description Failure detail when success is false. */
             errorDetail?: string | null;
+            /** @description Object-storage key for the sample DOCX artifact when produced. Confirmed on new async success samples that stored DOCX; null-ok on failure, missing artifact, or pre-PTA persisted rows. */
             docxKey?: string | null;
+            /** @description Object-storage key for the sample PDF artifact when produced. Confirmed on new async success samples that stored PDF; null-ok on failure, missing artifact, or pre-PTA persisted rows. */
             pdfKey?: string | null;
             /** @description Legacy sync-shaped dataset id (normalize on FE). */
             testDataSetId?: string | null;
-            /** @description Legacy sync-shaped preview id (optional Open preview). */
+            /** @description Preview run id for Open preview drill-down. Canonical on new async success samples that produced a preview (PTA / BDD-PTA-004); also present on legacy sync-shaped historical rows. Null-ok on failure samples and pre-PTA async rows that dropped the field. */
             previewId?: string | null;
             /** @description Legacy sync-shaped preview/status enum string. */
             status?: string | null;
@@ -4679,7 +4815,7 @@ export interface components {
             gatePassed?: boolean | null;
             /** Format: date-time */
             invalidatedAt?: string | null;
-            /** @description CE-U18: per-sample results derived from persisted `sampleResultsJson`. Null or empty when not yet available (e.g. RUNNING) or when the JSON is empty; parse failures must not crash the list — return null/empty and keep summary columns usable. */
+            /** @description CE-U18 / PTA: per-sample results derived from persisted `sampleResultsJson`. For COMPLETED async runs after PTA persist fix, successful samples that produced a preview expose `previewId` (and `docxKey` / `pdfKey` when stored) for Open preview. Null or empty when not yet available (e.g. RUNNING) or when the JSON is empty; parse failures must not crash the list — return null/empty and keep summary columns usable. */
             sampleResults?: components["schemas"]["BatchTestHistorySampleResultView"][] | null;
         };
         /** @description Envelope for `GET /api/management/v1/templates/{templateId}/batch-tests` (CE-U18 history list with sampleResults). */
@@ -4983,7 +5119,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "RENDERING" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED" | "LOCALE_VARIANT_CONFLICT" | "TEMPLATE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_RULE_INVALID" | "COMPOSITION_INCLUSION_UNSATISFIED" | "CONTENT_MODULE_JURISDICTION_MISMATCH" | "LEGAL_ENTITY_UNKNOWN" | "LEGAL_ENTITY_INACTIVE" | "DOCUMENT_BRAND_INACTIVE" | "DOCUMENT_BRAND_NOT_ALLOWED" | "DOCUMENT_BRAND_UNKNOWN";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "PRODUCTION_REISSUE_REASON_REQUIRED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED" | "LOCALE_VARIANT_CONFLICT" | "TEMPLATE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_RULE_INVALID" | "COMPOSITION_INCLUSION_UNSATISFIED" | "CONTENT_MODULE_JURISDICTION_MISMATCH" | "LEGAL_ENTITY_UNKNOWN" | "LEGAL_ENTITY_INACTIVE" | "DOCUMENT_BRAND_INACTIVE" | "DOCUMENT_BRAND_NOT_ALLOWED" | "DOCUMENT_BRAND_UNKNOWN" | "BULK_REPIN_TARGET_INVALID" | "CONTENT_MODULE_NESTING_CYCLE" | "CONTENT_MODULE_NESTING_DEPTH_EXCEEDED" | "CONTENT_MODULE_NESTING_TARGET_UNRESOLVED" | "CONTENT_MODULE_NESTING_STRUCTURE_INVALID";
     };
     responses: {
         /** @description Async task accepted. */
@@ -6623,6 +6759,39 @@ export interface operations {
             default: components["responses"]["ErrorResponse"];
         };
     };
+    bulkRepinContentModuleReferences: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkRepinContentModuleReferencesRequest"];
+            };
+        };
+        responses: {
+            /** @description Bulk re-pin preview or apply result (partial success allowed). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkRepinContentModuleReferencesResponse"];
+                };
+            };
+            400: components["responses"]["ErrorResponse"];
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
     listAnnualReviewDueAuthorTasks: {
         parameters: {
             query?: never;
@@ -7736,7 +7905,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description SPECIMEN regeneration accepted and artifact available. */
+            /** @description Regeneration accepted and artifact available (specimen=true for default CE-G06 path; specimen=false for PD-6 production re-issue). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -7779,6 +7948,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BatchTestRunSummaryListResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    downloadTemplatePreviewDocx: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+                previewId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description DOCX file attachment for the preview run. */
+            200: {
+                headers: {
+                    /** @description Attachment filename for the preview DOCX. */
+                    "Content-Disposition"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": string;
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    downloadTemplatePreviewPdf: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+                previewId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PDF file attachment for the preview run. */
+            200: {
+                headers: {
+                    /** @description Attachment filename for the preview PDF. */
+                    "Content-Disposition"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
                 };
             };
             401: components["responses"]["ErrorResponse"];

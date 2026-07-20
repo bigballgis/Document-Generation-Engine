@@ -1,0 +1,20 @@
+{
+  "status": "DEPLOY_OK",
+  "slice": "published-template-test-artifacts",
+  "task": "TM#144",
+  "stage": 10,
+  "capturedAt": "2026-07-21T03:07:48+08:00",
+  "worktree": "d:\\working\\DGE-published-template-test-artifacts",
+  "branch": "feat/published-template-test-artifacts",
+  "sha": "ade18bdb5b04941225542a10798e36c377b932e7",
+  "composeProject": "documentgenerationengine",
+  "healthzHttp": 200,
+  "healthzBody": "{\"status\":\"UP\"}",
+  "frontendHttp": 200,
+  "backendImageId": "sha256:d0c2b8f9bc5cbdefaf0c0c63634e13c0b4195890254525dc69da5d24856d3955",
+  "frontendImageId": "sha256:9d462f7cb6292c347d94fa05f8c4985e97fe46ed1c07f638ecceb4e24ebd7dbf",
+  "stage5BackendImageId": "sha256:7aa468695cf3d163e7e203b4010082247881b296094d279a3f2321dcae157604",
+  "stage5FrontendImageId": "sha256:07d8831815c4cc7c6746e8a5f3ce9d8a72c67087cb161d0f672c6d6cd44cb36b",
+  "mode": "queued-redeploy-after-skipbuild-conflict",
+  "merge": false
+}

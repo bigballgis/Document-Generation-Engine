@@ -1046,6 +1046,8 @@ export default {
       testing: {
         readOnlySummary:
           'This published release completed the testing workflow before go-live. Snapshot data below is read-only.',
+        openDataSetReadOnly:
+          'Data sets are not editable on published release detail. Use preview run history below to review and download prior test artifacts.',
         lifecycleStatus: 'Status at publish',
       },
       approval: {

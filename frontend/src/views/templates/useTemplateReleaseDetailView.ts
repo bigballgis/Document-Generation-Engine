@@ -30,6 +30,7 @@ export function useTemplateReleaseDetailView() {
   const loadFailed = ref(false)
   const cloning = ref(false)
   const releaseDetail = ref<TemplateDetail | null>(null)
+  const selectedPreviewId = ref<string | null>(null)
   const activeWorkspaceTab = ref<TemplateReleaseWorkspaceTab>(
     resolveTemplateReleaseWorkspaceTabFromQuery(route.query),
   )
@@ -144,6 +145,14 @@ export function useTemplateReleaseDetailView() {
     }
   }
 
+  function handleOpenPreview(payload: { previewId: string }) {
+    selectedPreviewId.value = payload.previewId
+  }
+
+  function handleOpenDataSet() {
+    ElMessage.info(t('templates.releaseDetail.testing.openDataSetReadOnly'))
+  }
+
   return {
     t,
     formatDateTime,
@@ -152,6 +161,7 @@ export function useTemplateReleaseDetailView() {
     loadFailed,
     cloning,
     releaseDetail,
+    selectedPreviewId,
     activeWorkspaceTab,
     templateId,
     releaseVersion,
@@ -164,5 +174,7 @@ export function useTemplateReleaseDetailView() {
     loadReleaseDetail,
     backToHub,
     handleClone,
+    handleOpenPreview,
+    handleOpenDataSet,
   }
 }

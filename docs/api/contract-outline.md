@@ -500,7 +500,8 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 粘贴清洗（P18-T10 / ops-paste-binding-seam） | 编辑期将 Word/HTML 清洗为受控结构化 JSON + 非敏感摘要。 | SoT **ADR-0019**：script / iframe / **object** / **absolute** → `BLOCKED`（整次 `blocked=true`，无 cleaned JSON）。Accept 后绑定持久化非敏感 `pasteCleaningEvidence`；未解除阻断在 validate / `computeBindingStatus` / PublishGate **fail-closed**。**不**新增权限面（复用配置锚点内容）。行为：[ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md)；领域 §2.6.7。 | `POST /api/management/v1/templates/{templateId}/paste-clean`（管理面；OpenAPI 绑定/validate/export 已声明 `pasteCleaningEvidence`） |
 | 变量 Schema PII 标签（CE-G03） | 变量 upsert/view 可选 `piiCategory`。 | 见下方「测试数据集 PII 治理（CE-G03）」；导出 bundle `variables[]` 携带该字段（OpenAPI `TemplateExportVariableSchemaView.piiCategory`）。 | 既有变量 Schema 管理路由（与配置模板变量同权） |
 | 测试数据集 PII 闸门（CE-G03） | create/update 触及 PII 标记字段非空值时强制 `piiHandling`。 | fail-closed；`SYNTHETIC` 或 `EXPLICIT_SENSITIVE`+审计；无新权限。行为：[ce-g03-testdata-pii.md](../behavior/ce-g03-testdata-pii.md)。 | `POST/PUT /api/management/v1/templates/{templateId}/test-data-sets[/{testDataSetId}]` |
-| 批量测试历史钻取（CE-U18） | 管理端历史摘要暴露可消费的逐样本结果，供 Testing 历史展开与跳转。 | 见下方「批量测试历史 sampleResults（CE-U18）」；正式字段以 [OpenAPI v1](openapi-v1.yaml) `BatchTestRunSummaryView.sampleResults` 为准。 | `GET /api/management/v1/templates/{templateId}/batch-tests`（首选）；或同字段的 `GET .../batch-tests/{runId}` 详情（实现择一） |
+| 批量测试历史钻取（CE-U18） | 管理端历史摘要暴露可消费的逐样本结果，供 Testing 历史展开与跳转。 | 见下方「批量测试历史 sampleResults（CE-U18 / PTA）」；正式字段以 [OpenAPI v1](openapi-v1.yaml) `BatchTestRunSummaryView.sampleResults` 为准。 | `GET /api/management/v1/templates/{templateId}/batch-tests`（首选）；或同字段的 `GET .../batch-tests/{runId}` 详情（实现择一） |
+| 预览产物下载（既有；PTA 文档化） | 对 SUCCEEDED preview 流式下载 DOCX / PDF，供 authoring Testing 与 **已发布 release Testing** 只读回顾。 | 见下方「预览产物下载（既有路径；PTA）」；**不**按 `PUBLISHED`/`STOPPED`/`DEPRECATED` 生命周期拦截；**不**新建第二条下载 API。 | `GET /api/management/v1/templates/{templateId}/previews/{previewId}/artifacts/docx` · `…/artifacts/pdf` |
 
 ### release `masterPin`（CE-U19）
 
@@ -514,20 +515,38 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 授权 | 沿用既有模板 release / version-line 读边界（与 Package Hub 相同）；**无**新权限位 |
 | 非目标 | 新建依赖聚合微服务或端点；CE-E01 导出 UI；改写 `TemplateDetailView` 列表摘要（本片不要求） |
 
-### 批量测试历史 sampleResults（CE-U18）
+### 批量测试历史 sampleResults（CE-U18 / PTA）
 
-管理面契约（**不**改变 caller-facing runtime generate / `batch-generate`）。权威行为：[ce-u18-batch-test-history.md](../behavior/ce-u18-batch-test-history.md)。正式 schema：[openapi-v1.yaml](openapi-v1.yaml) `BatchTestHistorySampleResultView` / `BatchTestRunSummaryView` / `BatchTestRunSummaryListResponse`。
+管理面契约（**不**改变 caller-facing runtime generate / `batch-generate`）。权威行为：[ce-u18-batch-test-history.md](../behavior/ce-u18-batch-test-history.md)；PTA 持久化对齐：[published-template-test-artifacts.md](../behavior/published-template-test-artifacts.md)（BDD-PTA-004）。正式 schema：[openapi-v1.yaml](openapi-v1.yaml) `BatchTestHistorySampleResultView` / `BatchTestRunSummaryView` / `BatchTestRunSummaryListResponse`。
 
 | 项 | 已确认 |
 | --- | --- |
 | 数据来源 | 持久化 `BatchTestRunEntity.sampleResultsJson`（P12）；API **不得**要求 FE 直读 DB |
 | 响应字段名 | `sampleResults`（数组；`null` 或 `[]` 表示尚未可用 / 空） |
 | 暴露面 | **首选**扩展 `GET .../batch-tests` 列表项；**允许**改为（或另加）`GET .../batch-tests/{runId}` 详情返回同名字段 — 实现择一并单测锁定 |
-| 规范样本形状（异步） | `dataSetExternalId`、`success`、可选 `errorDetail` / `docxKey` / `pdfKey` |
-| 历史兼容 | 旧同步形状（`testDataSetId` / `previewId` / `status` 等）可能仍出现在 JSON 中；**FE normalize** 到同一展示模型 |
-| 授权 | 沿用 `requireReadableSnapshot`；无读权限 → 既有 403/404，不泄露他组样本 |
+| 规范样本形状（异步） | `dataSetExternalId`、`success`、可选 `errorDetail`；当样本产生了 preview 时 **必须**含非空 `previewId`，并在产物已落库时含 `docxKey` / `pdfKey`（与 `PreviewRecordView` 存储键映射） |
+| 失败样本 | `success=false` 时可无 `previewId` / `docxKey` / `pdfKey`（null-ok） |
+| 历史兼容 | 旧同步形状（`testDataSetId` / `previewId` / `status` 等）及 **PTA 修复前**异步行（`previewId`/`docxKey`/`pdfKey` 为 null）可能仍出现；**FE normalize**；无 `previewId` 则不展示 Open preview / 无钻取 |
+| 授权 | 沿用 `requireReadableSnapshot`；无读权限 → 既有 403/404，不泄露他组样本；**不**扩大 permission-matrix |
 | 管理 UI 路径 | 全量测试用户旅程仅异步 `POST .../batch-tests/run` + SSE；退役同步 `POST .../previews/batch-test` 的用户旅程调用（后端 endpoint / seed 服务直调可暂留） |
-| 非目标 | Runtime P11 generation 批处理；历史保留策略变更；go-live / CD-3 / #50 |
+| 非目标 | Runtime P11 generation 批处理；历史保留策略变更；go-live / CD-3 / #50；为下载 API 新增 PUBLISHED 生命周期闸 |
+
+**Pending / open：** 无（PTA 合同字段与下载生命周期语义已由用户确认；实现落库见 PTA-T02，非本契约开放项）。
+
+### 预览产物下载（既有路径；PTA）
+
+管理面契约：文档化**既有** preview artifact 下载路径（`PreviewController` / `PreviewArtifactDownloadService`），供 authoring Testing 与 published release Testing 只读回顾共用。权威行为：[published-template-test-artifacts.md](../behavior/published-template-test-artifacts.md)（BDD-PTA-002 / BDD-PTA-008）；对照 [preview-success-artifact-download-journey.md](../behavior/preview-success-artifact-download-journey.md)。正式 OpenAPI：`downloadTemplatePreviewDocx` / `downloadTemplatePreviewPdf`。
+
+| 项 | 已确认 |
+| --- | --- |
+| 路径 | `GET /api/management/v1/templates/{templateId}/previews/{previewId}/artifacts/docx` · `…/artifacts/pdf` |
+| 响应 | 原始字节流 + `Content-Disposition: attachment`（**非** JSON envelope） |
+| 前置 | preview `status=SUCCEEDED` 且产物仍可用（既有不可用 / 清理语义） |
+| 授权 | `requireReadableSnapshot`（或现行等价）；403/404 fail-closed；**无**新 capability |
+| 生命周期 | **不**因 `lifecycleStatus` ∈ {`PUBLISHED`,`STOPPED`,`DEPRECATED`} 拒绝；本片**禁止**新增 PUBLISHED 下载阻断 |
+| 非目标 | 新建第二条「发布专用」下载 API；放宽跨组读；翻转 #3b/#5a |
+
+**Pending / open：** 无。
 
 ### 测试数据集 PII 治理（CE-G03）
 

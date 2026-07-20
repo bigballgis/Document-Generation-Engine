@@ -3417,9 +3417,12 @@ paths:
         (default limit 5; P12 soft-hide retention). Each summary includes
         coverage/gate fields and CE-U18 `sampleResults` derived from persisted
         `sampleResultsJson` so the management UI can expand per-sample detail
-        without reading the database. Authorization reuses
-        `requireReadableSnapshot` (fail-closed 403/404). Alternative allowed by
-        BDD CE-U18: expose the same `sampleResults` on
+        without reading the database. PTA (BDD-PTA-004): async success samples
+        that produced a preview MUST persist non-null `previewId` (and
+        `docxKey` / `pdfKey` when those artifacts were stored) so Open preview
+        drill-down works on authoring and published release Testing surfaces.
+        Authorization reuses `requireReadableSnapshot` (fail-closed 403/404).
+        Alternative allowed by BDD CE-U18: expose the same `sampleResults` on
         `GET .../batch-tests/{runId}` detail instead of (or in addition to)
         embedding on this list — implement exactly one primary FE-consumable
         surface and lock with tests. Sync `POST .../previews/batch-test` remains
@@ -3448,6 +3451,105 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTestRunSummaryListResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/previews/{previewId}/artifacts/docx:
+    get:
+      tags: [Admin]
+      operationId: downloadTemplatePreviewDocx
+      summary: Download SUCCEEDED preview DOCX artifact
+      description: >-
+        Streams the stored DOCX bytes for a SUCCEEDED preview run. Not wrapped
+        in the JSON success envelope; uses `Content-Disposition: attachment`.
+        Authorization reuses `requireReadableSnapshot` (fail-closed 403/404).
+        **Lifecycle (PTA / BDD-PTA-008):** this path is NOT gated on template
+        `lifecycleStatus` — downloads remain available for prior test artifacts
+        when the package is PUBLISHED, STOPPED, or DEPRECATED. Failure causes
+        remain: missing read permission, preview not SUCCEEDED, missing/expired
+        storage object (or equivalent existing artifact-unavailable errors).
+        Do not invent a second download API for published-release Testing.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: previewId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: DOCX file attachment for the preview run.
+          headers:
+            Content-Disposition:
+              description: Attachment filename for the preview DOCX.
+              schema:
+                type: string
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/previews/{previewId}/artifacts/pdf:
+    get:
+      tags: [Admin]
+      operationId: downloadTemplatePreviewPdf
+      summary: Download SUCCEEDED preview PDF artifact
+      description: >-
+        Streams the PDF bytes for a SUCCEEDED preview run (stored PDF key or
+        on-demand materialization from DOCX per existing preview download
+        service). Not wrapped in the JSON success envelope; uses
+        `Content-Disposition: attachment`. Authorization reuses
+        `requireReadableSnapshot` (fail-closed 403/404). **Lifecycle (PTA /
+        BDD-PTA-008):** NOT gated on `lifecycleStatus` PUBLISHED / STOPPED /
+        DEPRECATED — same availability as authoring Testing downloads. Do not
+        add a PUBLISHED-only block on this path.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: previewId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: PDF file attachment for the preview run.
+          headers:
+            Content-Disposition:
+              description: Attachment filename for the preview PDF.
+              schema:
+                type: string
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
@@ -11588,12 +11690,19 @@ components:
       type: object
       additionalProperties: true
       description: >-
-        Per-sample result for management batch-test history drill-down (CE-U18).
-        Canonical async shape (written by AsyncBatchTestOrchestrator):
-        `dataSetExternalId`, `success`, optional `errorDetail` / `docxKey` /
-        `pdfKey`. Historical rows may still contain legacy sync-shaped objects
-        (`testDataSetId`, `previewId`, `status`, …). Frontend MUST normalize
-        either shape to one display model; API MUST NOT require FE to read DB.
+        Per-sample result for management batch-test history drill-down (CE-U18;
+        PTA persist alignment / BDD-PTA-004). Canonical async shape (persisted
+        into `sampleResultsJson` by AsyncBatchTestOrchestrator /
+        AsyncBatchTestExecutionSupport): `dataSetExternalId`, `success`,
+        optional `errorDetail`, and — when the sample produced a preview —
+        non-null `previewId` plus `docxKey` / `pdfKey` when those artifacts
+        were stored (mapped from PreviewRecordView storage keys). Failed
+        samples may omit preview/artifact keys. Historical rows may still
+        contain legacy sync-shaped objects (`testDataSetId`, `status`, …) and
+        pre-PTA async rows that dropped `previewId` (null keys). Frontend MUST
+        normalize either shape to one display model; API MUST NOT require FE
+        to read DB. Schema fields stay optional for legacy/partial rows; the
+        persist rule above is the confirmed write contract for new async runs.
       properties:
         dataSetExternalId:
           type: string
@@ -11608,9 +11717,17 @@ components:
         docxKey:
           type: string
           nullable: true
+          description: >-
+            Object-storage key for the sample DOCX artifact when produced.
+            Confirmed on new async success samples that stored DOCX; null-ok
+            on failure, missing artifact, or pre-PTA persisted rows.
         pdfKey:
           type: string
           nullable: true
+          description: >-
+            Object-storage key for the sample PDF artifact when produced.
+            Confirmed on new async success samples that stored PDF; null-ok
+            on failure, missing artifact, or pre-PTA persisted rows.
         testDataSetId:
           type: string
           nullable: true
@@ -11618,7 +11735,11 @@ components:
         previewId:
           type: string
           nullable: true
-          description: Legacy sync-shaped preview id (optional Open preview).
+          description: >-
+            Preview run id for Open preview drill-down. Canonical on new async
+            success samples that produced a preview (PTA / BDD-PTA-004); also
+            present on legacy sync-shaped historical rows. Null-ok on failure
+            samples and pre-PTA async rows that dropped the field.
         status:
           type: string
           nullable: true
@@ -11684,10 +11805,13 @@ components:
           type: array
           nullable: true
           description: >-
-            CE-U18: per-sample results derived from persisted
-            `sampleResultsJson`. Null or empty when not yet available
-            (e.g. RUNNING) or when the JSON is empty; parse failures must not
-            crash the list — return null/empty and keep summary columns usable.
+            CE-U18 / PTA: per-sample results derived from persisted
+            `sampleResultsJson`. For COMPLETED async runs after PTA persist
+            fix, successful samples that produced a preview expose
+            `previewId` (and `docxKey` / `pdfKey` when stored) for Open
+            preview. Null or empty when not yet available (e.g. RUNNING) or
+            when the JSON is empty; parse failures must not crash the list —
+            return null/empty and keep summary columns usable.
           items:
             $ref: '#/components/schemas/BatchTestHistorySampleResultView'
     BatchTestRunSummaryListResponse:

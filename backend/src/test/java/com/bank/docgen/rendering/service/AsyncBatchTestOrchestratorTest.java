@@ -26,6 +26,7 @@ import com.bank.docgen.template.port.TemplateCoveragePort;
 import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
 import com.bank.docgen.template.port.TemplateRenderContextPort;
 import com.bank.docgen.template.service.CoverageComputationService;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
@@ -120,6 +121,71 @@ class AsyncBatchTestOrchestratorTest {
 
         verify(previewGenerationService).runTestGenerateForBatch(eq(templateId), eq("TDS-001"), any(), eq(session));
         verify(previewGenerationService).runTestGenerateForBatch(eq(templateId), eq("TDS-002"), any(), eq(session));
+    }
+
+    /**
+     * BDD-PTA-004 — async success samples must persist previewId + artifact keys
+     * into sampleResultsJson (Open preview drill-down).
+     */
+    @Test
+    void startBatchRun_persistsPreviewIdAndArtifactKeysOnSucceededSamples() throws Exception {
+        String previewId = "11111111-1111-1111-1111-111111111111";
+        String docxKey = "previews/" + previewId + "/output.docx";
+        String pdfKey = "previews/" + previewId + "/output.pdf";
+        TestDataSetEntity ds = mockDataSet("TDS-OK");
+        when(testDataSetRepository.findByTemplateIdOrderByUpdatedAtDesc(templateId))
+                .thenReturn(List.of(ds));
+        when(previewGenerationService.runTestGenerateForBatch(eq(templateId), eq("TDS-OK"), any(), eq(session)))
+                .thenReturn(new PreviewRecordView(
+                        previewId, templateId.toString(), versionId.toString(),
+                        PreviewStatus.SUCCEEDED, "DOCX", "rp-v1",
+                        docxKey, pdfKey,
+                        List.of(), new PreviewComparisonView(0, 0, 0, List.of()),
+                        "TDS-OK", Instant.now()
+                ));
+        when(templateCoveragePort.compute(any(), any())).thenReturn(emptyCoverage());
+
+        orchestrator.startBatchRun(templateId, session, "http://localhost");
+
+        ArgumentCaptor<BatchTestRunEntity> captor = ArgumentCaptor.forClass(BatchTestRunEntity.class);
+        verify(batchTestRunRepository, atLeast(1)).save(captor.capture());
+        BatchTestRunEntity completed = captor.getAllValues().stream()
+                .filter(run -> run.getStatus() == BatchTestRunStatus.COMPLETED)
+                .findFirst()
+                .orElseThrow();
+        JsonNode samples = new ObjectMapper().readTree(completed.getSampleResultsJson());
+        assertThat(samples).hasSize(1);
+        assertThat(samples.get(0).path("dataSetExternalId").asText()).isEqualTo("TDS-OK");
+        assertThat(samples.get(0).path("success").asBoolean()).isTrue();
+        assertThat(samples.get(0).path("previewId").asText()).isEqualTo(previewId);
+        assertThat(samples.get(0).path("docxKey").asText()).isEqualTo(docxKey);
+        assertThat(samples.get(0).path("pdfKey").asText()).isEqualTo(pdfKey);
+    }
+
+    @Test
+    void startBatchRun_failedSampleOmitsPreviewIdAndArtifactKeys() throws Exception {
+        TestDataSetEntity ds = mockDataSet("TDS-FAIL");
+        when(testDataSetRepository.findByTemplateIdOrderByUpdatedAtDesc(templateId))
+                .thenReturn(List.of(ds));
+        when(previewGenerationService.runTestGenerateForBatch(eq(templateId), eq("TDS-FAIL"), any(), eq(session)))
+                .thenThrow(new IllegalStateException("generation boom"));
+        when(templateCoveragePort.compute(any(), any())).thenReturn(emptyCoverage());
+
+        orchestrator.startBatchRun(templateId, session, "http://localhost");
+
+        ArgumentCaptor<BatchTestRunEntity> captor = ArgumentCaptor.forClass(BatchTestRunEntity.class);
+        verify(batchTestRunRepository, atLeast(1)).save(captor.capture());
+        BatchTestRunEntity completed = captor.getAllValues().stream()
+                .filter(run -> run.getStatus() == BatchTestRunStatus.COMPLETED)
+                .findFirst()
+                .orElseThrow();
+        JsonNode samples = new ObjectMapper().readTree(completed.getSampleResultsJson());
+        assertThat(samples).hasSize(1);
+        assertThat(samples.get(0).path("success").asBoolean()).isFalse();
+        assertThat(samples.get(0).path("previewId").isNull()).isTrue();
+        assertThat(samples.get(0).path("docxKey").isNull()).isTrue();
+        assertThat(samples.get(0).path("pdfKey").isNull()).isTrue();
+        assertThat(samples.get(0).path("errorDetail").asText()).contains("generation boom");
     }
 
     @Test

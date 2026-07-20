@@ -22,6 +22,7 @@ export const apiErrorZhCn = {
     fieldUnknown: "未知字段。",
     contentModuleStructureMissing: "引用的内容模块没有固定的结构。",
     variableValidationFailed: "一个或多个模板变量未通过 VariableSchema 校验。",
+    contentModuleNestingCycle: "展开过程中检测到标准条款嵌套环。",
   },
   storage: {
     operationFailed: "对象存储操作失败。"
@@ -88,6 +89,11 @@ export const apiErrorZhCn = {
     approvalStageMismatch: "请求的审批阶段与模板当前审批阶段不一致。",
     compositionInclusionRuleInvalid: "组合纳入规则集无效。",
     compositionInclusionUnsatisfied: "请求上下文未满足必需的组合纳入规则。",
+    bulkRepin: {
+      dryRunRequired: "批量重钉操作必须提供 dryRun。",
+      groupCodeRequired: "授权组上下文不明确时必须提供 groupCode。",
+      targetXor: "必须且只能提供 toSemanticVersion 或 useLatestApproved=true 之一。",
+    },
     contentModuleJurisdictionMismatch: "纳入的内容模块管辖区与请求管辖区不一致。",
     variableTypeUnsupported: "不支持该变量类型。",
     enumValuesRequired: "枚举变量需要枚举值。",
@@ -235,7 +241,8 @@ export const apiErrorZhCn = {
     releaseBundleHashMismatch: "发布包哈希与锁定的母版对象不匹配。",
     invocationKindNotRegenerable: "此调用类型不可重新生成；请使用 SINGLE、BATCH_ITEM 或 ASYNC_TASK 记录。",
     invocationRecordExpired: "调用记录已过期。",
-    specimenWatermarkFailed: "无法应用 SPECIMEN 水印。"
+    specimenWatermarkFailed: "无法应用 SPECIMEN 水印。",
+    productionReissueReasonRequired: "生产重发必须填写非空白原因。",
   },
   batch: {
     originalBatchNotFound: "未找到原始批次。"
@@ -261,6 +268,10 @@ export const apiErrorZhCn = {
     versionRequired: "该标准条款没有可用于投影目录状态的版本。",
     draftOnlyEditable: "仅草稿版本可编辑。",
     contentStructureRequired: "内容结构为必填项。",
+    nestingCycle: "标准条款嵌套形成环。",
+    nestingDepthExceeded: "标准条款嵌套深度超过上限 8。",
+    nestingTargetUnresolved: "无法将嵌套标准条款引用解析为可见模块。",
+    nestingStructureInvalid: "标准条款结构 JSON 格式无效，无法用于嵌套治理。",
     moduleIdRequired: "标准条款标识为必填项。",
     changeDescriptionRequired: "提交审批前必须填写变更说明。",
     rejectionReasonRequired: "驳回审批时必须填写驳回原因。",

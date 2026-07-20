@@ -1,0 +1,7 @@
+NAMES             STATUS                        PORTS                                                             IMAGE
+docgen-frontend   Up About a minute (healthy)   0.0.0.0:4173->8080/tcp, [::]:4173->8080/tcp                       documentgenerationengine-docgen-frontend
+docgen-backend    Up 3 minutes (healthy)        0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp                       documentgenerationengine-docgen-backend
+docgen-kafka      Up 2 days (healthy)           0.0.0.0:9092->9092/tcp, [::]:9092->9092/tcp                       bitnamilegacy/kafka:3.7
+docgen-postgres   Up 2 days (healthy)           0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp                       postgres:16-alpine
+docgen-redis      Up 2 days (healthy)           0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp                       redis:7-alpine
+docgen-minio      Up 2 days (healthy)           0.0.0.0:9000-9001->9000-9001/tcp, [::]:9000-9001->9000-9001/tcp   minio/minio:RELEASE.2024-12-18T13-15-44Z

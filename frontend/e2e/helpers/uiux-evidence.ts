@@ -1792,3 +1792,38 @@ export async function captureNavMissingIconsLocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** TM #144 published-template-test-artifacts — release Testing read-only @1920. */
+export const TM144_PTA_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'TM144-published-template-test-artifacts',
+)
+export const TM144_PTA_SCREENSHOT_DIR = path.join(TM144_PTA_EVIDENCE_ROOT, 'screenshots')
+export const TM144_PTA_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensureTm144PtaEvidenceDirs(): void {
+  fs.mkdirSync(TM144_PTA_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function tm144PtaScreenshotPath(filename: string): string {
+  return path.join(TM144_PTA_SCREENSHOT_DIR, filename)
+}
+
+export async function captureTm144PtaScreenshot(page: Page, filename: string): Promise<string> {
+  ensureTm144PtaEvidenceDirs()
+  const target = tm144PtaScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureTm144PtaLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureTm144PtaEvidenceDirs()
+  const target = tm144PtaScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
