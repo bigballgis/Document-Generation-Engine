@@ -167,6 +167,8 @@ class PublishGateServiceTest {
         lenient().when(contentModuleReferenceService.evaluateLocaleMismatch(any()))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleLocaleMismatchSummaryView(
                         false, 0, 0, List.of()));
+        lenient().when(contentModuleReferenceService.evaluateNestingClosure(any()))
+                .thenReturn(com.bank.docgen.contentmodule.api.ContentModuleNestingPublishSummaryView.clear());
         lenient().when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
                 .thenReturn(List.of());
         lenient().when(nodeMatrixValidationService.countUnsupportedNodeBlockers(any()))

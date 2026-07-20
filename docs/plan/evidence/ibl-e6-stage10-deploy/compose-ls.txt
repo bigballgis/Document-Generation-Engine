@@ -1,0 +1,2 @@
+NAME                       STATUS              CONFIG FILES
+documentgenerationengine   running(6)          D:\working\DGE-ibl-e6-clause-nesting-governance\docker-compose.yml,D:\working\DGE-ibl-e6-clause-nesting-governance\docker-compose.prod.yml,D:\working\DGE-ibl-e6-clause-nesting-governance\docker-compose.lab.yml,D:\working\DGE-prod-ops-resilience-pdf-pool\docker-compose.yml,D:\working\DGE-prod-ops-resilience-pdf-pool\docker-compose.prod.yml,D:\working\DGE-prod-ops-resilience-pdf-pool\docker-compose.lab.yml

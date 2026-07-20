@@ -16,6 +16,12 @@ public enum PublishGateCheckCode {
     CONTENT_MODULE_EFFECTIVE_NOT_STARTED,
     /** IBL-E1 / ADR-0061: pinned content-module locale incompatible with template locale. */
     CONTENT_MODULE_LOCALE_MISMATCH,
+    /** IBL-E6 / ADR-0067: nesting cycle in pinned CM closure. */
+    CONTENT_MODULE_NESTING_CYCLE,
+    /** IBL-E6 / ADR-0067: nesting depth &gt; 8 in pinned CM closure. */
+    CONTENT_MODULE_NESTING_DEPTH_EXCEEDED,
+    /** IBL-E6 / ADR-0067: nested contentModuleRef missing from template pins. */
+    CONTENT_MODULE_NESTING_UNPINNED,
     /** IBL-E2 / ADR-0063: inclusion rule referenceKey not declared on the version. */
     COMPOSITION_INCLUSION_REFERENCE_INVALID,
     UNSUPPORTED_STRUCTURED_NODES,

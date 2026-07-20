@@ -36,6 +36,7 @@ public class ContentModuleService {
     private final ContentModuleAccessService accessSupport;
     private final ManagementAuditRecorder auditRecorder;
     private final ContentModuleFullTextIndexWriter fullTextIndexWriter;
+    private final ContentModuleNestingService nestingService;
     private final ContentModuleCatalogSupport catalog;
 
     public ContentModuleService(
@@ -45,7 +46,8 @@ public class ContentModuleService {
             GroupAccessService groupAccessService,
             ContentModuleAccessService accessSupport,
             ManagementAuditRecorder auditRecorder,
-            ContentModuleFullTextIndexWriter fullTextIndexWriter
+            ContentModuleFullTextIndexWriter fullTextIndexWriter,
+            ContentModuleNestingService nestingService
     ) {
         this.moduleRepository = moduleRepository;
         this.versionRepository = versionRepository;
@@ -53,6 +55,7 @@ public class ContentModuleService {
         this.accessSupport = accessSupport;
         this.auditRecorder = auditRecorder;
         this.fullTextIndexWriter = fullTextIndexWriter;
+        this.nestingService = nestingService;
         this.catalog = new ContentModuleCatalogSupport(
                 moduleRepository,
                 versionRepository,
@@ -214,6 +217,13 @@ public class ContentModuleService {
                 session.username()
         );
         versionRepository.save(version);
+        nestingService.validateAndSyncEdges(
+                version.getId(),
+                moduleId,
+                moduleCode,
+                version.getContentStructureJson(),
+                session
+        );
         fullTextIndexWriter.refresh(version.getId(), version.getContentStructureJson());
 
         auditRecorder.recordContentModuleCreated(
@@ -253,6 +263,13 @@ public class ContentModuleService {
         );
         version.setLegalMetadata(jurisdiction, effectiveFrom, effectiveTo, legalReviewRef);
         versionRepository.save(version);
+        nestingService.validateAndSyncEdges(
+                version.getId(),
+                module.getId(),
+                module.getModuleCode(),
+                version.getContentStructureJson(),
+                session
+        );
         fullTextIndexWriter.refresh(version.getId(), version.getContentStructureJson());
         module.setUpdatedBy(session.username());
         moduleRepository.save(module);
@@ -294,6 +311,13 @@ public class ContentModuleService {
         }
         version.setLegalMetadata(jurisdiction, effectiveFrom, effectiveTo, legalReviewRef);
         version.setUpdatedBy(session.username());
+        nestingService.validateAndSyncEdges(
+                version.getId(),
+                module.getId(),
+                module.getModuleCode(),
+                request.contentStructureJson(),
+                session
+        );
         versionRepository.save(version);
         fullTextIndexWriter.refresh(version.getId(), version.getContentStructureJson());
         module.setUpdatedBy(session.username());

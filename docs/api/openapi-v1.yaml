@@ -1517,17 +1517,21 @@ paths:
     get:
       tags: [Admin]
       operationId: listContentModuleWhereUsed
-      summary: List templates that reference a content module (CE-G05)
+      summary: List templates that reference a content module (CE-G05 / IBL-E6)
       description: >-
         Returns a management `PageView` of template summaries that reference the
         given content module within the caller's authorized template visibility
-        (CE-G05 / BDD-CE-G05-014…015). Reuses
-        `template_content_module_reference` (and published lock relations); does
-        not scan binding JSON. Does **not** return clause body text. Cross-group
-        templates invisible to the caller are omitted (fail-closed). Empty
-        references → 200 empty page. Requires the same catalog browse access as
-        content-module get (§5.1); `TEMPLATE_TESTER` → 403. Behavior SoT:
-        docs/behavior/ce-g05-annual-review-fts.md.
+        (CE-G05 / BDD-CE-G05-014…015; IBL-E6 deep nesting / BDD-IBL-E6-006…009).
+        Direct hits reuse `template_content_module_reference` (and published lock
+        relations). Nested hits use the governed CM↔CM nesting-edge graph plus
+        ancestor template pins — does **not** scan binding JSON. Each row exposes
+        `referenceKind` (`DIRECT`|`NESTED`), `nestingDepth`, and optional
+        `nestingPathSummary` (non-sensitive `moduleCode` chain; never clause body).
+        Cross-group templates invisible to the caller are omitted (fail-closed).
+        Empty references → 200 empty page. Requires the same catalog browse access
+        as content-module get (§5.1); `TEMPLATE_TESTER` → 403. Behavior SoT:
+        docs/behavior/ce-g05-annual-review-fts.md;
+        docs/behavior/ibl-e6-clause-nesting-governance.md; ADR-0067.
       parameters:
         - name: moduleId
           in: path
@@ -7770,6 +7774,9 @@ components:
         - CONTENT_MODULE_EFFECTIVE_EXPIRED
         - CONTENT_MODULE_EFFECTIVE_NOT_STARTED
         - CONTENT_MODULE_LOCALE_MISMATCH
+        - CONTENT_MODULE_NESTING_CYCLE
+        - CONTENT_MODULE_NESTING_DEPTH_EXCEEDED
+        - CONTENT_MODULE_NESTING_UNPINNED
         - COMPOSITION_INCLUSION_REFERENCE_INVALID
         - UNSUPPORTED_STRUCTURED_NODES
         - PASTE_CLEANING_BLOCKERS
@@ -10323,13 +10330,20 @@ components:
           description: >-
             Optional explicit next review UTC calendar date. Invalid format →
             422 VALIDATION with stable messageKey; no success audit.
+    ContentModuleWhereUsedReferenceKind:
+      type: string
+      description: >-
+        IBL-E6 / ADR-0067 — how the template references the queried content module.
+        `DIRECT` = template pin/lock on the module; `NESTED` = via CM↔CM nesting
+        closure under an ancestor pin.
+      enum: [DIRECT, NESTED]
     ContentModuleWhereUsedTemplateView:
       type: object
       additionalProperties: false
       description: >-
-        CE-G05 where-used row — authorized template that references the module.
-        No clause body.
-      required: [id, externalId, name, groupCode, lifecycleStatus]
+        CE-G05 / IBL-E6 where-used row — authorized template that references the
+        module (direct pin or nested closure). No clause body.
+      required: [id, externalId, name, groupCode, lifecycleStatus, referenceKind, nestingDepth]
       properties:
         id:
           type: string
@@ -10348,11 +10362,26 @@ components:
           description: >-
             Pinned content-module semantic version when a lock/reference pin
             exists; null/omitted when not pinned.
+        referenceKind:
+          $ref: '#/components/schemas/ContentModuleWhereUsedReferenceKind'
+        nestingDepth:
+          type: integer
+          minimum: 0
+          description: >-
+            `0` when `referenceKind=DIRECT`. When `NESTED`, edge count along the
+            nesting path from the ancestor pin root to the queried module (≥ 1).
+        nestingPathSummary:
+          type: string
+          nullable: true
+          description: >-
+            Non-sensitive `moduleCode` chain for `NESTED` hits (e.g.
+            `PARENT>CHILD`). Null/omitted for `DIRECT`. Never includes clause body
+            or variables.
     ContentModuleWhereUsedPageResponse:
       type: object
       additionalProperties: false
       description: >-
-        CE-G05 where-used list envelope for
+        CE-G05 / IBL-E6 where-used list envelope for
         `GET /api/management/v1/content-modules/{moduleId}/where-used`.
       required: [metadata, result]
       properties:
@@ -12386,3 +12415,7 @@ components:
         - DOCUMENT_BRAND_NOT_ALLOWED
         - DOCUMENT_BRAND_UNKNOWN
         - BULK_REPIN_TARGET_INVALID
+        - CONTENT_MODULE_NESTING_CYCLE
+        - CONTENT_MODULE_NESTING_DEPTH_EXCEEDED
+        - CONTENT_MODULE_NESTING_TARGET_UNRESOLVED
+        - CONTENT_MODULE_NESTING_STRUCTURE_INVALID

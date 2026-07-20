@@ -3,7 +3,9 @@ package com.bank.docgen.contentmodule.service;
 import com.bank.docgen.authorization.management.api.CatalogPageSupport;
 import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.contentmodule.api.ContentModuleNestingAncestorHit;
 import com.bank.docgen.contentmodule.api.ContentModuleWhereUsedTemplateView;
+import com.bank.docgen.contentmodule.domain.ContentModuleWhereUsedReferenceKind;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
@@ -24,7 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * CE-G05 — read-only where-used projection for content modules.
+ * CE-G05 / IBL-E6 — where-used projection (direct pins + nesting closure).
  */
 @Service
 public class ContentModuleWhereUsedService {
@@ -35,6 +37,7 @@ public class ContentModuleWhereUsedService {
     private final TemplateContentModuleReferenceRepository referenceRepository;
     private final TemplateVersionRepository templateVersionRepository;
     private final TemplateRepository templateRepository;
+    private final ContentModuleNestingService nestingService;
 
     public ContentModuleWhereUsedService(
             ContentModuleAccessService accessSupport,
@@ -42,7 +45,8 @@ public class ContentModuleWhereUsedService {
             ContentModuleVersionRepository versionRepository,
             TemplateContentModuleReferenceRepository referenceRepository,
             TemplateVersionRepository templateVersionRepository,
-            TemplateRepository templateRepository
+            TemplateRepository templateRepository,
+            ContentModuleNestingService nestingService
     ) {
         this.accessSupport = accessSupport;
         this.groupAccessService = groupAccessService;
@@ -50,6 +54,7 @@ public class ContentModuleWhereUsedService {
         this.referenceRepository = referenceRepository;
         this.templateVersionRepository = templateVersionRepository;
         this.templateRepository = templateRepository;
+        this.nestingService = nestingService;
     }
 
     @Transactional(readOnly = true)
@@ -68,46 +73,43 @@ public class ContentModuleWhereUsedService {
 
         List<ContentModuleVersionEntity> versions =
                 versionRepository.findByModuleIdOrderBySemanticVersionDesc(module.getId());
-        if (versions.isEmpty()) {
-            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-        }
         Map<UUID, String> versionIdToSemver = new LinkedHashMap<>();
         for (ContentModuleVersionEntity version : versions) {
             versionIdToSemver.put(version.getId(), version.getSemanticVersion());
         }
 
-        List<TemplateContentModuleReferenceEntity> references =
-                referenceRepository.findByContentModuleVersionIdIn(versionIdToSemver.keySet());
-
         Map<UUID, ContentModuleWhereUsedTemplateView> byTemplate = new LinkedHashMap<>();
-        for (TemplateContentModuleReferenceEntity reference : references) {
-            TemplateVersionEntity templateVersion = templateVersionRepository
-                    .findById(reference.getTemplateVersionId())
-                    .orElse(null);
-            if (templateVersion == null || templateVersion.getDeletedAt() != null) {
-                continue;
+
+        if (!versionIdToSemver.isEmpty()) {
+            List<TemplateContentModuleReferenceEntity> directRefs =
+                    referenceRepository.findByContentModuleVersionIdIn(versionIdToSemver.keySet());
+            for (TemplateContentModuleReferenceEntity reference : directRefs) {
+                addTemplateHit(
+                        byTemplate,
+                        reference,
+                        versionIdToSemver.get(reference.getContentModuleVersionId()),
+                        ContentModuleWhereUsedReferenceKind.DIRECT,
+                        0,
+                        null,
+                        session
+                );
             }
-            TemplateEntity template = templateRepository
-                    .findByIdAndDeletedAtIsNull(templateVersion.getTemplateId())
-                    .orElse(null);
-            if (template == null) {
-                continue;
+        }
+
+        for (ContentModuleNestingAncestorHit ancestor : nestingService.findNestingAncestors(module.getId())) {
+            List<TemplateContentModuleReferenceEntity> nestedRefs =
+                    referenceRepository.findByContentModuleVersionIdIn(List.of(ancestor.ancestorVersionId()));
+            for (TemplateContentModuleReferenceEntity reference : nestedRefs) {
+                addTemplateHit(
+                        byTemplate,
+                        reference,
+                        null,
+                        ContentModuleWhereUsedReferenceKind.NESTED,
+                        ancestor.nestingDepth(),
+                        ancestor.nestingPathSummary(),
+                        session
+                );
             }
-            if (!groupAccessService.canAccessGroup(session, template.getGroupCode())) {
-                continue;
-            }
-            String pinned = versionIdToSemver.get(reference.getContentModuleVersionId());
-            byTemplate.putIfAbsent(
-                    template.getId(),
-                    new ContentModuleWhereUsedTemplateView(
-                            template.getId().toString(),
-                            template.getExternalId(),
-                            template.getName(),
-                            template.getGroupCode(),
-                            template.getLifecycleStatus(),
-                            pinned
-                    )
-            );
         }
 
         List<ContentModuleWhereUsedTemplateView> all = new ArrayList<>(byTemplate.values());
@@ -124,6 +126,46 @@ public class ContentModuleWhereUsedService {
                 safeSize,
                 total,
                 CatalogPageSupport.totalPages(total, safeSize)
+        );
+    }
+
+    private void addTemplateHit(
+            Map<UUID, ContentModuleWhereUsedTemplateView> byTemplate,
+            TemplateContentModuleReferenceEntity reference,
+            String pinnedSemanticVersion,
+            ContentModuleWhereUsedReferenceKind kind,
+            int nestingDepth,
+            String nestingPathSummary,
+            ManagementSessionClaims session
+    ) {
+        TemplateVersionEntity templateVersion = templateVersionRepository
+                .findById(reference.getTemplateVersionId())
+                .orElse(null);
+        if (templateVersion == null || templateVersion.getDeletedAt() != null) {
+            return;
+        }
+        TemplateEntity template = templateRepository
+                .findByIdAndDeletedAtIsNull(templateVersion.getTemplateId())
+                .orElse(null);
+        if (template == null) {
+            return;
+        }
+        if (!groupAccessService.canAccessGroup(session, template.getGroupCode())) {
+            return;
+        }
+        byTemplate.putIfAbsent(
+                template.getId(),
+                new ContentModuleWhereUsedTemplateView(
+                        template.getId().toString(),
+                        template.getExternalId(),
+                        template.getName(),
+                        template.getGroupCode(),
+                        template.getLifecycleStatus(),
+                        pinnedSemanticVersion,
+                        kind,
+                        nestingDepth,
+                        nestingPathSummary
+                )
         );
     }
 }

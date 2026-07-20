@@ -239,6 +239,23 @@ Publish hard gate for not-yet-effective CM pins + group-scoped bulk re-pin tooli
 
 Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `PublishGateCheckCode`, `BulkRepinContentModuleReferencesRequest`, `BulkRepinContentModuleReferencesResultView`, `ErrorCode`. Path: `POST /api/management/v1/content-module-references/bulk-repin`. Companion: [contract-outline.md](contract-outline.md) IBL-E5 bullet. Behavior SoT: [ibl-e5-effectivefrom-bulk-repin.md](../behavior/ibl-e5-effectivefrom-bulk-repin.md)（BDD-IBL-E5-001…017）. Accepted ADR ≠ E5 impl Done; formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
 
+### Clause nesting module-graph governance (IBL-E6)
+
+Governed CM↔CM nesting from `contentModuleRef`, depth/cycle fail-closed, deep where-used, and transitive pin publish gates ([ADR-0067](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md)). Extends CE-G05 where-used. Management API-first (`frontend_ui_in_scope=false`). **No new capability bit.**
+
+| Condition | Surface | Stable code |
+| --- | --- | --- |
+| Self / mutual / indirect nest cycle on CM structure write | 422 | `CONTENT_MODULE_NESTING_CYCLE` |
+| Nesting depth > 8 on CM structure write | 422 | `CONTENT_MODULE_NESTING_DEPTH_EXCEEDED` |
+| Nest `referenceKey` unresolved / invisible | 422 | `CONTENT_MODULE_NESTING_TARGET_UNRESOLVED` |
+| Malformed `contentStructureJson` on nesting write | 422 | `CONTENT_MODULE_NESTING_STRUCTURE_INVALID` |
+| Cycle in pinned nest closure | publish gate | `CONTENT_MODULE_NESTING_CYCLE` |
+| Depth > 8 in pinned nest closure | publish gate | `CONTENT_MODULE_NESTING_DEPTH_EXCEEDED` |
+| Nested `referenceKey` missing as template pin | publish gate | `CONTENT_MODULE_NESTING_UNPINNED` |
+| Render expand encounters cycle | structured failure | `CONTENT_MODULE_NESTING_CYCLE` |
+
+Where-used row extensions: `referenceKind` (`DIRECT`\|`NESTED`), `nestingDepth`, optional `nestingPathSummary`. Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `ContentModuleWhereUsedTemplateView`, `ContentModuleWhereUsedReferenceKind`, `PublishGateCheckCode`, `ErrorCode`. Companion: [contract-outline.md](contract-outline.md) IBL-E6 bullet. Behavior SoT: [ibl-e6-clause-nesting-governance.md](../behavior/ibl-e6-clause-nesting-governance.md)（BDD-IBL-E6-001…018）. Accepted ADR ≠ E6 impl Done; formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
+
 ### Full-library export (CE-E03)
 
 Management full-library export in [openapi-v1.yaml](openapi-v1.yaml) (`exportLibraryTemplates`) / [contract-outline.md](contract-outline.md) «模板导出/导入契约» CE-E03:

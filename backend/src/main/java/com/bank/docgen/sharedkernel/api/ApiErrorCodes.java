@@ -182,6 +182,15 @@ public final class ApiErrorCodes {
     /** IBL-E5 / ADR-0066: bulk re-pin target version missing, wrong module, or not referencable. */
     public static final String BULK_REPIN_TARGET_INVALID = "BULK_REPIN_TARGET_INVALID";
 
+    /** IBL-E6 / ADR-0067: CM nesting graph contains a cycle. */
+    public static final String CONTENT_MODULE_NESTING_CYCLE = "CONTENT_MODULE_NESTING_CYCLE";
+    /** IBL-E6 / ADR-0067: CM nesting depth exceeds hard limit (8). */
+    public static final String CONTENT_MODULE_NESTING_DEPTH_EXCEEDED = "CONTENT_MODULE_NESTING_DEPTH_EXCEEDED";
+    /** IBL-E6 / ADR-0067: nested contentModuleRef.referenceKey could not be resolved. */
+    public static final String CONTENT_MODULE_NESTING_TARGET_UNRESOLVED = "CONTENT_MODULE_NESTING_TARGET_UNRESOLVED";
+    /** IBL-E6 / ADR-0067: contentStructureJson is malformed / unparseable on nesting write path. */
+    public static final String CONTENT_MODULE_NESTING_STRUCTURE_INVALID = "CONTENT_MODULE_NESTING_STRUCTURE_INVALID";
+
     private ApiErrorCodes() {
     }
 }

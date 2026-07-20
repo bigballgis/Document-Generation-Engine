@@ -1,0 +1,24 @@
+{
+  "result": "DEPLOY_OK",
+  "when": "2026-07-20T10:17:14+08:00",
+  "slice": "ibl-e6-clause-nesting-governance",
+  "worktree": "D:/working/DGE-ibl-e6-clause-nesting-governance",
+  "branch": "feat/ibl-e6-clause-nesting-governance",
+  "git_tip": "65613c4be12e55ebfbc439078044ae436aa32c28",
+  "mode": "full",
+  "command": "COMPOSE_PROJECT_NAME=documentgenerationengine FRONTEND_PORT=4173 .\\scripts\\docker-deploy-queue.ps1 -Reason \"IBL-E6 Stage 10 deploy evidence\"",
+  "compose_project": "documentgenerationengine",
+  "frontend_ui_in_scope": false,
+  "healthz_8080": {
+    "status_code": 200,
+    "body": "{\"status\":\"UP\"}"
+  },
+  "frontend_4173": {
+    "note": "captured optionally; healthz sufficient per frontend_ui_in_scope=false",
+    "status_code": 200
+  },
+  "images": {
+    "frontend": "sha256:a1ca7f9542feeba90aa64b87881238c8f87b392703846ee126539d523a3eeee7",
+    "backend": "sha256:1f6caae7f638b92b64d3e5cc68418340ac1d9636f5d4fbb60c4bd2bdd13ef192"
+  }
+}

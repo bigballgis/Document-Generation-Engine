@@ -19,6 +19,7 @@ import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -239,6 +240,10 @@ final class PublishGateCheckItemSupport {
 
     PublishGateItemView contentModuleLocaleMismatchItem(UUID versionId) {
         return contentItems.contentModuleLocaleMismatchItem(versionId);
+    }
+
+    List<PublishGateItemView> contentModuleNestingItems(UUID versionId) {
+        return contentItems.contentModuleNestingItems(versionId);
     }
 
     PublishGateItemView compositionInclusionReferenceItem(TemplateVersionEntity version) {
