@@ -16,6 +16,7 @@ const emit = defineEmits<{
   download: []
   replaceFile: []
   editMetadata: []
+  openProperties: []
   openSubmitReview: []
   openReview: [mode: MasterReviewDecision]
 }>()
@@ -25,6 +26,9 @@ const { t } = useI18n()
 
 <template>
   <MasterStatusBadge :status="status" />
+  <el-button data-testid="master-hub-properties-action" @click="emit('openProperties')">
+    {{ t('masters.hub.properties') }}
+  </el-button>
   <el-button :loading="downloading" @click="emit('download')">
     {{ t('masters.download.action') }}
   </el-button>

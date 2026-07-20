@@ -11,6 +11,7 @@ import LifecycleStepper from '@/components/templates/LifecycleStepper.vue'
 import TemplateDetailDesignTab from '@/views/templates/detail/TemplateDetailDesignTab.vue'
 import TemplateDetailTestingTab from '@/views/templates/detail/TemplateDetailTestingTab.vue'
 import TemplateDetailApprovalTab from '@/views/templates/detail/TemplateDetailApprovalTab.vue'
+import TemplateDependenciesPanel from '@/views/templates/detail/TemplateDependenciesPanel.vue'
 import TemplateDetailDevWorkspaceActions from '@/views/templates/detail/TemplateDetailDevWorkspaceActions.vue'
 import { useTemplateDetailDevWorkspace } from '@/views/templates/detail/useTemplateDetailDevWorkspace'
 import type { SemverBumpLevel } from '@/utils/semver'
@@ -202,6 +203,10 @@ function onAuthoringPathDismiss() {
           @updated="emit('updated')"
           @preview-refreshed="emit('preview-refreshed', $event)"
         />
+      </template>
+
+      <template #dependencies>
+        <TemplateDependenciesPanel :template="template" />
       </template>
 
       <template #testing>

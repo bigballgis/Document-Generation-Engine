@@ -1,17 +1,45 @@
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props -- c is a reactive controller bag owned by the parent shell */
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import {
+  templatePackageHubPath,
+  templateReleaseDetailPath,
+} from '@/routing/routeKeys'
 import TemplateDetailDevWorkspace from '@/views/templates/detail/TemplateDetailDevWorkspace.vue'
 
 defineProps<{
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   c: any
 }>()
+
+const { t } = useI18n()
+const router = useRouter()
+
+function openCorrectSurface(c: {
+  templateId: string
+  template: { releaseVersion?: string | null; lifecycleStatus?: string }
+}) {
+  const releaseVersion = c.template.releaseVersion
+  if (
+    releaseVersion &&
+    (c.template.lifecycleStatus === 'PUBLISHED' ||
+      c.template.lifecycleStatus === 'STOPPED' ||
+      c.template.lifecycleStatus === 'DEPRECATED')
+  ) {
+    void router.push(templateReleaseDetailPath(c.templateId, releaseVersion))
+    return
+  }
+  void router.push(templatePackageHubPath(c.templateId))
+}
 </script>
 
 <template>
   <TemplateDetailDevWorkspace
     v-if="c.isDevEditor && c.showAuthoringSection"
     :template-id="c.templateId"
+    :template="c.template"
     :master-id="c.template.masterId"
     :variables="c.template.variables"
     :bindings="c.template.bindings"
@@ -69,4 +97,31 @@ defineProps<{
     @retry-submit-gate="c.loadSubmitGateData"
     @preview-refreshed="c.handlePreviewRefreshed"
   />
+
+  <div
+    v-else-if="c.isDevEditor && !c.showAuthoringSection"
+    class="dev-wrong-surface"
+    data-testid="dev-editor-wrong-surface"
+  >
+    <EmptyStatePanel
+      title-key="templates.devEditor.wrongSurfaceTitle"
+      description-key="templates.devEditor.wrongSurfaceDescription"
+    >
+      <template #actions>
+        <el-button
+          type="primary"
+          data-testid="dev-editor-open-correct-surface"
+          @click="openCorrectSurface(c)"
+        >
+          {{ t('templates.devEditor.openCorrectSurface') }}
+        </el-button>
+      </template>
+    </EmptyStatePanel>
+  </div>
 </template>
+
+<style scoped lang="scss">
+.dev-wrong-surface {
+  margin-top: var(--space-4);
+}
+</style>

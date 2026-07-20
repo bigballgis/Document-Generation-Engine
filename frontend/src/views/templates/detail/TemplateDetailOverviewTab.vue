@@ -27,7 +27,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const { masterDetailLink, templateDetailLink } = useEntityLinkTargets()
+const { masterDetailLink, templateDetailLink, groupCatalogLink } = useEntityLinkTargets()
 const { authorTemplates } = useCapabilities()
 const { confirmAction } = useConfirmAction()
 const templatesStore = useTemplatesStore()
@@ -86,6 +86,11 @@ const allowedDocumentBrandCodesLabel = computed(() => {
   }
   return codes.join(', ')
 })
+
+/** N4 — locale facts live in LocaleVariantFamilyNav when that block is shown. */
+const showStandaloneLocaleRow = computed(
+  () => !(props.template.locale || props.template.localeVariantFamilyId),
+)
 
 watch(
   () => props.template.approvalMatrixMode,
@@ -187,15 +192,20 @@ async function completeAnnualReview() {
         <dt>{{ t('templates.detail.name') }}</dt>
         <dd>{{ template.name }}</dd>
       </div>
-      <div>
+      <div data-testid="template-overview-group-code">
         <dt>{{ t('templates.detail.groupCode') }}</dt>
-        <dd>{{ template.groupCode }}</dd>
+        <dd>
+          <EntityLinkCell
+            :label="template.groupCode"
+            :to="groupCatalogLink(template.groupCode)"
+          />
+        </dd>
       </div>
-      <div>
+      <div data-testid="template-overview-external-id">
         <dt>{{ t('templates.detail.externalId') }}</dt>
         <dd>{{ template.externalId }}</dd>
       </div>
-      <div data-testid="template-overview-locale">
+      <div v-if="showStandaloneLocaleRow" data-testid="template-overview-locale">
         <dt>{{ t('templates.detail.locale') }}</dt>
         <dd>{{ template.locale || '—' }}</dd>
       </div>

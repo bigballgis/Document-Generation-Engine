@@ -20,7 +20,7 @@ export type TemplateDevWorkspaceSubTab =
   | TemplateTestingSubTab
   | TemplateApprovalSubTab
 
-export const TEMPLATE_DEV_WORKSPACE_TABS = ['design', 'testing', 'approval'] as const
+export const TEMPLATE_DEV_WORKSPACE_TABS = ['design', 'dependencies', 'testing', 'approval'] as const
 
 export type TemplateDevWorkspaceTab = (typeof TEMPLATE_DEV_WORKSPACE_TABS)[number]
 
@@ -28,6 +28,7 @@ const DEFAULT_TEMPLATE_DEV_WORKSPACE_TAB: TemplateDevWorkspaceTab = 'design'
 
 const TEMPLATE_DEV_WORKSPACE_TAB_LABEL_KEYS: Record<TemplateDevWorkspaceTab, string> = {
   design: 'templates.devWorkspace.tabs.design',
+  dependencies: 'templates.devWorkspace.tabs.dependencies',
   testing: 'templates.devWorkspace.tabs.testing',
   approval: 'templates.devWorkspace.tabs.approval',
 }

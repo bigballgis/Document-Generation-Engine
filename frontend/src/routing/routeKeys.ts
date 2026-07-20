@@ -1,3 +1,7 @@
+import { apiPackageSettingsPath } from '@/routing/apiPackageSettings'
+
+export { apiPackageSettingsPath } from '@/routing/apiPackageSettings'
+
 export const ROUTE_KEYS = {
   dashboardHome: 'route.dashboard-home',
   globalGovernanceHome: 'route.global-governance-home',
@@ -123,19 +127,9 @@ export function templateLifecyclePanelPath(
   return query ? `${base}&${query}` : base
 }
 
-/** Canonical external-access surface — package hub tab (P13 IA convergence). */
-function apiPolicyHubPath(templateId: string, domain?: string): string {
-  const base = templatePackageHubPath(templateId, 'apiAccess')
-  if (!domain) {
-    return base
-  }
-  return `${base}#domain=${encodeURIComponent(domain)}`
-}
-
 /**
- * @deprecated Legacy `/api/policies/:id` — resolves to hub path for programmatic navigation.
- * Router redirect handles direct browser hits to the old URL.
+ * Package-level API settings (Wave 2 model A). Prefer this over hub tabs.
  */
 export function apiPolicyDetailPath(templateId: string, domain?: string): string {
-  return apiPolicyHubPath(templateId, domain)
+  return apiPackageSettingsPath(templateId, domain ? { domain } : undefined)
 }

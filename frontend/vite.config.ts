@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 
+import { bypassSpaApiRoutes } from './src/dev/spaApiProxyBypass'
 import { createAppPlugins, resolveManualChunk } from './vite.shared'
 
 export default defineConfig({
@@ -25,6 +26,10 @@ export default defineConfig({
       '/api': {
         target: process.env.VITE_BACKEND_URL ?? 'http://localhost:8080',
         changeOrigin: true,
+        // SPA hard-refresh for /api/policies and /api/packages (see nginx.conf).
+        bypass(req) {
+          return bypassSpaApiRoutes(req.url)
+        },
       },
     },
   },

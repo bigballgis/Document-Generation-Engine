@@ -1,25 +1,18 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import type { WorkspaceTabOption } from '@/components/common/WorkspaceTabShell.vue'
-import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environments'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
+import { apiPackageSettingsPath } from '@/routing/apiPackageSettings'
 import { useTemplatesStore } from '@/stores/templates'
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
-import { templateDetailTabLabelKey } from '@/views/templates/templateDetailTabs'
 import { useTemplatePolicyCredentials } from '@/views/templates/useTemplatePolicyCredentials'
 import { createTemplatePackageHubActions } from '@/views/templates/createTemplatePackageHubActions'
-import {
-  useTemplatePackageHubRouting,
-  type HubSecondaryTab,
-} from '@/views/templates/useTemplatePackageHubRouting'
+import { useTemplatePackageHubRouting } from '@/views/templates/useTemplatePackageHubRouting'
 
 type HubWorkspaceExpose = {
   reloadVersionLines: () => Promise<void> | undefined
-  revealCredentialSecret: (externalId: string, secret: string) => void
 }
 
 export function useTemplatePackageHub() {
@@ -34,16 +27,17 @@ export function useTemplatePackageHub() {
     exportTemplates,
     editTemplateMetadata,
     manageReleaseVersionState,
+    manageApiPolicy,
   } = useCapabilities()
   const { confirmAction } = useConfirmAction()
 
   const metadataEditOpen = ref(false)
+  const propertiesOpen = ref(false)
+  const dependenciesGuidanceVisible = ref(false)
   const loadFailed = ref(false)
-  const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
   const workspaceRef = ref<HubWorkspaceExpose | null>(null)
 
   const templateId = computed(() => String(route.params.templateId ?? ''))
-  const secondaryTab = ref<HubSecondaryTab | undefined>(undefined)
 
   const template = computed(() => {
     const selected = templatesStore.selectedTemplate
@@ -70,28 +64,11 @@ export function useTemplatePackageHub() {
 
   const {
     showPolicyPanel,
-    policyLoadFailed,
-    apiPolicy,
-    loadingPolicy,
-    policySubmitting,
-    policyLoadErrorKey,
-    credentialColumnFilters,
-    credentialsCurrentPage,
-    paginatedCredentials,
-    credentialStatusFilterOptions,
-    totalCredentialRows,
-    sortCredentialsByCreatedAt,
     loadPolicyData,
-    handleCreateCredential,
-    handleRotateCredential,
-    handleRevokeCredential,
   } = useTemplatePolicyCredentials({
     templateId,
     template,
     errorMessage,
-    revealSecret: (externalId, secret) => {
-      workspaceRef.value?.revealCredentialSecret(externalId, secret)
-    },
   })
 
   const showMetadataEdit = computed(() => {
@@ -110,32 +87,16 @@ export function useTemplatePackageHub() {
       Boolean(template.value) &&
       isTemplateExportEligible(template.value!.lifecycleStatus),
   )
-
-  const hubWorkspaceTabs = computed((): WorkspaceTabOption[] => {
-    const tabs: WorkspaceTabOption[] = [
-      { name: 'overview', labelKey: templateDetailTabLabelKey('overview') },
-      { name: 'dependencies', labelKey: 'templates.detail.tabs.dependencies' },
-    ]
-    if (showPolicyPanel.value) {
-      tabs.push({ name: 'apiAccess', labelKey: templateDetailTabLabelKey('apiAccess') })
-    }
-    return tabs
-  })
-
-  const activeHubTab = computed({
-    get: () => secondaryTab.value ?? 'overview',
-    set: (value: string) => {
-      secondaryTab.value = value as HubSecondaryTab
-    },
-  })
+  const showApiSettingsAction = computed(() => manageApiPolicy.value)
 
   const { loadTemplate } = useTemplatePackageHubRouting({
     templateId,
     template,
-    secondaryTab,
     showPolicyPanel,
     loadPolicyData,
     loadFailed,
+    propertiesOpen,
+    dependenciesGuidanceVisible,
   })
 
   const hubActions = createTemplatePackageHubActions({
@@ -150,6 +111,14 @@ export function useTemplatePackageHub() {
     workspaceRef,
   })
 
+  function openProperties() {
+    propertiesOpen.value = true
+  }
+
+  function openApiSettings() {
+    void router.push(apiPackageSettingsPath(templateId.value))
+  }
+
   return {
     t,
     formatDateTime,
@@ -157,35 +126,21 @@ export function useTemplatePackageHub() {
     authorTemplates,
     manageReleaseVersionState,
     metadataEditOpen,
+    propertiesOpen,
+    dependenciesGuidanceVisible,
     loadFailed,
-    selectedContractEnvironment,
     workspaceRef,
     templateId,
     template,
     showDetailSkeleton,
     showPolicyPanel,
-    policyLoadFailed,
-    apiPolicy,
-    loadingPolicy,
-    policySubmitting,
-    policyLoadErrorKey,
-    credentialColumnFilters,
-    credentialsCurrentPage,
-    paginatedCredentials,
-    credentialStatusFilterOptions,
-    totalCredentialRows,
-    sortCredentialsByCreatedAt,
-    CLIENT_TABLE_PAGE_SIZE,
     showMetadataEdit,
     showDeleteTemplateAction,
     showExportActions,
-    hubWorkspaceTabs,
-    activeHubTab,
+    showApiSettingsAction,
     loadTemplate,
-    loadPolicyData,
+    openProperties,
+    openApiSettings,
     ...hubActions,
-    handleCreateCredential,
-    handleRotateCredential,
-    handleRevokeCredential,
   }
 }

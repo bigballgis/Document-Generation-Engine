@@ -1,20 +1,25 @@
 import { createRouter, createWebHistory, type RouteLocationGeneric } from 'vue-router'
 import { reportRouteAccessDenied } from '@/api/securityAudit'
 import { i18n } from '@/i18n'
+import { apiPackageSettingsPath } from '@/routing/apiPackageSettings'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useSessionStore } from '@/stores/session'
 
 function redirectLegacyApiPolicyDetail(to: RouteLocationGeneric) {
   const templateId = String(to.params.templateId ?? '')
   const domain = to.query.domain
-  const location: { path: string; query: { tab: string }; hash?: string } = {
-    path: `/templates/${templateId}`,
-    query: { tab: 'apiAccess' },
+  const path = apiPackageSettingsPath(
+    templateId,
+    typeof domain === 'string' && domain.length > 0 ? { domain } : undefined,
+  )
+  const [pathname, search] = path.split('?')
+  const query: Record<string, string> = {}
+  if (search) {
+    for (const [key, value] of new URLSearchParams(search)) {
+      query[key] = value
+    }
   }
-  if (typeof domain === 'string' && domain.length > 0) {
-    location.hash = `#domain=${encodeURIComponent(domain)}`
-  }
-  return location
+  return { path: pathname, query }
 }
 
 const router = createRouter({
@@ -61,6 +66,12 @@ const router = createRouter({
       path: '/api/policies',
       name: 'api-policy-management',
       component: () => import('@/views/api/ApiPolicyHomeView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.apiPolicyManagement },
+    },
+    {
+      path: '/api/packages/:templateId/settings',
+      name: 'api-package-settings',
+      component: () => import('@/views/api/ApiPackageSettingsShellView.vue'),
       meta: { logicalRoute: ROUTE_KEYS.apiPolicyManagement },
     },
     {

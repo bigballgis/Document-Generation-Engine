@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: cleared (prior NON-CE #144 published-template-test-artifacts Done ac36ecbc / 6bc74ff1) — do not treat #53 as delivery leaf. Prior NON-CE #143 SYS-NORM Wave 0 Done f8e898ad / 28d4abe1 / ade18bdb; prior #142 Wave B Done 288ce98f; #141 Wave A Done aa88170f; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done; prior NON-CE #139 PD-7 Done b966874a; OUT of IBL-E; pursue docs ADR-0069 + procurement; Accepted ≠ embedding Done; prior #138 PD-6 Done 73ab03cb. Prior NON-CE #134 IBL-E7 Done 37239d68 / 68abc7c3; Wave IBL-E Done E1–E7; F15 descope / ADR-0068; worktree REMOVED. Prior #133 IBL-E6 Done dcc42c81 / 0e542c03 / 32b62136 / docs a2501d48; F28 closed). Do NOT treat #53 as delivery leaf. Do NOT auto-activate CE-O02.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: cleared (prior NON-CE #144 Done ac36ecbc / 6bc74ff1). Prior NON-CE #143 SYS-NORM Wave 0 Done f8e898ad / 28d4abe1 / ade18bdb; next SYS-NORM queue head sys-norm-shell-fluid-nav not activated. Prior NON-CE #142/#141 bank-letter demo Done; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done. Do NOT claim program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02.",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: NON-CE #146 SYS-NORM Wave 2 (sys-norm-hub-ia) in-progress — do not treat #53 as delivery leaf. Prior NON-CE #145 SYS-NORM Wave 1 Done 7a62be44 / f1594f2a / ce2cb9f0; prior #144 PTA Done ac36ecbc / 6bc74ff1; prior #143 Wave 0 Done f8e898ad / 28d4abe1 / ade18bdb; prior #142 Wave B Done 288ce98f; #141 Wave A Done aa88170f; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done. Do NOT treat #53 as delivery leaf. Do NOT auto-activate CE-O02.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: NON-CE #146 SYS-NORM Wave 2 (sys-norm-hub-ia) in-progress. Prior NON-CE #145 Wave 1 Done 7a62be44; #144 PTA Done; #143 Wave 0 Done. Do NOT claim program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-21T03:25:00.000Z"
+        "updatedAt": "2026-07-21T05:35:00.000Z"
       },
       {
         "id": "54",
@@ -2000,17 +2000,31 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-20T20:32:26.741Z"
+      },
+      {
+        "id": "146",
+        "title": "SYS-NORM Wave 2 — Hub IA (sys-norm-hub-ia)",
+        "description": "IN PROGRESS 2026-07-21. NON-CE System Normalization Program Wave 2 — sole-active delivery leaf. Slice sys-norm-hub-ia; placement ISOLATED; worktree D:/working/DGE-sys-norm-hub-ia · feat/sys-norm-hub-ia (base origin/main @ 75147f3c). Batch recommendation solo (member_task_ids: [\"146\"]; proposed_slice_id: sys-norm-hub-ia; vetoes_applied: Wave-3-dashboard-not-merged, Wave-4-not-folded; evidence_amortization: FE+E2E+deploy; on_red_split_hint: Peel Master N14 if file-cap). Scope: Template (+ Master parity) Hub Properties drawer; remove hub tabs Overview/Dependencies/External access; version Dependencies; API jump model A; Dev blank-surface; locale de-dupe; legacy apiAccess. BDD ready docs/behavior/sys-norm-hub-ia.md BDD-SYS-NORM-W2-001…018. frontend_ui_in_scope=true. Depends on Wave 1 #145 Done. Waves 3–8 remain Not Started (next queue head after close: sys-norm-external-ops). Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT mega-merge Wave 3/4. Do NOT claim go-live / SYS-NORM program Done. Stale parked DGE-mgmt-hub-ia-fluid-properties removed at stage 0 — do not revive.",
+        "details": "ACTIVATED 2026-07-21 (stage 2 plan-orchestrator). Slice id: sys-norm-hub-ia. Status: in-progress — host sole-active NON-CE delivery leaf. Worktree D:/working/DGE-sys-norm-hub-ia · feat/sys-norm-hub-ia. Batch solo open. BDD ready (docs/behavior/sys-norm-hub-ia.md; BDD-SYS-NORM-W2-001…018). Program plan Wave 2 → In Progress. Prior #145 Wave 1 Done (7a62be44). Next after this leaf closes (notes only): Wave 3 sys-norm-external-ops — not activated. Vetoes held: CE-O02; checklist-#3b/#5a-GO; RTL; mega-merge Waves 3–8; fold Wave 3/4 into this leaf; do not mark #53 Done. Formal phase remains None. No FE impl in stage 2.",
+        "testStrategy": "1. BDD ready confirmed (docs/behavior/sys-norm-hub-ia.md; BDD-SYS-NORM-W2-001…018). 2. Program plan Wave 2 In Progress; sole-active = #146. 3. FE gates + E2E + UIUX + Stage 5/10 DEPLOY_OK before Done. 4. Stage 11 merge + MAIN doc-sync before Done. 5. Do NOT flip #3b/#5a GO; do NOT activate Wave 3; do NOT fold Wave 3/4; peel Master N14 if file-cap on red.",
+        "priority": "high",
+        "dependencies": [
+          "145"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-21T05:35:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-20T20:32:26.741Z",
-      "taskCount": 145,
+      "lastModified": "2026-07-21T05:35:00.000Z",
+      "taskCount": 146,
       "completedCount": 142,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-20T20:32:26.741Z"
+      "updated": "2026-07-21T05:35:00.000Z"
     }
   }
 }

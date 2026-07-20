@@ -11,6 +11,7 @@ import PublishGateReadOnlyPanel from '@/components/templates/PublishGateReadOnly
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import ReleaseSectionTable from '@/components/templates/ReleaseSectionTable.vue'
 import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
+import TemplateDependenciesPanel from '@/views/templates/detail/TemplateDependenciesPanel.vue'
 import { useTemplateReleaseDetailView } from '@/views/templates/useTemplateReleaseDetailView'
 
 const {
@@ -90,6 +91,10 @@ const {
         />
       </template>
 
+      <template #dependencies>
+        <TemplateDependenciesPanel :template="releaseDetail" />
+      </template>
+
       <template #testing>
         <div class="release-testing" data-testid="release-testing-readonly">
           <p class="read-only-hint">{{ t('templates.releaseDetail.testing.readOnlySummary') }}</p>
@@ -110,16 +115,7 @@ const {
         <el-card shadow="never" class="summary-card">
           <p class="read-only-hint">{{ t('templates.releaseDetail.approval.readOnlySummary') }}</p>
           <dl class="summary-grid">
-            <div>
-              <dt>{{ t('templates.releaseDetail.approval.lifecycleStatus') }}</dt>
-              <dd>
-                <TemplateStatusBadge
-                  :status="releaseDetail.lifecycleStatus"
-                  :approval-sub-state="releaseDetail.approvalSubState"
-                />
-              </dd>
-            </div>
-            <div>
+            <div data-testid="release-approval-sub-state">
               <dt>{{ t('templates.releaseDetail.approval.approvalSubState') }}</dt>
               <dd>{{ approvalSubStateLabel }}</dd>
             </div>

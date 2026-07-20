@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import { useCapabilities } from '@/composables/useCapabilities'
+import { apiPackageSettingsPath } from '@/routing/apiPackageSettings'
 import type { TemplateVersionLineSummary } from '@/types/template'
 import { isInFlightVersionLine } from '@/utils/templateVersionLine'
 import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 
 const currentPage = defineModel<number>('currentPage', { required: true })
 
-defineProps<{
+const props = defineProps<{
+  templateId?: string
   versionLines: TemplateVersionLineSummary[]
   showPagination: boolean
   pageSize: number
@@ -25,6 +29,21 @@ defineProps<{
   canRestoreRow: (row: TemplateVersionLineSummary) => boolean
   onRowClick: (row: TemplateVersionLineSummary, event: Event) => void
 }>()
+
+const router = useRouter()
+const { manageApiPolicy } = useCapabilities()
+
+function openApiPerspective(row: TemplateVersionLineSummary) {
+  if (!props.templateId || !row.releaseVersion) {
+    return
+  }
+  void router.push(
+    apiPackageSettingsPath(props.templateId, {
+      releaseVersion: row.releaseVersion,
+      panel: 'route',
+    }),
+  )
+}
 
 const emit = defineEmits<{
   open: [row: TemplateVersionLineSummary]
@@ -76,6 +95,35 @@ const { t } = useI18n()
           :status="row.lifecycleStatus"
           :approval-sub-state="row.approvalSubState"
         />
+      </template>
+    </el-table-column>
+    <el-table-column
+      v-if="templateId && manageApiPolicy"
+      min-width="160"
+      :label="t('templates.versionLines.apiPerspective')"
+    >
+      <template #default="{ row }">
+        <template v-if="!isInFlightVersionLine(row) && row.releaseVersion">
+          <span
+            class="api-perspective"
+            data-testid="version-line-api-perspective"
+          >
+            {{
+              row.defaultRouteTarget
+                ? t('templates.versionLines.apiPerspectiveDefault')
+                : t('templates.versionLines.apiPerspectiveRouted')
+            }}
+          </span>
+          <el-button
+            link
+            type="primary"
+            data-testid="version-line-api-settings-link"
+            @click.stop="openApiPerspective(row)"
+          >
+            {{ t('templates.versionLines.apiSettingsLink') }}
+          </el-button>
+        </template>
+        <span v-else class="api-perspective-muted">—</span>
       </template>
     </el-table-column>
     <el-table-column
@@ -159,5 +207,15 @@ const { t } = useI18n()
 <style scoped lang="scss">
 .line-tag {
   margin-left: var(--space-2);
+}
+
+.api-perspective {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.api-perspective-muted {
+  color: var(--text-muted);
 }
 </style>

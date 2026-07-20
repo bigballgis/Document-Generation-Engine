@@ -3,15 +3,20 @@ import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
+import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import MasterPackageHubActions from '@/views/masters/hub/MasterPackageHubActions.vue'
 import MasterPackageHubBody from '@/views/masters/hub/MasterPackageHubBody.vue'
 import MasterPackageHubDialogs from '@/views/masters/hub/MasterPackageHubDialogs.vue'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { useMasterPackageHub } from '@/views/masters/useMasterPackageHub'
+
+const { groupCatalogLink } = useEntityLinkTargets()
 
 const {
   t,
   mastersStore,
   metadataEditOpen,
+  propertiesOpen,
   replaceFileOpen,
   submitReviewOpen,
   reviewDialogOpen,
@@ -61,13 +66,12 @@ const {
           @download="handleDownloadCurrent"
           @replace-file="replaceFileOpen = true"
           @edit-metadata="metadataEditOpen = true"
+          @open-properties="propertiesOpen = true"
           @open-submit-review="submitReviewOpen = true"
           @open-review="openReviewDialog"
         />
       </template>
     </PageHeader>
-
-    <p v-if="master?.description" class="header-extra">{{ master.description }}</p>
 
     <LoadErrorPanel
       v-if="loadFailed"
@@ -97,6 +101,39 @@ const {
       @submit-review="submitReviewOpen = true"
     />
 
+    <el-drawer
+      v-model="propertiesOpen"
+      direction="rtl"
+      size="420px"
+      destroy-on-close
+      data-testid="master-properties-drawer"
+      :title="t('masters.hub.properties')"
+    >
+      <dl v-if="master" class="properties-grid">
+        <div>
+          <dt>{{ t('masters.hub.propertiesName') }}</dt>
+          <dd>{{ master.name }}</dd>
+        </div>
+        <div>
+          <dt>{{ t('masters.hub.propertiesGroup') }}</dt>
+          <dd>
+            <EntityLinkCell
+              :label="master.groupCode"
+              :to="groupCatalogLink(master.groupCode)"
+            />
+          </dd>
+        </div>
+        <div>
+          <dt>{{ t('masters.hub.propertiesFile') }}</dt>
+          <dd>{{ master.originalFilename }}</dd>
+        </div>
+        <div>
+          <dt>{{ t('masters.hub.propertiesDescription') }}</dt>
+          <dd>{{ master.description || t('masters.hub.propertiesNoDescription') }}</dd>
+        </div>
+      </dl>
+    </el-drawer>
+
     <MasterPackageHubDialogs
       v-if="master"
       v-model:metadata-edit-open="metadataEditOpen"
@@ -121,8 +158,20 @@ const {
 </template>
 
 <style scoped lang="scss">
-.header-extra {
-  margin: calc(-1 * var(--space-4)) 0 var(--space-6);
-  color: var(--text-secondary);
+.properties-grid {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+
+  dt {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  dd {
+    margin: var(--space-1) 0 0;
+    font-weight: 500;
+  }
 }
 </style>

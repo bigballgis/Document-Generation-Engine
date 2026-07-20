@@ -6,6 +6,7 @@ import type {
   BindingValidationResult,
   CompositionRule,
   PreviewRecord,
+  TemplateDetail,
   TemplateLifecycleStatus,
   VariableSchema,
 } from '@/types/template'
@@ -20,6 +21,7 @@ export type GovernanceAction = 'stop' | 'restore' | 'deprecate'
 
 export type TemplateDetailDevWorkspaceProps = {
   templateId: string
+  template: TemplateDetail
   masterId: string
   variables: VariableSchema[]
   bindings: AnchorBinding[]

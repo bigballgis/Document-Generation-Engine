@@ -23,7 +23,6 @@ export const apiErrorZhCn = {
     contentModuleStructureMissing: "引用的内容模块没有固定的结构。",
     contentModuleNestingCycle: "内容模块嵌套展开时检测到循环。",
     variableValidationFailed: "一个或多个模板变量未通过 VariableSchema 校验。",
-    contentModuleNestingCycle: "展开过程中检测到标准条款嵌套环。",
   },
   storage: {
     operationFailed: "对象存储操作失败。"
@@ -129,11 +128,6 @@ export const apiErrorZhCn = {
     importConflict: "模板导入与现有模板冲突。",
     importFailed: "模板导入未能完成。",
     importDependenciesUnsatisfied: "模板导入依赖未满足。",
-    bulkRepin: {
-      dryRunRequired: "批量重新固定母版时必须提供 dryRun。",
-      groupCodeRequired: "授权组上下文不明确时必须提供 groupCode。",
-      targetXor: "必须且只能提供 toSemanticVersion 或 useLatestApproved=true 之一。",
-    },
     dep: {
       bundleFormatOk: "导入包格式受支持。",
       masterPinAbsent: "导入包缺少母版锁定指纹。",
@@ -291,10 +285,6 @@ export const apiErrorZhCn = {
     invalidEffectiveRange: "effectiveFrom 必须小于或等于 effectiveTo。",
     searchTooLong: "搜索字符串最多 200 个字符。",
     searchModeInvalid: "不支持的 searchMode 值。",
-    nestingCycle: "内容模块嵌套形成循环。",
-    nestingDepthExceeded: "内容模块嵌套深度超过最大限制 8。",
-    nestingTargetUnresolved: "嵌套内容模块引用无法解析为可见模块。",
-    nestingStructureInvalid: "内容模块结构 JSON 格式错误，无法用于嵌套治理。",
   },
   collaboration: {
     accessDenied: "您无权查看协作待办事项。",
