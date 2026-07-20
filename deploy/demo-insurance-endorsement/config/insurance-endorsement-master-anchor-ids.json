@@ -1,0 +1,46 @@
+{
+  "anchorIds": [
+    "IE_PARTIES",
+    "IE_PROPERTY",
+    "IE_DEFINED_TERMS",
+    "IE_POLICY",
+    "IE_BANK_INTEREST",
+    "IE_REQUIREMENTS",
+    "IE_GOVERNING_LAW",
+    "IE_SIGNATURE"
+  ],
+  "sections": [
+    {
+      "anchorId": "IE_PARTIES",
+      "title": "Parties"
+    },
+    {
+      "anchorId": "IE_PROPERTY",
+      "title": "Secured Property"
+    },
+    {
+      "anchorId": "IE_DEFINED_TERMS",
+      "title": "Defined Terms"
+    },
+    {
+      "anchorId": "IE_POLICY",
+      "title": "Policy Particulars"
+    },
+    {
+      "anchorId": "IE_BANK_INTEREST",
+      "title": "Bank Interest / Loss Payee"
+    },
+    {
+      "anchorId": "IE_REQUIREMENTS",
+      "title": "Insurance Requirements"
+    },
+    {
+      "anchorId": "IE_GOVERNING_LAW",
+      "title": "Governing Law"
+    },
+    {
+      "anchorId": "IE_SIGNATURE",
+      "title": "Signatures"
+    }
+  ]
+}

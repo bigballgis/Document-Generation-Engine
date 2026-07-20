@@ -1,13 +1,15 @@
 # Bank letter demo refresh — Wave A (ops / demo content)
 
-**Program / slice family:** `bank-letter-demo-refresh` (ad-hoc **NON-CE** ops-demo content leaf; **not** a formal P-phase; **not** IBL Wave B; **not** CE-O02)  
+**Program / slice family:** `bank-letter-demo-refresh` (ad-hoc **NON-CE** ops-demo content program; **not** a formal P-phase; **not** IBL Wave B; **not** CE-O02)  
 **Formal plan phase:** **None** — single-active-phase discipline OK (does not occupy a P* slot)  
-**Task Master:** **#141** Wave A (`demo-refresh-wave-a`) → **Done** · **#142** Wave B expand (`bank-letter-demo-expand`, queued **pending**)  
-**Active delivery slice:** **none** — Wave A **Done** (sole-active **cleared**, 2026-07-20)  
-**Queued next (not activated):** `bank-letter-demo-expand` — Wave B new letter families → **Not Started** / TM **pending** (next sole-active candidate after this sync)  
-**Placement:** **ISOLATED** (historical) — worktree `D:/working/DGE-bank-letter-demo-refresh` · `feat/bank-letter-demo-refresh` → MAIN merge `aa88170f` (feature `5ae9575a`); worktree **REMOVED**  
-**BDD:** [bank-letter-demo-refresh.md](../../behavior/bank-letter-demo-refresh.md) — **ready** (`BDD-DEMO-REFRESH-001…014`); `frontend_ui_in_scope=false`  
-**Batch recommendation:** **split** (`member_task_ids: ["demo-refresh-wave-a"]`; `proposed_slice_id: bank-letter-demo-refresh`) — **closed**
+**Task Master:** **#141** Wave A (`demo-refresh-wave-a`) → **Done** · **#142** Wave B expand (`bank-letter-demo-expand`) → **In Progress** (**sole-active**)  
+**Active delivery slice:** `bank-letter-demo-expand` — Wave B **In Progress** (sole-active, 2026-07-20)  
+**Placement (Wave B active):** **ISOLATED** — worktree `D:/working/DGE-bank-letter-demo-expand` · `feat/bank-letter-demo-expand`  
+**Placement (Wave A historical):** worktree `D:/working/DGE-bank-letter-demo-refresh` · `feat/bank-letter-demo-refresh` → MAIN merge `aa88170f` (feature `5ae9575a`); worktree **REMOVED**  
+**BDD Wave A:** [bank-letter-demo-refresh.md](../../behavior/bank-letter-demo-refresh.md) — **ready** (`BDD-DEMO-REFRESH-001…014`); `frontend_ui_in_scope=false`  
+**BDD Wave B:** [bank-letter-demo-expand.md](../../behavior/bank-letter-demo-expand.md) — **ready** (16 scenarios; 7 new families); `frontend_ui_in_scope=false`  
+**Batch recommendation (Wave A):** **split** (`member_task_ids: ["demo-refresh-wave-a"]`; `proposed_slice_id: bank-letter-demo-refresh`) — **closed**  
+**Batch recommendation (Wave B):** **solo** (`member_task_ids: ["142"]`; `proposed_slice_id: bank-letter-demo-expand`) — **active**
 
 ---
 
@@ -23,8 +25,8 @@ Historical TM **#4–#8** (P23-era foreign-bank-letter rewrite + publish + gener
 
 | Wave | Slice id | TM | Scope | Status |
 | --- | --- | --- | --- | --- |
-| **A** | `bank-letter-demo-refresh` | **#141** (`demo-refresh-wave-a`) | Clean stack + uplift existing 8 packages + DEMO-FULL-FLOW-LETTER; import/publish/generate evidence | **Done** (sole-active cleared) |
-| **B** | `bank-letter-demo-expand` | **#142** | New letter families / catalogue expand | **Not Started** (queued; do **not** activate until orchestrator) |
+| **A** | `bank-letter-demo-refresh` | **#141** (`demo-refresh-wave-a`) | Clean stack + uplift existing 8 packages + DEMO-FULL-FLOW-LETTER; import/publish/generate evidence | **Done** |
+| **B** | `bank-letter-demo-expand` | **#142** | New letter families / catalogue expand (7 confirmed `DEMO-*` families) | **In Progress** (**sole-active**) |
 
 ---
 
@@ -45,8 +47,9 @@ Historical TM **#4–#8** (P23-era foreign-bank-letter rewrite + publish + gener
 - **CE-O02** deferred (D5 / 2026-07-20「暂时不做」) — do **not** activate
 - Checklist **#3b / #5a** — do **not** flip **GO**
 - **RTL** — do **not** reopen (ADR-0068 DESCOPE)
-- **Wave B** expand — **OUT OF SCOPE** this leaf (queued as #142 only; not activated by Wave A Done)
+- **Wave B** expand — **IN SCOPE** for active leaf **#142** only (not retroactive on Wave A Done)
 - Do **not** invent Word-host evidence; do **not** claim go-live / IBL program Done
+- Do **not** treat `DEMO-COMMITMENT-LETTER` as FOL / `CORP-FOL-OFFER` alias; do **not** rename PRD §6.7 eight product rows
 
 ---
 
@@ -78,10 +81,25 @@ Prefer overwrite; **no** reckless DB `DROP`. Canonical notes: [deploy/demo-share
 4. `publish-all-demos.ps1` → `generate-all-demos.ps1`
 5. Archive under [plan/evidence/bank-letter-demo-refresh/](../evidence/bank-letter-demo-refresh/README.md)
 
+## Wave B confirmed families (active #142)
+
+| # | Runtime externalId | Group | Notes |
+| --- | --- | --- | --- |
+| 1 | `DEMO-FACILITY-AMENDMENT` | CORP | Facility amendment / variation |
+| 2 | `DEMO-KYC-CDD-NOTICE` | RETAIL | KYC / CDD notice |
+| 3 | `DEMO-ACCOUNT-CLOSURE` | RETAIL | Account closure |
+| 4 | `DEMO-COMMITMENT-LETTER` | CORP | Commitment — **not** FOL alias |
+| 5 | `DEMO-FORMAL-DEMAND` | CORP | Formal demand |
+| 6 | `DEMO-COVENANT-WAIVER` | CORP | Covenant waiver / consent |
+| 7 | `DEMO-INSURANCE-ENDORSEMENT` | RETAIL | Insurance endorsement / security notice |
+
+Full matrix + acceptance: [bank-letter-demo-expand.md](../../behavior/bank-letter-demo-expand.md) (§7; BDD-DEMO-EXPAND-001…016). Target registry: Wave A **13** + Wave B **7** = **20**.
+
 ## Changelog
 
 | Date | Note |
 | --- | --- |
+| 2026-07-20 | Stage 2 plan-orchestrator: Wave B **#142 → In Progress** (**sole-active**); worktree `DGE-bank-letter-demo-expand` / `feat/bank-letter-demo-expand`; BDD **ready** (16 scenarios; 7 families); do **not** flip **#3b/#5a GO** / CE-O02 / RTL |
 | 2026-07-20 | Stage 12 MAIN doc-sync: Wave A **#141 → Done**; sole-active cleared; Wave B **#142** remains pending; evidence 13/13; merge `aa88170f` / feature `5ae9575a` |
 | 2026-07-20 | Stage 3 doc-keeper: SoT sync (PRD/requirements/EXP/TYP/fundraising/demo-shared); evidence stub; ops-safe cleanup path; **not** claiming Done |
 | 2026-07-20 | Stage 2 plan-orchestrator: registered Wave A sole-active (#141); queued Wave B (#142 pending); formal phase remains **None** |

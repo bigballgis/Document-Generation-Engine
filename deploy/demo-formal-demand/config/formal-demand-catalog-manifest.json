@@ -1,0 +1,34 @@
+{
+  "catalogMarker": "formal-demand-demo-v1-wave-b",
+  "packageCode": "formal-demand",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "pageTarget": 7,
+  "templates": [
+    {
+      "externalId": "DEMO-FORMAL-DEMAND",
+      "anchorIds": [
+        "FD_PARTIES",
+        "FD_DEFINED_TERMS",
+        "FD_DEFAULT",
+        "FD_DEMAND",
+        "FD_RESERVATION",
+        "FD_SCHEDULE",
+        "FD_GOVERNING_LAW",
+        "FD_SIGNATURE"
+      ]
+    }
+  ],
+  "contentModuleRefs": [
+    {
+      "referenceKey": "FORMAL-DEMAND-OPERATIVE",
+      "moduleCode": "FORMAL-DEMAND-OPS",
+      "semanticVersion": "1.0.0"
+    },
+    {
+      "referenceKey": "FORMAL-DEMAND-RESERVATION",
+      "moduleCode": "FORMAL-DEMAND-RSV",
+      "semanticVersion": "1.0.0"
+    }
+  ]
+}

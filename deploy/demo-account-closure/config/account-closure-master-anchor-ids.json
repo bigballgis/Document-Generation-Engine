@@ -1,0 +1,46 @@
+{
+  "anchorIds": [
+    "AC_PARTIES",
+    "AC_ACCOUNT",
+    "AC_DEFINED_TERMS",
+    "AC_CLOSURE_TERMS",
+    "AC_BALANCE",
+    "AC_NEXT_STEPS",
+    "AC_GOVERNING_LAW",
+    "AC_SIGNATURE"
+  ],
+  "sections": [
+    {
+      "anchorId": "AC_PARTIES",
+      "title": "Parties"
+    },
+    {
+      "anchorId": "AC_ACCOUNT",
+      "title": "Account Identification"
+    },
+    {
+      "anchorId": "AC_DEFINED_TERMS",
+      "title": "Defined Terms"
+    },
+    {
+      "anchorId": "AC_CLOSURE_TERMS",
+      "title": "Closure Terms"
+    },
+    {
+      "anchorId": "AC_BALANCE",
+      "title": "Balance and Interest"
+    },
+    {
+      "anchorId": "AC_NEXT_STEPS",
+      "title": "Final Statement and Next Steps"
+    },
+    {
+      "anchorId": "AC_GOVERNING_LAW",
+      "title": "Governing Law"
+    },
+    {
+      "anchorId": "AC_SIGNATURE",
+      "title": "Signatures"
+    }
+  ]
+}

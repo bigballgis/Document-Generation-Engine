@@ -1,0 +1,35 @@
+{
+  "catalogMarker": "facility-amendment-demo-v1-wave-b",
+  "packageCode": "facility-amendment",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "pageTarget": 10,
+  "templates": [
+    {
+      "externalId": "DEMO-FACILITY-AMENDMENT",
+      "anchorIds": [
+        "FA_PARTIES",
+        "FA_DEFINED_TERMS",
+        "FA_EXISTING_FACILITY",
+        "FA_VARIATIONS",
+        "FA_OPERATIVE",
+        "FA_COVENANTS",
+        "FA_SCHEDULE",
+        "FA_GOVERNING_LAW",
+        "FA_SIGNATURE"
+      ]
+    }
+  ],
+  "contentModuleRefs": [
+    {
+      "referenceKey": "FACILITY-AMENDMENT-OPERATIVE",
+      "moduleCode": "FAC-AMEND-OPS",
+      "semanticVersion": "1.0.0"
+    },
+    {
+      "referenceKey": "FACILITY-AMENDMENT-COVENANTS",
+      "moduleCode": "FAC-AMEND-COV",
+      "semanticVersion": "1.0.0"
+    }
+  ]
+}

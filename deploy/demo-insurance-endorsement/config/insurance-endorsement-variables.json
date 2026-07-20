@@ -1,0 +1,119 @@
+{
+  "catalogMarker": "insurance-endorsement-demo-v1-wave-b",
+  "variables": [
+    {
+      "key": "bankName",
+      "label": "Bank Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankAddress",
+      "label": "Bank Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankBranch",
+      "label": "Bank Branch",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "letterDate",
+      "label": "Letter Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "borrowerName",
+      "label": "Borrower Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "borrowerAddress",
+      "label": "Borrower Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "propertyAddress",
+      "label": "Property Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "mortgageReference",
+      "label": "Mortgage Reference",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "insurerName",
+      "label": "Insurer Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "policyNumber",
+      "label": "Policy Number",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "policyExpiryDate",
+      "label": "Policy Expiry Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "requiredSumInsured",
+      "label": "Required Sum Insured",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "responseDeadline",
+      "label": "Response Deadline",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "governingLaw",
+      "label": "Governing Law",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "jurisdiction",
+      "label": "Jurisdiction",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryName",
+      "label": "Signatory Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryTitle",
+      "label": "Signatory Title",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "insuranceSchedule",
+      "label": "Insurance Schedule",
+      "type": "LIST",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "catalogMarker": "facility-amendment-demo-v1-wave-b",
+  "name": "Facility Amendment — Pacific Rim Holdings",
+  "required": true,
+  "variables": {
+    "bankName": "Meridian Global Banking Corporation",
+    "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+    "bankBranch": "Wholesale Banking — Corporate Credit",
+    "letterDate": "2026-07-20",
+    "borrowerName": "Pacific Rim Holdings Pte. Ltd.",
+    "borrowerAddress": "8 Marina Boulevard, #22-01, Marina Bay Financial Centre, Singapore 018981",
+    "borrowerCountry": "Singapore",
+    "guarantorName": "Pacific Rim Group Holdings Ltd.",
+    "includeGuarantor": true,
+    "facilityReference": "CORP-FAC-2024-77102",
+    "originalFacilityDate": "2024-03-15",
+    "amendmentEffectiveDate": "2026-08-01",
+    "amendmentReference": "AMD-2026-FAC-77102-01",
+    "currency": "USD",
+    "originalCommitment": "75,000,000.00",
+    "amendedCommitment": "90,000,000.00",
+    "originalMarginBps": "185",
+    "amendedMarginBps": "165",
+    "originalExpiryDate": "2027-03-15",
+    "amendedExpiryDate": "2028-03-15",
+    "amendmentFee": "90,000.00",
+    "governingLaw": "English law",
+    "jurisdiction": "England and Wales",
+    "signatoryName": "Catherine M. Ellison",
+    "signatoryTitle": "Managing Director, Corporate Credit — Wholesale Banking",
+    "variationSchedule": [
+      {
+        "item": "Commitment",
+        "before": "USD 75,000,000.00",
+        "after": "USD 90,000,000.00"
+      },
+      {
+        "item": "Margin",
+        "before": "185 bps",
+        "after": "165 bps"
+      },
+      {
+        "item": "Final Maturity / Expiry",
+        "before": "15 March 2027",
+        "after": "15 March 2028"
+      },
+      {
+        "item": "Amendment Fee",
+        "before": "N/A",
+        "after": "USD 90,000.00 (payable on Amendment Effective Date)"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "catalogMarker": "insurance-endorsement-demo-v1-wave-b",
+  "name": "Insurance Endorsement — Oliver Hartley",
+  "required": true,
+  "variables": {
+    "bankName": "Meridian Retail Banking",
+    "bankAddress": "1 Churchill Place, London E14 5HP, United Kingdom",
+    "bankBranch": "Meridian Home Finance — Security & Insurance Servicing",
+    "letterDate": "2026-07-20",
+    "borrowerName": "Oliver Hartley",
+    "borrowerAddress": "18 Willow Close, Cambridge CB1 3RT",
+    "propertyAddress": "18 Willow Close, Cambridge CB1 3RT",
+    "mortgageReference": "MORT-2026-UHF-55201",
+    "insurerName": "Northbridge Household Insurance plc",
+    "policyNumber": "NHI-BLD-77821904",
+    "policyExpiryDate": "2027-03-31",
+    "requiredSumInsured": "485,000.00",
+    "currency": "GBP",
+    "responseDeadline": "2026-08-10",
+    "governingLaw": "English law",
+    "jurisdiction": "England and Wales",
+    "signatoryName": "Sophie Langford",
+    "signatoryTitle": "Team Lead, Security & Insurance Servicing — Meridian Home Finance",
+    "insuranceSchedule": [
+      {
+        "item": "Policy type",
+        "detail": "Buildings insurance — reinstatement"
+      },
+      {
+        "item": "Insurer",
+        "detail": "Northbridge Household Insurance plc"
+      },
+      {
+        "item": "Policy number",
+        "detail": "NHI-BLD-77821904"
+      },
+      {
+        "item": "Required sum insured",
+        "detail": "GBP 485,000.00"
+      },
+      {
+        "item": "Lender interest",
+        "detail": "Meridian Retail Banking / Meridian Home Finance as first loss payee"
+      },
+      {
+        "item": "Policy expiry",
+        "detail": "31 March 2027"
+      }
+    ]
+  }
+}

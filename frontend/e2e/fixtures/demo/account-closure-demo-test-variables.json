@@ -1,0 +1,44 @@
+{
+  "catalogMarker": "account-closure-demo-v1-wave-b",
+  "name": "Account Closure — Thomas Nguyen",
+  "required": true,
+  "variables": {
+    "bankName": "Meridian Retail Banking",
+    "bankAddress": "1 Churchill Place, London E14 5HP, United Kingdom",
+    "bankBranch": "Customer Operations — Account Services",
+    "letterDate": "2026-07-20",
+    "customerName": "Thomas Nguyen",
+    "customerAddress": "62 Harbour Road, Southampton SO14 3QY",
+    "accountName": "Thomas Nguyen",
+    "accountNumberMasked": "****9033",
+    "sortCode": "20-45-78",
+    "productName": "Meridian Everyday Current Account",
+    "closureEffectiveDate": "2026-08-05",
+    "closureReason": "Customer-requested closure following transfer of banking relationship",
+    "closingBalance": "1,842.67",
+    "currency": "GBP",
+    "destinationAccountMasked": "****6612 (sort code 40-12-18)",
+    "governingLaw": "English law",
+    "jurisdiction": "England and Wales",
+    "signatoryName": "Rachel Okonkwo",
+    "signatoryTitle": "Manager, Account Services — Customer Operations",
+    "closureChecklist": [
+      {
+        "step": "1",
+        "action": "Cancel standing orders and direct debits linked to the Account"
+      },
+      {
+        "step": "2",
+        "action": "Destroy debit cards and unused cheques"
+      },
+      {
+        "step": "3",
+        "action": "Await final statement within ten Business Days after closure"
+      },
+      {
+        "step": "4",
+        "action": "Confirm receipt of closing balance remittance to the destination account"
+      }
+    ]
+  }
+}

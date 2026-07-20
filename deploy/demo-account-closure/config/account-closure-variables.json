@@ -1,0 +1,125 @@
+{
+  "catalogMarker": "account-closure-demo-v1-wave-b",
+  "variables": [
+    {
+      "key": "bankName",
+      "label": "Bank Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankAddress",
+      "label": "Bank Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankBranch",
+      "label": "Bank Branch",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "letterDate",
+      "label": "Letter Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "customerName",
+      "label": "Customer Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "customerAddress",
+      "label": "Customer Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "accountName",
+      "label": "Account Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "accountNumberMasked",
+      "label": "Masked Account Number",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "sortCode",
+      "label": "Sort Code",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "productName",
+      "label": "Product Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "closureEffectiveDate",
+      "label": "Closure Effective Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "closureReason",
+      "label": "Closure Reason",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "closingBalance",
+      "label": "Closing Balance",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "destinationAccountMasked",
+      "label": "Destination Account Masked",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "governingLaw",
+      "label": "Governing Law",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "jurisdiction",
+      "label": "Jurisdiction",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryName",
+      "label": "Signatory Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryTitle",
+      "label": "Signatory Title",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "closureChecklist",
+      "label": "Closure Checklist",
+      "type": "LIST",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "catalogMarker": "account-closure-demo-v1-wave-b",
+  "groupCode": "RETAIL",
+  "pageNumberingProfile": "GLOBAL_ONLY",
+  "masterName": "Meridian Account Closure Master",
+  "masterLayoutVersion": "account-closure-layout-v1-eight-anchors",
+  "masterDescription": "P23 bank-grade account closure notice master — eight anchors",
+  "templateExternalId": "DEMO-ACCOUNT-CLOSURE",
+  "templateName": "Account Closure Notice",
+  "templateDescription": "Retail account closure confirmation — balance handling, final statement, effective date (Wave B)",
+  "masterDocx": "assets/account-closure-master.docx",
+  "generatedCatalogFiles": {
+    "variables": "config/account-closure-variables.json",
+    "bindingOverlays": "config/account-closure-binding-overlays.json",
+    "demoTestVariables": "config/account-closure-demo-test-variables.json",
+    "catalogManifest": "config/account-closure-catalog-manifest.json"
+  }
+}

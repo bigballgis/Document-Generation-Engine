@@ -1,0 +1,35 @@
+{
+  "catalogMarker": "commitment-demo-v1-wave-b",
+  "packageCode": "commitment",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "pageTarget": 8,
+  "templates": [
+    {
+      "externalId": "DEMO-COMMITMENT-LETTER",
+      "anchorIds": [
+        "CM_PARTIES",
+        "CM_DEFINED_TERMS",
+        "CM_COMMITMENT",
+        "CM_CPS",
+        "CM_AVAILABILITY",
+        "CM_COVENANTS",
+        "CM_RESERVATION",
+        "CM_GOVERNING_LAW",
+        "CM_SIGNATURE"
+      ]
+    }
+  ],
+  "contentModuleRefs": [
+    {
+      "referenceKey": "COMMITMENT-OPERATIVE",
+      "moduleCode": "COMMIT-OPS",
+      "semanticVersion": "1.0.0"
+    },
+    {
+      "referenceKey": "COMMITMENT-RESERVATION",
+      "moduleCode": "COMMIT-RSV",
+      "semanticVersion": "1.0.0"
+    }
+  ]
+}

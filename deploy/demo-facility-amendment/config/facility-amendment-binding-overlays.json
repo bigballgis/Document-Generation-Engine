@@ -1,0 +1,906 @@
+{
+  "catalogMarker": "facility-amendment-demo-v1-wave-b",
+  "bindings": {
+    "FA_PARTIES": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Date: "
+            },
+            {
+              "type": "variable",
+              "key": "letterDate"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "To: "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "borrowerName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "variable",
+              "key": "borrowerAddress"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "variable",
+              "key": "borrowerCountry"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Dear Sirs,"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Re: Facility Amendment and Variation Letter — Facility Reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "facilityReference"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " / Amendment Reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "amendmentReference"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "We, "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "bankName"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " of "
+            },
+            {
+              "type": "variable",
+              "key": "bankAddress"
+            },
+            {
+              "type": "textRun",
+              "value": " (the Bank / Agent), acting through "
+            },
+            {
+              "type": "variable",
+              "key": "bankBranch"
+            },
+            {
+              "type": "textRun",
+              "value": ", refer to the facility agreement dated "
+            },
+            {
+              "type": "variable",
+              "key": "originalFacilityDate"
+            },
+            {
+              "type": "textRun",
+              "value": " between the Bank and "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "borrowerName"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " (the Borrower) identified by facility reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "facilityReference"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " (the Original Facility Agreement)."
+            }
+          ]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeGuarantor} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {
+                  "type": "textRun",
+                  "value": "The obligations of the Borrower continue to be guaranteed by "
+                },
+                {
+                  "type": "emphasis",
+                  "variant": "bold",
+                  "children": [
+                    {
+                      "type": "variable",
+                      "key": "guarantorName"
+                    }
+                  ]
+                },
+                {
+                  "type": "textRun",
+                  "value": " (the Guarantor). By countersigning this letter, the Guarantor consents to the variations and confirms that its guarantee and indemnity remain in full force and effect."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "This letter sets out the agreed amendments to the Original Facility Agreement. Capitalised terms used but not defined herein have the meanings given in the Original Facility Agreement."
+            }
+          ]
+        }
+      ]
+    },
+    "FA_DEFINED_TERMS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Defined Terms"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Amendment Effective Date\""
+            },
+            {
+              "type": "textRun",
+              "value": " means "
+            },
+            {
+              "type": "variable",
+              "key": "amendmentEffectiveDate"
+            },
+            {
+              "type": "textRun",
+              "value": ", or such later date as the Agent confirms in writing that the conditions to effectiveness have been satisfied."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Amendment Letter\""
+            },
+            {
+              "type": "textRun",
+              "value": " means this facility amendment and variation letter, including the Variation Schedule."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Amended Commitment\""
+            },
+            {
+              "type": "textRun",
+              "value": " means the aggregate commitment of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "currency"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "amendedCommitment"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " as varied by this Amendment Letter."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Original Facility Agreement\""
+            },
+            {
+              "type": "textRun",
+              "value": " means the facility agreement dated "
+            },
+            {
+              "type": "variable",
+              "key": "originalFacilityDate"
+            },
+            {
+              "type": "textRun",
+              "value": " identified by reference "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "facilityReference"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "\"Variation Schedule\""
+            },
+            {
+              "type": "textRun",
+              "value": " means Schedule 1 (Variation Particulars) to this Amendment Letter."
+            }
+          ]
+        }
+      ]
+    },
+    "FA_EXISTING_FACILITY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Existing Facility"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Under the Original Facility Agreement, the Bank made available to the Borrower a revolving credit facility with an original commitment of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "currency"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "originalCommitment"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": ", margin of "
+            },
+            {
+              "type": "variable",
+              "key": "originalMarginBps"
+            },
+            {
+              "type": "textRun",
+              "value": " basis points, and final maturity on "
+            },
+            {
+              "type": "variable",
+              "key": "originalExpiryDate"
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The Borrower has requested, and the Bank has agreed (subject to the terms of this Amendment Letter), to increase the Commitment, reduce the Margin and extend the final maturity as set out in the Variation Schedule."
+            }
+          ]
+        }
+      ]
+    },
+    "FA_VARIATIONS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Variation Terms"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "With effect from the Amendment Effective Date: (a) the Commitment shall be increased from "
+            },
+            {
+              "type": "variable",
+              "key": "currency"
+            },
+            {
+              "type": "textRun",
+              "value": " "
+            },
+            {
+              "type": "variable",
+              "key": "originalCommitment"
+            },
+            {
+              "type": "textRun",
+              "value": " to "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "currency"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "amendedCommitment"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "; (b) the Margin shall be reduced from "
+            },
+            {
+              "type": "variable",
+              "key": "originalMarginBps"
+            },
+            {
+              "type": "textRun",
+              "value": " bps to "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "amendedMarginBps"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " bps; and (c) the final maturity / expiry date shall be extended from "
+            },
+            {
+              "type": "variable",
+              "key": "originalExpiryDate"
+            },
+            {
+              "type": "textRun",
+              "value": " to "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "amendedExpiryDate"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The Borrower shall pay an amendment fee of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "currency"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "amendmentFee"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " to the Agent on the Amendment Effective Date."
+            }
+          ]
+        }
+      ]
+    },
+    "FA_OPERATIVE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Operative Amendment"
+            }
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "FACILITY-AMENDMENT-OPERATIVE"
+        }
+      ]
+    },
+    "FA_COVENANTS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Continuing Covenants and Monitoring"
+            }
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "FACILITY-AMENDMENT-COVENANTS"
+        }
+      ]
+    },
+    "FA_SCHEDULE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Variation Schedule"
+            }
+          ]
+        },
+        {
+          "type": "sectionHeading",
+          "styleRef": "ScheduleTitle",
+          "children": [
+            {
+              "type": "text",
+              "value": "Schedule 1 — Variation Particulars"
+            }
+          ]
+        },
+        {
+          "type": "tableComponentRef",
+          "tableComponent": {
+            "componentKey": "FAC-AMEND-TBL-VARIATION",
+            "columnSchema": [
+              {
+                "columnKey": "item",
+                "widthPct": 30
+              },
+              {
+                "columnKey": "before",
+                "widthPct": 35
+              },
+              {
+                "columnKey": "after",
+                "widthPct": 35
+              }
+            ],
+            "headerRows": [
+              [
+                {
+                  "columnKey": "item",
+                  "value": "Term"
+                },
+                {
+                  "columnKey": "before",
+                  "value": "Before Amendment"
+                },
+                {
+                  "columnKey": "after",
+                  "value": "After Amendment"
+                }
+              ]
+            ],
+            "loopRow": {
+              "loopVariable": "variationSchedule",
+              "cells": [
+                {
+                  "columnKey": "item",
+                  "variableKey": "item"
+                },
+                {
+                  "columnKey": "before",
+                  "variableKey": "before"
+                },
+                {
+                  "columnKey": "after",
+                  "variableKey": "after"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The particulars in Schedule 1 prevail over any inconsistent narrative summary in this letter solely for the commercial terms listed therein."
+            }
+          ]
+        }
+      ]
+    },
+    "FA_GOVERNING_LAW": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Governing Law and Jurisdiction"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "This letter and any non-contractual obligations arising out of or in connection with it are governed by "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "governingLaw"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "The courts of "
+            },
+            {
+              "type": "underline",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "jurisdiction"
+                }
+              ]
+            },
+            {
+              "type": "textRun",
+              "value": " have exclusive jurisdiction to settle any dispute arising out of or in connection with this letter. Nothing in this clause limits the right of the Bank to take proceedings in any other court of competent jurisdiction."
+            }
+          ]
+        }
+      ]
+    },
+    "FA_SIGNATURE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {
+            "level": 1
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "Authorised Signatory"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Please acknowledge receipt of this letter by countersigning and returning an executed copy within ten Business Days of the date of this letter."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "Yours faithfully,"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "For and on behalf of "
+            },
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "bankName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "textRun",
+              "value": "_____________________________"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "emphasis",
+              "variant": "bold",
+              "children": [
+                {
+                  "type": "variable",
+                  "key": "signatoryName"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "variable",
+              "key": "signatoryTitle"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {
+              "type": "variable",
+              "key": "bankAddress"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

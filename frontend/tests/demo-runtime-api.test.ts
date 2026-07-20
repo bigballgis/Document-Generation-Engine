@@ -4,8 +4,8 @@ import { assertDocxArtifact, buildMinimalDocxArchive } from '@/utils/demoRuntime
 import { DEMO_PUBLISH_EXTERNAL_IDS, DEMO_RUNTIME_MIN_DOCX_BYTES } from '@/utils/demoRuntimeRegistry'
 
 describe('demoRuntimeRegistry', () => {
-  it('defines 13 published demo external IDs', () => {
-    expect(DEMO_PUBLISH_EXTERNAL_IDS).toHaveLength(13)
+  it('defines 20 published demo external IDs', () => {
+    expect(DEMO_PUBLISH_EXTERNAL_IDS).toHaveLength(20)
   })
 
   it('assigns a positive minBytes floor for every published demo', () => {

@@ -1,0 +1,34 @@
+{
+  "catalogMarker": "covenant-waiver-demo-v1-wave-b",
+  "packageCode": "covenant-waiver",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "pageTarget": 7,
+  "templates": [
+    {
+      "externalId": "DEMO-COVENANT-WAIVER",
+      "anchorIds": [
+        "CW_PARTIES",
+        "CW_DEFINED_TERMS",
+        "CW_WAIVER",
+        "CW_SCOPE",
+        "CW_CONDITIONS",
+        "CW_RESERVATION",
+        "CW_GOVERNING_LAW",
+        "CW_SIGNATURE"
+      ]
+    }
+  ],
+  "contentModuleRefs": [
+    {
+      "referenceKey": "COVENANT-WAIVER-OPERATIVE",
+      "moduleCode": "COV-WAIVER-OPS",
+      "semanticVersion": "1.0.0"
+    },
+    {
+      "referenceKey": "COVENANT-WAIVER-RESERVATION",
+      "moduleCode": "COV-WAIVER-RSV",
+      "semanticVersion": "1.0.0"
+    }
+  ]
+}

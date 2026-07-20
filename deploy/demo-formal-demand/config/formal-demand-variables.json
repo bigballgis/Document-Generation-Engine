@@ -1,0 +1,131 @@
+{
+  "catalogMarker": "formal-demand-demo-v1-wave-b",
+  "variables": [
+    {
+      "key": "bankName",
+      "label": "Bank Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankAddress",
+      "label": "Bank Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankBranch",
+      "label": "Bank Branch",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "letterDate",
+      "label": "Letter Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "borrowerName",
+      "label": "Borrower Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "borrowerAddress",
+      "label": "Borrower Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "borrowerCountry",
+      "label": "Borrower Country",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "facilityReference",
+      "label": "Facility Reference",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "defaultDescription",
+      "label": "Default Description",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "eventOfDefaultDate",
+      "label": "Event of Default Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "paymentDeadline",
+      "label": "Payment Deadline",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "principalDemanded",
+      "label": "Principal Demanded",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "interestDemanded",
+      "label": "Interest Demanded",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "feesDemanded",
+      "label": "Fees Demanded",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "totalDemanded",
+      "label": "Total Demanded",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "governingLaw",
+      "label": "Governing Law",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "jurisdiction",
+      "label": "Jurisdiction",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryName",
+      "label": "Signatory Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryTitle",
+      "label": "Signatory Title",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "amountsSchedule",
+      "label": "Amounts Schedule",
+      "type": "LIST",
+      "required": false
+    }
+  ]
+}

@@ -6,10 +6,12 @@ function Write-DemoStep([string]$Message) { Write-Host "==> $Message" }
 function Get-DemoApiResultItems {
     param([object]$Response)
     if ($null -eq $Response -or $null -eq $Response.result) { return @() }
-    if ($null -ne $Response.result.PSObject.Properties['content'] -and $Response.result.content) {
+    # Prefer paged envelope even when content/events is empty — do not fall through to the
+    # page object itself (empty @() is falsy in PowerShell and previously caused $_.name.Trim() NRE).
+    if ($null -ne $Response.result.PSObject.Properties['content']) {
         return @($Response.result.content)
     }
-    if ($null -ne $Response.result.PSObject.Properties['events'] -and $Response.result.events) {
+    if ($null -ne $Response.result.PSObject.Properties['events']) {
         return @($Response.result.events)
     }
     if ($Response.result -is [System.Array]) { return @($Response.result) }
@@ -407,7 +409,7 @@ function Find-DemoMasterByName {
     $mastersResp = Invoke-DemoApi -ApiBase $ApiBase -Method GET -Path $searchPath -Token $Token
     $masterList = Get-DemoMasterList $mastersResp
     return $masterList |
-        Where-Object { [string]$_.name.Trim() -eq $Name } |
+        Where-Object { $_.name -and ([string]$_.name.Trim() -eq $Name) } |
         Sort-Object { [datetime]$_.updatedAt } -Descending |
         Select-Object -First 1
 }
@@ -839,7 +841,14 @@ function Get-DemoPublishExternalIds {
         'demo-trade-lc',
         'demo-collection',
         'demo-annual-review',
-        'demo-wealth'
+        'demo-wealth',
+        'demo-facility-amendment',
+        'demo-kyc-cdd',
+        'demo-account-closure',
+        'demo-commitment',
+        'demo-formal-demand',
+        'demo-covenant-waiver',
+        'demo-insurance-endorsement'
     )
     foreach ($packageDir in $packageOrder) {
         $configDir = Join-Path $DeployRoot $packageDir 'config'

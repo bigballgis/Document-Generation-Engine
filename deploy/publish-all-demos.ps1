@@ -1,12 +1,12 @@
 # Publish all imported demo templates through lifecycle + API policy + credential.
-# P23-T12 — publish orchestration for all 8 demo families + full-flow letter.
+# P23-T12 / Wave B #142 — publish orchestration for Wave A + Wave B demo families + full-flow.
 #
 # Prerequisites:
 #   1. Backend healthy on :8080 (Docker deploy or local spring-boot:run)
-#   2. deploy/import-all-demos.ps1 completed (8 deploy/demo-* packages)
+#   2. deploy/import-all-demos.ps1 completed (15 deploy/demo-* packages)
 #   3. DEMO-FULL-FLOW-LETTER present (docgen.demo-catalog.seed-enabled=true on first boot, or E2E seed)
 #
-# Templates covered (13 external IDs — registry: Get-DemoPublishExternalIds):
+# Templates covered (20 external IDs — registry: Get-DemoPublishExternalIds):
 #   CORP-FOL-OFFER                          | CORP   | CORP_API
 #   DEMO-FULL-FLOW-LETTER                   | RETAIL | RETAIL_API
 #   DEMO-RETAIL-ACCOUNT-OPEN/BALANCE        | RETAIL | RETAIL_API
@@ -16,6 +16,13 @@
 #   DEMO-RATE-CHANGE / OVERDUE-COLLECTION   | RETAIL | RETAIL_API
 #   DEMO-ANNUAL-REVIEW / FACILITY-RENEWAL   | CORP   | CORP_API
 #   DEMO-WEALTH-STATEMENT                   | WEALTH | RETAIL_API
+#   DEMO-FACILITY-AMENDMENT                 | CORP   | CORP_API
+#   DEMO-KYC-CDD-NOTICE                     | RETAIL | RETAIL_API
+#   DEMO-ACCOUNT-CLOSURE                    | RETAIL | RETAIL_API
+#   DEMO-COMMITMENT-LETTER                  | CORP   | CORP_API
+#   DEMO-FORMAL-DEMAND                      | CORP   | CORP_API
+#   DEMO-COVENANT-WAIVER                    | CORP   | CORP_API
+#   DEMO-INSURANCE-ENDORSEMENT              | RETAIL | RETAIL_API
 #
 # AD group alignment: template groupCode CORP → policy CORP_API; all others → RETAIL_API.
 # Runtime callers svc-caller / e2e-runtime-caller hold both groups (application.yml).

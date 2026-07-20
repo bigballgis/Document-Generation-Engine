@@ -1,0 +1,18 @@
+{
+  "catalogMarker": "kyc-cdd-demo-v1-wave-b",
+  "groupCode": "RETAIL",
+  "pageNumberingProfile": "GLOBAL_ONLY",
+  "masterName": "Meridian KYC CDD Notice Master",
+  "masterLayoutVersion": "kyc-cdd-layout-v1-eight-anchors",
+  "masterDescription": "P23 bank-grade KYC/CDD notice master — eight anchors",
+  "templateExternalId": "DEMO-KYC-CDD-NOTICE",
+  "templateName": "KYC / CDD Customer Due Diligence Notice",
+  "templateDescription": "Retail customer due diligence / information update notice with document checklist (Wave B)",
+  "masterDocx": "assets/kyc-cdd-master.docx",
+  "generatedCatalogFiles": {
+    "variables": "config/kyc-cdd-variables.json",
+    "bindingOverlays": "config/kyc-cdd-binding-overlays.json",
+    "demoTestVariables": "config/kyc-cdd-demo-test-variables.json",
+    "catalogManifest": "config/kyc-cdd-catalog-manifest.json"
+  }
+}

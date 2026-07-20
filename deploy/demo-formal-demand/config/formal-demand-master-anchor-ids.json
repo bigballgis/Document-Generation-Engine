@@ -1,0 +1,46 @@
+{
+  "anchorIds": [
+    "FD_PARTIES",
+    "FD_DEFINED_TERMS",
+    "FD_DEFAULT",
+    "FD_DEMAND",
+    "FD_RESERVATION",
+    "FD_SCHEDULE",
+    "FD_GOVERNING_LAW",
+    "FD_SIGNATURE"
+  ],
+  "sections": [
+    {
+      "anchorId": "FD_PARTIES",
+      "title": "Parties"
+    },
+    {
+      "anchorId": "FD_DEFINED_TERMS",
+      "title": "Defined Terms"
+    },
+    {
+      "anchorId": "FD_DEFAULT",
+      "title": "Default Particulars"
+    },
+    {
+      "anchorId": "FD_DEMAND",
+      "title": "Formal Demand"
+    },
+    {
+      "anchorId": "FD_RESERVATION",
+      "title": "Reservation of Rights"
+    },
+    {
+      "anchorId": "FD_SCHEDULE",
+      "title": "Amounts Demanded"
+    },
+    {
+      "anchorId": "FD_GOVERNING_LAW",
+      "title": "Governing Law"
+    },
+    {
+      "anchorId": "FD_SIGNATURE",
+      "title": "Signatures"
+    }
+  ]
+}

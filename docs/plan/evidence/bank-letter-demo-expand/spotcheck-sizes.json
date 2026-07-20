@@ -1,0 +1,222 @@
+[
+  {
+    "externalId": "CORP-FOL-OFFER",
+    "sizeBytes": 30162,
+    "sha256": "dab241f0fe38cfa7792783a52f822c53277a4f7de4388ccd04ae43225d32a890",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-FULL-FLOW-LETTER",
+    "sizeBytes": 4775,
+    "sha256": "268a357abe4fe9edd6ee726d2c63af798a467f5e6bbb98a4d02f22e7eeccfc55",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-RETAIL-ACCOUNT-OPEN",
+    "sizeBytes": 6866,
+    "sha256": "ea2050d2d297a329329d3dda893ff931d67d29ab63e26b5d99948c82b06c6cc5",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-RETAIL-ACCOUNT-BALANCE",
+    "sizeBytes": 6359,
+    "sha256": "3c8694c71a38c39f2e6cc03867aecad61033a46b5631866a89512eb2e41b02ff",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-MORTGAGE-APPROVAL",
+    "sizeBytes": 9053,
+    "sha256": "108d891180784627f08dd52b88c5ed1f75ee97875af5d611adc9cc0fcb637270",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-CREDIT-LIMIT-CONFIRM",
+    "sizeBytes": 9710,
+    "sha256": "30c598adbf52dd93788def849bb70ca24932d8d8e41860658dcce74bb4894bd1",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-TRADE-LC-NOTICE",
+    "sizeBytes": 8018,
+    "sha256": "aaab9c51ffd8a6da35f5f86f0221208b784be4c984a486c4c6e02e00127dd02d",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-TRADE-GUARANTEE-NOTICE",
+    "sizeBytes": 6960,
+    "sha256": "b37d7ceae6871bec838d7953300cd11c40696867252aa743592494f7f414e7a2",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-RATE-CHANGE-NOTICE",
+    "sizeBytes": 6190,
+    "sha256": "c8a7420237e9ffe42edad9e209c4ed62a5f98e5a0de5edb5df14b141c7bf0d68",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-OVERDUE-COLLECTION",
+    "sizeBytes": 6485,
+    "sha256": "57cdffacf7631b0c260c5bf4480d485f09dafdafcd9434380b96636b1f46b1c9",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-ANNUAL-REVIEW",
+    "sizeBytes": 7218,
+    "sha256": "724216f4c0f0bf5dcae1e22377a205d07703ec14c5964082c5b08c2c6731db65",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-FACILITY-RENEWAL",
+    "sizeBytes": 7057,
+    "sha256": "5cee800e61c536f97a60b4c7275aae9510aab70efdf14dcd166c957b791444d6",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-WEALTH-STATEMENT",
+    "sizeBytes": 8733,
+    "sha256": "e5d078f0821793ce8990fc38dcd07d8f005b9b49beabc74d676ad1d0a028fdea",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-FACILITY-AMENDMENT",
+    "sizeBytes": 7281,
+    "sha256": "75245a06c775da388a56a9c5750874f7cfc95ce14b25dc545b4d35d77f4d56c0",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-KYC-CDD-NOTICE",
+    "sizeBytes": 6596,
+    "sha256": "2e42ac2e8f3145e01700fd0cb42e41742df71b75330ac0dc72a0f7e6fc2b22af",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-ACCOUNT-CLOSURE",
+    "sizeBytes": 6423,
+    "sha256": "cf331686468117fbc9700b9c64327761f35abb1c6741ce7764840d68fecf3495",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-COMMITMENT-LETTER",
+    "sizeBytes": 7181,
+    "sha256": "24de3009f96383e299c40df2380e34efb9897bdaab8eccb52a450f5e611ae025",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-FORMAL-DEMAND",
+    "sizeBytes": 6592,
+    "sha256": "9e58b7371e7fd19bdf7ac51ed548fceb5ba85f1ee5bc5d584fac79e0d449e74b",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-COVENANT-WAIVER",
+    "sizeBytes": 6431,
+    "sha256": "c73e9ecd78814227e6e6bf6d352b7779616e3a68fd41654515725759df310bb7",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  },
+  {
+    "externalId": "DEMO-INSURANCE-ENDORSEMENT",
+    "sizeBytes": 6679,
+    "sha256": "2e6acabb9d63ceca53a8a6a9a32b1d1c86bd96a7cb06ef6e8937e054f18d2068",
+    "meridian": true,
+    "placeholderLeak": false,
+    "contentMarkersPassed": true,
+    "forbiddenPatternScanPassed": true,
+    "minDocxBytesPassed": true,
+    "generateStatus": "SUCCESS"
+  }
+]

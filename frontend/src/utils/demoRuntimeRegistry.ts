@@ -13,13 +13,21 @@ export const DEMO_PUBLISH_EXTERNAL_IDS = [
   'DEMO-ANNUAL-REVIEW',
   'DEMO-FACILITY-RENEWAL',
   'DEMO-WEALTH-STATEMENT',
+  'DEMO-FACILITY-AMENDMENT',
+  'DEMO-KYC-CDD-NOTICE',
+  'DEMO-ACCOUNT-CLOSURE',
+  'DEMO-COMMITMENT-LETTER',
+  'DEMO-FORMAL-DEMAND',
+  'DEMO-COVENANT-WAIVER',
+  'DEMO-INSURANCE-ENDORSEMENT',
 ] as const
 
 export type DemoPublishExternalId = (typeof DEMO_PUBLISH_EXTERNAL_IDS)[number]
 
 /**
  * Per-template DOCX size floors (BDD-DEMO-TYP-012 anti-scaffold guard).
- * Calibrated from Docker runtime probe 2026-07-08 with ~10–15% headroom below observed sizes.
+ * Wave A floors calibrated from Docker runtime probe 2026-07-08; Wave B floors
+ * aligned to similar letter complexity pending generate-all evidence.
  */
 export const DEMO_RUNTIME_MIN_DOCX_BYTES: Record<DemoPublishExternalId, number> = {
   'CORP-FOL-OFFER': 20_480,
@@ -35,4 +43,11 @@ export const DEMO_RUNTIME_MIN_DOCX_BYTES: Record<DemoPublishExternalId, number> 
   'DEMO-ANNUAL-REVIEW': 5_120,
   'DEMO-FACILITY-RENEWAL': 4_608,
   'DEMO-WEALTH-STATEMENT': 5_120,
+  'DEMO-FACILITY-AMENDMENT': 6_144,
+  'DEMO-KYC-CDD-NOTICE': 4_096,
+  'DEMO-ACCOUNT-CLOSURE': 4_096,
+  'DEMO-COMMITMENT-LETTER': 6_144,
+  'DEMO-FORMAL-DEMAND': 5_120,
+  'DEMO-COVENANT-WAIVER': 5_120,
+  'DEMO-INSURANCE-ENDORSEMENT': 4_096,
 }

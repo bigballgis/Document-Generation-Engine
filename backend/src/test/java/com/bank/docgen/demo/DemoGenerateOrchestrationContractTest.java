@@ -20,7 +20,7 @@ class DemoGenerateOrchestrationContractTest {
     @Test
     void bddDemoTyp013_generateManifestCoversAllPublishRegistryTemplates() throws Exception {
         JsonNode manifest = DemoRuntimeGenerateManifest.load();
-        assertThat(manifest.path("manifestVersion").asText()).isEqualTo("wave-a-demo-refresh-v1");
+        assertThat(manifest.path("manifestVersion").asText()).isEqualTo("wave-b-demo-expand-v1");
         assertThat(DemoRuntimeGenerateManifest.templateExternalIds(manifest))
                 .containsExactlyElementsOf(DemoPublishRegistry.allPublishExternalIds());
     }

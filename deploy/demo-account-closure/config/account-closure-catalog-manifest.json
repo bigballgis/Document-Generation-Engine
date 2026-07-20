@@ -1,0 +1,34 @@
+{
+  "catalogMarker": "account-closure-demo-v1-wave-b",
+  "packageCode": "account-closure",
+  "groupCode": "RETAIL",
+  "pageNumberingProfile": "GLOBAL_ONLY",
+  "pageTarget": 5,
+  "templates": [
+    {
+      "externalId": "DEMO-ACCOUNT-CLOSURE",
+      "anchorIds": [
+        "AC_PARTIES",
+        "AC_ACCOUNT",
+        "AC_DEFINED_TERMS",
+        "AC_CLOSURE_TERMS",
+        "AC_BALANCE",
+        "AC_NEXT_STEPS",
+        "AC_GOVERNING_LAW",
+        "AC_SIGNATURE"
+      ]
+    }
+  ],
+  "contentModuleRefs": [
+    {
+      "referenceKey": "ACCOUNT-CLOSURE-OPERATIVE",
+      "moduleCode": "ACCT-CLOSE-OPS",
+      "semanticVersion": "1.0.0"
+    },
+    {
+      "referenceKey": "ACCOUNT-CLOSURE-NEXT-STEPS",
+      "moduleCode": "ACCT-CLOSE-NEXT",
+      "semanticVersion": "1.0.0"
+    }
+  ]
+}
