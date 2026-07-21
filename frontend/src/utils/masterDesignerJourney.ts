@@ -24,9 +24,9 @@ export type MasterDesignerDashboardMaster = MasterDocumentSummary & {
   reviewHistory?: MasterReviewRecord[]
 }
 
-const WAITING_REVIEW_GUIDANCE = 'journey.roles.MASTER_DESIGNER.waitingReview.guidance'
-const COMPLETE_GUIDANCE = 'journey.roles.MASTER_DESIGNER.complete.guidance'
-const EMPTY_GUIDANCE = 'journey.roles.MASTER_DESIGNER.empty.guidance'
+const WAITING_REVIEW_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.letterhead.waitingReview.guidance'
+const COMPLETE_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.letterhead.complete.guidance'
+const EMPTY_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.letterhead.empty.guidance'
 
 function hasMasterUploadedFile(originalFilename?: string | null): boolean {
   return Boolean(originalFilename && originalFilename.trim().length > 0)
@@ -176,7 +176,7 @@ export function resolveMasterDesignerDashboardJourneyIndex(
 }
 
 export function masterDesignerStepCtaKey(stepId: string): string {
-  return `journey.roles.MASTER_DESIGNER.steps.${stepId}.cta`
+  return `journey.roles.DOCUMENT_AUTHOR.letterhead.steps.${stepId}.cta`
 }
 
 export function shouldShowMasterDesignerJourney(options: {
@@ -186,7 +186,7 @@ export function shouldShowMasterDesignerJourney(options: {
   status?: MasterDocumentStatus
 }): boolean {
   const { roles, manageMasters, reviewMasters, status } = options
-  const isMasterDesigner = roles.includes(MANAGEMENT_ROLES.MASTER_DESIGNER)
+  const isMasterDesigner = roles.includes(MANAGEMENT_ROLES.DOCUMENT_AUTHOR)
   const isAuditOnly =
     roles.includes(MANAGEMENT_ROLES.AUDIT_ADMIN) &&
     !isMasterDesigner &&

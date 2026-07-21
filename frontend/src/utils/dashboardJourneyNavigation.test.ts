@@ -5,7 +5,7 @@ describe('dashboardJourneyNavigation', () => {
   it('builds template dev-editor deep link when dev version is known', () => {
     expect(
       buildDashboardJourneyPath({
-        kind: 'TEMPLATE_AUTHOR',
+        kind: 'DOCUMENT_AUTHOR',
         activeStepId: 'trialGenerate',
         targetTemplateId: 'tpl-1',
         devVersionId: 'dev-1',
@@ -23,10 +23,10 @@ describe('dashboardJourneyNavigation', () => {
     ).toBe('/templates/tpl-1')
   })
 
-  it('builds master package hub path for designer journey', () => {
+  it('builds master package hub path for letterhead journey', () => {
     expect(
       buildDashboardJourneyPath({
-        kind: 'MASTER_DESIGNER',
+        kind: 'DOCUMENT_AUTHOR_LETTERHEAD',
         activeStepId: 'submitReview',
         targetMasterId: 'master-1',
       }),

@@ -92,7 +92,7 @@ describe('DocumentBrandListView', () => {
   })
 
   it('hides create action for non-admin sessions', async () => {
-    patchSession(['TEMPLATE_AUTHOR'])
+    patchSession(['DOCUMENT_AUTHOR'])
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(DocumentBrandListView, {
       global: { plugins: [pinia, i18n, ElementPlus] },

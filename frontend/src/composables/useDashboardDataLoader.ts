@@ -57,7 +57,7 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
       canAccessMasters.value &&
       (reviewMasters.value ||
         manageMasters.value ||
-        primaryClusterOneRole.value === 'MASTER_DESIGNER'),
+        primaryClusterOneRole.value === 'DOCUMENT_AUTHOR'),
   )
 
   const taskScope = computed(() =>
@@ -127,9 +127,9 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
     }
     await mastersStore.fetchDashboardWorkflowMasters({
       includePendingReview:
-        reviewMasters.value || primaryClusterOneRole.value === 'MASTER_DESIGNER',
+        reviewMasters.value || primaryClusterOneRole.value === 'DOCUMENT_AUTHOR',
       includeDraftOrRejected:
-        manageMasters.value || primaryClusterOneRole.value === 'MASTER_DESIGNER',
+        manageMasters.value || primaryClusterOneRole.value === 'DOCUMENT_AUTHOR',
     })
   }
 
@@ -186,7 +186,7 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
 
     await Promise.all(jobs)
     if (needsMasterWorkflowCandidates.value && !mastersLoadError.value) {
-      if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
+      if (primaryClusterOneRole.value === 'DOCUMENT_AUTHOR') {
         await mastersStore.enrichDraftMasterReviewHistory().catch(() => {
           /* degrade to summary-only journey mapping */
         })

@@ -87,7 +87,7 @@ describe('TemplateDetailOverviewTab', () => {
         visibleRoutes: [ROUTE_KEYS.templateManagement, ROUTE_KEYS.masterManagement],
         expiresAt: new Date().toISOString(),
         capabilities:
-          roles.includes('TEMPLATE_AUTHOR') || roles.includes('GLOBAL_ADMIN')
+          roles.includes('DOCUMENT_AUTHOR') || roles.includes('GLOBAL_ADMIN')
             ? ({ authorTemplates: true } as never)
             : ({ authorTemplates: false } as never),
       },
@@ -132,7 +132,7 @@ describe('TemplateDetailOverviewTab', () => {
   })
 
   it('CE-G05: shows nextReviewDue and complete control for authors', async () => {
-    const wrapper = mountTab({}, ['TEMPLATE_AUTHOR'])
+    const wrapper = mountTab({}, ['DOCUMENT_AUTHOR'])
     await flushPromises()
 
     expect(wrapper.find('[data-testid="template-annual-review-due-value"]').text()).toBe(
@@ -145,7 +145,7 @@ describe('TemplateDetailOverviewTab', () => {
   })
 
   it('CE-G05: shows unset label when nextReviewDue is null', async () => {
-    const wrapper = mountTab({ nextReviewDue: null }, ['TEMPLATE_AUTHOR'])
+    const wrapper = mountTab({ nextReviewDue: null }, ['DOCUMENT_AUTHOR'])
     await flushPromises()
 
     expect(wrapper.find('[data-testid="template-annual-review-due-value"]').text()).toBe(
@@ -154,7 +154,7 @@ describe('TemplateDetailOverviewTab', () => {
   })
 
   it('CE-G05: completes annual review after confirmation', async () => {
-    const wrapper = mountTab({}, ['TEMPLATE_AUTHOR'])
+    const wrapper = mountTab({}, ['DOCUMENT_AUTHOR'])
     await flushPromises()
 
     const templatesStore = useTemplatesStore()

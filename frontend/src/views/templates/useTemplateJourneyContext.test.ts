@@ -25,7 +25,7 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push: vi.fn() }),
 }))
 
-const sessionRoles = ref<string[]>(['TEMPLATE_AUTHOR'])
+const sessionRoles = ref<string[]>(['DOCUMENT_AUTHOR'])
 
 vi.mock('@/stores/session', () => ({
   useSessionStore: () => ({
@@ -104,7 +104,7 @@ describe('useTemplateJourneyContext', () => {
   beforeEach(() => {
     pinia = createPinia()
     setActivePinia(pinia)
-    sessionRoles.value = ['TEMPLATE_AUTHOR']
+    sessionRoles.value = ['DOCUMENT_AUTHOR']
   })
 
   it('BDD-F6-A3-002: showAuthorJourney is true for DRAFT template', () => {

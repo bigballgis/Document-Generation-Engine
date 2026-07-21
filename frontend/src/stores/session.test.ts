@@ -17,7 +17,7 @@ function buildSession(overrides: Partial<ManagementSession> = {}): ManagementSes
     displayName: 'Template Author',
     email: 'author@example.com',
     authSource: 'LOCAL',
-    roles: ['TEMPLATE_AUTHOR'],
+    roles: ['DOCUMENT_AUTHOR'],
     authorizedGroupCodes: ['RETAIL'],
     defaultRoute: ROUTE_KEYS.dashboardHome,
     visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.templateManagement],

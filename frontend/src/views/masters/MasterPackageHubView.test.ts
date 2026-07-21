@@ -33,7 +33,7 @@ describe('MasterPackageHubView', () => {
     setActivePinia(pinia)
     const sessionStore = useSessionStore()
     sessionStore.session = {
-      roles: ['MASTER_DESIGNER'],
+      roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.master-management'],
       capabilities: { manageMasters: true },
@@ -218,7 +218,7 @@ describe('MasterPackageHubView', () => {
   it('hides Submit for review without manageMasters (MRR-003)', async () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
-      roles: ['TEMPLATE_APPROVER'],
+      roles: ['GROUP_ADMIN'],
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.master-management'],
       capabilities: { manageMasters: false, reviewMasters: true },
@@ -284,7 +284,7 @@ describe('MasterPackageHubView', () => {
   it('shows Approve and Reject on Hub when reviewMasters and PENDING_REVIEW (MRR-002)', async () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
-      roles: ['TEMPLATE_APPROVER'],
+      roles: ['GROUP_ADMIN'],
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.master-management'],
       capabilities: { manageMasters: false, reviewMasters: true },

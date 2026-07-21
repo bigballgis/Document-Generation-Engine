@@ -84,7 +84,7 @@ describe('ContentModuleDetailView', () => {
       },
     })
 
-    patchSession(['TEMPLATE_APPROVER'])
+    patchSession(['GROUP_ADMIN'])
     await flushPromises()
 
     expect(wrapper.text()).toContain('Loan disclosure')
@@ -170,7 +170,7 @@ describe('ContentModuleDetailView', () => {
       },
     })
 
-    patchSession(['TEMPLATE_AUTHOR'])
+    patchSession(['DOCUMENT_AUTHOR'])
     await flushPromises()
 
     expect(wrapper.text()).toContain('Wording not acceptable')
@@ -207,7 +207,7 @@ describe('ContentModuleDetailView', () => {
       },
     })
 
-    patchSession(['TEMPLATE_AUTHOR'])
+    patchSession(['DOCUMENT_AUTHOR'])
     await flushPromises()
     await wrapper.find('.workspace-tab-shell').findAll('.el-tabs__item')[2].trigger('click')
     await flushPromises()
@@ -230,7 +230,7 @@ describe('ContentModuleDetailView', () => {
     const wrapper = mount(ContentModuleDetailView, {
       global: { plugins: [pinia, i18n, ElementPlus] },
     })
-    patchSession(['TEMPLATE_AUTHOR'])
+    patchSession(['DOCUMENT_AUTHOR'])
     await flushPromises()
 
     expect(wrapper.text()).toContain('Owner: HQ')
@@ -252,7 +252,7 @@ describe('ContentModuleDetailView', () => {
     const wrapper = mount(ContentModuleDetailView, {
       global: { plugins: [pinia, i18n, ElementPlus] },
     })
-    patchSession(['TEMPLATE_AUTHOR'])
+    patchSession(['DOCUMENT_AUTHOR'])
     await flushPromises()
 
     expect(wrapper.text()).toContain('Not shared outside owner group')
@@ -273,7 +273,7 @@ describe('ContentModuleDetailView', () => {
     const wrapper = mount(ContentModuleDetailView, {
       global: { plugins: [pinia, i18n, ElementPlus] },
     })
-    patchSession(['TEMPLATE_AUTHOR'])
+    patchSession(['DOCUMENT_AUTHOR'])
     await flushPromises()
 
     expect(wrapper.find('[data-testid="content-module-settings-open"]').exists()).toBe(false)

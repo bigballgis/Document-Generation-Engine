@@ -76,15 +76,10 @@ function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
     allowed.add(ROUTE_KEYS.documentBrandAdministration)
     allowed.add(ROUTE_KEYS.templateAuthoringHome)
   }
-  if (roleSet.has(MANAGEMENT_ROLES.MASTER_DESIGNER)) {
+  // DOCUMENT_AUTHOR = former MASTER_DESIGNER ∪ TEMPLATE_AUTHOR route union.
+  if (roleSet.has(MANAGEMENT_ROLES.DOCUMENT_AUTHOR)) {
     allowed.add(ROUTE_KEYS.dashboardHome)
     allowed.add(ROUTE_KEYS.masterManagement)
-    allowed.add(ROUTE_KEYS.templateManagement)
-    allowed.add(ROUTE_KEYS.contentModuleManagement)
-    allowed.add(ROUTE_KEYS.assetLibraryManagement)
-  }
-  if (roleSet.has(MANAGEMENT_ROLES.TEMPLATE_AUTHOR)) {
-    allowed.add(ROUTE_KEYS.dashboardHome)
     allowed.add(ROUTE_KEYS.templateAuthoringHome)
     allowed.add(ROUTE_KEYS.templateManagement)
     allowed.add(ROUTE_KEYS.contentModuleManagement)
@@ -93,12 +88,6 @@ function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
   if (roleSet.has(MANAGEMENT_ROLES.TEMPLATE_TESTER)) {
     allowed.add(ROUTE_KEYS.dashboardHome)
     allowed.add(ROUTE_KEYS.templateManagement)
-    allowed.add(ROUTE_KEYS.assetLibraryManagement)
-  }
-  if (roleSet.has(MANAGEMENT_ROLES.TEMPLATE_APPROVER)) {
-    allowed.add(ROUTE_KEYS.dashboardHome)
-    allowed.add(ROUTE_KEYS.templateManagement)
-    allowed.add(ROUTE_KEYS.contentModuleManagement)
     allowed.add(ROUTE_KEYS.assetLibraryManagement)
   }
   // IBL-E3 / ADR-0064 — mirrors RouteVisibilityService LEGAL_REVIEWER set.
@@ -129,7 +118,7 @@ const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContext) => b
       [canUploadMasters, canReviewMasters],
       (roles) => canUploadMasters({ roles }) || canReviewMasters({ roles }),
     ),
-  // Testers/approvers/legal reviewers/publishers must reach template hub + /dev decision UI
+  // Testers/legal reviewers/publishers must reach template hub + /dev decision UI
   // even when authorTemplates is false (backend still lists route.template-management).
   [ROUTE_KEYS.templateManagement]: (context) =>
     strictRouteCapability(
@@ -147,9 +136,8 @@ const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContext) => b
           (
             [
               MANAGEMENT_ROLES.TEMPLATE_TESTER,
-              MANAGEMENT_ROLES.TEMPLATE_APPROVER,
               MANAGEMENT_ROLES.LEGAL_REVIEWER,
-              MANAGEMENT_ROLES.MASTER_DESIGNER,
+              MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
             ] as string[]
           ).includes(role),
         ),

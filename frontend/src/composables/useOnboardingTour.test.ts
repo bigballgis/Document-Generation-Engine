@@ -60,7 +60,7 @@ function patchAuthorSession(username = 'author.user') {
     displayName: 'Author',
     email: 'author@example.com',
     authSource: 'LOCAL',
-    roles: ['TEMPLATE_AUTHOR'],
+    roles: ['DOCUMENT_AUTHOR'],
     authorizedGroupCodes: ['RETAIL'],
     defaultRoute: 'route.dashboard-home',
     visibleRoutes: ['route.dashboard-home'],
@@ -101,7 +101,7 @@ describe('useOnboardingTour', () => {
   it('builds author tour steps from definitions (BDD-LRP-C8-006)', () => {
     patchAuthorSession()
     const tour = mountTourHarness()
-    expect(tour.tourRole.value).toBe('TEMPLATE_AUTHOR')
+    expect(tour.tourRole.value).toBe('DOCUMENT_AUTHOR')
     expect(tour.tourSteps.value).toBe(templateAuthorJourneySteps)
     expect(tour.canReplay.value).toBe(true)
   })

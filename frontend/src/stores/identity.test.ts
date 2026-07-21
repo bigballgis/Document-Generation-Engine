@@ -28,7 +28,7 @@ const user: ManagementUserView = {
   displayName: 'Retail Operator',
   email: 'operator@example.com',
   authSource: 'LOCAL',
-  roles: ['TEMPLATE_AUTHOR'],
+  roles: ['DOCUMENT_AUTHOR'],
   authorizedGroupCodes: ['RETAIL'],
   enabled: true,
   createdAt: '2026-06-23T10:00:00Z',
@@ -115,7 +115,7 @@ describe('identity store', () => {
       displayName: 'Another',
       email: 'a@example.com',
       initialPassword: 'Sup3rSecret!42',
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: ['RETAIL'],
     })
 

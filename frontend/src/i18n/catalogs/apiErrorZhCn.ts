@@ -10,6 +10,7 @@ export const apiErrorZhCn = {
     accessDenied: "您无权执行此操作。",
     groupScopeOutOfRange: "请求的组范围超出您的授权范围。",
     roleAssignmentNotAllowed: "您无权分配所请求的角色。",
+    roleNotAssignable: "所请求的管理角色不可分配。",
     userDeleteNotAllowed: "您无权删除用户。",
     groupManagementNotAllowed: "您无权管理业务组。"
   },

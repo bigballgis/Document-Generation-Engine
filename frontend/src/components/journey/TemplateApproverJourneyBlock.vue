@@ -85,7 +85,7 @@ function handleCtaClick() {
     :steps="templateApproverJourneySteps"
     :current-step-index="resolution.currentStepIndex"
     :guidance-key="resolution.guidanceKey"
-    :title-key="roleJourneyTitleKey('TEMPLATE_APPROVER')"
+    :title-key="roleJourneyTitleKey('GROUP_ADMIN')"
   >
     <template #after>
       <el-button

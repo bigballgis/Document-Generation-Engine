@@ -24,7 +24,7 @@ export interface TemplateApproverApprovalWorkItem {
   updatedAt?: string
 }
 
-const EMPTY_GUIDANCE = 'journey.roles.TEMPLATE_APPROVER.empty.guidance'
+const EMPTY_GUIDANCE = 'journey.roles.GROUP_ADMIN.compliance.empty.guidance'
 
 export function isAwaitingApproverDecision(template: {
   lifecycleStatus: TemplateLifecycleStatus
@@ -127,7 +127,7 @@ export function resolveTemplateApproverDashboardJourneyIndex(
 }
 
 export function templateApproverStepCtaKey(stepId: string): string {
-  return `journey.roles.TEMPLATE_APPROVER.steps.${stepId}.cta`
+  return `journey.roles.GROUP_ADMIN.compliance.steps.${stepId}.cta`
 }
 
 export function shouldShowTemplateApproverJourney(options: { decideApprovals: boolean }): boolean {

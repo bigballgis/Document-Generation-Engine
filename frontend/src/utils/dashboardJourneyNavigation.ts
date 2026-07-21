@@ -11,21 +11,21 @@ import {
 } from '@/utils/templateJourneyWorkspaceLink'
 
 export type DashboardJourneyKind =
-  | 'MASTER_DESIGNER'
-  | 'TEMPLATE_AUTHOR'
+  | 'DOCUMENT_AUTHOR'
+  | 'DOCUMENT_AUTHOR_LETTERHEAD'
   | 'TEMPLATE_TESTER'
-  | 'TEMPLATE_APPROVER'
+  | 'COMPLIANCE_APPROVER'
   | 'LEGAL_REVIEWER'
   | 'GROUP_ADMIN'
   | 'GLOBAL_ADMIN'
 
 function templateWorkspaceRole(kind: DashboardJourneyKind): TemplateJourneyWorkspaceRole | null {
   switch (kind) {
-    case 'TEMPLATE_AUTHOR':
+    case 'DOCUMENT_AUTHOR':
       return 'AUTHOR'
     case 'TEMPLATE_TESTER':
       return 'TESTER'
-    case 'TEMPLATE_APPROVER':
+    case 'COMPLIANCE_APPROVER':
       return 'APPROVER'
     case 'LEGAL_REVIEWER':
       return 'LEGAL_REVIEWER'
@@ -48,7 +48,7 @@ export function buildDashboardJourneyPath(input: {
     return null
   }
 
-  if (kind === 'MASTER_DESIGNER' && targetMasterId) {
+  if (kind === 'DOCUMENT_AUTHOR_LETTERHEAD' && targetMasterId) {
     return masterDetailPath(targetMasterId)
   }
 

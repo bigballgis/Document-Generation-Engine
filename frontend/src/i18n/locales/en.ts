@@ -2987,45 +2987,8 @@ export default {
       demo: 'Custom demo guidance',
     },
     roles: {
-      MASTER_DESIGNER: {
-        title: 'Letterhead design workflow',
-        empty: {
-          guidance:
-            'Upload a letterhead document to begin your design workflow, then follow each step below.',
-        },
-        waitingReview: {
-          guidance:
-            'Your letterhead is with the review team. You will be notified when a decision is recorded.',
-        },
-        complete: {
-          guidance: 'This letterhead is approved. You can view or download it anytime.',
-          cta: 'View letterhead',
-        },
-        steps: {
-          upload: {
-            label: 'Upload letterhead',
-            guidance: 'Upload your letterhead document to get started.',
-            cta: 'Upload letterhead',
-          },
-          placeholders: {
-            label: 'Set layout placeholders',
-            guidance: 'Define layout placeholders for dynamic content areas.',
-            cta: 'Check layout placeholders',
-          },
-          submitReview: {
-            label: 'Submit for review',
-            guidance: 'Submit your letterhead design for review when ready.',
-            cta: 'Submit for review',
-          },
-          rework: {
-            label: 'Fix and resubmit',
-            guidance: 'Address review feedback and resubmit your letterhead.',
-            cta: 'Update and resubmit',
-          },
-        },
-      },
-      TEMPLATE_AUTHOR: {
-        title: 'Template authoring workflow',
+      DOCUMENT_AUTHOR: {
+        title: 'Document authoring workflow',
         empty: {
           guidance:
             'Create or open a template to begin authoring, then follow each step below.',
@@ -3077,7 +3040,44 @@ export default {
             guidance: 'Wait for go-live confirmation after approval.',
           },
         },
+        letterhead: {
+          empty: {
+          guidance:
+            'Upload a letterhead document to begin your design workflow, then follow each step below.',
+        },
+        waitingReview: {
+          guidance:
+            'Your letterhead is with the review team. You will be notified when a decision is recorded.',
+        },
+        complete: {
+          guidance: 'This letterhead is approved. You can view or download it anytime.',
+          cta: 'View letterhead',
+        },
+        steps: {
+          upload: {
+            label: 'Upload letterhead',
+            guidance: 'Upload your letterhead document to get started.',
+            cta: 'Upload letterhead',
+          },
+          placeholders: {
+            label: 'Set layout placeholders',
+            guidance: 'Define layout placeholders for dynamic content areas.',
+            cta: 'Check layout placeholders',
+          },
+          submitReview: {
+            label: 'Submit for review',
+            guidance: 'Submit your letterhead design for review when ready.',
+            cta: 'Submit for review',
+          },
+          rework: {
+            label: 'Fix and resubmit',
+            guidance: 'Address review feedback and resubmit your letterhead.',
+            cta: 'Update and resubmit',
+          },
+        },
+        },
       },
+      
       TEMPLATE_TESTER: {
         title: 'Template testing workflow',
         empty: {
@@ -3102,30 +3102,7 @@ export default {
           },
         },
       },
-      TEMPLATE_APPROVER: {
-        title: 'Template approval workflow',
-        empty: {
-          guidance:
-            'Open an approval request from your task list, then follow each step below.',
-        },
-        steps: {
-          reviewRequest: {
-            label: 'Review approval request',
-            guidance: 'Open the approval request and review why it was submitted.',
-            cta: 'Review approval request',
-          },
-          reviewSubmission: {
-            label: 'Review submission package',
-            guidance: 'Review the submission summary and supporting evidence.',
-            cta: 'Review submission package',
-          },
-          recordDecision: {
-            label: 'Record approval decision',
-            guidance: 'Record your approval decision so the author can proceed.',
-            cta: 'Record approval decision',
-          },
-        },
-      },
+      
       LEGAL_REVIEWER: {
         title: 'Legal review workflow',
         empty: {
@@ -3177,6 +3154,29 @@ export default {
             guidance: 'Confirm the release summary and put the template live.',
             cta: 'Confirm go-live',
           },
+        },
+        compliance: {
+          empty: {
+          guidance:
+            'Open an approval request from your task list, then follow each step below.',
+        },
+        steps: {
+          reviewRequest: {
+            label: 'Review approval request',
+            guidance: 'Open the approval request and review why it was submitted.',
+            cta: 'Review approval request',
+          },
+          reviewSubmission: {
+            label: 'Review submission package',
+            guidance: 'Review the submission summary and supporting evidence.',
+            cta: 'Review submission package',
+          },
+          recordDecision: {
+            label: 'Record approval decision',
+            guidance: 'Record your approval decision so the author can proceed.',
+            cta: 'Record approval decision',
+          },
+        },
         },
       },
       GLOBAL_ADMIN: {
@@ -3268,10 +3268,8 @@ export default {
     roles: {
       GLOBAL_ADMIN: 'Global administrator',
       GROUP_ADMIN: 'Group administrator',
-      MASTER_DESIGNER: 'Letterhead designer',
-      TEMPLATE_AUTHOR: 'Template author',
+      DOCUMENT_AUTHOR: 'Document author',
       TEMPLATE_TESTER: 'Template tester',
-      TEMPLATE_APPROVER: 'Template approver',
       LEGAL_REVIEWER: 'Legal reviewer',
       AUDIT_ADMIN: 'Audit administrator',
     },

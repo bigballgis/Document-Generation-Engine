@@ -18,7 +18,7 @@ const sampleUser: ManagementUserView = {
   displayName: 'Retail Operator',
   email: 'operator@example.com',
   authSource: 'LOCAL',
-  roles: ['TEMPLATE_AUTHOR'],
+  roles: ['DOCUMENT_AUTHOR'],
   authorizedGroupCodes: ['RETAIL'],
   enabled: true,
   createdAt: '2026-06-23T10:00:00Z',
@@ -55,10 +55,10 @@ describe('identity API', () => {
   it('lists users with group, role and pagination params', async () => {
     vi.mocked(http.get).mockResolvedValue(pageEnvelope([sampleUser]))
 
-    const page = await identityApi.listUsers({ group: 'RETAIL', role: 'TEMPLATE_AUTHOR', page: 0, size: 20 })
+    const page = await identityApi.listUsers({ group: 'RETAIL', role: 'DOCUMENT_AUTHOR', page: 0, size: 20 })
 
     expect(http.get).toHaveBeenCalledWith('/users', {
-      params: { group: 'RETAIL', role: 'TEMPLATE_AUTHOR', page: 0, size: 20 },
+      params: { group: 'RETAIL', role: 'DOCUMENT_AUTHOR', page: 0, size: 20 },
     })
     expect(page.content[0]?.username).toBe('10000001')
     expect(page.totalElements).toBe(1)
@@ -88,7 +88,7 @@ describe('identity API', () => {
       displayName: 'Retail Operator',
       email: 'operator@example.com',
       initialPassword: 'Sup3rSecret!42',
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: ['RETAIL'],
     }
 
@@ -103,7 +103,7 @@ describe('identity API', () => {
     const body: UpdateUserRequest = {
       displayName: 'Retail Operator',
       email: 'operator@example.com',
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: ['RETAIL'],
     }
 
@@ -162,7 +162,7 @@ describe('identity API', () => {
         displayName: 'x',
         email: 'x@example.com',
         initialPassword: 'Sup3rSecret!42',
-        roles: ['TEMPLATE_AUTHOR'],
+        roles: ['DOCUMENT_AUTHOR'],
         authorizedGroupCodes: ['RETAIL'],
       }),
     ).rejects.toMatchObject({

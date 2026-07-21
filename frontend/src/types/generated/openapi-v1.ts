@@ -995,7 +995,7 @@ export interface paths {
         };
         /**
          * Export a template as JSON or ZIP bundle
-         * @description Exports an eligible template (`PENDING_RELEASE`, `PUBLISHED`, `STOPPED`, or `DEPRECATED`) as `template-export-bundle-v1-json` by default, or `template-export-bundle-v2-json` when `bundleVersion=2` (CE-E01). JSON responses use the management success envelope; ZIP responses (`format=zip`) return an `application/zip` attachment. v1 ZIP contains only `template-export-bundle.json`. v2 ZIP additionally embeds `artifacts/master.docx` (pinned master revision bytes) and the JSON carries `masterPin`, `clauseSnapshots`, `renderProfile`, and `assetKeyManifest`. Bundle omits secrets, API credential material, and runtime credentials. Permission boundary per permission-matrix section 5: `GLOBAL_ADMIN` (all templates), `GROUP_ADMIN` (authorized groups), `TEMPLATE_AUTHOR` (own templates only). Export actions are audited. Traceability: BDD-CE-E01-001…006; docs/behavior/ce-e01-export-bundle-v2.md. When the pinned master DOCX object is unavailable at export time, fail-closed with `PINNED_MASTER_UNAVAILABLE` / `api.error.rendering.pinnedMasterUnavailable` (reuse CE-K01 / CE-G06 key).
+         * @description Exports an eligible template (`PENDING_RELEASE`, `PUBLISHED`, `STOPPED`, or `DEPRECATED`) as `template-export-bundle-v1-json` by default, or `template-export-bundle-v2-json` when `bundleVersion=2` (CE-E01). JSON responses use the management success envelope; ZIP responses (`format=zip`) return an `application/zip` attachment. v1 ZIP contains only `template-export-bundle.json`. v2 ZIP additionally embeds `artifacts/master.docx` (pinned master revision bytes) and the JSON carries `masterPin`, `clauseSnapshots`, `renderProfile`, and `assetKeyManifest`. Bundle omits secrets, API credential material, and runtime credentials. Permission boundary per permission-matrix section 5: `GLOBAL_ADMIN` (all templates), `GROUP_ADMIN` (authorized groups), `DOCUMENT_AUTHOR` (own templates only). Export actions are audited. Traceability: BDD-CE-E01-001…006; docs/behavior/ce-e01-export-bundle-v2.md. When the pinned master DOCX object is unavailable at export time, fail-closed with `PINNED_MASTER_UNAVAILABLE` / `api.error.rendering.pinnedMasterUnavailable` (reuse CE-K01 / CE-G06 key).
          */
         get: operations["exportTemplateBundle"];
         put?: never;
@@ -1575,7 +1575,7 @@ export interface paths {
         put?: never;
         /**
          * Export authorized eligible templates as a full-library ZIP (CE-E03)
-         * @description Assembles a `template-library-export-v1-zip` attachment for the caller's authorized export-eligible templates (lifecycle `PENDING_RELEASE` | `PUBLISHED` | `STOPPED` | `DEPRECATED`, same as single-template export). ZIP fixed relative paths: `library-export-manifest.json`; `templates/{templateId}.zip` (each byte-equivalent to E01 `bundleVersion=2&format=zip`); deduped `masters/{masterFileHash}.docx`; deduped `clauses/{moduleCode}__{semanticVersion}.json`. Nested packs are always E01 v2; no library-embedded v1 mode. Asset binaries are never embedded (keys only in manifest `assetKeyManifest`). Permission boundary reuses permission-matrix section 5 **导出模板** exactly — no new permission code: `GLOBAL_ADMIN` (all), `GROUP_ADMIN` (authorized groups), `TEMPLATE_AUTHOR` (own templates only); per-template authorization filter; `TEMPLATE_TESTER` and other non-export roles → 403. Optional body filters: `groupId`, `templateIds` (max 500), `includeSkipped` (default true). Candidate resolution: non-empty `templateIds` → those IDs ∩ auth ∩ existence; else non-empty `groupId` → group ∩ auth; else all authorized. Eligible candidate count max 500 → else 422 `api.error.library.exportLimitExceeded`. Empty INCLUDED set → 422 `api.error.library.exportEmpty`. Partial success: HTTP 200 when `includedCount ≥ 1` (FAILED/SKIPPED recorded in manifest only). Unauthorized or unknown requested IDs are omitted from `templates[]` (`omittedUnauthorizedOrUnknownCount` only — no existence leak). Success (including partial) audits `LIBRARY_EXPORT` (batch id, counts, scope, actor; no clause full text, DOCX bytes, or variable values). No `Idempotency-Key` requirement (each call new `exportBatchId`). Library import and management UI are out of scope. Traceability: BDD-CE-E03-001…016; docs/behavior/ce-e03-full-library-export.md.
+         * @description Assembles a `template-library-export-v1-zip` attachment for the caller's authorized export-eligible templates (lifecycle `PENDING_RELEASE` | `PUBLISHED` | `STOPPED` | `DEPRECATED`, same as single-template export). ZIP fixed relative paths: `library-export-manifest.json`; `templates/{templateId}.zip` (each byte-equivalent to E01 `bundleVersion=2&format=zip`); deduped `masters/{masterFileHash}.docx`; deduped `clauses/{moduleCode}__{semanticVersion}.json`. Nested packs are always E01 v2; no library-embedded v1 mode. Asset binaries are never embedded (keys only in manifest `assetKeyManifest`). Permission boundary reuses permission-matrix section 5 **导出模板** exactly — no new permission code: `GLOBAL_ADMIN` (all), `GROUP_ADMIN` (authorized groups), `DOCUMENT_AUTHOR` (own templates only); per-template authorization filter; `TEMPLATE_TESTER` and other non-export roles → 403. Optional body filters: `groupId`, `templateIds` (max 500), `includeSkipped` (default true). Candidate resolution: non-empty `templateIds` → those IDs ∩ auth ∩ existence; else non-empty `groupId` → group ∩ auth; else all authorized. Eligible candidate count max 500 → else 422 `api.error.library.exportLimitExceeded`. Empty INCLUDED set → 422 `api.error.library.exportEmpty`. Partial success: HTTP 200 when `includedCount ≥ 1` (FAILED/SKIPPED recorded in manifest only). Unauthorized or unknown requested IDs are omitted from `templates[]` (`omittedUnauthorizedOrUnknownCount` only — no existence leak). Success (including partial) audits `LIBRARY_EXPORT` (batch id, counts, scope, actor; no clause full text, DOCX bytes, or variable values). No `Idempotency-Key` requirement (each call new `exportBatchId`). Library import and management UI are out of scope. Traceability: BDD-CE-E03-001…016; docs/behavior/ce-e03-full-library-export.md.
          */
         post: operations["exportLibraryTemplates"];
         delete?: never;
@@ -1707,7 +1707,7 @@ export interface paths {
         put?: never;
         /**
          * Upload a platform asset-library object (CE-E02)
-         * @description Multipart upload of an IMAGE / SEAL / OTHER asset. Logical `assetKey` (trim) is the MinIO resolvable object key — must match `^[A-Za-z][A-Za-z0-9._-]{0,127}$`; no forced `library/` prefix. Allowed MIME `image/png` | `image/jpeg`; application-layer max 5 MiB → 422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. ACTIVE key conflict → 409 `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; DISABLED key may re-upload and reactivate (audit `ASSET_LIBRARY_REUPLOAD`). SEAL upload requires TEMPLATE_APPROVER / GLOBAL_ADMIN / GROUP_ADMIN (fail-closed 403). Does not modify `StructuredContentImageResolver`. Header `Idempotency-Key` is reserved for a future slice and is **not enforced** in CE-E02 (accepted if present; ignored — no claim/replay/dedup). Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-001…009, 021–022).
+         * @description Multipart upload of an IMAGE / SEAL / OTHER asset. Logical `assetKey` (trim) is the MinIO resolvable object key — must match `^[A-Za-z][A-Za-z0-9._-]{0,127}$`; no forced `library/` prefix. Allowed MIME `image/png` | `image/jpeg`; application-layer max 5 MiB → 422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. ACTIVE key conflict → 409 `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; DISABLED key may re-upload and reactivate (audit `ASSET_LIBRARY_REUPLOAD`). SEAL upload requires GLOBAL_ADMIN / GROUP_ADMIN (fail-closed 403; former TEMPLATE_APPROVER absorbed). Does not modify `StructuredContentImageResolver`. Header `Idempotency-Key` is reserved for a future slice and is **not enforced** in CE-E02 (accepted if present; ignored — no claim/replay/dedup). Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-001…009, 021–022).
          */
         post: operations["uploadLibraryAsset"];
         delete?: never;
@@ -1785,7 +1785,7 @@ export interface paths {
         };
         /**
          * List paginated master revision lines
-         * @description Returns revision lines for a master package ordered by recency (current line first). **Phase A (Done):** may return only the current line with honest pagination (`totalElements: 1`). **Phase B (P2-T06):** each file replace persists an immutable row; this endpoint returns the full history with honest `totalElements`, `totalPages`, and `content[]` slicing. Requires group-scoped read access (`MASTER_DESIGNER`, `GLOBAL_ADMIN`, or other roles with master read per permission matrix); fail-closed `403 ACCESS_DENIED` when the master is outside authorized groups. Traceability: BDD-MASTER-REVISION-NAV-001 Phase B.
+         * @description Returns revision lines for a master package ordered by recency (current line first). **Phase A (Done):** may return only the current line with honest pagination (`totalElements: 1`). **Phase B (P2-T06):** each file replace persists an immutable row; this endpoint returns the full history with honest `totalElements`, `totalPages`, and `content[]` slicing. Requires group-scoped read access (`DOCUMENT_AUTHOR`, `GLOBAL_ADMIN`, or other roles with master read per permission matrix); fail-closed `403 ACCESS_DENIED` when the master is outside authorized groups. Traceability: BDD-MASTER-REVISION-NAV-001 Phase B.
          */
         get: operations["listMasterRevisionLines"];
         put?: never;
@@ -2795,8 +2795,18 @@ export interface components {
             errorMessage?: string;
             summary?: components["schemas"]["CredentialSummaryView"];
         };
-        /** @enum {string} */
-        LifecycleGovernanceActorRole: "GLOBAL_ADMIN" | "GROUP_ADMIN" | "APPROVER" | "TEMPLATE_AUTHOR" | "MASTER_DESIGNER";
+        /**
+         * @description Assignable management roles after ADR-0070 six-role compression (SYS-NORM Wave 5). Retired codes TEMPLATE_APPROVER / MASTER_DESIGNER / TEMPLATE_AUTHOR are rejected on assignment APIs with HTTP 422 ROLE_NOT_ASSIGNABLE (VALIDATION; retryable=false). Distinct from 403 ROLE_ASSIGNMENT_NOT_ALLOWED (ops escalation).
+         *
+         * @enum {string}
+         */
+        ManagementRole: "GLOBAL_ADMIN" | "GROUP_ADMIN" | "DOCUMENT_AUTHOR" | "TEMPLATE_TESTER" | "LEGAL_REVIEWER" | "AUDIT_ADMIN";
+        /**
+         * @description Content-module journey actor tokens. DOCUMENT_AUTHOR replaces former TEMPLATE_AUTHOR / MASTER_DESIGNER. APPROVER remains a compliance-decide token mapped to GROUP_ADMIN (or GLOBAL_ADMIN) session after ADR-0070.
+         *
+         * @enum {string}
+         */
+        LifecycleGovernanceActorRole: "GLOBAL_ADMIN" | "GROUP_ADMIN" | "APPROVER" | "DOCUMENT_AUTHOR";
         /** @enum {string} */
         AuditReadActorRole: "AUDIT_ADMIN" | "GLOBAL_ADMIN" | "GROUP_ADMIN";
         ManagementAuditResponse: {
@@ -3656,7 +3666,7 @@ export interface components {
             /** @enum {string} */
             lifecycleState?: "ACTIVE" | "STOPPED" | "DEPRECATED";
             changeDescription?: string;
-            /** @description Module content structure JSON. Optional on read responses; populated only when the caller holds structure-view permission per permission-matrix section 5.1 (GLOBAL_ADMIN, GROUP_ADMIN, MASTER_DESIGNER, TEMPLATE_AUTHOR, or TEMPLATE_APPROVER). Omitted or null when the caller may browse the catalog but lacks structure-view permission (fail-closed). TEMPLATE_TESTER receives 403 on catalog list/detail and never receives this field.
+            /** @description Module content structure JSON. Optional on read responses; populated only when the caller holds structure-view permission per permission-matrix section 5.1 (GLOBAL_ADMIN, GROUP_ADMIN, or DOCUMENT_AUTHOR). Omitted or null when the caller may browse the catalog but lacks structure-view permission (fail-closed). TEMPLATE_TESTER receives 403 on catalog list/detail and never receives this field.
              *      */
             contentStructureJson?: string;
             /** @description Present when the version is DRAFT after REJECT_REVIEW. Cleared on SUBMIT_FOR_REVIEW and APPROVE_REVIEW (CE-U08).
@@ -4988,10 +4998,10 @@ export interface components {
             /** @enum {string} */
             action: "SUBMIT_FOR_TEST" | "RECORD_TEST_DECISION" | "SUBMIT_FOR_APPROVAL" | "RECORD_APPROVAL_DECISION" | "MARK_PENDING_RELEASE" | "PUBLISH" | "STOP_USE" | "RESTORE" | "DEPRECATE" | "RECORD_EXPORT_GOVERNANCE_DECISION" | "EVALUATE_TIMEOUT_ESCALATION";
             /**
-             * @description IBL-E3 — LEGAL_REVIEWER for LEGAL-stage RECORD_APPROVAL_DECISION. ManagementRole mapping may use TEMPLATE_APPROVER / LEGAL_REVIEWER on the primary management API; this journey enum remains for the lifecycle journey stub.
+             * @description IBL-E3 — LEGAL_REVIEWER for LEGAL-stage RECORD_APPROVAL_DECISION. ManagementRole catalog is six roles (ADR-0070); APPROVER journey token maps to GROUP_ADMIN compliance decide. DOCUMENT_AUTHOR replaces TEMPLATE_AUTHOR. This journey enum remains for the lifecycle journey stub.
              * @enum {string}
              */
-            actorRole: "GLOBAL_ADMIN" | "GROUP_ADMIN" | "TEMPLATE_AUTHOR" | "TESTER" | "APPROVER" | "LEGAL_REVIEWER";
+            actorRole: "GLOBAL_ADMIN" | "GROUP_ADMIN" | "DOCUMENT_AUTHOR" | "TESTER" | "APPROVER" | "LEGAL_REVIEWER";
             actorId: string;
             /** @enum {string} */
             decisionOutcome?: "PASS" | "FAIL" | "APPROVE" | "REJECT";

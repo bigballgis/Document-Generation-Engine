@@ -7,8 +7,7 @@ export function canAuthorContentModules(context: CapabilityContext): boolean {
         [
           MANAGEMENT_ROLES.GLOBAL_ADMIN,
           MANAGEMENT_ROLES.GROUP_ADMIN,
-          MANAGEMENT_ROLES.MASTER_DESIGNER,
-          MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+          MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
         ] as string[]
       ).includes(role),
     ),
@@ -18,13 +17,7 @@ export function canAuthorContentModules(context: CapabilityContext): boolean {
 export function canDecideContentModuleReviews(context: CapabilityContext): boolean {
   return resolveCapability(context, 'decideContentModuleReviews', (roles) =>
     roles.some((role) =>
-      (
-        [
-          MANAGEMENT_ROLES.GLOBAL_ADMIN,
-          MANAGEMENT_ROLES.GROUP_ADMIN,
-          MANAGEMENT_ROLES.TEMPLATE_APPROVER,
-        ] as string[]
-      ).includes(role),
+      ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
     ),
   )
 }
@@ -52,9 +45,7 @@ export function canAccessContentModuleManagement(roles: string[]): boolean {
       [
         MANAGEMENT_ROLES.GLOBAL_ADMIN,
         MANAGEMENT_ROLES.GROUP_ADMIN,
-        MANAGEMENT_ROLES.MASTER_DESIGNER,
-        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
-        MANAGEMENT_ROLES.TEMPLATE_APPROVER,
+        MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
       ] as string[]
     ).includes(role),
   )
@@ -67,9 +58,9 @@ export function canViewCollaborationWorkItems(context: CapabilityContext): boole
         [
           MANAGEMENT_ROLES.GLOBAL_ADMIN,
           MANAGEMENT_ROLES.GROUP_ADMIN,
-          MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+          MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
           MANAGEMENT_ROLES.TEMPLATE_TESTER,
-          MANAGEMENT_ROLES.TEMPLATE_APPROVER,
+          MANAGEMENT_ROLES.LEGAL_REVIEWER,
         ] as string[]
       ).includes(role),
     ),

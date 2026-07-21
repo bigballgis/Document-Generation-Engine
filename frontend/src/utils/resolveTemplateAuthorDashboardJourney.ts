@@ -12,11 +12,11 @@ export {
   type TemplateAuthorRemediationItem,
 } from '@/utils/templateAuthorJourneyTypes'
 
-const WAITING_TESTING_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.waitingTesting.guidance'
-const WAITING_APPROVAL_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.waitingApproval.guidance'
-const EMPTY_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.empty.guidance'
-const REMEDIATION_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.remediation.guidance'
-const TEAM_LEAD_GO_LIVE_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.awaitGoLive.teamLeadGuidance'
+const WAITING_TESTING_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.waitingTesting.guidance'
+const WAITING_APPROVAL_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.waitingApproval.guidance'
+const EMPTY_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.empty.guidance'
+const REMEDIATION_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.remediation.guidance'
+const TEAM_LEAD_GO_LIVE_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.awaitGoLive.teamLeadGuidance'
 
 function hasTemplateBindings(context: { bindingsCount?: number }): boolean {
   return (context.bindingsCount ?? 0) > 0

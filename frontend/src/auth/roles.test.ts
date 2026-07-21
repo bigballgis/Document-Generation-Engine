@@ -68,7 +68,7 @@ const testerCapabilities: ManagementCapabilities = {
 
 describe('management roles', () => {
   it('allows master management for authoring and admin roles via fallback', () => {
-    expect(canAccessMasterManagement([MANAGEMENT_ROLES.TEMPLATE_AUTHOR])).toBe(true)
+    expect(canAccessMasterManagement([MANAGEMENT_ROLES.DOCUMENT_AUTHOR])).toBe(true)
     expect(canAccessMasterManagement([MANAGEMENT_ROLES.GROUP_ADMIN])).toBe(true)
     expect(canAccessMasterManagement([MANAGEMENT_ROLES.GLOBAL_ADMIN])).toBe(true)
     expect(canAccessMasterManagement([MANAGEMENT_ROLES.AUDIT_ADMIN])).toBe(false)
@@ -76,34 +76,35 @@ describe('management roles', () => {
 
   it('restricts review actions to admin roles via fallback', () => {
     expect(canReviewMasters({ roles: [MANAGEMENT_ROLES.GROUP_ADMIN] })).toBe(true)
-    expect(canReviewMasters({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(false)
+    expect(canReviewMasters({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR] })).toBe(false)
   })
 
   it('prefers capabilities over role fallback when provided', () => {
-    expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR], capabilities: testerCapabilities })).toBe(
+    expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR], capabilities: testerCapabilities })).toBe(
       false,
     )
-    expect(canDecideTests({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR], capabilities: testerCapabilities })).toBe(
+    expect(canDecideTests({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR], capabilities: testerCapabilities })).toBe(
       true,
     )
     expect(
-      canManageApiPolicy({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR], capabilities: globalAdminCapabilities }),
+      canManageApiPolicy({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR], capabilities: globalAdminCapabilities }),
     ).toBe(true)
   })
 
-  it('denies upload for template author via fallback (AUD-P01)', () => {
-    expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(false)
+  it('allows DOCUMENT_AUTHOR to manage masters via fallback (ADR-0070 union)', () => {
+    expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR] })).toBe(true)
+    expect(canReviewMasters({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR] })).toBe(false)
   })
 
-  it('allows master designer to manage masters via fallback (permission-matrix §4)', () => {
-    expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.MASTER_DESIGNER] })).toBe(true)
-    expect(canReviewMasters({ roles: [MANAGEMENT_ROLES.MASTER_DESIGNER] })).toBe(false)
+  it('does not grant decideTests to pure DOCUMENT_AUTHOR via fallback (BDD-SYS-NORM-ROLE-003)', () => {
+    expect(canDecideTests({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR] })).toBe(false)
+    expect(canDecideApprovals({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR] })).toBe(false)
   })
 
   it('denies upload when manageMasters capability is explicitly false (AUD-P01)', () => {
     expect(
       canUploadMasters({
-        roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR],
+        roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR],
         capabilities: { ...testerCapabilities, manageMasters: false },
       }),
     ).toBe(false)
@@ -112,7 +113,7 @@ describe('management roles', () => {
   it('allows template export/import for admin and author roles via authorTemplates fallback', () => {
     expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.GLOBAL_ADMIN] })).toBe(true)
     expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.GROUP_ADMIN] })).toBe(true)
-    expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(true)
+    expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR] })).toBe(true)
     expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.TEMPLATE_TESTER] })).toBe(false)
   })
 
@@ -128,22 +129,22 @@ describe('management roles', () => {
   it('prefers exportTemplates capability when present', () => {
     expect(
       canExportTemplates({
-        roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR],
+        roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR],
         capabilities: { ...globalAdminCapabilities, exportTemplates: false, authorTemplates: true },
       }),
     ).toBe(false)
   })
 
   it('allows template management for authoring and admin roles via fallback', () => {
-    expect(canAccessTemplateManagement([MANAGEMENT_ROLES.TEMPLATE_AUTHOR])).toBe(true)
+    expect(canAccessTemplateManagement([MANAGEMENT_ROLES.DOCUMENT_AUTHOR])).toBe(true)
     expect(canAccessTemplateManagement([MANAGEMENT_ROLES.GROUP_ADMIN])).toBe(true)
     expect(canAccessTemplateManagement([MANAGEMENT_ROLES.AUDIT_ADMIN])).toBe(false)
   })
 
   it('allows content module management for authoring, approver, and admin roles', () => {
-    expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.TEMPLATE_AUTHOR])).toBe(true)
-    expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.TEMPLATE_APPROVER])).toBe(true)
-    expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.MASTER_DESIGNER])).toBe(true)
+    expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.DOCUMENT_AUTHOR])).toBe(true)
+    expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.GROUP_ADMIN])).toBe(true)
+    expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.DOCUMENT_AUTHOR])).toBe(true)
     expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.TEMPLATE_TESTER])).toBe(false)
   })
 
@@ -154,13 +155,13 @@ describe('management roles', () => {
 
   it('restricts release version governance to admin roles via fallback', () => {
     expect(canManageReleaseVersionState({ roles: [MANAGEMENT_ROLES.GROUP_ADMIN] })).toBe(true)
-    expect(canManageReleaseVersionState({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(false)
+    expect(canManageReleaseVersionState({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR] })).toBe(false)
   })
 
   it('allows audit console for audit and admin roles via fallback', () => {
     expect(canAccessAuditConsole({ roles: [MANAGEMENT_ROLES.AUDIT_ADMIN] })).toBe(true)
     expect(canAccessAuditConsole({ roles: [MANAGEMENT_ROLES.GLOBAL_ADMIN] })).toBe(true)
-    expect(canAccessAuditConsole({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(false)
+    expect(canAccessAuditConsole({ roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR] })).toBe(false)
   })
 
   it('allows template deletion only for global admins by fallback', () => {
@@ -199,7 +200,7 @@ describe('management roles', () => {
   })
 
   it('denies content-module route when not in visibleRoutes even if role would allow (AUD-P02)', () => {
-    const authorContext = { roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR], capabilities: globalAdminCapabilities }
+    const authorContext = { roles: [MANAGEMENT_ROLES.DOCUMENT_AUTHOR], capabilities: globalAdminCapabilities }
 
     expect(
       canAccessLogicalRoute('route.content-module-management', authorContext, []),

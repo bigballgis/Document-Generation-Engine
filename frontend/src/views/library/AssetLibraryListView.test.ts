@@ -80,7 +80,7 @@ describe('AssetLibraryListView', () => {
   beforeEach(() => {
     pinia = createPinia()
     setActivePinia(pinia)
-    patchSession(['TEMPLATE_AUTHOR'], authorCapabilities)
+    patchSession(['DOCUMENT_AUTHOR'], authorCapabilities)
     vi.mocked(libraryAssetsApi.listLibraryAssets).mockReset()
     vi.mocked(libraryAssetsApi.uploadLibraryAsset).mockReset()
     vi.mocked(libraryAssetsApi.disableLibraryAsset).mockReset()

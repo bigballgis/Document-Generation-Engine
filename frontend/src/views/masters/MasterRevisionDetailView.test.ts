@@ -29,7 +29,7 @@ vi.mock('@/auth/roles', async (importOriginal) => {
   return {
     ...actual,
     canReviewMasters: () => false,
-    sessionContext: () => ({ roles: ['MASTER_DESIGNER'], capabilities: { manageMasters: true } }),
+    sessionContext: () => ({ roles: ['DOCUMENT_AUTHOR'], capabilities: { manageMasters: true } }),
   }
 })
 
@@ -41,7 +41,7 @@ describe('MasterRevisionDetailView', () => {
     setActivePinia(pinia)
     const sessionStore = useSessionStore()
     sessionStore.session = {
-      roles: ['MASTER_DESIGNER'],
+      roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.master-management'],
       capabilities: { manageMasters: true },

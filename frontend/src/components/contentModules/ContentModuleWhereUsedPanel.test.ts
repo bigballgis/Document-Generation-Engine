@@ -28,7 +28,7 @@ describe('ContentModuleWhereUsedPanel', () => {
         displayName: 'Author',
         email: 'author@example.com',
         authSource: 'LOCAL',
-        roles: ['TEMPLATE_AUTHOR'],
+        roles: ['DOCUMENT_AUTHOR'],
         authorizedGroupCodes: ['RETAIL'],
         defaultRoute: ROUTE_KEYS.dashboardHome,
         visibleRoutes: [ROUTE_KEYS.templateManagement, ROUTE_KEYS.contentModuleManagement],

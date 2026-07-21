@@ -1,9 +1,5 @@
 import { computed, type ComputedRef } from 'vue'
 import {
-  resolveMasterDesignerDashboardJourneyIndex,
-  type MasterDesignerDashboardMaster,
-} from '@/utils/masterDesignerJourney'
-import {
   resolveTemplateAuthorDashboardJourneyIndex,
   type TemplateAuthorRemediationItem,
 } from '@/utils/templateAuthorJourney'
@@ -63,16 +59,8 @@ export function useDashboardJourneyRoleResolutions(
   } = visibility
   const { mastersStore, templatesStore, collaborationStore } = stores
 
-  const masterDesignerJourneyResolution = computed(() => {
-    if (primaryClusterOneRole.value !== 'MASTER_DESIGNER') {
-      return null
-    }
-    const enrichedMasters: MasterDesignerDashboardMaster[] = mastersStore.masters.map((master) => ({
-      ...master,
-      reviewHistory: mastersStore.getDraftReviewHistory(master.id),
-    }))
-    return resolveMasterDesignerDashboardJourneyIndex(enrichedMasters)
-  })
+  /** Letterhead journey stays on master hub pages; dashboard cluster-① uses DOCUMENT_AUTHOR authoring. */
+  const masterDesignerJourneyResolution = computed(() => null)
 
   const templateAuthorRemediationItems = computed((): TemplateAuthorRemediationItem[] =>
     collaborationStore.workItems
@@ -84,7 +72,7 @@ export function useDashboardJourneyRoleResolutions(
   )
 
   const templateAuthorJourneyResolution = computed(() => {
-    if (primaryClusterOneRole.value !== 'TEMPLATE_AUTHOR') {
+    if (primaryClusterOneRole.value !== 'DOCUMENT_AUTHOR') {
       return null
     }
     return resolveTemplateAuthorDashboardJourneyIndex(

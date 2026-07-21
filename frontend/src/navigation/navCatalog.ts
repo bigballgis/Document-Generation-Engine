@@ -48,7 +48,7 @@ function canSeeBehaviorMasterReview(
     return true
   }
   return (
-    context.roles.includes(MANAGEMENT_ROLES.MASTER_DESIGNER) &&
+    context.roles.includes(MANAGEMENT_ROLES.DOCUMENT_AUTHOR) &&
     visibleRoutes.includes(ROUTE_KEYS.masterManagement)
   )
 }
@@ -59,7 +59,7 @@ function canSeeBehaviorRemediation(context: CapabilityContext): boolean {
       [
         MANAGEMENT_ROLES.GLOBAL_ADMIN,
         MANAGEMENT_ROLES.GROUP_ADMIN,
-        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+        MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
       ] as string[]
     ).includes(role),
   )

@@ -125,7 +125,7 @@ describe('navStructure', () => {
         ROUTE_KEYS.templateManagement,
         ROUTE_KEYS.assetLibraryManagement,
       ],
-      ['TEMPLATE_AUTHOR'],
+      ['DOCUMENT_AUTHOR'],
       authorCapabilities,
     )
     const contentGroup = groups.find((group) => group.id === 'documentContent')
@@ -138,7 +138,7 @@ describe('navStructure', () => {
   it('hides asset library when route is not visible', () => {
     const groups = buildVisibleNavGroups(
       [dashboardRoute, ROUTE_KEYS.templateManagement],
-      ['TEMPLATE_AUTHOR'],
+      ['DOCUMENT_AUTHOR'],
       authorCapabilities,
     )
     const contentGroup = groups.find((group) => group.id === 'documentContent')
@@ -152,15 +152,15 @@ describe('navStructure', () => {
       ).toEqual(['behavior-testing'])
     })
 
-    it('shows only approval entry for TEMPLATE_APPROVER with decideApprovals', () => {
+    it('shows approval (+ escalation) for GROUP_ADMIN with decideApprovals (ex-approver)', () => {
       expect(
-        behaviorItemIds(['TEMPLATE_APPROVER'], approverCapabilities),
-      ).toEqual(['behavior-approval'])
+        behaviorItemIds(['GROUP_ADMIN'], approverCapabilities),
+      ).toEqual(['behavior-approval', 'behavior-escalation'])
     })
 
     it('shows only remediation entry for TEMPLATE_AUTHOR with authorTemplates', () => {
       expect(
-        behaviorItemIds(['TEMPLATE_AUTHOR'], authorCapabilities),
+        behaviorItemIds(['DOCUMENT_AUTHOR'], authorCapabilities),
       ).toEqual(['behavior-remediation'])
     })
 
@@ -187,14 +187,14 @@ describe('navStructure', () => {
       ])
     })
 
-    it('shows only master-review for MASTER_DESIGNER with master-management route', () => {
+    it('shows remediation + master-review for DOCUMENT_AUTHOR with master-management route', () => {
       expect(
         behaviorItemIds(
-          ['MASTER_DESIGNER'],
+          ['DOCUMENT_AUTHOR'],
           masterDesignerCapabilities,
           [dashboardRoute, ROUTE_KEYS.masterManagement, ROUTE_KEYS.templateManagement],
         ),
-      ).toEqual(['behavior-master-review'])
+      ).toEqual(['behavior-remediation', 'behavior-master-review'])
     })
 
     it('returns no behavior items for AUDIT_ADMIN without dashboard-home', () => {

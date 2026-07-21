@@ -97,7 +97,7 @@ describe('resolveMasterDesignerJourneyIndex (§12.5 entity mapping)', () => {
       }),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.MASTER_DESIGNER.waitingReview.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.letterhead.waitingReview.guidance',
     })
   })
 
@@ -110,7 +110,7 @@ describe('resolveMasterDesignerJourneyIndex (§12.5 entity mapping)', () => {
       }),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.MASTER_DESIGNER.complete.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.letterhead.complete.guidance',
     })
   })
 
@@ -199,7 +199,7 @@ describe('resolveMasterDesignerDashboardJourneyIndex (§12.5 dashboard mapping)'
       ]),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.MASTER_DESIGNER.waitingReview.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.letterhead.waitingReview.guidance',
     })
   })
 
@@ -210,7 +210,7 @@ describe('resolveMasterDesignerDashboardJourneyIndex (§12.5 dashboard mapping)'
       ]),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.MASTER_DESIGNER.empty.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.letterhead.empty.guidance',
     })
   })
 
@@ -239,7 +239,7 @@ describe('shouldShowMasterDesignerJourney', () => {
   it('shows for MASTER_DESIGNER', () => {
     expect(
       shouldShowMasterDesignerJourney({
-        roles: ['MASTER_DESIGNER'],
+        roles: ['DOCUMENT_AUTHOR'],
         manageMasters: true,
         reviewMasters: false,
       }),

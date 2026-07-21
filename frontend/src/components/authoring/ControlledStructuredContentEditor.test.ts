@@ -27,7 +27,7 @@ function patchAuthorSession() {
       displayName: 'Author',
       email: 'a@example.com',
       authSource: 'LOCAL',
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: [],
       defaultRoute: 'dashboard',
       visibleRoutes: ['dashboard'],

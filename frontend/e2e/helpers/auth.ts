@@ -17,37 +17,55 @@ export const FOL_GROUP_CODE = 'CORP'
 export const FOL_EXPECTED_ANCHOR_COUNT = folCatalogManifest.expectedAnchorCount
 export const FOL_CLAUSE_CODES = folCatalogManifest.clauseCodes as readonly string[]
 
+/** GLOBAL_ADMIN — unchanged by ADR-0070. */
 export const E2E_ADMIN = {
   username: '10000001',
   password: 'ChangeMe123!',
 }
 
+/** GROUP_ADMIN — unchanged; also use for compliance decide (ex-approver absorbed). */
 export const E2E_GROUP_ADMIN = {
   username: '10000002',
   password: 'ChangeMe123!',
 }
 
+/**
+ * Seed 10000003 — role code DOCUMENT_AUTHOR after V75 (was TEMPLATE_AUTHOR).
+ * Constant name kept for existing E2E imports.
+ */
 export const E2E_TEMPLATE_AUTHOR = {
   username: '10000003',
   password: 'ChangeMe123!',
 }
 
+/** Prefer this alias in new specs (ADR-0070). */
+export const E2E_DOCUMENT_AUTHOR = E2E_TEMPLATE_AUTHOR
+
+/**
+ * Seed 10000005 — role code DOCUMENT_AUTHOR after V75 (was MASTER_DESIGNER).
+ * Constant name kept for existing E2E imports.
+ */
 export const E2E_MASTER_DESIGNER = {
   username: '10000005',
   password: 'ChangeMe123!',
 }
 
+/** TEMPLATE_TESTER — retained SoD role (ADR-0070). */
 export const E2E_TEMPLATE_TESTER = {
   username: '10000006',
   password: 'ChangeMe123!',
 }
 
+/**
+ * Seed 10000007 — role code GROUP_ADMIN after V75 (was TEMPLATE_APPROVER).
+ * Constant name kept for existing E2E imports.
+ */
 export const E2E_TEMPLATE_APPROVER = {
   username: '10000007',
   password: 'ChangeMe123!',
 }
 
-/** CORP group scope only — for cross-group isolation E2E (BDD S6). */
+/** CORP group scope only — DOCUMENT_AUTHOR after V75 (was TEMPLATE_AUTHOR). */
 export const E2E_CORP_TEMPLATE_AUTHOR = {
   username: '10000008',
   password: 'ChangeMe123!',

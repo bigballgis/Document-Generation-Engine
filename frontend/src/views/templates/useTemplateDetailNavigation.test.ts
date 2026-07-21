@@ -42,7 +42,7 @@ const capabilityRefs = {
   decideApprovals: ref(true),
   publishTemplates: ref(true),
   reviewMasters: ref(true),
-  context: ref({ roles: ['TEMPLATE_AUTHOR'] }),
+  context: ref({ roles: ['DOCUMENT_AUTHOR'] }),
 }
 
 vi.mock('@/composables/useCapabilities', () => ({
@@ -53,7 +53,7 @@ vi.mock('@/auth/roles', () => ({
   canViewCollaborationWorkItems: () => true,
 }))
 
-const sessionRoles = ref<string[]>(['TEMPLATE_AUTHOR'])
+const sessionRoles = ref<string[]>(['DOCUMENT_AUTHOR'])
 
 vi.mock('@/stores/session', () => ({
   useSessionStore: () => ({
@@ -185,7 +185,7 @@ describe('useTemplateDetailNavigation', () => {
     capabilityRefs.decideApprovals.value = true
     capabilityRefs.publishTemplates.value = true
     capabilityRefs.reviewMasters.value = true
-    sessionRoles.value = ['TEMPLATE_AUTHOR']
+    sessionRoles.value = ['DOCUMENT_AUTHOR']
     vi.mocked(templatesApi.fetchDevVersionDetail).mockReset()
   })
 

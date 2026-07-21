@@ -2,11 +2,10 @@ import { MANAGEMENT_ROLE_VALUES, type ManagementRole } from '@/types/identity'
 import type { ManagementSession } from '@/types/session'
 import { MANAGEMENT_ROLES } from '@/auth/roles'
 
+/** Ops roles GROUP_ADMIN may assign (ADR-0070 / permission-matrix). */
 const OPERATIONAL_ROLES: ManagementRole[] = [
-  MANAGEMENT_ROLES.MASTER_DESIGNER,
-  MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+  MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
   MANAGEMENT_ROLES.TEMPLATE_TESTER,
-  MANAGEMENT_ROLES.TEMPLATE_APPROVER,
   MANAGEMENT_ROLES.LEGAL_REVIEWER,
 ]
 

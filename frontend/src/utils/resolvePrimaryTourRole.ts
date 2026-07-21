@@ -3,7 +3,6 @@ import {
   globalAdminJourneySteps,
   resolveClusterOneJourney,
   resolvePrimaryClusterOneRole,
-  templateApproverJourneySteps,
   templateLegalReviewerJourneySteps,
   templateTeamLeadJourneySteps,
   type JourneyRole,
@@ -12,7 +11,6 @@ import {
 import { MANAGEMENT_ROLES } from '@/auth/roles'
 import { shouldShowAuditAdminJourney } from '@/utils/auditAdminJourney'
 import { shouldShowGlobalAdminJourney } from '@/utils/globalAdminJourney'
-import { shouldShowTemplateApproverJourney } from '@/utils/templateApproverJourney'
 import { shouldShowTemplateLegalReviewerJourney } from '@/utils/templateLegalReviewerJourney'
 import { shouldShowTemplateTeamLeadJourney } from '@/utils/templateTeamLeadJourney'
 
@@ -29,6 +27,7 @@ export interface ResolvePrimaryTourRoleInput {
 /**
  * Primary tour role — Dashboard journey priority (C8-C5) + AUDIT_ADMIN fallback.
  * Does not mutate Dashboard display logic; pure resolution for the onboarding tour.
+ * ADR-0070: retired TEMPLATE_APPROVER / MASTER_DESIGNER / TEMPLATE_AUTHOR codes.
  */
 export function resolvePrimaryTourRole(input: ResolvePrimaryTourRoleInput): TourRole | null {
   const roles = input.roles
@@ -45,13 +44,6 @@ export function resolvePrimaryTourRole(input: ResolvePrimaryTourRoleInput): Tour
     })
   ) {
     return 'LEGAL_REVIEWER'
-  }
-
-  if (
-    roles.includes(MANAGEMENT_ROLES.TEMPLATE_APPROVER) &&
-    shouldShowTemplateApproverJourney({ decideApprovals: input.decideApprovals })
-  ) {
-    return 'TEMPLATE_APPROVER'
   }
 
   if (shouldShowGlobalAdminJourney({ roles })) {
@@ -78,12 +70,9 @@ export function resolvePrimaryTourRole(input: ResolvePrimaryTourRoleInput): Tour
 /** Steps are the same arrays exported from roleJourneyDefinitions (no fork). */
 export function resolveTourStepsForRole(role: TourRole): RoleJourneyStep[] {
   switch (role) {
-    case 'MASTER_DESIGNER':
-    case 'TEMPLATE_AUTHOR':
+    case 'DOCUMENT_AUTHOR':
     case 'TEMPLATE_TESTER':
       return resolveClusterOneJourney(role)
-    case 'TEMPLATE_APPROVER':
-      return templateApproverJourneySteps
     case 'LEGAL_REVIEWER':
       return templateLegalReviewerJourneySteps
     case 'GLOBAL_ADMIN':

@@ -4,12 +4,13 @@ import en from '@/i18n/locales/en'
 import zhCn from '@/i18n/locales/zh-CN'
 import {
   auditAdminJourneySteps,
+  documentAuthorJourneySteps,
   globalAdminJourneySteps,
   masterDesignerJourneySteps,
   resolveClusterOneJourney,
   resolvePrimaryClusterOneRole,
-  templateAuthorJourneySteps,
   templateApproverJourneySteps,
+  templateAuthorJourneySteps,
   templateTeamLeadJourneySteps,
   templateTesterJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
@@ -30,7 +31,7 @@ describe('roleJourneyDefinitions', () => {
   const tEn = i18nEn.global.t
   const tZh = i18nZh.global.t
 
-  it('masterDesignerJourneySteps has exactly 4 steps in Spec B order', () => {
+  it('masterDesignerJourneySteps has exactly 4 letterhead steps under DOCUMENT_AUTHOR', () => {
     expect(masterDesignerJourneySteps).toHaveLength(4)
     expect(masterDesignerJourneySteps.map((step) => step.id)).toEqual([
       'upload',
@@ -38,11 +39,13 @@ describe('roleJourneyDefinitions', () => {
       'submitReview',
       'rework',
     ])
+    expect(masterDesignerJourneySteps[0].labelKey).toContain('DOCUMENT_AUTHOR.letterhead')
   })
 
-  it('templateAuthorJourneySteps has exactly 6 steps in Spec B order', () => {
-    expect(templateAuthorJourneySteps).toHaveLength(6)
-    expect(templateAuthorJourneySteps.map((step) => step.id)).toEqual([
+  it('documentAuthorJourneySteps has exactly 6 steps in Spec B order', () => {
+    expect(documentAuthorJourneySteps).toHaveLength(6)
+    expect(templateAuthorJourneySteps).toBe(documentAuthorJourneySteps)
+    expect(documentAuthorJourneySteps.map((step) => step.id)).toEqual([
       'create',
       'design',
       'trialGenerate',
@@ -83,13 +86,14 @@ describe('roleJourneyDefinitions', () => {
     ])
   })
 
-  it('templateApproverJourneySteps has exactly 3 steps in Spec B order', () => {
+  it('templateApproverJourneySteps has exactly 3 compliance steps under GROUP_ADMIN', () => {
     expect(templateApproverJourneySteps).toHaveLength(3)
     expect(templateApproverJourneySteps.map((step) => step.id)).toEqual([
       'reviewRequest',
       'reviewSubmission',
       'recordDecision',
     ])
+    expect(templateApproverJourneySteps[0].labelKey).toContain('GROUP_ADMIN.compliance')
   })
 
   it('templateTeamLeadJourneySteps has exactly 4 steps in Spec B order', () => {
@@ -105,7 +109,7 @@ describe('roleJourneyDefinitions', () => {
   it('resolves non-empty en and zh-CN strings for every cluster-① step labelKey', () => {
     const allSteps = [
       ...masterDesignerJourneySteps,
-      ...templateAuthorJourneySteps,
+      ...documentAuthorJourneySteps,
       ...templateTesterJourneySteps,
     ]
     for (const step of allSteps) {
@@ -116,34 +120,27 @@ describe('roleJourneyDefinitions', () => {
     }
   })
 
-  it('resolvePrimaryClusterOneRole prefers MASTER_DESIGNER over AUTHOR and TESTER', () => {
-    expect(
-      resolvePrimaryClusterOneRole(['TEMPLATE_TESTER', 'TEMPLATE_AUTHOR', 'MASTER_DESIGNER']),
-    ).toBe('MASTER_DESIGNER')
-  })
-
-  it('resolvePrimaryClusterOneRole prefers TEMPLATE_AUTHOR over TEMPLATE_TESTER', () => {
-    expect(resolvePrimaryClusterOneRole(['TEMPLATE_AUTHOR', 'TEMPLATE_TESTER'])).toBe(
-      'TEMPLATE_AUTHOR',
+  it('resolvePrimaryClusterOneRole prefers DOCUMENT_AUTHOR over TEMPLATE_TESTER', () => {
+    expect(resolvePrimaryClusterOneRole(['TEMPLATE_TESTER', 'DOCUMENT_AUTHOR'])).toBe(
+      'DOCUMENT_AUTHOR',
     )
   })
 
   it('resolvePrimaryClusterOneRole returns null for cluster-①-excluded roles', () => {
-    expect(resolvePrimaryClusterOneRole(['TEMPLATE_APPROVER'])).toBeNull()
+    expect(resolvePrimaryClusterOneRole(['GROUP_ADMIN'])).toBeNull()
     expect(resolvePrimaryClusterOneRole(['AUDIT_ADMIN'])).toBeNull()
     expect(resolvePrimaryClusterOneRole(['GLOBAL_ADMIN'])).toBeNull()
   })
 
   it('resolveClusterOneJourney returns the matching catalog', () => {
-    expect(resolveClusterOneJourney('MASTER_DESIGNER')).toBe(masterDesignerJourneySteps)
-    expect(resolveClusterOneJourney('TEMPLATE_AUTHOR')).toBe(templateAuthorJourneySteps)
+    expect(resolveClusterOneJourney('DOCUMENT_AUTHOR')).toBe(documentAuthorJourneySteps)
     expect(resolveClusterOneJourney('TEMPLATE_TESTER')).toBe(templateTesterJourneySteps)
   })
 
   it('cluster-① step label en values avoid forbidden L1 nouns', () => {
     const allSteps = [
       ...masterDesignerJourneySteps,
-      ...templateAuthorJourneySteps,
+      ...documentAuthorJourneySteps,
       ...templateTesterJourneySteps,
     ]
     for (const step of allSteps) {

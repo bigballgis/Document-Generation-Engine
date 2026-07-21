@@ -6,7 +6,7 @@ export function canAccessTemplateManagement(roles: string[]): boolean {
       [
         MANAGEMENT_ROLES.GLOBAL_ADMIN,
         MANAGEMENT_ROLES.GROUP_ADMIN,
-        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+        MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
       ] as string[]
     ).includes(role),
   )
@@ -65,7 +65,7 @@ export function canExportTemplates(context: CapabilityContext): boolean {
         [
           MANAGEMENT_ROLES.GLOBAL_ADMIN,
           MANAGEMENT_ROLES.GROUP_ADMIN,
-          MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+          MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
         ] as string[]
       ).includes(role),
     )
@@ -89,13 +89,7 @@ export function canDecideTests(context: CapabilityContext): boolean {
 export function canDecideApprovals(context: CapabilityContext): boolean {
   return resolveCapability(context, 'decideApprovals', (roles) =>
     roles.some((role) =>
-      (
-        [
-          MANAGEMENT_ROLES.GLOBAL_ADMIN,
-          MANAGEMENT_ROLES.GROUP_ADMIN,
-          MANAGEMENT_ROLES.TEMPLATE_APPROVER,
-        ] as string[]
-      ).includes(role),
+      ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
     ),
   )
 }
@@ -130,8 +124,7 @@ export function canStopTemplates(context: CapabilityContext): boolean {
         [
           MANAGEMENT_ROLES.GLOBAL_ADMIN,
           MANAGEMENT_ROLES.GROUP_ADMIN,
-          MANAGEMENT_ROLES.MASTER_DESIGNER,
-          MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+          MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
         ] as string[]
       ).includes(role),
     ),

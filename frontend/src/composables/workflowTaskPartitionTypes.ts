@@ -93,7 +93,7 @@ function canSeeBehaviorRemediation(context: CapabilityContext): boolean {
       [
         MANAGEMENT_ROLES.GLOBAL_ADMIN,
         MANAGEMENT_ROLES.GROUP_ADMIN,
-        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+        MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
       ] as string[]
     ).includes(role),
   )

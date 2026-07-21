@@ -2929,43 +2929,8 @@ export default {
       demo: '自定义演示引导',
     },
     roles: {
-      MASTER_DESIGNER: {
-        title: '母版设计流程',
-        empty: {
-          guidance: '上传母版文档开始设计流程，然后按下方步骤推进。',
-        },
-        waitingReview: {
-          guidance: '母版已提交审核，请等待审核结果。',
-        },
-        complete: {
-          guidance: '该母版已审核通过，可随时查看或下载。',
-          cta: '查看母版',
-        },
-        steps: {
-          upload: {
-            label: '上传母版文档',
-            guidance: '上传母版文档以开始设计。',
-            cta: '上传母版',
-          },
-          placeholders: {
-            label: '设置版式占位符',
-            guidance: '为动态内容区域设置版式占位符。',
-            cta: '检查版式占位符',
-          },
-          submitReview: {
-            label: '提交审核',
-            guidance: '设计完成后提交审核。',
-            cta: '提交审核',
-          },
-          rework: {
-            label: '修改后重新提交',
-            guidance: '根据审核意见修改并重新提交母版。',
-            cta: '更新并重新提交',
-          },
-        },
-      },
-      TEMPLATE_AUTHOR: {
-        title: '模板编写流程',
+      DOCUMENT_AUTHOR: {
+        title: '文档作者工作流',
         empty: {
           guidance: '创建或打开模板开始编写，然后按下方步骤推进。',
         },
@@ -3016,7 +2981,42 @@ export default {
             guidance: '审批通过后等待确认上线。',
           },
         },
+        letterhead: {
+          empty: {
+          guidance: '上传母版文档开始设计流程，然后按下方步骤推进。',
+        },
+        waitingReview: {
+          guidance: '母版已提交审核，请等待审核结果。',
+        },
+        complete: {
+          guidance: '该母版已审核通过，可随时查看或下载。',
+          cta: '查看母版',
+        },
+        steps: {
+          upload: {
+            label: '上传母版文档',
+            guidance: '上传母版文档以开始设计。',
+            cta: '上传母版',
+          },
+          placeholders: {
+            label: '设置版式占位符',
+            guidance: '为动态内容区域设置版式占位符。',
+            cta: '检查版式占位符',
+          },
+          submitReview: {
+            label: '提交审核',
+            guidance: '设计完成后提交审核。',
+            cta: '提交审核',
+          },
+          rework: {
+            label: '修改后重新提交',
+            guidance: '根据审核意见修改并重新提交母版。',
+            cta: '更新并重新提交',
+          },
+        },
+        },
       },
+      
       TEMPLATE_TESTER: {
         title: '模板测试流程',
         empty: {
@@ -3040,29 +3040,7 @@ export default {
           },
         },
       },
-      TEMPLATE_APPROVER: {
-        title: '模板审批流程',
-        empty: {
-          guidance: '从任务列表打开审批任务，然后按下方步骤推进。',
-        },
-        steps: {
-          reviewRequest: {
-            label: '查看审批任务',
-            guidance: '打开审批任务并查看提交原因。',
-            cta: '查看审批任务',
-          },
-          reviewSubmission: {
-            label: '审阅提交材料',
-            guidance: '审阅提交摘要与支撑证据。',
-            cta: '审阅提交材料',
-          },
-          recordDecision: {
-            label: '记录审批决定',
-            guidance: '记录审批决定以便作者继续推进。',
-            cta: '记录审批决定',
-          },
-        },
-      },
+      
       LEGAL_REVIEWER: {
         title: '法务审阅流程',
         empty: {
@@ -3112,6 +3090,28 @@ export default {
             guidance: '确认发布摘要并将模板上架。',
             cta: '确认上线',
           },
+        },
+        compliance: {
+          empty: {
+          guidance: '从任务列表打开审批任务，然后按下方步骤推进。',
+        },
+        steps: {
+          reviewRequest: {
+            label: '查看审批任务',
+            guidance: '打开审批任务并查看提交原因。',
+            cta: '查看审批任务',
+          },
+          reviewSubmission: {
+            label: '审阅提交材料',
+            guidance: '审阅提交摘要与支撑证据。',
+            cta: '审阅提交材料',
+          },
+          recordDecision: {
+            label: '记录审批决定',
+            guidance: '记录审批决定以便作者继续推进。',
+            cta: '记录审批决定',
+          },
+        },
         },
       },
       GLOBAL_ADMIN: {
@@ -3202,10 +3202,8 @@ export default {
     roles: {
       GLOBAL_ADMIN: '全局管理员',
       GROUP_ADMIN: '分组管理员',
-      MASTER_DESIGNER: '母版设计人员',
-      TEMPLATE_AUTHOR: '模板作者',
+      DOCUMENT_AUTHOR: '文档作者',
       TEMPLATE_TESTER: '模板测试员',
-      TEMPLATE_APPROVER: '模板审批员',
       LEGAL_REVIEWER: '法务审阅人',
       AUDIT_ADMIN: '审计管理员',
     },

@@ -6,9 +6,7 @@ import { useCollaborationStore } from '@/stores/collaboration'
 import { useDashboardStore } from '@/stores/dashboard'
 import {
   globalAdminJourneySteps,
-  masterDesignerJourneySteps,
   templateAuthorJourneySteps,
-  templateApproverJourneySteps,
   templateTeamLeadJourneySteps,
   templateTesterJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
@@ -218,7 +216,7 @@ describe('DashboardView', () => {
     expectJourney(wrapper, {
       stepCount: templateAuthorJourneySteps.length,
       index: '0',
-      titleKey: 'journey.roles.TEMPLATE_AUTHOR.title',
+      titleKey: 'journey.roles.DOCUMENT_AUTHOR.title',
     })
   })
 
@@ -251,7 +249,7 @@ describe('DashboardView', () => {
     const wrapper = await mountWorkflowAndFlush()
     expectJourney(wrapper, {
       index: '5',
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.awaitGoLive.teamLeadGuidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.awaitGoLive.teamLeadGuidance',
     })
   })
 
@@ -269,68 +267,19 @@ describe('DashboardView', () => {
     const wrapper = await mountWorkflowAndFlush()
     expectJourney(wrapper, {
       index: undefined,
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.waitingTesting.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.waitingTesting.guidance',
     })
   })
 
-  it('shows master designer journey with 4 steps on unfiltered dashboard', async () => {
+  it('shows DOCUMENT_AUTHOR authoring journey for remapped designer sessions (ADR-0070)', async () => {
     stubSession('masterDesigner')
-    stubTemplates()
+    stubTemplates('empty')
 
     const wrapper = await mountWorkflowAndFlush()
     expect(wrapper.find('#journey-section').exists()).toBe(true)
     expectJourney(wrapper, {
-      stepCount: masterDesignerJourneySteps.length,
-      titleKey: 'journey.roles.MASTER_DESIGNER.title',
-    })
-  })
-
-  it('sets master designer journey index 0 when catalog is empty', async () => {
-    stubSession('masterDesigner', { visibleRoutes: ['route.master-management'] })
-    stubMasters([])
-
-    const wrapper = await mountWorkflowAndFlush()
-    expectJourney(wrapper, { index: '0' })
-  })
-
-  it('sets master designer journey index 2 for ready draft master', async () => {
-    stubSession('masterDesigner', { visibleRoutes: ['route.master-management'] })
-    stubMasters([masterFixture()])
-
-    const wrapper = await mountWorkflowAndFlush()
-    expectJourney(wrapper, { index: '2' })
-  })
-
-  it('sets master designer journey index 3 when draft has rejected review history', async () => {
-    stubSession('masterDesigner', { visibleRoutes: ['route.master-management'] })
-    stubMasters([masterFixture()], {
-      reviewHistory: (masterId) =>
-        masterId === 'm1'
-          ? [
-              {
-                action: 'REJECTED',
-                decision: 'REJECTED',
-                changeSummary: null,
-                commentSummary: 'Fix header',
-                actorUsername: '10000001',
-                createdAt: '2026-06-25T10:00:00Z',
-              },
-            ]
-          : undefined,
-    })
-
-    const wrapper = await mountWorkflowAndFlush()
-    expectJourney(wrapper, { index: '3' })
-  })
-
-  it('sets master designer journey waiting guidance when only pending review masters exist', async () => {
-    stubSession('masterDesigner', { visibleRoutes: ['route.master-management'] })
-    stubMasters([masterFixture({ status: 'PENDING_REVIEW' })])
-
-    const wrapper = await mountWorkflowAndFlush()
-    expectJourney(wrapper, {
-      index: undefined,
-      guidanceKey: 'journey.roles.MASTER_DESIGNER.waitingReview.guidance',
+      stepCount: templateAuthorJourneySteps.length,
+      titleKey: 'journey.roles.DOCUMENT_AUTHOR.title',
     })
   })
 
@@ -382,34 +331,16 @@ describe('DashboardView', () => {
     expectJourney(wrapper, { index: '1' })
   })
 
-  it('shows approver journey with 3 steps for TEMPLATE_APPROVER-only sessions', async () => {
+  it('shows team-lead journey for remapped GROUP_ADMIN (ex-approver) sessions', async () => {
     stubSession('approver')
     stubTemplates()
 
     const wrapper = await mountWorkflowAndFlush()
     expect(wrapper.find('#journey-section').exists()).toBe(true)
     expectJourney(wrapper, {
-      stepCount: templateApproverJourneySteps.length,
-      titleKey: 'journey.roles.TEMPLATE_APPROVER.title',
+      stepCount: templateTeamLeadJourneySteps.length,
+      titleKey: 'journey.roles.GROUP_ADMIN.title',
     })
-  })
-
-  it('sets template approver journey index 0 for newest OPEN APPROVAL work item', async () => {
-    stubSession('approver')
-    stubTemplates()
-    setWorkItems([
-      workItemFixture({
-        workItemId: 'wi-approval',
-        templateId: 'tpl-approval',
-        templateName: 'Approval template',
-        queue: 'APPROVAL',
-        triggerType: 'SUBMIT_FOR_APPROVAL',
-        summaryText: 'Ready for approval',
-      }),
-    ])
-
-    const wrapper = await mountWorkflowAndFlush()
-    expectJourney(wrapper, { index: '0' })
   })
 
   it('hides journey section on filtered queue deep links', async () => {

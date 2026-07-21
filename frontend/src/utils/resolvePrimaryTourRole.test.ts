@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
-  masterDesignerJourneySteps,
   templateAuthorJourneySteps,
+  templateTeamLeadJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
 import {
   resolvePrimaryTourRole,
@@ -11,24 +11,15 @@ import {
 describe('resolvePrimaryTourRole', () => {
   const caps = {
     decideApprovals: false,
-  decideLegalApprovals: false,
+    decideLegalApprovals: false,
     publishTemplates: false,
     reviewMasters: false,
   }
 
-  it('resolves TEMPLATE_AUTHOR for author-only session (BDD-LRP-C8-001)', () => {
-    expect(resolvePrimaryTourRole({ roles: ['TEMPLATE_AUTHOR'], ...caps })).toBe(
-      'TEMPLATE_AUTHOR',
+  it('resolves DOCUMENT_AUTHOR for author-only session (BDD-SYS-NORM-ROLE-014)', () => {
+    expect(resolvePrimaryTourRole({ roles: ['DOCUMENT_AUTHOR'], ...caps })).toBe(
+      'DOCUMENT_AUTHOR',
     )
-  })
-
-  it('prefers MASTER_DESIGNER over TEMPLATE_AUTHOR (BDD-LRP-C8-008)', () => {
-    expect(
-      resolvePrimaryTourRole({
-        roles: ['MASTER_DESIGNER', 'TEMPLATE_AUTHOR'],
-        ...caps,
-      }),
-    ).toBe('MASTER_DESIGNER')
   })
 
   it('falls back to AUDIT_ADMIN when no higher journey role matches (C8-C5)', () => {
@@ -40,16 +31,16 @@ describe('resolvePrimaryTourRole', () => {
     expect(resolvePrimaryTourRole({ roles: ['SOME_UNKNOWN'], ...caps })).toBeNull()
   })
 
-  it('uses TEMPLATE_APPROVER when cluster-one absent and decideApprovals true', () => {
+  it('uses GROUP_ADMIN team-lead tour when publish/review caps apply (ex-approver remap)', () => {
     expect(
       resolvePrimaryTourRole({
-        roles: ['TEMPLATE_APPROVER'],
+        roles: ['GROUP_ADMIN'],
         decideApprovals: true,
-  decideLegalApprovals: false,
-        publishTemplates: false,
-        reviewMasters: false,
+        decideLegalApprovals: false,
+        publishTemplates: true,
+        reviewMasters: true,
       }),
-    ).toBe('TEMPLATE_APPROVER')
+    ).toBe('GROUP_ADMIN')
   })
 
   it('uses GLOBAL_ADMIN before GROUP_ADMIN', () => {
@@ -57,7 +48,7 @@ describe('resolvePrimaryTourRole', () => {
       resolvePrimaryTourRole({
         roles: ['GLOBAL_ADMIN', 'GROUP_ADMIN'],
         decideApprovals: false,
-  decideLegalApprovals: false,
+        decideLegalApprovals: false,
         publishTemplates: true,
         reviewMasters: true,
       }),
@@ -66,8 +57,8 @@ describe('resolvePrimaryTourRole', () => {
 })
 
 describe('resolveTourStepsForRole', () => {
-  it('returns author steps from roleJourneyDefinitions without forking (BDD-LRP-C8-006)', () => {
-    const steps = resolveTourStepsForRole('TEMPLATE_AUTHOR')
+  it('returns DOCUMENT_AUTHOR authoring steps from roleJourneyDefinitions (BDD-LRP-C8-006)', () => {
+    const steps = resolveTourStepsForRole('DOCUMENT_AUTHOR')
     expect(steps).toBe(templateAuthorJourneySteps)
     expect(steps.map((s) => s.id)).toEqual([
       'create',
@@ -79,9 +70,9 @@ describe('resolveTourStepsForRole', () => {
     ])
   })
 
-  it('returns master designer steps aligned with definitions (BDD-LRP-C8-007)', () => {
-    const steps = resolveTourStepsForRole('MASTER_DESIGNER')
-    expect(steps).toBe(masterDesignerJourneySteps)
-    expect(steps[0]?.id).toBe('upload')
+  it('returns GROUP_ADMIN team-lead steps (ex-TEMPLATE_APPROVER absorbed)', () => {
+    const steps = resolveTourStepsForRole('GROUP_ADMIN')
+    expect(steps).toBe(templateTeamLeadJourneySteps)
+    expect(steps[0]?.id).toBe('reviewLetterhead')
   })
 })

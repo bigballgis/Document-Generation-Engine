@@ -66,7 +66,7 @@ describe('TemplateClauseAuthoringPanel', () => {
         displayName: 'Author',
         email: 'author@example.com',
         authSource: 'LOCAL',
-        roles: ['TEMPLATE_AUTHOR'],
+        roles: ['DOCUMENT_AUTHOR'],
         authorizedGroupCodes: ['RETAIL'],
         defaultRoute: 'route.dashboard-home',
         visibleRoutes: ['route.dashboard-home', 'route.template-management'],

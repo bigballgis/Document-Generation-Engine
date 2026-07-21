@@ -113,7 +113,7 @@ describe('ContentModuleCreateDialog CE-U20 structured create', () => {
     pinia = createPinia()
     setActivePinia(pinia)
     ensureGroupCatalog.mockClear()
-    patchSession(['TEMPLATE_AUTHOR'], AUTHOR_CAPABILITIES)
+    patchSession(['DOCUMENT_AUTHOR'], AUTHOR_CAPABILITIES)
   })
 
   it('CCS-001: create dialog has structured editor and no structure JSON textarea', async () => {
@@ -266,7 +266,7 @@ describe('ContentModuleCreateDialog sharedGroupCodes (CE-U10)', () => {
   })
 
   it('SGC-002: TEMPLATE_AUTHOR does not see Share to groups and sends empty list', async () => {
-    patchSession(['TEMPLATE_AUTHOR'], AUTHOR_CAPABILITIES)
+    patchSession(['DOCUMENT_AUTHOR'], AUTHOR_CAPABILITIES)
     const wrapper = mountDialog(pinia)
 
     const store = useContentModulesStore()

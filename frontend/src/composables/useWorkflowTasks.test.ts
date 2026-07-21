@@ -239,7 +239,7 @@ describe('useWorkflowTasks', () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       ...sessionStore.session,
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       capabilities: authorCapabilities,
     } as never
 
@@ -265,7 +265,7 @@ describe('useWorkflowTasks', () => {
 
     const scope = parseDashboardTaskScope({}, { reviewMasters: false, manageMasters: false })
     const partitions = buildTaskPartitions(scope, tasks.value, {
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       capabilities: authorCapabilities,
     })
     const clausePartition = partitions.find((partition) => partition.kind === 'clause-outdated-bump')
@@ -277,7 +277,7 @@ describe('useWorkflowTasks', () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       ...sessionStore.session,
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       capabilities: authorCapabilities,
     } as never
 
@@ -302,7 +302,7 @@ describe('useWorkflowTasks', () => {
 
     const scope = parseDashboardTaskScope({}, { reviewMasters: false, manageMasters: false })
     const partitions = buildTaskPartitions(scope, tasks.value, {
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       capabilities: authorCapabilities,
     })
     const annualPartition = partitions.find(
@@ -341,7 +341,7 @@ describe('useWorkflowTasks', () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       ...sessionStore.session,
-      roles: ['MASTER_DESIGNER'],
+      roles: ['DOCUMENT_AUTHOR'],
       capabilities: managerCapabilities,
     } as never
 
@@ -381,7 +381,7 @@ describe('useWorkflowTasks', () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       ...sessionStore.session,
-      roles: ['TEMPLATE_APPROVER', 'TEMPLATE_AUTHOR'],
+      roles: ['GROUP_ADMIN', 'DOCUMENT_AUTHOR'],
       capabilities: {
         ...testerCapabilities,
         decideContentModuleReviews: true,
@@ -425,7 +425,7 @@ describe('useWorkflowTasks', () => {
 
     const scope = parseDashboardTaskScope({}, { reviewMasters: false, manageMasters: false })
     const partitions = buildTaskPartitions(scope, tasks.value, {
-      roles: ['TEMPLATE_APPROVER', 'TEMPLATE_AUTHOR'],
+      roles: ['GROUP_ADMIN', 'DOCUMENT_AUTHOR'],
       capabilities: {
         ...testerCapabilities,
         decideContentModuleReviews: true,

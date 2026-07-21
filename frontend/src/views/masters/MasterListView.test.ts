@@ -32,7 +32,7 @@ const manageMasters = ref(true)
 
 vi.mock('@/composables/useCapabilities', () => ({
   useCapabilities: () => ({
-    context: computed(() => ({ roles: ['MASTER_DESIGNER'] })),
+    context: computed(() => ({ roles: ['DOCUMENT_AUTHOR'] })),
     manageMasters,
     reviewMasters: ref(false),
   }),

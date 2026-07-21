@@ -75,7 +75,7 @@ vi.mock('@/composables/useCapabilities', () => ({
 const isOverviewTab = ref(true)
 const isWorkflowTab = ref(false)
 const isTaskTab = ref(false)
-const primaryClusterOneRole = ref<'MASTER_DESIGNER' | 'TEMPLATE_AUTHOR' | 'TEMPLATE_TESTER' | null>(
+const primaryClusterOneRole = ref<'DOCUMENT_AUTHOR' | 'DOCUMENT_AUTHOR' | 'TEMPLATE_TESTER' | null>(
   'TEMPLATE_TESTER',
 )
 const showTimeoutConfig = ref(false)
@@ -239,7 +239,7 @@ describe('useDashboardDataLoader', () => {
 
   it('loads bounded master workflow candidates for master designer (not fetchAll)', async () => {
     setupSession({ manageMasters: true })
-    primaryClusterOneRole.value = 'MASTER_DESIGNER'
+    primaryClusterOneRole.value = 'DOCUMENT_AUTHOR'
     isOverviewTab.value = true
     capabilityRefs.manageMasters.value = true
 

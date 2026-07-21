@@ -48,7 +48,7 @@ describe('RoleJourneyTimeline', () => {
 
     expect(steps[2]?.attributes('aria-current')).toBe('step')
     expect(wrapper.find('[data-journey-guidance]').text()).toBe(
-      en.journey.roles.MASTER_DESIGNER.steps.submitReview.guidance,
+      en.journey.roles.DOCUMENT_AUTHOR.letterhead.steps.submitReview.guidance,
     )
   })
 
@@ -58,7 +58,7 @@ describe('RoleJourneyTimeline', () => {
 
     expect(wrapper.findAll('[aria-current="step"]')).toHaveLength(0)
     expect(wrapper.find('[data-journey-guidance]').text()).toBe(
-      en.journey.roles.MASTER_DESIGNER.empty.guidance,
+      en.journey.roles.DOCUMENT_AUTHOR.letterhead.empty.guidance,
     )
     wrapper.findAll('[data-journey-step]').forEach((step) => {
       expect(step.classes()).toContain('is-upcoming')
@@ -129,19 +129,19 @@ describe('RoleJourneyTimeline', () => {
   it('renders titleKey when provided', async () => {
     const wrapper = mountTimeline({
       currentStepIndex: null,
-      titleKey: 'journey.roles.MASTER_DESIGNER.title',
+      titleKey: 'journey.roles.DOCUMENT_AUTHOR.title',
     })
     await flushPromises()
 
     expect(wrapper.find('[data-journey-title]').text()).toBe(
-      en.journey.roles.MASTER_DESIGNER.title,
+      en.journey.roles.DOCUMENT_AUTHOR.title,
     )
   })
 
   it('shows context help instead of inline guidance when inlineHelp is false', async () => {
     const wrapper = mountTimeline({
       currentStepIndex: 2,
-      titleKey: 'journey.roles.MASTER_DESIGNER.title',
+      titleKey: 'journey.roles.DOCUMENT_AUTHOR.title',
       inlineHelp: false,
     })
     await flushPromises()

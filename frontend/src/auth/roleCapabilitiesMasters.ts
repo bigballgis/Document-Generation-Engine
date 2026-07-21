@@ -6,7 +6,7 @@ export function canAccessMasterManagement(roles: string[]): boolean {
       [
         MANAGEMENT_ROLES.GLOBAL_ADMIN,
         MANAGEMENT_ROLES.GROUP_ADMIN,
-        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+        MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
       ] as string[]
     ).includes(role),
   )
@@ -26,7 +26,7 @@ function canManageMastersByRole(roles: string[]): boolean {
       [
         MANAGEMENT_ROLES.GLOBAL_ADMIN,
         MANAGEMENT_ROLES.GROUP_ADMIN,
-        MANAGEMENT_ROLES.MASTER_DESIGNER,
+        MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
       ] as string[]
     ).includes(role),
   )

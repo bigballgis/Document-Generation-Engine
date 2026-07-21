@@ -57,7 +57,7 @@ describe('TemplateDependenciesPanel', () => {
     setActivePinia(pinia)
     const sessionStore = useSessionStore()
     sessionStore.session = {
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management', 'route.master-management'],
       capabilities: { authorTemplates: true, manageMasters: true },

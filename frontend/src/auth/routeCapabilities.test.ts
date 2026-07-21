@@ -9,7 +9,7 @@ function session(partial: Partial<ManagementSession> = {}): ManagementSession {
     displayName: 'Tester',
     email: 'tester@example.com',
     authSource: 'LOCAL',
-    roles: ['TEMPLATE_AUTHOR'],
+    roles: ['DOCUMENT_AUTHOR'],
     authorizedGroupCodes: ['RETAIL'],
     defaultRoute: ROUTE_KEYS.dashboardHome,
     visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.templateManagement],
@@ -156,7 +156,7 @@ describe('routeCapabilities', () => {
     const allowed = canAccessRouteWithCapability(
       ROUTE_KEYS.templateManagement,
       session({
-        roles: ['TEMPLATE_APPROVER'],
+        roles: ['GROUP_ADMIN'],
         capabilities: {
           manageMasters: false,
           reviewMasters: false,
@@ -234,7 +234,7 @@ describe('routeCapabilities', () => {
     const allowed = canAccessRouteWithCapability(
       ROUTE_KEYS.templateManagement,
       session({
-        roles: ['TEMPLATE_APPROVER'],
+        roles: ['GROUP_ADMIN'],
         capabilities: undefined,
       }),
     )
@@ -258,7 +258,7 @@ describe('routeCapabilities', () => {
     const allowed = canAccessRouteWithCapability(
       ROUTE_KEYS.assetLibraryManagement,
       session({
-        roles: ['TEMPLATE_AUTHOR'],
+        roles: ['DOCUMENT_AUTHOR'],
         visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.assetLibraryManagement],
         capabilities: {
           manageMasters: false,
@@ -394,7 +394,7 @@ describe('routeCapabilities', () => {
     const denied = canAccessRouteWithCapability(
       ROUTE_KEYS.apiPolicyManagement,
       session({
-        roles: ['TEMPLATE_AUTHOR'],
+        roles: ['DOCUMENT_AUTHOR'],
         visibleRoutes: [
           ROUTE_KEYS.dashboardHome,
           ROUTE_KEYS.templateManagement,

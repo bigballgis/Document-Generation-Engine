@@ -355,7 +355,7 @@ describe('useCommandPalette route gate matrix', () => {
     })
     const palette = useCommandPalette({
       visibleRoutes: ref([ROUTE_KEYS.dashboardHome, ROUTE_KEYS.templateManagement]),
-      roles: ref(['TEMPLATE_AUTHOR']),
+      roles: ref(['DOCUMENT_AUTHOR']),
       capabilities: ref(fullCapabilities),
       translate,
       navigate: vi.fn(),

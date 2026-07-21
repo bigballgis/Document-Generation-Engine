@@ -26,7 +26,7 @@ vi.mock('@/auth/roles', () => ({
 vi.mock('@/composables/useCapabilities', () => ({
   useCapabilities: () => ({
     authorTemplates: ref(true),
-    context: ref({ roles: ['TEMPLATE_AUTHOR'] }),
+    context: ref({ roles: ['DOCUMENT_AUTHOR'] }),
   }),
 }))
 

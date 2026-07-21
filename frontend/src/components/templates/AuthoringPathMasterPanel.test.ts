@@ -22,7 +22,7 @@ describe('AuthoringPathMasterPanel', () => {
       session: {
         username: 'author',
         displayName: 'Author',
-        roles: ['TEMPLATE_AUTHOR'],
+        roles: ['DOCUMENT_AUTHOR'],
         capabilities: {},
         visibleRoutes: [ROUTE_KEYS.masterManagement],
       },
@@ -57,7 +57,7 @@ describe('AuthoringPathMasterPanel', () => {
       session: {
         username: 'author',
         displayName: 'Author',
-        roles: ['TEMPLATE_AUTHOR'],
+        roles: ['DOCUMENT_AUTHOR'],
         capabilities: {},
         visibleRoutes: [ROUTE_KEYS.masterManagement],
       },

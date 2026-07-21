@@ -1,17 +1,23 @@
 import type { Schema } from '@/types/openapi'
 
+/** Assignable management roles after ADR-0070 six-role compression. */
 export const MANAGEMENT_ROLE_VALUES = [
   'GLOBAL_ADMIN',
   'GROUP_ADMIN',
-  'MASTER_DESIGNER',
-  'TEMPLATE_AUTHOR',
+  'DOCUMENT_AUTHOR',
   'TEMPLATE_TESTER',
-  'TEMPLATE_APPROVER',
   'LEGAL_REVIEWER',
   'AUDIT_ADMIN',
 ] as const
 
 export type ManagementRole = (typeof MANAGEMENT_ROLE_VALUES)[number]
+
+/** Retired assignable codes — must never appear in role pickers. */
+export const RETIRED_MANAGEMENT_ROLE_VALUES = [
+  'MASTER_DESIGNER',
+  'TEMPLATE_AUTHOR',
+  'TEMPLATE_APPROVER',
+] as const
 
 export type GroupDimension = 'BUSINESS_LINE' | 'DEPARTMENT'
 

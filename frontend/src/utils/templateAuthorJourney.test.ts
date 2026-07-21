@@ -45,7 +45,7 @@ describe('resolveTemplateAuthorJourneyIndex (§12.6 entity mapping)', () => {
       }),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.waitingTesting.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.waitingTesting.guidance',
     })
   })
 
@@ -57,7 +57,7 @@ describe('resolveTemplateAuthorJourneyIndex (§12.6 entity mapping)', () => {
       }),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.waitingApproval.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.waitingApproval.guidance',
     })
   })
 
@@ -68,7 +68,7 @@ describe('resolveTemplateAuthorJourneyIndex (§12.6 entity mapping)', () => {
       }),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.waitingApproval.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.waitingApproval.guidance',
     })
   })
 
@@ -89,7 +89,7 @@ describe('resolveTemplateAuthorJourneyIndex (§12.6 entity mapping)', () => {
     ).toEqual({
       currentStepIndex: 5,
       activeStepId: 'awaitGoLive',
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.awaitGoLive.teamLeadGuidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.awaitGoLive.teamLeadGuidance',
     })
   })
 
@@ -100,7 +100,7 @@ describe('resolveTemplateAuthorJourneyIndex (§12.6 entity mapping)', () => {
       }),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.complete.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.complete.guidance',
     })
   })
 
@@ -144,7 +144,7 @@ describe('resolveTemplateAuthorJourneyIndex (§12.6 entity mapping)', () => {
     ).toEqual({
       currentStepIndex: 1,
       activeStepId: 'design',
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.remediation.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.remediation.guidance',
     })
   })
 
@@ -159,7 +159,7 @@ describe('resolveTemplateAuthorJourneyIndex (§12.6 entity mapping)', () => {
     ).toEqual({
       currentStepIndex: 3,
       activeStepId: 'submitTest',
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.remediation.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.remediation.guidance',
     })
   })
 
@@ -204,7 +204,7 @@ describe('resolveTemplateAuthorDashboardJourneyIndex (§12.6 dashboard mapping)'
       [remediationItem({ templateId: 'rework', createdAt: '2026-06-26T10:00:00Z' })],
     )
     expect(resolution.currentStepIndex).toBe(1)
-    expect(resolution.guidanceKey).toBe('journey.roles.TEMPLATE_AUTHOR.remediation.guidance')
+    expect(resolution.guidanceKey).toBe('journey.roles.DOCUMENT_AUTHOR.remediation.guidance')
     expect(resolution.targetTemplateId).toBe('rework')
   })
 
@@ -273,7 +273,7 @@ describe('resolveTemplateAuthorDashboardJourneyIndex (§12.6 dashboard mapping)'
     ).toEqual({
       currentStepIndex: 5,
       activeStepId: 'awaitGoLive',
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.awaitGoLive.teamLeadGuidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.awaitGoLive.teamLeadGuidance',
       targetTemplateId: 'pending-release',
     })
   })
@@ -286,7 +286,7 @@ describe('resolveTemplateAuthorDashboardJourneyIndex (§12.6 dashboard mapping)'
       ),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.waitingTesting.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.waitingTesting.guidance',
     })
   })
 
@@ -298,7 +298,7 @@ describe('resolveTemplateAuthorDashboardJourneyIndex (§12.6 dashboard mapping)'
       ),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.TEMPLATE_AUTHOR.empty.guidance',
+      guidanceKey: 'journey.roles.DOCUMENT_AUTHOR.empty.guidance',
     })
   })
 
@@ -319,7 +319,7 @@ describe('shouldShowTemplateAuthorJourney', () => {
     expect(
       shouldShowTemplateAuthorJourney({
         authorTemplates: true,
-        roles: ['TEMPLATE_AUTHOR'],
+        roles: ['DOCUMENT_AUTHOR'],
       }),
     ).toBe(true)
   })

@@ -40,7 +40,7 @@ describe('TemplatePackageHubView (BDD-SYS-NORM-W2-001…004/007)', () => {
     setActivePinia(pinia)
     const sessionStore = useSessionStore()
     sessionStore.session = {
-      roles: ['TEMPLATE_AUTHOR', 'GLOBAL_ADMIN'],
+      roles: ['DOCUMENT_AUTHOR', 'GLOBAL_ADMIN'],
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management', 'route.api-policy-management'],
       capabilities: { authorTemplates: true, manageApiPolicy: true },

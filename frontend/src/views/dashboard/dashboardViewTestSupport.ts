@@ -123,7 +123,7 @@ const SESSION_PRESETS: Record<
     displayName: 'Author',
     authorizedGroupCodes: ['RETAIL'],
     visibleRoutes: ['route.template-management'],
-    roles: ['TEMPLATE_AUTHOR'],
+    roles: ['DOCUMENT_AUTHOR'],
     capabilities: caps({
       authorTemplates: true,
       viewCollaborationWorkItems: true,
@@ -135,7 +135,7 @@ const SESSION_PRESETS: Record<
     displayName: 'Designer',
     authorizedGroupCodes: ['RETAIL'],
     visibleRoutes: ['route.master-management', 'route.template-management'],
-    roles: ['MASTER_DESIGNER'],
+    roles: ['DOCUMENT_AUTHOR'],
     capabilities: caps({ manageMasters: true, authorTemplates: true, authorContentModules: true }),
     allowAllRoutes: true,
   },
@@ -149,10 +149,12 @@ const SESSION_PRESETS: Record<
   approver: {
     displayName: 'Approver',
     authorizedGroupCodes: ['RETAIL'],
-    visibleRoutes: ['route.template-management'],
-    roles: ['TEMPLATE_APPROVER'],
+    visibleRoutes: ['route.template-management', 'route.master-management'],
+    roles: ['GROUP_ADMIN'],
     capabilities: caps({
       decideApprovals: true,
+      publishTemplates: true,
+      reviewMasters: true,
       viewCollaborationWorkItems: true,
       decideContentModuleReviews: true,
     }),

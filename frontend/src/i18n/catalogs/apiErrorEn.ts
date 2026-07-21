@@ -10,6 +10,7 @@ export const apiErrorEn = {
     accessDenied: "You do not have permission to perform this action.",
     groupScopeOutOfRange: "The requested group scope is outside your authorized scope.",
     roleAssignmentNotAllowed: "You are not allowed to assign one or more of the requested roles.",
+    roleNotAssignable: "The requested management role is not assignable.",
     userDeleteNotAllowed: "You are not allowed to delete users.",
     groupManagementNotAllowed: "You are not allowed to manage business groups."
   },

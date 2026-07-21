@@ -37,13 +37,13 @@ describe('roleCapabilitiesAssetLibrary', () => {
   it('grants manageAssetLibrary from session capability', () => {
     expect(
       canManageAssetLibrary({
-        roles: ['TEMPLATE_AUTHOR'],
+        roles: ['DOCUMENT_AUTHOR'],
         capabilities: { ...baseCaps, manageAssetLibrary: true },
       }),
     ).toBe(true)
     expect(
       canManageAssetLibrary({
-        roles: ['TEMPLATE_AUTHOR'],
+        roles: ['DOCUMENT_AUTHOR'],
         capabilities: { ...baseCaps, manageAssetLibrary: false },
       }),
     ).toBe(false)
@@ -52,23 +52,23 @@ describe('roleCapabilitiesAssetLibrary', () => {
   it('falls back to role matrix when capabilities are absent', () => {
     expect(canAccessAssetLibraryManagement(['TEMPLATE_TESTER'])).toBe(true)
     expect(canAccessAssetLibraryManagement(['AUDIT_ADMIN'])).toBe(false)
-    expect(canManageAssetLibrary({ roles: ['TEMPLATE_APPROVER'] })).toBe(true)
+    expect(canManageAssetLibrary({ roles: ['GROUP_ADMIN'] })).toBe(true)
     expect(canManageAssetLibrary({ roles: ['AUDIT_ADMIN'] })).toBe(false)
   })
 
   it('gates upload and disable actions by role matrix', () => {
-    expect(canUploadImageOrOtherAsset({ roles: ['TEMPLATE_AUTHOR'] })).toBe(true)
-    expect(canUploadSealAsset({ roles: ['TEMPLATE_AUTHOR'] })).toBe(false)
-    expect(canUploadSealAsset({ roles: ['TEMPLATE_APPROVER'] })).toBe(true)
-    expect(canUploadAnyLibraryAsset({ roles: ['TEMPLATE_APPROVER'] })).toBe(true)
+    expect(canUploadImageOrOtherAsset({ roles: ['DOCUMENT_AUTHOR'] })).toBe(true)
+    expect(canUploadSealAsset({ roles: ['DOCUMENT_AUTHOR'] })).toBe(false)
+    expect(canUploadSealAsset({ roles: ['GROUP_ADMIN'] })).toBe(true)
+    expect(canUploadAnyLibraryAsset({ roles: ['GROUP_ADMIN'] })).toBe(true)
     expect(canUploadAnyLibraryAsset({ roles: ['TEMPLATE_TESTER'] })).toBe(false)
     expect(canDisableAssetLibrary({ roles: ['GLOBAL_ADMIN'] })).toBe(true)
-    expect(canDisableAssetLibrary({ roles: ['TEMPLATE_AUTHOR'] })).toBe(false)
+    expect(canDisableAssetLibrary({ roles: ['DOCUMENT_AUTHOR'] })).toBe(false)
   })
 
   it('detects ACTIVE-only tester sessions', () => {
     expect(isAssetLibraryTesterOnly({ roles: ['TEMPLATE_TESTER'] })).toBe(true)
-    expect(isAssetLibraryTesterOnly({ roles: ['TEMPLATE_TESTER', 'TEMPLATE_AUTHOR'] })).toBe(false)
-    expect(isAssetLibraryTesterOnly({ roles: ['TEMPLATE_AUTHOR'] })).toBe(false)
+    expect(isAssetLibraryTesterOnly({ roles: ['TEMPLATE_TESTER', 'DOCUMENT_AUTHOR'] })).toBe(false)
+    expect(isAssetLibraryTesterOnly({ roles: ['DOCUMENT_AUTHOR'] })).toBe(false)
   })
 })

@@ -104,7 +104,7 @@ function openOverviewTab() {
     :steps="templateAuthorJourneySteps"
     :current-step-index="resolution.currentStepIndex"
     :guidance-key="resolution.guidanceKey"
-    :title-key="roleJourneyTitleKey('TEMPLATE_AUTHOR')"
+    :title-key="roleJourneyTitleKey('DOCUMENT_AUTHOR')"
   >
     <template #after>
       <template v-if="showPrimaryCta">
@@ -119,13 +119,13 @@ function openOverviewTab() {
         </el-button>
         <el-button
           v-else-if="
-            resolution.guidanceKey === 'journey.roles.TEMPLATE_AUTHOR.complete.guidance'
+            resolution.guidanceKey === 'journey.roles.DOCUMENT_AUTHOR.complete.guidance'
           "
           link
           type="primary"
           @click="openOverviewTab"
         >
-          {{ t('journey.roles.TEMPLATE_AUTHOR.complete.cta') }}
+          {{ t('journey.roles.DOCUMENT_AUTHOR.complete.cta') }}
         </el-button>
       </template>
       <template v-else-if="enableWorkspaceLink">
@@ -136,13 +136,13 @@ function openOverviewTab() {
         <el-button
           v-if="
             !workspaceQuery &&
-            resolution.guidanceKey === 'journey.roles.TEMPLATE_AUTHOR.complete.guidance'
+            resolution.guidanceKey === 'journey.roles.DOCUMENT_AUTHOR.complete.guidance'
           "
           link
           type="primary"
           @click="openOverviewTab"
         >
-          {{ t('journey.roles.TEMPLATE_AUTHOR.complete.cta') }}
+          {{ t('journey.roles.DOCUMENT_AUTHOR.complete.cta') }}
         </el-button>
       </template>
     </template>

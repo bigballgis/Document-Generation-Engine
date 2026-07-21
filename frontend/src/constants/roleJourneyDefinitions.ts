@@ -4,9 +4,10 @@ export interface RoleJourneyStep {
   descriptionKey?: string
 }
 
-export type ClusterOneRole = 'MASTER_DESIGNER' | 'TEMPLATE_AUTHOR' | 'TEMPLATE_TESTER'
+/** Cluster-① assignable roles after ADR-0070 (letterhead+author → DOCUMENT_AUTHOR). */
+export type ClusterOneRole = 'DOCUMENT_AUTHOR' | 'TEMPLATE_TESTER'
 
-type ClusterTwoRole = 'TEMPLATE_APPROVER' | 'LEGAL_REVIEWER' | 'GROUP_ADMIN'
+type ClusterTwoRole = 'LEGAL_REVIEWER' | 'GROUP_ADMIN'
 
 type ClusterThreeRole = 'GLOBAL_ADMIN'
 
@@ -23,21 +24,37 @@ function step(role: ClusterOneRole, id: string): RoleJourneyStep {
   }
 }
 
+/** Letterhead workflow steps — DOCUMENT_AUTHOR union capability (not a separate assignable role). */
 export const masterDesignerJourneySteps: RoleJourneyStep[] = [
-  step('MASTER_DESIGNER', 'upload'),
-  step('MASTER_DESIGNER', 'placeholders'),
-  step('MASTER_DESIGNER', 'submitReview'),
-  step('MASTER_DESIGNER', 'rework'),
+  {
+    id: 'upload',
+    labelKey: `${ROLE_PREFIX}.DOCUMENT_AUTHOR.letterhead.steps.upload.label`,
+  },
+  {
+    id: 'placeholders',
+    labelKey: `${ROLE_PREFIX}.DOCUMENT_AUTHOR.letterhead.steps.placeholders.label`,
+  },
+  {
+    id: 'submitReview',
+    labelKey: `${ROLE_PREFIX}.DOCUMENT_AUTHOR.letterhead.steps.submitReview.label`,
+  },
+  {
+    id: 'rework',
+    labelKey: `${ROLE_PREFIX}.DOCUMENT_AUTHOR.letterhead.steps.rework.label`,
+  },
 ]
 
+/** @deprecated Prefer documentAuthorJourneySteps — alias kept for existing imports. */
 export const templateAuthorJourneySteps: RoleJourneyStep[] = [
-  step('TEMPLATE_AUTHOR', 'create'),
-  step('TEMPLATE_AUTHOR', 'design'),
-  step('TEMPLATE_AUTHOR', 'trialGenerate'),
-  step('TEMPLATE_AUTHOR', 'submitTest'),
-  step('TEMPLATE_AUTHOR', 'submitApproval'),
-  step('TEMPLATE_AUTHOR', 'awaitGoLive'),
+  step('DOCUMENT_AUTHOR', 'create'),
+  step('DOCUMENT_AUTHOR', 'design'),
+  step('DOCUMENT_AUTHOR', 'trialGenerate'),
+  step('DOCUMENT_AUTHOR', 'submitTest'),
+  step('DOCUMENT_AUTHOR', 'submitApproval'),
+  step('DOCUMENT_AUTHOR', 'awaitGoLive'),
 ]
+
+export const documentAuthorJourneySteps = templateAuthorJourneySteps
 
 export const templateTesterJourneySteps: RoleJourneyStep[] = [
   step('TEMPLATE_TESTER', 'reviewRequest'),
@@ -45,17 +62,18 @@ export const templateTesterJourneySteps: RoleJourneyStep[] = [
   step('TEMPLATE_TESTER', 'recordResult'),
 ]
 
-function clusterTwoStep(role: ClusterTwoRole, id: string): RoleJourneyStep {
+function clusterTwoStep(role: ClusterTwoRole | 'GROUP_ADMIN.compliance', id: string): RoleJourneyStep {
   return {
     id,
     labelKey: `${ROLE_PREFIX}.${role}.steps.${id}.label`,
   }
 }
 
+/** Compliance / single-track approval workflow — GROUP_ADMIN decideApprovals (ex-TEMPLATE_APPROVER). */
 export const templateApproverJourneySteps: RoleJourneyStep[] = [
-  clusterTwoStep('TEMPLATE_APPROVER', 'reviewRequest'),
-  clusterTwoStep('TEMPLATE_APPROVER', 'reviewSubmission'),
-  clusterTwoStep('TEMPLATE_APPROVER', 'recordDecision'),
+  clusterTwoStep('GROUP_ADMIN.compliance', 'reviewRequest'),
+  clusterTwoStep('GROUP_ADMIN.compliance', 'reviewSubmission'),
+  clusterTwoStep('GROUP_ADMIN.compliance', 'recordDecision'),
 ]
 
 export const templateLegalReviewerJourneySteps: RoleJourneyStep[] = [
@@ -102,16 +120,11 @@ export const auditAdminJourneySteps: RoleJourneyStep[] = [
 ]
 
 const ROLE_JOURNEY_DEFINITIONS: Record<ClusterOneRole, RoleJourneyStep[]> = {
-  MASTER_DESIGNER: masterDesignerJourneySteps,
-  TEMPLATE_AUTHOR: templateAuthorJourneySteps,
+  DOCUMENT_AUTHOR: documentAuthorJourneySteps,
   TEMPLATE_TESTER: templateTesterJourneySteps,
 }
 
-const CLUSTER_ONE_PRIORITY: ClusterOneRole[] = [
-  'MASTER_DESIGNER',
-  'TEMPLATE_AUTHOR',
-  'TEMPLATE_TESTER',
-]
+const CLUSTER_ONE_PRIORITY: ClusterOneRole[] = ['DOCUMENT_AUTHOR', 'TEMPLATE_TESTER']
 
 export function resolveClusterOneJourney(role: ClusterOneRole): RoleJourneyStep[] {
   return ROLE_JOURNEY_DEFINITIONS[role]

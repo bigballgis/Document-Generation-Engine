@@ -173,7 +173,7 @@ vi.mock('@/composables/useCapabilities', () => ({
     exportTemplates: ref(true),
     editTemplateMetadata: ref(true),
     manageApiPolicy: ref(true),
-    context: ref({ roles: ['TEMPLATE_AUTHOR'] }),
+    context: ref({ roles: ['DOCUMENT_AUTHOR'] }),
   }),
 }))
 
@@ -183,7 +183,7 @@ vi.mock('@/auth/roles', () => ({
 
 vi.mock('@/stores/session', () => ({
   useSessionStore: () => ({
-    session: ref({ roles: ['TEMPLATE_AUTHOR'] }),
+    session: ref({ roles: ['DOCUMENT_AUTHOR'] }),
   }),
 }))
 

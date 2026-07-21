@@ -109,7 +109,7 @@ describe('resolveTemplateApproverDashboardJourneyIndex', () => {
   it('maps empty queues to null with empty guidance', () => {
     expect(resolveTemplateApproverDashboardJourneyIndex([], [])).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.TEMPLATE_APPROVER.empty.guidance',
+      guidanceKey: 'journey.roles.GROUP_ADMIN.compliance.empty.guidance',
     })
   })
 
@@ -127,7 +127,7 @@ describe('resolveTemplateApproverDashboardJourneyIndex', () => {
       ),
     ).toEqual({
       currentStepIndex: null,
-      guidanceKey: 'journey.roles.TEMPLATE_APPROVER.empty.guidance',
+      guidanceKey: 'journey.roles.GROUP_ADMIN.compliance.empty.guidance',
     })
   })
 
@@ -182,9 +182,9 @@ describe('resolveTemplateApproverDashboardJourneyIndex', () => {
 })
 
 describe('templateApproverStepCtaKey', () => {
-  it('builds stable CTA keys under journey.roles.TEMPLATE_APPROVER.steps', () => {
+  it('builds stable CTA keys under journey.roles.GROUP_ADMIN.compliance.steps', () => {
     expect(templateApproverStepCtaKey('reviewRequest')).toBe(
-      'journey.roles.TEMPLATE_APPROVER.steps.reviewRequest.cta',
+      'journey.roles.GROUP_ADMIN.compliance.steps.reviewRequest.cta',
     )
   })
 })

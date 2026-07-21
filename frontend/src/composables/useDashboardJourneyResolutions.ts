@@ -34,7 +34,6 @@ export function useDashboardJourneyResolutions(
   } = visibility
 
   const {
-    masterDesignerJourneyResolution,
     templateAuthorJourneyResolution,
     templateTesterJourneyResolution,
     templateLegalReviewerJourneyResolution,
@@ -44,10 +43,7 @@ export function useDashboardJourneyResolutions(
   } = useDashboardJourneyRoleResolutions(visibility, stores)
 
   const journeyCurrentStepIndex = computed(() => {
-    if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
-      return masterDesignerJourneyResolution.value?.currentStepIndex ?? null
-    }
-    if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
+    if (primaryClusterOneRole.value === 'DOCUMENT_AUTHOR') {
       return templateAuthorJourneyResolution.value?.currentStepIndex ?? null
     }
     if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
@@ -69,10 +65,7 @@ export function useDashboardJourneyResolutions(
   })
 
   const journeyGuidanceKey = computed(() => {
-    if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
-      return masterDesignerJourneyResolution.value?.guidanceKey
-    }
-    if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
+    if (primaryClusterOneRole.value === 'DOCUMENT_AUTHOR') {
       return templateAuthorJourneyResolution.value?.guidanceKey
     }
     if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
@@ -94,11 +87,8 @@ export function useDashboardJourneyResolutions(
   })
 
   const dashboardJourneyKind = computed((): DashboardJourneyKind | null => {
-    if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
-      return 'MASTER_DESIGNER'
-    }
-    if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
-      return 'TEMPLATE_AUTHOR'
+    if (primaryClusterOneRole.value === 'DOCUMENT_AUTHOR') {
+      return 'DOCUMENT_AUTHOR'
     }
     if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
       return 'TEMPLATE_TESTER'
@@ -107,7 +97,7 @@ export function useDashboardJourneyResolutions(
       return 'LEGAL_REVIEWER'
     }
     if (showApproverJourney.value) {
-      return 'TEMPLATE_APPROVER'
+      return 'COMPLIANCE_APPROVER'
     }
     if (showGlobalAdminJourney.value) {
       return 'GLOBAL_ADMIN'
@@ -119,10 +109,7 @@ export function useDashboardJourneyResolutions(
   })
 
   const journeyActiveStepId = computed(() => {
-    if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
-      return masterDesignerJourneyResolution.value?.activeStepId
-    }
-    if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
+    if (primaryClusterOneRole.value === 'DOCUMENT_AUTHOR') {
       return templateAuthorJourneyResolution.value?.activeStepId
     }
     if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
@@ -144,7 +131,7 @@ export function useDashboardJourneyResolutions(
   })
 
   const journeyTargetTemplateId = computed(() => {
-    if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
+    if (primaryClusterOneRole.value === 'DOCUMENT_AUTHOR') {
       return templateAuthorJourneyResolution.value?.targetTemplateId
     }
     if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
@@ -163,9 +150,6 @@ export function useDashboardJourneyResolutions(
   })
 
   const journeyTargetMasterId = computed(() => {
-    if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
-      return masterDesignerJourneyResolution.value?.targetMasterId
-    }
     if (showTeamLeadJourney.value) {
       return templateTeamLeadJourneyResolution.value?.targetMasterId
     }

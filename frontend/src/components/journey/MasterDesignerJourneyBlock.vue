@@ -113,7 +113,7 @@ async function openCurrentRevision() {
     :steps="masterDesignerJourneySteps"
     :current-step-index="resolution.currentStepIndex"
     :guidance-key="resolution.guidanceKey"
-    :title-key="roleJourneyTitleKey('MASTER_DESIGNER')"
+    :title-key="roleJourneyTitleKey('DOCUMENT_AUTHOR')"
   >
     <template #after>
       <el-button
@@ -127,13 +127,13 @@ async function openCurrentRevision() {
       <el-button
         v-else-if="
           showPrimaryCta &&
-          resolution.guidanceKey === 'journey.roles.MASTER_DESIGNER.complete.guidance'
+          resolution.guidanceKey === 'journey.roles.DOCUMENT_AUTHOR.letterhead.complete.guidance'
         "
         link
         type="primary"
         @click="router.push(masterRevisionDetailPath(masterId, currentRevisionLineId ?? ''))"
       >
-        {{ t('journey.roles.MASTER_DESIGNER.complete.cta') }}
+        {{ t('journey.roles.DOCUMENT_AUTHOR.letterhead.complete.cta') }}
       </el-button>
       <el-button
         v-else-if="enableWorkspaceLink && workspaceNavigation"

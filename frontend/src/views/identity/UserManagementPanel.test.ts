@@ -36,7 +36,7 @@ const sampleUser: ManagementUserView = {
   displayName: 'Retail Operator',
   email: 'operator@example.com',
   authSource: 'LOCAL',
-  roles: ['TEMPLATE_AUTHOR'],
+  roles: ['DOCUMENT_AUTHOR'],
   authorizedGroupCodes: ['RETAIL'],
   enabled: true,
   createdAt: '2026-06-23T10:00:00Z',
@@ -155,9 +155,12 @@ describe('UserManagementPanel', () => {
     await flushPromises()
 
     const optionText = document.body.textContent ?? ''
-    expect(optionText).toContain('Template author')
+    expect(optionText).toContain('Document author')
     expect(optionText).not.toContain('Global administrator')
     expect(optionText).not.toContain('Audit administrator')
+    expect(optionText).not.toContain('Template author')
+    expect(optionText).not.toContain('Letterhead designer')
+    expect(optionText).not.toContain('Template approver')
   })
 
   it('exposes administrative roles to global admins', async () => {
@@ -197,7 +200,7 @@ describe('UserManagementPanel', () => {
     vm.form.displayName = 'Second Operator'
     vm.form.email = 'second@example.com'
     vm.form.initialPassword = 'Sup3rSecret!42'
-    vm.form.roles = ['TEMPLATE_AUTHOR']
+    vm.form.roles = ['DOCUMENT_AUTHOR']
     vm.form.authorizedGroupCodes = ['RETAIL']
     await flushPromises()
     await vm.submitForm()
@@ -208,7 +211,7 @@ describe('UserManagementPanel', () => {
       displayName: 'Second Operator',
       email: 'second@example.com',
       initialPassword: 'Sup3rSecret!42',
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: ['RETAIL'],
     })
   }, 15000)

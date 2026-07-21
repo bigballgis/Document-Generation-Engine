@@ -17,7 +17,7 @@ vi.mock('vue-router', () => ({
 }))
 
 const capabilityRefs = {
-  context: ref({ roles: ['TEMPLATE_AUTHOR'] }),
+  context: ref({ roles: ['DOCUMENT_AUTHOR'] }),
   decideApprovals: ref(false),
   publishTemplates: ref(false),
   reviewMasters: ref(false),
@@ -68,7 +68,7 @@ describe('useDashboardJourney', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     routerPush.mockClear()
-    capabilityRefs.context.value = { roles: ['TEMPLATE_AUTHOR'] }
+    capabilityRefs.context.value = { roles: ['DOCUMENT_AUTHOR'] }
     capabilityRefs.decideApprovals.value = false
     capabilityRefs.publishTemplates.value = false
     capabilityRefs.reviewMasters.value = false
@@ -76,7 +76,7 @@ describe('useDashboardJourney', () => {
 
     const sessionStore = useSessionStore()
     sessionStore.session = {
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       capabilities: BASE_CAPABILITIES,
@@ -88,7 +88,7 @@ describe('useDashboardJourney', () => {
 
     expect(journey.showJourneySection.value).toBe(true)
     expect(journey.journeySteps.value.length).toBe(templateAuthorJourneySteps.length)
-    expect(journey.journeyTitleKey.value).toBe('journey.roles.TEMPLATE_AUTHOR.title')
+    expect(journey.journeyTitleKey.value).toBe('journey.roles.DOCUMENT_AUTHOR.title')
   })
 
   it('sets template author journey index 3 for draft ready to submit', async () => {
@@ -135,7 +135,7 @@ describe('useDashboardJourney', () => {
     const journey = mountJourneyHarness()
 
     expect(journey.journeyCurrentStepIndex.value).toBeNull()
-    expect(journey.journeyGuidanceKey.value).toBe('journey.roles.TEMPLATE_AUTHOR.waitingTesting.guidance')
+    expect(journey.journeyGuidanceKey.value).toBe('journey.roles.DOCUMENT_AUTHOR.waitingTesting.guidance')
   })
 
   it('hides journey section when no cluster role matches', () => {
@@ -178,10 +178,10 @@ describe('useDashboardJourney', () => {
     expect(routerPush).toHaveBeenCalledWith(journey.dashboardJourneyPath.value)
   })
 
-  it('sets master designer journey index 2 for ready draft master', async () => {
+  it('uses DOCUMENT_AUTHOR authoring journey (not letterhead) on dashboard after ADR-0070', async () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
-      roles: ['MASTER_DESIGNER'],
+      roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: ['RETAIL'],
       capabilities: {
         ...BASE_CAPABILITIES,
@@ -206,8 +206,11 @@ describe('useDashboardJourney', () => {
 
     const journey = mountJourneyHarness()
 
-    expect(journey.primaryClusterOneRole.value).toBe('MASTER_DESIGNER')
-    expect(journey.journeyCurrentStepIndex.value).toBe(2)
+    expect(journey.primaryClusterOneRole.value).toBe('DOCUMENT_AUTHOR')
+    expect(journey.journeyTitleKey.value).toBe('journey.roles.DOCUMENT_AUTHOR.title')
+    expect(journey.journeySteps.value).toEqual(templateAuthorJourneySteps)
+    // Empty template catalog → authoring step 0 (create), letterhead is master-hub only.
+    expect(journey.journeyCurrentStepIndex.value).toBe(0)
   })
 
   it('prefers global admin journey over team-lead when both roles present', () => {

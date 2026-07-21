@@ -3,24 +3,18 @@ import { MANAGEMENT_ROLES, resolveCapability, type CapabilityContext } from '@/a
 const ASSET_LIBRARY_ROUTE_ROLES = [
   MANAGEMENT_ROLES.GLOBAL_ADMIN,
   MANAGEMENT_ROLES.GROUP_ADMIN,
-  MANAGEMENT_ROLES.MASTER_DESIGNER,
-  MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+  MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
   MANAGEMENT_ROLES.TEMPLATE_TESTER,
-  MANAGEMENT_ROLES.TEMPLATE_APPROVER,
 ] as const
 
 const IMAGE_OR_OTHER_UPLOAD_ROLES = [
   MANAGEMENT_ROLES.GLOBAL_ADMIN,
   MANAGEMENT_ROLES.GROUP_ADMIN,
-  MANAGEMENT_ROLES.MASTER_DESIGNER,
-  MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+  MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
 ] as const
 
-const SEAL_UPLOAD_ROLES = [
-  MANAGEMENT_ROLES.GLOBAL_ADMIN,
-  MANAGEMENT_ROLES.GROUP_ADMIN,
-  MANAGEMENT_ROLES.TEMPLATE_APPROVER,
-] as const
+/** SEAL upload — admins only (former TEMPLATE_APPROVER absorbed into GROUP_ADMIN). */
+const SEAL_UPLOAD_ROLES = [MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as const
 
 const DISABLE_ROLES = [MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as const
 
@@ -44,7 +38,7 @@ export function canUploadImageOrOtherAsset(context: CapabilityContext): boolean 
   return hasAnyRole(context.roles, IMAGE_OR_OTHER_UPLOAD_ROLES)
 }
 
-/** Fine-grained: SEAL upload — approver or admin only. */
+/** Fine-grained: SEAL upload — admin only. */
 export function canUploadSealAsset(context: CapabilityContext): boolean {
   return hasAnyRole(context.roles, SEAL_UPLOAD_ROLES)
 }
@@ -68,9 +62,7 @@ export function isAssetLibraryTesterOnly(context: CapabilityContext): boolean {
     !hasAnyRole(context.roles, [
       MANAGEMENT_ROLES.GLOBAL_ADMIN,
       MANAGEMENT_ROLES.GROUP_ADMIN,
-      MANAGEMENT_ROLES.MASTER_DESIGNER,
-      MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
-      MANAGEMENT_ROLES.TEMPLATE_APPROVER,
+      MANAGEMENT_ROLES.DOCUMENT_AUTHOR,
     ])
   )
 }

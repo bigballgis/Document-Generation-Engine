@@ -13,11 +13,11 @@ export type {
 
 export { resolveTemplateAuthorDashboardJourneyIndex } from '@/utils/resolveTemplateAuthorDashboardJourney'
 
-const WAITING_TESTING_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.waitingTesting.guidance'
-const WAITING_APPROVAL_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.waitingApproval.guidance'
-const COMPLETE_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.complete.guidance'
-const REMEDIATION_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.remediation.guidance'
-const TEAM_LEAD_GO_LIVE_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.awaitGoLive.teamLeadGuidance'
+const WAITING_TESTING_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.waitingTesting.guidance'
+const WAITING_APPROVAL_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.waitingApproval.guidance'
+const COMPLETE_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.complete.guidance'
+const REMEDIATION_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.remediation.guidance'
+const TEAM_LEAD_GO_LIVE_GUIDANCE = 'journey.roles.DOCUMENT_AUTHOR.awaitGoLive.teamLeadGuidance'
 
 const TERMINAL_STATUSES: TemplateLifecycleStatus[] = ['STOPPED', 'DEPRECATED', 'DELETED']
 
@@ -105,7 +105,7 @@ export function resolveTemplateAuthorJourneyIndex(
 }
 
 export function templateAuthorStepCtaKey(stepId: string): string {
-  return `journey.roles.TEMPLATE_AUTHOR.steps.${stepId}.cta`
+  return `journey.roles.DOCUMENT_AUTHOR.steps.${stepId}.cta`
 }
 
 export function shouldShowTemplateAuthorJourney(options: {

@@ -5,13 +5,9 @@ import {
   resolvePrimaryClusterOneRole,
   roleJourneyTitleKey,
   globalAdminJourneySteps,
-  templateApproverJourneySteps,
   templateLegalReviewerJourneySteps,
   templateTeamLeadJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
-import {
-  shouldShowTemplateApproverJourney,
-} from '@/utils/templateApproverJourney'
 import {
   shouldShowTemplateLegalReviewerJourney,
 } from '@/utils/templateLegalReviewerJourney'
@@ -37,7 +33,6 @@ export function useDashboardJourney() {
   const collaborationStore = useCollaborationStore()
   const {
     context,
-    decideApprovals,
     decideLegalApprovals,
     publishTemplates,
     reviewMasters,
@@ -59,13 +54,8 @@ export function useDashboardJourney() {
       }),
   )
 
-  const showApproverJourney = computed(
-    () =>
-      !primaryClusterOneRole.value &&
-      !showLegalReviewerJourney.value &&
-      (sessionStore.session?.roles ?? []).includes(MANAGEMENT_ROLES.TEMPLATE_APPROVER) &&
-      shouldShowTemplateApproverJourney({ decideApprovals: decideApprovals.value }),
-  )
+  /** Retired TEMPLATE_APPROVER-only dashboard path — compliance decide is capability-gated on template UI. */
+  const showApproverJourney = computed(() => false)
 
   const showGlobalAdminJourney = computed(
     () =>
@@ -106,9 +96,6 @@ export function useDashboardJourney() {
     if (showLegalReviewerJourney.value) {
       return templateLegalReviewerJourneySteps
     }
-    if (showApproverJourney.value) {
-      return templateApproverJourneySteps
-    }
     if (showGlobalAdminJourney.value) {
       return globalAdminJourneySteps
     }
@@ -124,9 +111,6 @@ export function useDashboardJourney() {
     }
     if (showLegalReviewerJourney.value) {
       return roleJourneyTitleKey('LEGAL_REVIEWER')
-    }
-    if (showApproverJourney.value) {
-      return roleJourneyTitleKey('TEMPLATE_APPROVER')
     }
     if (showGlobalAdminJourney.value) {
       return roleJourneyTitleKey('GLOBAL_ADMIN')

@@ -9,11 +9,8 @@ export function resolveContentModuleAuthorActorRole(roles: string[]): ContentMod
   if (roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN)) {
     return 'GROUP_ADMIN'
   }
-  if (roles.includes(MANAGEMENT_ROLES.MASTER_DESIGNER)) {
-    return 'MASTER_DESIGNER'
-  }
-  if (roles.includes(MANAGEMENT_ROLES.TEMPLATE_AUTHOR)) {
-    return 'TEMPLATE_AUTHOR'
+  if (roles.includes(MANAGEMENT_ROLES.DOCUMENT_AUTHOR)) {
+    return 'DOCUMENT_AUTHOR'
   }
   return null
 }
@@ -24,9 +21,6 @@ export function resolveContentModuleApproverActorRole(roles: string[]): ContentM
   }
   if (roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN)) {
     return 'GROUP_ADMIN'
-  }
-  if (roles.includes(MANAGEMENT_ROLES.TEMPLATE_APPROVER)) {
-    return 'APPROVER'
   }
   return null
 }
