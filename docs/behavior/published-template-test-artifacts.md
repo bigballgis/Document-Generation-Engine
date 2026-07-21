@@ -8,6 +8,7 @@
 **Formal phase:** **None**  
 **Placement:** merged to MAIN; worktree **REMOVED**  
 **Plan detail:** [published-template-test-artifacts.md](../plan/detail/published-template-test-artifacts.md)  
+**SYS-NORM Wave 4 cross-ref:** program §5.1 product evidence for TM **#148** docs-close — [sys-norm-test-artifacts.md](./sys-norm-test-artifacts.md) (**BDD-SYS-NORM-W4-001…010** → **BDD-PTA-***; plan [detail](../plan/detail/sys-norm-test-artifacts.md))  
 **完成声明约束:** 关闭「已发布模板无法查看测试时生成的文件」缺口 — **已交付**；**不**翻转 checklist **#3b** / **#5a**；**不** reopen RTL；CE-O02 **保持 Deferred**；**不**宣称 go-live
 
 ---
