@@ -1,0 +1,19 @@
+{
+  "probes": [
+    {
+      "role": "TEMPLATE_APPROVER",
+      "status": 422,
+      "code": "ROLE_NOT_ASSIGNABLE"
+    },
+    {
+      "role": "MASTER_DESIGNER",
+      "status": 422,
+      "code": "ROLE_NOT_ASSIGNABLE"
+    },
+    {
+      "role": "TEMPLATE_AUTHOR",
+      "status": 422,
+      "code": "ROLE_NOT_ASSIGNABLE"
+    }
+  ]
+}

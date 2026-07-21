@@ -1,0 +1,19 @@
+{
+  "status": 403,
+  "body": {
+    "metadata": {
+      "auditId": "AUD-e238a8c4-16f5-40e5-851c-791508c4f7a8",
+      "traceId": "923c488a-0fa3-4e3b-8c0b-00b69ce4f8e6"
+    },
+    "error": {
+      "code": "ACCESS_DENIED",
+      "category": "TEMPLATE",
+      "message": "You do not have permission to access this template.",
+      "messageKey": "api.error.template.accessDenied",
+      "retryable": false,
+      "fieldErrors": [],
+      "idempotencyConflict": {},
+      "items": []
+    }
+  }
+}

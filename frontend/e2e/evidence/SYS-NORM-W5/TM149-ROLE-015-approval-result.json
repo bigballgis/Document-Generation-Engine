@@ -1,0 +1,11 @@
+{
+  "templateId": "50a2d511-fe4a-4bb3-83ed-6d8fd9da26d0",
+  "before": {
+    "lifecycleStatus": "APPROVAL",
+    "approvalSubState": "PENDING_DECISION"
+  },
+  "after": {
+    "lifecycleStatus": "PENDING_RELEASE",
+    "approvalSubState": null
+  }
+}

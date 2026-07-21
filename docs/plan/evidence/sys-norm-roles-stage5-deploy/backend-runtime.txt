@@ -1,0 +1,2 @@
+app.jar
+Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=/tmp -XX:MaxRAMPercentage=75.0
