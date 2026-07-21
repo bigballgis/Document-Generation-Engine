@@ -17,6 +17,7 @@ config:
   appEnvironment: dev
   asyncTransport: in-process
   seedDemoCatalog: true
+  seedDemoAssetLibrary: true
 
 externalServices:
   postgres:

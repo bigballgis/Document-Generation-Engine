@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import MasterAnchorPositionOverview from '@/components/masters/MasterAnchorPositionOverview.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
@@ -69,8 +70,14 @@ const { formatDateTime } = useLocaleFormatters()
           <template #header>
             <span>{{ t('masters.revision.summaryTitle') }}</span>
           </template>
-          <dl class="summary-list">
-            <div v-if="changeSummary">
+          <EmptyStatePanel
+            v-if="!changeSummary"
+            data-testid="master-revision-design-honest-empty"
+            title-key="masters.revision.emptySummaryTitle"
+            description-key="masters.revision.emptySummaryDescription"
+          />
+          <dl v-else class="summary-list">
+            <div>
               <dt>{{ t('masters.revision.changeSummary') }}</dt>
               <dd>{{ changeSummary }}</dd>
             </div>

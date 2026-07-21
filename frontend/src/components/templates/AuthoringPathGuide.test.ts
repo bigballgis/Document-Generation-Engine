@@ -23,7 +23,7 @@ describe('AuthoringPathGuide', () => {
       'step',
     )
     expect(wrapper.text()).toContain('Authoring path')
-    expect(wrapper.text()).toContain('Master')
+    expect(wrapper.text()).toContain('Letterhead')
     expect(wrapper.text()).toContain('Bindings')
     expect(wrapper.text()).toContain('Variables')
     expect(wrapper.text()).toContain('Preview')
@@ -61,7 +61,7 @@ describe('AuthoringPathGuide', () => {
     expect(wrapper.emitted('dismiss')).toHaveLength(2)
   })
 
-  it('Next advances from Master to Bindings', async () => {
+  it('Next advances from Letterhead to Bindings', async () => {
     const wrapper = mountGuide('master')
     await wrapper.get('[data-testid="authoring-path-guide-next"]').trigger('click')
     expect(wrapper.emitted('navigate')?.[0]).toEqual([

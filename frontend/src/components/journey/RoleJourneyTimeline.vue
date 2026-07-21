@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { toRef, useId } from 'vue'
+import { computed, toRef, useId } from 'vue'
 import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import { type RoleJourneyStep } from '@/constants/roleJourneyDefinitions'
 import { useRoleJourneyTimeline } from '@/components/journey/useRoleJourneyTimeline'
 
@@ -26,16 +27,37 @@ const { t, stepRefs, stepStatus, resolvedGuidanceKey, onStepKeydown } = useRoleJ
   currentStepIndex: toRef(props, 'currentStepIndex'),
   guidanceKey: toRef(props, 'guidanceKey'),
 })
+
+/** Empty work set (no current step) must surface guidance visibly — not only behind ?. */
+const showInlineGuidance = computed(
+  () =>
+    Boolean(resolvedGuidanceKey.value) &&
+    (props.inlineHelp || props.currentStepIndex === null),
+)
+
+const showContextHelp = computed(
+  () =>
+    Boolean(props.titleKey && resolvedGuidanceKey.value) &&
+    !props.inlineHelp &&
+    props.currentStepIndex !== null,
+)
 </script>
 
 <template>
-  <section v-if="steps.length > 0" class="role-journey-timeline" data-journey-timeline>
+  <EmptyStatePanel
+    v-if="steps.length === 0"
+    data-testid="journey-timeline-honest-empty"
+    :title-key="titleKey || 'journey.timeline.emptyTitle'"
+    description-key="journey.timeline.empty.guidance"
+  />
+
+  <section v-else class="role-journey-timeline" data-journey-timeline>
     <div v-if="titleKey" class="role-journey-timeline__title-row">
       <h2 class="role-journey-timeline__title" data-journey-title>
         {{ t(titleKey) }}
       </h2>
       <ContextHelpTrigger
-        v-if="!inlineHelp && resolvedGuidanceKey"
+        v-if="showContextHelp"
         :title="t(titleKey)"
         :content="t(resolvedGuidanceKey)"
       />
@@ -88,7 +110,7 @@ const { t, stepRefs, stepStatus, resolvedGuidanceKey, onStepKeydown } = useRoleJ
 
     <slot name="guidance">
       <p
-        v-if="inlineHelp && resolvedGuidanceKey"
+        v-if="showInlineGuidance"
         :id="guidanceId"
         class="role-journey-timeline__guidance"
         data-journey-guidance

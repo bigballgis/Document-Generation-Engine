@@ -4,7 +4,7 @@
 | --- | --- |
 | **Program ID** | `SYS-NORM` |
 | **Created** | 2026-07-21 |
-| **Status** | **In Progress** — Waves **0–7 Done**; Wave **8 Not Started** — program **not** Done |
+| **Status** | **In Progress** — Waves **0–7 Done**; Wave **8 In Progress** (TM **#152**) — program **not** Done |
 | **Formal phase** | **None** (not a P-phase; tracked here + ledger) |
 | **Wave 0 leaf** | TM **#143** · `sys-norm-charter` → **Done** (MAIN merge `f8e898ad` / feature `28d4abe1`; worktree **REMOVED**) |
 | **Wave 1 leaf** | TM **#145** · `sys-norm-shell-fluid-nav` → **Done** (MAIN merge `7a62be44` / feature `f1594f2a` + e2e `ce2cb9f0`; worktree **REMOVED**). Handoff briefly cited `#144` — **#144** remains PTA Done; Wave 1 = **#145**. |
@@ -14,7 +14,9 @@
 | **Wave 5 leaf** | TM **#149** · `sys-norm-roles` → **Done** (MAIN merge `febb95b3`; worktree **REMOVED**) |
 | **Wave 6 leaf** | TM **#150** · `sys-norm-d1-brands` → **Done** (MAIN merge `64b0a650`; worktree **REMOVED**) |
 | **Wave 7 leaf** | TM **#151** · `sys-norm-promotion-pack` → **Done** (MAIN merge `11356c63` / feature `f795b04a`; worktree **REMOVED**) |
-| **Sole-active** | **cleared** (Wave 7 **#151** Done) |
+| **Wave 8 leaf** | TM **#152** · `sys-norm-demo-seed-terms` → **In Progress** (ISOLATED; worktree `D:/working/DGE-sys-norm-demo-seed-terms` · `feat/sys-norm-demo-seed-terms`; base `9f89019b`) |
+| **Sole-active** | TM **#152** Wave 8 (`sys-norm-demo-seed-terms`) — sole host delivery leaf |
+| **Batch (Wave 8)** | **solo** · `member_task_ids: ["152"]` · `proposed_slice_id: sys-norm-demo-seed-terms` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / parked-UX-not-in-W8 — **active** |
 | **Batch (Wave 7)** | **solo** · `member_task_ids: ["151"]` · `proposed_slice_id: sys-norm-promotion-pack` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-8 / parked UX — **closed** |
 | **Batch (Wave 6)** | **solo** · `member_task_ids: ["150"]` · `proposed_slice_id: sys-norm-d1-brands` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-7 / Wave-8 / parked UX — **closed** |
 | **Batch (Wave 5)** | **solo** · `member_task_ids: ["149"]` · `proposed_slice_id: sys-norm-roles` — **closed** |
@@ -22,8 +24,8 @@
 | **Batch (Wave 3)** | **solo** · `member_task_ids: ["147"]` · `proposed_slice_id: sys-norm-external-ops` — **closed** |
 | **Batch (Wave 2)** | **solo** · `member_task_ids: ["146"]` · `proposed_slice_id: sys-norm-hub-ia` — **closed** |
 | **Batch (Wave 1)** | **solo** · `member_task_ids: ["145"]` · `proposed_slice_id: sys-norm-shell-fluid-nav` — **closed** |
-| **Next queue head** | Wave 8 `sys-norm-demo-seed-terms` — **Not Started** / **not** activated |
-| **Queue (Wave 8)** | Program-plan **Not Started** only — **no** TM pending stub (register next free TM id at Wave 8 activate) |
+| **Next queue head** | Wave 8 `sys-norm-demo-seed-terms` — **In Progress** (sole-active TM **#152**) |
+| **Queue (Wave 8)** | BDD SoT [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) **BDD-SYS-NORM-W8-001…018** — wave **In Progress**; detail [detail/sys-norm-demo-seed-terms.md](./detail/sys-norm-demo-seed-terms.md) |
 | **Parked worktrees** | Prior hub WIP worktrees **removed** — do **not** revive or fold stale hub WIP |
 | **CE umbrella** | TM **#53** remains **in-progress** registry-only — **not** this program's delivery leaf |
 | **Behavior SoT** | [system-normalization-program.md](../behavior/system-normalization-program.md) |
@@ -34,6 +36,7 @@
 | **Wave 5 BDD** | [sys-norm-roles.md](../behavior/sys-norm-roles.md) (**ready** / delivered; **BDD-SYS-NORM-ROLE-001…018**; TM **#149** Done `febb95b3`) |
 | **Wave 6 BDD** | [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) (**ready** / delivered; **BDD-SYS-NORM-D1-001…020**; TM **#150** Done `64b0a650`) |
 | **Wave 7 BDD** | [sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md) (**ready** / delivered; **BDD-SYS-NORM-PP-001…020**; TM **#151** Done `11356c63` / `f795b04a`) |
+| **Wave 8 BDD** | [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) (**ready**; **BDD-SYS-NORM-W8-001…018**; TM **#152** **In Progress**; **N18 deferred**) |
 | **Role ADR** | [ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md) (**Accepted**) |
 | **D1 ADR** | [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) (**Accepted**) |
 
@@ -81,7 +84,7 @@ Legal holds; shell themes UI-only; runtime simplify fail-closed. Delivered **202
 **Wave 7 mission (Done — #151):** UAT→PROD promotion pack + dry-run UI per §2
 promotion facts; extend CE-E01/E03. Delivered **2026-07-21** (`11356c63` / `f795b04a`;
 BDD [sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md) **PP-001…020**).
-Wave **8** remains **Not Started** / **not** activated.
+Wave **8** is **In Progress** (TM **#152**; sole-active).
 
 ---
 
@@ -98,8 +101,8 @@ Wave **8** remains **Not Started** / **not** activated.
 | **D1 brands/entities** | **Retire** Document brands + Legal entities **product surfaces**. Letterhead/logo/seal live in **Letterhead (master)**. Keep **Legal holds**. Shell REDBC/GREENBC remain UI-only. No brand/entity sidecar in promotion pack. Runtime simplify = Wave 6; nav removal may start Wave 1 after ADR-0071 Accepted. Supersedes ADR-0065 **product surface** (historical impl retained). |
 | **Roles (6-role compression)** | Keep: `TEMPLATE_TESTER`, `LEGAL_REVIEWER`, `AUDIT_ADMIN`, `GLOBAL_ADMIN`, `GROUP_ADMIN` (absorbs `TEMPLATE_APPROVER`). Merge: `TEMPLATE_APPROVER` → `GROUP_ADMIN` (privilege accept). Merge: `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` → `DOCUMENT_AUTHOR` (ID locked; **L1 display name finalizable** — Pending). Wave 5 **Done** (TM **#149** `febb95b3`; BDD **ready** [sys-norm-roles.md](../behavior/sys-norm-roles.md)); matrix + catalog/migration/JWT/FE landed. See ADR-0070. |
 | **Export / promotion pack** | Dependency closure; two-phase P2 masters (no skip APPROVED); no brand/entity sidecar; no secrets; import as DRAFT on PROD; re-test/re-approve/re-publish; dry-run UI in Wave 7. |
-| **Terminology** | L1 EN **Letterhead** / ZH **母版**; purge user-facing Master mix on L1; API/L3 may keep `masterId`. Sweep Done = Wave 8 (intent Confirmed in Wave 0). |
-| **Other UX** | Dev editor blank whiteboard → redirects + honest empty; asset library empty → seed or honest empty; Users Authorized groups → EntityLink; table Actions Edit/More alignment; clause locale metadata de-duplication. |
+| **Terminology** | L1 EN **Letterhead** / ZH **母版**; purge user-facing Master mix on L1; API/L3 may keep `masterId`. Sweep **In Progress** = Wave 8 (intent Confirmed Wave 0; SSOT [business-terminology-guide.md](../product/business-terminology-guide.md)). |
+| **Other UX** | Dev editor blank whiteboard → redirects + honest empty; **asset library:** product default honest empty + optional demo/验收 managed seed (off in prod; [demo-acceptance-asset-seed.md](../operations/demo-acceptance-asset-seed.md)); **N23** `demo-images` ≠ Asset Library; N13/N15/N21 honest empties; Users Authorized groups → EntityLink; table Actions Edit/More alignment; clause locale metadata de-duplication. **N18 deferred.** Parked UX = post-program §4a (not Wave 8). |
 
 **Pending (not confirmed — do not promote):** see behavior charter §3 (e.g. `DOCUMENT_AUTHOR` L1 labels). **P-Q4** promotion dry-run UX is **resolved** in [sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md) §5.1. Wave 1 nav-hide vs Wave 6 hard-delete cutover is **resolved** in [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) §5.2.
 
@@ -117,23 +120,19 @@ Wave **8** remains **Not Started** / **not** activated.
 | **5** | **#149** | `sys-norm-roles` | **Done** (`febb95b3`) | Implement ADR-0070; FE role labels + migration + JWT (matrix rewrite stage 3) | BE **2357/0/0**; FE lint/type-check/test(**1639**)/build **GREEN**; E2E **7/7**; UIUX **PASS**; Stage 5/10 **DEPLOY_OK**; arch Critical=0 `merge_go`; CQ allow merge |
 | **6** | **#150** | `sys-norm-d1-brands` | **Done** (`64b0a650`) | Runtime/management retirement per ADR-0071 | BE **2370** + Flyway **V76**; FE lint/type-check/test(**1634**)/build **GREEN**; E2E **16/16**; UIUX **PASS_WITH_NOTES** Critical=0; Arch/CQ **PASS_WITH_NOTES** Critical=0; Stage 5/10 **DEPLOY_OK** |
 | **7** | **#151** | `sys-norm-promotion-pack` | **Done** (`11356c63` / `f795b04a`) | UAT→PROD pack + dry-run UI per §2 promotion facts | BE **2381**; FE lint/type-check/test(**~1640**)/build **GREEN**; E2E W7 **4/4** + P14 **2/2**; UIUX **PASS_WITH_NOTES** Critical=0; Arch/CQ **PASS_WITH_NOTES** Critical=0; Stage 5/10 **DEPLOY_OK** |
-| **8** | *(register at activate)* | `sys-norm-demo-seed-terms` | **Not Started** | Asset seed / honest empty; L1 terminology sweep; remaining N* | Wave 8 BDD |
+| **8** | **#152** | `sys-norm-demo-seed-terms` | **In Progress** (BDD **ready**; sole-active) | Asset honest empty + optional demo/验收 seed; L1 Letterhead/母版; N13/N15/N16–N17/N21/N23; **N18 deferred** | FE+BE gates + E2E/UIUX + queued deploy (pending) |
 
-Per-wave implementation BDD stubs are **pending-wave** until authored at wave start
-([behavior charter §8](../behavior/system-normalization-program.md)), except Wave 1
-(**ready/Done** — [sys-norm-shell-fluid-nav.md](../behavior/sys-norm-shell-fluid-nav.md)),
-Wave 2 (**ready/Done** — [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md)
-**BDD-SYS-NORM-W2-001…018**; TM **#146** Done `5d77db80` / `992f6822`), Wave 3
-(**ready/Done** — [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md)
-**BDD-SYS-NORM-W3-001…018**; TM **#147** Done `18a9e3b2` / `f21dda5e`), and Wave 4
-(**ready/Done** docs-close — [sys-norm-test-artifacts.md](../behavior/sys-norm-test-artifacts.md)
-**BDD-SYS-NORM-W4-001…010**; TM **#148** Done `dac9dcd9` / `5c71acc0`; product **#144** `ac36ecbc` / `6bc74ff1`),
-and Wave 5 (**ready/Done** — [sys-norm-roles.md](../behavior/sys-norm-roles.md)
-**BDD-SYS-NORM-ROLE-001…018**; TM **#149** Done `febb95b3`), and Wave 6
-(**ready/Done** — [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md)
-**BDD-SYS-NORM-D1-001…020**; TM **#150** Done `64b0a650`), and Wave 7
-(**ready/Done** — [sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md)
-**BDD-SYS-NORM-PP-001…020**; TM **#151** Done `11356c63` / `f795b04a`).
+Per-wave implementation BDD: Waves **1–7 ready/Done**; Wave **8 BDD ready** + wave **In Progress**
+([sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md)
+**BDD-SYS-NORM-W8-001…018**; TM **#152**; detail [detail/sys-norm-demo-seed-terms.md](./detail/sys-norm-demo-seed-terms.md)).
+Prior waves: Wave 1
+([sys-norm-shell-fluid-nav.md](../behavior/sys-norm-shell-fluid-nav.md)), Wave 2
+([sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md) **W2-001…018**), Wave 3
+([sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md) **W3-001…018**), Wave 4
+([sys-norm-test-artifacts.md](../behavior/sys-norm-test-artifacts.md) **W4-001…010** → PTA),
+Wave 5 ([sys-norm-roles.md](../behavior/sys-norm-roles.md) **ROLE-001…018**), Wave 6
+([sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) **D1-001…020**), Wave 7
+([sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md) **PP-001…020**).
 
 ---
 
@@ -151,22 +150,22 @@ and Wave 5 (**ready/Done** — [sys-norm-roles.md](../behavior/sys-norm-roles.md
 | N10 | Nav contract — every nav item maps to icon | **1 Done** |
 | N11 | Route key — legal-entities (moot after D1) | **1 Done** (nav hide) / **6 Done** (retire) |
 | N12 | Filter toolbar — Brand list (moot after D1) | **1 Done** (nav hide) / **6 Done** |
-| N13 | Seed — Legal hold empty catalog story | 8 |
+| N13 | Seed — Legal hold empty catalog story | **8 In Progress** (docs locked; FE pending) |
 | N14 | Hub IA parity — Master hub same debt | **2 Done** |
-| N15 | Empty design — Master revision empty design summary | 2 / 8 |
-| N16–N17 | Terminology — EN Master mix; EN/ZH L1 | 8 |
-| N18 | EntityLink — Legal hold actor | **Deferred** (explicit; not in Wave 1 Done claim) — later wave + BDD |
-| N19–N20 | EntityLink — where-used; MasterImpact | 1 / 2 (residual) |
-| N21 | Journey — Role journey timeline silent empty | 1 / 8 |
+| N15 | Empty design — Master revision empty design summary | **8 In Progress** (docs locked; FE pending) |
+| N16–N17 | Terminology — EN Master mix; EN/ZH L1 | **8 In Progress** (SSOT locked; FE i18n pending) |
+| N18 | EntityLink — Legal hold actor | **Deferred** (explicit; not Wave 8 Done) — later wave + BDD |
+| N19–N20 | EntityLink — where-used; MasterImpact | 1 / 2 (residual; capacity defer OK) |
+| N21 | Journey — Role journey timeline silent empty | **8 In Progress** (docs locked; FE pending) |
 | N22 | Actions — Catalog row action pattern | **1** (partial via Edit/More primitive; catalog-wide pattern may continue) |
-| N23 | Docs/seed — `demo-images` bypass vs managed asset | 8 |
+| N23 | Docs/seed — `demo-images` bypass vs managed asset | **8 docs Done** ([demo-acceptance-asset-seed.md](../operations/demo-acceptance-asset-seed.md)); seed BE pending |
 
 ---
 
 ## 4a. Parked backlog notes (not activated — do not implement from this sync)
 
-Parked outside Waves 0–7 scope. Register/activate only via explicit deliver + Batch
-Recommendation. **Not** Wave 8 substitutes — do **not** fold into a future Wave 8 leaf until activated.
+Parked outside Waves 0–8 delivery scope. Register/activate only via explicit deliver + Batch
+Recommendation. **Not** Wave 8 substitutes — do **not** fold into the active Wave 8 leaf.
 
 | Note | Theme | Status |
 | --- | --- | --- |
@@ -175,9 +174,9 @@ Recommendation. **Not** Wave 8 substitutes — do **not** fold into a future Wav
 | Binding editor re-layout | Binding editor layout remedi | **Parked** — Not Started |
 | Auto `referenceKey` generation | Auto-generate `referenceKey` | **Parked** — Not Started |
 
-**Sole-active (program waves):** **cleared** (Wave 7 TM **#151** → **Done** `11356c63` / `f795b04a`).
-BDD **ready**/shipped ([sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md) **PP-001…020**).
-Wave **8** remains **Not Started** / **not** activated.
+**Sole-active (program waves):** TM **#152** Wave 8 (`sys-norm-demo-seed-terms`) — **In Progress**.
+BDD **ready** ([sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) **W8-001…018**).
+Prior Wave 7 TM **#151** → **Done** `11356c63` / `f795b04a`. Parked UX remains **not** activated.
 
 ---
 
@@ -236,7 +235,9 @@ still governing; checklist **#3b** / **#5a** **not** flipped by this program; **
 | [detail/sys-norm-roles.md](./detail/sys-norm-roles.md) | Wave 5 plan detail (**Done** · TM **#149** `febb95b3`) |
 | [detail/sys-norm-d1-brands.md](./detail/sys-norm-d1-brands.md) | Wave 6 plan detail (**Done** · TM **#150** `64b0a650`) |
 | [detail/sys-norm-promotion-pack.md](./detail/sys-norm-promotion-pack.md) | Wave 7 plan detail (**Done** · TM **#151** `11356c63` / `f795b04a`) |
+| [detail/sys-norm-demo-seed-terms.md](./detail/sys-norm-demo-seed-terms.md) | Wave 8 plan detail (**In Progress** · TM **#152**) |
 | [sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md) | Wave 7 BDD **ready**/delivered — **BDD-SYS-NORM-PP-001…020** (TM **#151** Done `11356c63` / `f795b04a`) |
+| [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) | Wave 8 BDD **ready** — **BDD-SYS-NORM-W8-001…018** (TM **#152** In Progress; N18 deferred) |
 | [published-template-test-artifacts.md](../behavior/published-template-test-artifacts.md) | Wave 4 product acceptance SoT (**BDD-PTA-001…009**; TM **#144** Done) |
 | [0070-role-compression-six-roles.md](../adr/authorization-security/0070-role-compression-six-roles.md) | Role compression (Accepted) |
 | [0071-retire-document-brand-legal-entity-surfaces.md](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) | D1 retire product surfaces (Accepted) |

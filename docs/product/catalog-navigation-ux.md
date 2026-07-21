@@ -8,9 +8,9 @@
 
 **Package list pagination (LR-C5, 2026-07-11):** Templates / Masters / Content-modules **package lists** use server-side `PageView` pagination + filter/search (default `size=20`, max 100; default sort group-first `groupCode ASC, updatedAt DESC`). Contract: [openapi-v1.yaml](../api/openapi-v1.yaml) `listTemplates` / `listMasters` / `listContentModules`; behavior [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md). Does not change package-hub version/revision-line pagination already specified below. Does **not** define LR-C6 command-palette API.
 
-### SYS-NORM Confirmed intent (2026-07-21) — Waves 0–3 Done; Waves 4+ queued
+### SYS-NORM Confirmed intent (2026-07-21) — Waves 0–7 Done; Wave 8 In Progress
 
-> Locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.1–2.3.
+> Locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.1–2.3 / §2.8–2.9.
 > Historical hub-tab narrative below is **superseded for Hub IA** by Wave 2; External services
 > dashboard / full settings panels delivered by Wave 3.
 > Program: [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md).
@@ -19,6 +19,8 @@
 > [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md) (**BDD-SYS-NORM-W2-001…018**).
 > Wave 3 leaf TM **#147** `sys-norm-external-ops` → **Done** (`18a9e3b2` / `f21dda5e`); BDD
 > [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md) (**BDD-SYS-NORM-W3-001…018**).
+> Wave 8 leaf TM **#152** `sys-norm-demo-seed-terms` → **In Progress** (BDD
+> [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) **W8-001…018**).
 
 | Intent | Confirmed decision | Implementation status | Wave |
 | --- | --- | --- | --- |
@@ -32,10 +34,21 @@
 | **API model A** | Package-level API settings SoT under External services; hub **API settings** jump to `/api/packages/:templateId/settings` shell; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities; legacy `?tab=apiAccess` / `#apiAccess` / `/api/policies/:templateId` → settings shell | **Done** IA shell + redirects (Wave 2) + full settings home (Wave 3; `#147` / `18a9e3b2`) | 2 (+ 3 settings) |
 | **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **Done** (2026-07-21; `#147` / `18a9e3b2` / `f21dda5e`; [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md)) | 3 `sys-norm-external-ops` |
 | **D1 brands/entities runtime** | Full product-surface + runtime retirement per ADR-0071 — hard-retire routes/APIs/catalogs; Letterhead (master) SoT for logo/seal; Legal holds kept; no brand/entity sidecar for promotion/export ([sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) **D1-001…020**) | **Done** (TM **#150** `64b0a650`; BDD **ready/Done**) | 6 `sys-norm-d1-brands` |
+| **L1 Letterhead / 母版 + honest empties** | L1 EN **Letterhead** / ZH **母版**; purge L1 Master mix; Asset Library / Legal hold / revision design / journey honest empties; optional demo seed ops; N23 classpath ≠ library | **In Progress** (docs locked; FE/BE impl pending) — **N18 deferred**; parked UX OOS | 8 `sys-norm-demo-seed-terms` |
+
+### Wave 8 empty-state product notes (N13 / N15 / N21)
+
+| Surface | Confirmed UX | BDD |
+| --- | --- | --- |
+| Legal holds catalog (zero rows) | Honest empty + Create CTA iff manage capability | W8-005 / W8-006 (N13) |
+| Letterhead revision **design** tab (empty summary) | Honest empty (reason + next step), not silent card body | W8-012 (N15) |
+| Role journey timeline (no current step / empty work set) | Visible `*.empty.guidance` (or equivalent); forbid silent blank chrome | W8-013 / W8-014 (N21) |
 
 ## Design principle
 
-The management shell exposes **Masters** and **Templates** as top-level catalog entries—not “master versions” or “template versions” as menu labels.
+The management shell exposes **Letterhead templates** (route/domain: masters) and **Templates**
+as top-level catalog entries—not “master versions” or “template versions” as L1 menu labels.
+API/L3 may still say `masters` / `masterId`.
 
 Navigation follows a package-first mental model (masters add a third level — revision line detail):
 

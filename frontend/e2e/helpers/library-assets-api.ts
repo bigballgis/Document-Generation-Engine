@@ -146,3 +146,43 @@ export async function ensureActiveLibraryAsset(
     `Failed to seed library asset ${options.assetKey} (${uploaded.status}): ${uploaded.bodyText}`,
   )
 }
+
+export async function disableLibraryAssetViaApi(
+  request: APIRequestContext,
+  assetKey: string,
+  credentials: { username: string; password: string } = E2E_ADMIN,
+): Promise<LibraryAssetView> {
+  const token = await apiLogin(request, credentials)
+  const response = await request.post(
+    `${E2E_API_BASE_URL}/library/assets/${encodeURIComponent(assetKey)}/disable`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!response.ok()) {
+    throw new Error(
+      `POST /library/assets/${assetKey}/disable failed (${response.status()}): ${await response.text()}`,
+    )
+  }
+  return ((await response.json()) as ApiEnvelope<LibraryAssetView>).result
+}
+
+/** Disable every ACTIVE managed asset so Wave 8 honest-empty journeys stay deterministic. */
+export async function disableAllActiveLibraryAssetsViaApi(
+  request: APIRequestContext,
+  credentials: { username: string; password: string } = E2E_ADMIN,
+): Promise<number> {
+  let disabled = 0
+  for (let guard = 0; guard < 40; guard += 1) {
+    const rows = await listLibraryAssetsViaApi(request, {
+      status: 'ACTIVE',
+      credentials,
+    })
+    if (rows.length === 0) {
+      break
+    }
+    for (const row of rows) {
+      await disableLibraryAssetViaApi(request, row.assetKey, credentials)
+      disabled += 1
+    }
+  }
+  return disabled
+}

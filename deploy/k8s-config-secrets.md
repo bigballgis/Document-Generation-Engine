@@ -28,6 +28,7 @@ Rendered resource: `{release}-config` (`templates/configmap.yaml`).
 | `MINIO_ENDPOINT` | `externalServices.minio.endpoint` | Object storage URL (TLS) |
 | `STORAGE_PROVIDER`, `STORAGE_BUCKET` | `config.*` | Storage selection |
 | `DOCGEN_SEED_DEMO_CATALOG` | `config.seedDemoCatalog` | Dev-only demo seed flag |
+| `DOCGEN_SEED_DEMO_ASSET_LIBRARY` | `config.seedDemoAssetLibrary` | Wave 8 managed Asset Library seed (IMG-1/SEAL-1); default false |
 | `JAVA_TOOL_OPTIONS` | `config.javaToolOptions` | JVM tmp dir for read-only root FS |
 | `BACKEND_PORT` | `backend.port` | Container listen port |
 

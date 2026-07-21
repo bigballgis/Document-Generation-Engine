@@ -59,6 +59,7 @@
 | **F1-C3** | A2 错误码：`CONTENT_MODULE_STRUCTURE_MISSING`；category `VALIDATION`；retryable `false` |
 | **F1-C4** | A2 发布门禁：绑定校验阶段检测空 pinned → checklist 项 **FAIL**，阻止进入 `PUBLISHED` |
 | **F1-C5** | A3 解析顺序：MinIO（按 storage key）→ 显式 demo classpath tier（仅 `rendering/demo-images/` 且须配置 flag 或 profile）→ fail-closed |
+| **F1-C5a** | **N23（SYS-NORM Wave 8 docs）：** demo classpath tier 命中 **不**意味着该 key 属于 Asset Library 目录；管理目录只认 managed `library_asset`。产品默认零资产 = honest empty；可选 demo/验收 managed seed 与 classpath 回退正交 — [demo-acceptance-asset-seed.md](../operations/demo-acceptance-asset-seed.md)。**不**改变 F1-C5 解析顺序或 resolver 签名。 |
 | **F1-C6** | A3 错误码：`IMAGE_ASSET_NOT_FOUND` / `SEAL_ASSET_NOT_FOUND`；category `RENDERING`；retryable `false` |
 | **F1-C7** | A3 `StructuredContentImageResolver` 必须通过 Spring DI 注入 `DocxAssembler`，禁止 `new` 构造 |
 | **F1-C8** | 本 Phase **不含** 表达式引擎扩展、LO 池化、运行时保真缓存（属 F2/F3/F4） |

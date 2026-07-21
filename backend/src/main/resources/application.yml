@@ -107,6 +107,10 @@ docgen:
     max-docx-upload-bytes: ${DOCGEN_MASTER_MAX_DOCX_UPLOAD_BYTES:52428800}
   demo-catalog:
     seed-enabled: ${DOCGEN_SEED_DEMO_CATALOG:false}
+  # SYS-NORM Wave 8 / W8-C2: optional managed Asset Library seed for demo/验收 only.
+  # Default false — production honest empty (W8-001). Not classpath ghost catalog rows (N23).
+  demo-asset-library:
+    seed-enabled: ${DOCGEN_SEED_DEMO_ASSET_LIBRARY:false}
   catalog-load-seed:
     # LR-C5: ≥500 templates across groups for pagination / p95 evidence.
     # Enable: DOCGEN_SEED_CATALOG_LOAD=true (optional DOCGEN_SEED_CATALOG_LOAD_COUNT=500)

@@ -165,6 +165,56 @@ describe('LegalHoldListView', () => {
     expect(vi.mocked(legalHoldsApi.listLegalHolds).mock.calls.length).toBeGreaterThanOrEqual(2)
   })
 
+  it('BDD-SYS-NORM-W8-005 — honest empty with Create CTA when manageLegalHold', async () => {
+    vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(pageView([]))
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(LegalHoldListView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+        stubs: {
+          LegalHoldCreateDialog: true,
+          RouterLink: { template: '<a><slot /></a>' },
+        },
+      },
+    })
+
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(en.legalHold.list.empty)
+    expect(wrapper.text()).toContain(en.legalHold.list.emptyDescription)
+    expect(wrapper.find('[data-testid="legal-hold-table"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="legal-hold-create-open-empty"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="empty-state-actions"]').exists()).toBe(true)
+  })
+
+  it('BDD-SYS-NORM-W8-006 — honest empty without Create CTA when no manage', async () => {
+    patchSession(['GROUP_ADMIN'], { ...adminCapabilities, manageLegalHold: false })
+    vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(pageView([]))
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(LegalHoldListView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+        stubs: {
+          LegalHoldCreateDialog: true,
+          RouterLink: { template: '<a><slot /></a>' },
+        },
+      },
+    })
+
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(en.legalHold.list.empty)
+    expect(wrapper.text()).toContain(en.legalHold.list.emptyDescriptionReadOnly)
+    expect(wrapper.find('[data-testid="legal-hold-table"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="legal-hold-create-open"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="legal-hold-create-open-empty"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="empty-state-actions"]').exists()).toBe(false)
+  })
+
   it('hides create and release when manageLegalHold is false', async () => {
     patchSession(['GROUP_ADMIN'], { ...adminCapabilities, manageLegalHold: false })
     vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(

@@ -259,6 +259,21 @@ class AssetLibraryServiceTest {
     }
 
     @Test
+    void list_doesNotFabricateClasspathDemoImageGhostsWhenRepositoryEmpty() {
+        // BDD-SYS-NORM-W8-003 / N23 — classpath rendering/demo-images/ is not Asset Library content.
+        when(repository.search(eq(AssetLibraryAssetStatus.ACTIVE), eq(null), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(), Pageable.ofSize(20), 0));
+
+        PageView<AssetLibraryAssetView> page = service.list(author, null, null, null, null, null);
+
+        assertThat(page.content()).isEmpty();
+        assertThat(page.totalElements()).isZero();
+        assertThat(page.content())
+                .extracting(AssetLibraryAssetView::assetKey)
+                .doesNotContain("IMG-1", "SEAL-1", "rendering/demo-images/img-1.png");
+    }
+
+    @Test
     void list_filterClassAndQuery() {
         when(repository.searchByQuery(
                 eq(AssetLibraryAssetStatus.ACTIVE),

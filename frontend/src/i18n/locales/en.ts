@@ -575,6 +575,9 @@ export default {
       notFoundDescription: 'This revision line may have been removed or is outside your group scope.',
       summaryTitle: 'Revision overview',
       changeSummary: 'Change summary',
+      emptySummaryTitle: 'No design change summary yet',
+      emptySummaryDescription:
+        'This revision has no change summary. Download the DOCX to continue design work, or add a summary when you submit the letterhead for review.',
       updatedAt: 'Last updated',
       updatedBy: 'Last updated by',
       anchorsTitle: 'DOCX overview — anchor positions',
@@ -911,17 +914,17 @@ export default {
     },
     dependencies: {
       masterRevision: {
-        title: 'Master / Letterhead revision',
-        masterLabel: 'Bound master',
+        title: 'Letterhead revision',
+        masterLabel: 'Bound letterhead',
         pinned: 'Pinned at publish',
         notPinnedUntilPublish: 'Not pinned until publish',
-        workingContext: 'Working master revision {revisionId} (sequence {sequence}) — not pinned',
+        workingContext: 'Working letterhead revision {revisionId} (sequence {sequence}) — not pinned',
         releaseVersion: 'Pinned release',
         revisionId: 'Master revision',
         revisionSequence: 'Revision sequence',
         fileHashSummary: 'File fingerprint (summary)',
         pinOrigin: 'Pin origin',
-        pinLoadError: 'Unable to load the published master pin.',
+        pinLoadError: 'Unable to load the published letterhead pin.',
       },
       anchors: {
         title: 'Layout placeholders',
@@ -1158,26 +1161,26 @@ export default {
     },
     authoringPathGuide: {
       title: 'Authoring path',
-      subtitle: 'Confirm the master, then bind placeholders, declare variables, and preview.',
+      subtitle: 'Confirm the letterhead, then bind placeholders, declare variables, and preview.',
       ariaLabel: 'Template authoring path',
       next: 'Next',
       skip: 'Skip guide',
       dismiss: 'Dismiss',
       steps: {
-        master: 'Master',
+        master: 'Letterhead',
         bindings: 'Bindings',
         variables: 'Variables',
         preview: 'Preview',
       },
       master: {
-        title: 'Confirm linked master',
+        title: 'Confirm linked letterhead',
         description:
-          'Review the master document and its layout placeholders before configuring bindings.',
-        linkedMaster: 'Linked master',
+          'Review the letterhead document and its layout placeholders before configuring bindings.',
+        linkedMaster: 'Linked letterhead',
         groupLabel: 'Group: {groupCode}',
         anchorCount: '{count} layout placeholders',
-        noAnchors: 'No layout placeholders found on the linked master.',
-        loadFailed: 'Unable to load master summary.',
+        noAnchors: 'No layout placeholders found on the linked letterhead.',
+        loadFailed: 'Unable to load letterhead summary.',
         retry: 'Retry',
       },
     },
@@ -1540,17 +1543,17 @@ export default {
         'Define API input schema: types, required flags, LIST/OBJECT structures, and COMPUTED expressions for derived values.',
       bindingsTitle: 'Layout placeholder bindings',
       bindingsDescription:
-        'Each row follows the linked master placeholder order. Configure what structured content fills each placeholder — text, variables, clauses, tables, or loops.',
+        'Each row follows the linked letterhead placeholder order. Configure what structured content fills each placeholder — text, variables, clauses, tables, or loops.',
       bindingsHelpTitle: 'How placeholder bindings work',
       bindingsHelpDescription:
         'Each master placeholder row follows letterhead order. Use Configure/Edit to open the form panel: pick content type, then compose structured blocks (paragraphs, inline variables, clause refs, tables, conditions, loops). Register clause refs on the Content modules tab first; insert them inside binding content via contentModuleRef nodes.',
       bindingEditorSubtitle: 'Compose structured content for this master placeholder',
-      anchorDisplayLabel: 'Master label',
+      anchorDisplayLabel: 'Letterhead label',
       bindingStatus: 'Status',
       bindingConfigured: 'Configured',
       bindingNotConfigured: 'Not configured',
       configureBinding: 'Configure',
-      noMasterAnchors: 'No layout placeholders found on the linked master.',
+      noMasterAnchors: 'No layout placeholders found on the linked letterhead.',
       masterAnchorsLoadFailed: 'Unable to load master placeholder catalog.',
       validationStatus: 'Validation',
       validationUnknown: 'Not validated',
@@ -3006,6 +3009,11 @@ export default {
   journey: {
     timeline: {
       ariaLabel: 'Role workflow progress',
+      emptyTitle: 'No workflow steps available',
+      empty: {
+        guidance:
+          'There is no active workflow journey for this view yet. Open a task from your to-do list or use the quick links below to continue.',
+      },
     },
     custom: {
       demo: 'Custom demo guidance',
@@ -3429,7 +3437,10 @@ export default {
         'Create and release legal holds that exempt matching invocation and audit records from retention deletion.',
       help: 'Only global administrators can manage legal holds. Active holds block cleanup until released.',
       empty: 'No legal holds yet',
-      emptyDescription: 'Create a legal hold to protect invocation or audit records from retention cleanup.',
+      emptyDescription:
+        'Create a legal hold to protect invocation or audit records from retention cleanup.',
+      emptyDescriptionReadOnly:
+        'No legal holds are in scope right now. Holds appear here when an administrator creates them.',
       columns: {
         holdId: 'Hold ID',
         scope: 'Scope',
@@ -3501,7 +3512,10 @@ export default {
         'Browse platform image and seal assets used by template bindings. Filter by class or status, upload new assets, or disable keys that should no longer resolve.',
       help: 'Asset keys match object-storage keys consumed by rendering. Prefer IMG-… for images and SEAL-… for seals.',
       empty: 'No assets yet.',
-      emptyDescription: 'Upload a PNG or JPEG asset to register it in the shared library.',
+      emptyDescription:
+        'No managed library assets are registered yet. Upload a PNG or JPEG asset to register it for template bindings.',
+      emptyDescriptionReadOnly:
+        'No managed library assets are in scope right now. Assets appear here after an authorized user uploads them to the shared library.',
       columns: {
         assetKey: 'Asset key',
         assetClass: 'Class',

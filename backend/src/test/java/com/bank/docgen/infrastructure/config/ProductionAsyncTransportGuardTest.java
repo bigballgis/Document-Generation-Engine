@@ -163,8 +163,23 @@ class ProductionAsyncTransportGuardTest {
                 .doesNotContain("ASYNC_TRANSPORT:-in-process")
                 .contains("DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED:-false")
                 .doesNotContain("DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED:-true")
+                .contains("DOCGEN_SEED_DEMO_ASSET_LIBRARY:-false")
+                .doesNotContain("DOCGEN_SEED_DEMO_ASSET_LIBRARY:-true")
                 .contains("DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB:-false")
                 .doesNotContain("DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB:-true");
+    }
+
+    @Test
+    void applicationYmlKeepsDemoAssetLibrarySeedAndClasspathTierOffByDefault() throws Exception {
+        // BDD-SYS-NORM-W8-004 — product defaults keep honest empty + demo tier off.
+        Path yml = resolveRepoFile("backend/src/main/resources/application.yml");
+        if (!Files.isRegularFile(yml)) {
+            yml = Path.of("src/main/resources/application.yml").toAbsolutePath().normalize();
+        }
+        String content = Files.readString(yml);
+        assertThat(content)
+                .contains("demo-classpath-image-tier-enabled: ${DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED:false}")
+                .contains("seed-enabled: ${DOCGEN_SEED_DEMO_ASSET_LIBRARY:false}");
     }
 
     @Test

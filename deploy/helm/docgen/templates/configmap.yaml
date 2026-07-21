@@ -19,5 +19,6 @@ data:
   STORAGE_PROVIDER: {{ .Values.config.storageProvider | quote }}
   STORAGE_BUCKET: {{ .Values.config.storageBucket | quote }}
   DOCGEN_SEED_DEMO_CATALOG: {{ .Values.config.seedDemoCatalog | toString | quote }}
+  DOCGEN_SEED_DEMO_ASSET_LIBRARY: {{ .Values.config.seedDemoAssetLibrary | default false | toString | quote }}
   JAVA_TOOL_OPTIONS: {{ .Values.config.javaToolOptions | quote }}
   BACKEND_PORT: {{ .Values.backend.port | toString | quote }}
