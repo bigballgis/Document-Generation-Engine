@@ -442,7 +442,7 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 
 ## 模板导出/导入契约
 
-已确认模板跨环境导出/导入接口与 [P14-T03](../plan/detail/P14-confirmed-large-domains.md) 行为一致，并经 **CE-E01** 扩展自包含 v2 + dry-run，以及 **CE-E03** 全库导出 ZIP。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准；本文档提供路由索引、bundle 语义、冲突策略与权限说明。权威行为：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)、[ce-e03-full-library-export.md](../behavior/ce-e03-full-library-export.md)。
+已确认模板跨环境导出/导入接口与 [P14-T03](../plan/detail/P14-confirmed-large-domains.md) 行为一致，并经 **CE-E01** 扩展自包含 v2 + dry-run、**CE-E03** 全库导出 ZIP，以及 **SYS-NORM Wave 7** 晋级依赖闭合（promotion pack）+ 管理端 Import dry-run UI。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准；本文档提供路由索引、bundle 语义、冲突策略与权限说明。权威行为：[ce-e01-export-bundle-v2.md](../behavior/ce-e01-export-bundle-v2.md)、[ce-e03-full-library-export.md](../behavior/ce-e03-full-library-export.md)、[sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md)。
 
 **P14-T03 范围说明：** OpenAPI 定义管理路径导出（JSON + `format=zip`）与导入（`POST`）；bundle schema、`TemplateImportConflictPolicy` 枚举与权限边界对齐 [权限矩阵 §5](../security/permission-matrix.md#5-模板权限矩阵)。
 
@@ -458,7 +458,7 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 条款物化 | 目标缺模块但 snapshot 存在 → dry-run `WILL_MATERIALIZE`；提交事务内创建草稿内容模块版本 |
 | 母版 | 仍要求目标已批准同组 `masterId`；用 `masterPin.masterFileHash` 与目标 revision 比对；本片不从 DOCX 自动建母版 |
 | 导入载体 | 既有 JSON body；另支持 multipart（`file`=v2 ZIP + `masterId` + 可选 policy/dryRun） |
-| UI | 管理端导出/导入/dry-run UI **本片 out of scope**（API-first） |
+| UI | 管理端导出/导入/dry-run UI **本片 out of scope**（API-first；Wave 7 拥有 Import dry-run UI） |
 
 **CE-E03 全库导出（2026-07-17 确认）：**
 
@@ -473,20 +473,36 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 护栏 | 合格候选最多 500；超出 → `422` `api.error.library.exportLimitExceeded`；不引入异步 job |
 | 部分成功 | `includedCount ≥ 1` → HTTP 200；FAILED/SKIPPED 仅记 manifest；空 INCLUDED → `422` `api.error.library.exportEmpty` |
 | 越权 ID | `templateIds` 中无权限/不存在的 ID **不**出现在 manifest `templates[]`；计入 `omittedUnauthorizedOrUnknownCount` |
-| 资产 | 聚合 `assetKeyManifest`（键 + 用途）；**不**嵌入资产二进制 |
+| 资产 | 聚合 `assetKeyManifest`（键 + 用途）；**默认不**嵌入资产二进制（Wave 7 `dependencyClosure=PROMOTION` 见下） |
 | 权限 | **完全复用**矩阵 §5「导出模板」；无新权限码、无新 capability；逐模板授权过滤 |
 | 审计 | 成功（含部分成功）→ `LIBRARY_EXPORT`（`exportBatchId`、counts、scope、actor；无条款全文/DOCX/变量值） |
 | Idempotency | **不要求** `Idempotency-Key`（每次新 `exportBatchId`） |
-| Out of scope | 全库导入；管理端批量导出 UI / E2E；嵌入资产二进制；改 E01 单模板语义 |
+| Out of scope | 全库导入；管理端批量导出 UI / E2E；默认路径嵌入资产二进制；改 E01 单模板默认语义 |
 
 正式 schema：[openapi-v1.yaml](openapi-v1.yaml) `LibraryExportRequest` / `LibraryExportManifestView`（operationId `exportLibraryTemplates`）。
+
+**SYS-NORM Wave 7 — UAT→PROD promotion pack（2026-07-21 确认 / BDD `ready`）：**
+
+| 项 | 已确认规则 |
+| --- | --- |
+| 参数名（OpenAPI 锁定） | `dependencyClosure=PROMOTION`（单模板导出 query；全库导出 body 同名字段）。缺省/省略 = 既有 E01/E03 行为不变 |
+| 单模板 promotion ZIP | `bundleVersion=2` + `format=zip` + `dependencyClosure=PROMOTION`：E01 v2 基线 + `artifacts/assets/{assetKey}` 二进制 + 嵌套条款闭包 + 可选 `clauseNestingGraph`（edges + depth≤8） |
+| 全库 promotion ZIP | 同上 profile：每个 `templates/{id}.zip` 为 promotion pack；根级可去重 `assets/{assetKey}` |
+| 禁带 | DocumentBrand/LegalEntity sidecar；secrets / 凭证 / 测试数据变量明文（ADR-0071 Decision 5 / PP-C4/C5） |
+| 导入 | 沿用 `POST …/templates/import`；自动识别嵌入资产/嵌套图；`dryRun=true` 零业务写入；提交落地模板 **DRAFT**；可选物化资产与 **DRAFT** 母版（**禁止**经 pack 跳过母版 APPROVED） |
+| 报告类型（加法） | `dependencyType` 增 `CLAUSE_NESTING`、`ASSET_BINARY`（亦可复用 `ASSET_KEY` + `ASSET_WILL_MATERIALIZE` / `ASSET_BINARY_ABSENT`） |
+| 权限 | **无新码**；复用矩阵 §5 导出/导入（含 dry-run） |
+| UI | Templates **Import** 对话框：**Check dependencies**（`dryRun=true`）→ 报告 → **Import** 仅当 `readyToCommit=true`（P-Q4） |
+| 兼容 | 非 promotion 的 v1/v2/E03 默认路径 fail-closed 语义不得回退 |
+| 行为 SoT | [sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md) **BDD-SYS-NORM-PP-001…020**；上游 extend E01/E03 |
 
 | 路由语义 | 用途 | 已确认规则 | 已确认路径 |
 | --- | --- | --- | --- |
 | 模板导出（JSON） | 导出已通过审批或已发布模板 bundle（元数据、变量、绑定、规则、内容模块引用、API 策略快照；v2 另含指纹/快照/清单）。 | 仅 `PENDING_RELEASE`、`PUBLISHED`、`STOPPED`、`DEPRECATED` 可导出；默认 `template-export-bundle-v1-json`；`bundleVersion=2` 为 v2；不得包含 secret、API 凭证或运行时凭证；导出动作记录审计。 | `GET /api/management/v1/templates/{templateId}/export` |
 | 模板导出（ZIP） | 与 JSON 相同 bundle，封装为单文件 ZIP 附件；v2 另嵌母版 DOCX。 | v1：ZIP 内仅含 `template-export-bundle.json`；v2：另含 `artifacts/master.docx`；响应 `Content-Type: application/zip`；`Content-Disposition` 为 attachment。 | `GET /api/management/v1/templates/{templateId}/export?format=zip`（可选 `bundleVersion=2`） |
-| 全库导出（ZIP）（CE-E03） | 一次导出授权范围内（或筛选后）全部导出合格模板：根 manifest + 嵌套 E01 v2 per-template ZIP + 去重母版/条款目录。 | 格式 `template-library-export-v1-zip`；**权限同矩阵 §5 导出模板**（无新码）；空集/超限 422；部分成功允许；**不含**资产二进制；全库导入 out of scope。OpenAPI：`exportLibraryTemplates`。行为：[ce-e03-full-library-export.md](../behavior/ce-e03-full-library-export.md)。 | `POST /api/management/v1/library/export` |
-| 模板导入 / dry-run | 将 bundle 导入目标环境并从草稿重新走流程；或仅预检依赖。 | 提交后模板状态为 `DRAFT`；须重新执行测试→审批→发布；`masterId` 须为同 `groupCode` 下已批准母版；`dryRun=true` 不落库；导入动作记录审计并返回 `importBatchId`（dry-run 无 batch 业务写入）。 | `POST /api/management/v1/templates/import` |
+| 晋级包导出（Wave 7） | UAT→PROD promotion dependency closure：资产二进制 + 条款嵌套闭包。 | 须 `bundleVersion=2` + `format=zip` + `dependencyClosure=PROMOTION`；ZIP 另含 `artifacts/assets/{assetKey}`；无 brand/entity sidecar；无 secrets。行为：[sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md)。 | `GET /api/management/v1/templates/{templateId}/export?bundleVersion=2&format=zip&dependencyClosure=PROMOTION` |
+| 全库导出（ZIP）（CE-E03） | 一次导出授权范围内（或筛选后）全部导出合格模板：根 manifest + 嵌套 E01 v2 per-template ZIP + 去重母版/条款目录。 | 格式 `template-library-export-v1-zip`；**权限同矩阵 §5 导出模板**（无新码）；空集/超限 422；部分成功允许；默认**不含**资产二进制；`dependencyClosure=PROMOTION` 时嵌套包为晋级包且根可含去重 `assets/`；全库导入 out of scope。OpenAPI：`exportLibraryTemplates`。行为：[ce-e03-full-library-export.md](../behavior/ce-e03-full-library-export.md)。 | `POST /api/management/v1/library/export` |
+| 模板导入 / dry-run | 将 bundle（含晋级包）导入目标环境并从草稿重新走流程；或仅预检依赖。 | 提交后模板状态为 `DRAFT`；须重新执行测试→审批→发布；`masterId` 须为同 `groupCode` 下已批准母版（绑定既有母版时）；晋级包可物化 DRAFT 母版但**不得**经 pack 置 APPROVED；`dryRun=true` 不落库；导入动作记录审计并返回 `importBatchId`（dry-run 无 batch 业务写入）。管理端 Import 对话框 dry-run UI = Wave 7。 | `POST /api/management/v1/templates/import` |
 | 目录列表分页（LR-C5） | 管理端 Templates / Masters / Content-modules **包列表**服务端分页与筛选。 | 见下方「目录列表分页契约（LR-C5）」；完整行为 [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md)；正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。CE-G05：content-modules 可选 `searchMode=FULL_TEXT`（见上专节）。 | `GET /api/management/v1/templates` · `GET /api/management/v1/masters` · `GET /api/management/v1/content-modules` |
 | Dashboard Overview 汇总（PRR-D01c） | 首屏统计卡授权组范围内分桶计数 + 目录总数；**禁止**以 fetch-all 为权威源。 | 见下方「Dashboard summary 契约（PRR-D01c）」；行为 [prod-dashboard-summary-api.md](../behavior/prod-dashboard-summary-api.md)；OpenAPI `getDashboardSummary`。 | `GET /api/management/v1/dashboard/summary` |
 | 模板年到期待办（CE-G05） | Dashboard Tasks 年检分区数据源。 | 见「模板年检与条款正文全文检索（CE-G05）」；**不**新建 collaboration `queue_type`。 | `GET /api/management/v1/author-workflow/annual-review-due-tasks` |
@@ -640,21 +656,24 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | `masterPin` | v2 是 | CE-E01：`masterRevisionId`（UUID）、`masterFileHash`（SHA-256 小写 hex）、可选 `revisionSequence` / `pinOrigin`（`PUBLISHED` \| `PINNED_RETROACTIVELY` \| `EXPORT_TIME`）。消费 CE-K01 钉扎字段，见 [ce-k01-release-bundle-pinning.md](../behavior/ce-k01-release-bundle-pinning.md)。 |
 | `clauseSnapshots` | v2 是 | CE-E01：条款正文/结构快照数组（可空）。项含 `moduleCode`、`moduleVersionId`、`versionNumber`、`contentStructureJson`；可选 `locked` 与 CE-K08 法务元数据。 |
 | `renderProfile` | v2 否 | CE-E01：`version` + `json`（JSON 文本快照）。皆空可省略；dry-run 记 `RENDER_PROFILE_ABSENT`（INFO）。 |
-| `assetKeyManifest` | v2 是 | CE-E01：`referenceKey` + `usage`（`IMAGE` \| `OTHER`）；可空数组；无二进制。 |
+| `assetKeyManifest` | v2 是 | CE-E01：`referenceKey` + `usage`（`IMAGE` \| `OTHER`）；可空数组；默认无二进制。Wave 7 promotion：键仍在此清单；二进制在 ZIP `artifacts/assets/{assetKey}`。 |
+| `clauseNestingGraph` | promotion 可选 | Wave 7：`edges[]`（`parentModuleCode` / `childModuleCode` / `depth`≤8）+ 可选 `maxDepth`；非嵌套可省略或空 edges。 |
 
-JSON 导出成功响应 envelope：`metadata` + `result`，其中 `result.format` 与 `result.bundle` 承载上述结构。ZIP 导出不含 envelope；v1 文件内容为 bundle JSON；v2 另含 `artifacts/master.docx`（字节 SHA-256 须等于 `masterPin.masterFileHash`）。
+JSON 导出成功响应 envelope：`metadata` + `result`，其中 `result.format` 与 `result.bundle` 承载上述结构。ZIP 导出不含 envelope；v1 文件内容为 bundle JSON；v2 另含 `artifacts/master.docx`（字节 SHA-256 须等于 `masterPin.masterFileHash`）；Wave 7 promotion 另可含 `artifacts/assets/{assetKey}` 二进制。
 
-### 导入 dry-run 与依赖报告（CE-E01）
+### 导入 dry-run 与依赖报告（CE-E01 + Wave 7）
 
 | 项 | 已确认 |
 | --- | --- |
 | 请求 | `dryRun: true`（JSON）或 multipart 同名字段 |
 | 成功 | `200`；`result.imported=false`；`result.dependencyReport` 含 `items[]`、`readyToCommit`、`blockingCount`、`warningCount`、`infoCount`、可选 `bundleFormat` |
-| 项字段 | `dependencyType`（`MASTER_PIN` \| `CLAUSE` \| `ASSET_KEY` \| `RENDER_PROFILE` \| `BUNDLE_FORMAT`）、`severity`（`OK` \| `MISSING` \| `MISMATCH` \| `WILL_MATERIALIZE` \| `INFO`）、`code`（UPPER_SNAKE）、`messageKey`、可选非敏感 `detail` |
+| 项字段 | `dependencyType`（`MASTER_PIN` \| `CLAUSE` \| `ASSET_KEY` \| `RENDER_PROFILE` \| `BUNDLE_FORMAT` \| Wave 7 加法 `CLAUSE_NESTING` \| `ASSET_BINARY`）、`severity`（`OK` \| `MISSING` \| `MISMATCH` \| `WILL_MATERIALIZE` \| `INFO`）、`code`（UPPER_SNAKE；资产亦可 `ASSET_WILL_MATERIALIZE` / `ASSET_BINARY_ABSENT`）、`messageKey`、可选非敏感 `detail` |
 | 提交拒绝 | `422`；`error.code=IMPORT_DEPENDENCIES_UNSATISFIED`；`error.messageKey=api.error.template.importDependenciesUnsatisfied`；`error.dependencyReport` 同形 |
-| 载体 | JSON body（v1/v2 清单）或 **multipart**（规范面：`file`=ZIP + `masterId` + 可选 policy/`dryRun`）。v2 自包含提交须 ZIP（含 `artifacts/master.docx`）；纯 JSON v2 可 dry-run，**不可**作为自包含提交载体 |
-| 审计 | dry-run → `TEMPLATE_IMPORT_DRY_RUN`（含 `readyToCommit`/blockingCount/bundleFormat/actor；无条款全文、无 DOCX 字节） |
+| 载体 | JSON body（v1/v2 清单）或 **multipart**（规范面：`file`=ZIP + `masterId` + 可选 policy/`dryRun`）。v2 自包含提交须 ZIP（含 `artifacts/master.docx`）；纯 JSON v2 可 dry-run，**不可**作为自包含提交载体；晋级包另可含 `artifacts/assets/{assetKey}` |
+| 晋级物化 | 嵌入资产二进制 → dry-run 非阻断 `WILL_MATERIALIZE`；缺键且缺二进制 → blocking；嵌套闭包 incomplete → blocking；提交可事务内物化 CE-E02 资产 + 可选 DRAFT 母版（**禁止**经 pack 置 APPROVED） |
+| 审计 | dry-run → `TEMPLATE_IMPORT_DRY_RUN`（含 `readyToCommit`/blockingCount/bundleFormat/actor；无条款全文、无 DOCX 字节、无 secrets） |
 | 权限 | 与导入相同（矩阵 §5）；无新权限码 |
+| UI | Wave 7：Templates Import 对话框 **Check dependencies** + 仅 `readyToCommit=true` 可 **Import**（P-Q4） |
 
 ### 导入冲突策略（`TemplateImportConflictPolicy`）
 

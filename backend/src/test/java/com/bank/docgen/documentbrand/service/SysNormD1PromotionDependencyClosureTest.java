@@ -27,6 +27,6 @@ class SysNormD1PromotionDependencyClosureTest {
                 "LEGAL_ENTITY_CATALOG",
                 "DEFAULT_LEGAL_ENTITY"
         );
-        assertThat(types).contains("MASTER_PIN", "BUNDLE_FORMAT");
+        assertThat(types).contains("MASTER_PIN", "BUNDLE_FORMAT", "CLAUSE_NESTING", "ASSET_BINARY");
     }
 }

@@ -95,7 +95,9 @@ class TemplateImportServiceTest {
                 dependencyPrecheck,
                 contentModuleService,
                 contentModuleRepository,
-                contentModuleVersionRepository
+                contentModuleVersionRepository,
+                org.mockito.Mockito.mock(com.bank.docgen.library.service.AssetLibraryService.class),
+                org.mockito.Mockito.mock(com.bank.docgen.master.service.MasterDocumentService.class)
         );
         templateId = UUID.randomUUID();
         masterId = UUID.randomUUID();

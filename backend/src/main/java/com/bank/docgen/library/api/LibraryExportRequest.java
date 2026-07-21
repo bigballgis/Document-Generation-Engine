@@ -6,14 +6,20 @@ import java.util.UUID;
 
 /**
  * Optional filters for CE-E03 full-library export.
+ * Wave 7: optional {@code dependencyClosure=PROMOTION}.
  */
 public record LibraryExportRequest(
         UUID groupId,
         List<UUID> templateIds,
-        Boolean includeSkipped
+        Boolean includeSkipped,
+        String dependencyClosure
 ) {
     public LibraryExportRequest {
         templateIds = DefensiveCopies.copyList(templateIds);
+    }
+
+    public LibraryExportRequest(UUID groupId, List<UUID> templateIds, Boolean includeSkipped) {
+        this(groupId, templateIds, includeSkipped, null);
     }
 
     public boolean includeSkippedOrDefault() {

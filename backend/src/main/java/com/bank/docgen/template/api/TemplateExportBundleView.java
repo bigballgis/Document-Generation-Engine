@@ -19,7 +19,9 @@ public record TemplateExportBundleView(
         List<TemplateExportClauseSnapshotView> clauseSnapshots,
         TemplateExportRenderProfileView renderProfile,
         List<TemplateExportAssetKeyManifestItemView> assetKeyManifest,
-        List<CompositionInclusionRuleView> compositionInclusionRules
+        List<CompositionInclusionRuleView> compositionInclusionRules,
+        TemplateExportClauseNestingGraphView clauseNestingGraph,
+        String dependencyClosure
 ) {
     public TemplateExportBundleView {
         variables = DefensiveCopies.copyList(variables);
@@ -53,11 +55,13 @@ public record TemplateExportBundleView(
                 null,
                 null,
                 null,
+                null,
+                null,
                 null
         );
     }
 
-    /** CE-E01 v2 constructor without inclusion rules. */
+    /** CE-E01 v2 constructor without inclusion rules / nesting graph. */
     public TemplateExportBundleView(
             String format,
             TemplateExportMetadataView metadata,
@@ -83,6 +87,75 @@ public record TemplateExportBundleView(
                 clauseSnapshots,
                 renderProfile,
                 assetKeyManifest,
+                null,
+                null,
+                null
+        );
+    }
+
+    /** CE-E01 v2 + inclusion rules (pre-Wave-7). */
+    public TemplateExportBundleView(
+            String format,
+            TemplateExportMetadataView metadata,
+            List<VariableSchemaView> variables,
+            List<AnchorBindingView> bindings,
+            List<CompositionRuleView> rules,
+            List<ContentModuleReferenceView> contentModuleReferences,
+            ApiPolicyView policySnapshot,
+            TemplateExportMasterPinView masterPin,
+            List<TemplateExportClauseSnapshotView> clauseSnapshots,
+            TemplateExportRenderProfileView renderProfile,
+            List<TemplateExportAssetKeyManifestItemView> assetKeyManifest,
+            List<CompositionInclusionRuleView> compositionInclusionRules
+    ) {
+        this(
+                format,
+                metadata,
+                variables,
+                bindings,
+                rules,
+                contentModuleReferences,
+                policySnapshot,
+                masterPin,
+                clauseSnapshots,
+                renderProfile,
+                assetKeyManifest,
+                compositionInclusionRules,
+                null,
+                null
+        );
+    }
+
+    /** Wave 7: nesting graph without explicit dependencyClosure (legacy / tests). */
+    public TemplateExportBundleView(
+            String format,
+            TemplateExportMetadataView metadata,
+            List<VariableSchemaView> variables,
+            List<AnchorBindingView> bindings,
+            List<CompositionRuleView> rules,
+            List<ContentModuleReferenceView> contentModuleReferences,
+            ApiPolicyView policySnapshot,
+            TemplateExportMasterPinView masterPin,
+            List<TemplateExportClauseSnapshotView> clauseSnapshots,
+            TemplateExportRenderProfileView renderProfile,
+            List<TemplateExportAssetKeyManifestItemView> assetKeyManifest,
+            List<CompositionInclusionRuleView> compositionInclusionRules,
+            TemplateExportClauseNestingGraphView clauseNestingGraph
+    ) {
+        this(
+                format,
+                metadata,
+                variables,
+                bindings,
+                rules,
+                contentModuleReferences,
+                policySnapshot,
+                masterPin,
+                clauseSnapshots,
+                renderProfile,
+                assetKeyManifest,
+                compositionInclusionRules,
+                clauseNestingGraph,
                 null
         );
     }

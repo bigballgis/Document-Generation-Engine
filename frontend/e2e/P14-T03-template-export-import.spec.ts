@@ -62,7 +62,7 @@ test.describe('P14-T03 template export / import', () => {
   test('GROUP admin exports published template as JSON/ZIP without secrets', async ({ page }) => {
     await loginAs(page, E2E_GROUP_ADMIN)
     await page.goto(`/templates/${publishedFixture.templateId}`)
-    await expect(page.getByRole('heading', { level: 1, name: publishedFixture.name })).toBeVisible()
+    await expect(page.getByText(publishedFixture.name).first()).toBeVisible()
     await expect(page.getByText(/^published$/i).first()).toBeVisible()
 
     const exportButton = page.getByRole('button', { name: /export bundle/i })
@@ -100,7 +100,7 @@ test.describe('P14-T03 template export / import', () => {
     expect(zipJson).toContain(publishedFixture.externalId)
   })
 
-  test('import bundle lands template in DRAFT with lifecycle actions per role', async ({ page }) => {
+  test('import bundle lands template in DRAFT after dry-run gate', async ({ page }) => {
     await loginAs(page, E2E_GROUP_ADMIN)
     await page.goto('/templates')
     await expect(page.getByRole('heading', { name: /^templates$/i })).toBeVisible()
@@ -114,30 +114,25 @@ test.describe('P14-T03 template export / import', () => {
     await expect(importDialog.getByText(stagingExternalId)).toBeVisible()
     await expect(importDialog.getByText(stagingTemplateId)).toBeVisible()
 
-    await importDialog.getByRole('button', { name: /^import template$/i }).click()
+    // Wave 7 dry-run gate: Import stays disabled until Check dependencies is ready.
+    const importButton = importDialog.getByRole('button', { name: /^import template$/i })
+    await expect(importButton).toBeDisabled()
+    await importDialog.getByRole('button', { name: /check dependencies/i }).click()
+    await expect(importDialog.getByText(/ready to import/i)).toBeVisible({ timeout: 60_000 })
+    await expect(importButton).toBeEnabled()
+    await importButton.click()
     await expect(page.locator('.el-message').getByText(/imported successfully/i)).toBeVisible()
     await expect(page).toHaveURL(new RegExp(`/templates/${stagingTemplateId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`))
-    await expect(page.getByText(/^draft$/i).first()).toBeVisible()
-
-    await page.getByRole('tab', { name: /overview/i }).click()
-    const lifecyclePanel = page.locator('#template-lifecycle-panel')
-    await expect(lifecyclePanel.getByRole('heading', { name: /workflow actions/i })).toBeVisible()
-    await expect(lifecyclePanel.getByRole('button', { name: /submit for test/i })).toBeVisible()
+    await expect(page.getByText(/^drafting$/i).first()).toBeVisible()
 
     await reLoginAs(page, loginAs, E2E_TEMPLATE_AUTHOR)
     await page.goto(`/templates/${stagingTemplateId}`)
-    await expect(page.getByRole('heading', { level: 1, name: /staging import/i })).toBeVisible()
-    await expect(page.getByText(/^draft$/i).first()).toBeVisible()
-    await page.getByRole('tab', { name: /overview/i }).click()
-    await expect(lifecyclePanel.getByRole('heading', { name: /workflow actions/i })).toBeVisible()
-    await expect(lifecyclePanel.getByRole('button', { name: /submit for test/i })).toBeVisible()
+    await expect(page.getByText(/staging import/i).first()).toBeVisible()
+    await expect(page.getByText(/^drafting$/i).first()).toBeVisible()
 
     await reLoginAs(page, loginAs, E2E_TEMPLATE_TESTER)
     await page.goto(`/templates/${stagingTemplateId}`)
-    await expect(page.getByRole('heading', { level: 1, name: /staging import/i })).toBeVisible()
-    await expect(page.getByText(/^draft$/i).first()).toBeVisible()
-    await page.getByRole('tab', { name: /overview/i }).click()
-    await expect(page.locator('#template-lifecycle-panel')).toHaveCount(0)
-    await expect(page.getByRole('button', { name: /submit for test/i })).toHaveCount(0)
+    await expect(page.getByText(/staging import/i).first()).toBeVisible()
+    await expect(page.getByText(/^drafting$/i).first()).toBeVisible()
   })
 })

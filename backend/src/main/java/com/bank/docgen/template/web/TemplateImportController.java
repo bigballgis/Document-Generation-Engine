@@ -88,7 +88,8 @@ public class TemplateImportController {
                     body,
                     session,
                     parsed.masterDocxBytes(),
-                    true
+                    true,
+                    parsed.assetBinaries()
             );
             return ResponseEntity.ok(envelope(request, result));
         }
@@ -96,7 +97,8 @@ public class TemplateImportController {
                 body,
                 session,
                 parsed.masterDocxBytes(),
-                true
+                true,
+                parsed.assetBinaries()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(envelope(request, result));
     }

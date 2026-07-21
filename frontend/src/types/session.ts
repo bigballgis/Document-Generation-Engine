@@ -15,6 +15,8 @@ export interface ApiErrorDetail {
   messageKey: string
   retryable: boolean
   fieldErrors?: ApiFieldError[]
+  /** CE-E01 / Wave 7: present on 422 IMPORT_DEPENDENCIES_UNSATISFIED. */
+  dependencyReport?: Schema<'TemplateImportDependencyReportView'>
 }
 
 /** Envelope metadata; management responses may omit dynamic-API-only fields. */

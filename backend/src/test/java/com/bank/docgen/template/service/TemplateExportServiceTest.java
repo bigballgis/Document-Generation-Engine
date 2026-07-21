@@ -85,7 +85,8 @@ class TemplateExportServiceTest {
                         org.mockito.Mockito.mock(com.bank.docgen.contentmodule.persistence.ContentModuleRepository.class),
                         org.mockito.Mockito.mock(com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository.class),
                         new ObjectMapper().findAndRegisterModules()
-                )
+                ),
+                org.mockito.Mockito.mock(TemplateExportPromotionSupport.class)
         );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(

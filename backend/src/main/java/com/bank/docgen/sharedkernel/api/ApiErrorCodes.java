@@ -205,6 +205,9 @@ public final class ApiErrorCodes {
     /** IBL-E6 / ADR-0067: contentStructureJson is malformed / unparseable on nesting write path. */
     public static final String CONTENT_MODULE_NESTING_STRUCTURE_INVALID = "CONTENT_MODULE_NESTING_STRUCTURE_INVALID";
 
+    /** SYS-NORM Wave 7: promotion export missing required asset object bytes. */
+    public static final String EXPORT_ASSET_BINARY_MISSING = "EXPORT_ASSET_BINARY_MISSING";
+
     private ApiErrorCodes() {
     }
 }

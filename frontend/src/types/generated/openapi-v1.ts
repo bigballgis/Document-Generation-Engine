@@ -995,7 +995,7 @@ export interface paths {
         };
         /**
          * Export a template as JSON or ZIP bundle
-         * @description Exports an eligible template (`PENDING_RELEASE`, `PUBLISHED`, `STOPPED`, or `DEPRECATED`) as `template-export-bundle-v1-json` by default, or `template-export-bundle-v2-json` when `bundleVersion=2` (CE-E01). JSON responses use the management success envelope; ZIP responses (`format=zip`) return an `application/zip` attachment. v1 ZIP contains only `template-export-bundle.json`. v2 ZIP additionally embeds `artifacts/master.docx` (pinned master revision bytes) and the JSON carries `masterPin`, `clauseSnapshots`, `renderProfile`, and `assetKeyManifest`. Bundle omits secrets, API credential material, and runtime credentials. Permission boundary per permission-matrix section 5: `GLOBAL_ADMIN` (all templates), `GROUP_ADMIN` (authorized groups), `DOCUMENT_AUTHOR` (own templates only). Export actions are audited. Traceability: BDD-CE-E01-001…006; docs/behavior/ce-e01-export-bundle-v2.md. When the pinned master DOCX object is unavailable at export time, fail-closed with `PINNED_MASTER_UNAVAILABLE` / `api.error.rendering.pinnedMasterUnavailable` (reuse CE-K01 / CE-G06 key).
+         * @description Exports an eligible template (`PENDING_RELEASE`, `PUBLISHED`, `STOPPED`, or `DEPRECATED`) as `template-export-bundle-v1-json` by default, or `template-export-bundle-v2-json` when `bundleVersion=2` (CE-E01). JSON responses use the management success envelope; ZIP responses (`format=zip`) return an `application/zip` attachment. v1 ZIP contains only `template-export-bundle.json`. v2 ZIP additionally embeds `artifacts/master.docx` (pinned master revision bytes) and the JSON carries `masterPin`, `clauseSnapshots`, `renderProfile`, and `assetKeyManifest`. When `dependencyClosure=PROMOTION` (SYS-NORM Wave 7; requires `bundleVersion=2` and `format=zip`), the ZIP is a UAT→PROD promotion pack: embeds asset binaries under `artifacts/assets/{assetKey}`, includes transitive clause nesting closure + optional `clauseNestingGraph`, and never includes DocumentBrand/LegalEntity sidecars or secrets. Omitting `dependencyClosure` preserves default CE-E01 v2 keys-only semantics (E01-C7). Bundle omits secrets, API credential material, and runtime credentials. Permission boundary per permission-matrix section 5: `GLOBAL_ADMIN` (all templates), `GROUP_ADMIN` (authorized groups), `DOCUMENT_AUTHOR` (own templates only). Export actions are audited. Traceability: BDD-CE-E01-001…006; docs/behavior/ce-e01-export-bundle-v2.md; Wave 7 BDD-SYS-NORM-PP-001…006; docs/behavior/sys-norm-promotion-pack.md. When the pinned master DOCX object is unavailable at export time, fail-closed with `PINNED_MASTER_UNAVAILABLE` / `api.error.rendering.pinnedMasterUnavailable` (reuse CE-K01 / CE-G06 key). Nesting cycle/depth violations under promotion closure fail closed (IBL-E6 code family). Missing asset object bytes under promotion closure fail closed.
          */
         get: operations["exportTemplateBundle"];
         put?: never;
@@ -1061,7 +1061,7 @@ export interface paths {
         put?: never;
         /**
          * Import a template export bundle into DRAFT (or dry-run dependency pre-check)
-         * @description Imports a validated `template-export-bundle-v1-json` or `template-export-bundle-v2-json` (CE-E01) bundle. Imported templates land in `DRAFT` and must re-run test, approval, and publish in the target environment. `masterId` must reference an `APPROVED` master in the same `groupCode` as bundle metadata. `importConflictPolicy` defaults to `REJECT_IMPORT` when omitted. `KEEP_TEMPLATE_ID` applies only when the internal template UUID in bundle metadata already exists; conflicting `externalId` always rejects import. When `dryRun=true`, the API returns a dependency pre-check report (`dependencyReport`) with HTTP 200 and performs no business-table writes (CE-E01). Commit import with blocking unmet dependencies returns 422 `api.error.template.importDependenciesUnsatisfied` with the same report shape — never a half-imported state. v2 may materialize missing clause snapshots as DRAFT content-module versions inside a single transaction. Permission boundary per permission-matrix section 5 matches export. Import and dry-run actions are audited; successful commit returns `importBatchId`. Traceability: BDD-CE-E01-007…017; docs/behavior/ce-e01-export-bundle-v2.md.
+         * @description Imports a validated `template-export-bundle-v1-json` or `template-export-bundle-v2-json` (CE-E01) bundle, including Wave 7 promotion packs when embedded assets/nesting graph are present (auto-detect; no separate import profile flag). Imported templates land in `DRAFT` and must re-run test, approval, and publish in the target environment — never PUBLISHED / PENDING_RELEASE via import. `masterId` must reference an `APPROVED` master in the same `groupCode` as bundle metadata when binding an existing master. `importConflictPolicy` defaults to `REJECT_IMPORT` when omitted. `KEEP_TEMPLATE_ID` applies only when the internal template UUID in bundle metadata already exists; conflicting `externalId` always rejects import. When `dryRun=true`, the API returns a dependency pre-check report (`dependencyReport`) with HTTP 200 and performs no business-table writes (CE-E01 / PP-C9). Commit import with blocking unmet dependencies returns 422 `api.error.template.importDependenciesUnsatisfied` with the same report shape — never a half-imported state. v2 may materialize missing clause snapshots as DRAFT content-module versions inside a single transaction. Promotion packs may also materialize CE-E02 library assets from embedded binaries and, when configured/allowed, a missing master from embedded DOCX as **DRAFT only** (two-phase P2 — never skip APPROVED; PP-C6). Additive report `dependencyType` values: `CLAUSE_NESTING`, `ASSET_BINARY` (or `ASSET_KEY` with codes `ASSET_WILL_MATERIALIZE` / `ASSET_BINARY_ABSENT`). Non-promotion v1/v2 fail-closed semantics must not regress. Permission boundary per permission-matrix section 5 matches export (no new codes). Import and dry-run actions are audited; successful commit returns `importBatchId`. Traceability: BDD-CE-E01-007…017; docs/behavior/ce-e01-export-bundle-v2.md; BDD-SYS-NORM-PP-007…019; docs/behavior/sys-norm-promotion-pack.md.
          */
         post: operations["importTemplateBundle"];
         delete?: never;
@@ -1575,7 +1575,7 @@ export interface paths {
         put?: never;
         /**
          * Export authorized eligible templates as a full-library ZIP (CE-E03)
-         * @description Assembles a `template-library-export-v1-zip` attachment for the caller's authorized export-eligible templates (lifecycle `PENDING_RELEASE` | `PUBLISHED` | `STOPPED` | `DEPRECATED`, same as single-template export). ZIP fixed relative paths: `library-export-manifest.json`; `templates/{templateId}.zip` (each byte-equivalent to E01 `bundleVersion=2&format=zip`); deduped `masters/{masterFileHash}.docx`; deduped `clauses/{moduleCode}__{semanticVersion}.json`. Nested packs are always E01 v2; no library-embedded v1 mode. Asset binaries are never embedded (keys only in manifest `assetKeyManifest`). Permission boundary reuses permission-matrix section 5 **导出模板** exactly — no new permission code: `GLOBAL_ADMIN` (all), `GROUP_ADMIN` (authorized groups), `DOCUMENT_AUTHOR` (own templates only); per-template authorization filter; `TEMPLATE_TESTER` and other non-export roles → 403. Optional body filters: `groupId`, `templateIds` (max 500), `includeSkipped` (default true). Candidate resolution: non-empty `templateIds` → those IDs ∩ auth ∩ existence; else non-empty `groupId` → group ∩ auth; else all authorized. Eligible candidate count max 500 → else 422 `api.error.library.exportLimitExceeded`. Empty INCLUDED set → 422 `api.error.library.exportEmpty`. Partial success: HTTP 200 when `includedCount ≥ 1` (FAILED/SKIPPED recorded in manifest only). Unauthorized or unknown requested IDs are omitted from `templates[]` (`omittedUnauthorizedOrUnknownCount` only — no existence leak). Success (including partial) audits `LIBRARY_EXPORT` (batch id, counts, scope, actor; no clause full text, DOCX bytes, or variable values). No `Idempotency-Key` requirement (each call new `exportBatchId`). Library import and management UI are out of scope. Traceability: BDD-CE-E03-001…016; docs/behavior/ce-e03-full-library-export.md.
+         * @description Assembles a `template-library-export-v1-zip` attachment for the caller's authorized export-eligible templates (lifecycle `PENDING_RELEASE` | `PUBLISHED` | `STOPPED` | `DEPRECATED`, same as single-template export). ZIP fixed relative paths: `library-export-manifest.json`; `templates/{templateId}.zip` (each byte-equivalent to E01 `bundleVersion=2&format=zip`); deduped `masters/{masterFileHash}.docx`; deduped `clauses/{moduleCode}__{semanticVersion}.json`. Nested packs are always E01 v2; no library-embedded v1 mode. Default (no `dependencyClosure`): asset binaries are never embedded (keys only in manifest `assetKeyManifest`). When body `dependencyClosure=PROMOTION` (SYS-NORM Wave 7 / PP-C3), each nested `templates/{templateId}.zip` is a promotion pack (asset binaries + nesting closure as required), and the root may include deduped `assets/{assetKey}` binaries. Permission boundary reuses permission-matrix section 5 **导出模板** exactly — no new permission code: `GLOBAL_ADMIN` (all), `GROUP_ADMIN` (authorized groups), `DOCUMENT_AUTHOR` (own templates only); per-template authorization filter; `TEMPLATE_TESTER` and other non-export roles → 403. Optional body filters: `groupId`, `templateIds` (max 500), `includeSkipped` (default true), optional `dependencyClosure`. Candidate resolution: non-empty `templateIds` → those IDs ∩ auth ∩ existence; else non-empty `groupId` → group ∩ auth; else all authorized. Eligible candidate count max 500 → else 422 `api.error.library.exportLimitExceeded`. Empty INCLUDED set → 422 `api.error.library.exportEmpty`. Partial success: HTTP 200 when `includedCount ≥ 1` (FAILED/SKIPPED recorded in manifest only). Unauthorized or unknown requested IDs are omitted from `templates[]` (`omittedUnauthorizedOrUnknownCount` only — no existence leak). Success (including partial) audits `LIBRARY_EXPORT` (batch id, counts, scope, actor; no clause full text, DOCX bytes, or variable values). No `Idempotency-Key` requirement (each call new `exportBatchId`). Library import and management batch-export UI remain out of scope. Traceability: BDD-CE-E03-001…016; docs/behavior/ce-e03-full-library-export.md; BDD-SYS-NORM-PP-006; docs/behavior/sys-norm-promotion-pack.md.
          */
         post: operations["exportLibraryTemplates"];
         delete?: never;
@@ -2107,7 +2107,7 @@ export interface components {
         BatchItemStatus: "SUCCEEDED" | "FAILED" | "SKIPPED";
         /** @enum {string} */
         Permission: "ALLOW_PRINT" | "ALLOW_COPY" | "ALLOW_EDIT" | "ALLOW_ANNOTATE" | "ALLOW_FORM_FILL";
-        /** @description Safe whitelist (ADR-0013 amended by ADR-0063 / IBL-E2 and ADR-0065 / IBL-E4). Optional `jurisdiction` / `product` plus existing `channel` may drive Composition Inclusion Rules. Optional `legalEntityCode` drives document-brand resolve (not package selection; not UI chrome). Unknown fields → 400 REQUEST_BODY_INVALID. Must not carry PII, amounts, or template variable plaintext. */
+        /** @description Safe whitelist (ADR-0013 amended by ADR-0063 / IBL-E2, ADR-0065 / IBL-E4, and ADR-0071 / SYS-NORM Wave 6). Optional `jurisdiction` / `product` plus existing `channel` may drive Composition Inclusion Rules. Optional `legalEntityCode` is whitelist-accepted when present but MUST NOT drive LegalEntity→DocumentBrand catalog resolve (not package selection; not UI chrome). Unknown fields → 400 REQUEST_BODY_INVALID. Must not carry PII, amounts, or template variable plaintext. */
         Context: {
             sourceSystem?: string;
             /** @description Call-channel tracing/stats; also a composition inclusion match axis (ADR-0063). Not outbound delivery channel (PD-1). */
@@ -4026,7 +4026,7 @@ export interface components {
         };
         /** @enum {string} */
         DocumentBrandStatus: "ACTIVE" | "INACTIVE";
-        /** @description ADR-0065 / IBL-E4 group-scoped DocumentBrand (≠ UI BrandPreset). */
+        /** @description HISTORICAL / RETIRED (ADR-0071 / SYS-NORM Wave 6). Formerly ADR-0065 / IBL-E4 group-scoped DocumentBrand (≠ UI BrandPreset). Management catalog APIs removed; schema retained for contract archaeology only. */
         DocumentBrandView: {
             groupCode: string;
             documentBrandCode: string;
@@ -4064,7 +4064,7 @@ export interface components {
                 content: components["schemas"]["DocumentBrandView"][];
             };
         };
-        /** @description ADR-0065 / IBL-E4 group-scoped LegalEntity with required brand bind. */
+        /** @description HISTORICAL / RETIRED (ADR-0071 / SYS-NORM Wave 6). Formerly ADR-0065 / IBL-E4 group-scoped LegalEntity with required brand bind. Management catalog APIs removed; schema retained for contract archaeology only. */
         LegalEntityView: {
             groupCode: string;
             legalEntityCode: string;
@@ -4460,7 +4460,7 @@ export interface components {
             assetKey: string;
             assetClass: components["schemas"]["AssetLibraryAssetClass"];
         };
-        /** @description Optional filters for CE-E03 full-library export. Empty object or omitted body = all authorized export-eligible templates. Behavior SoT: docs/behavior/ce-e03-full-library-export.md (E03-C4, E03-C5, E03-C12). */
+        /** @description Optional filters for CE-E03 full-library export. Empty object or omitted body = all authorized export-eligible templates. Behavior SoT: docs/behavior/ce-e03-full-library-export.md (E03-C4, E03-C5, E03-C12); Wave 7 promotion profile: docs/behavior/sys-norm-promotion-pack.md (PP-C3). */
         LibraryExportRequest: {
             /**
              * Format: uuid
@@ -4474,6 +4474,11 @@ export interface components {
              * @default true
              */
             includeSkipped: boolean;
+            /**
+             * @description Optional SYS-NORM Wave 7 promotion dependency-closure profile. When `PROMOTION`, each nested template ZIP is a promotion pack and root may include deduped `assets/{assetKey}` binaries (PP-C3). Absent = default CE-E03 keys-only asset semantics (E03-C10).
+             * @enum {string}
+             */
+            dependencyClosure?: "PROMOTION";
         };
         /**
          * @description How the export candidate set was selected (E03-C5 / E03-C11).
@@ -4570,7 +4575,7 @@ export interface components {
             templates: components["schemas"]["LibraryExportTemplateEntryView"][];
             masterCatalog: components["schemas"]["LibraryExportMasterCatalogEntryView"][];
             clauseCatalog: components["schemas"]["LibraryExportClauseCatalogEntryView"][];
-            /** @description Union of asset keys from INCLUDED E01 v2 bundles (key + usage only; no binaries) (E03-C10). */
+            /** @description Union of asset keys from INCLUDED E01 v2 bundles (key + usage only) (E03-C10). Default export has no root asset binary tree; when `dependencyClosure=PROMOTION`, binaries may appear under `assets/{assetKey}` while this manifest still lists keys. */
             assetKeyManifest: components["schemas"]["TemplateExportAssetKeyManifestItemView"][];
         };
         /** @description CE-E01 asset key inventory item (key only; no binary payload). */
@@ -4579,7 +4584,7 @@ export interface components {
             referenceKey: string;
             usage: components["schemas"]["TemplateExportAssetKeyUsage"];
         };
-        /** @description Template export bundle. v1 uses format `template-export-bundle-v1-json`. v2 (CE-E01) uses `template-export-bundle-v2-json` and includes `masterPin`, `clauseSnapshots`, optional `renderProfile`, and `assetKeyManifest`. Behavior SoT: docs/behavior/ce-e01-export-bundle-v2.md. */
+        /** @description Template export bundle. v1 uses format `template-export-bundle-v1-json`. v2 (CE-E01) uses `template-export-bundle-v2-json` and includes `masterPin`, `clauseSnapshots`, optional `renderProfile`, and `assetKeyManifest`. Promotion packs (Wave 7 `dependencyClosure=PROMOTION`) may additionally include `clauseNestingGraph` and ZIP-only asset binaries under `artifacts/assets/{assetKey}` (not inlined in JSON). Must never embed DocumentBrand/LegalEntity sidecars or secrets. Behavior SoT: docs/behavior/ce-e01-export-bundle-v2.md; docs/behavior/sys-norm-promotion-pack.md. */
         TemplateExportBundleView: {
             /**
              * @description Bundle format constant (v1 or v2).
@@ -4596,12 +4601,14 @@ export interface components {
             policySnapshot?: components["schemas"]["TemplateExportApiPolicySnapshot"];
             /** @description Required for v2 format; omit on v1. */
             masterPin?: components["schemas"]["TemplateExportMasterPinView"];
-            /** @description Required for v2 (may be empty); omit on v1. */
+            /** @description Required for v2 (may be empty); omit on v1. Under promotion closure, must include transitive nesting closure when nested modules exist (PP-C2; depth ≤ 8). */
             clauseSnapshots?: components["schemas"]["TemplateExportClauseSnapshotView"][];
             /** @description Optional on v2; absent → dry-run INFO `RENDER_PROFILE_ABSENT`. */
             renderProfile?: components["schemas"]["TemplateExportRenderProfileView"];
-            /** @description Required for v2 (may be empty); omit on v1; no binaries. */
+            /** @description Required for v2 (may be empty); omit on v1. Default E01 v2: keys only (no binaries in ZIP). Promotion: keys remain; binaries live under ZIP path `artifacts/assets/{assetKey}`. */
             assetKeyManifest?: components["schemas"]["TemplateExportAssetKeyManifestItemView"][];
+            /** @description Optional Wave 7 promotion field (PP-C2). Present when nested content modules exist under promotion export; non-nested templates may omit or emit empty edges. Cycles / depth > 8 fail closed at export. */
+            clauseNestingGraph?: components["schemas"]["TemplateExportClauseNestingGraphView"];
         };
         TemplateExportResult: {
             /** @enum {string} */
@@ -4632,15 +4639,33 @@ export interface components {
             masterId: string;
             /**
              * Format: binary
-             * @description ZIP archive (`template-export-bundle.json` [+ `artifacts/master.docx` for v2]).
+             * @description ZIP archive (`template-export-bundle.json` [+ `artifacts/master.docx` for v2]; promotion packs may also include `artifacts/assets/{assetKey}`).
              */
             file: string;
             importConflictPolicy?: components["schemas"]["TemplateImportConflictPolicy"];
             /** @default false */
             dryRun: boolean;
         };
-        /** @enum {string} */
-        TemplateImportDependencyType: "MASTER_PIN" | "CLAUSE" | "ASSET_KEY" | "RENDER_PROFILE" | "BUNDLE_FORMAT";
+        /** @description One nesting edge in a promotion-pack `clauseNestingGraph` (PP-C2 / ADR-0067). */
+        TemplateExportClauseNestingGraphEdgeView: {
+            /** @description Parent content-module code in the nesting graph. */
+            parentModuleCode: string;
+            /** @description Child content-module code nested under the parent. */
+            childModuleCode: string;
+            /** @description Nesting depth of this edge (≤ 8; ADR-0067). */
+            depth: number;
+        };
+        /** @description Machine-readable clause nesting closure for promotion packs (PP-C2). Edges + depth only; no clause full text. */
+        TemplateExportClauseNestingGraphView: {
+            edges: components["schemas"]["TemplateExportClauseNestingGraphEdgeView"][];
+            /** @description Optional observed max depth in the exported closure. */
+            maxDepth?: number;
+        };
+        /**
+         * @description Dependency category in dry-run / commit reports. Wave 7 adds `CLAUSE_NESTING` and `ASSET_BINARY` (additive; PP-C10). Implementers may also reuse `ASSET_KEY` with codes `ASSET_WILL_MATERIALIZE` / `ASSET_BINARY_ABSENT`.
+         * @enum {string}
+         */
+        TemplateImportDependencyType: "MASTER_PIN" | "CLAUSE" | "ASSET_KEY" | "RENDER_PROFILE" | "BUNDLE_FORMAT" | "CLAUSE_NESTING" | "ASSET_BINARY";
         /**
          * @description Item severity. `MISSING` / `MISMATCH` are blocking unless noted otherwise in behavior SoT; `WILL_MATERIALIZE` and `INFO` are non-blocking; `OK` is success.
          * @enum {string}
@@ -7204,6 +7229,8 @@ export interface operations {
                 format?: "zip";
                 /** @description Export bundle schema generation. `1` (default) = `template-export-bundle-v1-json`. `2` (CE-E01) = `template-export-bundle-v2-json` with self-contained ZIP artifacts. */
                 bundleVersion?: 1 | 2;
+                /** @description Optional promotion dependency-closure profile (SYS-NORM Wave 7). When `PROMOTION`, export embeds asset binaries and clause nesting closure (PP-C1/C2). Requires `bundleVersion=2` and `format=zip`. Absent = default CE-E01 / non-promotion behavior. */
+                dependencyClosure?: "PROMOTION";
             };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */

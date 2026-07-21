@@ -8,6 +8,7 @@ import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.api.TemplateExportBundleView;
 import com.bank.docgen.template.api.TemplateExportMetadataView;
 import com.bank.docgen.template.api.TemplateExportResult;
+import com.bank.docgen.template.domain.TemplateDependencyClosure;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
@@ -49,6 +51,7 @@ public class TemplateExportService {
     private final ObjectMapper objectMapper;
     private final TemplateCurrentVersionResolver templateVersionSupport;
     private final TemplateExportV2Support exportV2Support;
+    private final TemplateExportPromotionSupport exportPromotionSupport;
 
     public TemplateExportService(
             TemplateRepository templateRepository,
@@ -61,7 +64,8 @@ public class TemplateExportService {
             TemplateExportAccessService exportAccessSupport,
             ObjectMapper objectMapper,
             TemplateCurrentVersionResolver templateVersionSupport,
-            TemplateExportV2Support exportV2Support
+            TemplateExportV2Support exportV2Support,
+            TemplateExportPromotionSupport exportPromotionSupport
     ) {
         this.templateRepository = templateRepository;
         this.apiPolicyRepository = apiPolicyRepository;
@@ -74,6 +78,7 @@ public class TemplateExportService {
         this.objectMapper = objectMapper;
         this.templateVersionSupport = templateVersionSupport;
         this.exportV2Support = exportV2Support;
+        this.exportPromotionSupport = exportPromotionSupport;
     }
 
     @Transactional(readOnly = true)
@@ -83,7 +88,21 @@ public class TemplateExportService {
 
     @Transactional(readOnly = true)
     public TemplateExportResult exportJson(UUID templateId, ManagementSessionClaims session, int bundleVersion) {
-        BuiltExport built = buildExport(templateId, session, bundleVersion);
+        return exportJson(templateId, session, bundleVersion, null);
+    }
+
+    @Transactional(readOnly = true)
+    public TemplateExportResult exportJson(
+            UUID templateId,
+            ManagementSessionClaims session,
+            int bundleVersion,
+            TemplateDependencyClosure dependencyClosure
+    ) {
+        // OpenAPI: dependencyClosure=PROMOTION requires format=zip (binaries not inlined in JSON).
+        if (dependencyClosure == TemplateDependencyClosure.PROMOTION) {
+            throw new TemplateValidationException("api.error.template.exportFormatUnsupported");
+        }
+        BuiltExport built = buildExport(templateId, session, bundleVersion, dependencyClosure);
         recordAudit(built.bundle(), session);
         return new TemplateExportResult(built.format(), built.bundle());
     }
@@ -95,10 +114,20 @@ public class TemplateExportService {
 
     @Transactional(readOnly = true)
     public TemplateExportZipArtifact exportZip(UUID templateId, ManagementSessionClaims session, int bundleVersion) {
-        BuiltExport built = buildExport(templateId, session, bundleVersion);
+        return exportZip(templateId, session, bundleVersion, null);
+    }
+
+    @Transactional(readOnly = true)
+    public TemplateExportZipArtifact exportZip(
+            UUID templateId,
+            ManagementSessionClaims session,
+            int bundleVersion,
+            TemplateDependencyClosure dependencyClosure
+    ) {
+        BuiltExport built = buildExport(templateId, session, bundleVersion, dependencyClosure);
         recordAudit(built.bundle(), session);
         byte[] zipBytes = bundleVersion == 2
-                ? zipBundleV2(built.bundle(), built.masterDocxBytes())
+                ? zipBundleV2(built.bundle(), built.masterDocxBytes(), built.assetBinaries())
                 : zipBundle(built.bundle());
         return new TemplateExportZipArtifact(buildZipFilename(built.bundle()), zipBytes);
     }
@@ -109,17 +138,34 @@ public class TemplateExportService {
      */
     @Transactional(readOnly = true)
     public BuiltV2Export buildV2ExportWithoutAudit(UUID templateId, ManagementSessionClaims session) {
-        BuiltExport built = buildExport(templateId, session, 2);
-        byte[] zipBytes = zipBundleV2(built.bundle(), built.masterDocxBytes());
-        return new BuiltV2Export(built.bundle(), built.masterDocxBytes(), zipBytes);
+        return buildV2ExportWithoutAudit(templateId, session, null);
+    }
+
+    @Transactional(readOnly = true)
+    public BuiltV2Export buildV2ExportWithoutAudit(
+            UUID templateId,
+            ManagementSessionClaims session,
+            TemplateDependencyClosure dependencyClosure
+    ) {
+        BuiltExport built = buildExport(templateId, session, 2, dependencyClosure);
+        byte[] zipBytes = zipBundleV2(built.bundle(), built.masterDocxBytes(), built.assetBinaries());
+        return new BuiltV2Export(built.bundle(), built.masterDocxBytes(), zipBytes, built.assetBinaries());
     }
 
     public static boolean isExportEligible(TemplateLifecycleStatus status) {
         return EXPORT_ELIGIBLE.contains(status);
     }
 
-    private BuiltExport buildExport(UUID templateId, ManagementSessionClaims session, int bundleVersion) {
+    private BuiltExport buildExport(
+            UUID templateId,
+            ManagementSessionClaims session,
+            int bundleVersion,
+            TemplateDependencyClosure dependencyClosure
+    ) {
         if (bundleVersion != 1 && bundleVersion != 2) {
+            throw new TemplateValidationException("api.error.template.exportFormatUnsupported");
+        }
+        if (dependencyClosure == TemplateDependencyClosure.PROMOTION && bundleVersion != 2) {
             throw new TemplateValidationException("api.error.template.exportFormatUnsupported");
         }
         TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNull(templateId)
@@ -158,6 +204,34 @@ public class TemplateExportService {
                     references,
                     detail.bindings()
             );
+            if (dependencyClosure == TemplateDependencyClosure.PROMOTION) {
+                TemplateExportPromotionSupport.PromotionArtifacts promotion = exportPromotionSupport.assemble(
+                        v2.clauseSnapshots(),
+                        v2.assetKeyManifest()
+                );
+                TemplateExportBundleView bundle = new TemplateExportBundleView(
+                        EXPORT_FORMAT_V2,
+                        metadata,
+                        detail.variables(),
+                        detail.bindings(),
+                        templateService.loadRules(version),
+                        references,
+                        policy,
+                        v2.masterPin(),
+                        promotion.clauseSnapshots(),
+                        v2.renderProfile(),
+                        v2.assetKeyManifest(),
+                        compositionInclusionRuleService.loadRules(version),
+                        promotion.clauseNestingGraph(),
+                        TemplateDependencyClosure.PROMOTION.name()
+                );
+                return new BuiltExport(
+                        EXPORT_FORMAT_V2,
+                        bundle,
+                        v2.masterDocxBytes(),
+                        promotion.assetBinaries()
+                );
+            }
             TemplateExportBundleView bundle = new TemplateExportBundleView(
                     EXPORT_FORMAT_V2,
                     metadata,
@@ -170,9 +244,10 @@ public class TemplateExportService {
                     v2.clauseSnapshots(),
                     v2.renderProfile(),
                     v2.assetKeyManifest(),
-                    compositionInclusionRuleService.loadRules(version)
+                    compositionInclusionRuleService.loadRules(version),
+                    null
             );
-            return new BuiltExport(EXPORT_FORMAT_V2, bundle, v2.masterDocxBytes());
+            return new BuiltExport(EXPORT_FORMAT_V2, bundle, v2.masterDocxBytes(), Map.of());
         }
 
         TemplateExportBundleView bundle = new TemplateExportBundleView(
@@ -187,9 +262,10 @@ public class TemplateExportService {
                 null,
                 null,
                 null,
-                compositionInclusionRuleService.loadRules(version)
+                compositionInclusionRuleService.loadRules(version),
+                null
         );
-        return new BuiltExport(EXPORT_FORMAT, bundle, new byte[0]);
+        return new BuiltExport(EXPORT_FORMAT, bundle, new byte[0], Map.of());
     }
 
     private void assertExportEligible(TemplateEntity template) {
@@ -222,7 +298,11 @@ public class TemplateExportService {
         }
     }
 
-    private byte[] zipBundleV2(TemplateExportBundleView bundle, byte[] masterDocxBytes) {
+    private byte[] zipBundleV2(
+            TemplateExportBundleView bundle,
+            byte[] masterDocxBytes,
+            Map<String, byte[]> assetBinaries
+    ) {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
@@ -232,6 +312,14 @@ public class TemplateExportService {
                 zipOutputStream.putNextEntry(new ZipEntry(TemplateExportV2Support.ZIP_MASTER_ENTRY));
                 zipOutputStream.write(masterDocxBytes == null ? new byte[0] : masterDocxBytes);
                 zipOutputStream.closeEntry();
+                if (assetBinaries != null) {
+                    for (Map.Entry<String, byte[]> entry : assetBinaries.entrySet()) {
+                        zipOutputStream.putNextEntry(new ZipEntry(
+                                TemplateExportAssetPathSupport.zipEntryName(entry.getKey())));
+                        zipOutputStream.write(entry.getValue() == null ? new byte[0] : entry.getValue());
+                        zipOutputStream.closeEntry();
+                    }
+                }
             }
             return outputStream.toByteArray();
         } catch (IOException exception) {
@@ -259,7 +347,8 @@ public class TemplateExportService {
     public record BuiltV2Export(
             TemplateExportBundleView bundle,
             byte[] masterDocxBytes,
-            byte[] zipBytes
+            byte[] zipBytes,
+            Map<String, byte[]> assetBinaries
     ) {
         public BuiltV2Export {
             masterDocxBytes = masterDocxBytes == null
@@ -268,14 +357,26 @@ public class TemplateExportService {
             zipBytes = zipBytes == null
                     ? new byte[0]
                     : com.bank.docgen.sharedkernel.api.DefensiveCopies.copyBytes(zipBytes);
+            assetBinaries = assetBinaries == null ? Map.of() : Map.copyOf(assetBinaries);
+        }
+
+        /** Backward-compatible 3-arg shape used by older CE-E03 call sites/tests. */
+        public BuiltV2Export(TemplateExportBundleView bundle, byte[] masterDocxBytes, byte[] zipBytes) {
+            this(bundle, masterDocxBytes, zipBytes, Map.of());
         }
     }
 
-    private record BuiltExport(String format, TemplateExportBundleView bundle, byte[] masterDocxBytes) {
+    private record BuiltExport(
+            String format,
+            TemplateExportBundleView bundle,
+            byte[] masterDocxBytes,
+            Map<String, byte[]> assetBinaries
+    ) {
         private BuiltExport {
             masterDocxBytes = masterDocxBytes == null
                     ? new byte[0]
                     : com.bank.docgen.sharedkernel.api.DefensiveCopies.copyBytes(masterDocxBytes);
+            assetBinaries = assetBinaries == null ? Map.of() : Map.copyOf(assetBinaries);
         }
     }
 }

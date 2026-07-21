@@ -5,6 +5,7 @@ import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.TemplateExportResult;
+import com.bank.docgen.template.domain.TemplateDependencyClosure;
 import com.bank.docgen.template.service.TemplateExportService;
 import com.bank.docgen.template.service.TemplateValidationException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,10 +40,21 @@ public class TemplateExportController {
     public SuccessEnvelope<TemplateExportResult> exportJson(
             @PathVariable UUID templateId,
             @RequestParam(value = "bundleVersion", required = false, defaultValue = "1") int bundleVersion,
+            @RequestParam(value = "dependencyClosure", required = false) String dependencyClosure,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        return envelope(request, templateExportService.exportJson(templateId, session, bundleVersion));
+        TemplateDependencyClosure closure = parseDependencyClosure(dependencyClosure);
+        // OpenAPI: PROMOTION requires format=zip — reject JSON carrier early with stable 4xx envelope.
+        if (closure == TemplateDependencyClosure.PROMOTION) {
+            throw new TemplateValidationException("api.error.template.exportFormatUnsupported");
+        }
+        return envelope(request, templateExportService.exportJson(
+                templateId,
+                session,
+                bundleVersion,
+                closure
+        ));
     }
 
     @GetMapping(value = "/{templateId}/export", params = "format=zip")
@@ -50,6 +62,7 @@ public class TemplateExportController {
             @PathVariable UUID templateId,
             @RequestParam("format") String format,
             @RequestParam(value = "bundleVersion", required = false, defaultValue = "1") int bundleVersion,
+            @RequestParam(value = "dependencyClosure", required = false) String dependencyClosure,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletResponse response
     ) throws IOException {
@@ -57,7 +70,12 @@ public class TemplateExportController {
             throw new TemplateValidationException("api.error.template.exportFormatUnsupported");
         }
         TemplateExportService.TemplateExportZipArtifact artifact =
-                templateExportService.exportZip(templateId, session, bundleVersion);
+                templateExportService.exportZip(
+                        templateId,
+                        session,
+                        bundleVersion,
+                        parseDependencyClosure(dependencyClosure)
+                );
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/zip");
         response.setHeader(
@@ -65,6 +83,14 @@ public class TemplateExportController {
                 "attachment; filename=\"" + artifact.filename() + "\""
         );
         response.getOutputStream().write(artifact.content());
+    }
+
+    private static TemplateDependencyClosure parseDependencyClosure(String raw) {
+        try {
+            return TemplateDependencyClosure.parseOptional(raw);
+        } catch (IllegalArgumentException ex) {
+            throw new TemplateValidationException("api.error.template.exportFormatUnsupported");
+        }
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

@@ -53,4 +53,14 @@ describe('parseTemplateExportBundleFile', () => {
     const file = new File(['not-json'], 'bundle.txt', { type: 'text/plain' })
     await expect(parseTemplateExportBundleFile(file)).rejects.toBeInstanceOf(TemplateExportBundleParseError)
   })
+
+  it('parses a v2 JSON bundle file', async () => {
+    const file = createJsonFile({
+      ...sampleBundle,
+      format: 'template-export-bundle-v2-json',
+    })
+    const parsed = await parseTemplateExportBundleFile(file)
+    expect(parsed.format).toBe('template-export-bundle-v2-json')
+    expect(parsed.metadata.externalId).toBe('TPL-IMPORT')
+  })
 })

@@ -5,19 +5,15 @@ import com.bank.docgen.authorization.management.persistence.BusinessGroupEntity;
 import com.bank.docgen.authorization.management.persistence.BusinessGroupRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.library.api.LibraryExportActorView;
-import com.bank.docgen.library.api.LibraryExportClauseCatalogEntryView;
 import com.bank.docgen.library.api.LibraryExportCountsView;
 import com.bank.docgen.library.api.LibraryExportManifestView;
-import com.bank.docgen.library.api.LibraryExportMasterCatalogEntryView;
 import com.bank.docgen.library.api.LibraryExportRequest;
 import com.bank.docgen.library.api.LibraryExportScopeView;
 import com.bank.docgen.library.api.LibraryExportTemplateEntryView;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.TemplateExportAssetKeyManifestItemView;
-import com.bank.docgen.template.api.TemplateExportBundleView;
-import com.bank.docgen.template.api.TemplateExportClauseSnapshotView;
-import com.bank.docgen.template.api.TemplateExportMasterPinView;
+import com.bank.docgen.template.domain.TemplateDependencyClosure;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.service.TemplateAccessDeniedException;
@@ -29,22 +25,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -133,8 +124,9 @@ public class LibraryExportService {
             throw new TemplateAccessDeniedException();
         }
         LibraryExportRequest effective = request == null
-                ? new LibraryExportRequest(null, null, true)
+                ? new LibraryExportRequest(null, null, true, null)
                 : request;
+        TemplateDependencyClosure dependencyClosure = parseDependencyClosure(effective.dependencyClosure());
         if (effective.templateIds() != null && effective.templateIds().size() > MAX_TEMPLATE_IDS) {
             throw new LibraryExportValidationException(
                     ApiErrorCodes.LIBRARY_EXPORT_LIMIT_EXCEEDED,
@@ -143,138 +135,28 @@ public class LibraryExportService {
         }
 
         ResolvedScope scope = resolveCandidates(effective, session);
-        int eligibleCount = 0;
-        for (TemplateEntity template : scope.authorizedTemplates()) {
-            if (TemplateExportService.isExportEligible(template.getLifecycleStatus())) {
-                eligibleCount++;
-            }
-        }
-        if (eligibleCount > MAX_ELIGIBLE_CANDIDATES) {
-            throw new LibraryExportValidationException(
-                    ApiErrorCodes.LIBRARY_EXPORT_LIMIT_EXCEEDED,
-                    "api.error.library.exportLimitExceeded"
-            );
-        }
-        if (eligibleCount < 1) {
-            throw new LibraryExportValidationException(
-                    ApiErrorCodes.LIBRARY_EXPORT_EMPTY,
-                    "api.error.library.exportEmpty"
-            );
-        }
+        assertEligibleCandidateBounds(scope);
 
         UUID exportBatchId = UUID.randomUUID();
         Instant exportedAt = Instant.now();
-        List<LibraryExportTemplateEntryView> templateEntries = new ArrayList<>();
-        Map<String, MasterCatalogAccumulator> masters = new LinkedHashMap<>();
-        Map<String, ClauseCatalogAccumulator> clauses = new LinkedHashMap<>();
-        Map<String, TemplateExportAssetKeyManifestItemView> assets = new LinkedHashMap<>();
-        Set<String> writtenMasterPaths = new HashSet<>();
-        Set<String> writtenClausePaths = new HashSet<>();
-
-        int skippedCount = 0;
-        int failedCount = 0;
-        int includedCount = 0;
-        int retainedNestedZipMapEntries = 0;
-
         Path tempZip = null;
         try {
             tempZip = tempZipFactory.createTempZip();
-            try (OutputStream fileOut = Files.newOutputStream(tempZip);
-                    ZipOutputStream zip = new ZipOutputStream(fileOut)) {
-                for (TemplateEntity template : scope.authorizedTemplates()) {
-                    if (!TemplateExportService.isExportEligible(template.getLifecycleStatus())) {
-                        skippedCount++;
-                        if (effective.includeSkippedOrDefault()) {
-                            templateEntries.add(new LibraryExportTemplateEntryView(
-                                    template.getId().toString(),
-                                    STATUS_SKIPPED,
-                                    REASON_NOT_ELIGIBLE,
-                                    null
-                            ));
-                        }
-                        continue;
-                    }
-                    try {
-                        TemplateExportService.BuiltV2Export built =
-                                templateExportService.buildV2ExportWithoutAudit(template.getId(), session);
-                        String relativePath = "templates/" + template.getId() + ".zip";
-                        writeZipEntry(zip, relativePath, built.zipBytes());
-                        assemblyProbe.afterNestedZipWritten(retainedNestedZipMapEntries);
-                        templateEntries.add(new LibraryExportTemplateEntryView(
-                                template.getId().toString(),
-                                STATUS_INCLUDED,
-                                null,
-                                relativePath
-                        ));
-                        includedCount++;
-                        writeCatalogBinaries(
-                                zip,
-                                template.getId(),
-                                built.bundle(),
-                                built.masterDocxBytes(),
-                                masters,
-                                clauses,
-                                assets,
-                                writtenMasterPaths,
-                                writtenClausePaths
-                        );
-                    } catch (TemplateGovernanceException ex) {
-                        failedCount++;
-                        templateEntries.add(new LibraryExportTemplateEntryView(
-                                template.getId().toString(),
-                                STATUS_FAILED,
-                                ex.errorCode(),
-                                null
-                        ));
-                    } catch (TemplateValidationException ex) {
-                        failedCount++;
-                        templateEntries.add(new LibraryExportTemplateEntryView(
-                                template.getId().toString(),
-                                STATUS_FAILED,
-                                "EXPORT_FAILED",
-                                null
-                        ));
-                    }
-                }
-
-                if (includedCount < 1) {
-                    throw new LibraryExportValidationException(
-                            ApiErrorCodes.LIBRARY_EXPORT_EMPTY,
-                            "api.error.library.exportEmpty"
-                    );
-                }
-
-                LibraryExportCountsView counts = new LibraryExportCountsView(
-                        includedCount,
-                        skippedCount,
-                        failedCount,
-                        scope.omittedCount(),
-                        masters.size(),
-                        clauses.size(),
-                        assets.size()
-                );
-                LibraryExportManifestView manifest = new LibraryExportManifestView(
-                        LIBRARY_EXPORT_FORMAT,
-                        exportBatchId.toString(),
-                        exportedAt,
-                        2,
-                        new LibraryExportActorView(session.username(), primaryRole(session)),
-                        scope.scopeView(),
-                        counts,
-                        templateEntries,
-                        toMasterCatalog(masters),
-                        toClauseCatalog(clauses),
-                        List.copyOf(assets.values())
-                );
-                writeZipEntry(zip, MANIFEST_ENTRY, objectMapper.writeValueAsBytes(manifest));
-            }
-
+            AssemblyResult assembly = assembleLibraryZip(
+                    tempZip,
+                    scope,
+                    effective,
+                    session,
+                    dependencyClosure,
+                    exportBatchId,
+                    exportedAt
+            );
             managementAuditRecorder.recordLibraryExport(
                     exportBatchId.toString(),
                     scope.scopeView().selection(),
-                    includedCount,
-                    skippedCount,
-                    failedCount,
+                    assembly.includedCount(),
+                    assembly.skippedCount(),
+                    assembly.failedCount(),
                     scope.omittedCount(),
                     session.username(),
                     session.displayName()
@@ -295,6 +177,216 @@ public class LibraryExportService {
         } catch (RuntimeException ex) {
             deleteQuietly(tempZip);
             throw ex;
+        }
+    }
+
+    private void assertEligibleCandidateBounds(ResolvedScope scope) {
+        int eligibleCount = 0;
+        for (TemplateEntity template : scope.authorizedTemplates()) {
+            if (TemplateExportService.isExportEligible(template.getLifecycleStatus())) {
+                eligibleCount++;
+            }
+        }
+        if (eligibleCount > MAX_ELIGIBLE_CANDIDATES) {
+            throw new LibraryExportValidationException(
+                    ApiErrorCodes.LIBRARY_EXPORT_LIMIT_EXCEEDED,
+                    "api.error.library.exportLimitExceeded"
+            );
+        }
+        if (eligibleCount < 1) {
+            throw new LibraryExportValidationException(
+                    ApiErrorCodes.LIBRARY_EXPORT_EMPTY,
+                    "api.error.library.exportEmpty"
+            );
+        }
+    }
+
+    private AssemblyResult assembleLibraryZip(
+            Path tempZip,
+            ResolvedScope scope,
+            LibraryExportRequest effective,
+            ManagementSessionClaims session,
+            TemplateDependencyClosure dependencyClosure,
+            UUID exportBatchId,
+            Instant exportedAt
+    ) throws IOException {
+        List<LibraryExportTemplateEntryView> templateEntries = new ArrayList<>();
+        Map<String, LibraryExportCatalogSupport.MasterCatalogAccumulator> masters = new LinkedHashMap<>();
+        Map<String, LibraryExportCatalogSupport.ClauseCatalogAccumulator> clauses = new LinkedHashMap<>();
+        Map<String, TemplateExportAssetKeyManifestItemView> assets = new LinkedHashMap<>();
+        Set<String> writtenMasterPaths = new HashSet<>();
+        Set<String> writtenClausePaths = new HashSet<>();
+        Map<String, byte[]> promotionAssetBinaries = new LinkedHashMap<>();
+        int skippedCount = 0;
+        int failedCount = 0;
+        int includedCount = 0;
+
+        try (OutputStream fileOut = Files.newOutputStream(tempZip);
+                ZipOutputStream zip = new ZipOutputStream(fileOut)) {
+            for (TemplateEntity template : scope.authorizedTemplates()) {
+                if (!TemplateExportService.isExportEligible(template.getLifecycleStatus())) {
+                    skippedCount++;
+                    if (effective.includeSkippedOrDefault()) {
+                        templateEntries.add(new LibraryExportTemplateEntryView(
+                                template.getId().toString(),
+                                STATUS_SKIPPED,
+                                REASON_NOT_ELIGIBLE,
+                                null
+                        ));
+                    }
+                    continue;
+                }
+                TemplateProcessOutcome outcome = processEligibleTemplate(
+                        zip,
+                        template,
+                        session,
+                        dependencyClosure,
+                        masters,
+                        clauses,
+                        assets,
+                        writtenMasterPaths,
+                        writtenClausePaths,
+                        promotionAssetBinaries
+                );
+                templateEntries.add(outcome.entry());
+                if (outcome.included()) {
+                    includedCount++;
+                } else {
+                    failedCount++;
+                }
+            }
+
+            if (includedCount < 1) {
+                throw new LibraryExportValidationException(
+                        ApiErrorCodes.LIBRARY_EXPORT_EMPTY,
+                        "api.error.library.exportEmpty"
+                );
+            }
+
+            LibraryExportCatalogSupport.writePromotionRootAssets(
+                    zip,
+                    dependencyClosure,
+                    promotionAssetBinaries,
+                    writtenMasterPaths,
+                    writtenClausePaths,
+                    assemblyProbe
+            );
+
+            LibraryExportCountsView counts = new LibraryExportCountsView(
+                    includedCount,
+                    skippedCount,
+                    failedCount,
+                    scope.omittedCount(),
+                    masters.size(),
+                    clauses.size(),
+                    assets.size()
+            );
+            LibraryExportManifestView manifest = new LibraryExportManifestView(
+                    LIBRARY_EXPORT_FORMAT,
+                    exportBatchId.toString(),
+                    exportedAt,
+                    2,
+                    new LibraryExportActorView(session.username(), primaryRole(session)),
+                    scope.scopeView(),
+                    counts,
+                    templateEntries,
+                    LibraryExportCatalogSupport.toMasterCatalog(masters),
+                    LibraryExportCatalogSupport.toClauseCatalog(clauses),
+                    List.copyOf(assets.values())
+            );
+            LibraryExportCatalogSupport.writeZipEntry(
+                    zip, MANIFEST_ENTRY, objectMapper.writeValueAsBytes(manifest));
+        }
+        return new AssemblyResult(includedCount, skippedCount, failedCount);
+    }
+
+    private TemplateProcessOutcome processEligibleTemplate(
+            ZipOutputStream zip,
+            TemplateEntity template,
+            ManagementSessionClaims session,
+            TemplateDependencyClosure dependencyClosure,
+            Map<String, LibraryExportCatalogSupport.MasterCatalogAccumulator> masters,
+            Map<String, LibraryExportCatalogSupport.ClauseCatalogAccumulator> clauses,
+            Map<String, TemplateExportAssetKeyManifestItemView> assets,
+            Set<String> writtenMasterPaths,
+            Set<String> writtenClausePaths,
+            Map<String, byte[]> promotionAssetBinaries
+    ) throws IOException {
+        try {
+            TemplateExportService.BuiltV2Export built =
+                    templateExportService.buildV2ExportWithoutAudit(
+                            template.getId(),
+                            session,
+                            dependencyClosure
+                    );
+            String relativePath = "templates/" + template.getId() + ".zip";
+            LibraryExportCatalogSupport.writeZipEntry(zip, relativePath, built.zipBytes());
+            assemblyProbe.afterNestedZipWritten(0);
+            LibraryExportCatalogSupport.writeCatalogBinaries(
+                    zip,
+                    template.getId(),
+                    built.bundle(),
+                    built.masterDocxBytes(),
+                    masters,
+                    clauses,
+                    assets,
+                    writtenMasterPaths,
+                    writtenClausePaths,
+                    objectMapper,
+                    assemblyProbe
+            );
+            if (dependencyClosure == TemplateDependencyClosure.PROMOTION
+                    && built.assetBinaries() != null) {
+                for (Map.Entry<String, byte[]> assetEntry : built.assetBinaries().entrySet()) {
+                    promotionAssetBinaries.putIfAbsent(assetEntry.getKey(), assetEntry.getValue());
+                }
+            }
+            return new TemplateProcessOutcome(
+                    true,
+                    new LibraryExportTemplateEntryView(
+                            template.getId().toString(),
+                            STATUS_INCLUDED,
+                            null,
+                            relativePath
+                    )
+            );
+        } catch (TemplateGovernanceException ex) {
+            return new TemplateProcessOutcome(
+                    false,
+                    new LibraryExportTemplateEntryView(
+                            template.getId().toString(),
+                            STATUS_FAILED,
+                            ex.errorCode(),
+                            null
+                    )
+            );
+        } catch (TemplateValidationException ex) {
+            return new TemplateProcessOutcome(
+                    false,
+                    new LibraryExportTemplateEntryView(
+                            template.getId().toString(),
+                            STATUS_FAILED,
+                            "EXPORT_FAILED",
+                            null
+                    )
+            );
+        }
+    }
+
+    private record AssemblyResult(int includedCount, int skippedCount, int failedCount) {
+    }
+
+    private record TemplateProcessOutcome(boolean included, LibraryExportTemplateEntryView entry) {
+    }
+
+    private static TemplateDependencyClosure parseDependencyClosure(String raw) {
+        try {
+            return TemplateDependencyClosure.parseOptional(raw);
+        } catch (IllegalArgumentException ex) {
+            throw new LibraryExportValidationException(
+                    ApiErrorCodes.LIBRARY_EXPORT_FAILED,
+                    "api.error.library.exportFailed"
+            );
         }
     }
 
@@ -384,114 +476,6 @@ public class LibraryExportService {
         return authorized;
     }
 
-    private void writeCatalogBinaries(
-            ZipOutputStream zip,
-            UUID templateId,
-            TemplateExportBundleView bundle,
-            byte[] masterDocxBytes,
-            Map<String, MasterCatalogAccumulator> masters,
-            Map<String, ClauseCatalogAccumulator> clauses,
-            Map<String, TemplateExportAssetKeyManifestItemView> assets,
-            Set<String> writtenMasterPaths,
-            Set<String> writtenClausePaths
-    ) throws IOException {
-        TemplateExportMasterPinView pin = bundle.masterPin();
-        if (pin != null && pin.masterFileHash() != null && !pin.masterFileHash().isBlank()) {
-            String hash = pin.masterFileHash().toLowerCase(Locale.ROOT);
-            String path = "masters/" + hash + ".docx";
-            MasterCatalogAccumulator acc = masters.computeIfAbsent(
-                    hash,
-                    key -> new MasterCatalogAccumulator(
-                            hash,
-                            pin.masterRevisionId(),
-                            pin.revisionSequence(),
-                            path,
-                            new LinkedHashSet<>()
-                    )
-            );
-            acc.sourceTemplateIds().add(templateId.toString());
-            if (writtenMasterPaths.add(path)) {
-                writeZipEntry(zip, path, masterDocxBytes == null ? new byte[0] : masterDocxBytes);
-                assemblyProbe.afterCatalogBinaryWritten(writtenMasterPaths.size() + writtenClausePaths.size());
-            }
-        }
-        List<TemplateExportClauseSnapshotView> snapshots =
-                bundle.clauseSnapshots() == null ? List.of() : bundle.clauseSnapshots();
-        for (TemplateExportClauseSnapshotView snapshot : snapshots) {
-            if (snapshot == null || snapshot.moduleCode() == null || snapshot.semanticVersion() == null) {
-                continue;
-            }
-            String catalogKey = snapshot.moduleCode() + "\0" + snapshot.semanticVersion();
-            String path = "clauses/"
-                    + safePathSegment(snapshot.moduleCode())
-                    + "__"
-                    + safePathSegment(snapshot.semanticVersion())
-                    + ".json";
-            ClauseCatalogAccumulator acc = clauses.computeIfAbsent(
-                    catalogKey,
-                    key -> new ClauseCatalogAccumulator(
-                            snapshot.moduleCode(),
-                            snapshot.semanticVersion(),
-                            snapshot.sourceModuleId(),
-                            path,
-                            new LinkedHashSet<>()
-                    )
-            );
-            acc.sourceTemplateIds().add(templateId.toString());
-            if (writtenClausePaths.add(path)) {
-                writeZipEntry(zip, path, objectMapper.writeValueAsBytes(snapshot));
-                assemblyProbe.afterCatalogBinaryWritten(writtenMasterPaths.size() + writtenClausePaths.size());
-            }
-        }
-        List<TemplateExportAssetKeyManifestItemView> assetItems =
-                bundle.assetKeyManifest() == null ? List.of() : bundle.assetKeyManifest();
-        for (TemplateExportAssetKeyManifestItemView item : assetItems) {
-            if (item == null || item.referenceKey() == null || item.referenceKey().isBlank()) {
-                continue;
-            }
-            String key = item.referenceKey() + "|" + item.usage();
-            assets.putIfAbsent(key, item);
-        }
-    }
-
-    private static List<LibraryExportMasterCatalogEntryView> toMasterCatalog(
-            Map<String, MasterCatalogAccumulator> masters
-    ) {
-        List<LibraryExportMasterCatalogEntryView> rows = new ArrayList<>();
-        for (MasterCatalogAccumulator acc : masters.values()) {
-            rows.add(new LibraryExportMasterCatalogEntryView(
-                    acc.masterFileHash(),
-                    acc.masterRevisionId(),
-                    acc.revisionSequence(),
-                    List.copyOf(acc.sourceTemplateIds()),
-                    acc.path()
-            ));
-        }
-        return rows;
-    }
-
-    private static List<LibraryExportClauseCatalogEntryView> toClauseCatalog(
-            Map<String, ClauseCatalogAccumulator> clauses
-    ) {
-        List<LibraryExportClauseCatalogEntryView> rows = new ArrayList<>();
-        for (ClauseCatalogAccumulator acc : clauses.values()) {
-            rows.add(new LibraryExportClauseCatalogEntryView(
-                    acc.moduleCode(),
-                    acc.semanticVersion(),
-                    acc.sourceModuleId(),
-                    List.copyOf(acc.sourceTemplateIds()),
-                    acc.path()
-            ));
-        }
-        return rows;
-    }
-
-    private static void writeZipEntry(ZipOutputStream zip, String name, byte[] bytes) throws IOException {
-        zip.putNextEntry(new ZipEntry(name));
-        zip.write(bytes == null ? new byte[0] : bytes);
-        zip.closeEntry();
-    }
-
     private static void deleteQuietly(Path path) {
         if (path == null) {
             return;
@@ -501,15 +485,6 @@ public class LibraryExportService {
         } catch (IOException ignored) {
             // best-effort cleanup
         }
-    }
-
-    private static String safePathSegment(String value) {
-        String encoded = URLEncoder.encode(value, StandardCharsets.UTF_8)
-                .replace("+", "%20");
-        if (encoded.contains("..") || encoded.contains("/") || encoded.contains("\\")) {
-            return encoded.replace("..", "_").replace("/", "_").replace("\\", "_");
-        }
-        return encoded;
     }
 
     private static String primaryRole(ManagementSessionClaims session) {
@@ -589,24 +564,6 @@ public class LibraryExportService {
             List<TemplateEntity> authorizedTemplates,
             int omittedCount,
             LibraryExportScopeView scopeView
-    ) {
-    }
-
-    private record MasterCatalogAccumulator(
-            String masterFileHash,
-            String masterRevisionId,
-            Integer revisionSequence,
-            String path,
-            Set<String> sourceTemplateIds
-    ) {
-    }
-
-    private record ClauseCatalogAccumulator(
-            String moduleCode,
-            String semanticVersion,
-            String sourceModuleId,
-            String path,
-            Set<String> sourceTemplateIds
     ) {
     }
 }

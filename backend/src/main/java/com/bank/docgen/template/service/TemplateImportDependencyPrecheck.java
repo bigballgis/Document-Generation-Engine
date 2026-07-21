@@ -13,10 +13,13 @@ import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.api.TemplateExportAssetKeyManifestItemView;
 import com.bank.docgen.template.api.TemplateExportBundleView;
+import com.bank.docgen.template.api.TemplateExportClauseNestingGraphEdgeView;
+import com.bank.docgen.template.api.TemplateExportClauseNestingGraphView;
 import com.bank.docgen.template.api.TemplateExportClauseSnapshotView;
 import com.bank.docgen.template.api.TemplateExportMasterPinView;
 import com.bank.docgen.template.api.TemplateImportDependencyItemView;
 import com.bank.docgen.template.api.TemplateImportDependencyReportView;
+import com.bank.docgen.template.domain.TemplateDependencyClosure;
 import com.bank.docgen.template.domain.TemplateImportDependencySeverity;
 import com.bank.docgen.template.domain.TemplateImportDependencyType;
 import java.io.IOException;
@@ -31,7 +34,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /**
- * CE-E01: builds import dependency pre-check reports for dry-run and commit gates.
+ * CE-E01 / Wave 7: builds import dependency pre-check reports for dry-run and commit gates.
  */
 @Component
 public class TemplateImportDependencyPrecheck {
@@ -61,8 +64,46 @@ public class TemplateImportDependencyPrecheck {
             UUID targetMasterId,
             byte[] embeddedMasterDocx,
             boolean zipCarrier,
-            boolean requireMasterDocxForCommit
+            boolean requireMasterDocxForCommit,
+            Map<String, byte[]> embeddedAssetBinaries
     ) {
+        public PrecheckContext {
+            embeddedAssetBinaries = embeddedAssetBinaries == null ? Map.of() : Map.copyOf(embeddedAssetBinaries);
+        }
+
+        /** Backward-compatible CE-E01 constructor (no embedded assets). */
+        public PrecheckContext(
+                TemplateExportBundleView bundle,
+                UUID targetMasterId,
+                byte[] embeddedMasterDocx,
+                boolean zipCarrier,
+                boolean requireMasterDocxForCommit
+        ) {
+            this(bundle, targetMasterId, embeddedMasterDocx, zipCarrier, requireMasterDocxForCommit, Map.of());
+        }
+
+        /**
+         * Prefer explicit bundle {@code dependencyClosure=PROMOTION} (Wave 7 export marker).
+         * Fall back to embedded-asset / nesting-graph heuristics for legacy packs without the field.
+         * Unknown explicit values fail closed (not treated as promotion).
+         */
+        public boolean promotionCarrier() {
+            if (bundle != null
+                    && bundle.dependencyClosure() != null
+                    && !bundle.dependencyClosure().isBlank()) {
+                try {
+                    return TemplateDependencyClosure.parseOptional(bundle.dependencyClosure())
+                            == TemplateDependencyClosure.PROMOTION;
+                } catch (IllegalArgumentException ex) {
+                    return false;
+                }
+            }
+            if (embeddedAssetBinaries != null && !embeddedAssetBinaries.isEmpty()) {
+                return true;
+            }
+            TemplateExportClauseNestingGraphView graph = bundle == null ? null : bundle.clauseNestingGraph();
+            return graph != null && graph.edges() != null && !graph.edges().isEmpty();
+        }
     }
 
     public TemplateImportDependencyReportView evaluate(PrecheckContext context) {
@@ -80,7 +121,8 @@ public class TemplateImportDependencyPrecheck {
 
         evaluateMasterPin(context, items);
         evaluateClauses(bundle, items);
-        evaluateAssets(bundle, items);
+        evaluateNesting(bundle, items);
+        evaluateAssets(context, items);
         evaluateRenderProfile(bundle, items);
 
         int blocking = 0;
@@ -174,13 +216,23 @@ public class TemplateImportDependencyPrecheck {
 
         String targetHash = resolveTargetMasterFileHash(context.targetMasterId());
         if (!targetHash.equalsIgnoreCase(pin.masterFileHash())) {
-            items.add(item(
-                    TemplateImportDependencyType.MASTER_PIN,
-                    TemplateImportDependencySeverity.MISMATCH,
-                    "MASTER_FINGERPRINT_MISMATCH",
-                    "api.error.template.dep.masterFingerprintMismatch",
-                    null
-            ));
+            if (context.promotionCarrier() && hasDocx) {
+                items.add(item(
+                        TemplateImportDependencyType.MASTER_PIN,
+                        TemplateImportDependencySeverity.WILL_MATERIALIZE,
+                        "MASTER_WILL_MATERIALIZE",
+                        "api.error.template.dep.masterWillMaterialize",
+                        null
+                ));
+            } else {
+                items.add(item(
+                        TemplateImportDependencyType.MASTER_PIN,
+                        TemplateImportDependencySeverity.MISMATCH,
+                        "MASTER_FINGERPRINT_MISMATCH",
+                        "api.error.template.dep.masterFingerprintMismatch",
+                        null
+                ));
+            }
         } else {
             items.add(item(
                     TemplateImportDependencyType.MASTER_PIN,
@@ -242,7 +294,6 @@ public class TemplateImportDependencyPrecheck {
             if (reference == null) {
                 continue;
             }
-            // Prefer moduleCode via snapshot coverage (source UUID is not a target identity).
             String moduleCode = resolveModuleCode(reference, snapshotsBySourceModuleId);
             if (moduleCode != null && snapshotsByCode.containsKey(moduleCode)) {
                 continue;
@@ -271,10 +322,67 @@ public class TemplateImportDependencyPrecheck {
         }
     }
 
-    /**
-     * Resolve clause identity by moduleCode: snapshot sourceModuleId correlation first,
-     * then target lookup by UUID only when the module already exists locally.
-     */
+    private void evaluateNesting(TemplateExportBundleView bundle, List<TemplateImportDependencyItemView> items) {
+        if (!TemplateExportV2Support.EXPORT_FORMAT_V2.equals(bundle.format())) {
+            return;
+        }
+        TemplateExportClauseNestingGraphView graph = bundle.clauseNestingGraph();
+        if (graph == null || graph.edges() == null || graph.edges().isEmpty()) {
+            return;
+        }
+        Map<String, TemplateExportClauseSnapshotView> snapshotsByCode = new LinkedHashMap<>();
+        List<TemplateExportClauseSnapshotView> snapshots =
+                bundle.clauseSnapshots() == null ? List.of() : bundle.clauseSnapshots();
+        for (TemplateExportClauseSnapshotView snapshot : snapshots) {
+            if (snapshot == null || snapshot.moduleCode() == null || snapshot.moduleCode().isBlank()) {
+                continue;
+            }
+            snapshotsByCode.put(snapshot.moduleCode().trim().toUpperCase(Locale.ROOT), snapshot);
+        }
+        for (TemplateExportClauseNestingGraphEdgeView edge : graph.edges()) {
+            if (edge == null) {
+                continue;
+            }
+            String parent = edge.parentModuleCode() == null
+                    ? ""
+                    : edge.parentModuleCode().trim().toUpperCase(Locale.ROOT);
+            String child = edge.childModuleCode() == null
+                    ? ""
+                    : edge.childModuleCode().trim().toUpperCase(Locale.ROOT);
+            boolean parentOnTarget = !parent.isBlank()
+                    && contentModuleRepository.findByModuleCodeAndDeletedAtIsNull(parent).isPresent();
+            boolean childOnTarget = !child.isBlank()
+                    && contentModuleRepository.findByModuleCodeAndDeletedAtIsNull(child).isPresent();
+            boolean parentSnapshot = snapshotsByCode.containsKey(parent);
+            boolean childSnapshot = snapshotsByCode.containsKey(child);
+            if (parentOnTarget && childOnTarget) {
+                items.add(item(
+                        TemplateImportDependencyType.CLAUSE_NESTING,
+                        TemplateImportDependencySeverity.OK,
+                        "CLAUSE_NESTING_OK",
+                        "api.error.template.dep.clauseNestingOk",
+                        parent + ">" + child
+                ));
+            } else if ((parentOnTarget || parentSnapshot) && (childOnTarget || childSnapshot)) {
+                items.add(item(
+                        TemplateImportDependencyType.CLAUSE_NESTING,
+                        TemplateImportDependencySeverity.WILL_MATERIALIZE,
+                        "CLAUSE_NESTING_WILL_MATERIALIZE",
+                        "api.error.template.dep.clauseNestingWillMaterialize",
+                        parent + ">" + child
+                ));
+            } else {
+                items.add(item(
+                        TemplateImportDependencyType.CLAUSE_NESTING,
+                        TemplateImportDependencySeverity.MISSING,
+                        "CLAUSE_NESTING_MISSING",
+                        "api.error.template.dep.clauseNestingMissing",
+                        parent + ">" + child
+                ));
+            }
+        }
+    }
+
     private String resolveModuleCode(
             ContentModuleReferenceView reference,
             Map<String, TemplateExportClauseSnapshotView> snapshotsBySourceModuleId
@@ -325,12 +433,14 @@ public class TemplateImportDependencyPrecheck {
         }
     }
 
-    private void evaluateAssets(TemplateExportBundleView bundle, List<TemplateImportDependencyItemView> items) {
+    private void evaluateAssets(PrecheckContext context, List<TemplateImportDependencyItemView> items) {
+        TemplateExportBundleView bundle = context.bundle();
         if (!TemplateExportV2Support.EXPORT_FORMAT_V2.equals(bundle.format())) {
             return;
         }
         List<TemplateExportAssetKeyManifestItemView> manifest =
                 bundle.assetKeyManifest() == null ? List.of() : bundle.assetKeyManifest();
+        Map<String, byte[]> embedded = context.embeddedAssetBinaries();
         for (TemplateExportAssetKeyManifestItemView asset : manifest) {
             if (asset == null || asset.referenceKey() == null || asset.referenceKey().isBlank()) {
                 continue;
@@ -342,6 +452,22 @@ public class TemplateImportDependencyPrecheck {
                         TemplateImportDependencySeverity.OK,
                         "ASSET_KEY_PRESENT",
                         "api.error.template.dep.assetKeyPresent",
+                        key
+                ));
+            } else if (embedded.containsKey(key) && embedded.get(key) != null && embedded.get(key).length > 0) {
+                items.add(item(
+                        TemplateImportDependencyType.ASSET_BINARY,
+                        TemplateImportDependencySeverity.WILL_MATERIALIZE,
+                        "ASSET_WILL_MATERIALIZE",
+                        "api.error.template.dep.assetWillMaterialize",
+                        key
+                ));
+            } else if (!embedded.isEmpty() || context.promotionCarrier()) {
+                items.add(item(
+                        TemplateImportDependencyType.ASSET_BINARY,
+                        TemplateImportDependencySeverity.MISSING,
+                        "ASSET_BINARY_ABSENT",
+                        "api.error.template.dep.assetBinaryAbsent",
                         key
                 ));
             } else {

@@ -1,4 +1,8 @@
-import { inflateRawSync } from 'node:zlib'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { crc32, inflateRawSync } from 'node:zlib'
+import AdmZip from 'adm-zip'
 import type { APIRequestContext } from '@playwright/test'
 import {
   DEMO_GROUP_CODE,
@@ -9,6 +13,17 @@ import {
   E2E_TEMPLATE_TESTER,
 } from './auth'
 import { E2E_API_BASE_URL, findMasterByName } from './masters-api'
+
+const E2E_ASSET_PNG_PATH = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  'fixtures',
+  'e2e-asset-1x1.png',
+)
+
+const ZIP_BUNDLE_ENTRY = 'template-export-bundle.json'
+const ZIP_MASTER_ENTRY = 'artifacts/master.docx'
+const ZIP_ASSET_DIR = 'artifacts/assets/'
 
 interface ApiEnvelope<T> {
   result: T
@@ -180,6 +195,11 @@ async function publishTemplateThroughLifecycle(
     previewViewedConfirmed: true,
   })
 
+  // IBL-E3: after test pass the template is PENDING_SUBMIT — must submit-for-approval first.
+  await authorizedPost(request, authorToken, `/templates/${templateId}/lifecycle/submit-approval`, {
+    commentSummary: 'E2E ready for approval decision',
+  })
+
   await authorizedPost(request, approverToken, `/templates/${templateId}/lifecycle/approval-decision`, {
     decision: 'APPROVED',
     commentSummary: 'E2E approved',
@@ -261,6 +281,195 @@ export async function exportTemplateJsonViaApi(
 ): Promise<TemplateExportApiResult> {
   const token = await apiLogin(request, E2E_GROUP_ADMIN)
   return authorizedGet<TemplateExportApiResult>(request, token, `/templates/${templateId}/export`)
+}
+
+/** SYS-NORM Wave 7 — promotion pack ZIP (`dependencyClosure=PROMOTION`). */
+export async function exportPromotionZipViaApi(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<Buffer> {
+  const token = await apiLogin(request, E2E_GROUP_ADMIN)
+  const pathSuffix =
+    `/templates/${templateId}/export?bundleVersion=2&format=zip&dependencyClosure=PROMOTION`
+  const response = await request.get(`${E2E_API_BASE_URL}${pathSuffix}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok()) {
+    throw new Error(`GET ${pathSuffix} failed (${response.status()}): ${await response.text()}`)
+  }
+  const contentType = response.headers()['content-type'] ?? ''
+  if (!contentType.includes('application/zip') && !contentType.includes('application/octet-stream')) {
+    throw new Error(`Expected ZIP content-type for promotion export, got "${contentType}"`)
+  }
+  return Buffer.from(await response.body())
+}
+
+function pathSafeAssetSegment(assetKey: string): string {
+  return encodeURIComponent(assetKey.trim()).replace(/\+/g, '%20')
+}
+
+function readZipBundleJson(zip: AdmZip): Record<string, unknown> {
+  const entry = zip.getEntry(ZIP_BUNDLE_ENTRY)
+  if (!entry) {
+    throw new Error(`Promotion ZIP missing ${ZIP_BUNDLE_ENTRY}`)
+  }
+  return JSON.parse(entry.getData().toString('utf8')) as Record<string, unknown>
+}
+
+/**
+ * Build a ZIP with STORE compression, preserving entry order.
+ * AdmZip reorders entries alphabetically on write, which breaks the FE import
+ * summary parser (it only reads the first local ZIP entry as JSON).
+ */
+function buildOrderedStoreZip(entries: Array<{ name: string; data: Buffer }>): Buffer {
+  const localParts: Buffer[] = []
+  const centralParts: Buffer[] = []
+  let offset = 0
+
+  for (const entry of entries) {
+    const nameBuf = Buffer.from(entry.name, 'utf8')
+    const data = entry.data
+    const checksum = crc32(data) >>> 0
+    const localHeader = Buffer.alloc(30)
+    localHeader.writeUInt32LE(0x04034b50, 0)
+    localHeader.writeUInt16LE(20, 4) // version needed
+    localHeader.writeUInt16LE(0, 6) // flags
+    localHeader.writeUInt16LE(0, 8) // STORE
+    localHeader.writeUInt16LE(0, 10) // time
+    localHeader.writeUInt16LE(0, 12) // date
+    localHeader.writeUInt32LE(checksum, 14)
+    localHeader.writeUInt32LE(data.length, 18)
+    localHeader.writeUInt32LE(data.length, 22)
+    localHeader.writeUInt16LE(nameBuf.length, 26)
+    localHeader.writeUInt16LE(0, 28)
+
+    const central = Buffer.alloc(46)
+    central.writeUInt32LE(0x02014b50, 0)
+    central.writeUInt16LE(20, 4)
+    central.writeUInt16LE(20, 6)
+    central.writeUInt16LE(0, 8)
+    central.writeUInt16LE(0, 10)
+    central.writeUInt16LE(0, 12)
+    central.writeUInt16LE(0, 14)
+    central.writeUInt32LE(checksum, 16)
+    central.writeUInt32LE(data.length, 20)
+    central.writeUInt32LE(data.length, 24)
+    central.writeUInt16LE(nameBuf.length, 28)
+    central.writeUInt16LE(0, 30)
+    central.writeUInt16LE(0, 32)
+    central.writeUInt16LE(0, 34)
+    central.writeUInt16LE(0, 36)
+    central.writeUInt32LE(0, 38)
+    central.writeUInt32LE(offset, 42)
+
+    localParts.push(localHeader, nameBuf, data)
+    centralParts.push(central, nameBuf)
+    offset += localHeader.length + nameBuf.length + data.length
+  }
+
+  const centralDirectory = Buffer.concat(centralParts)
+  const end = Buffer.alloc(22)
+  end.writeUInt32LE(0x06054b50, 0)
+  end.writeUInt16LE(0, 4)
+  end.writeUInt16LE(0, 6)
+  end.writeUInt16LE(entries.length, 8)
+  end.writeUInt16LE(entries.length, 10)
+  end.writeUInt32LE(centralDirectory.length, 12)
+  end.writeUInt32LE(offset, 16)
+  end.writeUInt16LE(0, 20)
+
+  return Buffer.concat([...localParts, centralDirectory, end])
+}
+
+function rebuildPromotionZip(
+  sourceZip: AdmZip,
+  bundleJson: Record<string, unknown>,
+  options?: {
+    omitMasterDocx?: boolean
+    extraAsset?: { assetKey: string; bytes: Buffer }
+  },
+): Buffer {
+  const ordered: Array<{ name: string; data: Buffer }> = [
+    // FE summary parser reads the first ZIP entry — keep JSON first.
+    { name: ZIP_BUNDLE_ENTRY, data: Buffer.from(JSON.stringify(bundleJson), 'utf8') },
+  ]
+
+  for (const entry of sourceZip.getEntries()) {
+    if (entry.isDirectory || entry.entryName === ZIP_BUNDLE_ENTRY) {
+      continue
+    }
+    if (options?.omitMasterDocx && entry.entryName === ZIP_MASTER_ENTRY) {
+      continue
+    }
+    ordered.push({ name: entry.entryName, data: entry.getData() })
+  }
+
+  if (options?.extraAsset) {
+    const entryName = `${ZIP_ASSET_DIR}${pathSafeAssetSegment(options.extraAsset.assetKey)}`
+    ordered.push({ name: entryName, data: options.extraAsset.bytes })
+  }
+
+  return buildOrderedStoreZip(ordered)
+}
+
+export interface StagingPromotionZip {
+  zipBytes: Buffer
+  externalId: string
+  templateId: string
+  name: string
+  injectedAssetKey?: string
+}
+
+/**
+ * Rewrites promotion ZIP metadata for a clean REJECT_IMPORT into the same stack,
+ * optionally embeds a unique asset binary so dry-run surfaces ASSET_BINARY rows.
+ */
+export function mutatePromotionZipForStagingImport(
+  zipBytes: Buffer,
+  options?: { injectSyntheticAsset?: boolean },
+): StagingPromotionZip {
+  const source = new AdmZip(zipBytes)
+  const bundle = readZipBundleJson(source)
+  const metadata = (bundle.metadata ?? {}) as Record<string, unknown>
+  const baseExternalId = String(metadata.externalId ?? 'E2E-PROMO')
+  const stagingExternalId = `${baseExternalId}-STAGING`.replace(/[^A-Z0-9_-]/gi, '-').toUpperCase()
+  const stagingTemplateId = crypto.randomUUID()
+  const stagingName = `${String(metadata.name ?? 'E2E Promotion')} (staging import)`
+
+  metadata.templateId = stagingTemplateId
+  metadata.externalId = stagingExternalId
+  metadata.name = stagingName
+  bundle.metadata = metadata
+
+  let injectedAssetKey: string | undefined
+  let extraAsset: { assetKey: string; bytes: Buffer } | undefined
+  if (options?.injectSyntheticAsset !== false) {
+    injectedAssetKey = `E2E-PROMO-ASSET-${Date.now().toString(36).toUpperCase()}`
+    const manifest = Array.isArray(bundle.assetKeyManifest)
+      ? (bundle.assetKeyManifest as Array<Record<string, unknown>>)
+      : []
+    manifest.push({ referenceKey: injectedAssetKey, usage: 'IMAGE' })
+    bundle.assetKeyManifest = manifest
+    extraAsset = {
+      assetKey: injectedAssetKey,
+      bytes: fs.readFileSync(E2E_ASSET_PNG_PATH),
+    }
+  }
+
+  return {
+    zipBytes: rebuildPromotionZip(source, bundle, { extraAsset }),
+    externalId: stagingExternalId,
+    templateId: stagingTemplateId,
+    name: stagingName,
+    injectedAssetKey,
+  }
+}
+
+/** Strip embedded master DOCX so dry-run reports blocking MASTER_DOCX_ABSENT. */
+export function stripMasterDocxFromPromotionZip(zipBytes: Buffer): Buffer {
+  const source = new AdmZip(zipBytes)
+  const bundle = readZipBundleJson(source)
+  return rebuildPromotionZip(source, bundle, { omitMasterDocx: true })
 }
 
 export function assertNoSecretsInSerializedBundle(serialized: string): void {

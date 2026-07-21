@@ -11,6 +11,9 @@ describe('brand theme tokens', () => {
     expect(getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim()).toBe(
       BRAND_THEMES.REDBC.primary,
     )
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--el-color-primary').trim()).toBe(
+      BRAND_THEMES.REDBC.primary,
+    )
   })
 
   it('applies GREENBC primary color to document root', () => {
@@ -20,6 +23,9 @@ describe('brand theme tokens', () => {
       BRAND_THEMES.GREENBC.primary,
     )
     expect(getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim()).toBe(
+      BRAND_THEMES.GREENBC.primary,
+    )
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--el-color-primary').trim()).toBe(
       BRAND_THEMES.GREENBC.primary,
     )
   })

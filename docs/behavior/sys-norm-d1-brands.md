@@ -251,7 +251,8 @@ lookup
 **When** export / dependency-closure behavior is evaluated after Wave 6  
 **Then** the path **does not require** DocumentBrand/LegalEntity sidecar catalogs  
 **And** letterhead/master dependency rules still follow two-phase P2 (no skip APPROVED)  
-**And** Wave 7 dry-run UI remains **out of scope** for this leaf
+**And** Wave 7 dry-run UI / pack runtime SoT is
+[sys-norm-promotion-pack.md](./sys-norm-promotion-pack.md) (out of scope for **this** leaf)
 
 ### 6.2 FE hard retire (closes Wave 1 soft routes)
 
