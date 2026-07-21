@@ -4,18 +4,19 @@
 **Owner phase:** [P21 — Role-journey frontend redesign & business-friendly terminology](../plan/detail/P21-role-journey-frontend-redesign.md) (**Done** 2026-06-30)
 **Primary persona source:** user confirmation 2026-06-29 (two rounds).
 
-### SYS-NORM Confirmed intent (2026-07-21) — Implementation Not Started
+### SYS-NORM Confirmed intent (2026-07-21) — Wave 5 matrix rewritten; runtime code In Progress
 
 > Product direction locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.8.
 > **Do not claim L1 sweep Done** until Wave 8 `sys-norm-demo-seed-terms`.
+> **Do not claim Wave 5 Done** — matrix rewrite landed; Flyway/FE enums remain TM **#149**.
 
 | Topic | Confirmed | Pending | Wave |
 | --- | --- | --- | --- |
 | L1 English primary object label | **Letterhead** (purge user-facing mixed “Master” on L1 primary surfaces) | — | Intent Wave 0; sweep **Wave 8** |
 | L1 Chinese primary object label | **母版** | — | Intent Wave 0; sweep **Wave 8** |
 | API / L3 identifiers | May keep `masterId`, `MasterDocument`, routes | — | Unchanged |
-| Role `DOCUMENT_AUTHOR` | Role **ID** direction locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md); BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) ROLE-013) | EN/ZH **display label** finalizable — interim FE copy OK | Labels finalize Wave 5 interim / Wave 8 |
-| Role merge (catalog) | Six-role compression direction locked (ADR-0070); Wave 5 BDD **ready** | Runtime catalog + matrix still 8-role until Wave 5 impl | **Wave 5** `sys-norm-roles` |
+| Role `DOCUMENT_AUTHOR` | Role **ID** locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md); BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) ROLE-013) | EN/ZH **display label** finalizable — interim FE copy OK | Labels: Wave 5 interim / Wave 8 finalize |
+| Role merge (catalog) | Six-role compression locked (ADR-0070); matrix tables rewritten ([permission-matrix.md](../security/permission-matrix.md) stage 3) | Runtime `ManagementRole` / migration / FE pickers still Wave 5 code | **Wave 5** `sys-norm-roles` In Progress |
 
 §4.5 below remains the P21 canonical glossary baseline; SYS-NORM Wave 8 reconciles residual “Master” mix on L1.
 
@@ -82,7 +83,7 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | Master (object) | Letterhead | 母版 | `masters.*`, dashboard stats | short form for the DOCX asset |
 | Master package | Letterhead package | 母版包 | `packageCatalog.master`, `masters.hub` | catalog row / package hub |
 | Master name | Letterhead name | 母版名称 | `masters.list.columns.name` | form/table L2 |
-| Master designer (role) | Letterhead designer | 母版设计人员 | `roles.MASTER_DESIGNER` | aligns with domain docs & permission matrix |
+| Document author (role) | Document author (interim) | 文档作者（interim） | `roles.DOCUMENT_AUTHOR` | Role ID locked; L1 final Pending (P-Q1). Retired: `roles.MASTER_DESIGNER` / `TEMPLATE_AUTHOR` |
 | Master review / approval | Letterhead review | 母版审核 | `masters.workflow.*`, `nav.behaviorItems.masterReview` | not 主文档审批 |
 | Master ID (technical) | Master ID | 母版 ID | `templates.detail.masterId` | L2 field label only |
 | Layout placeholder (was anchor) | Layout placeholder | 版式占位符 | `templates.authoring.*` | never expose "anchor" on L1 |
@@ -116,11 +117,11 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | Queue / trigger code | Behavior entry label (en) | Behavior entry label (zh-CN) | Visible to |
 | --- | --- | --- | --- |
 | TEST | Waiting on my testing | 待我测试 | TEMPLATE_TESTER, GROUP, GLOBAL |
-| APPROVAL | Waiting on my approval | 待我审批 | TEMPLATE_APPROVER, GROUP, GLOBAL |
-| REMEDIATION | Waiting on my fixes | 待我修改 | TEMPLATE_AUTHOR, GROUP, GLOBAL |
+| APPROVAL | Waiting on my approval | 待我审批 | GROUP, GLOBAL (ex-`TEMPLATE_APPROVER` absorbed) |
+| REMEDIATION | Waiting on my fixes | 待我修改 | DOCUMENT_AUTHOR, GROUP, GLOBAL |
 | PENDING_RELEASE | Waiting to confirm go-live | 待确认上线 | GROUP, GLOBAL |
 | ESCALATION | Overdue to follow up | 超时待跟进 | GROUP, GLOBAL |
-| (master review) | Letterheads to review | 待审核母版 | GROUP, GLOBAL (+ MASTER_DESIGNER for own rework) |
+| (master review) | Letterheads to review | 待审核母版 | GROUP, GLOBAL (+ DOCUMENT_AUTHOR for own rework) |
 | Collaboration timeout config | Reminder timing | 催办时限设置 | GROUP, GLOBAL |
 | Escalation (concept) | Overdue reminder | 超时提醒 | notification, not system escalation |
 | Exception intervention | Confirm on behalf (with audit trail) | 代为确认（留痕） | GROUP, GLOBAL |
@@ -160,7 +161,7 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | Package container | **Letterhead package** | **母版包** | Catalog rows, hub pages (`packageCatalog.master.*`, `masters.hub.*`) |
 | Revision snapshot | **Revision line** | **修订线** | Immutable upload/replace history (`MasterRevisionLine`) |
 | Layout slot in DOCX | **Layout placeholder** | **版式占位符** | Bindings, integrity checks — not **锚点** on L1 |
-| Role | **Letterhead designer** | **母版设计人员** | `MASTER_DESIGNER` display label |
+| Role | **Document author** (interim) | **文档作者**（interim） | `DOCUMENT_AUTHOR` — L1 final Pending (P-Q1); historical letterhead-designer label retired from assignable catalog |
 | Behavior queue | **Letterheads to review** | **待审核母版** | Dashboard / nav behavior entry |
 
 **Forbidden on L1 (zh-CN):** **主文档** — do not use in any user-facing bundle value.
@@ -178,7 +179,7 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | `dashboard.stats.masterPendingReview.title` | Letterheads awaiting review | 待审核母版 |
 | `nav.behaviorItems.masterReview` | Letterheads to review | 待审核母版 |
 | `api.error.master.*` (L1 message) | …this letterhead… | …此母版… |
-| `roles.MASTER_DESIGNER` | Letterhead designer | 母版设计人员 |
+| `roles.DOCUMENT_AUTHOR` | Document author (interim) | 文档作者（interim） |
 
 **Code / docs (L3 — unchanged):** `MasterDocument`, `master_document`, `GET /masters`, Flyway table
 names, audit event codes, OpenAPI schema `MasterDocumentResponse`.

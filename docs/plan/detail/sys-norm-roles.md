@@ -24,7 +24,7 @@ Retain SoD: `TEMPLATE_TESTER` remains distinct; authors do not gain `decideTests
 
 | Item | Value |
 | --- | --- |
-| Leaf status | **In Progress** (activated; matrix rewrite + code **not** Done) |
+| Leaf status | **In Progress** (activated; **matrix rewrite landed** stage 3; production code **not** started) |
 | Formal phase | **None** |
 | Host sole-active | **#149** `sys-norm-roles` |
 | Next queue head (after this leaf) | `sys-norm-d1-brands` (Wave 6) — **Not Started** / **not** activated |
@@ -37,7 +37,7 @@ Retain SoD: `TEMPLATE_TESTER` remains distinct; authors do not gain `decideTests
 | # | Criterion | Evidence |
 | --- | --- | --- |
 | 1 | Wave 5 BDD ready | [sys-norm-roles.md](../../behavior/sys-norm-roles.md) **BDD-SYS-NORM-ROLE-001…018** |
-| 2 | Permission-matrix rewrite (doc-keeper) before production code | [permission-matrix.md](../../security/permission-matrix.md) — stage 3 |
+| 2 | Permission-matrix rewrite (doc-keeper) before production code | [permission-matrix.md](../../security/permission-matrix.md) — **stage 3 landed** (six-role SoT) |
 | 3 | Six-role catalog + migration + JWT/FE per ADR-0070 | Gates + ROLE scenarios green |
 | 4 | Program plan Wave 5 → Done; Wave 6 not auto-activated | [system-normalization-program-2026-07.md](../system-normalization-program-2026-07.md) |
 | 5 | Vetoes held | No `#3b/#5a` GO; no `#53` Done; no Wave 6+ fold; no SYS-NORM program Done |
@@ -47,7 +47,7 @@ Retain SoD: `TEMPLATE_TESTER` remains distinct; authors do not gain `decideTests
 ## Gate order (locked)
 
 1. BDD **ready** (met)  
-2. **doc-keeper** matrix rewrite (stage 3) — **before** role-catalog / Flyway / FE enum code  
+2. **doc-keeper** matrix rewrite (stage 3) — **landed**; gate before role-catalog / Flyway / FE enum code  
 3. TDD Red → Green (BE + FE)  
 4. E2E + UIUX (`frontend_ui_in_scope=true`)  
 5. Queued deploy evidence (stages 5/10)  

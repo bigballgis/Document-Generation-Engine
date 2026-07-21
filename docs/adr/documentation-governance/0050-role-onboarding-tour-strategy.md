@@ -7,6 +7,9 @@ deciders: architecture, frontend-engineer
 related:
   - docs/plan/detail/LRP-C-usability-deepening.md
   - docs/product/catalog-navigation-ux.md
+  - docs/adr/authorization-security/0070-role-compression-six-roles.md
+  - docs/behavior/sys-norm-roles.md
+  - docs/security/permission-matrix.md
 ---
 
 # ADR-0050 — Role Onboarding Tour Strategy
@@ -25,9 +28,12 @@ affordances, dismissable and re-triggerable from the help menu.
 Use **Element Plus `el-tour`** (bundled in `element-plus@2.9+`, no new dependency) to deliver
 a role-aware first-run onboarding tour:
 
-1. **One tour per role** — `GLOBAL_ADMIN`, `GROUP_ADMIN`, `TEMPLATE_AUTHOR`,
-   `TEMPLATE_TESTER`, `TEMPLATE_APPROVER`, `AUDIT_ADMIN`. Each tour highlights the 3–6
-   affordances that role uses most.
+1. **One tour per role** — align to the **six-role** assignable catalog
+   ([ADR-0070](../authorization-security/0070-role-compression-six-roles.md)):
+   `GLOBAL_ADMIN`, `GROUP_ADMIN` (absorbs former approver tour), `DOCUMENT_AUTHOR`
+   (merges former designer/author tours; interim L1 labels OK), `TEMPLATE_TESTER`,
+   `LEGAL_REVIEWER`, `AUDIT_ADMIN`. Each tour highlights the 3–6 affordances that role
+   uses most.
 2. **Dismissable + re-triggerable** — a "Take the tour" entry in the help menu restarts the
    tour for the current role.
 3. **Persistence** — completion is stored in `localStorage` (`docgen.onboarding.<role>`);
@@ -46,6 +52,8 @@ a role-aware first-run onboarding tour:
   (`data-tour="template-create-btn"`) not CSS classes.
 - **Neutral:** the tour does not teach the full lifecycle (that is the role-journey
   timeline's job); it only points at the entry points.
+- **Wave 5:** retired role codes must not appear as assignable picker options; journey
+  resolution follows [sys-norm-roles.md](../../behavior/sys-norm-roles.md) ROLE-014.
 
 ## Alternatives considered
 

@@ -84,45 +84,39 @@ ManagementUser 是后台治理与管理界面的本地账户对象，也是平�
 
 - 用户名全局唯一；创建重复用户名返回 `409 USERNAME_ALREADY_EXISTS`。
 - 分组管理员创建/编辑用户时，目标用户被授权组范围必须 ⊆ 分组管理员自身被授权组范围（否则 `403 GROUP_SCOPE_OUT_OF_RANGE`）。
-- 分组管理员只能分配运营类角色（`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_TESTER`、`TEMPLATE_APPROVER`、`LEGAL_REVIEWER`），不得分配 `GLOBAL_ADMIN`、`AUDIT_ADMIN`、`GROUP_ADMIN`（否则 `403 ROLE_ASSIGNMENT_NOT_ALLOWED`）。
+- 分组管理员只能分配运营类角色（`DOCUMENT_AUTHOR`、`TEMPLATE_TESTER`、`LEGAL_REVIEWER`），不得分配 `GLOBAL_ADMIN`、`AUDIT_ADMIN`、`GROUP_ADMIN`（否则 `403 ROLE_ASSIGNMENT_NOT_ALLOWED`）。退役角色 `TEMPLATE_APPROVER` / `MASTER_DESIGNER` / `TEMPLATE_AUTHOR` → **422** `ROLE_NOT_ASSIGNABLE`（[ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md)）。
 - 逻辑删除用户仅全局管理员可执行（否则 `403 USER_DELETE_NOT_ALLOWED`）。
 
 ### 2.2 角色 Role
 
-已确认系统角色包括：
+**已确认（ADR-0070 / Wave 5）：** 可分配管理角色恰好六个。权限单元格 SoT：[permission-matrix.md](../security/permission-matrix.md)；行为：[sys-norm-roles.md](../behavior/sys-norm-roles.md)。生产枚举/迁移实现属 Wave 5 后续阶段（Accepted ≠ runtime Done）。
 
-- 管理员。
-- 母版设计人员。
-- 模板编排人员。
-- 测试人员。
-- 审批人员。
-- 审计管理员。
+| 角色标识 | 说明 |
+| --- | --- |
+| `GLOBAL_ADMIN` | 全局管理员；系统最大权限。 |
+| `GROUP_ADMIN` | 分组管理员；管理范围由显式授权组决定；**吸收**原 `TEMPLATE_APPROVER`（合规/单级审批、SEAL 等）。 |
+| `DOCUMENT_AUTHOR` | 文档作者；原 `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` 能力并集。L1 EN/ZH **Pending**。 |
+| `TEMPLATE_TESTER` | 测试人员；正常 `decideTests`（SoD，不并入作者）。 |
+| `LEGAL_REVIEWER` | 法务审阅人；多级 LEGAL 阶段（ADR-0064；压缩未改动）。 |
+| `AUDIT_ADMIN` | 审计管理员；压缩未改动。 |
 
-管理员范围包括：
+退役不可分配：`TEMPLATE_APPROVER`、`MASTER_DESIGNER`、`TEMPLATE_AUTHOR` → **422** `ROLE_NOT_ASSIGNABLE`。
 
-- 全局管理员。
-- 分组管理员。
+API 管理由全局管理员和分组管理员承担，不设置独立 API 管理员角色。API 调用方为非管理身份。
 
-全局管理员拥有系统最大权限。
+测试人员与法务审阅人按分组配置。合规/单级审批判定由分组管理员（+全局管理员）承担。审计管理员用于查看审计记录。
 
-分组管理员的管理范围由显式授权的一个或多个组决定，不要求等同于用户自身所属组；分组管理员仅在被授权组范围内拥有管理员权限。
+非主责角色采用最小权限；文档作者不因合并获得测试判定或正常审批判定；API 调用方只调用已授权 API。
 
-API 管理由全局管理员和分组管理员承担，不设置独立 API 管理员角色。
+登录起点角色旅程（历史 T01 首波基线，已被六角色目录取代）：
 
-测试人员和审批人员按分组配置。审计管理员用于查看审计记录。
-
-非主责角色采用最小权限；除已确认职责外，不获得额外母版/模板编辑权限。测试人员只执行测试通过/不通过判定，审批人员只执行审批通过/不通过判定，API 调用方只调用已授权 API。
-
-登录起点角色旅程重构（T01 首波）已确认规则：
-
-- 首波角色范围为 `GLOBAL_ADMIN`、`GROUP_ADMIN`、`TEMPLATE_AUTHOR`。
+- 历史首波曾为 `GLOBAL_ADMIN`、`GROUP_ADMIN`、`TEMPLATE_AUTHOR`；**当前可分配目录**见上表六角色。
 - 登录鉴权边界本迭代采用真实本地管理账户认证，并为未来 SSO/OIDC 集成保留扩展边界。
-- 新旧导航并行切换由特性开关控制，不引入新的持久权限对象。
-- 首波角色旅程链路基线：登录 -> 角色落地页 -> 角色首个关键任务。
+- 会话 `capabilities` / `visibleRoutes` 由后端下发（见权限矩阵 §13）。
 
 待确认（不作为已确认领域规则）：
 
-- `TEMPLATE_AUTHOR` 与现有“母版设计人员”在身份映射层面的最终对齐策略。
+- `DOCUMENT_AUTHOR` L1 EN/ZH 显示名最终文案（P-Q1；interim OK）。
 - 角色关键任务完成时间指标的量化口径和阈值。
 
 ### 2.2.1 路由可见性与禁止访问判定 Route Visibility and Forbidden Decision
@@ -170,8 +164,7 @@ API 管理由全局管理员和分组管理员承担，不设置独立 API 管�
 
 已确认规则：
 
-- 母版设计人员需要分组。
-- 模板编排人员需要分组。
+- 文档作者（`DOCUMENT_AUTHOR`）需要分组（承接原母版设计与模板编排分组要求）。
 - 母版本身需要严格按组隔离。
 - 模板本身需要分组隔离。
 - 模板只能在所属或被授权组范围内使用和维护。
@@ -1145,14 +1138,14 @@ API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 
 - 全局管理员按已确认最大权限范围查看审计记录。
 - 分组管理员只能查看被授权组范围内的审计明细。
 - 分组管理员不能查看未授权组审计明细，也不能查看全局审计明细。
-- 母版设计人员、模板编排人员、测试人员、审批人员、API 调用方不因该角色本身获得审计查看权限。
+- 文档作者、测试人员、法务审阅人、API 调用方不因该角色本身获得审计查看权限。
 
 已确认审计导出权限：
 
 - 审计记录允许导出。
 - 全局管理员和审计管理员可导出全部审计记录。
 - 分组管理员只能导出被授权组范围内的审计记录。
-- 母版设计人员、模板编排人员、测试人员、审批人员、API 调用方不因该角色本身获得审计导出权限。
+- 文档作者、测试人员、法务审阅人、API 调用方不因该角色本身获得审计导出权限。
 
 已确认审计保留规则（Tier-1 / Tier-2 — ADR-0048 / LR-D1）：
 
@@ -1352,8 +1345,8 @@ P19 范围（见 [P5 薄切片边界](../plan/detail/P5-lifecycle-governance.md)
 
 | Mode | 提交审批后子状态 | 正常判定角色 | 到达待发布条件 |
 | --- | --- | --- | --- |
-| `SINGLE_TRACK`（默认；存量迁移） | `PENDING_DECISION` | `TEMPLATE_APPROVER`（+管理员） | 一次 Approve |
-| `LEGAL_THEN_COMPLIANCE` | `PENDING_LEGAL_DECISION` →（LEGAL Approve）→ `PENDING_COMPLIANCE_DECISION` | LEGAL：`LEGAL_REVIEWER`（+管理员）；COMPLIANCE：`TEMPLATE_APPROVER`（+管理员） | 两阶段均 Approve |
+| `SINGLE_TRACK`（默认；存量迁移） | `PENDING_DECISION` | `GROUP_ADMIN`（+`GLOBAL_ADMIN`；吸收原 `TEMPLATE_APPROVER`） | 一次 Approve |
+| `LEGAL_THEN_COMPLIANCE` | `PENDING_LEGAL_DECISION` →（LEGAL Approve）→ `PENDING_COMPLIANCE_DECISION` | LEGAL：`LEGAL_REVIEWER`（+管理员）；COMPLIANCE：`GROUP_ADMIN`（+`GLOBAL_ADMIN`） | 两阶段均 Approve |
 
 可选回显 `approvalStage`：`LEGAL` \| `COMPLIANCE` \| null（由子状态唯一推导或显式入参；对外契约禁止歧义双源）。Mode 可写窗口：仅 `DRAFT` 或 `APPROVAL`+`PENDING_SUBMIT`；否则 **422** `APPROVAL_MATRIX_MODE_LOCKED`。任一层 Reject → `DRAFT`；再发须重测+重审全链。母版审核与条款独立审批轨**不**采用本矩阵。CE-K08 法务元数据仍可选。行为：[ibl-e3-legal-approval-matrix.md](../behavior/ibl-e3-legal-approval-matrix.md)；决策：[ADR-0064](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)。Accepted ≠ impl Done。
 
@@ -1361,12 +1354,12 @@ P19 范围（见 [P5 薄切片边界](../plan/detail/P5-lifecycle-governance.md)
 
 - v1 不新增发布前或发布后中间状态；发布前检查、生成预览、测试生成、渲染任务、阻断项和失败原因通过 Template Test Record、Preview Artifact、Pre-release Checklist、Release Summary 和 Audit Summary 表达，不升级为 Template Lifecycle Status。多级审批的 LEGAL/COMPLIANCE 通过 **`approvalSubState`** 表达，不新增顶层 `TemplateLifecycleStatus`。
 - 模板必须经过测试人员测试。
-- 模板必须经过审批轨判定（`SINGLE_TRACK` 的审批人员，或 `LEGAL_THEN_COMPLIANCE` 的法务审阅人 + 审批人员）。
+- 模板必须经过审批轨判定（`SINGLE_TRACK` 的分组管理员合规路径，或 `LEGAL_THEN_COMPLIANCE` 的法务审阅人 + 分组管理员）。
 - 测试人员按分组配置。
-- 审批人员与法务审阅人按分组配置。
+- 法务审阅人按分组配置；合规/单级审批正常路径由分组管理员承担（ADR-0070）。
 - 提交测试只能从草稿状态或测试通过状态发起；提交测试后模板进入测试中状态。
 - 正常测试判定由测试人员执行；分组管理员只在异常处理或补救场景中，作为例外管理员在被授权组范围内执行测试通过/不通过判定。
-- **`SINGLE_TRACK`：** 正常审批判定由审批人员执行；管理员可按权限矩阵对审批做正常判定（组范围）。**`LEGAL_THEN_COMPLIANCE`：** LEGAL 由 `LEGAL_REVIEWER`（+管理员）判定；COMPLIANCE 由 `TEMPLATE_APPROVER`（+管理员）判定；错角色/错阶段 fail-closed。
+- **`SINGLE_TRACK`：** 正常审批判定由 `GROUP_ADMIN`（+`GLOBAL_ADMIN`）执行（吸收原 `TEMPLATE_APPROVER`）。**`LEGAL_THEN_COMPLIANCE`：** LEGAL 由 `LEGAL_REVIEWER`（+管理员）判定；COMPLIANCE 由 `GROUP_ADMIN`（+`GLOBAL_ADMIN`）判定；错角色/错阶段 fail-closed。
 - 分组管理员/全局管理员对同人自批的例外干预须填写原因、执行二次确认，并在审计中添加单独的管理员例外干预标记（CE-G01）。
 - 测试通过后，模板进入测试通过状态，不自动进入待审批状态。
 - 测试通过状态下，需要由具备提交审批权限的角色手动提交审批；提交审批后进入待审批（单级 `PENDING_DECISION` 或多级 `PENDING_LEGAL_DECISION`）。

@@ -30,15 +30,15 @@ related:
 | User confirmation | **Yes** — 2026-07-21 (LOCKED — do not reopen) |
 | Behavior SoT (decision) | [system-normalization-program.md](../../behavior/system-normalization-program.md) §2.6 / §6 |
 | Runtime BDD SoT | [sys-norm-roles.md](../../behavior/sys-norm-roles.md) **ready** — **BDD-SYS-NORM-ROLE-001…018** |
-| Implementation wave | **Wave 5** `sys-norm-roles` — BDD ready; slice **Not Started** until activate |
-| Matrix rewrite | Wave 5 (permission-matrix tables; doc-keeper after BDD `ready`); Wave 0 recorded Confirmed intent only |
+| Implementation wave | **Wave 5** `sys-norm-roles` — BDD ready; slice **In Progress** (TM **#149**); runtime catalog/migration/FE **not** Done |
+| Matrix rewrite | **Landed** (doc-keeper stage 3) — [permission-matrix.md](../../security/permission-matrix.md) six-role SoT; production code follows |
 | Checklist | Does **not** flip **#3b** / **#5a** |
 
 `sourceOfTruth: true` while Accepted.
 
-**Accepted ≠ Wave 5 Done.** Production role catalog, migration SQL, and FE labels remain Wave 5
-delivery after matrix rewrite + this wave BDD (`ready`) — code follows plan-orchestrator /
-doc-keeper / implementers.
+**Accepted ≠ Wave 5 Done.** Permission-matrix rewrite is complete; production role catalog,
+migration SQL, and FE labels remain Wave 5 delivery — implementers follow this ADR + BDD +
+rewritten matrix.
 
 ## Context
 

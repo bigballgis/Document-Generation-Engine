@@ -81,7 +81,7 @@ BDD **ready** ([sys-norm-roles.md](../behavior/sys-norm-roles.md)). Wave 6+ rema
 | **External services** | Invocation records = **separate page** (dashboard-like). Package API settings = single edit surface (off hub External access tab). |
 | **Testing artifacts** | On published + history Testing: download DOCX/PDF; durable `previewId` / artifact keys; read-only ≠ no download for authorized viewers. |
 | **D1 brands/entities** | **Retire** Document brands + Legal entities **product surfaces**. Letterhead/logo/seal live in **Letterhead (master)**. Keep **Legal holds**. Shell REDBC/GREENBC remain UI-only. No brand/entity sidecar in promotion pack. Runtime simplify = Wave 6; nav removal may start Wave 1 after ADR-0071 Accepted. Supersedes ADR-0065 **product surface** (historical impl retained). |
-| **Roles (6-role compression)** | Keep: `TEMPLATE_TESTER`, `LEGAL_REVIEWER`, `AUDIT_ADMIN`, `GLOBAL_ADMIN`, `GROUP_ADMIN` (absorbs `TEMPLATE_APPROVER`). Merge: `TEMPLATE_APPROVER` → `GROUP_ADMIN` (privilege accept). Merge: `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` → `DOCUMENT_AUTHOR` (ID locked; **L1 display name finalizable** — Pending). Wave 5 **In Progress** (TM **#149**; BDD **ready** [sys-norm-roles.md](../behavior/sys-norm-roles.md)); matrix rewrite (doc-keeper) **before** code. See ADR-0070. |
+| **Roles (6-role compression)** | Keep: `TEMPLATE_TESTER`, `LEGAL_REVIEWER`, `AUDIT_ADMIN`, `GLOBAL_ADMIN`, `GROUP_ADMIN` (absorbs `TEMPLATE_APPROVER`). Merge: `TEMPLATE_APPROVER` → `GROUP_ADMIN` (privilege accept). Merge: `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` → `DOCUMENT_AUTHOR` (ID locked; **L1 display name finalizable** — Pending). Wave 5 **In Progress** (TM **#149**; BDD **ready** [sys-norm-roles.md](../behavior/sys-norm-roles.md)); **permission-matrix rewrite landed** (doc-keeper stage 3) — production catalog/migration/FE code still follows. See ADR-0070. |
 | **Export / promotion pack** | Dependency closure; two-phase P2 masters (no skip APPROVED); no brand/entity sidecar; no secrets; import as DRAFT on PROD; re-test/re-approve/re-publish; dry-run UI in Wave 7. |
 | **Terminology** | L1 EN **Letterhead** / ZH **母版**; purge user-facing Master mix on L1; API/L3 may keep `masterId`. Sweep Done = Wave 8 (intent Confirmed in Wave 0). |
 | **Other UX** | Dev editor blank whiteboard → redirects + honest empty; asset library empty → seed or honest empty; Users Authorized groups → EntityLink; table Actions Edit/More alignment; clause locale metadata de-duplication. |
@@ -99,7 +99,7 @@ BDD **ready** ([sys-norm-roles.md](../behavior/sys-norm-roles.md)). Wave 6+ rema
 | **2** | **#146** | `sys-norm-hub-ia` | **Done** (`5d77db80` / `992f6822`) | Template (+ Master parity) Hub Properties drawer; remove wrong tabs; version Dependencies; API jump model A; Dev blank-surface; locale de-dupe; legacy apiAccess | FE gates + E2E 8/8 + UIUX PASS + Stage 5/10 DEPLOY_OK |
 | **3** | **#147** | `sys-norm-external-ops` | **Done** (`18a9e3b2` / `f21dda5e`) | External services dashboard; invocation records page; package API settings completion; nav; redirects | FE gates + E2E 10/10 + UIUX PASS + Stage 5/10 DEPLOY_OK |
 | **4** | **#148** | `sys-norm-test-artifacts` | **Done** (docs-close; MAIN `dac9dcd9` / feature `5c71acc0`; product **#144** `ac36ecbc` / `6bc74ff1`; worktree **REMOVED**) | Published/history Testing durable DOCX/PDF; program registry close | Docs-only this leaf — reuse #144 E2E/deploy |
-| **5** | **#149** | `sys-norm-roles` | **In Progress** | Implement ADR-0070; matrix rewrite + FE role labels + migration + JWT | Wave 5 BDD **ready** ([sys-norm-roles.md](../behavior/sys-norm-roles.md) **BDD-SYS-NORM-ROLE-001…018**); matrix rewrite (stage 3) **before** production code |
+| **5** | **#149** | `sys-norm-roles` | **In Progress** | Implement ADR-0070; FE role labels + migration + JWT (matrix rewrite **landed** stage 3) | Wave 5 BDD **ready** ([sys-norm-roles.md](../behavior/sys-norm-roles.md) **BDD-SYS-NORM-ROLE-001…018**); [permission-matrix.md](../security/permission-matrix.md) six-role SoT ready for implementers — **code not started** |
 | **6** | *(register at activate)* | `sys-norm-d1-brands` | **Not Started** | Runtime/management retirement per ADR-0071 | Wave 6 BDD **ready** before code |
 | **7** | *(register at activate)* | `sys-norm-promotion-pack` | **Not Started** | UAT→PROD pack + dry-run UI per §2 promotion facts | Wave 7 BDD |
 | **8** | *(register at activate)* | `sys-norm-demo-seed-terms` | **Not Started** | Asset seed / honest empty; L1 terminology sweep; remaining N* | Wave 8 BDD |
@@ -114,8 +114,8 @@ Wave 2 (**ready/Done** — [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md)
 (**ready/Done** docs-close — [sys-norm-test-artifacts.md](../behavior/sys-norm-test-artifacts.md)
 **BDD-SYS-NORM-W4-001…010**; TM **#148** Done `dac9dcd9` / `5c71acc0`; product **#144** `ac36ecbc` / `6bc74ff1`),
 and Wave 5 (**BDD ready** / slice **In Progress** — [sys-norm-roles.md](../behavior/sys-norm-roles.md)
-**BDD-SYS-NORM-ROLE-001…018**; TM **#149**; matrix rewrite + code in flight — matrix
-rewrite stage 3 **before** production code).
+**BDD-SYS-NORM-ROLE-001…018**; TM **#149**; matrix rewrite stage 3 **landed**;
+production catalog/migration/FE code follows).
 
 ---
 
@@ -202,7 +202,7 @@ still governing; checklist **#3b** / **#5a** **not** flipped by this program; **
 | [0070-role-compression-six-roles.md](../adr/authorization-security/0070-role-compression-six-roles.md) | Role compression (Accepted) |
 | [0071-retire-document-brand-legal-entity-surfaces.md](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) | D1 retire product surfaces (Accepted) |
 | [0065-legal-entity-document-brand-variants.md](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md) | Historical IBL-E4; product surface superseded by 0071 |
-| [permission-matrix.md](../security/permission-matrix.md) | Current 8-role baseline until Wave 5 matrix rewrite (doc-keeper stage 3; BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) **ready**); Wave 1 ADR-0071 nav-hide cross-ref |
+| [permission-matrix.md](../security/permission-matrix.md) | **Six-role rewrite landed** (doc-keeper stage 3; BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) **ready**); runtime catalog code still Wave 5 In Progress; Wave 1 ADR-0071 nav-hide cross-ref |
 | [sys-norm-roles.md](../behavior/sys-norm-roles.md) | Wave 5 BDD **ready** — **BDD-SYS-NORM-ROLE-001…018** (TM **#149** In Progress) |
 | [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) | Hub IA intent + Wave 1 layout/nav-hide status |
 | [business-terminology-guide.md](../product/business-terminology-guide.md) | L1 Letterhead/母版 intent |

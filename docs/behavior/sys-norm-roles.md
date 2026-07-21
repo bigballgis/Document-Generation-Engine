@@ -77,7 +77,7 @@ Group isolation remains fail-closed (`GroupAccessService` / rewritten matrix).
 3. Retire `TEMPLATE_APPROVER`, `MASTER_DESIGNER`, `TEMPLATE_AUTHOR` from the assignable
    catalog with fail-closed assignment API behavior.  
 4. Keep SoD: authors do **not** gain `decideTests`; tester remains distinct.  
-5. Unblock doc-keeper matrix rewrite + TDD Red for catalog / migration / FE.
+5. Unblock TDD Red for catalog / migration / FE (matrix rewrite stage 3 **landed**).
 
 ---
 
@@ -97,8 +97,9 @@ Group isolation remains fail-closed (`GroupAccessService` / rewritten matrix).
 - ADR-0070 **Accepted**; charter §2.6 / §6 decision lock unchanged.  
 - Waves **0–4** Done (program registry).  
 - Wave 5 BDD this file = **`ready`** (stage 1).  
-- Permission-matrix tables still show 8-role **runtime baseline** until stage 3 rewrite —
-  rewrite **must** land in the same Wave 5 change set **before** production code merges.  
+- Permission-matrix six-role rewrite **landed** (doc-keeper stage 3) —
+  [permission-matrix.md](../security/permission-matrix.md) is the Confirmed docs SoT
+  **before** production role-catalog / Flyway / FE enum code merges.  
 - Actor authenticated with management JWT where UI/API scenarios apply.  
 - Formal phase **None**; go-live checklist **#3b** / **#5a** untouched; **#53** not Done.
 
@@ -130,7 +131,7 @@ Group isolation remains fail-closed (`GroupAccessService` / rewritten matrix).
 | Approvals (compliance / single-track) | Normal decider path = `GROUP_ADMIN` (+ `GLOBAL_ADMIN`); no assignable `TEMPLATE_APPROVER` |
 | Legal track | `LEGAL_REVIEWER` + `decideLegalApprovals` unchanged (ADR-0064) |
 
-### 5.2 Capability remap (matrix rewrite target — Confirmed direction)
+### 5.2 Capability remap (Confirmed — mirrored in permission-matrix §13.2)
 
 > Cell-level tables are rewritten by doc-keeper; this section locks **merge direction** for
 > implementers (charter P-Q5). Do not invent privileges beyond the union / absorption rules.
@@ -382,7 +383,7 @@ final L1 terminology sweep beyond interim `DOCUMENT_AUTHOR` copy
 | Terminology (L1 Pending) | [business-terminology-guide.md](../product/business-terminology-guide.md) |
 | Legal track unchanged | [ADR-0064](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md) |
 | Slice / branch | `sys-norm-roles` / `feat/sys-norm-roles` |
-| Task Master | `register-at-activate` (~#149) |
+| Task Master | **#149** (In Progress) |
 
 ---
 
@@ -399,7 +400,7 @@ final L1 terminology sweep beyond interim `DOCUMENT_AUTHOR` copy
 ## 11. Handoff
 
 ```
-task_ids: [register-at-activate]  # ~149
+task_ids: ["149"]
 bdd_readiness: ready
 frontend_ui_in_scope: true
 placement: ISOLATED
@@ -407,6 +408,7 @@ worktree_path: D:/working/DGE-sys-norm-roles
 branch: feat/sys-norm-roles
 batch_recommendation:
   decision: solo
+  member_task_ids: ["149"]
   proposed_slice_id: sys-norm-roles
-next: plan-orchestrator (activate TM ~#149) → doc-keeper (matrix rewrite) → implementers
+next: implementers (BE/FE/Flyway) — matrix rewrite stage 3 landed
 ```

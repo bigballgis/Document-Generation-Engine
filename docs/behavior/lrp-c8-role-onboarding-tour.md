@@ -11,6 +11,15 @@
 **Task Master / slice**: plan `LR-C8` / slice `lrp-c8-role-onboarding-tour` — **Task Master #34** (`in-progress`)  
 **Worktree**: `D:/working/DGE-lrp-c8-role-onboarding-tour` · `feat/lrp-c8-role-onboarding-tour`
 
+> **SYS-NORM Wave 5 supersession note (2026-07-21):** Assignable management catalog is now
+> **six roles** ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md);
+> [permission-matrix.md](../security/permission-matrix.md); BDD
+> [sys-norm-roles.md](../behavior/sys-norm-roles.md) ROLE-014). Runtime onboarding /
+> journey maps must resolve:
+> `TEMPLATE_APPROVER` → `GROUP_ADMIN` journeys; `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` →
+> `DOCUMENT_AUTHOR` (interim L1 labels OK). Historical scenario IDs below remain archive
+> acceptance for LR-C8; they do **not** keep retired codes in the assignable catalog.
+
 ---
 
 ## 1. 概述
@@ -46,8 +55,8 @@
 
 | Actor | 角色 | 说明 |
 | --- | --- | --- |
-| **模板作者（主验收）** | `TEMPLATE_AUTHOR` | 首次登录自动打开 author 旅程 step 1；Skip 持久 |
-| **其它旅程角色** | `MASTER_DESIGNER` / `TEMPLATE_TESTER` / `TEMPLATE_APPROVER` / `GROUP_ADMIN` / `GLOBAL_ADMIN` / `AUDIT_ADMIN` | 各角色使用对应 `*JourneySteps` 定义 |
+| **文档作者（主验收；Wave 5）** | `DOCUMENT_AUTHOR`（历史验收键曾为 `TEMPLATE_AUTHOR`） | 首次登录自动打开 author 旅程 step 1；Skip 持久 |
+| **其它旅程角色** | `TEMPLATE_TESTER` / `GROUP_ADMIN`（含原 `TEMPLATE_APPROVER` 审批旅程） / `GLOBAL_ADMIN` / `LEGAL_REVIEWER` / `AUDIT_ADMIN` | 各角色使用对应 `*JourneySteps`；设计师历史键并入 `DOCUMENT_AUTHOR` |
 | **无旅程角色用户** | 会话无法解析出主 tour 角色 | **不**自动打开；Help 重播项禁用或 no-op + i18n 提示 |
 | **系统（UI）** | `ManagementShell` + tour 宿主 + Help 菜单 | 触发、Skip、Replay、锚点 |
 | **系统（存储）** | `localStorage` | per-user dismiss 标记 |
