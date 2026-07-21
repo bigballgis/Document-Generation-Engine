@@ -2047,27 +2047,27 @@
       {
         "id": "149",
         "title": "SYS-NORM Wave 5 — Six-role compression (sys-norm-roles)",
-        "description": "IN PROGRESS 2026-07-21. NON-CE System Normalization Program Wave 5 — sole-active delivery leaf. Slice sys-norm-roles; placement ISOLATED; worktree D:/working/DGE-sys-norm-roles · feat/sys-norm-roles (base origin/main @ 32ead955). Batch recommendation solo (member_task_ids: [\"149\"]; proposed_slice_id: sys-norm-roles). Scope: implement ADR-0070 six-role compression — permission-matrix rewrite (doc-keeper stage 3 BEFORE code) + migration remap + JWT/capabilities + FE role pickers/journeys + ROLE_NOT_ASSIGNABLE fail-closed; SoD TEMPLATE_TESTER retained. BDD ready docs/behavior/sys-norm-roles.md BDD-SYS-NORM-ROLE-001…018. frontend_ui_in_scope=true. Depends on Wave 4 #148 Done. Wave 5 → In Progress; Waves 0–4 Done; Waves 6–8 Not Started. Next after this leaf: sys-norm-d1-brands (Wave 6) — NOT activated. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim go-live / SYS-NORM program Done. Do NOT fold Wave 6/7/8 into this leaf.",
-        "details": "ACTIVATED 2026-07-21 (stage 2 plan-orchestrator). Slice id: sys-norm-roles. Batch solo. Gate order locked: matrix rewrite (doc-keeper) + BDD ready BEFORE production role-catalog / Flyway / FE enum code. Plan: docs/plan/system-normalization-program-2026-07.md Wave 5; detail docs/plan/detail/sys-norm-roles.md. ADR-0070 Accepted. Formal phase remains None. Host sole-active = this leaf. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT claim SYS-NORM program Done; do NOT activate Wave 6.",
-        "testStrategy": "1. BDD ready confirmed (docs/behavior/sys-norm-roles.md; BDD-SYS-NORM-ROLE-001…018). 2. Doc-keeper matrix rewrite before production code. 3. FE+BE gates + E2E + UIUX + Stage 5/10 DEPLOY_OK when implemented. 4. Migration remap evidence + ROLE_NOT_ASSIGNABLE. 5. Stage 11 merge + MAIN doc-sync before Done. 6. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT claim SYS-NORM program Done; do NOT fold Wave 6+.",
+        "description": "DONE 2026-07-21. NON-CE System Normalization Program Wave 5 closed. Slice sys-norm-roles; MAIN FF merge febb95b3; worktree DGE-sys-norm-roles REMOVED. Batch solo (member_task_ids: [\"149\"]) closed. Scope delivered: ADR-0070 six-role compression — permission-matrix rewrite + Flyway remap + JWT/capabilities + FE role pickers/journeys + ROLE_NOT_ASSIGNABLE fail-closed; SoD TEMPLATE_TESTER retained. BDD ready docs/behavior/sys-norm-roles.md BDD-SYS-NORM-ROLE-001…018. frontend_ui_in_scope=true. Waves 0–5 Done; Waves 6–8 Not Started — program NOT Done. Sole-active cleared. Next queue head: sys-norm-d1-brands (Wave 6) — NOT activated. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim go-live / SYS-NORM program Done.",
+        "details": "DONE 2026-07-21 (stage 12 post-task-doc-sync on MAIN). Merge SHA febb95b3 (FF). Worktree REMOVED. Plan: docs/plan/system-normalization-program-2026-07.md Wave 5 → Done; detail docs/plan/detail/sys-norm-roles.md exit criteria met. ADR-0070 Accepted (impl landed; decision text unchanged). Formal phase remains None. Host sole-active cleared. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT claim SYS-NORM program Done; do NOT activate Wave 6.",
+        "testStrategy": "Evidence at Done (merge febb95b3): 1. BDD ready shipped (docs/behavior/sys-norm-roles.md; BDD-SYS-NORM-ROLE-001…018). 2. Doc-keeper matrix rewrite landed before code. 3. BE mvn verify GREEN 2357/0/0; FE lint/type-check/test(1639)/build GREEN. 4. E2E 7/7; UIUX PASS. 5. Stage 5+10 DEPLOY_OK (docs/plan/evidence/sys-norm-roles-stage5-deploy/ + stage10). 6. Arch Critical=0 merge_go; CQ allow merge. 7. Stage 11 FF merge febb95b3; worktree removed. 8. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT claim SYS-NORM program Done; do NOT fold Wave 6+.",
         "priority": "high",
         "dependencies": [
           "148"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-21T02:05:00.000Z"
+        "updatedAt": "2026-07-21T06:55:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-21T02:05:00.000Z",
+      "lastModified": "2026-07-21T06:55:00.000Z",
       "taskCount": 149,
-      "completedCount": 145,
+      "completedCount": 146,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-21T02:05:00.000Z"
+      "updated": "2026-07-21T06:55:00.000Z"
     }
   }
 }

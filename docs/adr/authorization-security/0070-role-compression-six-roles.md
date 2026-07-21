@@ -29,16 +29,17 @@ related:
 | --- | --- |
 | User confirmation | **Yes** — 2026-07-21 (LOCKED — do not reopen) |
 | Behavior SoT (decision) | [system-normalization-program.md](../../behavior/system-normalization-program.md) §2.6 / §6 |
-| Runtime BDD SoT | [sys-norm-roles.md](../../behavior/sys-norm-roles.md) **ready** — **BDD-SYS-NORM-ROLE-001…018** |
-| Implementation wave | **Wave 5** `sys-norm-roles` — BDD ready; slice **In Progress** (TM **#149**); runtime catalog/migration/FE **not** Done |
-| Matrix rewrite | **Landed** (doc-keeper stage 3) — [permission-matrix.md](../../security/permission-matrix.md) six-role SoT; production code follows |
+| Runtime BDD SoT | [sys-norm-roles.md](../../behavior/sys-norm-roles.md) **ready** / delivered — **BDD-SYS-NORM-ROLE-001…018** |
+| Implementation wave | **Wave 5** `sys-norm-roles` → **Done** (TM **#149**; MAIN merge `febb95b3`; worktree **REMOVED**) |
+| Matrix rewrite | **Landed** (doc-keeper stage 3) — [permission-matrix.md](../../security/permission-matrix.md) six-role SoT + production catalog/migration/FE |
 | Checklist | Does **not** flip **#3b** / **#5a** |
 
 `sourceOfTruth: true` while Accepted.
 
-**Accepted ≠ Wave 5 Done.** Permission-matrix rewrite is complete; production role catalog,
-migration SQL, and FE labels remain Wave 5 delivery — implementers follow this ADR + BDD +
-rewritten matrix.
+**Implementation note (2026-07-21):** Wave 5 delivery **Done** (`febb95b3`) — matrix rewrite,
+Flyway remap, JWT/capabilities, and FE role surfaces landed. **Accepted status and Decision
+text below are unchanged** (do not reopen merges). `DOCUMENT_AUTHOR` L1 EN/ZH labels remain
+Pending finalize (non-blocking).
 
 ## Context
 
@@ -113,9 +114,10 @@ the architectural decision only.
 
 ## Consequences
 
-- Wave 5 owns matrix rewrite, Flyway/user-role migration, OpenAPI/FE role enums, and E2E.
-- Onboarding / journey docs that list eight roles must be updated in Wave 5 (or with
-  terminology Wave 8 for display labels only).
+- Wave 5 owned matrix rewrite, Flyway/user-role migration, OpenAPI/FE role enums, and E2E —
+  **delivered** 2026-07-21 (`febb95b3`). Decision text above unchanged.
+- Onboarding / journey docs that listed eight roles were updated in Wave 5 (display-label
+  polish may continue in Wave 8).
 - ADR-0064 legal track remains; `LEGAL_REVIEWER` is not compressed away.
 - `DOCUMENT_AUTHOR` L1 label finalization remains Pending until product locks EN/ZH strings.
 
@@ -124,6 +126,6 @@ the architectural decision only.
 - Wave 5 runtime BDD: [sys-norm-roles.md](../../behavior/sys-norm-roles.md) (`ready`)
 - Behavior charter: [system-normalization-program.md](../../behavior/system-normalization-program.md)
 - Program: [system-normalization-program-2026-07.md](../../plan/system-normalization-program-2026-07.md)
-- Permissions: [permission-matrix.md](../../security/permission-matrix.md) (rewrite = Wave 5 stage 3)
+- Permissions: [permission-matrix.md](../../security/permission-matrix.md) (Wave 5 rewrite + runtime Done)
 - Legal approval: [0064-legal-compliance-approval-matrix.md](../template-lifecycle/0064-legal-compliance-approval-matrix.md)
 - Terminology: [business-terminology-guide.md](../../product/business-terminology-guide.md)

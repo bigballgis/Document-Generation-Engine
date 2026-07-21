@@ -4,13 +4,12 @@
 
 本文档用于整理金融信函低代码文档生成平台的角色、分组、对象权限和权限边界。当前内容仅基于已确认需求，不自行扩展未确认权限。
 
-> **SYS-NORM Wave 5 — Six-role catalog rewrite (doc-keeper stage 3, 2026-07-21):**
+> **SYS-NORM Wave 5 — Six-role catalog (Done 2026-07-21, merge `febb95b3`):**
 > Management assignable catalog is **six roles** per
 > [ADR-0070 Accepted](../adr/authorization-security/0070-role-compression-six-roles.md) and Wave 5 BDD
-> **ready** [sys-norm-roles.md](../behavior/sys-norm-roles.md) (**BDD-SYS-NORM-ROLE-001…018**).
-> This file’s §3 / §13 tables are the **Confirmed permission SoT** for Wave 5 implementers.
-> **Accepted ADR ≠ Wave 5 Done** — production `ManagementRole` / Flyway / FE enums remain
-> Wave 5 delivery (TM **#149** In Progress) **after** this rewrite. `DOCUMENT_AUTHOR` L1 EN/ZH
+> **ready**/delivered [sys-norm-roles.md](../behavior/sys-norm-roles.md) (**BDD-SYS-NORM-ROLE-001…018**).
+> This file’s §3 / §13 tables are the **Confirmed permission SoT**. Production `ManagementRole` /
+> Flyway / FE enums landed with TM **#149** → **Done**. `DOCUMENT_AUTHOR` L1 EN/ZH
 > display labels remain **Pending** finalize (non-blocking; interim FE copy OK per ROLE-013).
 >
 > **Migration remap (locked):** `TEMPLATE_APPROVER` → `GROUP_ADMIN` (privilege accept);
@@ -29,9 +28,9 @@
 - [产品需求说明](../product/PRD.md)
 - [领域模型](../domain/domain-model.md)
 - [文档治理规则](../governance.md)
-- [ADR-0070 Role compression (six roles)](../adr/authorization-security/0070-role-compression-six-roles.md)（Accepted — Wave 5 impl In Progress）
-- [SYS-NORM Wave 5 roles BDD](../behavior/sys-norm-roles.md)（**ready** — **BDD-SYS-NORM-ROLE-001…018**）
-- [System Normalization program](../plan/system-normalization-program-2026-07.md)（Wave 5 In Progress）
+- [ADR-0070 Role compression (six roles)](../adr/authorization-security/0070-role-compression-six-roles.md)（Accepted — Wave 5 impl **Done** `febb95b3`）
+- [SYS-NORM Wave 5 roles BDD](../behavior/sys-norm-roles.md)（**ready**/delivered — **BDD-SYS-NORM-ROLE-001…018**）
+- [System Normalization program](../plan/system-normalization-program-2026-07.md)（Waves **0–5 Done**; Waves **6–8 Not Started**）
 - [ADR-0071 Retire document brand / legal entity surfaces](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)（Accepted — Wave 1 nav hide Done `#145`; Wave 6 runtime）
 - [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
 - [LR-D1 行为规格](../behavior/lrp-d1-audit-retention.md)

@@ -18,20 +18,19 @@ related:
 
 # SYS-NORM Wave 5 — Six-role compression (ADR-0070)
 
-> **TM:** Task Master **#149** (**In Progress**) · slice `sys-norm-roles` ·
-> placement **ISOLATED** · worktree `D:/working/DGE-sys-norm-roles` · `feat/sys-norm-roles`
-> (base `32ead955`).  
+> **TM:** Task Master **#149** (**Done**) · slice `sys-norm-roles` ·
+> MAIN merge `febb95b3` · worktree **REMOVED**.  
 > **Locks:** [ADR-0070 Accepted](../adr/authorization-security/0070-role-compression-six-roles.md);
 > charter [system-normalization-program.md](./system-normalization-program.md) §2.6 / §6;
 > plan [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md)
-> Wave 5.  
-> **Gate order (locked):** permission-matrix **rewrite** (doc-keeper stage 3) + this BDD
-> **`ready`** **before** production role-catalog / Flyway / FE enum code.  
+> Wave 5 → **Done**.  
+> **Gate order (completed):** permission-matrix **rewrite** (doc-keeper stage 3) + this BDD
+> **`ready`** before production role-catalog / Flyway / FE enum code — all met.  
 > **Formal phase:** **None**.  
 > **Do not:** reopen ADR-0070 merges; merge `TEMPLATE_TESTER` into author; invent final
 > `DOCUMENT_AUTHOR` L1 EN/ZH strings (Pending — interim OK); flip **#3b** / **#5a**;
 > mark **#53** Done; claim SYS-NORM program Done; fold Wave 6 D1 / Wave 7 promotion /
-> Wave 8 terminology into this leaf.
+> Wave 8 terminology into a closed leaf.
 
 ```
 bdd_readiness: ready
@@ -382,8 +381,8 @@ final L1 terminology sweep beyond interim `DOCUMENT_AUTHOR` copy
 | Matrix (rewrite = stage 3) | [permission-matrix.md](../security/permission-matrix.md) |
 | Terminology (L1 Pending) | [business-terminology-guide.md](../product/business-terminology-guide.md) |
 | Legal track unchanged | [ADR-0064](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md) |
-| Slice / branch | `sys-norm-roles` / `feat/sys-norm-roles` |
-| Task Master | **#149** (In Progress) |
+| Slice / branch | `sys-norm-roles` / MAIN `febb95b3` (feature worktree **REMOVED**) |
+| Task Master | **#149** (**Done**) |
 
 ---
 
@@ -401,14 +400,17 @@ final L1 terminology sweep beyond interim `DOCUMENT_AUTHOR` copy
 
 ```
 task_ids: ["149"]
+status: Done
 bdd_readiness: ready
 frontend_ui_in_scope: true
-placement: ISOLATED
-worktree_path: D:/working/DGE-sys-norm-roles
-branch: feat/sys-norm-roles
+merge_sha: febb95b3
+placement: MAIN (worktree REMOVED)
 batch_recommendation:
   decision: solo
   member_task_ids: ["149"]
   proposed_slice_id: sys-norm-roles
-next: backend-engineer (catalog/migration/JWT/capabilities) → frontend-engineer (pickers/journeys/i18n) — matrix rewrite stage 3 landed; production code not started
+  closed: true
+implementers: complete (BE + FE + E2E + deploy + merge)
+gates: BE 2357/0/0; FE lint/type-check/test(1639)/build GREEN; E2E 7/7; UIUX PASS; Stage 5+10 DEPLOY_OK; arch Critical=0 merge_go; CQ allow merge
+next: queue head sys-norm-d1-brands (Wave 6) — Not Started / not activated; sole-active cleared
 ```

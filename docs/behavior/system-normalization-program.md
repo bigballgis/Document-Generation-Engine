@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| **文件状态** | Wave 0 charter **`ready`**（plan + ADR SoT）；Wave 1 BDD **ready/Done**；Wave 2 BDD **ready/Done**（[sys-norm-hub-ia.md](./sys-norm-hub-ia.md)；TM **#146** `5d77db80` / `992f6822`）；Wave 3 BDD **ready/Done**（[sys-norm-external-ops.md](./sys-norm-external-ops.md)；TM **#147** `18a9e3b2` / `f21dda5e`）；Wave 4 BDD **ready/Done** docs-close（[sys-norm-test-artifacts.md](./sys-norm-test-artifacts.md)；TM **#148**；product **#144** PTA）；Wave 5 BDD **ready** / slice **In Progress**（[sys-norm-roles.md](./sys-norm-roles.md)；**BDD-SYS-NORM-ROLE-001…018**；TM **#149**）；Waves 6–8 实现 BDD = **stub / pending-wave** |
+| **文件状态** | Wave 0 charter **`ready`**（plan + ADR SoT）；Wave 1 BDD **ready/Done**；Wave 2 BDD **ready/Done**（[sys-norm-hub-ia.md](./sys-norm-hub-ia.md)；TM **#146** `5d77db80` / `992f6822`）；Wave 3 BDD **ready/Done**（[sys-norm-external-ops.md](./sys-norm-external-ops.md)；TM **#147** `18a9e3b2` / `f21dda5e`）；Wave 4 BDD **ready/Done** docs-close（[sys-norm-test-artifacts.md](./sys-norm-test-artifacts.md)；TM **#148**；product **#144** PTA）；Wave 5 BDD **ready/Done**（[sys-norm-roles.md](./sys-norm-roles.md)；**BDD-SYS-NORM-ROLE-001…018**；TM **#149** `febb95b3`）；Waves 6–8 实现 BDD = **stub / pending-wave** |
 | **BDD ID 前缀** | `BDD-SYS-NORM`（程序级）；波次实现前缀见 §8 |
 | **编写日期** | 2026-07-21 |
 | **程序 / 队列** | System Normalization Program · Wave **0** first leaf |
@@ -10,7 +10,7 @@
 | **Branch** | `feat/sys-norm-charter` |
 | **Worktree** | `D:/working/DGE-sys-norm-charter` |
 | **Placement** | ISOLATED |
-| **Task / leaf** | Wave 0 TM **#143** `sys-norm-charter` → **Done**；Wave 1 TM **#145** `sys-norm-shell-fluid-nav` → **Done**（handoff briefly cited `#144` — `#144` remains PTA）；Wave 2 TM **#146** `sys-norm-hub-ia` → **Done** (`5d77db80` / `992f6822`); Wave 3 TM **#147** `sys-norm-external-ops` → **Done** (`18a9e3b2` / `f21dda5e`)；Wave 4 TM **#148** `sys-norm-test-artifacts` → **Done** docs-close（product **#144** `ac36ecbc` / `6bc74ff1`）；Wave 5 TM **#149** `sys-norm-roles` → **In Progress**；Waves 6–8 **Not Started** in program plan |
+| **Task / leaf** | Wave 0 TM **#143** `sys-norm-charter` → **Done**；Wave 1 TM **#145** `sys-norm-shell-fluid-nav` → **Done**（handoff briefly cited `#144` — `#144` remains PTA）；Wave 2 TM **#146** `sys-norm-hub-ia` → **Done** (`5d77db80` / `992f6822`); Wave 3 TM **#147** `sys-norm-external-ops` → **Done** (`18a9e3b2` / `f21dda5e`)；Wave 4 TM **#148** `sys-norm-test-artifacts` → **Done** docs-close（product **#144** `ac36ecbc` / `6bc74ff1`）；Wave 5 TM **#149** `sys-norm-roles` → **Done** (`febb95b3`)；Waves 6–8 **Not Started** in program plan |
 | **Formal phase** | None invented — program tracked via plan doc (doc-keeper) + this charter |
 | **Frontend UI** | Wave 0：**`frontend_ui_in_scope=false`**（docs/ADR only）。Wave 5：**`frontend_ui_in_scope=true`**（[sys-norm-roles.md](./sys-norm-roles.md)）。Waves 1–4 / 6–8 UI 另立波次 BDD |
 | **Owning docs** | **本文件（程序行为 / 决策接受 SoT）**；计划纲领 → [`docs/plan/system-normalization-program-2026-07.md`](../plan/system-normalization-program-2026-07.md)；角色压缩 → **[ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md)**（**Accepted**）；D1 退役 → **[ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)**（**Accepted**；**supersedes** ADR-0065 **product-surface**） |
@@ -18,12 +18,12 @@
 ```
 bdd_readiness: ready
 wave0_scope: plan+ADR SoT + program acceptance scenarios (no production code)
-per_wave_impl_bdd: Wave 1 ready/Done; Wave 2 ready/Done ([sys-norm-hub-ia.md](./sys-norm-hub-ia.md)); Wave 3 ready/Done ([sys-norm-external-ops.md](./sys-norm-external-ops.md) BDD-SYS-NORM-W3-001…018; merge 18a9e3b2 / f21dda5e); Wave 4 ready/Done docs-close ([sys-norm-test-artifacts.md](./sys-norm-test-artifacts.md) BDD-SYS-NORM-W4-001…010 → BDD-PTA-001…009; TM #148; product evidence #144 ac36ecbc / 6bc74ff1); Wave 5 BDD ready / slice In Progress ([sys-norm-roles.md](./sys-norm-roles.md) BDD-SYS-NORM-ROLE-001…018; TM #149); Waves 6–8 stubs / pending-wave
+per_wave_impl_bdd: Wave 1 ready/Done; Wave 2 ready/Done ([sys-norm-hub-ia.md](./sys-norm-hub-ia.md)); Wave 3 ready/Done ([sys-norm-external-ops.md](./sys-norm-external-ops.md) BDD-SYS-NORM-W3-001…018; merge 18a9e3b2 / f21dda5e); Wave 4 ready/Done docs-close ([sys-norm-test-artifacts.md](./sys-norm-test-artifacts.md) BDD-SYS-NORM-W4-001…010 → BDD-PTA-001…009; TM #148; product evidence #144 ac36ecbc / 6bc74ff1); Wave 5 ready/Done ([sys-norm-roles.md](./sys-norm-roles.md) BDD-SYS-NORM-ROLE-001…018; TM #149 febb95b3); Waves 6–8 stubs / pending-wave
 open_questions:
-  - DOCUMENT_AUTHOR L1 display name finalization (EN/ZH) — ID locked; label finalizable (non-blocking for Wave 5)
+  - DOCUMENT_AUTHOR L1 display name finalization (EN/ZH) — ID locked; label finalizable (non-blocking; Wave 5 Done)
   - Wave 1 nav-hide vs Wave 6 runtime delete sequencing detail (both allowed; plan locks order)
 owning_doc: docs/behavior/system-normalization-program.md
-task_ids: ["143", "145", "146", "147", "148"]
+task_ids: ["143", "145", "146", "147", "148", "149"]
 queue_slice_ids: ["sys-norm-shell-fluid-nav", "sys-norm-hub-ia", "sys-norm-external-ops", "sys-norm-test-artifacts", "sys-norm-roles", "sys-norm-d1-brands", "sys-norm-promotion-pack", "sys-norm-demo-seed-terms"]
 sole_active: cleared
 suggested_adrs:
@@ -43,9 +43,9 @@ Normalization Program confirmed by the user on **2026-07-21**.
 | --- | --- | --- |
 | Confirmed product decisions (§2) | **Locked** | Do not reopen in delivery |
 | Program acceptance scenarios (§5) | **Ready** | Evidence = docs/ADR Accepted + plan wave table — **not** runtime E2E |
-| Role compression acceptance (§6) | **Decision locked**; runtime BDD = **Wave 5 ready** | ADR-0070 + [sys-norm-roles.md](./sys-norm-roles.md) |
+| Role compression acceptance (§6) | **Decision locked**; runtime BDD = **Wave 5 ready/Done** | ADR-0070 + [sys-norm-roles.md](./sys-norm-roles.md) (`febb95b3`) |
 | D1 retirement acceptance (§7) | **Decision locked**; impl = **Wave 6** (+ FE nav may Wave 1) | Point to ADR-0071; supersede ADR-0065 management UX |
-| Per-wave runtime BDD (§8) | Wave 1 **ready/Done**; Wave 2 **ready/Done**; Wave 3 **ready/Done** ([sys-norm-external-ops.md](./sys-norm-external-ops.md); `18a9e3b2` / `f21dda5e`); Wave 4 **ready/Done** docs-close ([sys-norm-test-artifacts.md](./sys-norm-test-artifacts.md); TM **#148**; product **#144** PTA); Wave 5 **ready** ([sys-norm-roles.md](./sys-norm-roles.md) **BDD-SYS-NORM-ROLE-001…018**); Waves 6–8 **stub / pending-wave** | Author full G/W/T at wave start — do not invent ready scenarios here for unstarted waves |
+| Per-wave runtime BDD (§8) | Wave 1 **ready/Done**; Wave 2 **ready/Done**; Wave 3 **ready/Done** ([sys-norm-external-ops.md](./sys-norm-external-ops.md); `18a9e3b2` / `f21dda5e`); Wave 4 **ready/Done** docs-close ([sys-norm-test-artifacts.md](./sys-norm-test-artifacts.md); TM **#148**; product **#144** PTA); Wave 5 **ready/Done** ([sys-norm-roles.md](./sys-norm-roles.md) **BDD-SYS-NORM-ROLE-001…018**; TM **#149** `febb95b3`); Waves 6–8 **stub / pending-wave** | Author full G/W/T at wave start — do not invent ready scenarios here for unstarted waves |
 
 **Wave 0 Done** = durable program SoT + ADR decision documents Accepted (or equivalent
 decision-lock status) + indexes/plan activation — **no** `mvn` / `pnpm` / E2E / deploy
@@ -308,9 +308,9 @@ acceptance scenarios
 
 ## 6. Role compression — ADR-0070 acceptance scenarios
 
-**Status:** Decision **locked** (2026-07-21). **Implementation = Wave 5** (TM **#149** · slice **In Progress**).  
+**Status:** Decision **locked** (2026-07-21). **Implementation = Wave 5 Done** (TM **#149** · merge `febb95b3`).  
 **ADR pointer:** [ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md) (**Accepted** 2026-07-21).  
-**Runtime BDD SoT (ready):** [sys-norm-roles.md](./sys-norm-roles.md) — **BDD-SYS-NORM-ROLE-001…018**
+**Runtime BDD SoT (ready/delivered):** [sys-norm-roles.md](./sys-norm-roles.md) — **BDD-SYS-NORM-ROLE-001…018**
 (`frontend_ui_in_scope=true`). Charter §6.3 sketches remain decision-lock summaries; full
 Given/When/Then + FE/JWT/matrix acceptance live in the Wave 5 file.  
 **Supersedes (intent):** prior 8-role assignable catalog narrative in permission matrix /
@@ -444,7 +444,7 @@ governance moves to **Letterhead (master)**. Legal holds **kept**. Shell REDBC/G
 | 2 | `sys-norm-hub-ia` | **ready/Done** (TM **#146**; [sys-norm-hub-ia.md](./sys-norm-hub-ia.md) **BDD-SYS-NORM-W2-001…018**; merge `5d77db80` / `992f6822`) | Template (+ Master parity) Hub Properties drawer; remove wrong tabs; version Dependencies; API jump model A; Dev blank-surface; locale de-dupe; legacy apiAccess |
 | 3 | `sys-norm-external-ops` | **ready/Done** (TM **#147**; [sys-norm-external-ops.md](./sys-norm-external-ops.md) **BDD-SYS-NORM-W3-001…018**; merge `18a9e3b2` / `f21dda5e`) | External services dashboard; invocation records page; package API settings completion; nav; redirects |
 | 4 | `sys-norm-test-artifacts` | **ready/Done** docs-close (TM **#148**; [sys-norm-test-artifacts.md](./sys-norm-test-artifacts.md) **BDD-SYS-NORM-W4-001…010** → **BDD-PTA-001…009**; product evidence TM **#144** `ac36ecbc` / `6bc74ff1`) | Published/history Testing durable DOCX/PDF downloads — §5.1 satisfied by PTA; **no** new product residual |
-| 5 | `sys-norm-roles` | **ready** / slice **In Progress** ([sys-norm-roles.md](./sys-norm-roles.md) **BDD-SYS-NORM-ROLE-001…018**; TM **#149**) | Implement §6 after ADR-0070; matrix rewrite (stage 3) + FE role labels + migration + JWT |
+| 5 | `sys-norm-roles` | **ready/Done** ([sys-norm-roles.md](./sys-norm-roles.md) **BDD-SYS-NORM-ROLE-001…018**; TM **#149** `febb95b3`) | Implement §6 after ADR-0070; matrix rewrite (stage 3) + FE role labels + migration + JWT |
 | 6 | `sys-norm-d1-brands` | **pending-wave** | Implement §7 runtime/management retirement |
 | 7 | `sys-norm-promotion-pack` | **pending-wave** | UAT→PROD pack + dry-run UI per §2.7 |
 | 8 | `sys-norm-demo-seed-terms` | **pending-wave** | Asset seed / honest empty; L1 terminology sweep; remaining N* |
@@ -463,7 +463,7 @@ governance moves to **Letterhead (master)**. Legal holds **kept**. Shell REDBC/G
 | Role ADR | ADR-0070 (doc-keeper) |
 | D1 ADR | ADR-0071 suggested (doc-keeper); supersedes ADR-0065 product surface |
 | Historical brands | [ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md), [ibl-e4-entity-document-brands.md](./ibl-e4-entity-document-brands.md) |
-| Permissions (8-role baseline until Wave 5 matrix rewrite) | [permission-matrix.md](../security/permission-matrix.md) — rewrite after Wave 5 BDD `ready` |
+| Permissions (six-role catalog — Wave 5 Done) | [permission-matrix.md](../security/permission-matrix.md) — rewrite + runtime catalog `febb95b3` |
 | Terminology SSOT | [business-terminology-guide.md](../product/business-terminology-guide.md) |
 | Hub nav baseline (to amend) | [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) |
 | Wave 2 Hub IA BDD | [sys-norm-hub-ia.md](./sys-norm-hub-ia.md) |
