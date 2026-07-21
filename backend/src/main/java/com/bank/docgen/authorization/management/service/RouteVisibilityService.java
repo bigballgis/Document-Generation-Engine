@@ -38,7 +38,6 @@ public class RouteVisibilityService {
             visible.add(ManagementRoute.AUDIT_CONSOLE.routeKey());
             visible.add(ManagementRoute.IDENTITY_ADMINISTRATION.routeKey());
             visible.add(ManagementRoute.LEGAL_HOLD_ADMINISTRATION.routeKey());
-            visible.add(ManagementRoute.DOCUMENT_BRAND_ADMINISTRATION.routeKey());
             return new ArrayList<>(visible);
         }
         if (roles.contains(ManagementRole.AUDIT_ADMIN)) {
@@ -54,7 +53,6 @@ public class RouteVisibilityService {
             visible.add(ManagementRoute.API_POLICY_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.AUDIT_CONSOLE.routeKey());
             visible.add(ManagementRoute.IDENTITY_ADMINISTRATION.routeKey());
-            visible.add(ManagementRoute.DOCUMENT_BRAND_ADMINISTRATION.routeKey());
         }
         if (roles.contains(ManagementRole.DOCUMENT_AUTHOR)) {
             visible.add(ManagementRoute.DASHBOARD_HOME.routeKey());

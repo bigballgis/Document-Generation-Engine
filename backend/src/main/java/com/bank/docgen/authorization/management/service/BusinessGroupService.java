@@ -8,7 +8,6 @@ import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.api.UpdateGroupRequest;
 import com.bank.docgen.authorization.management.persistence.BusinessGroupEntity;
 import com.bank.docgen.authorization.management.persistence.BusinessGroupRepository;
-import com.bank.docgen.documentbrand.service.DocumentBrandSeedSupport;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.util.List;
 import java.util.UUID;
@@ -23,16 +22,13 @@ public class BusinessGroupService {
 
     private final BusinessGroupRepository businessGroupRepository;
     private final ManagementAuditRecorder auditRecorder;
-    private final DocumentBrandSeedSupport documentBrandSeedSupport;
 
     public BusinessGroupService(
             BusinessGroupRepository businessGroupRepository,
-            ManagementAuditRecorder auditRecorder,
-            DocumentBrandSeedSupport documentBrandSeedSupport
+            ManagementAuditRecorder auditRecorder
     ) {
         this.businessGroupRepository = businessGroupRepository;
         this.auditRecorder = auditRecorder;
-        this.documentBrandSeedSupport = documentBrandSeedSupport;
     }
 
     @Transactional(readOnly = true)
@@ -65,7 +61,6 @@ public class BusinessGroupService {
                 request.dimension()
         );
         businessGroupRepository.save(group);
-        documentBrandSeedSupport.ensurePlatformDefault(group.getGroupCode());
         auditRecorder.recordGroupEvent(
                 ManagementAuditEventTypes.GROUP_CREATED,
                 group.getGroupCode(),

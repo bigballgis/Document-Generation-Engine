@@ -5,6 +5,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 
+/**
+ * Template {@code allowedDocumentBrandCodes} JSON helper.
+ *
+ * <p>ADR-0071 / Wave 6: writes always strip to empty/null (no catalog resurrection).
+ * Parse remains for historical rows until Flyway clears them; generate ignores allow-list.
+ */
 public final class AllowedDocumentBrandCodesJsonSupport {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -32,24 +38,10 @@ public final class AllowedDocumentBrandCodesJsonSupport {
         }
     }
 
+    /**
+     * Wave 6 lock: any write (including non-empty historical allow-lists) persists as empty.
+     */
     public static String write(List<String> codes) {
-        if (codes == null || codes.isEmpty()) {
-            return null;
-        }
-        List<String> normalized = codes.stream()
-                .filter(code -> code != null && !code.isBlank())
-                .map(String::trim)
-                .toList();
-        if (normalized.isEmpty()) {
-            return null;
-        }
-        try {
-            return MAPPER.writeValueAsString(normalized);
-        } catch (JsonProcessingException ex) {
-            throw new DocumentBrandCatalogException(
-                    com.bank.docgen.sharedkernel.api.ApiErrorCodes.REQUEST_BODY_INVALID,
-                    "api.error.validation.requestBodyInvalid"
-            );
-        }
+        return null;
     }
 }

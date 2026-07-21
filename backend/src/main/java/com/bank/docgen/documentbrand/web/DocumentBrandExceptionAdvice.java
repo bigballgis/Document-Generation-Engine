@@ -33,6 +33,8 @@ public class DocumentBrandExceptionAdvice {
                 : ApiErrorCodes.GROUP_NOT_FOUND.equals(ex.errorCode())
                         || ApiErrorCodes.DOCUMENT_BRAND_UNKNOWN.equals(ex.errorCode())
                         || ApiErrorCodes.LEGAL_ENTITY_UNKNOWN.equals(ex.errorCode())
+                        || ApiErrorCodes.DOCUMENT_BRAND_SURFACE_RETIRED.equals(ex.errorCode())
+                        || ApiErrorCodes.LEGAL_ENTITY_SURFACE_RETIRED.equals(ex.errorCode())
                 ? HttpStatus.NOT_FOUND
                 : HttpStatus.UNPROCESSABLE_ENTITY;
         String category = status == HttpStatus.FORBIDDEN

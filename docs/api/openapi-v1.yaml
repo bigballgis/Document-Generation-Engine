@@ -3866,17 +3866,21 @@ paths:
     get:
       tags: [Admin]
       operationId: listDocumentBrands
-      summary: List group-scoped DocumentBrand catalog entries (IBL-E4)
+      deprecated: true
+      summary: Retired — DocumentBrand catalog list (ADR-0071 / Wave 6)
       description: >-
-        ADR-0065 / IBL-E4. Returns DocumentBrand rows for an authorized group.
-        Orthogonal to UI BrandPreset (REDBC/GREENBC). Read access for template
-        authors selecting allow-list / entity bind targets; writes require admin.
+        RETIRED (ADR-0071 / SYS-NORM Wave 6 / BDD-SYS-NORM-D1-009). DocumentBrand
+        product surfaces are withdrawn. Returns HTTP 404 or 410 with stable
+        error.code DOCUMENT_BRAND_SURFACE_RETIRED. Must not return a usable
+        catalog payload. Logo/seal governance via Letterhead (master). Historical
+        IBL-E4 schemas retained for reference only.
       parameters:
         - name: groupCode
           in: query
-          required: true
+          required: false
           schema:
             type: string
+          description: Ignored after retirement; may be omitted by legacy clients.
         - name: status
           in: query
           required: false
@@ -3885,53 +3889,71 @@ paths:
             enum: [ACTIVE, INACTIVE, ALL]
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
-        '200':
-          description: DocumentBrand page/list.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentBrandListResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
           $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: >-
+            Surface retired — error.code DOCUMENT_BRAND_SURFACE_RETIRED
+            (retryable=false). Prefer 404; 410 also permitted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '410':
+          description: >-
+            Surface gone — same DOCUMENT_BRAND_SURFACE_RETIRED family as 404.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
     post:
       tags: [Admin]
       operationId: createDocumentBrand
-      summary: Create a DocumentBrand catalog entry (IBL-E4)
+      deprecated: true
+      summary: Retired — create DocumentBrand (ADR-0071 / Wave 6)
       description: >-
-        ADR-0065. GROUP_ADMIN / GLOBAL_ADMIN only (group scope). Requires
-        logoObjectRef. documentBrandCode group-unique.
+        RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with
+        DOCUMENT_BRAND_SURFACE_RETIRED. No catalog create.
       parameters:
         - $ref: '#/components/parameters/TraceIdHeader'
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateDocumentBrandRequest'
       responses:
-        '201':
-          description: Created DocumentBrand.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentBrandResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
           $ref: '#/components/responses/ErrorResponse'
-        '422':
-          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: Surface retired — DOCUMENT_BRAND_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '410':
+          description: Surface gone — DOCUMENT_BRAND_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/document-brands/{documentBrandCode}:
     get:
       tags: [Admin]
       operationId: getDocumentBrand
-      summary: Get a DocumentBrand by code (IBL-E4)
+      deprecated: true
+      summary: Retired — get DocumentBrand (ADR-0071 / Wave 6)
+      description: >-
+        RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with
+        DOCUMENT_BRAND_SURFACE_RETIRED.
       parameters:
         - name: documentBrandCode
           in: path
@@ -3941,29 +3963,37 @@ paths:
             maxLength: 64
         - name: groupCode
           in: query
-          required: true
+          required: false
           schema:
             type: string
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
-        '200':
-          description: DocumentBrand detail.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentBrandResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
           $ref: '#/components/responses/ErrorResponse'
         '404':
-          $ref: '#/components/responses/ErrorResponse'
+          description: Surface retired — DOCUMENT_BRAND_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '410':
+          description: Surface gone — DOCUMENT_BRAND_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
     put:
       tags: [Admin]
       operationId: updateDocumentBrand
-      summary: Update a DocumentBrand catalog entry (IBL-E4)
+      deprecated: true
+      summary: Retired — update DocumentBrand (ADR-0071 / Wave 6)
+      description: >-
+        RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with
+        DOCUMENT_BRAND_SURFACE_RETIRED.
       parameters:
         - name: documentBrandCode
           in: path
@@ -3973,39 +4003,45 @@ paths:
             maxLength: 64
         - $ref: '#/components/parameters/TraceIdHeader'
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateDocumentBrandRequest'
       responses:
-        '200':
-          description: Updated DocumentBrand.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentBrandResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
           $ref: '#/components/responses/ErrorResponse'
         '404':
-          $ref: '#/components/responses/ErrorResponse'
-        '422':
-          $ref: '#/components/responses/ErrorResponse'
+          description: Surface retired — DOCUMENT_BRAND_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '410':
+          description: Surface gone — DOCUMENT_BRAND_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/legal-entities:
     get:
       tags: [Admin]
       operationId: listLegalEntities
-      summary: List group-scoped LegalEntity catalog entries (IBL-E4)
+      deprecated: true
+      summary: Retired — LegalEntity catalog list (ADR-0071 / Wave 6)
       description: >-
-        ADR-0065 / IBL-E4. Each entity binds exactly one documentBrandCode.
+        RETIRED (ADR-0071 / SYS-NORM Wave 6 / BDD-SYS-NORM-D1-010). LegalEntity
+        product surfaces are withdrawn. Returns HTTP 404 or 410 with stable
+        error.code LEGAL_ENTITY_SURFACE_RETIRED. Must not return a usable catalog
+        payload. Legal holds remain a separate surface.
       parameters:
         - name: groupCode
           in: query
-          required: true
+          required: false
           schema:
             type: string
         - name: status
@@ -4016,53 +4052,71 @@ paths:
             enum: [ACTIVE, INACTIVE, ALL]
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
-        '200':
-          description: LegalEntity page/list.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LegalEntityListResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
           $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: >-
+            Surface retired — error.code LEGAL_ENTITY_SURFACE_RETIRED
+            (retryable=false). Prefer 404; 410 also permitted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '410':
+          description: Surface gone — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
     post:
       tags: [Admin]
       operationId: createLegalEntity
-      summary: Create a LegalEntity with required documentBrandCode (IBL-E4)
+      deprecated: true
+      summary: Retired — create LegalEntity (ADR-0071 / Wave 6)
       description: >-
-        ADR-0065. GROUP_ADMIN / GLOBAL_ADMIN only. Missing documentBrandCode →
-        422. Unknown brand → 422 DOCUMENT_BRAND_UNKNOWN (or equivalent).
+        RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with
+        LEGAL_ENTITY_SURFACE_RETIRED. No LegalEntity↔DocumentBrand binding may be
+        persisted.
       parameters:
         - $ref: '#/components/parameters/TraceIdHeader'
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateLegalEntityRequest'
       responses:
-        '201':
-          description: Created LegalEntity.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LegalEntityResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
           $ref: '#/components/responses/ErrorResponse'
-        '422':
-          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: Surface retired — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '410':
+          description: Surface gone — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/legal-entities/{legalEntityCode}:
     get:
       tags: [Admin]
       operationId: getLegalEntity
-      summary: Get a LegalEntity by code (IBL-E4)
+      deprecated: true
+      summary: Retired — get LegalEntity (ADR-0071 / Wave 6)
+      description: >-
+        RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with
+        LEGAL_ENTITY_SURFACE_RETIRED.
       parameters:
         - name: legalEntityCode
           in: path
@@ -4072,31 +4126,37 @@ paths:
             maxLength: 64
         - name: groupCode
           in: query
-          required: true
+          required: false
           schema:
             type: string
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
-        '200':
-          description: LegalEntity detail.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LegalEntityResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
           $ref: '#/components/responses/ErrorResponse'
         '404':
-          $ref: '#/components/responses/ErrorResponse'
+          description: Surface retired — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '410':
+          description: Surface gone — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
     put:
       tags: [Admin]
       operationId: updateLegalEntity
-      summary: Update / re-bind LegalEntity document brand (IBL-E4)
+      deprecated: true
+      summary: Retired — update LegalEntity (ADR-0071 / Wave 6)
       description: >-
-        ADR-0065. Re-bind writes management audit (old→new documentBrandCode).
+        RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with
+        LEGAL_ENTITY_SURFACE_RETIRED.
       parameters:
         - name: legalEntityCode
           in: path
@@ -4106,33 +4166,39 @@ paths:
             maxLength: 64
         - $ref: '#/components/parameters/TraceIdHeader'
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateLegalEntityRequest'
       responses:
-        '200':
-          description: Updated LegalEntity.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LegalEntityResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
           $ref: '#/components/responses/ErrorResponse'
         '404':
-          $ref: '#/components/responses/ErrorResponse'
-        '422':
-          $ref: '#/components/responses/ErrorResponse'
+          description: Surface retired — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '410':
+          description: Surface gone — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/groups/{groupCode}/default-legal-entity:
     get:
       tags: [Admin]
       operationId: getGroupDefaultLegalEntity
-      summary: Get group defaultLegalEntityCode for document-brand fallback (IBL-E4)
+      deprecated: true
+      summary: Retired — get group defaultLegalEntityCode (ADR-0071 / Wave 6)
+      description: >-
+        RETIRED (ADR-0071 / Wave 6 / BDD-SYS-NORM-D1-010). Returns HTTP 404 or 410
+        with LEGAL_ENTITY_SURFACE_RETIRED. No DocumentBrand fallback product API.
       parameters:
         - name: groupCode
           in: path
@@ -4141,27 +4207,32 @@ paths:
             type: string
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
-        '200':
-          description: Group default legal-entity setting.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GroupDefaultLegalEntityResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
           $ref: '#/components/responses/ErrorResponse'
         '404':
-          $ref: '#/components/responses/ErrorResponse'
+          description: Surface retired — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '410':
+          description: Surface gone — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
     put:
       tags: [Admin]
       operationId: putGroupDefaultLegalEntity
-      summary: Set group defaultLegalEntityCode (IBL-E4)
+      deprecated: true
+      summary: Retired — set group defaultLegalEntityCode (ADR-0071 / Wave 6)
       description: >-
-        ADR-0065. Admin-only. Null clears default (runtime omit → PLATFORM_DEFAULT
-        document brand). Invalid/inactive entity → 422.
+        RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with
+        LEGAL_ENTITY_SURFACE_RETIRED.
       parameters:
         - name: groupCode
           in: path
@@ -4170,26 +4241,28 @@ paths:
             type: string
         - $ref: '#/components/parameters/TraceIdHeader'
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/PutGroupDefaultLegalEntityRequest'
       responses:
-        '200':
-          description: Persisted group default.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GroupDefaultLegalEntityResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
           $ref: '#/components/responses/ErrorResponse'
         '404':
-          $ref: '#/components/responses/ErrorResponse'
-        '422':
-          $ref: '#/components/responses/ErrorResponse'
+          description: Surface retired — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '410':
+          description: Surface gone — LEGAL_ENTITY_SURFACE_RETIRED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
           $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/library/assets:
@@ -5430,12 +5503,14 @@ components:
       type: object
       additionalProperties: false
       description: >-
-        Safe whitelist (ADR-0013 amended by ADR-0063 / IBL-E2 and ADR-0065 /
-        IBL-E4). Optional `jurisdiction` / `product` plus existing `channel` may
-        drive Composition Inclusion Rules. Optional `legalEntityCode` drives
-        document-brand resolve (not package selection; not UI chrome). Unknown
-        fields → 400 REQUEST_BODY_INVALID. Must not carry PII, amounts, or
-        template variable plaintext.
+        Safe whitelist (ADR-0013 amended by ADR-0063 / IBL-E2, ADR-0065 /
+        IBL-E4, and ADR-0071 / SYS-NORM Wave 6). Optional `jurisdiction` /
+        `product` plus existing `channel` may drive Composition Inclusion
+        Rules. Optional `legalEntityCode` is whitelist-accepted when present
+        but MUST NOT drive LegalEntity→DocumentBrand catalog resolve (not
+        package selection; not UI chrome). Unknown fields → 400
+        REQUEST_BODY_INVALID. Must not carry PII, amounts, or template
+        variable plaintext.
       properties:
         sourceSystem:
           type: string
@@ -5468,10 +5543,14 @@ components:
         legalEntityCode:
           type: string
           description: >-
-            Optional legal-entity axis (ADR-0065 / IBL-E4). Trim; blank → absent;
-            suggested maxLength 64; case-sensitive exact match against group
-            LegalEntity catalog. Resolves DocumentBrand for artifact brand slots.
-            Does not select template packages. Does not change UI BrandPreset.
+            Optional opaque non-PII context field (ADR-0013 whitelist; historical
+            ADR-0065 axis). After ADR-0071 / SYS-NORM Wave 6: whitelist-accepted when
+            present; MUST NOT drive LegalEntity→DocumentBrand catalog resolve; MUST
+            NOT produce retired catalog 422 codes (LEGAL_ENTITY_UNKNOWN /
+            LEGAL_ENTITY_INACTIVE / DOCUMENT_BRAND_INACTIVE /
+            DOCUMENT_BRAND_NOT_ALLOWED / DOCUMENT_BRAND_UNKNOWN); MUST NOT change UI
+            chrome. Omitted remains valid. Letterhead/logo/seal from Letterhead
+            (master). Does not select template packages.
           maxLength: 64
     OutputOptions:
       type: object
@@ -5639,16 +5718,16 @@ components:
           type: string
           nullable: true
           description: >-
-            IBL-E4 / ADR-0065 — non-sensitive legal entity used for document-brand
-            resolve (request value or group default). Null when omitted and no
-            group default applied beyond PLATFORM_DEFAULT-only path without entity.
+            Historical IBL-E4 echo. After ADR-0071 / Wave 6 runtime simplify: may be
+            null/absent; must not imply live LegalEntity catalog resolve.
           maxLength: 64
         resolvedDocumentBrandCode:
           type: string
           nullable: true
           description: >-
-            IBL-E4 / ADR-0065 — non-sensitive resolved DocumentBrand code applied
-            to artifact brand slots (never a UI REDBC/GREENBC chrome code).
+            Historical IBL-E4 echo. After ADR-0071 / Wave 6: may be null/absent;
+            artifact letterhead/logo/seal come from Letterhead (master), never from
+            UI REDBC/GREENBC chrome codes or retired DocumentBrand catalogs.
           maxLength: 64
     DownloadUrlResponse:
       type: object
@@ -10019,7 +10098,10 @@ components:
     DocumentBrandView:
       type: object
       additionalProperties: false
-      description: ADR-0065 / IBL-E4 group-scoped DocumentBrand (≠ UI BrandPreset).
+      description: >-
+        HISTORICAL / RETIRED (ADR-0071 / SYS-NORM Wave 6). Formerly ADR-0065 /
+        IBL-E4 group-scoped DocumentBrand (≠ UI BrandPreset). Management catalog
+        APIs removed; schema retained for contract archaeology only.
       required: [groupCode, documentBrandCode, displayName, status, logoObjectRef]
       properties:
         groupCode:
@@ -10115,7 +10197,10 @@ components:
     LegalEntityView:
       type: object
       additionalProperties: false
-      description: ADR-0065 / IBL-E4 group-scoped LegalEntity with required brand bind.
+      description: >-
+        HISTORICAL / RETIRED (ADR-0071 / SYS-NORM Wave 6). Formerly ADR-0065 /
+        IBL-E4 group-scoped LegalEntity with required brand bind. Management
+        catalog APIs removed; schema retained for contract archaeology only.
       required: [groupCode, legalEntityCode, displayName, status, documentBrandCode]
       properties:
         groupCode:
@@ -11520,10 +11605,10 @@ components:
         allowedDocumentBrandCodes:
           type: array
           description: >-
-            IBL-E4 / ADR-0065 — optional package allow-list of documentBrandCode
-            values. Empty/absent = any ACTIVE group DocumentBrand (incl.
-            PLATFORM_DEFAULT). Non-empty and resolved brand ∉ list → 422
-            DOCUMENT_BRAND_NOT_ALLOWED.
+            Historical IBL-E4 field. After ADR-0071 / Wave 6: ignored for
+            generate/preview/test-generation gates (no DOCUMENT_BRAND_NOT_ALLOWED
+            from catalog allow-list). FE brand allow-list editor removed. May be
+            absent/empty after durable retire.
           items:
             type: string
             maxLength: 64
@@ -11573,8 +11658,9 @@ components:
         allowedDocumentBrandCodes:
           type: array
           description: >-
-            IBL-E4 / ADR-0065 — optional package document-brand allow-list on
-            create. Omitted/empty = unrestricted ACTIVE brands.
+            Historical IBL-E4 field (ADR-0071 / Wave 6). Omitted/empty preferred.
+            Non-empty write is stripped to empty (no catalog resurrection).
+            Ignored at generate gates. Locked behavior: strip-to-empty.
           items:
             type: string
             maxLength: 64
@@ -11609,8 +11695,8 @@ components:
         allowedDocumentBrandCodes:
           type: array
           description: >-
-            IBL-E4 / ADR-0065 — optional package document-brand allow-list.
-            Writable window aligns with package metadata draft rules.
+            Historical IBL-E4 field (ADR-0071 / Wave 6). Same write rule as create:
+            non-empty write is stripped to empty. Ignored at generate gates.
           items:
             type: string
             maxLength: 64
@@ -12586,6 +12672,8 @@ components:
         - DOCUMENT_BRAND_INACTIVE
         - DOCUMENT_BRAND_NOT_ALLOWED
         - DOCUMENT_BRAND_UNKNOWN
+        - DOCUMENT_BRAND_SURFACE_RETIRED
+        - LEGAL_ENTITY_SURFACE_RETIRED
         - BULK_REPIN_TARGET_INVALID
         - CONTENT_MODULE_NESTING_CYCLE
         - CONTENT_MODULE_NESTING_DEPTH_EXCEEDED

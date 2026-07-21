@@ -182,6 +182,16 @@ public final class ApiErrorCodes {
     public static final String DOCUMENT_BRAND_UNKNOWN = "DOCUMENT_BRAND_UNKNOWN";
     /** IBL-E4 / ADR-0065: document brand / legal entity code format invalid. */
     public static final String DOCUMENT_BRAND_CODE_INVALID = "DOCUMENT_BRAND_CODE_INVALID";
+    /**
+     * ADR-0071 / SYS-NORM Wave 6: DocumentBrand management product surface retired
+     * (HTTP 404 or 410).
+     */
+    public static final String DOCUMENT_BRAND_SURFACE_RETIRED = "DOCUMENT_BRAND_SURFACE_RETIRED";
+    /**
+     * ADR-0071 / SYS-NORM Wave 6: LegalEntity / defaultLegalEntity management product
+     * surface retired (HTTP 404 or 410).
+     */
+    public static final String LEGAL_ENTITY_SURFACE_RETIRED = "LEGAL_ENTITY_SURFACE_RETIRED";
 
     /** IBL-E5 / ADR-0066: bulk re-pin target version missing, wrong module, or not referencable. */
     public static final String BULK_REPIN_TARGET_INVALID = "BULK_REPIN_TARGET_INVALID";

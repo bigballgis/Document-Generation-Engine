@@ -39,10 +39,6 @@ public class BusinessGroupEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-    /** IBL-E4 / ADR-0065 — optional group default legal entity for document-brand fallback. */
-    @Column(name = "default_legal_entity_code", length = 64)
-    private String defaultLegalEntityCode;
-
     protected BusinessGroupEntity() {
     }
 
@@ -106,14 +102,5 @@ public class BusinessGroupEntity {
 
     public Instant getDeletedAt() {
         return deletedAt;
-    }
-
-    public String getDefaultLegalEntityCode() {
-        return defaultLegalEntityCode;
-    }
-
-    public void setDefaultLegalEntityCode(String defaultLegalEntityCode) {
-        this.defaultLegalEntityCode = defaultLegalEntityCode;
-        touch();
     }
 }

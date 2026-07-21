@@ -17,7 +17,6 @@ import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.domain.GroupDimension;
 import com.bank.docgen.authorization.management.persistence.BusinessGroupEntity;
 import com.bank.docgen.authorization.management.persistence.BusinessGroupRepository;
-import com.bank.docgen.documentbrand.service.DocumentBrandSeedSupport;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.time.Instant;
 import java.util.List;
@@ -37,9 +36,6 @@ class BusinessGroupServiceTest {
 
     @Mock
     private ManagementAuditRecorder auditRecorder;
-
-    @Mock
-    private DocumentBrandSeedSupport documentBrandSeedSupport;
 
     @InjectMocks
     private BusinessGroupService service;

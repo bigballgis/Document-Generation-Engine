@@ -14,9 +14,7 @@ public enum ManagementRoute {
     API_POLICY_MANAGEMENT("route.api-policy-management"),
     AUDIT_CONSOLE("route.audit-console"),
     IDENTITY_ADMINISTRATION("route.identity-administration"),
-    LEGAL_HOLD_ADMINISTRATION("route.legal-hold-administration"),
-    /** IBL-E4 / ADR-0065 — DocumentBrand + LegalEntity admin catalogs. */
-    DOCUMENT_BRAND_ADMINISTRATION("route.document-brand-administration");
+    LEGAL_HOLD_ADMINISTRATION("route.legal-hold-administration");
 
     private final String routeKey;
 
