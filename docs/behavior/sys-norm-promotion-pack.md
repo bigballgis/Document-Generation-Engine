@@ -24,15 +24,16 @@ related:
 
 # SYS-NORM Wave 7 — UAT→PROD promotion pack + dry-run UI
 
-> **Slice:** `sys-norm-promotion-pack` · TM **#151** (**In Progress** / sole-active).  
-> **Placement:** ISOLATED · worktree `D:/working/DGE-sys-norm-promotion-pack` ·
-> branch `feat/sys-norm-promotion-pack` · base `51b96e36`.  
+> **Slice:** `sys-norm-promotion-pack` · TM **#151** (**Done** — MAIN `11356c63` / feature `f795b04a`;
+> worktree **REMOVED**; sole-active **cleared**).  
+> **Placement (historical):** ISOLATED · worktree `D:/working/DGE-sys-norm-promotion-pack` ·
+> branch `feat/sys-norm-promotion-pack` — **REMOVED**.  
 > **Locks:** charter [system-normalization-program.md](./system-normalization-program.md)
 > §2.7; plan [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md)
 > Wave 7; ADR-0071 Decision 5; upstream CE-E01 / CE-E03 (**extend**, do not break).  
 > **Formal phase:** **None**.  
 > **Do not:** flip checklist **#3b** / **#5a**; mark **#53** Done; claim SYS-NORM program Done;
-> implement Wave 8 (`sys-norm-demo-seed-terms`) or parked UX in this leaf; invent go-live.
+> activate Wave 8 (`sys-norm-demo-seed-terms`) or parked UX without explicit deliver; invent go-live.
 
 ```
 bdd_readiness: ready
@@ -421,7 +422,7 @@ Charter Pending **P-Q4** is **resolved** by this section (promote to confirmed f
 | [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) Decision 5 | Promotion packs + two-phase P2 |
 | [PRD.md](../product/PRD.md) §10 | Import → DRAFT; re-test/approve/publish |
 | [permission-matrix.md](../security/permission-matrix.md) §5 | Export/import authz |
-| Task Master **#151** | Execution leaf (**In Progress** / sole-active) |
+| Task Master **#151** | Execution leaf (**Done** `11356c63` / `f795b04a`; sole-active **cleared**) |
 
 ---
 

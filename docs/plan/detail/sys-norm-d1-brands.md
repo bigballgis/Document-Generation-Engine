@@ -3,7 +3,7 @@
 **Program / slice:** `sys-norm-d1-brands` (SYS-NORM Wave **6**; **NON-CE**; **not** a formal P-phase)  
 **Formal plan phase:** **None**  
 **Task Master:** **#150** → **Done** (2026-07-21; MAIN merge `64b0a650`; worktree **REMOVED**)  
-**Active delivery slice:** none — Wave 6 closed; host sole-active moved to Wave 7 **#151**  
+**Active delivery slice:** none — Wave 6 closed; host sole-active **cleared** (Wave 7 **#151** also **Done** `11356c63`)  
 **Placement (historical):** **ISOLATED** · worktree `D:/working/DGE-sys-norm-d1-brands` · branch `feat/sys-norm-d1-brands` — **REMOVED** after stage 11 merge  
 **BDD:** [sys-norm-d1-brands.md](../../behavior/sys-norm-d1-brands.md) — **ready** / delivered (`BDD-SYS-NORM-D1-001…020`); `frontend_ui_in_scope=true`  
 **ADR:** [ADR-0071 Accepted](../../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) — impl landed; Accepted decision text unchanged  
@@ -31,9 +31,9 @@ catalog resolve).
 | --- | --- |
 | Leaf status | **Done** (MAIN `64b0a650`; worktree **REMOVED**) |
 | Formal phase | **None** |
-| Host sole-active | Wave 6 cleared — superseded by Wave 7 TM **#151** **In Progress** |
-| Program | Waves **0–6 Done**; Wave **7 In Progress** (**#151**); Wave **8 Not Started** — program **not** Done |
-| Next after this leaf | Wave 7 `sys-norm-promotion-pack` — **In Progress** (TM **#151**) |
+| Host sole-active | **cleared** (Wave 7 **#151** also **Done** `11356c63`) |
+| Program | Waves **0–7 Done**; Wave **8 Not Started** — program **not** Done |
+| Next after this leaf | Wave 8 `sys-norm-demo-seed-terms` — **Not Started** / **not** activated |
 
 ---
 
