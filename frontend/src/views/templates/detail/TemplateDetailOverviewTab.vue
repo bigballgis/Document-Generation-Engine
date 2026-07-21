@@ -6,7 +6,6 @@ import { getMaster } from '@/api/masters'
 import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import LocaleVariantFamilyNav from '@/components/common/LocaleVariantFamilyNav.vue'
 import TemplateApprovalMatrixModeField from '@/components/templates/TemplateApprovalMatrixModeField.vue'
-import TemplateDocumentBrandAllowListField from '@/components/templates/TemplateDocumentBrandAllowListField.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
@@ -35,13 +34,9 @@ const authorWorkflowStore = useAuthorWorkflowStore()
 const masterName = ref<string | null>(null)
 const completing = ref(false)
 const savingMode = ref(false)
-const savingAllowList = ref(false)
 const draftApprovalMatrixMode = ref<ApprovalMatrixMode>(
   normalizeApprovalMatrixMode(props.template.approvalMatrixMode),
 )
-const draftAllowedDocumentBrandCodes = ref<string[]>([
-  ...(props.template.allowedDocumentBrandCodes ?? []),
-])
 const { siblings: localeVariantSiblings, loading: localeVariantLoading } =
   useTemplateLocaleVariantSiblings(toRef(props, 'template'))
 
@@ -62,30 +57,9 @@ const modeWritable = computed(
     }),
 )
 
-const allowListWritable = computed(() => {
-  if (!authorTemplates.value) {
-    return false
-  }
-  const status = props.template.lifecycleStatus
-  return (
-    status !== 'PUBLISHED' &&
-    status !== 'STOPPED' &&
-    status !== 'DEPRECATED' &&
-    status !== 'DELETED'
-  )
-})
-
 const approvalMatrixModeLabel = computed(() =>
   t(approvalMatrixModeLabelKey(normalizeApprovalMatrixMode(props.template.approvalMatrixMode))),
 )
-
-const allowedDocumentBrandCodesLabel = computed(() => {
-  const codes = props.template.allowedDocumentBrandCodes ?? []
-  if (codes.length === 0) {
-    return t('templates.documentBrandAllowList.unrestricted')
-  }
-  return codes.join(', ')
-})
 
 /** N4 — locale facts live in LocaleVariantFamilyNav when that block is shown. */
 const showStandaloneLocaleRow = computed(
@@ -96,13 +70,6 @@ watch(
   () => props.template.approvalMatrixMode,
   (mode) => {
     draftApprovalMatrixMode.value = normalizeApprovalMatrixMode(mode)
-  },
-)
-
-watch(
-  () => props.template.allowedDocumentBrandCodes,
-  (codes) => {
-    draftAllowedDocumentBrandCodes.value = [...(codes ?? [])]
   },
 )
 
@@ -122,25 +89,6 @@ async function saveApprovalMatrixMode() {
     draftApprovalMatrixMode.value = normalizeApprovalMatrixMode(props.template.approvalMatrixMode)
   } finally {
     savingMode.value = false
-  }
-}
-
-async function saveDocumentBrandAllowList() {
-  if (!allowListWritable.value) {
-    return
-  }
-  savingAllowList.value = true
-  try {
-    await templatesStore.updateTemplateMetadata(props.template.id, {
-      allowedDocumentBrandCodes: draftAllowedDocumentBrandCodes.value,
-    })
-    ElMessage.success(t('templates.documentBrandAllowList.saveSuccess'))
-  } catch {
-    const key = templatesStore.lastErrorMessageKey ?? 'templates.error.updateMetadata'
-    ElMessage.error(t(key))
-    draftAllowedDocumentBrandCodes.value = [...(props.template.allowedDocumentBrandCodes ?? [])]
-  } finally {
-    savingAllowList.value = false
   }
 }
 
@@ -213,10 +161,6 @@ async function completeAnnualReview() {
         <dt>{{ t('templates.approvalMatrix.label') }}</dt>
         <dd>{{ approvalMatrixModeLabel }}</dd>
       </div>
-      <div data-testid="template-overview-document-brand-allow-list">
-        <dt>{{ t('templates.documentBrandAllowList.label') }}</dt>
-        <dd>{{ allowedDocumentBrandCodesLabel }}</dd>
-      </div>
       <div>
         <dt>{{ t('templates.detail.masterId') }}</dt>
         <dd>
@@ -256,26 +200,6 @@ async function completeAnnualReview() {
         @click="saveApprovalMatrixMode"
       >
         {{ t('templates.approvalMatrix.save') }}
-      </el-button>
-    </div>
-
-    <div
-      v-if="allowListWritable"
-      class="document-brand-allow-list-edit"
-      data-testid="template-overview-document-brand-allow-list-edit"
-    >
-      <TemplateDocumentBrandAllowListField
-        v-model="draftAllowedDocumentBrandCodes"
-        :group-code="template.groupCode"
-      />
-      <el-button
-        type="primary"
-        data-testid="template-overview-document-brand-allow-list-save"
-        :loading="savingAllowList"
-        :disabled="savingAllowList || templatesStore.submitting"
-        @click="saveDocumentBrandAllowList"
-      >
-        {{ t('templates.documentBrandAllowList.save') }}
       </el-button>
     </div>
 
@@ -338,8 +262,7 @@ async function completeAnnualReview() {
   color: var(--text-muted);
 }
 
-.approval-matrix-edit,
-.document-brand-allow-list-edit {
+.approval-matrix-edit {
   margin-top: var(--space-4);
   max-width: 28rem;
 }

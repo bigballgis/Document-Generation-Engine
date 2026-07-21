@@ -311,6 +311,10 @@ export const apiErrorZhCn = {
     codeInvalid: "文档品牌或法人实体代码格式无效。",
     codeConflict: "本组中已存在相同代码的目录条目。",
     logoRequired: "文档品牌必须提供 logo 对象引用。",
-    documentBrandRequired: "创建法人实体时必须绑定文档品牌代码。"
-  }
+    documentBrandRequired: "创建法人实体时必须绑定文档品牌代码。",
+    surfaceRetired: "文档品牌管理面已退役。请通过信头（母版）管理信头、徽标与印章。",
+  },
+  legalEntity: {
+    surfaceRetired: "法人实体管理面已退役。法律冻结仍作为独立功能保留。",
+  },
 } as const

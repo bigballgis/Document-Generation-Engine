@@ -335,6 +335,12 @@ export const apiErrorEn = {
     codeInvalid: "The document brand or legal entity code format is invalid.",
     codeConflict: "A catalog entry with this code already exists in the group.",
     logoRequired: "A logo object reference is required for the document brand.",
-    documentBrandRequired: "A document brand code is required when creating a legal entity."
-  }
+    documentBrandRequired: "A document brand code is required when creating a legal entity.",
+    surfaceRetired:
+      "The DocumentBrand management surface has been retired. Manage letterhead, logo, and seal via Letterhead (master).",
+  },
+  legalEntity: {
+    surfaceRetired:
+      "The LegalEntity management surface has been retired. Legal holds remain available as a separate surface.",
+  },
 } as const

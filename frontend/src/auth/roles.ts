@@ -56,8 +56,6 @@ export {
 
 export { canManageLegalHold } from '@/auth/roleCapabilitiesLegalHold'
 
-export { canManageDocumentBrandCatalogs } from '@/auth/roleCapabilitiesDocumentBrands'
-
 import type { CapabilityContext } from '@/auth/roleCapabilityCore'
 
 /** @deprecated Use sessionStore.canAccessRoute for route guards. */

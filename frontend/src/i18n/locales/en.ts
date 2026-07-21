@@ -146,6 +146,23 @@ export default {
     copyReferenceSuccess: 'Reference copied to clipboard.',
     copyReferenceError: 'Unable to copy the reference. Copy it manually.',
   },
+  retiredSurface: {
+    documentBrands: {
+      title: 'Document brands catalog retired',
+      message:
+        'Document brand management is no longer a product surface. Manage letterhead, logo, and seal via Letterhead (master). Shell REDBC/GREENBC themes remain UI chrome only.',
+    },
+    legalEntities: {
+      title: 'Legal entities catalog retired',
+      message:
+        'Legal entity management is no longer a product surface. Legal holds remain available under Security. Letterhead, logo, and seal are governed via Letterhead (master).',
+    },
+    actions: {
+      openLetterhead: 'Open Letterhead templates',
+      openLegalHolds: 'Open Legal holds',
+      backToHome: 'Back to home',
+    },
+  },
   nav: {
     login: 'Login',
     logout: 'Sign out',
@@ -175,8 +192,6 @@ export default {
       apiInvocations: 'Invocation records',
       audit: 'Activity log',
       legalHolds: 'Legal holds',
-      documentBrands: 'Document brands',
-      legalEntities: 'Legal entities',
     },
     behaviorItems: {
       allTasks: 'All tasks',
@@ -3396,107 +3411,6 @@ export default {
       loadGroups: 'Unable to load groups.',
       createGroup: 'Unable to create group.',
       updateGroup: 'Unable to update group.',
-    },
-  },
-  documentBrands: {
-    list: {
-      title: 'Document brands',
-      description:
-        'Manage group-scoped document brand assets used on generated letters. These codes are not UI themes (REDBC/GREENBC).',
-      help: 'Each brand requires a logo object reference. Optional default seal and letterhead legal name apply when templates expose those slots.',
-      empty: 'No document brands yet',
-      emptyDescription: 'Create a document brand, or rely on the seeded PLATFORM_DEFAULT brand for the group.',
-      columns: {
-        code: 'Document brand',
-        status: 'Status',
-        logoObjectRef: 'Logo object ref',
-        letterheadLegalName: 'Letterhead legal name',
-      },
-    },
-    filters: {
-      group: 'Group',
-      status: 'Status',
-      statusAll: 'All statuses',
-    },
-    status: {
-      ACTIVE: 'Active',
-      INACTIVE: 'Inactive',
-    },
-    form: {
-      createOpen: 'Create document brand',
-      createTitle: 'Create document brand',
-      editTitle: 'Edit document brand',
-      save: 'Save document brand',
-      createSuccess: 'Document brand created.',
-      updateSuccess: 'Document brand updated.',
-      groupCode: 'Group',
-      documentBrandCode: 'Document brand code',
-      displayName: 'Display name',
-      status: 'Status',
-      logoObjectRef: 'Logo object reference',
-      defaultSealObjectRef: 'Default seal object reference (optional)',
-      letterheadLegalName: 'Letterhead legal name (optional)',
-      uiChromeHint:
-        'Document brands drive letter artifacts only. Switching REDBC/GREENBC in the header does not change these bindings.',
-    },
-    error: {
-      loadList: 'Unable to load document brands.',
-      create: 'Unable to create the document brand.',
-      update: 'Unable to update the document brand.',
-    },
-  },
-  legalEntities: {
-    list: {
-      title: 'Legal entities',
-      description:
-        'Bind each legal entity to exactly one document brand. Runtime requests may send context.legalEntityCode to resolve artifact branding.',
-      help: 'Creating or rebinding a legal entity requires an ACTIVE document brand in the same group.',
-      empty: 'No legal entities yet',
-      emptyDescription: 'Create a legal entity and select its document brand.',
-      columns: {
-        code: 'Legal entity',
-        documentBrandCode: 'Document brand',
-        status: 'Status',
-      },
-    },
-    filters: {
-      group: 'Group',
-      status: 'Status',
-      statusAll: 'All statuses',
-    },
-    status: {
-      ACTIVE: 'Active',
-      INACTIVE: 'Inactive',
-    },
-    default: {
-      title: 'Group default legal entity',
-      help: 'When generate omits context.legalEntityCode, an ACTIVE default entity brand is used; otherwise PLATFORM_DEFAULT. Never falls back to UI REDBC/GREENBC.',
-      placeholder: 'No group default (use PLATFORM_DEFAULT)',
-      none: 'No group default',
-      save: 'Save group default',
-      saveSuccess: 'Group default legal entity updated.',
-    },
-    form: {
-      createOpen: 'Create legal entity',
-      createTitle: 'Create legal entity',
-      editTitle: 'Edit legal entity',
-      save: 'Save legal entity',
-      createSuccess: 'Legal entity created.',
-      updateSuccess: 'Legal entity updated.',
-      groupCode: 'Group',
-      legalEntityCode: 'Legal entity code',
-      displayName: 'Display name',
-      status: 'Status',
-      documentBrandCode: 'Document brand',
-      documentBrandPlaceholder: 'Select an ACTIVE document brand',
-      documentBrandHint: 'Only ACTIVE document brands can be newly bound. UI themes are not listed here.',
-    },
-    error: {
-      loadList: 'Unable to load legal entities.',
-      loadDefault: 'Unable to load the group default legal entity.',
-      create: 'Unable to create the legal entity.',
-      update: 'Unable to update the legal entity.',
-      saveDefault: 'Unable to save the group default legal entity.',
     },
   },
   legalHold: {

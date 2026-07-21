@@ -437,7 +437,7 @@ describe('ManagementShell', () => {
         ROUTE_KEYS.dashboardHome,
         ROUTE_KEYS.auditConsole,
         ROUTE_KEYS.legalHoldAdministration,
-        ROUTE_KEYS.documentBrandAdministration,
+        'route.document-brand-administration',
       ],
       capabilities: {
         ...globalAdminCapabilities,

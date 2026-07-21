@@ -142,6 +142,23 @@ export default {
     copyReferenceSuccess: '参考编号已复制到剪贴板。',
     copyReferenceError: '无法复制参考编号，请手动复制。',
   },
+  retiredSurface: {
+    documentBrands: {
+      title: '文档品牌目录已退役',
+      message:
+        '文档品牌管理不再作为产品功能面。请通过信头（母版）管理信头、徽标与印章。壳层 REDBC/GREENBC 主题仅用于界面外观。',
+    },
+    legalEntities: {
+      title: '法人实体目录已退役',
+      message:
+        '法人实体管理不再作为产品功能面。法律冻结仍在安全菜单下可用。信头、徽标与印章通过信头（母版）治理。',
+    },
+    actions: {
+      openLetterhead: '打开信头母版',
+      openLegalHolds: '打开法律冻结',
+      backToHome: '返回首页',
+    },
+  },
   nav: {
     login: '登录',
     logout: '退出登录',
@@ -171,8 +188,6 @@ export default {
       apiInvocations: '调用记录',
       audit: '操作记录',
       legalHolds: '法律冻结',
-      documentBrands: '文档品牌',
-      legalEntities: '法人实体',
     },
     behaviorItems: {
       allTasks: '全部任务',
@@ -3330,107 +3345,6 @@ export default {
       loadGroups: '无法加载分组列表。',
       createGroup: '无法创建分组。',
       updateGroup: '无法更新分组。',
-    },
-  },
-  documentBrands: {
-    list: {
-      title: '文档品牌',
-      description:
-        '管理组范围内用于生成信函产物的文档品牌资产。这些代码不是 UI 主题（REDBC/GREENBC）。',
-      help: '每个品牌必须提供 logo 对象引用。可选默认签章与信头法定名称仅在模板暴露对应槽位时生效。',
-      empty: '暂无文档品牌',
-      emptyDescription: '创建文档品牌，或使用组内已种子的 PLATFORM_DEFAULT 品牌。',
-      columns: {
-        code: '文档品牌',
-        status: '状态',
-        logoObjectRef: 'Logo 对象引用',
-        letterheadLegalName: '信头法定名称',
-      },
-    },
-    filters: {
-      group: '分组',
-      status: '状态',
-      statusAll: '全部状态',
-    },
-    status: {
-      ACTIVE: '启用',
-      INACTIVE: '停用',
-    },
-    form: {
-      createOpen: '创建文档品牌',
-      createTitle: '创建文档品牌',
-      editTitle: '编辑文档品牌',
-      save: '保存文档品牌',
-      createSuccess: '文档品牌已创建。',
-      updateSuccess: '文档品牌已更新。',
-      groupCode: '分组',
-      documentBrandCode: '文档品牌代码',
-      displayName: '显示名称',
-      status: '状态',
-      logoObjectRef: 'Logo 对象引用',
-      defaultSealObjectRef: '默认签章对象引用（可选）',
-      letterheadLegalName: '信头法定名称（可选）',
-      uiChromeHint:
-        '文档品牌仅驱动信函产物。切换顶栏 REDBC/GREENBC 不会改变这些绑定。',
-    },
-    error: {
-      loadList: '无法加载文档品牌。',
-      create: '无法创建文档品牌。',
-      update: '无法更新文档品牌。',
-    },
-  },
-  legalEntities: {
-    list: {
-      title: '法人实体',
-      description:
-        '将每个法人实体绑定到恰好一个文档品牌。运行时可提交 context.legalEntityCode 以解析产物品牌。',
-      help: '创建或改绑法人实体时，必须选择同组 ACTIVE 文档品牌。',
-      empty: '暂无法人实体',
-      emptyDescription: '创建法人实体并选择其文档品牌。',
-      columns: {
-        code: '法人实体',
-        documentBrandCode: '文档品牌',
-        status: '状态',
-      },
-    },
-    filters: {
-      group: '分组',
-      status: '状态',
-      statusAll: '全部状态',
-    },
-    status: {
-      ACTIVE: '启用',
-      INACTIVE: '停用',
-    },
-    default: {
-      title: '组默认法人实体',
-      help: '生成请求省略 context.legalEntityCode 时，使用 ACTIVE 默认实体绑定的品牌；否则回落 PLATFORM_DEFAULT。不会回落到 UI 的 REDBC/GREENBC。',
-      placeholder: '无组默认（使用 PLATFORM_DEFAULT）',
-      none: '无组默认',
-      save: '保存组默认',
-      saveSuccess: '组默认法人实体已更新。',
-    },
-    form: {
-      createOpen: '创建法人实体',
-      createTitle: '创建法人实体',
-      editTitle: '编辑法人实体',
-      save: '保存法人实体',
-      createSuccess: '法人实体已创建。',
-      updateSuccess: '法人实体已更新。',
-      groupCode: '分组',
-      legalEntityCode: '法人实体代码',
-      displayName: '显示名称',
-      status: '状态',
-      documentBrandCode: '文档品牌',
-      documentBrandPlaceholder: '选择 ACTIVE 文档品牌',
-      documentBrandHint: '新建绑定仅可选 ACTIVE 文档品牌。壳层主题不会出现在此列表中。',
-    },
-    error: {
-      loadList: '无法加载法人实体。',
-      loadDefault: '无法加载组默认法人实体。',
-      create: '无法创建法人实体。',
-      update: '无法更新法人实体。',
-      saveDefault: '无法保存组默认法人实体。',
     },
   },
   legalHold: {

@@ -98,15 +98,16 @@ const router = createRouter({
     },
     {
       path: '/governance/document-brands',
-      name: 'document-brand-administration',
-      component: () => import('@/views/documentBrands/DocumentBrandListView.vue'),
-      meta: { logicalRoute: ROUTE_KEYS.documentBrandAdministration },
+      name: 'document-brand-surface-retired',
+      component: () => import('@/views/governance/SurfaceRetiredView.vue'),
+      props: { surface: 'document-brands' },
+      // ADR-0071 / Wave 6: honest gone — no product catalog, no logicalRoute capability gate.
     },
     {
       path: '/governance/legal-entities',
-      name: 'legal-entity-administration',
-      component: () => import('@/views/legalEntities/LegalEntityListView.vue'),
-      meta: { logicalRoute: ROUTE_KEYS.documentBrandAdministration },
+      name: 'legal-entity-surface-retired',
+      component: () => import('@/views/governance/SurfaceRetiredView.vue'),
+      props: { surface: 'legal-entities' },
     },
     {
       path: '/masters',
@@ -231,8 +232,8 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
   'master-package-hub': 'masters.hub.breadcrumbLabel',
   'audit-console': 'audit.title',
   'legal-hold-administration': 'legalHold.list.title',
-  'document-brand-administration': 'documentBrands.list.title',
-  'legal-entity-administration': 'legalEntities.list.title',
+  'document-brand-surface-retired': 'retiredSurface.documentBrands.title',
+  'legal-entity-surface-retired': 'retiredSurface.legalEntities.title',
   'api-policy-management': 'apiPolicy.home.title',
   'entitlement-users': 'identity.usersPageTitle',
   'entitlement-groups': 'identity.groupsPageTitle',

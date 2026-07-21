@@ -15,7 +15,6 @@ export const ROUTE_KEYS = {
   assetLibraryManagement: 'route.asset-library-management',
   identityAdministration: 'route.identity-administration',
   legalHoldAdministration: 'route.legal-hold-administration',
-  documentBrandAdministration: 'route.document-brand-administration',
 } as const
 
 export type RouteKey = (typeof ROUTE_KEYS)[keyof typeof ROUTE_KEYS]
@@ -28,6 +27,8 @@ const LEGACY_ROUTE_PATH_REDIRECT: Partial<Record<string, string>> = {
   'route.tester-workbench': '/dashboard#tasks-section',
   'route.approver-workbench': '/dashboard#tasks-section',
   'route.escalation-workbench': '/dashboard#tasks-section',
+  // ADR-0071 Wave 6 — DocumentBrand / LegalEntity product surfaces hard-retired.
+  'route.document-brand-administration': '/governance/document-brands',
 }
 
 export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
@@ -43,7 +44,6 @@ export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.assetLibraryManagement]: '/library/assets',
   [ROUTE_KEYS.identityAdministration]: '/entitlement/users',
   [ROUTE_KEYS.legalHoldAdministration]: '/governance/legal-holds',
-  [ROUTE_KEYS.documentBrandAdministration]: '/governance/document-brands',
 }
 
 

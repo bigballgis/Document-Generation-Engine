@@ -32,6 +32,10 @@ describe('routeKeys', () => {
     expect(pathForRouteKey('route.escalation-workbench')).toBe('/dashboard#tasks-section')
   })
 
+  it('maps retired document-brand route key to honest gone path (BDD-SYS-NORM-D1-006)', () => {
+    expect(pathForRouteKey('route.document-brand-administration')).toBe('/governance/document-brands')
+  })
+
   it('builds template package navigation paths', () => {
     expect(templatePackageHubPath('tpl-1')).toBe('/templates/tpl-1')
     expect(templatePackageHubPath('tpl-1', 'overview')).toBe('/templates/tpl-1?tab=overview')

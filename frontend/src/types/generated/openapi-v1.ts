@@ -1592,14 +1592,16 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List group-scoped DocumentBrand catalog entries (IBL-E4)
-         * @description ADR-0065 / IBL-E4. Returns DocumentBrand rows for an authorized group. Orthogonal to UI BrandPreset (REDBC/GREENBC). Read access for template authors selecting allow-list / entity bind targets; writes require admin.
+         * Retired — DocumentBrand catalog list (ADR-0071 / Wave 6)
+         * @deprecated
+         * @description RETIRED (ADR-0071 / SYS-NORM Wave 6 / BDD-SYS-NORM-D1-009). DocumentBrand product surfaces are withdrawn. Returns HTTP 404 or 410 with stable error.code DOCUMENT_BRAND_SURFACE_RETIRED. Must not return a usable catalog payload. Logo/seal governance via Letterhead (master). Historical IBL-E4 schemas retained for reference only.
          */
         get: operations["listDocumentBrands"];
         put?: never;
         /**
-         * Create a DocumentBrand catalog entry (IBL-E4)
-         * @description ADR-0065. GROUP_ADMIN / GLOBAL_ADMIN only (group scope). Requires logoObjectRef. documentBrandCode group-unique.
+         * Retired — create DocumentBrand (ADR-0071 / Wave 6)
+         * @deprecated
+         * @description RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with DOCUMENT_BRAND_SURFACE_RETIRED. No catalog create.
          */
         post: operations["createDocumentBrand"];
         delete?: never;
@@ -1615,9 +1617,17 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a DocumentBrand by code (IBL-E4) */
+        /**
+         * Retired — get DocumentBrand (ADR-0071 / Wave 6)
+         * @deprecated
+         * @description RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with DOCUMENT_BRAND_SURFACE_RETIRED.
+         */
         get: operations["getDocumentBrand"];
-        /** Update a DocumentBrand catalog entry (IBL-E4) */
+        /**
+         * Retired — update DocumentBrand (ADR-0071 / Wave 6)
+         * @deprecated
+         * @description RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with DOCUMENT_BRAND_SURFACE_RETIRED.
+         */
         put: operations["updateDocumentBrand"];
         post?: never;
         delete?: never;
@@ -1634,14 +1644,16 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List group-scoped LegalEntity catalog entries (IBL-E4)
-         * @description ADR-0065 / IBL-E4. Each entity binds exactly one documentBrandCode.
+         * Retired — LegalEntity catalog list (ADR-0071 / Wave 6)
+         * @deprecated
+         * @description RETIRED (ADR-0071 / SYS-NORM Wave 6 / BDD-SYS-NORM-D1-010). LegalEntity product surfaces are withdrawn. Returns HTTP 404 or 410 with stable error.code LEGAL_ENTITY_SURFACE_RETIRED. Must not return a usable catalog payload. Legal holds remain a separate surface.
          */
         get: operations["listLegalEntities"];
         put?: never;
         /**
-         * Create a LegalEntity with required documentBrandCode (IBL-E4)
-         * @description ADR-0065. GROUP_ADMIN / GLOBAL_ADMIN only. Missing documentBrandCode → 422. Unknown brand → 422 DOCUMENT_BRAND_UNKNOWN (or equivalent).
+         * Retired — create LegalEntity (ADR-0071 / Wave 6)
+         * @deprecated
+         * @description RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with LEGAL_ENTITY_SURFACE_RETIRED. No LegalEntity↔DocumentBrand binding may be persisted.
          */
         post: operations["createLegalEntity"];
         delete?: never;
@@ -1657,11 +1669,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a LegalEntity by code (IBL-E4) */
+        /**
+         * Retired — get LegalEntity (ADR-0071 / Wave 6)
+         * @deprecated
+         * @description RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with LEGAL_ENTITY_SURFACE_RETIRED.
+         */
         get: operations["getLegalEntity"];
         /**
-         * Update / re-bind LegalEntity document brand (IBL-E4)
-         * @description ADR-0065. Re-bind writes management audit (old→new documentBrandCode).
+         * Retired — update LegalEntity (ADR-0071 / Wave 6)
+         * @deprecated
+         * @description RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with LEGAL_ENTITY_SURFACE_RETIRED.
          */
         put: operations["updateLegalEntity"];
         post?: never;
@@ -1678,11 +1695,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get group defaultLegalEntityCode for document-brand fallback (IBL-E4) */
+        /**
+         * Retired — get group defaultLegalEntityCode (ADR-0071 / Wave 6)
+         * @deprecated
+         * @description RETIRED (ADR-0071 / Wave 6 / BDD-SYS-NORM-D1-010). Returns HTTP 404 or 410 with LEGAL_ENTITY_SURFACE_RETIRED. No DocumentBrand fallback product API.
+         */
         get: operations["getGroupDefaultLegalEntity"];
         /**
-         * Set group defaultLegalEntityCode (IBL-E4)
-         * @description ADR-0065. Admin-only. Null clears default (runtime omit → PLATFORM_DEFAULT document brand). Invalid/inactive entity → 422.
+         * Retired — set group defaultLegalEntityCode (ADR-0071 / Wave 6)
+         * @deprecated
+         * @description RETIRED (ADR-0071 / Wave 6). Always 404 or 410 with LEGAL_ENTITY_SURFACE_RETIRED.
          */
         put: operations["putGroupDefaultLegalEntity"];
         post?: never;
@@ -2099,7 +2121,7 @@ export interface components {
             jurisdiction?: string;
             /** @description Optional composition axis (ADR-0063). Same normalization/match rules as jurisdiction. */
             product?: string;
-            /** @description Optional legal-entity axis (ADR-0065 / IBL-E4). Trim; blank → absent; suggested maxLength 64; case-sensitive exact match against group LegalEntity catalog. Resolves DocumentBrand for artifact brand slots. Does not select template packages. Does not change UI BrandPreset. */
+            /** @description Optional opaque non-PII context field (ADR-0013 whitelist; historical ADR-0065 axis). After ADR-0071 / SYS-NORM Wave 6: whitelist-accepted when present; MUST NOT drive LegalEntity→DocumentBrand catalog resolve; MUST NOT produce retired catalog 422 codes (LEGAL_ENTITY_UNKNOWN / LEGAL_ENTITY_INACTIVE / DOCUMENT_BRAND_INACTIVE / DOCUMENT_BRAND_NOT_ALLOWED / DOCUMENT_BRAND_UNKNOWN); MUST NOT change UI chrome. Omitted remains valid. Letterhead/logo/seal from Letterhead (master). Does not select template packages. */
             legalEntityCode?: string;
         };
         OutputOptions: {
@@ -2159,9 +2181,9 @@ export interface components {
             routeType?: components["schemas"]["RouteType"];
             resolvedReleaseVersion?: string;
             output?: components["schemas"]["OutputOptions"];
-            /** @description IBL-E4 / ADR-0065 — non-sensitive legal entity used for document-brand resolve (request value or group default). Null when omitted and no group default applied beyond PLATFORM_DEFAULT-only path without entity. */
+            /** @description Historical IBL-E4 echo. After ADR-0071 / Wave 6 runtime simplify: may be null/absent; must not imply live LegalEntity catalog resolve. */
             resolvedLegalEntityCode?: string | null;
-            /** @description IBL-E4 / ADR-0065 — non-sensitive resolved DocumentBrand code applied to artifact brand slots (never a UI REDBC/GREENBC chrome code). */
+            /** @description Historical IBL-E4 echo. After ADR-0071 / Wave 6: may be null/absent; artifact letterhead/logo/seal come from Letterhead (master), never from UI REDBC/GREENBC chrome codes or retired DocumentBrand catalogs. */
             resolvedDocumentBrandCode?: string | null;
         };
         DownloadUrlResponse: {
@@ -4702,7 +4724,7 @@ export interface components {
              * @description IBL-E1 / ADR-0062 — optional locale-variant family id.
              */
             localeVariantFamilyId?: string | null;
-            /** @description IBL-E4 / ADR-0065 — optional package allow-list of documentBrandCode values. Empty/absent = any ACTIVE group DocumentBrand (incl. PLATFORM_DEFAULT). Non-empty and resolved brand ∉ list → 422 DOCUMENT_BRAND_NOT_ALLOWED. */
+            /** @description Historical IBL-E4 field. After ADR-0071 / Wave 6: ignored for generate/preview/test-generation gates (no DOCUMENT_BRAND_NOT_ALLOWED from catalog allow-list). FE brand allow-list editor removed. May be absent/empty after durable retire. */
             allowedDocumentBrandCodes?: string[];
         };
         CreateTemplateRequest: {
@@ -4728,7 +4750,7 @@ export interface components {
              * @enum {string}
              */
             approvalMatrixMode?: "SINGLE_TRACK" | "LEGAL_THEN_COMPLIANCE";
-            /** @description IBL-E4 / ADR-0065 — optional package document-brand allow-list on create. Omitted/empty = unrestricted ACTIVE brands. */
+            /** @description Historical IBL-E4 field (ADR-0071 / Wave 6). Omitted/empty preferred. Non-empty write is stripped to empty (no catalog resurrection). Ignored at generate gates. Locked behavior: strip-to-empty. */
             allowedDocumentBrandCodes?: string[];
         };
         UpdateTemplateRequest: {
@@ -4746,7 +4768,7 @@ export interface components {
              * @enum {string}
              */
             approvalMatrixMode?: "SINGLE_TRACK" | "LEGAL_THEN_COMPLIANCE";
-            /** @description IBL-E4 / ADR-0065 — optional package document-brand allow-list. Writable window aligns with package metadata draft rules. */
+            /** @description Historical IBL-E4 field (ADR-0071 / Wave 6). Same write rule as create: non-empty write is stripped to empty. Ignored at generate gates. */
             allowedDocumentBrandCodes?: string[];
         };
         /** @description Single-template summary envelope (CE-G05 annual-review complete and other summary-returning management operations). */
@@ -5129,7 +5151,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "RENDERING" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "PRODUCTION_REISSUE_REASON_REQUIRED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED" | "LOCALE_VARIANT_CONFLICT" | "TEMPLATE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_RULE_INVALID" | "COMPOSITION_INCLUSION_UNSATISFIED" | "CONTENT_MODULE_JURISDICTION_MISMATCH" | "LEGAL_ENTITY_UNKNOWN" | "LEGAL_ENTITY_INACTIVE" | "DOCUMENT_BRAND_INACTIVE" | "DOCUMENT_BRAND_NOT_ALLOWED" | "DOCUMENT_BRAND_UNKNOWN" | "BULK_REPIN_TARGET_INVALID" | "CONTENT_MODULE_NESTING_CYCLE" | "CONTENT_MODULE_NESTING_DEPTH_EXCEEDED" | "CONTENT_MODULE_NESTING_TARGET_UNRESOLVED" | "CONTENT_MODULE_NESTING_STRUCTURE_INVALID";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "PRODUCTION_REISSUE_REASON_REQUIRED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED" | "LOCALE_VARIANT_CONFLICT" | "TEMPLATE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_RULE_INVALID" | "COMPOSITION_INCLUSION_UNSATISFIED" | "CONTENT_MODULE_JURISDICTION_MISMATCH" | "LEGAL_ENTITY_UNKNOWN" | "LEGAL_ENTITY_INACTIVE" | "DOCUMENT_BRAND_INACTIVE" | "DOCUMENT_BRAND_NOT_ALLOWED" | "DOCUMENT_BRAND_UNKNOWN" | "DOCUMENT_BRAND_SURFACE_RETIRED" | "LEGAL_ENTITY_SURFACE_RETIRED" | "BULK_REPIN_TARGET_INVALID" | "CONTENT_MODULE_NESTING_CYCLE" | "CONTENT_MODULE_NESTING_DEPTH_EXCEEDED" | "CONTENT_MODULE_NESTING_TARGET_UNRESOLVED" | "CONTENT_MODULE_NESTING_STRUCTURE_INVALID";
     };
     responses: {
         /** @description Async task accepted. */
@@ -8308,8 +8330,9 @@ export interface operations {
     };
     listDocumentBrands: {
         parameters: {
-            query: {
-                groupCode: string;
+            query?: {
+                /** @description Ignored after retirement; may be omitted by legacy clients. */
+                groupCode?: string;
                 status?: "ACTIVE" | "INACTIVE" | "ALL";
             };
             header?: {
@@ -8321,17 +8344,26 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description DocumentBrand page/list. */
-            200: {
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Surface retired — error.code DOCUMENT_BRAND_SURFACE_RETIRED (retryable=false). Prefer 404; 410 also permitted. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DocumentBrandListResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            401: components["responses"]["ErrorResponse"];
-            403: components["responses"]["ErrorResponse"];
+            /** @description Surface gone — same DOCUMENT_BRAND_SURFACE_RETIRED family as 404. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -8345,31 +8377,39 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["CreateDocumentBrandRequest"];
             };
         };
         responses: {
-            /** @description Created DocumentBrand. */
-            201: {
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Surface retired — DOCUMENT_BRAND_SURFACE_RETIRED. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DocumentBrandResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            401: components["responses"]["ErrorResponse"];
-            403: components["responses"]["ErrorResponse"];
-            422: components["responses"]["ErrorResponse"];
+            /** @description Surface gone — DOCUMENT_BRAND_SURFACE_RETIRED. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };
     getDocumentBrand: {
         parameters: {
-            query: {
-                groupCode: string;
+            query?: {
+                groupCode?: string;
             };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
@@ -8382,18 +8422,26 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description DocumentBrand detail. */
-            200: {
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Surface retired — DOCUMENT_BRAND_SURFACE_RETIRED. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DocumentBrandResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            401: components["responses"]["ErrorResponse"];
-            403: components["responses"]["ErrorResponse"];
-            404: components["responses"]["ErrorResponse"];
+            /** @description Surface gone — DOCUMENT_BRAND_SURFACE_RETIRED. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -8409,32 +8457,39 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["UpdateDocumentBrandRequest"];
             };
         };
         responses: {
-            /** @description Updated DocumentBrand. */
-            200: {
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Surface retired — DOCUMENT_BRAND_SURFACE_RETIRED. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DocumentBrandResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            401: components["responses"]["ErrorResponse"];
-            403: components["responses"]["ErrorResponse"];
-            404: components["responses"]["ErrorResponse"];
-            422: components["responses"]["ErrorResponse"];
+            /** @description Surface gone — DOCUMENT_BRAND_SURFACE_RETIRED. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };
     listLegalEntities: {
         parameters: {
-            query: {
-                groupCode: string;
+            query?: {
+                groupCode?: string;
                 status?: "ACTIVE" | "INACTIVE" | "ALL";
             };
             header?: {
@@ -8446,17 +8501,26 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description LegalEntity page/list. */
-            200: {
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Surface retired — error.code LEGAL_ENTITY_SURFACE_RETIRED (retryable=false). Prefer 404; 410 also permitted. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LegalEntityListResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            401: components["responses"]["ErrorResponse"];
-            403: components["responses"]["ErrorResponse"];
+            /** @description Surface gone — LEGAL_ENTITY_SURFACE_RETIRED. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -8470,31 +8534,39 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["CreateLegalEntityRequest"];
             };
         };
         responses: {
-            /** @description Created LegalEntity. */
-            201: {
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Surface retired — LEGAL_ENTITY_SURFACE_RETIRED. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LegalEntityResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            401: components["responses"]["ErrorResponse"];
-            403: components["responses"]["ErrorResponse"];
-            422: components["responses"]["ErrorResponse"];
+            /** @description Surface gone — LEGAL_ENTITY_SURFACE_RETIRED. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };
     getLegalEntity: {
         parameters: {
-            query: {
-                groupCode: string;
+            query?: {
+                groupCode?: string;
             };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
@@ -8507,18 +8579,26 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description LegalEntity detail. */
-            200: {
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Surface retired — LEGAL_ENTITY_SURFACE_RETIRED. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LegalEntityResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            401: components["responses"]["ErrorResponse"];
-            403: components["responses"]["ErrorResponse"];
-            404: components["responses"]["ErrorResponse"];
+            /** @description Surface gone — LEGAL_ENTITY_SURFACE_RETIRED. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -8534,25 +8614,32 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["UpdateLegalEntityRequest"];
             };
         };
         responses: {
-            /** @description Updated LegalEntity. */
-            200: {
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Surface retired — LEGAL_ENTITY_SURFACE_RETIRED. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LegalEntityResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            401: components["responses"]["ErrorResponse"];
-            403: components["responses"]["ErrorResponse"];
-            404: components["responses"]["ErrorResponse"];
-            422: components["responses"]["ErrorResponse"];
+            /** @description Surface gone — LEGAL_ENTITY_SURFACE_RETIRED. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -8570,18 +8657,26 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Group default legal-entity setting. */
-            200: {
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Surface retired — LEGAL_ENTITY_SURFACE_RETIRED. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GroupDefaultLegalEntityResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            401: components["responses"]["ErrorResponse"];
-            403: components["responses"]["ErrorResponse"];
-            404: components["responses"]["ErrorResponse"];
+            /** @description Surface gone — LEGAL_ENTITY_SURFACE_RETIRED. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -8597,25 +8692,32 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["PutGroupDefaultLegalEntityRequest"];
             };
         };
         responses: {
-            /** @description Persisted group default. */
-            200: {
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            /** @description Surface retired — LEGAL_ENTITY_SURFACE_RETIRED. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GroupDefaultLegalEntityResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            401: components["responses"]["ErrorResponse"];
-            403: components["responses"]["ErrorResponse"];
-            404: components["responses"]["ErrorResponse"];
-            422: components["responses"]["ErrorResponse"];
+            /** @description Surface gone — LEGAL_ENTITY_SURFACE_RETIRED. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             default: components["responses"]["ErrorResponse"];
         };
     };

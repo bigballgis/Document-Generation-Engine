@@ -180,4 +180,24 @@ describe('TemplateDetailOverviewTab', () => {
     expect(ElMessageBox.confirm).toHaveBeenCalled()
     expect(completeSpy).toHaveBeenCalledWith('tpl-1')
   })
+
+  it('hard-retires document brand allow-list editor (BDD-SYS-NORM-D1-007/014)', async () => {
+    const wrapper = mountTab(
+      {
+        lifecycleStatus: 'DRAFT',
+        allowedDocumentBrandCodes: ['PLATFORM_DEFAULT'],
+      },
+      ['DOCUMENT_AUTHOR'],
+    )
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="template-overview-document-brand-allow-list"]').exists()).toBe(
+      false,
+    )
+    expect(
+      wrapper.find('[data-testid="template-overview-document-brand-allow-list-edit"]').exists(),
+    ).toBe(false)
+    expect(wrapper.find('[data-testid="template-document-brand-allow-list"]').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('Allowed document brands')
+  })
 })

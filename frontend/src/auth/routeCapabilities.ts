@@ -11,7 +11,6 @@ import {
   canDecideTests,
   canManageAssetLibrary,
   canManageContentModuleLifecycle,
-  canManageDocumentBrandCatalogs,
   canManageLegalHold,
   canPublishTemplates,
   canReviewMasters,
@@ -54,7 +53,6 @@ function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
       routeKey === ROUTE_KEYS.auditConsole ||
       routeKey === ROUTE_KEYS.identityAdministration ||
       routeKey === ROUTE_KEYS.legalHoldAdministration ||
-      routeKey === ROUTE_KEYS.documentBrandAdministration ||
       routeKey === ROUTE_KEYS.templateAuthoringHome
     )
   }
@@ -73,7 +71,6 @@ function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
     allowed.add(ROUTE_KEYS.apiPolicyManagement)
     allowed.add(ROUTE_KEYS.auditConsole)
     allowed.add(ROUTE_KEYS.identityAdministration)
-    allowed.add(ROUTE_KEYS.documentBrandAdministration)
     allowed.add(ROUTE_KEYS.templateAuthoringHome)
   }
   // DOCUMENT_AUTHOR = former MASTER_DESIGNER ∪ TEMPLATE_AUTHOR route union.
@@ -157,7 +154,6 @@ const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContext) => b
   [ROUTE_KEYS.identityAdministration]: (context) =>
     isGlobalAdmin(context.roles) || context.roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN),
   [ROUTE_KEYS.legalHoldAdministration]: canManageLegalHold,
-  [ROUTE_KEYS.documentBrandAdministration]: canManageDocumentBrandCatalogs,
 }
 
 export function canAccessRouteWithCapability(
