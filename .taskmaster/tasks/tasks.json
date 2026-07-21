@@ -2061,27 +2061,27 @@
       {
         "id": "150",
         "title": "SYS-NORM Wave 6 — D1 DocumentBrand/LegalEntity runtime retirement (sys-norm-d1-brands)",
-        "description": "IN PROGRESS 2026-07-21. NON-CE System Normalization Program Wave 6 sole-active delivery leaf. Slice sys-norm-d1-brands; placement ISOLATED; worktree D:/working/DGE-sys-norm-d1-brands; branch feat/sys-norm-d1-brands. Batch solo (member_task_ids: [\"150\"]; proposed_slice_id: sys-norm-d1-brands). Scope: ADR-0071 D1 — retire DocumentBrand/LegalEntity product surfaces; letterhead/master owns logo/seal; keep Legal holds; shell themes UI-only; runtime simplify fail-closed. BDD ready docs/behavior/sys-norm-d1-brands.md BDD-SYS-NORM-D1-001…020. frontend_ui_in_scope=true. Waves 0–5 Done; Wave 6 In Progress; Waves 7–8 Not Started — program NOT Done. Formal phase None. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Do NOT flip #3b/#5a GO. Do NOT activate Wave 7/8 or fold parked UX items. Do NOT claim go-live / SYS-NORM program Done.",
-        "details": "ACTIVATED 2026-07-21 (stage 2 plan-orchestrator). Sole-active NON-CE delivery leaf supersedes cleared Wave 5 sole-active. Depends on Wave 5 #149 Done (febb95b3). Plan: docs/plan/system-normalization-program-2026-07.md Wave 6 → In Progress; detail docs/plan/detail/sys-norm-d1-brands.md. ADR-0071 Accepted. Implementation readiness (one leaf): BE = durable hard-delete + management API fail-closed + runtime/preview/test-generation simplify (no LegalEntity→DocumentBrand resolve); FE = hard-retire routes/catalogs/pickers/API consumers + letterhead path + Legal holds + shell theme regression; doc-keeper = permission-matrix/OpenAPI/catalog-nav notes before/with code as needed. Gate order: BDD ready (met) → doc-keeper → TDD Red/Green BE+FE → E2E+UIUX → queued deploy → merge. Formal phase remains None. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT claim SYS-NORM program Done; do NOT activate Wave 7/8/parked items.",
-        "testStrategy": "Acceptance via BDD-SYS-NORM-D1-001…020: 1. Brand/entity product surfaces absent (nav + hard-retired routes). 2. Management APIs DocumentBrand/LegalEntity/defaultLegalEntity fail-closed 404/410 with stable codes. 3. Durable hard delete of brand/entity persistence. 4. Runtime/preview/test-generation no LegalEntity→DocumentBrand catalog resolve; letterhead/master owns logo/seal; legalEntityCode opaque non-driving. 5. allowedDocumentBrandCodes no longer gates. 6. Legal holds kept; shell REDBC/GREENBC UI-only. 7. No brand/entity sidecar required for export dependency closure (Wave 7 dry-run OOS). 8. Gates: mvn verify GREEN; FE lint/type-check/test/build GREEN; E2E+UIUX; Stage 5/10 DEPLOY_OK. 9. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT claim SYS-NORM program Done; do NOT fold Wave 7/8/parked.",
+        "description": "DONE 2026-07-21. NON-CE System Normalization Program Wave 6 closed. Slice sys-norm-d1-brands; MAIN merge 64b0a650; worktree DGE-sys-norm-d1-brands REMOVED. Batch solo (member_task_ids: [\"150\"]) closed. Scope delivered: ADR-0071 D1 — retire DocumentBrand/LegalEntity product surfaces; letterhead/master owns logo/seal; keep Legal holds; shell themes UI-only; runtime simplify fail-closed; Flyway V76. BDD ready docs/behavior/sys-norm-d1-brands.md BDD-SYS-NORM-D1-001…020. frontend_ui_in_scope=true. Gates: BE mvn verify GREEN 2370; FE lint/type-check/test(1634)/build GREEN; E2E 16/16; UIUX PASS_WITH_NOTES Critical=0; Arch/CQ PASS_WITH_NOTES Critical=0; Stage 5+10 DEPLOY_OK. Waves 0–6 Done; Waves 7–8 Not Started — program NOT Done. Host sole-active cleared. Next queue head sys-norm-promotion-pack (Wave 7) Not Started / not activated. Formal phase None. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Do NOT flip #3b/#5a GO. Do NOT claim go-live / SYS-NORM program Done.",
+        "details": "DONE 2026-07-21 (stage 12 post-task-doc-sync on MAIN). Merge SHA 64b0a650. Worktree REMOVED. Plan: docs/plan/system-normalization-program-2026-07.md Wave 6 → Done; detail docs/plan/detail/sys-norm-d1-brands.md exit criteria met. ADR-0071 Accepted (impl landed; decision text unchanged). Formal phase remains None. Host sole-active cleared. Next queue head Wave 7 sys-norm-promotion-pack — Not Started / not activated. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT claim SYS-NORM program Done; do NOT activate Wave 7/8 implementation.",
+        "testStrategy": "Regression: BE mvn verify 2370 + V76; FE 1634; E2E SYS-NORM-D1 16/16; UIUX/Arch/CQ Critical=0; deploy evidence docs/plan/evidence/sys-norm-d1-brands-stage5-deploy/ and stage10.",
         "priority": "high",
         "dependencies": [
           "149"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-21T07:31:26.594Z"
+        "updatedAt": "2026-07-21T09:14:55.040Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-21T07:31:26.594Z",
+      "lastModified": "2026-07-21T09:14:55.040Z",
       "taskCount": 150,
-      "completedCount": 146,
+      "completedCount": 147,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-21T07:31:26.594Z"
+      "updated": "2026-07-21T09:14:55.040Z"
     }
   }
 }

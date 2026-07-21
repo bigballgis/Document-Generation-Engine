@@ -16,7 +16,7 @@
 > `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` → `DOCUMENT_AUTHOR` (capability union). Retired codes are
 > **not** assignable — fail-closed **422** `ROLE_NOT_ASSIGNABLE` (ROLE-005).
 >
-> **ADR-0071 / SYS-NORM Wave 6 (D1 — docs-first 2026-07-21; TM #150 In Progress):** DocumentBrand /
+> **ADR-0071 / SYS-NORM Wave 6 (D1 — Done 2026-07-21; TM #150 `64b0a650`):** DocumentBrand /
 > LegalEntity **catalog read/write product surfaces are retired** — no management nav, no
 > catalog CRUD permission rows as live product capabilities, **no new role bits**. Logo / seal /
 > letterhead legal presentation are governed via **Letterhead (master)** only. **Legal holds**
@@ -34,9 +34,9 @@
 - [文档治理规则](../governance.md)
 - [ADR-0070 Role compression (six roles)](../adr/authorization-security/0070-role-compression-six-roles.md)（Accepted — Wave 5 impl **Done** `febb95b3`）
 - [SYS-NORM Wave 5 roles BDD](../behavior/sys-norm-roles.md)（**ready**/delivered — **BDD-SYS-NORM-ROLE-001…018**）
-- [System Normalization program](../plan/system-normalization-program-2026-07.md)（Waves **0–5 Done**; Wave **6 In Progress** `#150`; Waves **7–8 Not Started**）
+- [System Normalization program](../plan/system-normalization-program-2026-07.md)（Waves **0–6 Done** `#150` `64b0a650`; Waves **7–8 Not Started**）
 - [ADR-0071 Retire document brand / legal entity surfaces](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)（Accepted — Wave 1 nav hide Done `#145`; Wave 6 runtime SoT [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md)）
-- [SYS-NORM Wave 6 D1 brands BDD](../behavior/sys-norm-d1-brands.md)（**ready** — **BDD-SYS-NORM-D1-001…020**；TM **#150**）
+- [SYS-NORM Wave 6 D1 brands BDD](../behavior/sys-norm-d1-brands.md)（**ready/Done** — **BDD-SYS-NORM-D1-001…020**；TM **#150** `64b0a650`）
 - [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
 - [LR-D1 行为规格](../behavior/lrp-d1-audit-retention.md)
 - [CE-G04 Legal hold 行为规格](../behavior/ce-g04-legal-hold.md)（BDD-CE-G04；#75 — retention 豁免叠加，不改 ADR-0040/0048 正文）

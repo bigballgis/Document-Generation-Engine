@@ -26,9 +26,9 @@ Retain SoD: `TEMPLATE_TESTER` remains distinct; authors do not gain `decideTests
 | --- | --- |
 | Leaf status | **Done** (MAIN `febb95b3`; worktree **REMOVED**) |
 | Formal phase | **None** |
-| Host sole-active | **cleared** for Wave 5 — superseded by Wave 6 TM **#150** (`sys-norm-d1-brands`) |
-| Next queue head | `sys-norm-d1-brands` (Wave 6) — TM **#150** **In Progress** (see [sys-norm-d1-brands.md](./sys-norm-d1-brands.md)) |
-| Program | Waves **0–5 Done**; Wave **6 In Progress**; Waves **7–8 Not Started** — program **not** Done |
+| Host sole-active | **cleared** (Wave 5 closed; Wave 6 **#150** also **Done** `64b0a650`) |
+| Next queue head | Wave 7 `sys-norm-promotion-pack` — **Not Started** / **not** activated (Wave 6 Done — [sys-norm-d1-brands.md](./sys-norm-d1-brands.md)) |
+| Program | Waves **0–6 Done**; Waves **7–8 Not Started** — program **not** Done |
 
 ---
 

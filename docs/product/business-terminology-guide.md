@@ -4,12 +4,12 @@
 **Owner phase:** [P21 — Role-journey frontend redesign & business-friendly terminology](../plan/detail/P21-role-journey-frontend-redesign.md) (**Done** 2026-06-30)
 **Primary persona source:** user confirmation 2026-06-29 (two rounds).
 
-### SYS-NORM Confirmed intent (2026-07-21) — Wave 5 Done; Wave 6 D1 docs-first
+### SYS-NORM Confirmed intent (2026-07-21) — Wave 5–6 Done; Wave 8 L1 sweep pending
 
 > Product direction locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.8 / §2.5.
 > **Do not claim L1 sweep Done** until Wave 8 `sys-norm-demo-seed-terms`.
-> Wave 5 six-role runtime **Done** (`febb95b3`). Wave 6 D1 brand/entity retirement = TM **#150**
-> (BDD **ready**; docs-first; impl pending — **not** program Done).
+> Wave 5 six-role runtime **Done** (`febb95b3`). Wave 6 D1 brand/entity retirement **Done**
+> (TM **#150** `64b0a650` — **not** program Done; Waves 7–8 remain).
 
 | Topic | Confirmed | Pending | Wave |
 | --- | --- | --- | --- |
@@ -18,7 +18,7 @@
 | API / L3 identifiers | May keep `masterId`, `MasterDocument`, routes | — | Unchanged |
 | Role `DOCUMENT_AUTHOR` | Role **ID** locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md); BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) ROLE-013) | EN/ZH **display label** finalizable — interim FE copy OK | Labels: Wave 5 interim / Wave 8 finalize |
 | Role merge (catalog) | Six-role compression locked (ADR-0070); runtime catalog **Done** (`febb95b3`) | — | **Wave 5 Done** |
-| Document brands / Legal entities (L1) | **Not required product surfaces** ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); do **not** use as nav/module titles | Legacy L3 codes may linger until Wave 6 durable delete | **Wave 6** `sys-norm-d1-brands` |
+| Document brands / Legal entities (L1) | **Not required product surfaces** ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); do **not** use as nav/module titles | — (Wave 6 durable retire **Done** `64b0a650`) | **Wave 6 Done** `sys-norm-d1-brands` |
 | Logo / seal / letterhead legal name | Governed via **Letterhead** / **母版** (master flows) — not “Document brand” MDM | — | Wave 6+ |
 | Shell brand themes | `REDBC` / `GREENBC` remain UI-only chrome labels — not document brand MDM | — | Unchanged |
 

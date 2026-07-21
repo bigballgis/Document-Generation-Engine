@@ -20,14 +20,15 @@ related:
 
 # SYS-NORM Wave 6 — D1 DocumentBrand / LegalEntity runtime retirement (ADR-0071)
 
-> **Slice:** `sys-norm-d1-brands` · branch `feat/sys-norm-d1-brands` ·
-> worktree `D:/working/DGE-sys-norm-d1-brands` · placement **ISOLATED**.  
+> **Slice:** `sys-norm-d1-brands` · TM **#150** → **Done** (MAIN merge `64b0a650`; worktree **REMOVED**).  
+> **Historical placement:** branch `feat/sys-norm-d1-brands` · worktree `D:/working/DGE-sys-norm-d1-brands` · **ISOLATED**.  
 > **Locks:** [ADR-0071 Accepted](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)
 > (2026-07-21); charter [system-normalization-program.md](./system-normalization-program.md)
 > §2.5 / §7; plan [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md)
-> Wave 6.  
+> Wave 6 **Done**.  
 > **Prior:** Wave 1 nav hide **Done** ([sys-norm-shell-fluid-nav.md](./sys-norm-shell-fluid-nav.md)
 > **BDD-SYS-NORM-W1-003 / W1-004**); Waves 0–5 **Done**.  
+
 > **Historical product surface:** [ibl-e4-entity-document-brands.md](./ibl-e4-entity-document-brands.md)
 > / [ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md) —
 > **superseded for ongoing product surface** by ADR-0071; historical impl evidence retained.  

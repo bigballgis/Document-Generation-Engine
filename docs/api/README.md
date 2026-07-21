@@ -235,7 +235,7 @@ Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `Context`, `CompositionInclusi
 
 **Historical IBL-E4** ([ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md) / #131 Done): optional `context.legalEntityCode`, DocumentBrand/LegalEntity catalogs, `allowedDocumentBrandCodes`, catalog 422 codes. Evidence: [ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md).
 
-**SYS-NORM Wave 6 / D1** ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) Accepted; BDD [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) **ready** **D1-001…020**; TM **#150**): management brand/entity + group `defaultLegalEntityCode` APIs **retired** (404/410 + surface-retired codes). Runtime simplify — letterhead/logo/seal from **Letterhead (master)**; `legalEntityCode` opaque non-driving; allow-list ignored at generate. Promotion/export **must not** require brand/entity sidecar (Wave 7 owns dry-run UI). Legal holds kept. UI `REDBC`/`GREENBC` orthogonal.
+**SYS-NORM Wave 6 / D1** ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) Accepted; BDD [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) **ready/Done** **D1-001…020**; TM **#150** Done `64b0a650`): management brand/entity + group `defaultLegalEntityCode` APIs **retired** (404/410 + surface-retired codes). Runtime simplify — letterhead/logo/seal from **Letterhead (master)**; `legalEntityCode` opaque non-driving; allow-list ignored at generate. Promotion/export **must not** require brand/entity sidecar (Wave 7 owns dry-run UI). Legal holds kept. UI `REDBC`/`GREENBC` orthogonal.
 
 | Condition | HTTP | `error.code` (stable) |
 | --- | --- | --- |

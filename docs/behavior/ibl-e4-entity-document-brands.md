@@ -5,7 +5,7 @@
 > [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)
 > (**Accepted**). **Wave 6 runtime / API / catalog retirement SoT (BDD ready):**
 > [sys-norm-d1-brands.md](./sys-norm-d1-brands.md) **`bdd_readiness: ready`** —
-> **BDD-SYS-NORM-D1-001…020** (TM **#150** In Progress; docs-first stage 3; impl pending).
+> **BDD-SYS-NORM-D1-001…020** (TM **#150** Done `64b0a650`; Wave 6 delivered).
 > This file remains **historical** IBL-E4 delivery acceptance evidence; do **not** treat
 > E4-C* dual-catalog management UX as an ongoing product requirement. New implementers
 > follow Wave 6 + ADR-0071, not E4-C* catalog permissions.
