@@ -38,42 +38,44 @@ class GroupAccessServiceTest {
     }
 
     @Test
-    void mastersReviewAndManageRequireAdminRoles() {
-        ManagementSessionClaims author = session(List.of("TEMPLATE_AUTHOR"), List.of("G1"));
+    void mastersReviewRequiresAdminWhileDocumentAuthorMayManage() {
+        ManagementSessionClaims author = session(List.of("DOCUMENT_AUTHOR"), List.of("G1"));
         assertThat(service.canReviewMasters(author)).isFalse();
-        assertThat(service.canManageMasters(author)).isFalse();
+        assertThat(service.canManageMasters(author)).isTrue();
         assertThat(service.canReviewMasters(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
         assertThat(service.canManageMasters(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
     }
 
     @Test
     void masterDesignerCanManageMastersButNotReview() {
-        ManagementSessionClaims designer = session(List.of("MASTER_DESIGNER"), List.of("G1"));
+        ManagementSessionClaims designer = session(List.of("DOCUMENT_AUTHOR"), List.of("G1"));
         assertThat(service.canManageMasters(designer)).isTrue();
         assertThat(service.canReviewMasters(designer)).isFalse();
     }
 
     @Test
     void authoringAllowsDesignerAuthorAndAdmins() {
-        assertThat(service.canAuthorTemplates(session(List.of("MASTER_DESIGNER"), List.of()))).isTrue();
-        assertThat(service.canAuthorTemplates(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isTrue();
+        assertThat(service.canAuthorTemplates(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isTrue();
+        assertThat(service.canAuthorTemplates(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isTrue();
         assertThat(service.canAuthorTemplates(session(List.of("AUDIT_ADMIN"), List.of()))).isFalse();
     }
 
     @Test
     void testAndApprovalDecisionsAreRoleScoped() {
         assertThat(service.canDecideTemplateTests(session(List.of("TEMPLATE_TESTER"), List.of()))).isTrue();
-        assertThat(service.canDecideTemplateTests(session(List.of("TEMPLATE_APPROVER"), List.of()))).isFalse();
-        assertThat(service.canDecideTemplateApprovals(session(List.of("TEMPLATE_APPROVER"), List.of()))).isTrue();
+        assertThat(service.canDecideTemplateTests(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isFalse();
+        assertThat(service.canDecideTemplateTests(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
+        assertThat(service.canDecideTemplateApprovals(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
         assertThat(service.canDecideTemplateApprovals(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();
+        assertThat(service.canDecideTemplateApprovals(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isFalse();
         assertThat(service.canDecideLegalApprovals(session(List.of("LEGAL_REVIEWER"), List.of()))).isTrue();
-        assertThat(service.canDecideLegalApprovals(session(List.of("TEMPLATE_APPROVER"), List.of()))).isFalse();
+        assertThat(service.canDecideLegalApprovals(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
         assertThat(service.canDecideTemplateApprovals(session(List.of("LEGAL_REVIEWER"), List.of()))).isFalse();
     }
 
     @Test
     void publishRestoreAndApiPolicyRequireAdminRoles() {
-        ManagementSessionClaims author = session(List.of("TEMPLATE_AUTHOR"), List.of());
+        ManagementSessionClaims author = session(List.of("DOCUMENT_AUTHOR"), List.of());
         assertThat(service.canPublishTemplates(author)).isFalse();
         assertThat(service.canRestoreOrDeprecateTemplates(author)).isFalse();
         assertThat(service.canManageApiPolicy(author)).isFalse();
@@ -93,14 +95,14 @@ class GroupAccessServiceTest {
 
     @Test
     void stopTemplatesAllowsAuthorsAndDesigners() {
-        assertThat(service.canStopTemplates(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isTrue();
-        assertThat(service.canStopTemplates(session(List.of("MASTER_DESIGNER"), List.of()))).isTrue();
+        assertThat(service.canStopTemplates(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isTrue();
+        assertThat(service.canStopTemplates(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isTrue();
         assertThat(service.canStopTemplates(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();
     }
 
     @Test
     void manageReleaseVersionStateRequiresAdminRoles() {
-        assertThat(service.canManageReleaseVersionState(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isFalse();
+        assertThat(service.canManageReleaseVersionState(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isFalse();
         assertThat(service.canManageReleaseVersionState(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
         assertThat(service.canManageReleaseVersionState(session(List.of("GLOBAL_ADMIN"), List.of()))).isTrue();
     }
@@ -109,14 +111,14 @@ class GroupAccessServiceTest {
     void auditReadRequiresAuditOrAdminRoles() {
         assertThat(service.canReadAudit(session(List.of("AUDIT_ADMIN"), List.of()))).isTrue();
         assertThat(service.canReadAudit(session(List.of("GLOBAL_ADMIN"), List.of()))).isTrue();
-        assertThat(service.canReadAudit(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isFalse();
+        assertThat(service.canReadAudit(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isFalse();
     }
 
     @Test
     void deleteTemplateRequiresGlobalAdminOnly() {
         assertThat(service.canDeleteTemplate(session(List.of("GLOBAL_ADMIN"), List.of()))).isTrue();
         assertThat(service.canDeleteTemplate(session(List.of("GROUP_ADMIN"), List.of()))).isFalse();
-        assertThat(service.canDeleteTemplate(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isFalse();
+        assertThat(service.canDeleteTemplate(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isFalse();
     }
 
     @Test
@@ -128,13 +130,13 @@ class GroupAccessServiceTest {
 
     @Test
     void contentModuleCatalogBrowseFollowsPermissionMatrix() {
-        assertThat(service.canBrowseContentModuleCatalog(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isTrue();
-        assertThat(service.canBrowseContentModuleCatalog(session(List.of("MASTER_DESIGNER"), List.of()))).isTrue();
-        assertThat(service.canBrowseContentModuleCatalog(session(List.of("TEMPLATE_APPROVER"), List.of()))).isTrue();
+        assertThat(service.canBrowseContentModuleCatalog(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isTrue();
+        assertThat(service.canBrowseContentModuleCatalog(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isTrue();
+        assertThat(service.canBrowseContentModuleCatalog(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
         assertThat(service.canBrowseContentModuleCatalog(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
         assertThat(service.canBrowseContentModuleCatalog(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();
         assertThat(service.canViewContentModuleStructure(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();
-        assertThat(service.canViewContentModuleStructure(session(List.of("TEMPLATE_APPROVER"), List.of()))).isTrue();
+        assertThat(service.canViewContentModuleStructure(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
     }
 
     @Test
@@ -142,16 +144,15 @@ class GroupAccessServiceTest {
         assertThat(service.canMaintainCollaborationTimeoutConfig(session(List.of("GLOBAL_ADMIN"), List.of()))).isTrue();
         assertThat(service.canMaintainCollaborationTimeoutConfig(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
         assertThat(service.canMaintainCollaborationTimeoutConfig(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();
-        assertThat(service.canMaintainCollaborationTimeoutConfig(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isFalse();
+        assertThat(service.canMaintainCollaborationTimeoutConfig(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isFalse();
     }
 
     @Test
     void collaborationWorkItemVisibilityFollowsPermissionMatrix() {
-        assertThat(service.canViewCollaborationWorkItems(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isTrue();
+        assertThat(service.canViewCollaborationWorkItems(session(List.of("DOCUMENT_AUTHOR"), List.of()))).isTrue();
         assertThat(service.canViewCollaborationWorkItems(session(List.of("TEMPLATE_TESTER"), List.of()))).isTrue();
-        assertThat(service.canViewCollaborationWorkItems(session(List.of("TEMPLATE_APPROVER"), List.of()))).isTrue();
         assertThat(service.canViewCollaborationWorkItems(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
-        assertThat(service.canViewCollaborationWorkItems(session(List.of("MASTER_DESIGNER"), List.of()))).isFalse();
+        assertThat(service.canViewCollaborationWorkItems(session(List.of("LEGAL_REVIEWER"), List.of()))).isTrue();
         assertThat(service.canViewCollaborationWorkItems(session(List.of("AUDIT_ADMIN"), List.of()))).isFalse();
         assertThat(service.hasCollaborationWorkItemAdminVisibility(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
         assertThat(service.hasCollaborationWorkItemAdminVisibility(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();

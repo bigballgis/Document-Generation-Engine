@@ -55,6 +55,8 @@ public final class ApiErrorCodes {
     public static final String GROUP_CODE_ALREADY_EXISTS = "GROUP_CODE_ALREADY_EXISTS";
     public static final String GROUP_SCOPE_OUT_OF_RANGE = "GROUP_SCOPE_OUT_OF_RANGE";
     public static final String ROLE_ASSIGNMENT_NOT_ALLOWED = "ROLE_ASSIGNMENT_NOT_ALLOWED";
+    /** SYS-NORM Wave 5 / ADR-0070 — retired or unknown management role on assignment (422). */
+    public static final String ROLE_NOT_ASSIGNABLE = "ROLE_NOT_ASSIGNABLE";
     public static final String USER_DELETE_NOT_ALLOWED = "USER_DELETE_NOT_ALLOWED";
     public static final String GROUP_MANAGEMENT_NOT_ALLOWED = "GROUP_MANAGEMENT_NOT_ALLOWED";
     public static final String CONTENT_MODULE_NOT_FOUND = "CONTENT_MODULE_NOT_FOUND";

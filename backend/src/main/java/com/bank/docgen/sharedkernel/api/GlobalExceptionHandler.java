@@ -1,5 +1,6 @@
 package com.bank.docgen.sharedkernel.api;
 
+import com.bank.docgen.authorization.management.service.RoleNotAssignableException;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.infrastructure.resilience.GenerationServiceUnavailableException;
 import com.bank.docgen.infrastructure.resilience.GenerationTimeoutException;
@@ -59,6 +60,17 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException ex,
             HttpServletRequest request
     ) {
+        RoleNotAssignableException roleNotAssignable = findRoleNotAssignable(ex);
+        if (roleNotAssignable != null) {
+            return errorEnvelopeFactory.domainError(
+                    request,
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    ApiErrorCodes.ROLE_NOT_ASSIGNABLE,
+                    ApiErrorCategories.VALIDATION,
+                    roleNotAssignable.messageKey(),
+                    false
+            );
+        }
         Throwable cause = ex.getMostSpecificCause();
         if (cause instanceof UnrecognizedPropertyException unrecognized) {
             String field = fieldPath(unrecognized);
@@ -194,5 +206,16 @@ public class GlobalExceptionHandler {
                 .map(JsonMappingException.Reference::getFieldName)
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining("."));
+    }
+
+    private static RoleNotAssignableException findRoleNotAssignable(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof RoleNotAssignableException roleNotAssignable) {
+                return roleNotAssignable;
+            }
+            current = current.getCause();
+        }
+        return null;
     }
 }

@@ -44,7 +44,7 @@ class DecisionFormServiceTest {
                 "Approver",
                 "approver@example.com",
                 AuthSource.LOCAL,
-                List.of("TEMPLATE_APPROVER"),
+                List.of("GROUP_ADMIN"),
                 List.of("RETAIL"),
                 "route.template-authoring-home",
                 List.of("route.template-authoring-home"),

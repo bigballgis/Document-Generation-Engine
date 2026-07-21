@@ -84,7 +84,7 @@ class MasterSelfApprovalBlockTest {
 
     @Test
     void m001_sameActorApproval_isBlocked403_andStateUnchanged() {
-        ManagementSessionClaims alice = session("alice", List.of("MASTER_DESIGNER"));
+        ManagementSessionClaims alice = session("alice", List.of("DOCUMENT_AUTHOR"));
         stubReadable(alice);
         when(groupAccessService.canReviewMasters(alice)).thenReturn(true);
         stubLatestSubmitter("alice");
@@ -128,7 +128,7 @@ class MasterSelfApprovalBlockTest {
 
     @Test
     void m003_differentActorApproval_succeedsWithoutException() {
-        ManagementSessionClaims bob = session("bob", List.of("MASTER_DESIGNER"));
+        ManagementSessionClaims bob = session("bob", List.of("DOCUMENT_AUTHOR"));
         stubReadable(bob);
         when(groupAccessService.canReviewMasters(bob)).thenReturn(true);
         stubLatestSubmitter("alice");
@@ -146,7 +146,7 @@ class MasterSelfApprovalBlockTest {
 
     @Test
     void x006_sameActorReject_alsoBlocked() {
-        ManagementSessionClaims alice = session("alice", List.of("MASTER_DESIGNER"));
+        ManagementSessionClaims alice = session("alice", List.of("DOCUMENT_AUTHOR"));
         stubReadable(alice);
         when(groupAccessService.canReviewMasters(alice)).thenReturn(true);
         stubLatestSubmitter("alice");
@@ -161,7 +161,7 @@ class MasterSelfApprovalBlockTest {
 
     @Test
     void x001_noSubmitRecord_doesNotBlock() {
-        ManagementSessionClaims alice = session("alice", List.of("MASTER_DESIGNER"));
+        ManagementSessionClaims alice = session("alice", List.of("DOCUMENT_AUTHOR"));
         stubReadable(alice);
         when(groupAccessService.canReviewMasters(alice)).thenReturn(true);
         when(masterReviewRecordRepository.findByMasterIdOrderByCreatedAtDesc(masterId))

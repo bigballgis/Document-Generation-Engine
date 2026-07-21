@@ -86,7 +86,7 @@ class CoverageComputationServiceTest {
                 "Author",
                 "author@example.com",
                 AuthSource.LOCAL,
-                List.of("TEMPLATE_AUTHOR"),
+                List.of("DOCUMENT_AUTHOR"),
                 List.of("RETAIL"),
                 "route.template-authoring-home",
                 List.of("route.template-authoring-home"),

@@ -21,7 +21,7 @@ class SelfApprovalGuardTest {
 
     @Test
     void sameActorWithoutException_isBlocked() {
-        ManagementSessionClaims approver = session("alice", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims approver = session("alice", List.of("GROUP_ADMIN"));
         SelfApprovalGuard guard = new SelfApprovalGuard();
 
         assertThatThrownBy(() -> guard.enforce(request("alice", "alice", false, null, null, approver)))
@@ -60,10 +60,11 @@ class SelfApprovalGuardTest {
 
     @Test
     void nonGroupAdminExceptionRequest_isRejected403() {
-        ManagementSessionClaims approver = session("alice", List.of("TEMPLATE_APPROVER"));
+        // ADR-0070: former TEMPLATE_APPROVER absorbed into GROUP_ADMIN; pure authors cannot intervene.
+        ManagementSessionClaims author = session("alice", List.of("DOCUMENT_AUTHOR"));
         SelfApprovalGuard guard = new SelfApprovalGuard();
 
-        assertThatThrownBy(() -> guard.enforce(request("alice", "alice", true, "reason", true, approver)))
+        assertThatThrownBy(() -> guard.enforce(request("alice", "alice", true, "reason", true, author)))
                 .isInstanceOf(LifecycleAuthorizationException.class)
                 .satisfies(ex -> {
                     LifecycleAuthorizationException e = (LifecycleAuthorizationException) ex;
@@ -105,7 +106,7 @@ class SelfApprovalGuardTest {
 
     @Test
     void nullLastSubmitActor_doesNotBlock() {
-        ManagementSessionClaims approver = session("alice", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims approver = session("alice", List.of("GROUP_ADMIN"));
         SelfApprovalGuard guard = new SelfApprovalGuard();
 
         SelfApprovalGuard.EnforceOutcome outcome = guard.enforce(
@@ -117,7 +118,7 @@ class SelfApprovalGuardTest {
 
     @Test
     void differentActor_passesWithoutException() {
-        ManagementSessionClaims approver = session("bob", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims approver = session("bob", List.of("GROUP_ADMIN"));
         SelfApprovalGuard guard = new SelfApprovalGuard();
 
         SelfApprovalGuard.EnforceOutcome outcome = guard.enforce(
@@ -129,7 +130,7 @@ class SelfApprovalGuardTest {
 
     @Test
     void comparisonIsCaseSensitiveAfterTrim() {
-        ManagementSessionClaims approver = session("alice", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims approver = session("alice", List.of("GROUP_ADMIN"));
         SelfApprovalGuard guard = new SelfApprovalGuard();
 
         // "Alice" vs "alice" => different people (CMP-1)

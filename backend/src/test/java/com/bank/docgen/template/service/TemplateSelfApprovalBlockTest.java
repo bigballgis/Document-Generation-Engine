@@ -111,7 +111,7 @@ class TemplateSelfApprovalBlockTest {
 
     @Test
     void t001_sameActorApproval_isBlocked403_andStateUnchanged() {
-        ManagementSessionClaims alice = session("alice", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims alice = session("alice", List.of("GROUP_ADMIN"));
         stubApprovable(alice);
         stubLatestSubmitter("alice");
 
@@ -154,7 +154,8 @@ class TemplateSelfApprovalBlockTest {
 
     @Test
     void t003_nonGroupAdminException_isRejected403WithTemplateKey() {
-        ManagementSessionClaims alice = session("alice", List.of("TEMPLATE_APPROVER"));
+        // Capability stub keeps decideApprovals open; role itself must not allow exception intervention.
+        ManagementSessionClaims alice = session("alice", List.of("DOCUMENT_AUTHOR"));
         stubApprovable(alice);
         stubLatestSubmitter("alice");
 
@@ -189,7 +190,7 @@ class TemplateSelfApprovalBlockTest {
 
     @Test
     void t005_differentActorApproval_succeedsWithoutException() {
-        ManagementSessionClaims bob = session("bob", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims bob = session("bob", List.of("GROUP_ADMIN"));
         stubApprovable(bob);
         stubLatestSubmitter("alice");
         when(templateRepository.save(any())).thenReturn(template);
@@ -209,7 +210,7 @@ class TemplateSelfApprovalBlockTest {
 
     @Test
     void x006_sameActorReject_alsoBlocked() {
-        ManagementSessionClaims alice = session("alice", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims alice = session("alice", List.of("GROUP_ADMIN"));
         stubApprovable(alice);
         stubLatestSubmitter("alice");
 
@@ -222,7 +223,7 @@ class TemplateSelfApprovalBlockTest {
 
     @Test
     void x001_noSubmitRecord_doesNotBlock() {
-        ManagementSessionClaims alice = session("alice", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims alice = session("alice", List.of("GROUP_ADMIN"));
         stubApprovable(alice);
         when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
                 .thenReturn(List.of());

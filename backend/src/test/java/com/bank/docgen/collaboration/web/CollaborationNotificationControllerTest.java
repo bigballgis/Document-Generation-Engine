@@ -48,7 +48,7 @@ class CollaborationNotificationControllerTest {
 
     private ManagementSessionClaims tester;
     private ManagementSessionClaims groupAdmin;
-    private ManagementSessionClaims masterDesigner;
+    private ManagementSessionClaims auditAdmin;
 
     @BeforeEach
     void setUp() {
@@ -56,7 +56,7 @@ class CollaborationNotificationControllerTest {
         workItemRepository.deleteAll();
         tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
         groupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL"));
-        masterDesigner = session("10000004", List.of("MASTER_DESIGNER"), List.of("RETAIL"));
+        auditAdmin = session("10000004", List.of("AUDIT_ADMIN"), List.of());
 
         workItemRepository.save(openItem(
                 WORK_ITEM_ID,
@@ -186,7 +186,7 @@ class CollaborationNotificationControllerTest {
     @Test
     void deniesUnauthorizedRole() throws Exception {
         mockMvc.perform(get("/api/management/v1/collaboration-notifications/unread-count")
-                        .with(authentication(new ManagementAuthentication(masterDesigner))))
+                        .with(authentication(new ManagementAuthentication(auditAdmin))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
     }

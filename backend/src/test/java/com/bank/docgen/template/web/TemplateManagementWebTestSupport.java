@@ -63,10 +63,10 @@ abstract class TemplateManagementWebTestSupport {
         resetTemplateRepositories();
         sampleDocx = buildSampleDocx("Dear {{anchor:HEADER}} customer");
         groupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL", "CORP"));
-        templateAuthor = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        templateAuthor = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
         globalAdmin = session("10000001", List.of("GLOBAL_ADMIN"), List.of("*"));
         tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
-        approver = session("10000007", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
+        approver = session("10000007", List.of("GROUP_ADMIN"), List.of("RETAIL"));
     }
 
     protected void resetTemplateRepositories() {

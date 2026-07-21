@@ -99,7 +99,7 @@ class ApiManagementServiceRoutesSummaryTest {
 
     @Test
     void getRoutesSummary_deniedForNonApiAdmin() {
-        assertThatThrownBy(() -> service.getRoutesSummary(TEMPLATE_ID, "dev", session(List.of("TEMPLATE_AUTHOR"))))
+        assertThatThrownBy(() -> service.getRoutesSummary(TEMPLATE_ID, "dev", session(List.of("DOCUMENT_AUTHOR"))))
                 .isInstanceOf(ApiManagementAccessDeniedException.class);
         verifyNoInteractions(templateService, apiPolicyRepository, contractAssemblyService);
     }

@@ -38,13 +38,13 @@ class CollaborationWorkItemControllerTest {
     private CollaborationWorkItemRepository workItemRepository;
 
     private ManagementSessionClaims tester;
-    private ManagementSessionClaims masterDesigner;
+    private ManagementSessionClaims auditAdmin;
 
     @BeforeEach
     void setUp() {
         workItemRepository.deleteAll();
         tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
-        masterDesigner = session("10000004", List.of("MASTER_DESIGNER"), List.of("RETAIL"));
+        auditAdmin = session("10000004", List.of("AUDIT_ADMIN"), List.of());
         workItemRepository.save(new CollaborationWorkItemEntity(
                 UUID.fromString("11111111-1111-1111-1111-111111111111"),
                 TEMPLATE_ID,
@@ -73,9 +73,9 @@ class CollaborationWorkItemControllerTest {
     }
 
     @Test
-    void listQueue_deniesMasterDesigner() throws Exception {
+    void listQueue_deniesAuditAdmin() throws Exception {
         mockMvc.perform(get("/api/management/v1/collaboration-work-items")
-                        .with(authentication(new ManagementAuthentication(masterDesigner))))
+                        .with(authentication(new ManagementAuthentication(auditAdmin))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
     }

@@ -62,7 +62,7 @@ class AsyncPreviewOrchestratorTest {
         templateId = UUID.randomUUID();
         session = new ManagementSessionClaims(
                 "10000001", "Author", "author@test.com",
-                AuthSource.LOCAL, List.of("TEMPLATE_AUTHOR"),
+                AuthSource.LOCAL, List.of("DOCUMENT_AUTHOR"),
                 List.of("RETAIL"), "route.home", List.of("route.home"),
                 Instant.now().plusSeconds(3600)
         );

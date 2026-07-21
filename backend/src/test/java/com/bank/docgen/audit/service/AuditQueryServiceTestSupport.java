@@ -82,7 +82,7 @@ abstract class AuditQueryServiceTestSupport {
         globalAdmin = session("10000001", List.of("GLOBAL_ADMIN"), List.of("*"));
         groupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL", "CORP"));
         auditAdmin = session("10000004", List.of("AUDIT_ADMIN"), List.of("*"));
-        templateAuthor = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        templateAuthor = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
     }
 
     protected void allowAuditRead(ManagementSessionClaims session) {

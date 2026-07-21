@@ -102,7 +102,7 @@ class PersistenceEntityCollectionImmutabilityTest {
 
         assertThat(user.getRoles()).containsExactly(ManagementRole.GROUP_ADMIN);
         assertThat(user.getAuthorizedGroupCodes()).containsExactly("RETAIL");
-        assertThatThrownBy(() -> user.getRoles().add(ManagementRole.TEMPLATE_AUTHOR))
+        assertThatThrownBy(() -> user.getRoles().add(ManagementRole.DOCUMENT_AUTHOR))
                 .isInstanceOf(UnsupportedOperationException.class);
         assertThatThrownBy(() -> user.getAuthorizedGroupCodes().add("WHOLESALE"))
                 .isInstanceOf(UnsupportedOperationException.class);

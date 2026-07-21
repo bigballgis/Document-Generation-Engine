@@ -170,8 +170,7 @@ public class ContentModuleReviewService {
     }
 
     private boolean isAuthorRole(ContentModuleGovernanceActorRole actorRole) {
-        return actorRole == ContentModuleGovernanceActorRole.TEMPLATE_AUTHOR
-                || actorRole == ContentModuleGovernanceActorRole.MASTER_DESIGNER
+        return actorRole == ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR
                 || actorRole == ContentModuleGovernanceActorRole.GROUP_ADMIN
                 || actorRole == ContentModuleGovernanceActorRole.GLOBAL_ADMIN;
     }

@@ -77,7 +77,7 @@ class TestDataSetSchemaValidationServiceTest {
                 "10000001"
         );
         version = new TemplateVersionEntity(versionId, templateId, "10000001");
-        author = session("10000003", List.of("TEMPLATE_AUTHOR"));
+        author = session("10000003", List.of("DOCUMENT_AUTHOR"));
     }
 
     @Test

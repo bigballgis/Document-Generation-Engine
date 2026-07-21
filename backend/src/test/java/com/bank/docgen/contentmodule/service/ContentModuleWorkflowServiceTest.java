@@ -62,7 +62,7 @@ class ContentModuleWorkflowServiceTest {
                 INBOX_LIMIT,
                 SCAN_PAGE_SIZE
         );
-        approver = session("10000005", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
+        approver = session("10000005", List.of("GROUP_ADMIN"), List.of("RETAIL"));
         lenient().when(groupAccessService.canBrowseContentModuleCatalog(any())).thenReturn(true);
         lenient().when(groupAccessService.canDecideContentModuleReviews(any())).thenReturn(true);
         lenient().when(groupAccessService.canAuthorContentModules(any())).thenReturn(false);

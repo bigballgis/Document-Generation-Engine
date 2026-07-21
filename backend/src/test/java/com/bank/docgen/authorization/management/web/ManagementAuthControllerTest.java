@@ -122,8 +122,12 @@ class ManagementAuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.session.defaultRoute")
                         .value(ManagementRoute.DASHBOARD_HOME.routeKey()))
-                .andExpect(jsonPath("$.result.session.visibleRoutes.length()").value(4))
-                .andExpect(jsonPath("$.result.session.visibleRoutes[3]")
+                .andExpect(jsonPath("$.result.session.visibleRoutes.length()").value(5))
+                .andExpect(jsonPath("$.result.session.visibleRoutes[0]")
+                        .value(ManagementRoute.DASHBOARD_HOME.routeKey()))
+                .andExpect(jsonPath("$.result.session.visibleRoutes[1]")
+                        .value(ManagementRoute.MASTER_MANAGEMENT.routeKey()))
+                .andExpect(jsonPath("$.result.session.visibleRoutes[4]")
                         .value(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey()));
     }
 

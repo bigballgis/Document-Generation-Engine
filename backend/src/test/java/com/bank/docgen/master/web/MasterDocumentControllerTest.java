@@ -45,7 +45,7 @@ class MasterDocumentControllerTest {
     private byte[] sampleDocx;
     private ManagementSessionClaims retailGroupAdmin;
     private ManagementSessionClaims globalAdmin;
-    private ManagementSessionClaims templateAuthor;
+    private ManagementSessionClaims templateTester;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -53,7 +53,7 @@ class MasterDocumentControllerTest {
         sampleDocx = buildSampleDocx("{{anchor:HEADER}} body");
         retailGroupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL", "CORP"));
         globalAdmin = session("10000001", List.of("GLOBAL_ADMIN"), List.of("*"));
-        templateAuthor = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        templateTester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
     }
 
     @Test
@@ -119,7 +119,7 @@ class MasterDocumentControllerTest {
     }
 
     @Test
-    void templateAuthorCannotUploadMaster() throws Exception {
+    void templateTesterCannotUploadMaster() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "master.docx",
@@ -130,7 +130,7 @@ class MasterDocumentControllerTest {
                         .file(file)
                         .param("groupCode", "RETAIL")
                         .param("name", "Retail Letter Master")
-                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                        .with(authentication(new ManagementAuthentication(templateTester))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
     }

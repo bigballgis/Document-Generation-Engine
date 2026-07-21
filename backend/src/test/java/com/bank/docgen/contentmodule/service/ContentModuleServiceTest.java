@@ -91,7 +91,7 @@ class ContentModuleServiceTest {
                 "Initial",
                 "10000003"
         );
-        author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        author = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
         tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
         lenient().when(groupAccessService.canBrowseContentModuleCatalog(author)).thenReturn(true);
         lenient().when(groupAccessService.canViewContentModuleStructure(author)).thenReturn(true);
@@ -214,7 +214,7 @@ class ContentModuleServiceTest {
 
     @Test
     void get_omitsContentStructureWhenViewerCannotViewStructure() {
-        ManagementSessionClaims catalogViewer = session("10000005", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
+        ManagementSessionClaims catalogViewer = session("10000005", List.of("GROUP_ADMIN"), List.of("RETAIL"));
         when(groupAccessService.canBrowseContentModuleCatalog(catalogViewer)).thenReturn(true);
         when(groupAccessService.canViewContentModuleStructure(catalogViewer)).thenReturn(false);
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))

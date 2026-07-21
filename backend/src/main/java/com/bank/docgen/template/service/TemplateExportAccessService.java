@@ -47,6 +47,6 @@ public class TemplateExportAccessService {
         if (session.roles().contains("GLOBAL_ADMIN") || session.roles().contains("GROUP_ADMIN")) {
             return false;
         }
-        return session.roles().contains("TEMPLATE_AUTHOR");
+        return session.roles().contains("DOCUMENT_AUTHOR");
     }
 }

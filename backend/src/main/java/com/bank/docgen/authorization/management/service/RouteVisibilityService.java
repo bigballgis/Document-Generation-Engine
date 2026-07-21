@@ -18,10 +18,8 @@ public class RouteVisibilityService {
         }
         if (roles.contains(ManagementRole.GLOBAL_ADMIN)
                 || roles.contains(ManagementRole.GROUP_ADMIN)
-                || roles.contains(ManagementRole.MASTER_DESIGNER)
-                || roles.contains(ManagementRole.TEMPLATE_AUTHOR)
+                || roles.contains(ManagementRole.DOCUMENT_AUTHOR)
                 || roles.contains(ManagementRole.TEMPLATE_TESTER)
-                || roles.contains(ManagementRole.TEMPLATE_APPROVER)
                 || roles.contains(ManagementRole.LEGAL_REVIEWER)) {
             return ManagementRoute.DASHBOARD_HOME.routeKey();
         }
@@ -58,15 +56,9 @@ public class RouteVisibilityService {
             visible.add(ManagementRoute.IDENTITY_ADMINISTRATION.routeKey());
             visible.add(ManagementRoute.DOCUMENT_BRAND_ADMINISTRATION.routeKey());
         }
-        if (roles.contains(ManagementRole.MASTER_DESIGNER)) {
+        if (roles.contains(ManagementRole.DOCUMENT_AUTHOR)) {
             visible.add(ManagementRoute.DASHBOARD_HOME.routeKey());
             visible.add(ManagementRoute.MASTER_MANAGEMENT.routeKey());
-            visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
-            visible.add(ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey());
-            visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
-        }
-        if (roles.contains(ManagementRole.TEMPLATE_AUTHOR)) {
-            visible.add(ManagementRoute.DASHBOARD_HOME.routeKey());
             visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
@@ -76,16 +68,9 @@ public class RouteVisibilityService {
             visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
             visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
         }
-        if (roles.contains(ManagementRole.TEMPLATE_APPROVER)) {
-            visible.add(ManagementRoute.DASHBOARD_HOME.routeKey());
-            visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
-            visible.add(ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey());
-            visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
-        }
         if (roles.contains(ManagementRole.LEGAL_REVIEWER)) {
             visible.add(ManagementRoute.DASHBOARD_HOME.routeKey());
             visible.add(ManagementRoute.TEMPLATE_MANAGEMENT.routeKey());
-            visible.add(ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey());
         }
         return new ArrayList<>(visible);
     }

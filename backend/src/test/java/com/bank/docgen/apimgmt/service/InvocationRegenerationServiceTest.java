@@ -131,7 +131,7 @@ class InvocationRegenerationServiceTest {
 
     @Test
     void regenerate_rejectsTemplateAuthor() {
-        ManagementSessionClaims author = session(List.of("TEMPLATE_AUTHOR"), List.of("GRP-A"));
+        ManagementSessionClaims author = session(List.of("DOCUMENT_AUTHOR"), List.of("GRP-A"));
         when(groupAccessService.canRegenerateInvocation(author)).thenReturn(false);
 
         assertThatThrownBy(() -> service.regenerate(

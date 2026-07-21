@@ -49,7 +49,7 @@ class MasterRevisionLineAnchorControllerTest {
 
     private byte[] sampleDocx;
     private ManagementSessionClaims retailGroupAdmin;
-    private ManagementSessionClaims templateAuthor;
+    private ManagementSessionClaims templateTester;
     private ManagementSessionClaims globalAdmin;
 
     @BeforeEach
@@ -57,7 +57,7 @@ class MasterRevisionLineAnchorControllerTest {
         masterDocumentRepository.deleteAll();
         sampleDocx = buildSampleDocx("{{anchor:HEADER}} before {{anchor:FOOTER}} after");
         retailGroupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL", "CORP"));
-        templateAuthor = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        templateTester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
         globalAdmin = session("10000001", List.of("GLOBAL_ADMIN"), List.of("*"));
     }
 
@@ -115,12 +115,12 @@ class MasterRevisionLineAnchorControllerTest {
         String revisionLineId = currentRevisionLineId(masterId);
 
         mockMvc.perform(get("/api/management/v1/masters/" + masterId + "/revision-lines/" + revisionLineId)
-                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                        .with(authentication(new ManagementAuthentication(templateTester))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.anchors[0].displayLabel").value("HEADER"));
 
         mockMvc.perform(patch(anchorPath(masterId, revisionLineId, "HEADER"))
-                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .with(authentication(new ManagementAuthentication(templateTester)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"displayLabel":"Should not save"}

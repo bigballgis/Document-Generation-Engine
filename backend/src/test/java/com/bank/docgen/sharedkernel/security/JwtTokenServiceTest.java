@@ -55,7 +55,7 @@ class JwtTokenServiceTest {
         String token = jwtTokenService.createManagementToken(session);
         ManagementSessionClaims parsed = jwtTokenService.parseManagementToken(token);
 
-        roles.add("TEMPLATE_AUTHOR");
+        roles.add("DOCUMENT_AUTHOR");
         groups.add("RETAIL");
         routes.add("/masters");
 

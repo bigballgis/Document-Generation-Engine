@@ -41,7 +41,7 @@ class CollaborationWorkItemAccessServiceTest {
 
     @Test
     void visibleQueues_forAuthorIncludesRemediationAndPendingRelease() {
-        ManagementSessionClaims author = session(List.of("TEMPLATE_AUTHOR"));
+        ManagementSessionClaims author = session(List.of("DOCUMENT_AUTHOR"));
         when(groupAccessService.canViewCollaborationWorkItems(author)).thenReturn(true);
         when(groupAccessService.hasCollaborationWorkItemAdminVisibility(author)).thenReturn(false);
 
@@ -64,10 +64,10 @@ class CollaborationWorkItemAccessServiceTest {
 
     @Test
     void requireViewer_deniesUnauthorizedRoles() {
-        ManagementSessionClaims designer = session(List.of("MASTER_DESIGNER"));
-        when(groupAccessService.canViewCollaborationWorkItems(designer)).thenReturn(false);
+        ManagementSessionClaims auditAdmin = session(List.of("AUDIT_ADMIN"));
+        when(groupAccessService.canViewCollaborationWorkItems(auditAdmin)).thenReturn(false);
 
-        assertThatThrownBy(() -> accessSupport.requireViewer(designer))
+        assertThatThrownBy(() -> accessSupport.requireViewer(auditAdmin))
                 .isInstanceOf(CollaborationWorkItemAccessDeniedException.class);
     }
 

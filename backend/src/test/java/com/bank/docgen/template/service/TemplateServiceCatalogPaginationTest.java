@@ -85,7 +85,7 @@ class TemplateServiceCatalogPaginationTest {
                 org.mockito.Mockito.mock(ApprovalSubStateResolver.class)
         );
         globalAdmin = session("10000001", List.of("GLOBAL_ADMIN"), List.of("*"));
-        retailAuthor = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        retailAuthor = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
     }
 
     @Test

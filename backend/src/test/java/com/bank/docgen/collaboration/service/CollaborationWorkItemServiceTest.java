@@ -44,7 +44,7 @@ class CollaborationWorkItemServiceTest {
     private CollaborationWorkItemService service;
     private ManagementSessionClaims tester;
     private ManagementSessionClaims author;
-    private ManagementSessionClaims masterDesigner;
+    private ManagementSessionClaims auditAdmin;
 
     @BeforeEach
     void setUp() {
@@ -52,8 +52,8 @@ class CollaborationWorkItemServiceTest {
         service = new CollaborationWorkItemService(
                 workItemRepository, groupAccessService, accessSupport, managementUserDisplayService);
         tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
-        author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
-        masterDesigner = session("10000004", List.of("MASTER_DESIGNER"), List.of("RETAIL"));
+        author = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
+        auditAdmin = session("10000004", List.of("AUDIT_ADMIN"), List.of());
     }
 
     @Test
@@ -100,10 +100,10 @@ class CollaborationWorkItemServiceTest {
     }
 
     @Test
-    void listQueue_deniesMasterDesigner() {
-        when(groupAccessService.canViewCollaborationWorkItems(masterDesigner)).thenReturn(false);
+    void listQueue_deniesAuditAdmin() {
+        when(groupAccessService.canViewCollaborationWorkItems(auditAdmin)).thenReturn(false);
 
-        assertThatThrownBy(() -> service.listQueue(masterDesigner, null, null))
+        assertThatThrownBy(() -> service.listQueue(auditAdmin, null, null))
                 .isInstanceOf(CollaborationWorkItemAccessDeniedException.class);
     }
 

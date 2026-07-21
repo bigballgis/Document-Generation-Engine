@@ -75,8 +75,8 @@ class AssetLibraryServiceTest {
                 auditRecorder,
                 Clock.fixed(NOW, ZoneOffset.UTC)
         );
-        author = session("10000003", List.of("TEMPLATE_AUTHOR"));
-        approver = session("10000004", List.of("TEMPLATE_APPROVER"));
+        author = session("10000003", List.of("DOCUMENT_AUTHOR"));
+        approver = session("10000004", List.of("GROUP_ADMIN"));
         admin = session("10000001", List.of("GLOBAL_ADMIN"));
         tester = session("10000006", List.of("TEMPLATE_TESTER"));
         auditAdmin = session("10000007", List.of("AUDIT_ADMIN"));

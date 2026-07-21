@@ -53,7 +53,7 @@ class CollaborationNotificationServiceTest {
     private CollaborationNotificationService service;
     private ManagementSessionClaims tester;
     private ManagementSessionClaims groupAdmin;
-    private ManagementSessionClaims masterDesigner;
+    private ManagementSessionClaims auditAdmin;
 
     @BeforeEach
     void setUp() {
@@ -67,7 +67,7 @@ class CollaborationNotificationServiceTest {
         );
         tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
         groupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL"));
-        masterDesigner = session("10000004", List.of("MASTER_DESIGNER"), List.of("RETAIL"));
+        auditAdmin = session("10000004", List.of("AUDIT_ADMIN"), List.of());
     }
 
     @Test
@@ -88,9 +88,9 @@ class CollaborationNotificationServiceTest {
 
     @Test
     void unreadCount_deniesUnauthorizedRole() {
-        when(groupAccessService.canViewCollaborationWorkItems(masterDesigner)).thenReturn(false);
+        when(groupAccessService.canViewCollaborationWorkItems(auditAdmin)).thenReturn(false);
 
-        assertThatThrownBy(() -> service.unreadCount(masterDesigner))
+        assertThatThrownBy(() -> service.unreadCount(auditAdmin))
                 .isInstanceOf(CollaborationWorkItemAccessDeniedException.class);
     }
 

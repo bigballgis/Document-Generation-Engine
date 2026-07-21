@@ -273,7 +273,7 @@ class TemplateLifecycleGovernanceServiceTest {
 
     @Test
     void deactivateVersion_byUnauthorizedRole_throwsAccessDenied() {
-        ManagementSessionClaims author = session(List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        ManagementSessionClaims author = session(List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
         when(groupAccessService.canManageReleaseVersionState(author)).thenReturn(false);
 
         assertThatThrownBy(() -> service.deactivateVersion(

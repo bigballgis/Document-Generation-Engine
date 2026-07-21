@@ -59,7 +59,8 @@
         <!-- SpotBugs core 4.10.2 required to analyze Java 25 class files (Task #51). -->
         <spotbugs.version>4.10.2</spotbugs.version>
         <surefire.forkCount>1</surefire.forkCount>
-        <surefire.argLine>-Xmx512m -XX:+ExitOnOutOfMemoryError</surefire.argLine>
+        <!-- SYS-NORM #149: full suite + JaCoCo needs ≥1g; 512m forks exit mid-run (SurefireBooterForkException). -->
+        <surefire.argLine>-Xmx1024m -XX:+ExitOnOutOfMemoryError</surefire.argLine>
         <!-- IBL-D1 / F20: default verify stays H2; TC+Flyway only via -Ptestcontainers. -->
         <surefire.groups></surefire.groups>
         <surefire.excludedGroups>testcontainers</surefire.excludedGroups>

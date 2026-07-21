@@ -21,15 +21,16 @@ final class DemoCatalogSessions {
     }
 
     static ManagementSessionClaims templateAuthorSession() {
-        return session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        return session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
     }
 
     static ManagementSessionClaims templateTesterSession() {
         return session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
     }
 
+    /** Remapped former TEMPLATE_APPROVER seed (10000007) → GROUP_ADMIN. */
     static ManagementSessionClaims templateApproverSession() {
-        return session("10000007", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
+        return session("10000007", List.of("GROUP_ADMIN"), List.of("RETAIL"));
     }
 
     static ManagementSessionClaims legalReviewerSession() {

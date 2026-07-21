@@ -4,6 +4,7 @@ import com.bank.docgen.authorization.management.service.InvalidCredentialsExcept
 import com.bank.docgen.authorization.management.service.ManagementConflictException;
 import com.bank.docgen.authorization.management.service.ManagementForbiddenException;
 import com.bank.docgen.authorization.management.service.ManagementNotFoundException;
+import com.bank.docgen.authorization.management.service.RoleNotAssignableException;
 import com.bank.docgen.authorization.management.service.SessionExpiredException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
@@ -83,6 +84,21 @@ public class AuthorizationManagementExceptionAdvice {
                 ex.errorCode(),
                 ApiErrorCategories.AUTHORIZATION,
                 ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(RoleNotAssignableException.class)
+    public ResponseEntity<ErrorEnvelope> handleRoleNotAssignable(
+            HttpServletRequest request,
+            RoleNotAssignableException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorCodes.ROLE_NOT_ASSIGNABLE,
+                ApiErrorCategories.VALIDATION,
+                ex.messageKey(),
+                false
         );
     }
 }

@@ -519,8 +519,8 @@ public class LibraryExportService {
         if (session.roles().contains("GROUP_ADMIN")) {
             return "GROUP_ADMIN";
         }
-        if (session.roles().contains("TEMPLATE_AUTHOR")) {
-            return "TEMPLATE_AUTHOR";
+        if (session.roles().contains("DOCUMENT_AUTHOR")) {
+            return "DOCUMENT_AUTHOR";
         }
         return session.roles().isEmpty() ? "UNKNOWN" : session.roles().getFirst();
     }

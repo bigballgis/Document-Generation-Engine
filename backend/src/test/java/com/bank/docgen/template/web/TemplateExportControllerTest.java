@@ -59,7 +59,7 @@ class TemplateExportControllerTest {
         masterDocumentRepository.deleteAll();
         apiCredentialRepository.deleteAll();
         groupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL"));
-        templateAuthor = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        templateAuthor = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
         globalAdmin = session("10000001", List.of("GLOBAL_ADMIN"), List.of("*"));
         tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
     }
@@ -102,7 +102,7 @@ class TemplateExportControllerTest {
 
     @Test
     void exportJson_deniesAuthorForOthersTemplate() throws Exception {
-        ManagementSessionClaims otherAuthor = session("10000004", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        ManagementSessionClaims otherAuthor = session("10000004", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
         String templateId = publishTemplate();
 
         mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/export")
@@ -270,7 +270,7 @@ class TemplateExportControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"commentSummary\":\"Ready for approval\"}"))
                 .andExpect(status().isOk());
-        ManagementSessionClaims approver = session("10000007", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
+        ManagementSessionClaims approver = session("10000007", List.of("GROUP_ADMIN"), List.of("RETAIL"));
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/approval-decision")
                         .with(authentication(new ManagementAuthentication(approver)))
                         .contentType(MediaType.APPLICATION_JSON)

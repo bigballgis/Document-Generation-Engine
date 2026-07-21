@@ -71,7 +71,7 @@ class ContentModuleSelfApprovalBlockTest {
 
     @Test
     void c001_sameActorApprove_isBlocked403_andStateUnchanged() {
-        ManagementSessionClaims alice = session("alice", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims alice = session("alice", List.of("GROUP_ADMIN"));
         stubReadableAndDecide(alice);
 
         assertThatThrownBy(() -> reviewService.transition("MOD-LOAN",
@@ -116,7 +116,7 @@ class ContentModuleSelfApprovalBlockTest {
 
     @Test
     void c003_differentActorApprove_succeedsWithoutException() {
-        ManagementSessionClaims bob = session("bob", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims bob = session("bob", List.of("GROUP_ADMIN"));
         stubReadableAndDecide(bob);
         when(versionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -135,7 +135,7 @@ class ContentModuleSelfApprovalBlockTest {
 
     @Test
     void x006_sameActorReject_alsoBlocked() {
-        ManagementSessionClaims alice = session("alice", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims alice = session("alice", List.of("GROUP_ADMIN"));
         stubReadableAndDecide(alice);
 
         assertThatThrownBy(() -> reviewService.transition("MOD-LOAN",
@@ -151,7 +151,7 @@ class ContentModuleSelfApprovalBlockTest {
 
     @Test
     void submitForReview_persistsSubmittedBy() {
-        ManagementSessionClaims alice = session("alice", List.of("TEMPLATE_AUTHOR"));
+        ManagementSessionClaims alice = session("alice", List.of("DOCUMENT_AUTHOR"));
         ContentModuleVersionEntity draft = new ContentModuleVersionEntity(VERSION_ID, MODULE_ID, "1.0.0",
                 "{\"blocks\":[]}", "Initial", "10000003");
         draft.setReviewState(ContentModuleReviewState.DRAFT);
@@ -168,7 +168,7 @@ class ContentModuleSelfApprovalBlockTest {
         reviewService.transition("MOD-LOAN",
                 new ContentModuleReviewTransitionRequest(
                         ContentModuleReviewOperation.SUBMIT_FOR_REVIEW,
-                        ContentModuleGovernanceActorRole.TEMPLATE_AUTHOR, "author-a",
+                        ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR, "author-a",
                         "Ready for review", null),
                 alice);
 

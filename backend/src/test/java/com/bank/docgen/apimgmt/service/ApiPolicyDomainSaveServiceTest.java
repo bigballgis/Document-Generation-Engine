@@ -240,7 +240,7 @@ class ApiPolicyDomainSaveServiceTest {
 
     @Test
     void saveDomain_byUnauthorizedGroup_returns403() {
-        ManagementSessionClaims author = session(List.of("TEMPLATE_AUTHOR"));
+        ManagementSessionClaims author = session(List.of("DOCUMENT_AUTHOR"));
 
         assertThatThrownBy(() -> service.saveOutputDomain(
                 templateId,

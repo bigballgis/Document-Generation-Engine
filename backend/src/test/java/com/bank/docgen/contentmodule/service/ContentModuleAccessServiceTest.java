@@ -86,7 +86,7 @@ class ContentModuleAccessServiceTest {
 
     @Test
     void requireReadableModule_allowsSharedGroupAccess() {
-        ManagementSessionClaims wholesaleUser = session("10000007", List.of("TEMPLATE_AUTHOR"), List.of("WHOLESALE"));
+        ManagementSessionClaims wholesaleUser = session("10000007", List.of("DOCUMENT_AUTHOR"), List.of("WHOLESALE"));
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(Optional.of(module));
         when(groupAccessService.canAccessGroup(wholesaleUser, "RETAIL")).thenReturn(false);
@@ -99,7 +99,7 @@ class ContentModuleAccessServiceTest {
 
     @Test
     void requireReadableModule_deniesWhenNoGroupAccess() {
-        ManagementSessionClaims outsider = session("10000008", List.of("TEMPLATE_AUTHOR"), List.of("CORPORATE"));
+        ManagementSessionClaims outsider = session("10000008", List.of("DOCUMENT_AUTHOR"), List.of("CORPORATE"));
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(Optional.of(module));
         when(groupAccessService.canAccessGroup(outsider, "RETAIL")).thenReturn(false);
@@ -154,14 +154,14 @@ class ContentModuleAccessServiceTest {
 
     @Test
     void assertActorSession_matchesSessionRole() {
-        ManagementSessionClaims approver = session("10000005", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
+        ManagementSessionClaims approver = session("10000005", List.of("GROUP_ADMIN"), List.of("RETAIL"));
 
         accessSupport.assertActorSession(approver, ContentModuleGovernanceActorRole.APPROVER);
     }
 
     @Test
     void assertActorSession_rejectsMismatchedRole() {
-        ManagementSessionClaims author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        ManagementSessionClaims author = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
 
         assertThatThrownBy(() -> accessSupport.assertActorSession(author, ContentModuleGovernanceActorRole.APPROVER))
                 .isInstanceOf(ContentModuleGovernanceException.class)
@@ -178,11 +178,11 @@ class ContentModuleAccessServiceTest {
 
     @Test
     void assertLifecycleActorSession_rejectsAuthorRole() {
-        ManagementSessionClaims author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        ManagementSessionClaims author = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
 
         assertThatThrownBy(() -> accessSupport.assertLifecycleActorSession(
                 author,
-                ContentModuleGovernanceActorRole.TEMPLATE_AUTHOR
+                ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR
         ))
                 .isInstanceOf(ContentModuleGovernanceException.class)
                 .extracting(ex -> ((ContentModuleGovernanceException) ex).errorCode())
@@ -196,8 +196,8 @@ class ContentModuleAccessServiceTest {
                 ContentModuleGovernanceActorRole.GLOBAL_ADMIN
         )).isTrue();
         assertThat(accessSupport.sessionHasActorRole(
-                session("d", List.of("MASTER_DESIGNER"), List.of("RETAIL")),
-                ContentModuleGovernanceActorRole.MASTER_DESIGNER
+                session("d", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL")),
+                ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR
         )).isTrue();
     }
 
@@ -208,7 +208,7 @@ class ContentModuleAccessServiceTest {
                 "Template Author",
                 "author@example.com",
                 AuthSource.LOCAL,
-                List.of("TEMPLATE_AUTHOR"),
+                List.of("DOCUMENT_AUTHOR"),
                 List.of("RETAIL"),
                 "route.dashboard-home",
                 List.of("route.dashboard-home"),

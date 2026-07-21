@@ -33,13 +33,10 @@ public class CollaborationWorkItemAccessService {
         if (roles.contains("TEMPLATE_TESTER")) {
             queues.add(CollaborationWorkItemQueue.TEST);
         }
-        if (roles.contains("TEMPLATE_APPROVER")) {
-            queues.add(CollaborationWorkItemQueue.APPROVAL);
-        }
         if (roles.contains("LEGAL_REVIEWER")) {
             queues.add(CollaborationWorkItemQueue.LEGAL);
         }
-        if (roles.contains("TEMPLATE_AUTHOR")) {
+        if (roles.contains("DOCUMENT_AUTHOR")) {
             queues.add(CollaborationWorkItemQueue.REMEDIATION);
             queues.add(CollaborationWorkItemQueue.PENDING_RELEASE);
         }

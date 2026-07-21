@@ -52,7 +52,7 @@ class UserManagementServiceTest {
         when(passwordHashService.hash(anyString())).thenReturn("HASH");
 
         ManagementUserView view = service.create(
-                createRequest("20000001", List.of(ManagementRole.TEMPLATE_AUTHOR), List.of("RETAIL")),
+                createRequest("20000001", List.of(ManagementRole.DOCUMENT_AUTHOR), List.of("RETAIL")),
                 globalAdmin());
 
         assertThat(view.username()).isEqualTo("20000001");
@@ -68,7 +68,7 @@ class UserManagementServiceTest {
         when(userRepository.existsByUsername("20000001")).thenReturn(true);
 
         assertThatThrownBy(() -> service.create(
-                createRequest("20000001", List.of(ManagementRole.TEMPLATE_AUTHOR), List.of("RETAIL")),
+                createRequest("20000001", List.of(ManagementRole.DOCUMENT_AUTHOR), List.of("RETAIL")),
                 globalAdmin()))
                 .isInstanceOf(UsernameAlreadyExistsException.class);
         verify(userRepository, never()).save(any());
@@ -76,10 +76,10 @@ class UserManagementServiceTest {
 
     @Test
     void nonAdminCannotCreateUser() {
-        ManagementSessionClaims author = session(List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        ManagementSessionClaims author = session(List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
 
         assertThatThrownBy(() -> service.create(
-                createRequest("20000002", List.of(ManagementRole.TEMPLATE_AUTHOR), List.of("RETAIL")),
+                createRequest("20000002", List.of(ManagementRole.DOCUMENT_AUTHOR), List.of("RETAIL")),
                 author))
                 .isInstanceOf(UserManagementNotAllowedException.class);
     }
@@ -98,7 +98,7 @@ class UserManagementServiceTest {
     @Test
     void groupAdminCannotAssignOutOfRangeScope() {
         assertThatThrownBy(() -> service.create(
-                createRequest("20000004", List.of(ManagementRole.TEMPLATE_AUTHOR), List.of("RETAIL", "CORP")),
+                createRequest("20000004", List.of(ManagementRole.DOCUMENT_AUTHOR), List.of("RETAIL", "CORP")),
                 groupAdmin(List.of("RETAIL"))))
                 .isInstanceOf(GroupScopeOutOfRangeException.class);
         verify(auditRecorder).recordEscalationDenied(
@@ -130,7 +130,7 @@ class UserManagementServiceTest {
 
     @Test
     void globalAdminDeletesUser() {
-        ManagementUserEntity user = user("20000006", Set.of(ManagementRole.TEMPLATE_AUTHOR), Set.of("RETAIL"));
+        ManagementUserEntity user = user("20000006", Set.of(ManagementRole.DOCUMENT_AUTHOR), Set.of("RETAIL"));
         when(userRepository.findByIdAndDeletedAtIsNull(user.getId())).thenReturn(Optional.of(user));
 
         service.delete(user.getId(), globalAdmin());
@@ -143,7 +143,7 @@ class UserManagementServiceTest {
 
     @Test
     void groupAdminCannotSeeOutOfScopeUser() {
-        ManagementUserEntity corpUser = user("20000007", Set.of(ManagementRole.TEMPLATE_AUTHOR), Set.of("CORP"));
+        ManagementUserEntity corpUser = user("20000007", Set.of(ManagementRole.DOCUMENT_AUTHOR), Set.of("CORP"));
         when(userRepository.findByIdAndDeletedAtIsNull(corpUser.getId())).thenReturn(Optional.of(corpUser));
 
         assertThatThrownBy(() -> service.get(corpUser.getId(), groupAdmin(List.of("RETAIL"))))
@@ -152,7 +152,7 @@ class UserManagementServiceTest {
 
     @Test
     void globalAdminResetsPasswordWithoutLeakingHash() {
-        ManagementUserEntity user = user("20000008", Set.of(ManagementRole.TEMPLATE_AUTHOR), Set.of("RETAIL"));
+        ManagementUserEntity user = user("20000008", Set.of(ManagementRole.DOCUMENT_AUTHOR), Set.of("RETAIL"));
         when(userRepository.findByIdAndDeletedAtIsNull(user.getId())).thenReturn(Optional.of(user));
         when(passwordHashService.hash("NewSecret1234")).thenReturn("NEWHASH");
 
@@ -166,7 +166,7 @@ class UserManagementServiceTest {
 
     @Test
     void globalAdminDisablesAndEnablesUser() {
-        ManagementUserEntity user = user("20000009", Set.of(ManagementRole.TEMPLATE_AUTHOR), Set.of("RETAIL"));
+        ManagementUserEntity user = user("20000009", Set.of(ManagementRole.DOCUMENT_AUTHOR), Set.of("RETAIL"));
         lenient().when(userRepository.findByIdAndDeletedAtIsNull(user.getId())).thenReturn(Optional.of(user));
 
         assertThat(service.disable(user.getId(), globalAdmin()).enabled()).isFalse();
@@ -176,7 +176,7 @@ class UserManagementServiceTest {
     @Test
     void listAppliesScopeAndFilters() {
         when(userRepository.findByDeletedAtIsNullOrderByUsernameAsc()).thenReturn(List.of(
-                user("20000010", Set.of(ManagementRole.TEMPLATE_AUTHOR), Set.of("RETAIL")),
+                user("20000010", Set.of(ManagementRole.DOCUMENT_AUTHOR), Set.of("RETAIL")),
                 user("20000011", Set.of(ManagementRole.TEMPLATE_TESTER), Set.of("CORP"))
         ));
 

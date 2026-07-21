@@ -53,23 +53,8 @@ class RouteVisibilityServiceTest {
     }
 
     @Test
-    void templateAuthorSeesDashboardAndTemplateManagement() {
-        Set<ManagementRole> roles = Set.of(ManagementRole.TEMPLATE_AUTHOR);
-
-        assertThat(routeVisibilityService.resolveDefaultRoute(roles))
-                .isEqualTo(ManagementRoute.DASHBOARD_HOME.routeKey());
-        assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
-                .containsExactly(
-                        ManagementRoute.DASHBOARD_HOME.routeKey(),
-                        ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
-                        ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey(),
-                        ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey()
-                );
-    }
-
-    @Test
-    void masterDesignerLandsOnDashboardWithMasterAndTemplateManagement() {
-        Set<ManagementRole> roles = Set.of(ManagementRole.MASTER_DESIGNER);
+    void documentAuthorSeesMasterTemplateContentAndAssetRoutes() {
+        Set<ManagementRole> roles = Set.of(ManagementRole.DOCUMENT_AUTHOR);
 
         assertThat(routeVisibilityService.resolveDefaultRoute(roles))
                 .isEqualTo(ManagementRoute.DASHBOARD_HOME.routeKey());
@@ -98,21 +83,6 @@ class RouteVisibilityServiceTest {
     }
 
     @Test
-    void templateApproverLandsOnDashboardWithTemplateManagement() {
-        Set<ManagementRole> roles = Set.of(ManagementRole.TEMPLATE_APPROVER);
-
-        assertThat(routeVisibilityService.resolveDefaultRoute(roles))
-                .isEqualTo(ManagementRoute.DASHBOARD_HOME.routeKey());
-        assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
-                .containsExactly(
-                        ManagementRoute.DASHBOARD_HOME.routeKey(),
-                        ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
-                        ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey(),
-                        ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey()
-                );
-    }
-
-    @Test
     void legalReviewerLandsOnDashboardWithTemplateManagement() {
         Set<ManagementRole> roles = Set.of(ManagementRole.LEGAL_REVIEWER);
 
@@ -121,8 +91,7 @@ class RouteVisibilityServiceTest {
         assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
                 .containsExactly(
                         ManagementRoute.DASHBOARD_HOME.routeKey(),
-                        ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
-                        ManagementRoute.ASSET_LIBRARY_MANAGEMENT.routeKey()
+                        ManagementRoute.TEMPLATE_MANAGEMENT.routeKey()
                 );
     }
 

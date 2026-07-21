@@ -96,7 +96,7 @@ class AuditControllerTest {
     }
 
     private ManagementSessionClaims templateAuthor() {
-        return session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        return session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
     }
 
     private ManagementSessionClaims session(String username, List<String> roles, List<String> groups) {

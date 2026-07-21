@@ -410,5 +410,5 @@ batch_recommendation:
   decision: solo
   member_task_ids: ["149"]
   proposed_slice_id: sys-norm-roles
-next: implementers (BE/FE/Flyway) — matrix rewrite stage 3 landed
+next: backend-engineer (catalog/migration/JWT/capabilities) → frontend-engineer (pickers/journeys/i18n) — matrix rewrite stage 3 landed; production code not started
 ```

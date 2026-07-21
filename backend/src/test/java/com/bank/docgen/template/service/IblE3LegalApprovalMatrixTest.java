@@ -110,7 +110,7 @@ class IblE3LegalApprovalMatrixTest {
 
     @Test
     void bdd004_submitMultiStage_createsLegalQueueNotPendingRelease() {
-        ManagementSessionClaims author = session("10000003", List.of("TEMPLATE_AUTHOR"));
+        ManagementSessionClaims author = session("10000003", List.of("DOCUMENT_AUTHOR"));
         when(templateService.requireWritableTemplate(templateId, author)).thenReturn(template);
         when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_SUBMIT);
         when(templateService.toDetail(template)).thenReturn(detail(ApprovalSubState.PENDING_LEGAL_DECISION));
@@ -143,7 +143,7 @@ class IblE3LegalApprovalMatrixTest {
 
     @Test
     void bdd006_complianceApprove_reachesPendingRelease() {
-        ManagementSessionClaims approver = session("10000007", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims approver = session("10000007", List.of("GROUP_ADMIN"));
         when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
         when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_COMPLIANCE_DECISION);
         when(groupAccessService.canDecideTemplateApprovals(approver)).thenReturn(true);
@@ -180,7 +180,7 @@ class IblE3LegalApprovalMatrixTest {
 
     @Test
     void bdd009_templateApproverCannotDecideLegal() {
-        ManagementSessionClaims approver = session("10000007", List.of("TEMPLATE_APPROVER"));
+        ManagementSessionClaims approver = session("10000007", List.of("GROUP_ADMIN"));
         when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
         when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_LEGAL_DECISION);
         when(groupAccessService.canDecideLegalApprovals(approver)).thenReturn(false);

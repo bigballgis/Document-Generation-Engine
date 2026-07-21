@@ -364,7 +364,7 @@ class DomainDtoImmutabilityTest {
 
     @Test
     void loginSessionDefensivelyCopiesNestedSessionView() {
-        List<String> roles = new ArrayList<>(List.of("TEMPLATE_AUTHOR"));
+        List<String> roles = new ArrayList<>(List.of("DOCUMENT_AUTHOR"));
         ManagementSessionView session = new ManagementSessionView(
                 "user01",
                 "User One",
@@ -386,9 +386,9 @@ class DomainDtoImmutabilityTest {
                 session
         );
 
-        roles.add("TEMPLATE_APPROVER");
+        roles.add("GROUP_ADMIN");
 
-        assertThat(loginSession.session().roles()).containsExactly("TEMPLATE_AUTHOR");
+        assertThat(loginSession.session().roles()).containsExactly("DOCUMENT_AUTHOR");
     }
 
     @Test

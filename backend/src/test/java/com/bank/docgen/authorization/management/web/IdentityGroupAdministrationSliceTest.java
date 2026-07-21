@@ -40,7 +40,7 @@ class IdentityGroupAdministrationSliceTest {
     private final ManagementSessionClaims retailGroupAdmin =
             session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL"));
     private final ManagementSessionClaims templateAuthor =
-            session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+            session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
 
     // ---- Group management ----
 
@@ -129,10 +129,10 @@ class IdentityGroupAdministrationSliceTest {
         MvcResult result = mockMvc.perform(post("/api/management/v1/users")
                         .with(authentication(new ManagementAuthentication(globalAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(createUserBody("30000001", "TEMPLATE_AUTHOR", "RETAIL")))
+                        .content(createUserBody("30000001", "DOCUMENT_AUTHOR", "RETAIL")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.result.username").value("30000001"))
-                .andExpect(jsonPath("$.result.roles[0]").value("TEMPLATE_AUTHOR"))
+                .andExpect(jsonPath("$.result.roles[0]").value("DOCUMENT_AUTHOR"))
                 .andExpect(jsonPath("$.result.passwordHash").doesNotExist())
                 .andExpect(jsonPath("$.result.password").doesNotExist())
                 .andReturn();
@@ -146,7 +146,7 @@ class IdentityGroupAdministrationSliceTest {
         mockMvc.perform(post("/api/management/v1/users")
                         .with(authentication(new ManagementAuthentication(globalAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(createUserBody("30000002", "TEMPLATE_AUTHOR", "RETAIL")))
+                        .content(createUserBody("30000002", "DOCUMENT_AUTHOR", "RETAIL")))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post("/api/management/v1/users")
@@ -174,7 +174,7 @@ class IdentityGroupAdministrationSliceTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"username":"30000004","displayName":"N","email":"n@example.com",
-                                 "initialPassword":"InitSecret1234","roles":["TEMPLATE_AUTHOR"],
+                                 "initialPassword":"InitSecret1234","roles":["DOCUMENT_AUTHOR"],
                                  "authorizedGroupCodes":["RETAIL","CORP"]}
                                 """))
                 .andExpect(status().isForbidden())
@@ -192,18 +192,44 @@ class IdentityGroupAdministrationSliceTest {
     }
 
     @Test
+    void retiredRoleAssignmentIsRejectedUnprocessable() throws Exception {
+        mockMvc.perform(post("/api/management/v1/users")
+                        .with(authentication(new ManagementAuthentication(globalAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createUserBody("30000015", "TEMPLATE_APPROVER", "RETAIL")))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.error.code").value("ROLE_NOT_ASSIGNABLE"))
+                .andExpect(jsonPath("$.error.category").value("VALIDATION"))
+                .andExpect(jsonPath("$.error.retryable").value(false));
+
+        mockMvc.perform(post("/api/management/v1/users")
+                        .with(authentication(new ManagementAuthentication(globalAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createUserBody("30000016", "MASTER_DESIGNER", "RETAIL")))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.error.code").value("ROLE_NOT_ASSIGNABLE"));
+
+        mockMvc.perform(post("/api/management/v1/users")
+                        .with(authentication(new ManagementAuthentication(globalAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createUserBody("30000017", "TEMPLATE_AUTHOR", "RETAIL")))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.error.code").value("ROLE_NOT_ASSIGNABLE"));
+    }
+
+    @Test
     void nonAdminCannotManageUsers() throws Exception {
         mockMvc.perform(post("/api/management/v1/users")
                         .with(authentication(new ManagementAuthentication(templateAuthor)))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(createUserBody("30000006", "TEMPLATE_AUTHOR", "RETAIL")))
+                        .content(createUserBody("30000006", "DOCUMENT_AUTHOR", "RETAIL")))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
     }
 
     @Test
     void groupAdminCannotDeleteUser() throws Exception {
-        String id = createUser(globalAdmin, "30000007", "TEMPLATE_AUTHOR", "RETAIL");
+        String id = createUser(globalAdmin, "30000007", "DOCUMENT_AUTHOR", "RETAIL");
 
         mockMvc.perform(delete("/api/management/v1/users/" + id)
                         .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
@@ -213,7 +239,7 @@ class IdentityGroupAdministrationSliceTest {
 
     @Test
     void globalAdminDeletesUserThenNotFound() throws Exception {
-        String id = createUser(globalAdmin, "30000008", "TEMPLATE_AUTHOR", "RETAIL");
+        String id = createUser(globalAdmin, "30000008", "DOCUMENT_AUTHOR", "RETAIL");
 
         mockMvc.perform(delete("/api/management/v1/users/" + id)
                         .with(authentication(new ManagementAuthentication(globalAdmin))))
@@ -227,7 +253,7 @@ class IdentityGroupAdministrationSliceTest {
 
     @Test
     void globalAdminDisablesEnablesAndResetsPassword() throws Exception {
-        String id = createUser(globalAdmin, "30000009", "TEMPLATE_AUTHOR", "RETAIL");
+        String id = createUser(globalAdmin, "30000009", "DOCUMENT_AUTHOR", "RETAIL");
 
         mockMvc.perform(post("/api/management/v1/users/" + id + "/disable")
                         .with(authentication(new ManagementAuthentication(globalAdmin))))
@@ -253,14 +279,14 @@ class IdentityGroupAdministrationSliceTest {
 
     @Test
     void globalAdminUpdatesUserRolesAndScope() throws Exception {
-        String id = createUser(globalAdmin, "30000010", "TEMPLATE_AUTHOR", "RETAIL");
+        String id = createUser(globalAdmin, "30000010", "DOCUMENT_AUTHOR", "RETAIL");
 
         mockMvc.perform(put("/api/management/v1/users/" + id)
                         .with(authentication(new ManagementAuthentication(globalAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"displayName":"Updated","email":"u@example.com",
-                                 "roles":["TEMPLATE_TESTER","TEMPLATE_APPROVER"],
+                                 "roles":["TEMPLATE_TESTER","GROUP_ADMIN"],
                                  "authorizedGroupCodes":["RETAIL","CORP"]}
                                 """))
                 .andExpect(status().isOk())

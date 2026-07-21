@@ -133,9 +133,8 @@ public class ContentModuleAccessService {
         return switch (actorRole) {
             case GLOBAL_ADMIN -> session.roles().contains("GLOBAL_ADMIN");
             case GROUP_ADMIN -> session.roles().contains("GROUP_ADMIN");
-            case APPROVER -> session.roles().contains("TEMPLATE_APPROVER");
-            case TEMPLATE_AUTHOR -> session.roles().contains("TEMPLATE_AUTHOR");
-            case MASTER_DESIGNER -> session.roles().contains("MASTER_DESIGNER");
+            case APPROVER -> session.roles().contains("GROUP_ADMIN") || session.roles().contains("GLOBAL_ADMIN");
+            case DOCUMENT_AUTHOR -> session.roles().contains("DOCUMENT_AUTHOR");
         };
     }
 

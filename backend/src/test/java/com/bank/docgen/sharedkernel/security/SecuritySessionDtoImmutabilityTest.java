@@ -27,7 +27,7 @@ class SecuritySessionDtoImmutabilityTest {
 
         ManagementSessionClaims claims = claims(roles, groups, routes);
 
-        roles.add("TEMPLATE_AUTHOR");
+        roles.add("DOCUMENT_AUTHOR");
         groups.add("CORP");
         routes.add("/masters");
 
@@ -69,7 +69,7 @@ class SecuritySessionDtoImmutabilityTest {
 
     @Test
     void managementUserViewDefensivelyCopiesMutableInputs() {
-        List<String> roles = new ArrayList<>(List.of("TEMPLATE_AUTHOR"));
+        List<String> roles = new ArrayList<>(List.of("DOCUMENT_AUTHOR"));
         List<String> groups = new ArrayList<>(List.of("RETAIL"));
 
         ManagementUserView view = new ManagementUserView(
@@ -88,7 +88,7 @@ class SecuritySessionDtoImmutabilityTest {
         roles.add("GLOBAL_ADMIN");
         groups.add("CORP");
 
-        assertThat(view.roles()).containsExactly("TEMPLATE_AUTHOR");
+        assertThat(view.roles()).containsExactly("DOCUMENT_AUTHOR");
         assertThat(view.authorizedGroupCodes()).containsExactly("RETAIL");
         assertThatThrownBy(() -> view.roles().add("X")).isInstanceOf(UnsupportedOperationException.class);
     }

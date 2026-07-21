@@ -111,7 +111,7 @@ class ManagementSecurityHandlersSessionTest {
                 "Author",
                 "author@bank.test",
                 AuthSource.LOCAL,
-                List.of("TEMPLATE_AUTHOR"),
+                List.of("DOCUMENT_AUTHOR"),
                 List.of("RETAIL"),
                 "route.dashboard-home",
                 List.of("route.dashboard-home"),

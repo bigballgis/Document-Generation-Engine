@@ -64,8 +64,8 @@ class RiskPromptConfigServiceTest {
                 new ObjectMapper()
         );
         globalAdmin = session("10000001", "Global Admin", List.of("GLOBAL_ADMIN"), List.of("*"));
-        groupAuthor = session("10000002", "Group Author", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
-        crossGroupActor = session("10000003", "Corp Author", List.of("TEMPLATE_AUTHOR"), List.of("CORP"));
+        groupAuthor = session("10000002", "Group Author", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
+        crossGroupActor = session("10000003", "Corp Author", List.of("DOCUMENT_AUTHOR"), List.of("CORP"));
         retailTemplate = template(TEMPLATE_ID, "RETAIL");
     }
 

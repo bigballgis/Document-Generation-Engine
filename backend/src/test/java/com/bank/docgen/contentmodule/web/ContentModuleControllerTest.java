@@ -51,8 +51,8 @@ class ContentModuleControllerTest {
     void setUp() {
         moduleRepository.deleteAll();
         versionRepository.deleteAll();
-        author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
-        approver = session("10000005", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
+        author = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
+        approver = session("10000005", List.of("GROUP_ADMIN"), List.of("RETAIL"));
         groupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL"));
         tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
     }
@@ -283,7 +283,7 @@ class ContentModuleControllerTest {
                         .content("""
                                 {
                                   "operation":"SUBMIT_FOR_REVIEW",
-                                  "actorRole":"TEMPLATE_AUTHOR",
+                                  "actorRole":"DOCUMENT_AUTHOR",
                                   "actorId":"author-a"
                                 }
                                 """))
@@ -360,7 +360,7 @@ class ContentModuleControllerTest {
                         .content("""
                                 {
                                   "operation":"SUBMIT_FOR_REVIEW",
-                                  "actorRole":"TEMPLATE_AUTHOR",
+                                  "actorRole":"DOCUMENT_AUTHOR",
                                   "actorId":"author-a",
                                   "changeDescription":"ready for review"
                                 }

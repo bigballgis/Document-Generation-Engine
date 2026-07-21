@@ -65,7 +65,7 @@ class ContentModuleWhereUsedNestedTest {
         );
         author = new ManagementSessionClaims(
                 "10000003", "Author", "a@example.com", AuthSource.LOCAL,
-                List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"),
+                List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"),
                 "route.home", List.of("route.home"), Instant.now().plusSeconds(3600)
         );
     }

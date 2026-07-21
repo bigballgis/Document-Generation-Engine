@@ -2307,7 +2307,7 @@ paths:
         `assetKeyManifest`. Bundle omits secrets, API credential material, and
         runtime credentials. Permission boundary per permission-matrix section 5:
         `GLOBAL_ADMIN` (all templates), `GROUP_ADMIN` (authorized groups),
-        `TEMPLATE_AUTHOR` (own templates only). Export actions are audited.
+        `DOCUMENT_AUTHOR` (own templates only). Export actions are audited.
         Traceability: BDD-CE-E01-001…006; docs/behavior/ce-e01-export-bundle-v2.md.
         When the pinned master DOCX object is unavailable at export time, fail-closed
         with `PINNED_MASTER_UNAVAILABLE` /
@@ -3792,7 +3792,7 @@ paths:
         embedded (keys only in manifest `assetKeyManifest`). Permission boundary
         reuses permission-matrix section 5 **导出模板** exactly — no new
         permission code: `GLOBAL_ADMIN` (all), `GROUP_ADMIN` (authorized groups),
-        `TEMPLATE_AUTHOR` (own templates only); per-template authorization filter;
+        `DOCUMENT_AUTHOR` (own templates only); per-template authorization filter;
         `TEMPLATE_TESTER` and other non-export roles → 403. Optional body
         filters: `groupId`, `templateIds` (max 500), `includeSkipped` (default
         true). Candidate resolution: non-empty `templateIds` → those IDs ∩
@@ -4258,7 +4258,7 @@ paths:
         422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. ACTIVE key conflict → 409
         `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; DISABLED key may re-upload and
         reactivate (audit `ASSET_LIBRARY_REUPLOAD`). SEAL upload requires
-        TEMPLATE_APPROVER / GLOBAL_ADMIN / GROUP_ADMIN (fail-closed 403).
+        GLOBAL_ADMIN / GROUP_ADMIN (fail-closed 403; former TEMPLATE_APPROVER absorbed).
         Does not modify `StructuredContentImageResolver`. Header
         `Idempotency-Key` is reserved for a future slice and is
         **not enforced** in CE-E02 (accepted if present; ignored —
@@ -4459,7 +4459,7 @@ paths:
         honest pagination (`totalElements: 1`). **Phase B (P2-T06):** each file
         replace persists an immutable row; this endpoint returns the full history
         with honest `totalElements`, `totalPages`, and `content[]` slicing.
-        Requires group-scoped read access (`MASTER_DESIGNER`, `GLOBAL_ADMIN`,
+        Requires group-scoped read access (`DOCUMENT_AUTHOR`, `GLOBAL_ADMIN`,
         or other roles with master read per permission matrix); fail-closed
         `403 ACCESS_DENIED` when the master is outside authorized groups.
         Traceability: BDD-MASTER-REVISION-NAV-001 Phase B.
@@ -7084,9 +7084,27 @@ components:
           type: string
         summary:
           $ref: '#/components/schemas/CredentialSummaryView'
+    ManagementRole:
+      type: string
+      description: >
+        Assignable management roles after ADR-0070 six-role compression (SYS-NORM Wave 5).
+        Retired codes TEMPLATE_APPROVER / MASTER_DESIGNER / TEMPLATE_AUTHOR are rejected on
+        assignment APIs with HTTP 422 ROLE_NOT_ASSIGNABLE (VALIDATION; retryable=false).
+        Distinct from 403 ROLE_ASSIGNMENT_NOT_ALLOWED (ops escalation).
+      enum:
+        - GLOBAL_ADMIN
+        - GROUP_ADMIN
+        - DOCUMENT_AUTHOR
+        - TEMPLATE_TESTER
+        - LEGAL_REVIEWER
+        - AUDIT_ADMIN
     LifecycleGovernanceActorRole:
       type: string
-      enum: [GLOBAL_ADMIN, GROUP_ADMIN, APPROVER, TEMPLATE_AUTHOR, MASTER_DESIGNER]
+      description: >
+        Content-module journey actor tokens. DOCUMENT_AUTHOR replaces former
+        TEMPLATE_AUTHOR / MASTER_DESIGNER. APPROVER remains a compliance-decide token
+        mapped to GROUP_ADMIN (or GLOBAL_ADMIN) session after ADR-0070.
+      enum: [GLOBAL_ADMIN, GROUP_ADMIN, APPROVER, DOCUMENT_AUTHOR]
     AuditReadActorRole:
       type: string
       enum: [AUDIT_ADMIN, GLOBAL_ADMIN, GROUP_ADMIN]
@@ -8107,7 +8125,7 @@ components:
             sourceChecksum: sha256:abc123
             uploadReference: upload-ref-001
             createdAt: '2026-06-12T07:00:00Z'
-            actorRole: MASTER_DESIGNER
+            actorRole: DOCUMENT_AUTHOR
             createdBy: designer-a
             changeDescription: baseline upload
           reviewSnapshot:
@@ -8251,7 +8269,7 @@ components:
           items:
             $ref: '#/components/schemas/TemplateBindingValidationItemRequest'
       examples:
-        - actorRole: TEMPLATE_AUTHOR
+        - actorRole: DOCUMENT_AUTHOR
           sourceAnchorCatalogVersion: v1
           bindings:
             - anchorId: ANC-BODY
@@ -8474,7 +8492,7 @@ components:
           items:
             $ref: '#/components/schemas/TemplateVariableDefinitionRequest'
       examples:
-        - actorRole: TEMPLATE_AUTHOR
+        - actorRole: DOCUMENT_AUTHOR
           actorId: template-author-a
           definitions:
             - variableKey: customerName
@@ -9281,7 +9299,7 @@ components:
           description: >
             Module content structure JSON. Optional on read responses; populated only when the
             caller holds structure-view permission per permission-matrix section 5.1
-            (GLOBAL_ADMIN, GROUP_ADMIN, MASTER_DESIGNER, TEMPLATE_AUTHOR, or TEMPLATE_APPROVER).
+            (GLOBAL_ADMIN, GROUP_ADMIN, or DOCUMENT_AUTHOR).
             Omitted or null when the caller may browse the catalog but lacks structure-view
             permission (fail-closed). TEMPLATE_TESTER receives 403 on catalog list/detail and
             never receives this field.
@@ -12198,12 +12216,12 @@ components:
             [SUBMIT_FOR_TEST, RECORD_TEST_DECISION, SUBMIT_FOR_APPROVAL, RECORD_APPROVAL_DECISION, MARK_PENDING_RELEASE, PUBLISH, STOP_USE, RESTORE, DEPRECATE, RECORD_EXPORT_GOVERNANCE_DECISION, EVALUATE_TIMEOUT_ESCALATION]
         actorRole:
           type: string
-          enum: [GLOBAL_ADMIN, GROUP_ADMIN, TEMPLATE_AUTHOR, TESTER, APPROVER, LEGAL_REVIEWER]
+          enum: [GLOBAL_ADMIN, GROUP_ADMIN, DOCUMENT_AUTHOR, TESTER, APPROVER, LEGAL_REVIEWER]
           description: >-
             IBL-E3 — LEGAL_REVIEWER for LEGAL-stage RECORD_APPROVAL_DECISION.
-            ManagementRole mapping may use TEMPLATE_APPROVER / LEGAL_REVIEWER
-            on the primary management API; this journey enum remains for the
-            lifecycle journey stub.
+            ManagementRole catalog is six roles (ADR-0070); APPROVER journey token
+            maps to GROUP_ADMIN compliance decide. DOCUMENT_AUTHOR replaces
+            TEMPLATE_AUTHOR. This journey enum remains for the lifecycle journey stub.
         actorId:
           type: string
           minLength: 1

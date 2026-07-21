@@ -86,8 +86,8 @@ class ContentModuleReviewServiceTest {
                 "Initial",
                 "10000003"
         );
-        author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
-        approver = session("10000005", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
+        author = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
+        approver = session("10000005", List.of("GROUP_ADMIN"), List.of("RETAIL"));
     }
 
     @Test
@@ -107,7 +107,7 @@ class ContentModuleReviewServiceTest {
                 "MOD-LOAN-DISCLOSURE",
                 new ContentModuleReviewTransitionRequest(
                         ContentModuleReviewOperation.SUBMIT_FOR_REVIEW,
-                        ContentModuleGovernanceActorRole.TEMPLATE_AUTHOR,
+                        ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR,
                         "author-a",
                         "updated clause wording",
                         null
@@ -129,7 +129,7 @@ class ContentModuleReviewServiceTest {
                 "MOD-LOAN-DISCLOSURE",
                 new ContentModuleReviewTransitionRequest(
                         ContentModuleReviewOperation.SUBMIT_FOR_REVIEW,
-                        ContentModuleGovernanceActorRole.TEMPLATE_AUTHOR,
+                        ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR,
                         "author-a",
                         " ",
                         null
@@ -215,7 +215,7 @@ class ContentModuleReviewServiceTest {
                 "MOD-LOAN-DISCLOSURE",
                 new ContentModuleReviewTransitionRequest(
                         ContentModuleReviewOperation.APPROVE_REVIEW,
-                        ContentModuleGovernanceActorRole.TEMPLATE_AUTHOR,
+                        ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR,
                         "author-a",
                         null,
                         null
@@ -241,7 +241,7 @@ class ContentModuleReviewServiceTest {
                 "MOD-LOAN-DISCLOSURE",
                 new ContentModuleReviewTransitionRequest(
                         ContentModuleReviewOperation.SUBMIT_FOR_REVIEW,
-                        ContentModuleGovernanceActorRole.TEMPLATE_AUTHOR,
+                        ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR,
                         "author-a",
                         "change",
                         null
@@ -277,7 +277,7 @@ class ContentModuleReviewServiceTest {
                 "MOD-LOAN-DISCLOSURE",
                 new ContentModuleReviewTransitionRequest(
                         ContentModuleReviewOperation.SUBMIT_FOR_REVIEW,
-                        ContentModuleGovernanceActorRole.TEMPLATE_AUTHOR,
+                        ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR,
                         " ",
                         "change",
                         null

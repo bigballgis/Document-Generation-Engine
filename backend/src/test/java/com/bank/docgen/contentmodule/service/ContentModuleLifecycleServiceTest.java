@@ -235,7 +235,7 @@ class ContentModuleLifecycleServiceTest {
 
     @Test
     void authorCannotStopUse() {
-        ManagementSessionClaims author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        ManagementSessionClaims author = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(author, "RETAIL")).thenReturn(true);
@@ -244,7 +244,7 @@ class ContentModuleLifecycleServiceTest {
                 "MOD-LOAN-DISCLOSURE",
                 new ContentModuleLifecycleOperationApplyRequest(
                         ContentModuleLifecycleOperation.STOP_USE,
-                        ContentModuleGovernanceActorRole.TEMPLATE_AUTHOR,
+                        ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR,
                         "author-a",
                         true,
                         true,

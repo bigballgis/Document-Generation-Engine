@@ -70,7 +70,7 @@ class ApiManagementServiceAuthorizationTest {
 
     @Test
     void getPolicyDeniedForNonApiAdminRoleAndDoesNotTouchPersistence() {
-        assertThatThrownBy(() -> service.getPolicy(TEMPLATE_ID, session(List.of("TEMPLATE_AUTHOR"))))
+        assertThatThrownBy(() -> service.getPolicy(TEMPLATE_ID, session(List.of("DOCUMENT_AUTHOR"))))
                 .isInstanceOf(ApiManagementAccessDeniedException.class);
 
         verifyNoInteractions(apiPolicyRepository);

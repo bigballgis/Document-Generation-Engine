@@ -149,7 +149,7 @@ class TemplateVersionLineControllerTest extends TemplateManagementWebTestSupport
     void versionLinesAreGroupScoped() throws Exception {
         String masterId = uploadAndApproveMaster();
         String templateId = createTemplate(masterId);
-        ManagementSessionClaims corpOnlyAuthor = session("10000004", List.of("TEMPLATE_AUTHOR"), List.of("CORP"));
+        ManagementSessionClaims corpOnlyAuthor = session("10000004", List.of("DOCUMENT_AUTHOR"), List.of("CORP"));
 
         mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/version-lines")
                         .with(authentication(new ManagementAuthentication(corpOnlyAuthor))))

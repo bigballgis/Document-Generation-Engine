@@ -28,14 +28,13 @@ public class GroupAccessService {
     public boolean canManageMasters(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("MASTER_DESIGNER");
+                || session.roles().contains("DOCUMENT_AUTHOR");
     }
 
     public boolean canAuthorTemplates(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("TEMPLATE_AUTHOR")
-                || session.roles().contains("MASTER_DESIGNER");
+                || session.roles().contains("DOCUMENT_AUTHOR");
     }
 
     public boolean canDecideTemplateTests(ManagementSessionClaims session) {
@@ -46,8 +45,7 @@ public class GroupAccessService {
 
     public boolean canDecideTemplateApprovals(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
-                || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("TEMPLATE_APPROVER");
+                || session.roles().contains("GROUP_ADMIN");
     }
 
     /**
@@ -66,8 +64,7 @@ public class GroupAccessService {
     public boolean canStopTemplates(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("MASTER_DESIGNER")
-                || session.roles().contains("TEMPLATE_AUTHOR");
+                || session.roles().contains("DOCUMENT_AUTHOR");
     }
 
     public boolean canRestoreOrDeprecateTemplates(ManagementSessionClaims session) {
@@ -122,8 +119,7 @@ public class GroupAccessService {
     public boolean canAuthorContentModules(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("TEMPLATE_AUTHOR")
-                || session.roles().contains("MASTER_DESIGNER");
+                || session.roles().contains("DOCUMENT_AUTHOR");
     }
 
     /**
@@ -133,10 +129,7 @@ public class GroupAccessService {
     public boolean canBrowseContentModuleCatalog(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("MASTER_DESIGNER")
-                || session.roles().contains("TEMPLATE_AUTHOR")
-                || session.roles().contains("TEMPLATE_APPROVER")
-                || session.roles().contains("LEGAL_REVIEWER");
+                || session.roles().contains("DOCUMENT_AUTHOR");
     }
 
     public boolean canViewContentModuleStructure(ManagementSessionClaims session) {
@@ -145,8 +138,7 @@ public class GroupAccessService {
 
     public boolean canDecideContentModuleReviews(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
-                || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("TEMPLATE_APPROVER");
+                || session.roles().contains("GROUP_ADMIN");
     }
 
     public boolean canManageContentModuleLifecycle(ManagementSessionClaims session) {
@@ -157,9 +149,8 @@ public class GroupAccessService {
     public boolean canViewCollaborationWorkItems(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("TEMPLATE_AUTHOR")
+                || session.roles().contains("DOCUMENT_AUTHOR")
                 || session.roles().contains("TEMPLATE_TESTER")
-                || session.roles().contains("TEMPLATE_APPROVER")
                 || session.roles().contains("LEGAL_REVIEWER");
     }
 
@@ -176,7 +167,7 @@ public class GroupAccessService {
     public boolean canExportTemplates(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("TEMPLATE_AUTHOR");
+                || session.roles().contains("DOCUMENT_AUTHOR");
     }
 
     /**
@@ -186,24 +177,19 @@ public class GroupAccessService {
     public boolean canManageAssetLibrary(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("MASTER_DESIGNER")
-                || session.roles().contains("TEMPLATE_AUTHOR")
-                || session.roles().contains("TEMPLATE_TESTER")
-                || session.roles().contains("TEMPLATE_APPROVER")
-                || session.roles().contains("LEGAL_REVIEWER");
+                || session.roles().contains("DOCUMENT_AUTHOR")
+                || session.roles().contains("TEMPLATE_TESTER");
     }
 
     public boolean canUploadImageOrOtherAsset(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("MASTER_DESIGNER")
-                || session.roles().contains("TEMPLATE_AUTHOR");
+                || session.roles().contains("DOCUMENT_AUTHOR");
     }
 
     public boolean canUploadSealAsset(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
-                || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("TEMPLATE_APPROVER");
+                || session.roles().contains("GROUP_ADMIN");
     }
 
     public boolean canDisableAssetLibrary(ManagementSessionClaims session) {
@@ -216,9 +202,6 @@ public class GroupAccessService {
         return session.roles().contains("TEMPLATE_TESTER")
                 && !session.roles().contains("GLOBAL_ADMIN")
                 && !session.roles().contains("GROUP_ADMIN")
-                && !session.roles().contains("MASTER_DESIGNER")
-                && !session.roles().contains("TEMPLATE_AUTHOR")
-                && !session.roles().contains("TEMPLATE_APPROVER")
-                && !session.roles().contains("LEGAL_REVIEWER");
+                && !session.roles().contains("DOCUMENT_AUTHOR");
     }
 }

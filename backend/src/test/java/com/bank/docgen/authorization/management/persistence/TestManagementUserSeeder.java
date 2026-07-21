@@ -16,11 +16,12 @@ public class TestManagementUserSeeder implements ApplicationRunner {
 
     private static final UUID GLOBAL_ADMIN_ID = UUID.fromString("11111111-1111-1111-1111-111111111101");
     private static final UUID GROUP_ADMIN_ID = UUID.fromString("11111111-1111-1111-1111-111111111102");
-    private static final UUID TEMPLATE_AUTHOR_ID = UUID.fromString("11111111-1111-1111-1111-111111111103");
+    private static final UUID DOCUMENT_AUTHOR_ID = UUID.fromString("11111111-1111-1111-1111-111111111103");
     private static final UUID AUDIT_ADMIN_ID = UUID.fromString("11111111-1111-1111-1111-111111111104");
-    private static final UUID MASTER_DESIGNER_ID = UUID.fromString("11111111-1111-1111-1111-111111111105");
+    private static final UUID DOCUMENT_AUTHOR_LETTERHEAD_ID = UUID.fromString("11111111-1111-1111-1111-111111111105");
     private static final UUID TEMPLATE_TESTER_ID = UUID.fromString("11111111-1111-1111-1111-111111111106");
-    private static final UUID TEMPLATE_APPROVER_ID = UUID.fromString("11111111-1111-1111-1111-111111111107");
+    private static final UUID GROUP_ADMIN_APPROVALS_ID = UUID.fromString("11111111-1111-1111-1111-111111111107");
+    private static final UUID LEGAL_REVIEWER_ID = UUID.fromString("11111111-1111-1111-1111-111111111109");
 
     private final ManagementUserRepository managementUserRepository;
     private final PasswordHashService passwordHashService;
@@ -60,13 +61,13 @@ public class TestManagementUserSeeder implements ApplicationRunner {
                 Set.of("RETAIL", "CORP")
         ));
         managementUserRepository.save(new ManagementUserEntity(
-                TEMPLATE_AUTHOR_ID,
+                DOCUMENT_AUTHOR_ID,
                 "10000003",
-                "Template Author",
+                "Document Author",
                 "author@example.com",
                 passwordHash,
                 AuthSource.LOCAL,
-                Set.of(ManagementRole.TEMPLATE_AUTHOR),
+                Set.of(ManagementRole.DOCUMENT_AUTHOR),
                 Set.of("RETAIL")
         ));
         managementUserRepository.save(new ManagementUserEntity(
@@ -80,13 +81,13 @@ public class TestManagementUserSeeder implements ApplicationRunner {
                 Set.of()
         ));
         managementUserRepository.save(new ManagementUserEntity(
-                MASTER_DESIGNER_ID,
+                DOCUMENT_AUTHOR_LETTERHEAD_ID,
                 "10000005",
-                "Master Designer",
+                "Document Author (Letterhead)",
                 "master.designer@example.com",
                 passwordHash,
                 AuthSource.LOCAL,
-                Set.of(ManagementRole.MASTER_DESIGNER),
+                Set.of(ManagementRole.DOCUMENT_AUTHOR),
                 Set.of("RETAIL")
         ));
         managementUserRepository.save(new ManagementUserEntity(
@@ -100,13 +101,23 @@ public class TestManagementUserSeeder implements ApplicationRunner {
                 Set.of("RETAIL")
         ));
         managementUserRepository.save(new ManagementUserEntity(
-                TEMPLATE_APPROVER_ID,
+                GROUP_ADMIN_APPROVALS_ID,
                 "10000007",
-                "Template Approver",
+                "Group Admin (Retail Approvals)",
                 "template.approver@example.com",
                 passwordHash,
                 AuthSource.LOCAL,
-                Set.of(ManagementRole.TEMPLATE_APPROVER),
+                Set.of(ManagementRole.GROUP_ADMIN),
+                Set.of("RETAIL")
+        ));
+        managementUserRepository.save(new ManagementUserEntity(
+                LEGAL_REVIEWER_ID,
+                "10000009",
+                "Legal Reviewer",
+                "legal.reviewer@example.com",
+                passwordHash,
+                AuthSource.LOCAL,
+                Set.of(ManagementRole.LEGAL_REVIEWER),
                 Set.of("RETAIL")
         ));
     }

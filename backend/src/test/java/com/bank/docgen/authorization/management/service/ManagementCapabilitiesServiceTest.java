@@ -38,7 +38,7 @@ class ManagementCapabilitiesServiceTest {
     }
 
     @Test
-    void groupAdminCanManageApiPolicyWithoutApiAdminRole() {
+    void groupAdminAbsorbsApproverAndKeepsAdminBits() {
         var capabilities = service.resolve(Set.of(ManagementRole.GROUP_ADMIN));
 
         assertThat(capabilities.manageApiPolicy()).isTrue();
@@ -53,11 +53,15 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.manageContentModuleLifecycle()).isTrue();
         assertThat(capabilities.manageAssetLibrary()).isTrue();
         assertThat(capabilities.manageLegalHold()).isFalse();
+        assertThat(capabilities.decideApprovals()).isTrue();
+        assertThat(capabilities.decideTests()).isTrue();
+        assertThat(capabilities.decideLegalApprovals()).isTrue();
+        assertThat(capabilities.publishTemplates()).isTrue();
     }
 
     @Test
-    void masterDesignerCanManageMastersAndAuthorTemplates() {
-        var capabilities = service.resolve(Set.of(ManagementRole.MASTER_DESIGNER));
+    void documentAuthorHasAuthoringUnionWithoutDecideBits() {
+        var capabilities = service.resolve(Set.of(ManagementRole.DOCUMENT_AUTHOR));
 
         assertThat(capabilities.authorTemplates()).isTrue();
         assertThat(capabilities.stopTemplates()).isTrue();
@@ -69,31 +73,15 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.decideTests()).isFalse();
         assertThat(capabilities.decideApprovals()).isFalse();
         assertThat(capabilities.decideLegalApprovals()).isFalse();
-        assertThat(capabilities.exportTemplates()).isFalse();
-        assertThat(capabilities.viewCollaborationWorkItems()).isFalse();
-        assertThat(capabilities.maintainCollaborationTimeoutConfig()).isFalse();
-        assertThat(capabilities.authorContentModules()).isTrue();
-        assertThat(capabilities.decideContentModuleReviews()).isFalse();
-        assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
-        assertThat(capabilities.manageAssetLibrary()).isTrue();
-        assertThat(capabilities.manageLegalHold()).isFalse();
-    }
-
-    @Test
-    void templateAuthorCanAuthorAndExportWithoutLifecycleGovernance() {
-        var capabilities = service.resolve(Set.of(ManagementRole.TEMPLATE_AUTHOR));
-
-        assertThat(capabilities.authorTemplates()).isTrue();
         assertThat(capabilities.exportTemplates()).isTrue();
         assertThat(capabilities.viewCollaborationWorkItems()).isTrue();
-        assertThat(capabilities.authorContentModules()).isTrue();
         assertThat(capabilities.maintainCollaborationTimeoutConfig()).isFalse();
+        assertThat(capabilities.authorContentModules()).isTrue();
         assertThat(capabilities.decideContentModuleReviews()).isFalse();
         assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
-        assertThat(capabilities.manageApiPolicy()).isFalse();
-        assertThat(capabilities.deleteTemplates()).isFalse();
         assertThat(capabilities.manageAssetLibrary()).isTrue();
         assertThat(capabilities.manageLegalHold()).isFalse();
+        assertThat(capabilities.publishTemplates()).isFalse();
     }
 
     @Test
@@ -115,24 +103,6 @@ class ManagementCapabilitiesServiceTest {
     }
 
     @Test
-    void templateApproverCanDecideApprovalsOnly() {
-        var capabilities = service.resolve(Set.of(ManagementRole.TEMPLATE_APPROVER));
-
-        assertThat(capabilities.decideApprovals()).isTrue();
-        assertThat(capabilities.decideLegalApprovals()).isFalse();
-        assertThat(capabilities.authorTemplates()).isFalse();
-        assertThat(capabilities.manageApiPolicy()).isFalse();
-        assertThat(capabilities.deleteTemplates()).isFalse();
-        assertThat(capabilities.exportTemplates()).isFalse();
-        assertThat(capabilities.viewCollaborationWorkItems()).isTrue();
-        assertThat(capabilities.decideContentModuleReviews()).isTrue();
-        assertThat(capabilities.authorContentModules()).isFalse();
-        assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
-        assertThat(capabilities.manageAssetLibrary()).isTrue();
-        assertThat(capabilities.manageLegalHold()).isFalse();
-    }
-
-    @Test
     void legalReviewerCanDecideLegalApprovalsOnly() {
         var capabilities = service.resolve(Set.of(ManagementRole.LEGAL_REVIEWER));
 
@@ -140,8 +110,9 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.decideApprovals()).isFalse();
         assertThat(capabilities.authorTemplates()).isFalse();
         assertThat(capabilities.viewCollaborationWorkItems()).isTrue();
-        assertThat(capabilities.manageAssetLibrary()).isTrue();
+        assertThat(capabilities.manageAssetLibrary()).isFalse();
         assertThat(capabilities.decideContentModuleReviews()).isFalse();
+        assertThat(capabilities.decideTests()).isFalse();
     }
 
     @Test

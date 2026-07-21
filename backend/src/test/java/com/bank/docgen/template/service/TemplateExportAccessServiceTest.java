@@ -51,7 +51,7 @@ class TemplateExportAccessServiceTest {
     @Test
     void templateAuthor_canExportOwnTemplate() {
         TemplateEntity template = template("RETAIL", "10000003");
-        ManagementSessionClaims author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        ManagementSessionClaims author = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
 
         assertThatCode(() -> support.assertCanExport(template, author)).doesNotThrowAnyException();
     }
@@ -59,7 +59,7 @@ class TemplateExportAccessServiceTest {
     @Test
     void templateAuthor_deniedForOthersTemplate() {
         TemplateEntity template = template("RETAIL", "10000004");
-        ManagementSessionClaims author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        ManagementSessionClaims author = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
 
         assertThatThrownBy(() -> support.assertCanExport(template, author))
                 .isInstanceOf(TemplateAccessDeniedException.class);
@@ -86,7 +86,7 @@ class TemplateExportAccessServiceTest {
     void assertCanExport_matchesCanExport() {
         TemplateEntity own = template("RETAIL", "10000003");
         TemplateEntity other = template("RETAIL", "10000004");
-        ManagementSessionClaims author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        ManagementSessionClaims author = session("10000003", List.of("DOCUMENT_AUTHOR"), List.of("RETAIL"));
 
         assertThat(support.canExport(own, author)).isTrue();
         assertThatCode(() -> support.assertCanExport(own, author)).doesNotThrowAnyException();
