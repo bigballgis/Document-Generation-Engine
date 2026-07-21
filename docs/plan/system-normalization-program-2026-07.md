@@ -15,7 +15,7 @@
 | **Wave 6 leaf** | TM **#150** · `sys-norm-d1-brands` → **Done** (MAIN merge `64b0a650`; worktree **REMOVED**) |
 | **Wave 7 leaf** | TM **#151** · `sys-norm-promotion-pack` → **Done** (MAIN merge `11356c63` / feature `f795b04a`; worktree **REMOVED**) |
 | **Wave 8 leaf** | TM **#152** · `sys-norm-demo-seed-terms` → **Done** (MAIN merge `8aca145b` / feature `7df6c563`; worktree **REMOVED**) |
-| **Sole-active** | **#154** `asset-library-group-isolation` → **In Progress** (post-program §4a; ISOLATED `D:/working/DGE-asset-library-group-isolation` · `feat/asset-library-group-isolation`; SYS-NORM waves remain **Done**) |
+| **Sole-active** | **cleared** (post-program §4a **#154** Asset library → **Done** `c12a0687` / `5b48117f`; SYS-NORM waves remain **Done**) |
 | **Batch (Wave 8)** | **solo** · `member_task_ids: ["152"]` · `proposed_slice_id: sys-norm-demo-seed-terms` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / parked-UX-not-in-W8 — **closed** |
 | **Batch (Wave 7)** | **solo** · `member_task_ids: ["151"]` · `proposed_slice_id: sys-norm-promotion-pack` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-8 / parked UX — **closed** |
 | **Batch (Wave 6)** | **solo** · `member_task_ids: ["150"]` · `proposed_slice_id: sys-norm-d1-brands` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-7 / Wave-8 / parked UX — **closed** |
@@ -24,8 +24,8 @@
 | **Batch (Wave 3)** | **solo** · `member_task_ids: ["147"]` · `proposed_slice_id: sys-norm-external-ops` — **closed** |
 | **Batch (Wave 2)** | **solo** · `member_task_ids: ["146"]` · `proposed_slice_id: sys-norm-hub-ia` — **closed** |
 | **Batch (Wave 1)** | **solo** · `member_task_ids: ["145"]` · `proposed_slice_id: sys-norm-shell-fluid-nav` — **closed** |
-| **Next queue head** | §4a **Asset library group isolation** — TM **#154** → **In Progress** (sole-active); siblings Binding editor / Auto `referenceKey` remain **Parked**; Reminder timing **#153** → **Done** |
-| **Batch (§4a ALGI)** | **solo** · `member_task_ids: ["154"]` · `proposed_slice_id: asset-library-group-isolation` · vetoes: Binding editor / Auto `referenceKey` / checklist-#3b/#5a / CE-O02 / #53 — **open** |
+| **Next queue head** | §4a **Binding editor re-layout** — **Parked** (**not** activated); Auto `referenceKey` remains **Parked**; Asset library **#154** → **Done** (`c12a0687` / `5b48117f`); Reminder timing **#153** → **Done** |
+| **Batch (§4a ALGI)** | **solo** · `member_task_ids: ["154"]` · `proposed_slice_id: asset-library-group-isolation` · vetoes: Binding editor / Auto `referenceKey` / checklist-#3b/#5a / CE-O02 / #53 — **closed** |
 | **Queue (Wave 8)** | BDD SoT [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) **BDD-SYS-NORM-W8-001…018** — wave **Done**; detail [detail/sys-norm-demo-seed-terms.md](./detail/sys-norm-demo-seed-terms.md) |
 | **Parked worktrees** | Prior hub WIP worktrees **removed** — do **not** revive or fold stale hub WIP |
 | **CE umbrella** | TM **#53** remains **in-progress** registry-only — **not** this program's delivery leaf; **do not** mark **#53** Done |
@@ -178,18 +178,19 @@ Do **not** activate CE-O02.
 | Note | Theme | Status |
 | --- | --- | --- |
 | Reminder timing | System / Team settings IA for reminder timing | **Done** — TM **#153** `reminder-timing-settings-ia` (MAIN merge `d213834f` / feature `807d8213`; worktree **REMOVED**; Batch **solo** closed; BDD **ready**/shipped — [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md) **BDD-RT-IA-001…016**; detail [detail/reminder-timing-settings-ia.md](./detail/reminder-timing-settings-ia.md)) |
-| Asset library group isolation | Group-scoped asset library isolation | **In Progress** — TM **#154** `asset-library-group-isolation` (**sole-active**; ISOLATED `D:/working/DGE-asset-library-group-isolation` · `feat/asset-library-group-isolation`; base `2fcd3f74`; Batch **solo** open; BDD **ready** — [asset-library-group-isolation.md](../behavior/asset-library-group-isolation.md) **BDD-ALGI-001…018**; migration **ALGI-M1**; CE-E02 §15 amendment; detail [detail/asset-library-group-isolation.md](./detail/asset-library-group-isolation.md); gate_evidence `[]`) |
-| Binding editor re-layout | Binding editor layout remedi | **Parked** — Not Started (**do not** activate) |
+| Asset library group isolation | Group-scoped asset library isolation | **Done** — TM **#154** `asset-library-group-isolation` (MAIN merge `c12a0687` / feature `5b48117f`; worktree **REMOVED**; Batch **solo** closed; BDD **ready**/shipped — [asset-library-group-isolation.md](../behavior/asset-library-group-isolation.md) **BDD-ALGI-001…018**; migration **ALGI-M1**; CE-E02 §15 amendment; detail [detail/asset-library-group-isolation.md](./detail/asset-library-group-isolation.md); Gates BE **2400**/FE **1672**/E2E **6/6**/UIUX **PASS**/Arch **PASS_WITH_NOTES**/Stage 5+10 **DEPLOY_OK**) |
+| Binding editor re-layout | Binding editor layout remedi | **Parked** — Not Started (**next parked head**; **do not** activate) |
 | Auto `referenceKey` generation | Auto-generate `referenceKey` | **Parked** — Not Started (**do not** activate) |
 
 **Also deferred (not parked-UX, does not block program Done):** **N18** Legal-hold actor
 EntityLink — later leaf + BDD.
 
-**Sole-active (host delivery leaf):** **#154** Asset library group isolation → **In Progress**.
-SYS-NORM Wave 8 TM **#152** → **Done** `8aca145b` / `7df6c563` (program waves remain
-**Done**). §4a Reminder timing TM **#153** → **Done** (`d213834f` / `807d8213`). Siblings
-Binding editor / Auto `referenceKey` stay **Parked**. Do **not** fold into **#53**; do
-**not** flip **#3b** / **#5a**; do **not** activate CE-O02.
+**Sole-active (host delivery leaf):** **cleared**. §4a Asset library TM **#154** → **Done**
+(`c12a0687` / `5b48117f`). SYS-NORM Wave 8 TM **#152** → **Done** `8aca145b` / `7df6c563`
+(program waves remain **Done**). §4a Reminder timing TM **#153** → **Done** (`d213834f` /
+`807d8213`). Next parked head = Binding editor re-layout (**Parked** / **not** activated);
+Auto `referenceKey` stays **Parked**. Do **not** fold into **#53**; do **not** flip **#3b** /
+**#5a**; do **not** activate CE-O02.
 
 ---
 
@@ -263,8 +264,8 @@ registry-only.
 | [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) | Hub IA intent + Wave 1 layout/nav-hide + Reminder timing System/Team IA (**#153 Done**) |
 | [detail/reminder-timing-settings-ia.md](./detail/reminder-timing-settings-ia.md) | Post-program §4a Reminder timing leaf (**Done** · TM **#153** `d213834f` / `807d8213`) |
 | [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md) | Reminder timing IA BDD **ready**/shipped — **BDD-RT-IA-001…016** |
-| [detail/asset-library-group-isolation.md](./detail/asset-library-group-isolation.md) | Post-program §4a Asset library group isolation leaf (**In Progress** · TM **#154** sole-active) |
-| [asset-library-group-isolation.md](../behavior/asset-library-group-isolation.md) | Asset library group isolation BDD **ready** — **BDD-ALGI-001…018** |
+| [detail/asset-library-group-isolation.md](./detail/asset-library-group-isolation.md) | Post-program §4a Asset library group isolation leaf (**Done** · TM **#154** `c12a0687` / `5b48117f`) |
+| [asset-library-group-isolation.md](../behavior/asset-library-group-isolation.md) | Asset library group isolation BDD **ready**/shipped — **BDD-ALGI-001…018** |
 | [ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md) | CE-E02 historical + §15 ALGI amendment |
 | [business-terminology-guide.md](../product/business-terminology-guide.md) | L1 Letterhead/母版 intent |
 | [execution-sync-ledger.md](./execution-sync-ledger.md) | Activation / evidence mirror |

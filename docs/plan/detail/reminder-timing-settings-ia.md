@@ -34,8 +34,8 @@ Relocate Reminder timing off Dashboard Overview into settings-appropriate IA:
 | --- | --- |
 | Leaf status | **Done** |
 | Formal phase | **None** |
-| Host sole-active | Succeeded by **#154** `asset-library-group-isolation` (**In Progress**) — this leaf remains **Done** |
-| Program | SYS-NORM Waves **0–8 Done** — program **Done**; §4a Reminder timing → **Done**; Asset library → **In Progress** (#154); Binding editor / Auto `referenceKey` stay **Parked** |
+| Host sole-active | Succeeded by **#154** `asset-library-group-isolation` (**Done** `c12a0687` / `5b48117f`; sole-active **cleared**) — this leaf remains **Done** |
+| Program | SYS-NORM Waves **0–8 Done** — program **Done**; §4a Reminder timing → **Done**; Asset library → **Done** (#154 `c12a0687`); next parked = Binding editor re-layout; Auto `referenceKey` stay **Parked** |
 | Succeeded by | **#154** Asset library group isolation — do **not** flip **#3b/#5a**; do **not** mark **#53** Done; do **not** activate Binding editor / Auto `referenceKey` / CE-O02 |
 
 ---
