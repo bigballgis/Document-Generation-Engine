@@ -1,0 +1,63 @@
+{
+  "result": "DEPLOY_OK",
+  "stage": 10,
+  "slice_id": "sys-norm-roles",
+  "task_ids": ["149"],
+  "batch_recommendation": "solo",
+  "worktree_path": "D:/working/DGE-sys-norm-roles",
+  "branch": "feat/sys-norm-roles",
+  "git_head": "3b208c61af7e9debeead8772a6a02e868e4c404a",
+  "local_time": "2026-07-21T14:47:30+08:00",
+  "utc_time": "2026-07-21T06:47:30Z",
+  "command": ".\\scripts\\docker-deploy-queue.ps1 -SkipBuild -Reason \"SYS-NORM Wave5 TM149 stage10 evidence SkipBuild\"",
+  "compose_project": "documentgenerationengine",
+  "queue_after": "idle",
+  "ports": {
+    "backend": 8080,
+    "frontend": 4173
+  },
+  "e2e_base_url": "http://localhost:4173",
+  "health": {
+    "healthz_8080": {
+      "status_code": 200,
+      "body": "{\"status\":\"UP\"}"
+    },
+    "frontend_4173": {
+      "status_code": 200,
+      "content_length": 1202
+    },
+    "docgen_backend": "healthy",
+    "docgen_frontend": "healthy"
+  },
+  "images": {
+    "backend": {
+      "digest": "sha256:163617876c0aa051732eaec3f35c7ebe2c5420af091f04a8d24dfcc0b873bb8a",
+      "created": "2026-07-21T06:03:15.336850508Z"
+    },
+    "frontend": {
+      "digest": "sha256:63b4c73d210a27f8e2f42d2c1733a4b690de4176d55b8556c082410e909f69ac",
+      "created": "2026-07-21T06:03:08.292516615Z"
+    }
+  },
+  "previous_known_good_stage5": {
+    "backend": "sha256:9bc6f9c5cd8aa0011a82b64c9d314fa11efe6dd51e36920b2487ae844abc7b79",
+    "frontend": "sha256:ad11339b8f5dc2fa39c45d564628d318aff2820e7560a7a48cd5befa7b02e044"
+  },
+  "fe_asset_markers": [
+    "assets/index-DoiaxH4V.js",
+    "assets/vue-vendor-YCgdmryA.js",
+    "assets/vendor-Xw4Mn6wR.js",
+    "assets/element-icons-D44Rupkn.js",
+    "assets/element-plus-DdFImHIC.js",
+    "assets/app-vendor-BKMZwS8Q.js",
+    "assets/element-plus-CzM4-epj.css",
+    "assets/index-DgfinNic.css"
+  ],
+  "notes": [
+    "Stage 10 SkipBuild queued health evidence only; mvn verify NOT run.",
+    "Queue acquired then released; idle after; no bypass; single compose project.",
+    "Backend/frontend containers healthy; :8080/healthz 200 UP; :4173 200.",
+    "Image layer Created timestamps match Stage 5 (CACHED); manifest-list Ids refreshed on re-export.",
+    "No merge."
+  ]
+}

@@ -1,0 +1,6 @@
+documentgenerationengine-docgen-backend:latest  digest=sha256:163617876c0aa051732eaec3f35c7ebe2c5420af091f04a8d24dfcc0b873bb8a  created=2026-07-21T06:03:15.336850508Z
+documentgenerationengine-docgen-frontend:latest digest=sha256:63b4c73d210a27f8e2f42d2c1733a4b690de4176d55b8556c082410e909f69ac  created=2026-07-21T06:03:08.292516615Z
+source: docker image inspect Id / RepoDigests (local manifest list)
+previous_known_good_stage5_backend=sha256:9bc6f9c5cd8aa0011a82b64c9d314fa11efe6dd51e36920b2487ae844abc7b79
+previous_known_good_stage5_frontend=sha256:ad11339b8f5dc2fa39c45d564628d318aff2820e7560a7a48cd5befa7b02e044
+note: layer Created timestamps unchanged (CACHED); manifest-list digests refreshed after SkipBuild re-export

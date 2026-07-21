@@ -1,0 +1,14 @@
+HTTP/200
+Server: nginx/1.27.5
+Date: Tue, 21 Jul 2026 06:47:38 GMT
+Connection: keep-alive
+ETag: "6a5f0b94-4b2"
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+Accept-Ranges: bytes
+Content-Type: text/html
+Content-Length: 1202
+Last-Modified: Tue, 21 Jul 2026 06:03:00 GMT
+content_length=1202
