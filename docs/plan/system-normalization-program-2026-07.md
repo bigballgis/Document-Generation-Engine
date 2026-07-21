@@ -4,24 +4,27 @@
 | --- | --- |
 | **Program ID** | `SYS-NORM` |
 | **Created** | 2026-07-21 |
-| **Status** | **In Progress** — Waves **0–3 Done**; Waves **4–8 Not Started** |
+| **Status** | **In Progress** — Waves **0–4 Done**; Waves **5–8 Not Started** |
 | **Formal phase** | **None** (not a P-phase; tracked here + ledger) |
 | **Wave 0 leaf** | TM **#143** · `sys-norm-charter` → **Done** (MAIN merge `f8e898ad` / feature `28d4abe1`; worktree **REMOVED**) |
 | **Wave 1 leaf** | TM **#145** · `sys-norm-shell-fluid-nav` → **Done** (MAIN merge `7a62be44` / feature `f1594f2a` + e2e `ce2cb9f0`; worktree **REMOVED**). Handoff briefly cited `#144` — **#144** remains PTA Done; Wave 1 = **#145**. |
 | **Wave 2 leaf** | TM **#146** · `sys-norm-hub-ia` → **Done** (MAIN merge `5d77db80` / feature `992f6822`; worktree **REMOVED**; branch `feat/sys-norm-hub-ia` deleted) |
 | **Wave 3 leaf** | TM **#147** · `sys-norm-external-ops` → **Done** (MAIN merge `18a9e3b2` / feature `f21dda5e`; worktree **REMOVED**; origin/main **PUSHED**) |
-| **Sole-active** | **cleared** (no SYS-NORM delivery leaf In Progress) |
+| **Wave 4 leaf** | TM **#148** · `sys-norm-test-artifacts` → **Done** (docs-close; product evidence **#144** PTA `ac36ecbc` / `6bc74ff1`; worktree pending stage 11 merge) |
+| **Sole-active** | TM **#148** Wave 4 docs-close (`D:/working/DGE-sys-norm-test-artifacts` · `feat/sys-norm-test-artifacts`) — clears after stage 11 merge |
+| **Batch (Wave 4)** | **split** · `member_task_ids: ["148"]` · `proposed_slice_id: sys-norm-test-artifacts` · vetoes: do-not-merge-wave4-with-roles / checklist-#3b/#5a / CE-O02 / #53 — **closed** (plan layer) |
 | **Batch (Wave 3)** | **solo** · `member_task_ids: ["147"]` · `proposed_slice_id: sys-norm-external-ops` — **closed** |
 | **Batch (Wave 2)** | **solo** · `member_task_ids: ["146"]` · `proposed_slice_id: sys-norm-hub-ia` — **closed** |
 | **Batch (Wave 1)** | **solo** · `member_task_ids: ["145"]` · `proposed_slice_id: sys-norm-shell-fluid-nav` — **closed** |
-| **Next queue head** | `sys-norm-test-artifacts` (Wave 4) — **Not Started** / **not** activated |
-| **Queue (Waves 4–8)** | Program-plan **Not Started** only — **no** TM pending stubs (register next free TM id at each wave activation) |
+| **Next queue head** | `sys-norm-roles` (Wave 5) — **Not Started** / **not** activated |
+| **Queue (Waves 5–8)** | Program-plan **Not Started** only — **no** TM pending stubs (register next free TM id at each wave activation) |
 | **Parked worktrees** | Prior hub WIP worktrees **removed** — do **not** revive or fold stale hub WIP |
-| **CE umbrella** | TM **#53** remains **in-progress** registry-only — **not** this program's delivery leaf |
+| **CE umbrella** | TM **#53** remains **in-progress** registry-only — **not** this program's delivery leaf (may note **#148** sole-active temporarily) |
 | **Behavior SoT** | [system-normalization-program.md](../behavior/system-normalization-program.md) |
 | **Wave 1 BDD** | [sys-norm-shell-fluid-nav.md](../behavior/sys-norm-shell-fluid-nav.md) (**ready** / delivered; **BDD-SYS-NORM-W1-001…016**) |
 | **Wave 2 BDD** | [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md) (**ready** / delivered; **BDD-SYS-NORM-W2-001…018**) |
 | **Wave 3 BDD** | [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md) (**ready** / delivered; **BDD-SYS-NORM-W3-001…018**; TM **#147** Done `18a9e3b2` / `f21dda5e`) |
+| **Wave 4 BDD** | [sys-norm-test-artifacts.md](../behavior/sys-norm-test-artifacts.md) (**ready** / docs-close **Done**; **BDD-SYS-NORM-W4-001…010** → PTA; product evidence **#144** `ac36ecbc` / `6bc74ff1`; TM **#148**) |
 | **Role ADR** | [ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md) (**Accepted**) |
 | **D1 ADR** | [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) (**Accepted**) |
 
@@ -50,7 +53,12 @@ de-dupe; legacy apiAccess redirects. Delivered **2026-07-21** (`5d77db80` / `992
 **Wave 3 mission (Done — #147):** External services dashboard; separate invocation records
 page; complete package API settings (`/api/packages/:templateId/settings`); External services
 nav; redirects; group-scope fail-closed; honest empty/error. Delivered **2026-07-21**
-(`18a9e3b2` / `f21dda5e`). Wave 4 testing artifacts remains **Not Started** / **not** activated.
+(`18a9e3b2` / `f21dda5e`).
+
+**Wave 4 mission (Done — #148 docs-close):** Published/history Testing durable artifacts —
+§5.1 satisfied by prior PTA delivery **#144** (`ac36ecbc` / `6bc74ff1`). This leaf closed
+the program registry + Wave 4 BDD stub only (`frontend_ui_in_scope=false`; gates **N/A** /
+reuse #144). Wave 5 roles remains **Not Started** / **not** activated.
 
 ---
 
@@ -82,7 +90,7 @@ nav; redirects; group-scope fail-closed; honest empty/error. Delivered **2026-07
 | **1** | **#145** | `sys-norm-shell-fluid-nav` | **Done** (`7a62be44` / `f1594f2a` / `ce2cb9f0`) | Fluid all pages; nav icons + contract; Security = audit + legal holds; brands/entities nav hide (ADR-0071); Edit/More; EntityLink N1/N2/N3; **N18 deferred** | FE gates + E2E 7/7 + UIUX PASS + Stage 5/10 DEPLOY_OK |
 | **2** | **#146** | `sys-norm-hub-ia` | **Done** (`5d77db80` / `992f6822`) | Template (+ Master parity) Hub Properties drawer; remove wrong tabs; version Dependencies; API jump model A; Dev blank-surface; locale de-dupe; legacy apiAccess | FE gates + E2E 8/8 + UIUX PASS + Stage 5/10 DEPLOY_OK |
 | **3** | **#147** | `sys-norm-external-ops` | **Done** (`18a9e3b2` / `f21dda5e`) | External services dashboard; invocation records page; package API settings completion; nav; redirects | FE gates + E2E 10/10 + UIUX PASS + Stage 5/10 DEPLOY_OK |
-| **4** | *(register at activate)* | `sys-norm-test-artifacts` | **Not Started** | Batch test history handles; download on published/history Testing | BE/FE + E2E as scoped |
+| **4** | **#148** | `sys-norm-test-artifacts` | **Done** (docs-close; product **#144** `ac36ecbc` / `6bc74ff1`) | Published/history Testing durable DOCX/PDF; program registry close | Docs-only this leaf — reuse #144 E2E/deploy |
 | **5** | *(register at activate)* | `sys-norm-roles` | **Not Started** | Implement ADR-0070; matrix rewrite + FE role labels + migration | Matrix + Wave 5 BDD **ready** before code |
 | **6** | *(register at activate)* | `sys-norm-d1-brands` | **Not Started** | Runtime/management retirement per ADR-0071 | Wave 6 BDD **ready** before code |
 | **7** | *(register at activate)* | `sys-norm-promotion-pack` | **Not Started** | UAT→PROD pack + dry-run UI per §2 promotion facts | Wave 7 BDD |
@@ -92,9 +100,11 @@ Per-wave implementation BDD stubs are **pending-wave** until authored at wave st
 ([behavior charter §8](../behavior/system-normalization-program.md)), except Wave 1
 (**ready/Done** — [sys-norm-shell-fluid-nav.md](../behavior/sys-norm-shell-fluid-nav.md)),
 Wave 2 (**ready/Done** — [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md)
-**BDD-SYS-NORM-W2-001…018**; TM **#146** Done `5d77db80` / `992f6822`), and Wave 3
+**BDD-SYS-NORM-W2-001…018**; TM **#146** Done `5d77db80` / `992f6822`), Wave 3
 (**ready/Done** — [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md)
-**BDD-SYS-NORM-W3-001…018**; TM **#147** Done `18a9e3b2` / `f21dda5e`).
+**BDD-SYS-NORM-W3-001…018**; TM **#147** Done `18a9e3b2` / `f21dda5e`), and Wave 4
+(**ready/Done** docs-close — [sys-norm-test-artifacts.md](../behavior/sys-norm-test-artifacts.md)
+**BDD-SYS-NORM-W4-001…010**; TM **#148**; product **#144** `ac36ecbc` / `6bc74ff1`).
 
 ---
 
@@ -134,7 +144,7 @@ Wave 2 (**ready/Done** — [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md)
 | **1** | Fluid layout + nav/security IA + EntityLink/Actions targets green; FE gates + E2E; doc-sync — **met 2026-07-21** (`7a62be44`); N18 deferred with evidence |
 | **2** | Hub IA model A + Properties drawer + tab removals + version Dependencies; Master parity as scoped; E2E — **met 2026-07-21** (`5d77db80` / `992f6822`) |
 | **3** | External services invocation page + package API settings surface; hub redirects |
-| **4** | Published/history Testing downloads durable artifacts |
+| **4** | Published/history Testing downloads durable artifacts — **met 2026-07-21** via **#144** PTA (`ac36ecbc` / `6bc74ff1`); program close TM **#148** |
 | **5** | Six-role catalog live; migration audited; matrix rewritten; ROLE BDD green |
 | **6** | Brand/entity product surfaces + runtime simplify per ADR-0071; Legal holds kept |
 | **7** | Promotion pack + dry-run UI per confirmed design facts |
@@ -174,6 +184,9 @@ still governing; checklist **#3b** / **#5a** **not** flipped by this program; **
 | [sys-norm-shell-fluid-nav.md](../behavior/sys-norm-shell-fluid-nav.md) | Wave 1 BDD (**ready** / delivered) |
 | [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md) | Wave 2 BDD (**ready** / delivered) |
 | [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md) | Wave 3 BDD (**ready** / delivered; TM **#147** Done `18a9e3b2` / `f21dda5e`) |
+| [sys-norm-test-artifacts.md](../behavior/sys-norm-test-artifacts.md) | Wave 4 BDD (**ready** / docs-close **Done**; TM **#148**; **BDD-SYS-NORM-W4-001…010** → PTA; product evidence **#144**) |
+| [detail/sys-norm-test-artifacts.md](./detail/sys-norm-test-artifacts.md) | Wave 4 plan detail (docs-close) |
+| [published-template-test-artifacts.md](../behavior/published-template-test-artifacts.md) | Wave 4 product acceptance SoT (**BDD-PTA-001…009**; TM **#144** Done) |
 | [0070-role-compression-six-roles.md](../adr/authorization-security/0070-role-compression-six-roles.md) | Role compression (Accepted) |
 | [0071-retire-document-brand-legal-entity-surfaces.md](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) | D1 retire product surfaces (Accepted) |
 | [0065-legal-entity-document-brand-variants.md](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md) | Historical IBL-E4; product surface superseded by 0071 |
