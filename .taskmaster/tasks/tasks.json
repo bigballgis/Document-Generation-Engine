@@ -2103,16 +2103,16 @@
       {
         "id": "153",
         "title": "Reminder timing settings IA — System settings + Team settings (reminder-timing-settings-ia)",
-        "description": "IN PROGRESS 2026-07-22. NON-CE post-SYS-NORM parked UX §4a sole-active leaf. Slice reminder-timing-settings-ia; placement ISOLATED; worktree D:/working/DGE-reminder-timing-settings-ia · feat/reminder-timing-settings-ia. Batch solo (member_task_ids: [\"153\"]; proposed_slice_id: reminder-timing-settings-ia; vetoes: parked-#2-asset-library-group-isolation / parked-#3-binding-editor-re-layout / parked-#4-auto-referenceKey / checklist-#3b/#5a / CE-O02 / #53) open. Scope: GLOBAL_ADMIN System settings full page for Global default; GROUP_ADMIN Team settings dialog for group override; remove CollaborationTimeoutConfigPanel from Dashboard Overview. API unchanged — reuse GET/PUT /api/management/v1/collaboration-timeout-config. BDD ready docs/behavior/reminder-timing-settings-ia.md BDD-RT-IA-001…016. frontend_ui_in_scope=true; backend_api_contract_change=false. SYS-NORM Waves 0–8 remain Done — program Done; §4a Reminder timing In Progress; siblings #2–4 stay Parked. Formal phase None. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Do NOT flip #3b/#5a GO. Do NOT activate CE-O02 / parked #2–4. Do NOT claim Done until gates + merge + MAIN doc-sync.",
-        "details": "Activated 2026-07-22 (stage 2 plan-orchestrator on feature worktree). Plan: docs/plan/system-normalization-program-2026-07.md §4a Reminder timing → In Progress; detail docs/plan/detail/reminder-timing-settings-ia.md; ledger activation note. Formal phase remains None. Host sole-active = #153 only. Next pipeline: doc-keeper (if needed) then frontend-engineer. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT activate CE-O02 / parked #2–4; do NOT implement until after plan sync handoff.",
+        "description": "DONE 2026-07-22. NON-CE post-SYS-NORM §4a Reminder timing settings IA. Slice reminder-timing-settings-ia; MAIN merge d213834f; feature 807d8213; worktree REMOVED. Batch solo (member_task_ids: [\"153\"]) closed. BDD ready/shipped docs/behavior/reminder-timing-settings-ia.md BDD-RT-IA-001…016. Behavior: Reminder timing relocated to System settings page (GLOBAL) + Team settings dialog (GROUP); removed from Dashboard Overview; API GET/PUT /collaboration-timeout-config unchanged. Gates: FE lint/type-check/test 1665/build GREEN; E2E 12/12; UIUX PASS_WITH_NOTES Critical=0; architecture PASS_WITH_NOTES Critical=0 GO_WITH_NOTES; Stage 5+10 DEPLOY_OK; BE mvn verify N/A. Sole-active cleared. Formal phase None. Next parked head (not activated): Asset library group isolation. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02 or parked #2–4.",
+        "details": "COMPLETED 2026-07-22. Slice id: reminder-timing-settings-ia. Merge: d213834f (feat/reminder-timing-settings-ia → main); feature 807d8213; worktree REMOVED (stage 11). Batch solo closed. frontend_ui_in_scope=true; backend_api_contract_change=false. Evidence: frontend/e2e/evidence/reminder-timing-settings-ia* · docs/plan/detail/reminder-timing-settings-ia.md. Program §4a Reminder timing → Done; siblings #2–4 Parked. Sole-active cleared.",
         "testStrategy": "1. BDD ready RT-IA-001…016. 2. FE TDD for System settings page + Team settings dialog + Dashboard Overview panel removal. 3. FE lint/type-check/test/build + BE mvn verify GREEN (no API contract change). 4. E2E + UIUX for relocated IA. 5. Queued docker-deploy-queue DEPLOY_OK. 6. Merge + MAIN doc-sync. 7. Do NOT flip #3b/#5a; do NOT mark #53 Done.",
         "priority": "high",
         "dependencies": [
           "152"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-22T01:20:00.000Z"
+        "updatedAt": "2026-07-21T19:09:28.000Z"
       }
     ],
     "metadata": {

@@ -22,9 +22,9 @@
 > Wave 8 leaf TM **#152** `sys-norm-demo-seed-terms` → **Done** (`8aca145b` / `7df6c563`; BDD
 > [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) **W8-001…018**;
 > SYS-NORM program Waves **0–8 Done**; **N18 deferred**).
-> Post-program §4a Reminder timing IA — TM **#153** `reminder-timing-settings-ia` → **In Progress**
-> (BDD [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md)
-> **BDD-RT-IA-001…016**; FE impl pending — docs-first Confirmed below).
+> Post-program §4a Reminder timing IA — TM **#153** `reminder-timing-settings-ia` → **Done**
+> (`d213834f` / `807d8213`; BDD [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md)
+> **BDD-RT-IA-001…016**; FE **Done**).
 
 | Intent | Confirmed decision | Implementation status | Wave |
 | --- | --- | --- | --- |
@@ -39,7 +39,7 @@
 | **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **Done** (2026-07-21; `#147` / `18a9e3b2` / `f21dda5e`; [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md)) | 3 `sys-norm-external-ops` |
 | **D1 brands/entities runtime** | Full product-surface + runtime retirement per ADR-0071 — hard-retire routes/APIs/catalogs; Letterhead (master) SoT for logo/seal; Legal holds kept; no brand/entity sidecar for promotion/export ([sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) **D1-001…020**) | **Done** (TM **#150** `64b0a650`; BDD **ready/Done**) | 6 `sys-norm-d1-brands` |
 | **L1 Letterhead / 母版 + honest empties** | L1 EN **Letterhead** / ZH **母版**; purge L1 Master mix; Asset Library / Legal hold / revision design / journey honest empties; optional demo seed ops; N23 classpath ≠ library | **Done** (2026-07-22; `#152` / `8aca145b` / `7df6c563`) — **N18 deferred**; parked UX OOS | 8 `sys-norm-demo-seed-terms` |
-| **Reminder timing settings IA** | Relocate **Reminder timing** off Dashboard Overview: Global Admin **System settings** full page (Global default only); Group Admin **Team settings** dialog on Groups/team surface (group override only); API unchanged | **In Progress** (docs Confirmed; FE pending) — TM **#153**; BDD **BDD-RT-IA-001…016** | post-program §4a |
+| **Reminder timing settings IA** | Relocate **Reminder timing** off Dashboard Overview: Global Admin **System settings** full page (Global default only); Group Admin **Team settings** dialog on Groups/team surface (group override only); API unchanged | **Done** (2026-07-22; `#153` / `d213834f` / `807d8213`) — BDD **BDD-RT-IA-001…016** | post-program §4a |
 
 ### Wave 8 empty-state product notes (N13 / N15 / N21)
 
@@ -333,9 +333,9 @@ Left navigation IA
 
 ### Reminder timing settings IA (System / Team) — Confirmed 2026-07-21
 
-**Status:** Confirmed product IA (user 2026-07-21) | **Implementation:** **In Progress** — TM **#153**
-`reminder-timing-settings-ia` (BDD [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md)
-**BDD-RT-IA-001…016**; FE pending).  
+**Status:** Confirmed product IA (user 2026-07-21) | **Implementation:** **Done** — TM **#153**
+`reminder-timing-settings-ia` (MAIN `d213834f` / feature `807d8213`; BDD [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md)
+**BDD-RT-IA-001…016**).  
 **Supersedes:** P14-T02d / P21 Dashboard Overview hosting of `CollaborationTimeoutConfigPanel`
 (historical delivery remains valid; **current** IA must not keep Reminder timing on Overview).
 

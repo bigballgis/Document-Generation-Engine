@@ -15,7 +15,7 @@
 | **Wave 6 leaf** | TM **#150** · `sys-norm-d1-brands` → **Done** (MAIN merge `64b0a650`; worktree **REMOVED**) |
 | **Wave 7 leaf** | TM **#151** · `sys-norm-promotion-pack` → **Done** (MAIN merge `11356c63` / feature `f795b04a`; worktree **REMOVED**) |
 | **Wave 8 leaf** | TM **#152** · `sys-norm-demo-seed-terms` → **Done** (MAIN merge `8aca145b` / feature `7df6c563`; worktree **REMOVED**) |
-| **Sole-active** | Host NON-CE **#153** `reminder-timing-settings-ia` **In Progress** (post-program §4a; SYS-NORM waves remain **Done**) |
+| **Sole-active** | **cleared** — NON-CE **#153** Reminder timing IA → **Done** (`d213834f` / `807d8213`; post-program §4a; SYS-NORM waves remain **Done**) |
 | **Batch (Wave 8)** | **solo** · `member_task_ids: ["152"]` · `proposed_slice_id: sys-norm-demo-seed-terms` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / parked-UX-not-in-W8 — **closed** |
 | **Batch (Wave 7)** | **solo** · `member_task_ids: ["151"]` · `proposed_slice_id: sys-norm-promotion-pack` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-8 / parked UX — **closed** |
 | **Batch (Wave 6)** | **solo** · `member_task_ids: ["150"]` · `proposed_slice_id: sys-norm-d1-brands` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-7 / Wave-8 / parked UX — **closed** |
@@ -24,7 +24,7 @@
 | **Batch (Wave 3)** | **solo** · `member_task_ids: ["147"]` · `proposed_slice_id: sys-norm-external-ops` — **closed** |
 | **Batch (Wave 2)** | **solo** · `member_task_ids: ["146"]` · `proposed_slice_id: sys-norm-hub-ia` — **closed** |
 | **Batch (Wave 1)** | **solo** · `member_task_ids: ["145"]` · `proposed_slice_id: sys-norm-shell-fluid-nav` — **closed** |
-| **Next queue head** | §4a Reminder timing **In Progress** (TM **#153**); siblings Asset library / Binding editor / Auto `referenceKey` remain **Parked** |
+| **Next queue head** | §4a **Asset library group isolation** — **Parked** / Not Started (**not** activated); siblings Binding editor / Auto `referenceKey` remain **Parked**; Reminder timing **#153** → **Done** |
 | **Queue (Wave 8)** | BDD SoT [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) **BDD-SYS-NORM-W8-001…018** — wave **Done**; detail [detail/sys-norm-demo-seed-terms.md](./detail/sys-norm-demo-seed-terms.md) |
 | **Parked worktrees** | Prior hub WIP worktrees **removed** — do **not** revive or fold stale hub WIP |
 | **CE umbrella** | TM **#53** remains **in-progress** registry-only — **not** this program's delivery leaf; **do not** mark **#53** Done |
@@ -176,18 +176,19 @@ Do **not** activate CE-O02.
 
 | Note | Theme | Status |
 | --- | --- | --- |
-| Reminder timing | System / Team settings IA for reminder timing | **In Progress** — sole-active leaf TM **#153** `reminder-timing-settings-ia` (BDD **ready** — [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md) **BDD-RT-IA-001…016**; Batch **solo** open; worktree `D:/working/DGE-reminder-timing-settings-ia` · `feat/reminder-timing-settings-ia`; detail [detail/reminder-timing-settings-ia.md](./detail/reminder-timing-settings-ia.md); do **not** claim Done) |
-| Asset library group isolation | Group-scoped asset library isolation | **Parked** — Not Started |
+| Reminder timing | System / Team settings IA for reminder timing | **Done** — TM **#153** `reminder-timing-settings-ia` (MAIN merge `d213834f` / feature `807d8213`; worktree **REMOVED**; Batch **solo** closed; BDD **ready**/shipped — [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md) **BDD-RT-IA-001…016**; detail [detail/reminder-timing-settings-ia.md](./detail/reminder-timing-settings-ia.md)) |
+| Asset library group isolation | Group-scoped asset library isolation | **Parked** — Not Started (**next queue head** — **not** activated) |
 | Binding editor re-layout | Binding editor layout remedi | **Parked** — Not Started |
 | Auto `referenceKey` generation | Auto-generate `referenceKey` | **Parked** — Not Started |
 
 **Also deferred (not parked-UX, does not block program Done):** **N18** Legal-hold actor
 EntityLink — later leaf + BDD.
 
-**Sole-active (host delivery leaf):** **#153** only. SYS-NORM Wave 8 TM **#152** → **Done**
-`8aca145b` / `7df6c563` (program waves remain **Done**). §4a Reminder timing **activated**;
-siblings **#2–4** stay **Parked**. Do **not** fold into **#53**; do **not** flip **#3b** /
-**#5a**; do **not** activate CE-O02.
+**Sole-active (host delivery leaf):** **cleared**. SYS-NORM Wave 8 TM **#152** → **Done**
+`8aca145b` / `7df6c563` (program waves remain **Done**). §4a Reminder timing TM **#153** →
+**Done** (`d213834f` / `807d8213`). Next parked head = **Asset library group isolation**
+(**not** activated). Siblings Binding editor / Auto `referenceKey` stay **Parked**. Do
+**not** fold into **#53**; do **not** flip **#3b** / **#5a**; do **not** activate CE-O02.
 
 ---
 
@@ -258,7 +259,9 @@ registry-only.
 | [permission-matrix.md](../security/permission-matrix.md) | **Six-role rewrite + runtime catalog Done** (Wave 5 `febb95b3`); Wave 6 D1 §5.3 retire **Done** (TM **#150** `64b0a650`); nav-hide Wave 1 cross-ref retained |
 | [sys-norm-roles.md](../behavior/sys-norm-roles.md) | Wave 5 BDD **ready**/delivered — **BDD-SYS-NORM-ROLE-001…018** (TM **#149** Done `febb95b3`) |
 | [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) | Wave 6 BDD **ready**/delivered — **BDD-SYS-NORM-D1-001…020** (TM **#150** Done `64b0a650`) |
-| [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) | Hub IA intent + Wave 1 layout/nav-hide status |
+| [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) | Hub IA intent + Wave 1 layout/nav-hide + Reminder timing System/Team IA (**#153 Done**) |
+| [detail/reminder-timing-settings-ia.md](./detail/reminder-timing-settings-ia.md) | Post-program §4a Reminder timing leaf (**Done** · TM **#153** `d213834f` / `807d8213`) |
+| [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md) | Reminder timing IA BDD **ready**/shipped — **BDD-RT-IA-001…016** |
 | [business-terminology-guide.md](../product/business-terminology-guide.md) | L1 Letterhead/母版 intent |
 | [execution-sync-ledger.md](./execution-sync-ledger.md) | Activation / evidence mirror |
 | [docs/README.md](../README.md) | Index |
