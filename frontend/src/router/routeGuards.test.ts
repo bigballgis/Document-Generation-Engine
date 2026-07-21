@@ -20,6 +20,12 @@ vi.mock('@/views/dashboard/DashboardView.vue', () => ({
 vi.mock('@/views/api/ApiPolicyHomeView.vue', () => ({
   default: { name: 'ApiPolicyHomeViewStub', template: '<div />' },
 }))
+vi.mock('@/views/api/ApiInvocationsView.vue', () => ({
+  default: { name: 'ApiInvocationsViewStub', template: '<div />' },
+}))
+vi.mock('@/views/api/ApiPackageSettingsShellView.vue', () => ({
+  default: { name: 'ApiPackageSettingsShellViewStub', template: '<div />' },
+}))
 vi.mock('@/views/audit/AuditConsoleView.vue', () => ({
   default: { name: 'AuditConsoleViewStub', template: '<div />' },
 }))

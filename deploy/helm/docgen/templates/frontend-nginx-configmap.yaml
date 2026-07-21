@@ -30,7 +30,7 @@ data:
             return 200 'ok\n';
         }
 
-        # Management UI SPA routes under /api/policies and /api/packages
+        # Management UI SPA routes under /api/policies, /api/packages, and /api/invocations
         # (not backend runtime/management API under /api/management/**).
         location = /api/policies {
             try_files $uri $uri/ /index.html;
@@ -45,6 +45,14 @@ data:
         }
 
         location ^~ /api/packages/ {
+            try_files $uri $uri/ /index.html;
+        }
+
+        location = /api/invocations {
+            try_files $uri $uri/ /index.html;
+        }
+
+        location ^~ /api/invocations/ {
             try_files $uri $uri/ /index.html;
         }
 

@@ -11,8 +11,11 @@ import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, templatePackageHubPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
+import { API_POLICY_DOMAINS } from '@/types/apiPolicyDomain'
 import TemplateDetailApiAccessTab from '@/views/templates/detail/TemplateDetailApiAccessTab.vue'
 import { useTemplatePolicyCredentials } from '@/views/templates/useTemplatePolicyCredentials'
+
+const KNOWN_PANELS = new Set(['domain', 'credentials', 'routes', 'contract', 'invocations', ...API_POLICY_DOMAINS])
 
 const { t, te } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
@@ -27,6 +30,21 @@ const templateId = computed(() => String(route.params.templateId ?? ''))
 const releaseVersionContext = computed(() => {
   const value = route.query.releaseVersion
   return typeof value === 'string' && value.length > 0 ? value : null
+})
+
+const panelQuery = computed(() => {
+  const value = route.query.panel
+  return typeof value === 'string' && value.length > 0 ? value : null
+})
+
+const unknownPanel = computed(() => {
+  if (!panelQuery.value) {
+    return null
+  }
+  if (KNOWN_PANELS.has(panelQuery.value)) {
+    return null
+  }
+  return panelQuery.value
 })
 
 const template = computed(() => {
@@ -86,6 +104,13 @@ function backToApiHome() {
   void router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.apiPolicyManagement])
 }
 
+function openPackageInvocations() {
+  void router.push({
+    path: '/api/invocations',
+    query: { templateId: templateId.value },
+  })
+}
+
 onMounted(() => {
   void loadPage()
 })
@@ -100,7 +125,7 @@ watch(templateId, () => {
 </script>
 
 <template>
-  <AppPageLayout>
+  <AppPageLayout layout-variant="fluid">
     <PageHeader
       show-back
       :back-label="t('apiPolicy.packageSettings.backToHub')"
@@ -109,10 +134,13 @@ watch(templateId, () => {
           ? t('apiPolicy.packageSettings.title', { name: template.name })
           : t('apiPolicy.packageSettings.loadingTitle')
       "
-      :description="t('apiPolicy.packageSettings.interimDescription')"
+      :description="t('apiPolicy.packageSettings.description')"
       @back="backToHub"
     >
       <template #actions>
+        <el-button data-testid="api-package-settings-open-invocations" @click="openPackageInvocations">
+          {{ t('apiPolicy.packageSettings.openInvocations') }}
+        </el-button>
         <el-button @click="backToApiHome">
           {{ t('apiPolicy.packageSettings.backToExternalServices') }}
         </el-button>
@@ -128,12 +156,13 @@ watch(templateId, () => {
     </p>
 
     <el-alert
-      class="interim-banner"
+      v-if="unknownPanel"
+      class="unknown-panel"
       type="info"
       :closable="false"
       show-icon
-      data-testid="api-package-settings-interim-banner"
-      :title="t('apiPolicy.packageSettings.interimBanner')"
+      data-testid="api-package-settings-unknown-panel"
+      :title="t('apiPolicy.packageSettings.unknownPanelNotice', { panel: unknownPanel })"
     />
 
     <LoadErrorPanel
@@ -184,7 +213,7 @@ watch(templateId, () => {
   font-size: var(--font-size-sm);
 }
 
-.interim-banner {
+.unknown-panel {
   margin-bottom: var(--space-4);
 }
 </style>

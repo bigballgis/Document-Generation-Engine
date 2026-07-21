@@ -358,6 +358,11 @@ describe('navStructure', () => {
           path: '/library/assets',
         },
         { id: 'api-policies', routeKey: ROUTE_KEYS.apiPolicyManagement, path: '/api/policies' },
+        {
+          id: 'api-invocations',
+          routeKey: ROUTE_KEYS.apiPolicyManagement,
+          path: '/api/invocations',
+        },
         { id: 'audit', routeKey: ROUTE_KEYS.auditConsole, path: '/audit' },
         {
           id: 'legal-holds',
@@ -401,6 +406,18 @@ describe('navStructure', () => {
 
       const apiGroup = groups.find((group) => group.id === 'api')
       expect(apiGroup).toBeUndefined()
+    })
+
+    it('BDD-SYS-NORM-W3-012: External services nav includes dashboard + invocations', () => {
+      const groups = buildVisibleNavGroups(
+        [dashboardRoute, ROUTE_KEYS.apiPolicyManagement],
+        ['GLOBAL_ADMIN'],
+        globalAdminCapabilities,
+      )
+      const apiGroup = groups.find((group) => group.id === 'api')
+      expect(apiGroup?.items.map((item) => item.id)).toEqual(['api-policies', 'api-invocations'])
+      expect(apiGroup?.items.some((item) => item.path.includes('/settings'))).toBe(false)
+      expect(en.nav.items.apiInvocations).toBe('Invocation records')
     })
   })
 

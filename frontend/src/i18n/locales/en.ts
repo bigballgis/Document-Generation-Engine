@@ -172,6 +172,7 @@ export default {
       masterVersions: 'Letterhead versions',
       templateVersions: 'Template versions',
       apiPolicies: 'External services overview',
+      apiInvocations: 'Invocation records',
       audit: 'Activity log',
       legalHolds: 'Legal holds',
       documentBrands: 'Document brands',
@@ -2597,22 +2598,58 @@ export default {
     packageSettings: {
       title: 'API settings — {name}',
       loadingTitle: 'Loading package API settings…',
-      interimDescription:
-        'Package-level external access settings (API model A). Invocation ops dashboard panels arrive in a later wave.',
-      interimBanner:
-        'Settings home shell — configure AD groups, routes, retention, and access keys below. Full External services ops dashboard is coming later.',
+      description:
+        'Edit package-level external access: authorized AD groups, default route, retention, credentials, and advanced domains.',
       backToHub: 'Back to template package',
       backToExternalServices: 'External services overview',
+      openInvocations: 'Invocation records for this package',
       releaseContext: 'Version perspective: release {releaseVersion}',
+      unknownPanelNotice:
+        'Unknown settings panel “{panel}”. Showing the default package API settings home.',
+    },
+    invocationsPage: {
+      title: 'Invocation records',
+      description:
+        'Cross-package management invocation summaries for your authorized scope. Variable plaintext is never shown here.',
+      backToDashboard: 'External services overview',
+      loadFailed: 'Unable to load invocation records.',
+      emptyTitle: 'No invocation records',
+      emptyDescription: 'No management-visible invocations match the current filters in your scope.',
+      compositionLimitTitle: 'Composition sample limit',
+      compositionLimitDescription:
+        'Results are composed from per-package APIs (first packages in scope). Select a package filter for full server pagination, or narrow filters if counts look incomplete.',
+      openDetail: 'Open summary',
+      openSettings: 'API settings',
+      filters: {
+        status: 'Status',
+        statusPlaceholder: 'Any status',
+        package: 'Package',
+        packagePlaceholder: 'All authorized packages',
+        requestId: 'Request ID',
+        requestIdPlaceholder: 'Filter by request ID',
+        createdAfter: 'Created after',
+        createdBefore: 'Created before',
+        apply: 'Apply filters',
+        clear: 'Clear',
+      },
+      columns: {
+        createdAt: 'Created',
+        package: 'Package',
+        status: 'Status',
+        requestId: 'Request ID',
+        releaseVersion: 'Release',
+        actions: 'Actions',
+      },
     },
     home: {
       title: 'External services overview',
       description:
-        'Monitor cross-package external access. Configure AD groups, routes, retention, and access keys on each template package.',
+        'Monitor cross-package readiness, recent invocation outcomes, and attention alerts. Configure access on each package’s API settings page.',
       empty: 'No published templates in your authorized scope.',
       groupCode: 'Group',
       monitoringHint:
         'External access is configured per template package. Open package API settings to edit configuration.',
+      openInvocations: 'Open invocation records',
       summary: {
         title: 'API readiness summary',
         description:
@@ -2625,6 +2662,24 @@ export default {
         pendingReleaseNeedingSetup: 'Pending release needing setup',
         pendingReleaseNeedingSetupDescription:
           'Pending-release packages that still need authorized AD groups before runtime callers can succeed.',
+      },
+      ops: {
+        title: 'Recent invocation sample',
+        description:
+          'Honest counts derived from a composed sample of authorized packages. No latency or error-budget thresholds are applied.',
+        loadFailed: 'Unable to load invocation sample summaries.',
+        emptyTitle: 'No sampled invocations',
+        emptyDescription: 'No recent management-visible invocations were found in the composed sample.',
+        compositionNote:
+          'Sampled from up to {packageCount} packages ({invocationCount} rows). Select Invocation records and filter by package for complete pagination.',
+        performance: 'Recent invocations (sample)',
+        performanceDescription: 'Management-visible invocation rows included in the composed sample.',
+        failureRate: 'Failure rate (sample)',
+        failureRateDescription: 'Failed and partial outcomes as a share of the sampled rows.',
+        failureRateEmpty: '—',
+        artifacts: 'Succeeded outcomes (sample)',
+        artifactsDescription:
+          'Succeeded statuses in the sample. Document presence is confirmed in invocation detail, not claimed as a download inventory.',
       },
       alerts: {
         title: 'Attention items',
@@ -2646,10 +2701,10 @@ export default {
       },
       packageLinks: {
         title: 'Published packages',
-        description: 'Jump directly to a package external access tab.',
+        description: "Jump directly to a package's API settings.",
         browseTemplates: 'Browse templates',
         action: 'External access',
-        openAccess: 'Open external access',
+        openAccess: 'Open API settings',
       },
     },
     detail: {

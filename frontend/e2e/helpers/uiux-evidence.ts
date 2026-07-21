@@ -1888,3 +1888,33 @@ export async function captureSysNormW2LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** SYS-NORM Wave 3 — External services ops (dashboard / invocations / settings) — 1440×900 dual-brand. */
+export const SYS_NORM_W3_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'SYS-NORM-W3')
+export const SYS_NORM_W3_SCREENSHOT_DIR = path.join(SYS_NORM_W3_EVIDENCE_ROOT, 'screenshots')
+export const SYS_NORM_W3_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureSysNormW3EvidenceDirs(): void {
+  fs.mkdirSync(SYS_NORM_W3_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function sysNormW3ScreenshotPath(filename: string): string {
+  return path.join(SYS_NORM_W3_SCREENSHOT_DIR, filename)
+}
+
+export async function captureSysNormW3Screenshot(page: Page, filename: string): Promise<string> {
+  ensureSysNormW3EvidenceDirs()
+  const target = sysNormW3ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureSysNormW3LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureSysNormW3EvidenceDirs()
+  const target = sysNormW3ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

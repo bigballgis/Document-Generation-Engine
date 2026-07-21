@@ -10,6 +10,7 @@ import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
+import { useCrossPackageInvocations } from '@/composables/useCrossPackageInvocations'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { apiPackageSettingsPath } from '@/routing/apiPackageSettings'
 import { ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
@@ -22,6 +23,13 @@ const router = useRouter()
 const { formatDateTime } = useLocaleFormatters()
 const apiPolicyStore = useApiPolicyStore()
 const sessionStore = useSessionStore()
+
+const {
+  opsSummary,
+  loading: loadingOps,
+  loadFailed: opsLoadFailed,
+  loadOpsSummaryOnly,
+} = useCrossPackageInvocations({ autoLoad: false })
 
 const alertsErrorMessageKey = computed(() => apiPolicyStore.alertsErrorMessageKey)
 const summaryErrorMessageKey = computed(() => apiPolicyStore.summaryErrorMessageKey)
@@ -50,8 +58,36 @@ const summaryCards = computed(() => [
   },
 ])
 
+const opsCards = computed(() => [
+  {
+    key: 'performance',
+    value: String(opsSummary.value.sampledInvocationCount),
+    titleKey: 'apiPolicy.home.ops.performance',
+    descriptionKey: 'apiPolicy.home.ops.performanceDescription',
+  },
+  {
+    key: 'failureRate',
+    value:
+      opsSummary.value.failureRatePercent == null
+        ? t('apiPolicy.home.ops.failureRateEmpty')
+        : `${opsSummary.value.failureRatePercent}%`,
+    titleKey: 'apiPolicy.home.ops.failureRate',
+    descriptionKey: 'apiPolicy.home.ops.failureRateDescription',
+  },
+  {
+    key: 'artifacts',
+    value: String(opsSummary.value.succeededCount),
+    titleKey: 'apiPolicy.home.ops.artifacts',
+    descriptionKey: 'apiPolicy.home.ops.artifactsDescription',
+  },
+])
+
 const { reload: reloadOverview } = useAbortableCatalogLoader(async () => {
-  await Promise.all([apiPolicyStore.fetchAlerts(), apiPolicyStore.fetchReadinessSummary()])
+  await Promise.all([
+    apiPolicyStore.fetchAlerts(),
+    apiPolicyStore.fetchReadinessSummary(),
+    loadOpsSummaryOnly(),
+  ])
 })
 
 onMounted(async () => {
@@ -64,6 +100,10 @@ function openPackageAccess(templateId: string) {
 
 function openTemplateCatalog() {
   router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
+}
+
+function openInvocations() {
+  router.push('/api/invocations')
 }
 
 function alertMessageKey(kind: ApiAccessAlertKind): string {
@@ -108,6 +148,9 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
       :description="t('apiPolicy.home.description')"
     >
       <template #actions>
+        <el-button data-testid="api-home-open-invocations" @click="openInvocations">
+          {{ t('apiPolicy.home.openInvocations') }}
+        </el-button>
         <el-button v-if="canBrowseTemplates" @click="openTemplateCatalog">
           {{ t('apiPolicy.home.packageLinks.browseTemplates') }}
         </el-button>
@@ -148,6 +191,51 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
           <p class="summary-card-description">{{ t(card.descriptionKey) }}</p>
         </el-card>
       </div>
+    </section>
+
+    <section class="summary-section" data-testid="api-ops-summary" aria-labelledby="api-ops-summary-title">
+      <h2 id="api-ops-summary-title">{{ t('apiPolicy.home.ops.title') }}</h2>
+      <p class="section-description">{{ t('apiPolicy.home.ops.description') }}</p>
+
+      <LoadErrorPanel
+        v-if="opsLoadFailed && !loadingOps"
+        message-key="apiPolicy.home.ops.loadFailed"
+        :retryable="true"
+        @retry="reloadOverview"
+      />
+
+      <el-skeleton v-else-if="loadingOps" :rows="2" animated />
+
+      <template v-else>
+        <EmptyStatePanel
+          v-if="opsSummary.sampledInvocationCount === 0 && opsSummary.sampledPackageCount === 0"
+          title-key="apiPolicy.home.ops.emptyTitle"
+          description-key="apiPolicy.home.ops.emptyDescription"
+        />
+        <template v-else>
+          <div class="summary-grid">
+            <el-card
+              v-for="card in opsCards"
+              :key="card.key"
+              shadow="never"
+              class="summary-card"
+              :data-testid="`ops-card-${card.key}`"
+            >
+              <p class="summary-count">{{ card.value }}</p>
+              <h3>{{ t(card.titleKey) }}</h3>
+              <p class="summary-card-description">{{ t(card.descriptionKey) }}</p>
+            </el-card>
+          </div>
+          <p class="ops-composition-note" data-testid="api-ops-composition-note">
+            {{
+              t('apiPolicy.home.ops.compositionNote', {
+                packageCount: opsSummary.sampledPackageCount,
+                invocationCount: opsSummary.sampledInvocationCount,
+              })
+            }}
+          </p>
+        </template>
+      </template>
     </section>
 
     <el-card shadow="never" class="section-card alerts-card">
@@ -251,6 +339,12 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
 
 .summary-card-description {
   margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.ops-composition-note {
+  margin: var(--space-3) 0 0;
   color: var(--text-muted);
   font-size: var(--font-size-sm);
 }

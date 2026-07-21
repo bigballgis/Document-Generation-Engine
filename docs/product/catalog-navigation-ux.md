@@ -28,7 +28,7 @@
 | **Remove hub tabs** | Overview, Dependencies, External access | **Done** (2026-07-21) | 2 |
 | **Dependencies** | Live on **per-version** surfaces (release / dev detail), not package hub tab | **Done** (2026-07-21) | 2 |
 | **API model A** | Package-level API settings SoT under External services; hub **API settings** jump to `/api/packages/:templateId/settings` shell; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities; legacy `?tab=apiAccess` / `#apiAccess` / `/api/policies/:templateId` → settings shell | **Done** IA shell + redirects (2026-07-21); Wave 3 fills full settings home + invocation dashboard | 2 (+ 3 for dashboard) |
-| **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **Not Started** | 3 `sys-norm-external-ops` |
+| **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **BDD ready** ([sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md)); impl **Not Started** | 3 `sys-norm-external-ops` |
 | **D1 brands/entities runtime** | Full product-surface + runtime retirement per ADR-0071 (beyond nav hide) | **Not Started** | 6 `sys-norm-d1-brands` |
 
 ## Design principle
