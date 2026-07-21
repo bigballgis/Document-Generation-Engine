@@ -504,6 +504,7 @@ public class ManagementAuditRecorder {
 
     @Transactional
     public void recordAssetLibraryUpload(
+            String groupCode,
             String assetKey,
             String assetClass,
             String actorUsername,
@@ -511,12 +512,13 @@ public class ManagementAuditRecorder {
             String contentSha256
     ) {
         assetLibraryAuditRecorder.recordUpload(
-                assetKey, assetClass, actorUsername, actorSummary, contentSha256
+                groupCode, assetKey, assetClass, actorUsername, actorSummary, contentSha256
         );
     }
 
     @Transactional
     public void recordAssetLibraryDisable(
+            String groupCode,
             String assetKey,
             String assetClass,
             String actorUsername,
@@ -524,12 +526,13 @@ public class ManagementAuditRecorder {
             String contentSha256
     ) {
         assetLibraryAuditRecorder.recordDisable(
-                assetKey, assetClass, actorUsername, actorSummary, contentSha256
+                groupCode, assetKey, assetClass, actorUsername, actorSummary, contentSha256
         );
     }
 
     @Transactional
     public void recordAssetLibraryReupload(
+            String groupCode,
             String assetKey,
             String assetClass,
             String actorUsername,
@@ -537,8 +540,13 @@ public class ManagementAuditRecorder {
             String contentSha256
     ) {
         assetLibraryAuditRecorder.recordReupload(
-                assetKey, assetClass, actorUsername, actorSummary, contentSha256
+                groupCode, assetKey, assetClass, actorUsername, actorSummary, contentSha256
         );
+    }
+
+    @Transactional
+    public void recordAssetLibraryMigrateQuarantine(String groupCode, String assetKey, String migrationId) {
+        assetLibraryAuditRecorder.recordMigrateQuarantine(groupCode, assetKey, migrationId);
     }
 
     @Transactional

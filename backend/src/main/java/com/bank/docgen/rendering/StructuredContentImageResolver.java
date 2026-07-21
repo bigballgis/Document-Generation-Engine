@@ -2,13 +2,13 @@ package com.bank.docgen.rendering;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
+import com.bank.docgen.library.service.AssetLibraryStorageKeys;
+import com.bank.docgen.library.service.LibraryAssetActiveLookup;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +19,11 @@ import org.springframework.stereotype.Component;
 /**
  * Resolves image and seal references to embeddable bytes.
  *
- * <p>F1-A3 resolution order: MinIO object storage (by storage key) → explicit demo classpath tier
- * (only when {@link DocgenRenderingProperties#isDemoClasspathImageTierEnabled()}) → fail-closed.
+ * <p>ALGI-C5: when a template owning {@code groupCode} is present in
+ * {@link AssetResolveGroupContext}, resolve succeeds only for ACTIVE catalog
+ * membership under that group and namespaced MinIO keys {@code {groupCode}/{assetKey}}.
+ * Bare / foreign-group MinIO keys never satisfy managed resolve. Demo classpath tier
+ * remains orthogonal (N23 / TPC; prod off).
  */
 @Component
 public class StructuredContentImageResolver {
@@ -30,20 +33,33 @@ public class StructuredContentImageResolver {
 
     private final ObjectStoragePort objectStoragePort;
     private final boolean demoClasspathTierEnabled;
+    private final LibraryAssetActiveLookup catalogLookup;
 
     @Autowired
     public StructuredContentImageResolver(
             ObjectStoragePort objectStoragePort,
-            DocgenRenderingProperties renderingProperties
+            DocgenRenderingProperties renderingProperties,
+            LibraryAssetActiveLookup catalogLookup
     ) {
         this.objectStoragePort = objectStoragePort;
         this.demoClasspathTierEnabled = renderingProperties.isDemoClasspathImageTierEnabled();
+        this.catalogLookup = catalogLookup;
     }
 
     /** Test-only constructor; production wiring uses {@link DocgenRenderingProperties}. */
-    StructuredContentImageResolver(ObjectStoragePort objectStoragePort, boolean demoClasspathTierEnabled) {
+    public StructuredContentImageResolver(ObjectStoragePort objectStoragePort, boolean demoClasspathTierEnabled) {
+        this(objectStoragePort, demoClasspathTierEnabled, null);
+    }
+
+    /** Test-only constructor with optional catalog gate. */
+    public StructuredContentImageResolver(
+            ObjectStoragePort objectStoragePort,
+            boolean demoClasspathTierEnabled,
+            LibraryAssetActiveLookup catalogLookup
+    ) {
         this.objectStoragePort = objectStoragePort;
         this.demoClasspathTierEnabled = demoClasspathTierEnabled;
+        this.catalogLookup = catalogLookup;
     }
 
     public ResolvedImage resolveImageRef(String imageRef) {
@@ -59,12 +75,13 @@ public class StructuredContentImageResolver {
             throw notFound(kind, reference);
         }
         String normalized = reference.trim();
-        for (String storageKey : candidateStorageKeys(normalized)) {
-            ResolvedImage fromStorage = loadFromObjectStorage(storageKey, fileNameForKey(normalized, storageKey));
-            if (fromStorage != null) {
-                return fromStorage;
-            }
+        String groupCode = AssetResolveGroupContext.currentGroupCode();
+
+        if (groupCode != null && !groupCode.isBlank()) {
+            return resolveForGroup(normalized, groupCode.trim(), kind);
         }
+
+        // No owning-group context: managed MinIO bare keys are not authoritative; demo classpath only.
         if (demoClasspathTierEnabled) {
             ResolvedImage fromClasspath = loadFromDemoClasspath(normalized, kind);
             if (fromClasspath != null) {
@@ -80,15 +97,33 @@ public class StructuredContentImageResolver {
         throw notFound(kind, normalized);
     }
 
-    private List<String> candidateStorageKeys(String reference) {
-        List<String> keys = new ArrayList<>();
-        keys.add(reference);
-        if (!reference.contains(".")) {
-            keys.add(reference + ".png");
-            keys.add(reference + ".jpg");
-            keys.add(reference + ".jpeg");
+    private ResolvedImage resolveForGroup(String normalized, String groupCode, ReferenceKind kind) {
+        boolean active = catalogLookup != null && catalogLookup.isActive(groupCode, normalized);
+        if (active) {
+            for (String storageKey : AssetLibraryStorageKeys.namespacedResolvableKeys(groupCode, normalized)) {
+                ResolvedImage fromStorage = loadFromObjectStorage(storageKey, fileNameForKey(normalized, storageKey));
+                if (fromStorage != null) {
+                    return fromStorage;
+                }
+            }
+            throw notFound(kind, normalized);
         }
-        return keys;
+
+        // Catalog miss / DISABLED / cross-group: ignore bare or foreign MinIO; optional demo classpath.
+        if (demoClasspathTierEnabled) {
+            ResolvedImage fromClasspath = loadFromDemoClasspath(normalized, kind);
+            if (fromClasspath != null) {
+                LOG.info(
+                        "Resolved {} reference '{}' from demo classpath tier ({}) after catalog miss for group {}",
+                        kind.logLabel(),
+                        normalized,
+                        DEMO_IMAGE_PREFIX,
+                        groupCode
+                );
+                return fromClasspath;
+            }
+        }
+        throw notFound(kind, normalized);
     }
 
     private ResolvedImage loadFromObjectStorage(String storageKey, String fileName) {

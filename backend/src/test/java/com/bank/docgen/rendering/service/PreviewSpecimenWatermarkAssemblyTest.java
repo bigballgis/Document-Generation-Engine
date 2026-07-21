@@ -128,7 +128,7 @@ class PreviewSpecimenWatermarkAssemblyTest {
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)).thenReturn(List.of());
         when(renderContextPort.resolvePinnedContentStructures(eq(versionId), any())).thenReturn(Map.of());
         when(objectStoragePort.get("masters/m1.docx")).thenReturn(new ByteArrayInputStream(new byte[] {1}));
-        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(assembledDocx);
+        when(docxAssembler.assembleStructured(any(), any(), any(), any(), any())).thenReturn(assembledDocx);
 
         TemplateVersionEntity version = org.mockito.Mockito.mock(TemplateVersionEntity.class);
         when(version.getId()).thenReturn(versionId);
@@ -189,7 +189,7 @@ class PreviewSpecimenWatermarkAssemblyTest {
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)).thenReturn(List.of());
         when(renderContextPort.resolvePinnedContentStructures(eq(versionId), any())).thenReturn(Map.of());
         when(objectStoragePort.get("masters/m1.docx")).thenReturn(new ByteArrayInputStream(new byte[] {1}));
-        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(assembledDocx);
+        when(docxAssembler.assembleStructured(any(), any(), any(), any(), any())).thenReturn(assembledDocx);
 
         TemplateVersionEntity version = org.mockito.Mockito.mock(TemplateVersionEntity.class);
         when(version.getId()).thenReturn(versionId);

@@ -41,10 +41,11 @@ public class AssetLibraryController {
             @RequestParam(required = false) AssetLibraryAssetClass assetClass,
             @RequestParam(required = false) AssetLibraryListStatusFilter status,
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) String groupCode,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        return envelope(request, assetLibraryService.list(session, page, size, assetClass, status, q));
+        return envelope(request, assetLibraryService.list(session, page, size, assetClass, status, q, groupCode));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -53,19 +54,21 @@ public class AssetLibraryController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("assetKey") String assetKey,
             @RequestParam("assetClass") AssetLibraryAssetClass assetClass,
+            @RequestParam(value = "groupCode", required = false) String groupCode,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        return envelope(request, assetLibraryService.upload(session, file, assetKey, assetClass));
+        return envelope(request, assetLibraryService.upload(session, file, assetKey, assetClass, groupCode));
     }
 
     @PostMapping("/{assetKey}/disable")
     public SuccessEnvelope<AssetLibraryAssetView> disable(
             @PathVariable String assetKey,
+            @RequestParam(value = "groupCode", required = false) String groupCode,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        return envelope(request, assetLibraryService.disable(session, assetKey));
+        return envelope(request, assetLibraryService.disable(session, assetKey, groupCode));
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

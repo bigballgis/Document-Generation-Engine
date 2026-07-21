@@ -1722,14 +1722,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List platform asset-library catalog entries (CE-E02)
-         * @description Returns a management `PageView` of shared MinIO asset catalog rows (metadata only; no binary). Default `status=ACTIVE` when omitted; `DISABLED` or `ALL` must be explicit. Optional filters: `assetClass`, `q` (case-insensitive contains on `assetKey` / `originalFileName`). Requires `manageAssetLibrary` / `route.asset-library-management`; `TEMPLATE_TESTER` is ACTIVE-only. Does not change `StructuredContentImageResolver` protocol. Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-010…012).
+         * List group-scoped asset-library catalog entries (CE-E02 + ALGI)
+         * @description Returns a management `PageView` of group-owned MinIO asset catalog rows (metadata only; no binary). Platform-shared catalog is withdrawn (ALGI). Default `status=ACTIVE` when omitted; `DISABLED` or `ALL` must be explicit. Optional filters: `groupCode` (exact), `assetClass`, `q` (case-insensitive contains on `assetKey` / `originalFileName`). Non-GLOBAL actors: results ∩ authorized groups; unauthorized `groupCode` → empty page (no leak). GLOBAL_ADMIN: omit `groupCode` → all groups; with filter → that group only. Each item includes `groupCode`. Requires `manageAssetLibrary` / `route.asset-library-management`; `TEMPLATE_TESTER` is ACTIVE-only. Behavior SoT: docs/behavior/asset-library-group-isolation.md (BDD-ALGI-005…007, 018).
          */
         get: operations["listLibraryAssets"];
         put?: never;
         /**
-         * Upload a platform asset-library object (CE-E02)
-         * @description Multipart upload of an IMAGE / SEAL / OTHER asset. Logical `assetKey` (trim) is the MinIO resolvable object key — must match `^[A-Za-z][A-Za-z0-9._-]{0,127}$`; no forced `library/` prefix. Allowed MIME `image/png` | `image/jpeg`; application-layer max 5 MiB → 422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. ACTIVE key conflict → 409 `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; DISABLED key may re-upload and reactivate (audit `ASSET_LIBRARY_REUPLOAD`). SEAL upload requires GLOBAL_ADMIN / GROUP_ADMIN (fail-closed 403; former TEMPLATE_APPROVER absorbed). Does not modify `StructuredContentImageResolver`. Header `Idempotency-Key` is reserved for a future slice and is **not enforced** in CE-E02 (accepted if present; ignored — no claim/replay/dedup). Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-001…009, 021–022).
+         * Upload a group-scoped asset-library object (CE-E02 + ALGI)
+         * @description Multipart upload of an IMAGE / SEAL / OTHER asset into an owning business `groupCode` (required). Natural identity is `(groupCode, assetKey)` (both trim). Logical `assetKey` must match `^[A-Za-z][A-Za-z0-9._-]{0,127}$`; bindings stay bare `assetKey` (no `groupCode/` prefix). Physical MinIO object key is `{groupCode}/{assetKey}` (± extension candidates). Allowed MIME `image/png` | `image/jpeg`; application-layer max 5 MiB → 422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. Missing/blank `groupCode` → 422 `ASSET_LIBRARY_GROUP_CODE_REQUIRED`. Unauthorized group → 403. ACTIVE conflict **within the same group** → 409 `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; same `(groupCode, assetKey)` when DISABLED may re-upload and reactivate (audit `ASSET_LIBRARY_REUPLOAD`). Same `assetKey` in a different group is allowed. SEAL upload requires GLOBAL_ADMIN / GROUP_ADMIN authorized for that group (fail-closed 403; former TEMPLATE_APPROVER absorbed). Header `Idempotency-Key` is reserved / **not enforced** (accepted if present; ignored). Behavior SoT: docs/behavior/asset-library-group-isolation.md (BDD-ALGI-001…004, 009, 014).
          */
         post: operations["uploadLibraryAsset"];
         delete?: never;
@@ -1748,8 +1748,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Disable a platform asset-library entry (CE-E02)
-         * @description Marks catalog row DISABLED and deletes resolvable MinIO object key(s) so `StructuredContentImageResolver` fail-closes with existing IMAGE_ASSET_NOT_FOUND / SEAL_ASSET_NOT_FOUND. Admin-only (GLOBAL_ADMIN / GROUP_ADMIN). Unauthorized callers receive 403 without existence leakage. Behavior SoT: docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-013…014). Disable of an already-DISABLED key is idempotent HTTP 200 (catalog remains DISABLED; resolvable objects re-checked for deletion).
+         * Disable a group-scoped asset-library entry (CE-E02 + ALGI)
+         * @description Marks catalog identity `(groupCode, assetKey)` DISABLED and deletes namespaced resolvable MinIO object key(s) so template resolve fail-closes with existing IMAGE_ASSET_NOT_FOUND / SEAL_ASSET_NOT_FOUND. `groupCode` is required as a query parameter (locked OpenAPI shape). Admin-only (GLOBAL_ADMIN / GROUP_ADMIN authorized for that group). Unauthorized callers receive 403 without existence leakage. Behavior SoT: docs/behavior/asset-library-group-isolation.md (BDD-ALGI-008…009). Disable of an already-DISABLED identity is idempotent HTTP 200 (catalog remains DISABLED; resolvable objects re-checked for deletion).
          */
         post: operations["disableLibraryAsset"];
         delete?: never;
@@ -4405,23 +4405,25 @@ export interface components {
             result: components["schemas"]["LegalHoldView"];
         };
         /**
-         * @description CE-E02 platform asset class (UPPER_SNAKE_CASE). SEAL is image seal/signature asset, not cryptographic e-seal.
+         * @description CE-E02 / ALGI asset class (UPPER_SNAKE_CASE). SEAL is image seal/signature asset, not cryptographic e-seal.
          * @enum {string}
          */
         AssetLibraryAssetClass: "IMAGE" | "SEAL" | "OTHER";
         /**
-         * @description CE-E02 catalog row status.
+         * @description CE-E02 / ALGI catalog row status.
          * @enum {string}
          */
         AssetLibraryAssetStatus: "ACTIVE" | "DISABLED";
         /**
-         * @description List filter for CE-E02. Omit/`ACTIVE` defaults to ACTIVE-only; `ALL` returns ACTIVE ∪ DISABLED.
+         * @description List filter for CE-E02 / ALGI. Omit/`ACTIVE` defaults to ACTIVE-only; `ALL` returns ACTIVE ∪ DISABLED.
          * @enum {string}
          */
         AssetLibraryListStatusFilter: "ACTIVE" | "DISABLED" | "ALL";
-        /** @description CE-E02 catalog metadata row. Binary bytes are never returned. `assetKey` is the MinIO-resolvable object key consumed unchanged by StructuredContentImageResolver. */
+        /** @description Group-scoped catalog metadata row (CE-E02 + ALGI). Binary bytes are never returned. Natural identity is `(groupCode, assetKey)`. `assetKey` is the logical binding key used bare in template `imageRef`/`sealRef`; physical MinIO object key is `{groupCode}/{assetKey}` (± extension candidates). */
         AssetLibraryAssetView: {
-            /** @description Logical key ≡ storage object key (trim on write). */
+            /** @description Owning business groupCode (trim on write; hard isolation v1). */
+            groupCode: string;
+            /** @description Logical binding key (trim on write). Must not embed a `groupCode/` prefix; storage is namespaced separately. */
             assetKey: string;
             assetClass: components["schemas"]["AssetLibraryAssetClass"];
             status: components["schemas"]["AssetLibraryAssetStatus"];
@@ -4439,14 +4441,14 @@ export interface components {
             /** Format: date-time */
             uploadedAt: string;
         };
-        /** @description CE-E02 list envelope for `GET /api/management/v1/library/assets`. */
+        /** @description Group-scoped list envelope for `GET /api/management/v1/library/assets` (CE-E02 + ALGI). */
         AssetLibraryAssetPageResponse: {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["PageView"] & {
                 content: components["schemas"]["AssetLibraryAssetView"][];
             };
         };
-        /** @description CE-E02 single-asset envelope (upload / disable). */
+        /** @description Group-scoped single-asset envelope (upload / disable; CE-E02 + ALGI). */
         AssetLibraryAssetResponse: {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["AssetLibraryAssetView"];
@@ -4459,6 +4461,8 @@ export interface components {
             file: string;
             assetKey: string;
             assetClass: components["schemas"]["AssetLibraryAssetClass"];
+            /** @description Owning business groupCode (required). Actor must be authorized for this group (GLOBAL always). Missing/blank → 422 `ASSET_LIBRARY_GROUP_CODE_REQUIRED`. */
+            groupCode: string;
         };
         /** @description Optional filters for CE-E03 full-library export. Empty object or omitted body = all authorized export-eligible templates. Behavior SoT: docs/behavior/ce-e03-full-library-export.md (E03-C4, E03-C5, E03-C12); Wave 7 promotion profile: docs/behavior/sys-norm-promotion-pack.md (PP-C3). */
         LibraryExportRequest: {
@@ -5181,7 +5185,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "RENDERING" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "PRODUCTION_REISSUE_REASON_REQUIRED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED" | "LOCALE_VARIANT_CONFLICT" | "TEMPLATE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_RULE_INVALID" | "COMPOSITION_INCLUSION_UNSATISFIED" | "CONTENT_MODULE_JURISDICTION_MISMATCH" | "LEGAL_ENTITY_UNKNOWN" | "LEGAL_ENTITY_INACTIVE" | "DOCUMENT_BRAND_INACTIVE" | "DOCUMENT_BRAND_NOT_ALLOWED" | "DOCUMENT_BRAND_UNKNOWN" | "DOCUMENT_BRAND_SURFACE_RETIRED" | "LEGAL_ENTITY_SURFACE_RETIRED" | "BULK_REPIN_TARGET_INVALID" | "CONTENT_MODULE_NESTING_CYCLE" | "CONTENT_MODULE_NESTING_DEPTH_EXCEEDED" | "CONTENT_MODULE_NESTING_TARGET_UNRESOLVED" | "CONTENT_MODULE_NESTING_STRUCTURE_INVALID";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "PDF_ARCHIVAL_ENCRYPTION_MUTEX" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "VARIABLE_VALIDATION_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "PDF_CONVERSION_CAPACITY_EXCEEDED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "ORIGINAL_BATCH_NOT_FOUND" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED" | "VARIABLE_COMPUTE_FAILED" | "TEMPLATE_VALIDATION_FAILED" | "OOXML_VALIDATION_FAILED" | "RELEASE_BUNDLE_SNAPSHOT_UNAVAILABLE" | "RELEASE_BUNDLE_HASH_MISMATCH" | "PINNED_MASTER_UNAVAILABLE" | "IMPORT_DEPENDENCIES_UNSATISFIED" | "INVOCATION_KIND_NOT_REGENERABLE" | "SPECIMEN_WATERMARK_FAILED" | "PRODUCTION_REISSUE_REASON_REQUIRED" | "INVOCATION_RECORD_EXPIRED" | "ASSET_LIBRARY_GROUP_CODE_REQUIRED" | "ASSET_LIBRARY_ASSET_KEY_INVALID" | "ASSET_LIBRARY_ASSET_KEY_CONFLICT" | "ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED" | "ASSET_LIBRARY_CONTENT_TYPE_MISMATCH" | "ASSET_LIBRARY_PAYLOAD_TOO_LARGE" | "ASSET_LIBRARY_ASSET_NOT_FOUND" | "LEGAL_HOLD_NOT_FOUND" | "LEGAL_HOLD_ALREADY_RELEASED" | "LOCALE_VARIANT_CONFLICT" | "TEMPLATE_LOCALE_MISMATCH" | "COMPOSITION_INCLUSION_RULE_INVALID" | "COMPOSITION_INCLUSION_UNSATISFIED" | "CONTENT_MODULE_JURISDICTION_MISMATCH" | "LEGAL_ENTITY_UNKNOWN" | "LEGAL_ENTITY_INACTIVE" | "DOCUMENT_BRAND_INACTIVE" | "DOCUMENT_BRAND_NOT_ALLOWED" | "DOCUMENT_BRAND_UNKNOWN" | "DOCUMENT_BRAND_SURFACE_RETIRED" | "LEGAL_ENTITY_SURFACE_RETIRED" | "BULK_REPIN_TARGET_INVALID" | "CONTENT_MODULE_NESTING_CYCLE" | "CONTENT_MODULE_NESTING_DEPTH_EXCEEDED" | "CONTENT_MODULE_NESTING_TARGET_UNRESOLVED" | "CONTENT_MODULE_NESTING_STRUCTURE_INVALID";
     };
     responses: {
         /** @description Async task accepted. */
@@ -8760,6 +8764,8 @@ export interface operations {
                 page?: components["parameters"]["CatalogPageQuery"];
                 /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
                 size?: components["parameters"]["CatalogSizeQuery"];
+                /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
+                groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
                 /** @description Optional exact asset class filter. */
                 assetClass?: components["schemas"]["AssetLibraryAssetClass"];
                 /**
@@ -8779,7 +8785,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Paginated asset catalog metadata. */
+            /** @description Paginated asset catalog metadata (items include groupCode). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8797,7 +8803,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: {
-                /** @description Reserved / not enforced in CE-E02. May be sent on the management upload path; the server ignores it (no idempotency store, replay, or conflict semantics). */
+                /** @description Reserved / not enforced. May be sent on the management upload path; the server ignores it (no idempotency store, replay, or conflict semantics). */
                 "Idempotency-Key"?: string;
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
                 "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
@@ -8811,7 +8817,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Asset stored ACTIVE; catalog row returned (no binary). */
+            /** @description Asset stored ACTIVE under owning groupCode; catalog row returned (includes groupCode; no binary). */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -8822,7 +8828,7 @@ export interface operations {
             };
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
-            /** @description ACTIVE `assetKey` already exists (`ASSET_LIBRARY_ASSET_KEY_CONFLICT` / `api.error.assetLibrary.assetKeyConflict`). */
+            /** @description ACTIVE `(groupCode, assetKey)` already exists (`ASSET_LIBRARY_ASSET_KEY_CONFLICT` / `api.error.assetLibrary.assetKeyConflict`). */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -8831,7 +8837,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Validation failure (invalid key, unsupported/mismatched content type, empty file, or application-layer payload > 5 MiB). */
+            /** @description Validation failure (missing groupCode, invalid key, unsupported/mismatched content type, empty file, or application-layer payload > 5 MiB). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8845,20 +8851,23 @@ export interface operations {
     };
     disableLibraryAsset: {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Owning business groupCode for the asset identity (trim). Required to disambiguate composite uniqueness `(groupCode, assetKey)`. */
+                groupCode: string;
+            };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
                 "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
             };
             path: {
-                /** @description Logical asset key (same grammar as upload). */
+                /** @description Logical asset key (same grammar as upload; bare binding key). */
                 assetKey: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Asset disabled; catalog metadata returned (no binary). */
+            /** @description Asset disabled; catalog metadata returned (includes groupCode; no binary). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8869,7 +8878,7 @@ export interface operations {
             };
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
-            /** @description Key not found for authorized admin (`ASSET_LIBRARY_ASSET_NOT_FOUND` / `api.error.assetLibrary.assetNotFound`). */
+            /** @description Identity not found for authorized admin (`ASSET_LIBRARY_ASSET_NOT_FOUND` / `api.error.assetLibrary.assetNotFound`). */
             404: {
                 headers: {
                     [name: string]: unknown;

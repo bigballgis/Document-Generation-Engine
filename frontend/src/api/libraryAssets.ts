@@ -14,6 +14,10 @@ export async function listLibraryAssets(
   options: LibraryAssetListQueryOptions = {},
 ): Promise<PageView<LibraryAssetView>> {
   const params: Record<string, string | number> = { page, size }
+  const groupCode = options.groupCode?.trim()
+  if (groupCode) {
+    params.groupCode = groupCode
+  }
   if (options.assetClass) {
     params.assetClass = options.assetClass
   }
@@ -31,11 +35,13 @@ export async function listLibraryAssets(
 }
 
 export async function uploadLibraryAsset(payload: {
+  groupCode: string
   assetKey: string
   assetClass: LibraryAssetClass
   file: File
 }): Promise<LibraryAssetView> {
   const formData = new FormData()
+  formData.append('groupCode', payload.groupCode.trim())
   formData.append('assetKey', payload.assetKey)
   formData.append('assetClass', payload.assetClass)
   formData.append('file', payload.file)
@@ -46,9 +52,14 @@ export async function uploadLibraryAsset(payload: {
   return unwrapEnvelope(response.data)
 }
 
-export async function disableLibraryAsset(assetKey: string): Promise<LibraryAssetView> {
+export async function disableLibraryAsset(
+  assetKey: string,
+  groupCode: string,
+): Promise<LibraryAssetView> {
   const response = await http.post<ApiEnvelope<LibraryAssetView>>(
     `/library/assets/${encodeURIComponent(assetKey)}/disable`,
+    null,
+    { params: { groupCode: groupCode.trim() } },
   )
   return unwrapEnvelope(response.data)
 }

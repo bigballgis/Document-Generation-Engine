@@ -163,7 +163,8 @@ public class InvocationRegenerationAssemblySupport {
                     masterStream,
                     bindingJson,
                     resolvedVariables,
-                    pinnedModuleStructures
+                    pinnedModuleStructures,
+                    template.getGroupCode()
             );
         } catch (DocxAssemblyException | RenderingOperationException ex) {
             throw ex;

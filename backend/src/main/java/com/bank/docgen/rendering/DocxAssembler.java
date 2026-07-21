@@ -84,7 +84,7 @@ public class DocxAssembler {
     }
 
     public String renderStructuredContent(String structuredContentJson, Map<String, Object> variables) {
-        return renderStructuredContent(structuredContentJson, variables, Map.of());
+        return renderStructuredContent(structuredContentJson, variables, Map.of(), null);
     }
 
     public String renderStructuredContent(
@@ -92,23 +92,34 @@ public class DocxAssembler {
             Map<String, Object> variables,
             Map<String, String> pinnedModuleStructures
     ) {
-        StructuredContentDocxWriter writer = new StructuredContentDocxWriter(
-                objectMapper,
-                platformMetadataCatalog,
-                imageResolver
-        );
-        return writer.renderPlainTextProjection(
-                structuredContentJson,
-                variables,
-                pinnedModuleStructures
-        );
+        return renderStructuredContent(structuredContentJson, variables, pinnedModuleStructures, null);
+    }
+
+    public String renderStructuredContent(
+            String structuredContentJson,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures,
+            String owningGroupCode
+    ) {
+        return AssetResolveGroupContext.callWithGroup(owningGroupCode, () -> {
+            StructuredContentDocxWriter writer = new StructuredContentDocxWriter(
+                    objectMapper,
+                    platformMetadataCatalog,
+                    imageResolver
+            );
+            return writer.renderPlainTextProjection(
+                    structuredContentJson,
+                    variables,
+                    pinnedModuleStructures
+            );
+        });
     }
 
     public Map<String, String> buildAnchorReplacements(
             Map<String, String> bindingJsonByAnchor,
             Map<String, Object> variables
     ) {
-        return buildAnchorReplacements(bindingJsonByAnchor, variables, Map.of());
+        return buildAnchorReplacements(bindingJsonByAnchor, variables, Map.of(), null);
     }
 
     public Map<String, String> buildAnchorReplacements(
@@ -116,10 +127,24 @@ public class DocxAssembler {
             Map<String, Object> variables,
             Map<String, String> pinnedModuleStructures
     ) {
+        return buildAnchorReplacements(bindingJsonByAnchor, variables, pinnedModuleStructures, null);
+    }
+
+    public Map<String, String> buildAnchorReplacements(
+            Map<String, String> bindingJsonByAnchor,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures,
+            String owningGroupCode
+    ) {
         return bindingJsonByAnchor.entrySet().stream()
                 .collect(java.util.stream.Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> renderStructuredContent(entry.getValue(), variables, pinnedModuleStructures)
+                        entry -> renderStructuredContent(
+                                entry.getValue(),
+                                variables,
+                                pinnedModuleStructures,
+                                owningGroupCode
+                        )
                 ));
     }
 
@@ -133,9 +158,25 @@ public class DocxAssembler {
             Map<String, Object> variables,
             Map<String, String> pinnedModuleStructures
     ) {
+        return assembleStructured(masterDocx, bindingJsonByAnchor, variables, pinnedModuleStructures, null);
+    }
+
+    public byte[] assembleStructured(
+            InputStream masterDocx,
+            Map<String, String> bindingJsonByAnchor,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures,
+            String owningGroupCode
+    ) {
         try {
             byte[] masterBytes = masterDocx.readAllBytes();
-            return assembleStructuredFromBytes(masterBytes, bindingJsonByAnchor, variables, pinnedModuleStructures);
+            return assembleStructuredFromBytes(
+                    masterBytes,
+                    bindingJsonByAnchor,
+                    variables,
+                    pinnedModuleStructures,
+                    owningGroupCode
+            );
         } catch (IOException ex) {
             throw new DocxAssemblyException(ex);
         }
@@ -147,41 +188,59 @@ public class DocxAssembler {
             Map<String, Object> variables,
             Map<String, String> pinnedModuleStructures
     ) {
-        lastAssemblyFidelityWarnings.clear();
-        MasterStyleCatalog assemblyCatalog = resolveAssemblyCatalog(masterBytes);
-        StructuredContentDocxWriter writer = new StructuredContentDocxWriter(
-                objectMapper,
-                assemblyCatalog,
-                imageResolver
+        return assembleStructuredFromBytes(
+                masterBytes,
+                bindingJsonByAnchor,
+                variables,
+                pinnedModuleStructures,
+                null
         );
-        try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(masterBytes));
-                ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            DocxMasterLayoutFillerSupport.removeFillerParagraphs(document, MASTER_FILLER_MARKER);
-            DocxStructuredAnchorSupport.replaceInDocumentBody(
-                    document,
-                    bindingJsonByAnchor,
-                    variables,
-                    pinnedModuleStructures,
-                    writer,
-                    ANCHOR_PATTERN
+    }
+
+    public byte[] assembleStructuredFromBytes(
+            byte[] masterBytes,
+            Map<String, String> bindingJsonByAnchor,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures,
+            String owningGroupCode
+    ) {
+        return AssetResolveGroupContext.callWithGroup(owningGroupCode, () -> {
+            lastAssemblyFidelityWarnings.clear();
+            MasterStyleCatalog assemblyCatalog = resolveAssemblyCatalog(masterBytes);
+            StructuredContentDocxWriter writer = new StructuredContentDocxWriter(
+                    objectMapper,
+                    assemblyCatalog,
+                    imageResolver
             );
-            DocxStructuredAnchorSupport.replaceInTablesHeadersAndFooters(
-                    document,
-                    bindingJsonByAnchor,
-                    variables,
-                    pinnedModuleStructures,
-                    writer,
-                    ANCHOR_PATTERN
-            );
-            DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
-            if (!assemblyCatalog.hasDocDefaults()) {
-                lastAssemblyFidelityWarnings.add("MASTER_STYLE_FALLBACK");
+            try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(masterBytes));
+                    ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+                DocxMasterLayoutFillerSupport.removeFillerParagraphs(document, MASTER_FILLER_MARKER);
+                DocxStructuredAnchorSupport.replaceInDocumentBody(
+                        document,
+                        bindingJsonByAnchor,
+                        variables,
+                        pinnedModuleStructures,
+                        writer,
+                        ANCHOR_PATTERN
+                );
+                DocxStructuredAnchorSupport.replaceInTablesHeadersAndFooters(
+                        document,
+                        bindingJsonByAnchor,
+                        variables,
+                        pinnedModuleStructures,
+                        writer,
+                        ANCHOR_PATTERN
+                );
+                DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
+                if (!assemblyCatalog.hasDocDefaults()) {
+                    lastAssemblyFidelityWarnings.add("MASTER_STYLE_FALLBACK");
+                }
+                document.write(output);
+                return validatedBytes(output.toByteArray());
+            } catch (IOException ex) {
+                throw new DocxAssemblyException(ex);
             }
-            document.write(output);
-            return validatedBytes(output.toByteArray());
-        } catch (IOException ex) {
-            throw new DocxAssemblyException(ex);
-        }
+        });
     }
 
     /**

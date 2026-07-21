@@ -26,8 +26,8 @@ This view defines storage responsibility boundaries for durable data, cache data
 
 | Storage Area | Owns | Must Not Store |
 | --- | --- | --- |
-| Relational Database | Master metadata, template metadata, lifecycle state, API policies, idempotency records, task metadata, audit records, release summaries, **Asset Library catalog** (`library_asset` — CE-E02) | API credential secrets in plaintext, output encryption passwords, raw sensitive template variable values unless explicitly approved and protected |
-| Object Storage or File Service | DOCX masters, generated DOCX/PDF files, previews, large rendering artifacts, temporary outputs subject to retention rules, **ACTIVE Asset Library bytes** keyed by `assetKey` (CE-E02) | Authorization decisions as the only source of truth, unbounded retention without policy |
+| Relational Database | Master metadata, template metadata, lifecycle state, API policies, idempotency records, task metadata, audit records, release summaries, **Asset Library catalog** (`library_asset` — CE-E02 + ALGI; `group_code` + unique `(group_code, asset_key)`) | API credential secrets in plaintext, output encryption passwords, raw sensitive template variable values unless explicitly approved and protected |
+| Object Storage or File Service | DOCX masters, generated DOCX/PDF files, previews, large rendering artifacts, temporary outputs subject to retention rules, **ACTIVE Asset Library bytes** keyed by group-namespaced `{groupCode}/{assetKey}` (CE-E02 + ALGI) | Authorization decisions as the only source of truth, unbounded retention without policy |
 | Redis or Cache Platform | AD Group successful resolution cache, short-lived coordination data, short-lived download/task acceleration data where approved | Failed AD Group resolution cache, expired authorization data as an authorization basis, sensitive plaintext passwords |
 | Kafka | Task identifiers, event identifiers, safe summaries, policy versions, trace metadata, retry/dead-letter messages | Full request bodies, raw variables, generated documents, full download URLs, API credential secrets, encryption passwords, full AD Group member lists |
 | Logs and Traces | Operational diagnostics, trace IDs, safe summaries, error categories | Sensitive plaintext, full request bodies, generated document content, encryption passwords |
@@ -62,16 +62,17 @@ at the Ingress.
 | ConfigMap / Secret wiring | [k8s-config-secrets.md](../../deploy/k8s-config-secrets.md) |
 | Service DNS and external endpoints | [k8s-ingress-tls.md](../../deploy/k8s-ingress-tls.md) |
 
-## Confirmed — Asset Library catalog storage (CE-E02)
+## Confirmed — Asset Library catalog storage (CE-E02 + ALGI)
 
-**Closed (2026-07-16):** platform shared Asset Library catalog ownership for CE-E02.
+**Closed (2026-07-16) / amended (2026-07-22 ALGI):** Asset Library catalog is **group-scoped** (platform-shared catalog **withdrawn**).
 
-- **Owns:** relational catalog row in `library_asset` (metadata: `asset_key`, `asset_class`, `status`, content type/size/sha256, upload actor/time) and the MinIO object bytes for **ACTIVE** keys (logical `assetKey` ≡ resolvable object key).
-- **Does not own:** `StructuredContentImageResolver` protocol, authorization/permission policy source of truth, or generation orchestration.
-- **PK exception (intentional):** `library_asset` uses natural-key PK `asset_key` (not UUID). Aligns catalog identity with the resolvable MinIO key grammar (`E02-C1` / `E02-C2`); UUID surrogate is out of scope for CE-E02.
-- Disable removes resolvable object bytes and marks `DISABLED`; binary content is not retained as a durable archive in this slice.
+- **Owns:** relational catalog row in `library_asset` (metadata: `group_code`, `asset_key`, `asset_class`, `status`, content type/size/sha256, upload actor/time) and the MinIO object bytes for **ACTIVE** identities under namespaced key `{groupCode}/{assetKey}` (± extension candidates).
+- **Does not own:** authorization/permission policy source of truth, or generation orchestration. Binding refs remain bare `assetKey` (no `groupCode/` prefix in template bindings).
+- **Identity exception (intentional):** unique natural identity `(group_code, asset_key)` (not UUID). Logical binding key grammar unchanged (`E02-C2`); physical object key is group-namespaced (**ALGI-C4** amends historical bare-key ≡ storage-key).
+- Disable / ALGI-M1 quarantine removes resolvable object bytes (legacy bare keys and namespaced keys as applicable) and marks `DISABLED`; binary content is not retained as a durable archive in this slice.
+- Resolve gate: ACTIVE catalog membership in the **template's** `groupCode` is required; foreign-group or bare MinIO presence alone must not succeed.
 
-Behavior SoT: [ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md). Module boundary: [module-boundaries.md](./module-boundaries.md).
+Behavior SoT: [asset-library-group-isolation.md](../behavior/asset-library-group-isolation.md); historical + §15 amendment: [ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md). Module boundary: [module-boundaries.md](./module-boundaries.md).
 
 ## Confirmed — template test data PII storage (CE-G03)
 

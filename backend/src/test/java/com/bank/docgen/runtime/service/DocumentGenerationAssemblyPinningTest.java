@@ -204,7 +204,7 @@ class DocumentGenerationAssemblyPinningTest {
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(VERSION_ID)).thenReturn(List.of());
         when(contentModuleReferenceService.resolvePinnedContentStructures(VERSION_ID)).thenReturn(java.util.Map.of());
         when(objectStoragePort.get("masters/dev-live.docx")).thenReturn(new ByteArrayInputStream(docx));
-        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(docx);
+        when(docxAssembler.assembleStructured(any(), any(), any(), any(), any())).thenReturn(docx);
         when(renderProfileService.resolveEffectiveProfile(any(), any())).thenReturn(renderProfile());
         stubFinalizeArtifact(docx);
         when(versionFidelityWarningService.resolveWarningCodes(any(), eq(MASTER_ID))).thenReturn(List.of());
@@ -228,7 +228,7 @@ class DocumentGenerationAssemblyPinningTest {
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(VERSION_ID)).thenReturn(List.of());
         when(contentModuleReferenceService.resolvePinnedContentStructures(VERSION_ID)).thenReturn(java.util.Map.of());
         when(objectStoragePort.get(storageKey)).thenReturn(new ByteArrayInputStream(docx));
-        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(docx);
+        when(docxAssembler.assembleStructured(any(), any(), any(), any(), any())).thenReturn(docx);
         when(renderProfileService.resolveEffectiveProfile(any(), any())).thenReturn(renderProfile());
         stubFinalizeArtifact(docx);
         when(versionFidelityWarningService.resolveWarningCodes(any(), eq(MASTER_ID))).thenReturn(List.of());

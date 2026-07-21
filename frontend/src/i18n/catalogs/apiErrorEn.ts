@@ -327,6 +327,7 @@ export const apiErrorEn = {
     accessDenied: "You do not have permission to access the asset library.",
     assetKeyInvalid: "The asset key is invalid.",
     assetKeyConflict: "An active asset with this key already exists.",
+    groupCodeRequired: "A group code is required to upload or disable an asset library entry.",
     contentTypeUnsupported: "The uploaded content type is not supported.",
     contentTypeMismatch: "The uploaded content type does not match the file contents.",
     payloadTooLarge: "The uploaded file exceeds the maximum allowed size of 5 MiB.",

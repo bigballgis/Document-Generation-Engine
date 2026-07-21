@@ -2019,3 +2019,44 @@ export async function captureReminderTimingIaLocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** Asset library group isolation / #154 — list filter + upload group @1440 dual-brand. */
+export const ASSET_LIBRARY_GROUP_ISOLATION_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'asset-library-group-isolation',
+)
+export const ASSET_LIBRARY_GROUP_ISOLATION_SCREENSHOT_DIR = path.join(
+  ASSET_LIBRARY_GROUP_ISOLATION_EVIDENCE_ROOT,
+  'screenshots',
+)
+export const ASSET_LIBRARY_GROUP_ISOLATION_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureAssetLibraryGroupIsolationEvidenceDirs(): void {
+  fs.mkdirSync(ASSET_LIBRARY_GROUP_ISOLATION_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function assetLibraryGroupIsolationScreenshotPath(filename: string): string {
+  return path.join(ASSET_LIBRARY_GROUP_ISOLATION_SCREENSHOT_DIR, filename)
+}
+
+export async function captureAssetLibraryGroupIsolationScreenshot(
+  page: Page,
+  filename: string,
+): Promise<string> {
+  ensureAssetLibraryGroupIsolationEvidenceDirs()
+  const target = assetLibraryGroupIsolationScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureAssetLibraryGroupIsolationLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureAssetLibraryGroupIsolationEvidenceDirs()
+  const target = assetLibraryGroupIsolationScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

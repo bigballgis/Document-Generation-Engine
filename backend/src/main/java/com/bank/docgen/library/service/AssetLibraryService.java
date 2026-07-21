@@ -3,6 +3,7 @@ package com.bank.docgen.library.service;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.authorization.management.api.CatalogPageSupport;
 import com.bank.docgen.authorization.management.api.PageView;
+import com.bank.docgen.authorization.management.persistence.BusinessGroupRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
@@ -18,11 +19,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,6 +42,7 @@ public class AssetLibraryService {
     private final LibraryAssetRepository repository;
     private final ObjectStoragePort objectStoragePort;
     private final GroupAccessService groupAccessService;
+    private final BusinessGroupRepository businessGroupRepository;
     private final ManagementAuditRecorder auditRecorder;
     private final Clock clock;
 
@@ -45,12 +50,14 @@ public class AssetLibraryService {
             LibraryAssetRepository repository,
             ObjectStoragePort objectStoragePort,
             GroupAccessService groupAccessService,
+            BusinessGroupRepository businessGroupRepository,
             ManagementAuditRecorder auditRecorder,
             Clock clock
     ) {
         this.repository = repository;
         this.objectStoragePort = objectStoragePort;
         this.groupAccessService = groupAccessService;
+        this.businessGroupRepository = businessGroupRepository;
         this.auditRecorder = auditRecorder;
         this.clock = clock;
     }
@@ -62,22 +69,38 @@ public class AssetLibraryService {
             Integer size,
             AssetLibraryAssetClass assetClass,
             AssetLibraryListStatusFilter statusFilter,
-            String q
+            String q,
+            String groupCodeRaw
     ) {
         requireListAccess(session);
         int normalizedPage = CatalogPageSupport.normalizePage(page);
         int normalizedSize = CatalogPageSupport.normalizeSize(size);
         AssetLibraryAssetStatus status = resolveListStatus(session, statusFilter);
         String query = CatalogPageSupport.blankToNull(q);
+        String groupFilter = CatalogPageSupport.blankToNull(groupCodeRaw == null ? null : groupCodeRaw.trim());
         Pageable pageable = PageRequest.of(
                 normalizedPage,
                 normalizedSize,
                 Sort.by(Sort.Direction.DESC, "uploadedAt")
         );
-        // Split null-q vs non-null-q: Postgres+Hibernate null String binds as bytea inside LOWER(CONCAT).
+
+        boolean global = session.roles().contains("GLOBAL_ADMIN");
+        boolean restrictGroups = !global;
+        Collection<String> accessibleGroups = global ? List.of("__unused__") : session.authorizedGroupCodes();
+        if (restrictGroups) {
+            if (accessibleGroups.isEmpty()) {
+                return emptyPage(normalizedPage, normalizedSize);
+            }
+            if (groupFilter != null && !accessibleGroups.contains(groupFilter)) {
+                return emptyPage(normalizedPage, normalizedSize);
+            }
+        }
+
         Page<LibraryAssetEntity> result = query == null
-                ? repository.search(status, assetClass, pageable)
-                : repository.searchByQuery(status, assetClass, query, pageable);
+                ? repository.search(status, assetClass, groupFilter, restrictGroups, accessibleGroups, pageable)
+                : repository.searchByQuery(
+                        status, assetClass, groupFilter, restrictGroups, accessibleGroups, query, pageable
+                );
         return new PageView<>(
                 result.getContent().stream().map(this::toView).toList(),
                 normalizedPage,
@@ -92,14 +115,18 @@ public class AssetLibraryService {
             ManagementSessionClaims session,
             MultipartFile file,
             String assetKeyRaw,
-            AssetLibraryAssetClass assetClass
+            AssetLibraryAssetClass assetClass,
+            String groupCodeRaw
     ) {
         requireUploadAccess(session, assetClass);
+        String groupCode = requireExistingAuthorizedGroup(session, groupCodeRaw);
         String assetKey = AssetLibraryUploadValidator.normalizeAssetKey(assetKeyRaw);
         AssetLibraryUploadValidator.ValidatedPayload payload = AssetLibraryUploadValidator.validateFile(file);
         warnIfPrefixMismatch(assetKey, assetClass);
 
-        LibraryAssetEntity existing = repository.findById(assetKey).orElse(null);
+        LibraryAssetEntity existing = repository
+                .findByGroupCodeAndAssetKeyAndDeletedAtIsNull(groupCode, assetKey)
+                .orElse(null);
         boolean reupload = false;
         if (existing != null) {
             if (existing.getStatus() == AssetLibraryAssetStatus.ACTIVE) {
@@ -113,7 +140,8 @@ public class AssetLibraryService {
 
         Instant now = clock.instant();
         String sha256 = sha256Hex(payload.bytes());
-        storeObject(assetKey, payload.bytes(), payload.contentType());
+        String objectKey = AssetLibraryStorageKeys.namespacedKey(groupCode, assetKey);
+        storeObject(objectKey, payload.bytes(), payload.contentType());
 
         LibraryAssetEntity saved;
         if (reupload) {
@@ -128,6 +156,7 @@ public class AssetLibraryService {
             );
             saved = repository.save(existing);
             auditRecorder.recordAssetLibraryReupload(
+                    groupCode,
                     assetKey,
                     assetClass.name(),
                     session.username(),
@@ -136,6 +165,7 @@ public class AssetLibraryService {
             );
         } else {
             saved = repository.save(new LibraryAssetEntity(
+                    groupCode,
                     assetKey,
                     assetClass,
                     AssetLibraryAssetStatus.ACTIVE,
@@ -147,6 +177,7 @@ public class AssetLibraryService {
                     now
             ));
             auditRecorder.recordAssetLibraryUpload(
+                    groupCode,
                     assetKey,
                     assetClass.name(),
                     session.username(),
@@ -158,12 +189,13 @@ public class AssetLibraryService {
     }
 
     /**
-     * SYS-NORM Wave 7 / PP-C8 — materialize an asset binary from a promotion pack in the
-     * same transaction as template import. Fail-closed on conflict with an ACTIVE key.
+     * SYS-NORM Wave 7 / PP-C8 — materialize an asset binary from a promotion pack into the
+     * <strong>target template group</strong> (ALGI hard isolation; no platform-shared reintroduction).
      */
     @Transactional
     public AssetLibraryAssetView materializeImportedAsset(
             ManagementSessionClaims session,
+            String groupCodeRaw,
             String assetKeyRaw,
             AssetLibraryAssetClass assetClass,
             byte[] bytes,
@@ -171,6 +203,7 @@ public class AssetLibraryService {
             String originalFileName
     ) {
         requireUploadAccess(session, assetClass == null ? AssetLibraryAssetClass.OTHER : assetClass);
+        String groupCode = requireExistingAuthorizedGroup(session, groupCodeRaw);
         String assetKey = AssetLibraryUploadValidator.normalizeAssetKey(assetKeyRaw);
         if (bytes == null || bytes.length == 0) {
             throw new AssetLibraryValidationException(
@@ -188,15 +221,16 @@ public class AssetLibraryService {
         String resolvedType = contentType == null || contentType.isBlank() ? "application/octet-stream" : contentType;
         String fileName = originalFileName == null || originalFileName.isBlank() ? assetKey : originalFileName;
 
-        LibraryAssetEntity existing = repository.findById(assetKey).orElse(null);
+        LibraryAssetEntity existing = repository
+                .findByGroupCodeAndAssetKeyAndDeletedAtIsNull(groupCode, assetKey)
+                .orElse(null);
         if (existing != null && existing.getStatus() == AssetLibraryAssetStatus.ACTIVE) {
-            // Already present — treat as idempotent success for import materialize.
             return toView(existing);
         }
 
         Instant now = clock.instant();
         String sha256 = sha256Hex(bytes);
-        storeObject(assetKey, bytes, resolvedType);
+        storeObject(AssetLibraryStorageKeys.namespacedKey(groupCode, assetKey), bytes, resolvedType);
         LibraryAssetEntity saved;
         if (existing != null) {
             existing.reactivate(
@@ -211,6 +245,7 @@ public class AssetLibraryService {
             saved = repository.save(existing);
         } else {
             saved = repository.save(new LibraryAssetEntity(
+                    groupCode,
                     assetKey,
                     resolvedClass,
                     AssetLibraryAssetStatus.ACTIVE,
@@ -226,15 +261,19 @@ public class AssetLibraryService {
     }
 
     @Transactional
-    public AssetLibraryAssetView disable(ManagementSessionClaims session, String assetKeyRaw) {
+    public AssetLibraryAssetView disable(
+            ManagementSessionClaims session,
+            String assetKeyRaw,
+            String groupCodeRaw
+    ) {
         requireDisableAccess(session);
+        String groupCode = requireExistingAuthorizedGroup(session, groupCodeRaw);
         String assetKey = AssetLibraryUploadValidator.normalizeAssetKey(assetKeyRaw);
-        LibraryAssetEntity entity = repository.findById(assetKey)
+        LibraryAssetEntity entity = repository
+                .findByGroupCodeAndAssetKeyAndDeletedAtIsNull(groupCode, assetKey)
                 .orElseThrow(() -> new AssetLibraryNotFoundException("api.error.assetLibrary.assetNotFound"));
 
-        // E02-C6 fail-closed: remove resolvable objects first; only then commit DISABLED.
-        // Storage errors / post-delete existence must abort before catalog status changes.
-        deleteResolvableObjects(assetKey);
+        deleteResolvableObjects(groupCode, assetKey);
 
         if (entity.getStatus() == AssetLibraryAssetStatus.DISABLED) {
             return toView(entity);
@@ -244,6 +283,7 @@ public class AssetLibraryService {
         entity.markDisabled(now);
         LibraryAssetEntity saved = repository.save(entity);
         auditRecorder.recordAssetLibraryDisable(
+                groupCode,
                 assetKey,
                 saved.getAssetClass().name(),
                 session.username(),
@@ -253,24 +293,38 @@ public class AssetLibraryService {
         return toView(saved);
     }
 
-    private void storeObject(String assetKey, byte[] bytes, String contentType) {
-        objectStoragePort.put(assetKey, new ByteArrayInputStream(bytes), bytes.length, contentType);
+    private String requireExistingAuthorizedGroup(ManagementSessionClaims session, String groupCodeRaw) {
+        if (groupCodeRaw == null || groupCodeRaw.isBlank()) {
+            throw new AssetLibraryValidationException(
+                    ApiErrorCodes.ASSET_LIBRARY_GROUP_CODE_REQUIRED,
+                    "api.error.assetLibrary.groupCodeRequired"
+            );
+        }
+        String groupCode = groupCodeRaw.trim();
+        if (!businessGroupRepository.existsByGroupCodeAndDeletedAtIsNull(groupCode)) {
+            throw new AssetLibraryAccessDeniedException();
+        }
+        if (!groupAccessService.canAccessGroup(session, groupCode)) {
+            throw new AssetLibraryAccessDeniedException();
+        }
+        return groupCode;
     }
 
-    private void deleteResolvableObjects(String assetKey) {
-        ensureObjectRemoved(assetKey);
-        if (!assetKey.contains(".")) {
-            ensureObjectRemoved(assetKey + ".png");
-            ensureObjectRemoved(assetKey + ".jpg");
-            ensureObjectRemoved(assetKey + ".jpeg");
+    private static PageView<AssetLibraryAssetView> emptyPage(int page, int size) {
+        Page<LibraryAssetEntity> empty = new PageImpl<>(List.of(), PageRequest.of(page, size), 0);
+        return new PageView<>(List.of(), page, size, empty.getTotalElements(), empty.getTotalPages());
+    }
+
+    private void storeObject(String objectKey, byte[] bytes, String contentType) {
+        objectStoragePort.put(objectKey, new ByteArrayInputStream(bytes), bytes.length, contentType);
+    }
+
+    private void deleteResolvableObjects(String groupCode, String assetKey) {
+        for (String key : AssetLibraryStorageKeys.namespacedResolvableKeys(groupCode, assetKey)) {
+            ensureObjectRemoved(key);
         }
     }
 
-    /**
-     * Delete-then-verify: always attempt delete (MinIO remove is idempotent for missing keys),
-     * then require {@code exists == false}. Ambiguous storage errors from {@code exists}/{@code delete}
-     * propagate as {@link com.bank.docgen.infrastructure.storage.ObjectStorageException}.
-     */
     private void ensureObjectRemoved(String objectKey) {
         objectStoragePort.delete(objectKey);
         if (objectStoragePort.exists(objectKey)) {
@@ -339,6 +393,7 @@ public class AssetLibraryService {
 
     private AssetLibraryAssetView toView(LibraryAssetEntity entity) {
         return new AssetLibraryAssetView(
+                entity.getGroupCode(),
                 entity.getAssetKey(),
                 entity.getAssetClass(),
                 entity.getStatus(),

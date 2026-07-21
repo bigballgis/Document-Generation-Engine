@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toRef } from 'vue'
 import { UploadFilled } from '@element-plus/icons-vue'
+import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import { useAssetLibraryUploadDialog } from '@/components/library/useAssetLibraryUploadDialog'
 import type { LibraryAssetClass } from '@/types/libraryAsset'
 import { LIBRARY_ASSET_MAX_BYTES } from '@/types/libraryAsset'
@@ -15,7 +16,9 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  submit: [payload: { assetKey: string; assetClass: LibraryAssetClass; file: File }]
+  submit: [
+    payload: { groupCode: string; assetKey: string; assetClass: LibraryAssetClass; file: File },
+  ]
   'clear-server-error': []
 }>()
 
@@ -60,6 +63,15 @@ const maxMb = LIBRARY_ASSET_MAX_BYTES / (1024 * 1024)
     @closed="resetForm"
   >
     <el-form label-position="top" data-testid="asset-library-upload-form">
+      <el-form-item :label="t('assetLibrary.upload.groupCode')" required>
+        <div data-testid="asset-library-upload-group">
+          <ScopedGroupSelect
+            v-model="form.groupCode"
+            :placeholder="t('assetLibrary.upload.groupCodePlaceholder')"
+            :disabled="loading"
+          />
+        </div>
+      </el-form-item>
       <el-form-item :label="t('assetLibrary.upload.assetClass')" required>
         <el-select
           v-model="form.assetClass"

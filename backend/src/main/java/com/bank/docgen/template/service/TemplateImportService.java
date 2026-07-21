@@ -393,6 +393,7 @@ public class TemplateImportService {
                     : AssetLibraryAssetClass.OTHER;
             assetLibraryService.materializeImportedAsset(
                     session,
+                    bundle.metadata() == null ? null : bundle.metadata().groupCode(),
                     entry.getKey(),
                     assetClass,
                     entry.getValue(),

@@ -22,6 +22,7 @@ describe('libraryAssets API', () => {
         result: {
           content: [
             {
+              groupCode: 'RETAIL',
               assetKey: 'IMG-LOGO',
               assetClass: 'IMAGE',
               status: 'ACTIVE',
@@ -42,25 +43,57 @@ describe('libraryAssets API', () => {
     })
 
     const pageView = await libraryAssetsApi.listLibraryAssets(0, 20, {
+      groupCode: 'RETAIL',
       assetClass: 'IMAGE',
       status: 'ACTIVE',
       q: 'IMG',
     })
 
     expect(http.get).toHaveBeenCalledWith('/library/assets', {
-      params: { page: 0, size: 20, assetClass: 'IMAGE', status: 'ACTIVE', q: 'IMG' },
+      params: {
+        page: 0,
+        size: 20,
+        groupCode: 'RETAIL',
+        assetClass: 'IMAGE',
+        status: 'ACTIVE',
+        q: 'IMG',
+      },
       signal: undefined,
     })
     expect(pageView.content).toHaveLength(1)
     expect(pageView.content[0]?.assetKey).toBe('IMG-LOGO')
+    expect(pageView.content[0]?.groupCode).toBe('RETAIL')
   })
 
-  it('uploads multipart asset payload', async () => {
+  it('BDD-ALGI-016 — omits groupCode from list params when filter cleared', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [],
+          page: 0,
+          size: 20,
+          totalElements: 0,
+          totalPages: 0,
+        },
+      },
+    })
+
+    await libraryAssetsApi.listLibraryAssets(0, 20, { groupCode: '' })
+
+    expect(http.get).toHaveBeenCalledWith('/library/assets', {
+      params: { page: 0, size: 20 },
+      signal: undefined,
+    })
+  })
+
+  it('uploads multipart asset payload with required groupCode', async () => {
     const file = new File([new Uint8Array([1, 2, 3])], 'logo.png', { type: 'image/png' })
     vi.mocked(http.post).mockResolvedValue({
       data: {
         metadata: {},
         result: {
+          groupCode: 'RETAIL',
           assetKey: 'IMG-LOGO',
           assetClass: 'IMAGE',
           status: 'ACTIVE',
@@ -75,6 +108,7 @@ describe('libraryAssets API', () => {
     })
 
     const result = await libraryAssetsApi.uploadLibraryAsset({
+      groupCode: 'RETAIL',
       assetKey: 'IMG-LOGO',
       assetClass: 'IMAGE',
       file,
@@ -88,17 +122,20 @@ describe('libraryAssets API', () => {
       }),
     )
     const formData = vi.mocked(http.post).mock.calls[0]?.[1] as FormData
+    expect(formData.get('groupCode')).toBe('RETAIL')
     expect(formData.get('assetKey')).toBe('IMG-LOGO')
     expect(formData.get('assetClass')).toBe('IMAGE')
     expect(formData.get('file')).toBe(file)
     expect(result.assetKey).toBe('IMG-LOGO')
+    expect(result.groupCode).toBe('RETAIL')
   })
 
-  it('disables an asset by key', async () => {
+  it('disables an asset by (groupCode, assetKey)', async () => {
     vi.mocked(http.post).mockResolvedValue({
       data: {
         metadata: {},
         result: {
+          groupCode: 'RETAIL',
           assetKey: 'IMG-LOGO',
           assetClass: 'IMAGE',
           status: 'DISABLED',
@@ -112,9 +149,12 @@ describe('libraryAssets API', () => {
       },
     })
 
-    const result = await libraryAssetsApi.disableLibraryAsset('IMG-LOGO')
+    const result = await libraryAssetsApi.disableLibraryAsset('IMG-LOGO', 'RETAIL')
 
-    expect(http.post).toHaveBeenCalledWith('/library/assets/IMG-LOGO/disable')
+    expect(http.post).toHaveBeenCalledWith('/library/assets/IMG-LOGO/disable', null, {
+      params: { groupCode: 'RETAIL' },
+    })
     expect(result.status).toBe('DISABLED')
+    expect(result.groupCode).toBe('RETAIL')
   })
 })

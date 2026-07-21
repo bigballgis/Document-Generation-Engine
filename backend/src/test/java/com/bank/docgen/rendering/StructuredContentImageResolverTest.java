@@ -3,9 +3,12 @@ package com.bank.docgen.rendering;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
+import com.bank.docgen.library.service.LibraryAssetActiveLookup;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import java.io.ByteArrayInputStream;
@@ -21,40 +24,98 @@ class StructuredContentImageResolverTest {
     private static final byte[] PNG_BYTES = new byte[] {
             (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A
     };
+    private static final byte[] OTHER_BYTES = new byte[] {
+            (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0B
+    };
 
     @Mock
     private ObjectStoragePort objectStoragePort;
 
     @Test
-    void resolvesImageRefFromMinioWhenObjectExists() {
-        when(objectStoragePort.exists("IMG-1")).thenReturn(true);
-        when(objectStoragePort.get("IMG-1")).thenReturn(new ByteArrayInputStream(PNG_BYTES));
+    void resolve_sameGroupActive_ok() {
+        LibraryAssetActiveLookup lookup = (g, k) -> "CORP".equals(g) && "IMG-1".equals(k);
+        when(objectStoragePort.exists("CORP/IMG-1")).thenReturn(true);
+        when(objectStoragePort.get("CORP/IMG-1")).thenReturn(new ByteArrayInputStream(PNG_BYTES));
 
-        StructuredContentImageResolver resolver = new StructuredContentImageResolver(objectStoragePort, false);
+        StructuredContentImageResolver resolver =
+                new StructuredContentImageResolver(objectStoragePort, false, lookup);
 
-        StructuredContentImageResolver.ResolvedImage image = resolver.resolveImageRef("IMG-1");
-
-        assertThat(image.bytes()).isEqualTo(PNG_BYTES);
-        assertThat(image.fileName()).isEqualTo("IMG-1.png");
+        AssetResolveGroupContext.runWithGroup("CORP", () -> {
+            StructuredContentImageResolver.ResolvedImage image = resolver.resolveImageRef("IMG-1");
+            assertThat(image.bytes()).isEqualTo(PNG_BYTES);
+            assertThat(image.fileName()).isEqualTo("IMG-1.png");
+        });
     }
 
     @Test
-    void resolvesSealRefFromMinioWhenObjectExists() {
-        when(objectStoragePort.exists("SEAL-1")).thenReturn(true);
-        when(objectStoragePort.get("SEAL-1")).thenReturn(new ByteArrayInputStream(PNG_BYTES));
+    void resolve_crossGroupActive_failClosed() {
+        LibraryAssetActiveLookup lookup = (g, k) -> "RETAIL".equals(g) && "IMG-ALGI-010".equals(k);
 
-        StructuredContentImageResolver resolver = new StructuredContentImageResolver(objectStoragePort, false);
+        StructuredContentImageResolver resolver =
+                new StructuredContentImageResolver(objectStoragePort, false, lookup);
 
-        StructuredContentImageResolver.ResolvedImage image = resolver.resolveSealRef("SEAL-1");
+        AssetResolveGroupContext.runWithGroup("CORP", () ->
+                assertThatThrownBy(() -> resolver.resolveImageRef("IMG-ALGI-010"))
+                        .isInstanceOf(DocxAssemblyException.class)
+                        .satisfies(ex -> {
+                            DocxAssemblyException assemblyException = (DocxAssemblyException) ex;
+                            assertThat(assemblyException.errorCode()).isEqualTo(ApiErrorCodes.IMAGE_ASSET_NOT_FOUND);
+                            assertThat(assemblyException.messageKey())
+                                    .isEqualTo("api.error.rendering.imageAssetNotFound");
+                        })
+        );
+        verify(objectStoragePort, never()).get(anyString());
+        verify(objectStoragePort, never()).exists(anyString());
+    }
 
-        assertThat(image.bytes()).isEqualTo(PNG_BYTES);
-        assertThat(image.fileName()).isEqualTo("SEAL-1.png");
+    @Test
+    void resolve_ignoresBareForeignObject() {
+        LibraryAssetActiveLookup lookup = (g, k) -> false;
+
+        StructuredContentImageResolver resolver =
+                new StructuredContentImageResolver(objectStoragePort, false, lookup);
+
+        AssetResolveGroupContext.runWithGroup("CORP", () ->
+                assertThatThrownBy(() -> resolver.resolveImageRef("IMG-ALGI-011"))
+                        .isInstanceOf(DocxAssemblyException.class)
+                        .extracting(ex -> ((DocxAssemblyException) ex).errorCode())
+                        .isEqualTo(ApiErrorCodes.IMAGE_ASSET_NOT_FOUND)
+        );
+        verify(objectStoragePort, never()).get(anyString());
+        verify(objectStoragePort, never()).exists(anyString());
+    }
+
+    @Test
+    void resolve_sameGroupPrefersNamespacedOverForeign() {
+        LibraryAssetActiveLookup lookup = (g, k) -> "CORP".equals(g) && "IMG-ALGI-010".equals(k);
+        when(objectStoragePort.exists("CORP/IMG-ALGI-010")).thenReturn(true);
+        when(objectStoragePort.get("CORP/IMG-ALGI-010")).thenReturn(new ByteArrayInputStream(PNG_BYTES));
+
+        StructuredContentImageResolver resolver =
+                new StructuredContentImageResolver(objectStoragePort, false, lookup);
+
+        AssetResolveGroupContext.runWithGroup("CORP", () ->
+                assertThat(resolver.resolveImageRef("IMG-ALGI-010").bytes()).isEqualTo(PNG_BYTES)
+        );
+        assertThat(OTHER_BYTES).isNotEqualTo(PNG_BYTES);
+    }
+
+    @Test
+    void resolvesSealRefFromNamespacedMinioWhenActive() {
+        LibraryAssetActiveLookup lookup = (g, k) -> "CORP".equals(g) && "SEAL-1".equals(k);
+        when(objectStoragePort.exists("CORP/SEAL-1")).thenReturn(true);
+        when(objectStoragePort.get("CORP/SEAL-1")).thenReturn(new ByteArrayInputStream(PNG_BYTES));
+
+        StructuredContentImageResolver resolver =
+                new StructuredContentImageResolver(objectStoragePort, false, lookup);
+
+        AssetResolveGroupContext.runWithGroup("CORP", () ->
+                assertThat(resolver.resolveSealRef("SEAL-1").bytes()).isEqualTo(PNG_BYTES)
+        );
     }
 
     @Test
     void failsClosedWhenImageAssetMissingAndDemoTierDisabled() {
-        when(objectStoragePort.exists(anyString())).thenReturn(false);
-
         StructuredContentImageResolver resolver = new StructuredContentImageResolver(objectStoragePort, false);
 
         assertThatThrownBy(() -> resolver.resolveImageRef("MISSING-IMAGE"))
@@ -69,8 +130,6 @@ class StructuredContentImageResolverTest {
 
     @Test
     void failsClosedWhenSealAssetMissingAndDemoTierDisabled() {
-        when(objectStoragePort.exists(anyString())).thenReturn(false);
-
         StructuredContentImageResolver resolver = new StructuredContentImageResolver(objectStoragePort, false);
 
         assertThatThrownBy(() -> resolver.resolveSealRef("MISSING-SEAL"))
@@ -85,8 +144,6 @@ class StructuredContentImageResolverTest {
 
     @Test
     void resolvesFromDemoClasspathTierWhenEnabledAndMinioMissing() {
-        when(objectStoragePort.exists(anyString())).thenReturn(false);
-
         StructuredContentImageResolver resolver = new StructuredContentImageResolver(objectStoragePort, true);
 
         StructuredContentImageResolver.ResolvedImage image = resolver.resolveImageRef("IMG-1");
@@ -97,8 +154,6 @@ class StructuredContentImageResolverTest {
 
     @Test
     void writeReferenceNodeFailsClosedWhenImageMissing() throws Exception {
-        when(objectStoragePort.exists(anyString())).thenReturn(false);
-
         StructuredContentImageResolver resolver = new StructuredContentImageResolver(objectStoragePort, false);
         StructuredContentDocxWriter writer = StructuredContentDocxWriterTestSupport.createWriter(
                 new com.fasterxml.jackson.databind.ObjectMapper(),
@@ -121,8 +176,6 @@ class StructuredContentImageResolverTest {
 
     @Test
     void writeReferenceNodeFailsClosedWhenSealMissing() throws Exception {
-        when(objectStoragePort.exists(anyString())).thenReturn(false);
-
         StructuredContentImageResolver resolver = new StructuredContentImageResolver(objectStoragePort, false);
         StructuredContentDocxWriter writer = StructuredContentDocxWriterTestSupport.createWriter(
                 new com.fasterxml.jackson.databind.ObjectMapper(),

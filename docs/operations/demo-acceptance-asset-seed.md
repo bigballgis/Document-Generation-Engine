@@ -76,13 +76,22 @@ DOCGEN_SEED_DEMO_ASSET_LIBRARY=true
 
 ---
 
-## 5. Explicitly out of scope (post-program parked queue)
+## 5. Group isolation amend (ALGI — post-Wave 8) — confirmed
+
+**Confirmed (ALGI-C13 / BDD-ALGI-017):** when `DOCGEN_SEED_DEMO_ASSET_LIBRARY=true`,
+optional seed **must** write **group-scoped** ACTIVE `IMG-1` / `SEAL-1` for each
+present seeded business group among `{CORP,RETAIL,TRADE,WEALTH}` — not a single
+platform-shared unscoped row. Physical keys follow `{groupCode}/{assetKey}`.
+Product default seed **off** / honest empty unchanged. Behavior SoT:
+[asset-library-group-isolation.md](../behavior/asset-library-group-isolation.md).
+
+## 6. Explicitly out of scope (other parked UX)
 
 Not Wave 8 substitutes — see plan §4a:
 
-- Reminder timing  
-- Asset library group isolation  
 - Binding editor re-layout  
 - Auto `referenceKey`  
+
+(Reminder timing → **Done** #153; Asset library group isolation → TM **#154** **In Progress** / ALGI BDD **ready**.)
 
 **N18** Legal hold actor EntityLink remains **deferred** (not claimed Done by Wave 8).

@@ -5,6 +5,7 @@ import com.bank.docgen.library.domain.AssetLibraryAssetStatus;
 import java.time.Instant;
 
 public record AssetLibraryAssetView(
+        String groupCode,
         String assetKey,
         AssetLibraryAssetClass assetClass,
         AssetLibraryAssetStatus status,
