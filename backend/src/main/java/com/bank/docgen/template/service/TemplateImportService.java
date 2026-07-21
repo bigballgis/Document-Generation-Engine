@@ -10,12 +10,17 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.contentmodule.service.ContentModuleService;
 import com.bank.docgen.contentmodule.service.ContentModuleValidationException;
+import com.bank.docgen.library.domain.AssetLibraryAssetClass;
+import com.bank.docgen.library.service.AssetLibraryService;
+import com.bank.docgen.master.api.MasterDocumentDetailView;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
+import com.bank.docgen.master.service.MasterDocumentService;
 import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.api.ImportTemplateRequest;
+import com.bank.docgen.template.api.TemplateExportAssetKeyManifestItemView;
 import com.bank.docgen.template.api.TemplateExportBundleView;
 import com.bank.docgen.template.api.TemplateExportClauseSnapshotView;
 import com.bank.docgen.template.api.TemplateExportMetadataView;
@@ -23,6 +28,7 @@ import com.bank.docgen.template.api.TemplateImportDependencyReportView;
 import com.bank.docgen.template.api.TemplateImportDryRunResult;
 import com.bank.docgen.template.api.TemplateImportResult;
 import com.bank.docgen.template.api.TemplateImportSummaryView;
+import com.bank.docgen.template.domain.TemplateExportAssetKeyUsage;
 import com.bank.docgen.template.domain.TemplateImportConflictPolicy;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
@@ -61,6 +67,8 @@ public class TemplateImportService {
     private final ContentModuleService contentModuleService;
     private final ContentModuleRepository contentModuleRepository;
     private final ContentModuleVersionRepository contentModuleVersionRepository;
+    private final AssetLibraryService assetLibraryService;
+    private final MasterDocumentService masterDocumentService;
     private final ObjectMapper objectMapper;
 
     public TemplateImportService(
@@ -79,7 +87,9 @@ public class TemplateImportService {
             TemplateImportDependencyPrecheck dependencyPrecheck,
             ContentModuleService contentModuleService,
             ContentModuleRepository contentModuleRepository,
-            ContentModuleVersionRepository contentModuleVersionRepository
+            ContentModuleVersionRepository contentModuleVersionRepository,
+            AssetLibraryService assetLibraryService,
+            MasterDocumentService masterDocumentService
     ) {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
@@ -93,6 +103,8 @@ public class TemplateImportService {
         this.contentModuleService = contentModuleService;
         this.contentModuleRepository = contentModuleRepository;
         this.contentModuleVersionRepository = contentModuleVersionRepository;
+        this.assetLibraryService = assetLibraryService;
+        this.masterDocumentService = masterDocumentService;
         this.targetResolution = new TemplateImportTargetResolutionSupport(
                 templateRepository,
                 templateVersionRepository,
@@ -115,6 +127,17 @@ public class TemplateImportService {
             byte[] embeddedMasterDocx,
             boolean zipCarrier
     ) {
+        return dryRun(request, session, embeddedMasterDocx, zipCarrier, Map.of());
+    }
+
+    @Transactional(readOnly = true)
+    public TemplateImportDryRunResult dryRun(
+            ImportTemplateRequest request,
+            ManagementSessionClaims session,
+            byte[] embeddedMasterDocx,
+            boolean zipCarrier,
+            Map<String, byte[]> embeddedAssetBinaries
+    ) {
         TemplateExportBundleView bundle = request.bundle();
         bundleValidator.validate(bundle);
         TemplateExportMetadataView metadata = bundle.metadata();
@@ -130,7 +153,8 @@ public class TemplateImportService {
                         targetMasterId,
                         embeddedMasterDocx,
                         zipCarrier,
-                        requireDocx
+                        requireDocx,
+                        embeddedAssetBinaries
                 )
         );
         managementAuditRecorder.recordTemplateImportDryRun(
@@ -147,12 +171,12 @@ public class TemplateImportService {
 
     @Transactional(readOnly = true)
     public TemplateImportDryRunResult dryRun(ImportTemplateRequest request, ManagementSessionClaims session) {
-        return dryRun(request, session, null, false);
+        return dryRun(request, session, null, false, Map.of());
     }
 
     @Transactional
     public TemplateImportResult importBundle(ImportTemplateRequest request, ManagementSessionClaims session) {
-        return importBundle(request, session, null, false);
+        return importBundle(request, session, null, false, Map.of());
     }
 
     @Transactional
@@ -162,6 +186,17 @@ public class TemplateImportService {
             byte[] embeddedMasterDocx,
             boolean zipCarrier
     ) {
+        return importBundle(request, session, embeddedMasterDocx, zipCarrier, Map.of());
+    }
+
+    @Transactional
+    public TemplateImportResult importBundle(
+            ImportTemplateRequest request,
+            ManagementSessionClaims session,
+            byte[] embeddedMasterDocx,
+            boolean zipCarrier,
+            Map<String, byte[]> embeddedAssetBinaries
+    ) {
         if (request.isDryRun()) {
             throw new TemplateValidationException("api.error.template.importFailed");
         }
@@ -170,27 +205,46 @@ public class TemplateImportService {
         TemplateExportMetadataView metadata = bundle.metadata();
         importAccessSupport.assertCanImportForGroup(metadata.groupCode(), session);
 
-        UUID targetMasterId = UUID.fromString(request.masterId());
-        dependencyPrecheck.assertMasterGate(targetMasterId, metadata.groupCode());
+        UUID gateMasterId = UUID.fromString(request.masterId());
+        dependencyPrecheck.assertMasterGate(gateMasterId, metadata.groupCode());
 
+        TemplateImportDependencyReportView report = null;
         if (TemplateExportV2Support.EXPORT_FORMAT_V2.equals(bundle.format())) {
             boolean requireDocx = zipCarrier || embeddedMasterDocx != null;
             // JSON-only v2 commit without DOCX is not a self-contained carrier — require ZIP bytes
             if (!zipCarrier) {
                 requireDocx = true;
             }
-            TemplateImportDependencyReportView report = dependencyPrecheck.evaluate(
+            report = dependencyPrecheck.evaluate(
                     new TemplateImportDependencyPrecheck.PrecheckContext(
                             bundle,
-                            targetMasterId,
+                            gateMasterId,
                             embeddedMasterDocx,
                             zipCarrier,
-                            requireDocx
+                            requireDocx,
+                            embeddedAssetBinaries
                     )
             );
             if (!report.readyToCommit()) {
                 throw new TemplateImportDependenciesException(report);
             }
+        }
+
+        boolean materializeMaster = report != null && report.items().stream()
+                .anyMatch(item -> "MASTER_WILL_MATERIALIZE".equals(item.code()));
+        UUID targetMasterId = gateMasterId;
+        if (materializeMaster) {
+            MasterDocumentDetailView drafted = masterDocumentService.materializeDraftFromImport(
+                    metadata.groupCode(),
+                    metadata.name() == null ? "Imported letterhead" : metadata.name() + " letterhead",
+                    "Materialized from promotion pack (DRAFT; must re-approve on PROD)",
+                    embeddedMasterDocx,
+                    session
+            );
+            if (!"DRAFT".equals(drafted.status())) {
+                throw new TemplateValidationException("api.error.template.masterNotApproved");
+            }
+            targetMasterId = UUID.fromString(drafted.id());
         }
 
         TemplateImportConflictPolicy conflictPolicy = request.importConflictPolicy() == null
@@ -215,11 +269,12 @@ public class TemplateImportService {
 
         MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(targetMasterId)
                 .orElseThrow(MasterNotFoundException::new);
-        targetResolution.assertMasterCompatible(master, metadata);
+        targetResolution.assertMasterCompatible(master, metadata, materializeMaster);
 
         int materializedClauseCount = 0;
         TemplateExportBundleView artifactsBundle = bundle;
         if (TemplateExportV2Support.EXPORT_FORMAT_V2.equals(bundle.format())) {
+            materializeAssets(bundle, embeddedAssetBinaries, session);
             MaterializeResult materializeResult = materializeClauses(bundle, metadata, session);
             materializedClauseCount = materializeResult.materializedCount();
             artifactsBundle = remapContentModuleReferences(bundle, materializeResult.remappedBySourceModuleId());
@@ -268,6 +323,7 @@ public class TemplateImportService {
         }
         TemplateExportBundleView bundle = null;
         byte[] masterDocx = null;
+        Map<String, byte[]> assetBinaries = new LinkedHashMap<>();
         Set<String> entries = new HashSet<>();
         try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
             ZipEntry entry = zip.getNextEntry();
@@ -278,6 +334,11 @@ public class TemplateImportService {
                     bundle = objectMapper.readValue(zip.readAllBytes(), TemplateExportBundleView.class);
                 } else if (TemplateExportV2Support.ZIP_MASTER_ENTRY.equals(name)) {
                     masterDocx = zip.readAllBytes();
+                } else if (name != null && name.startsWith(TemplateExportAssetPathSupport.ZIP_ASSET_DIR)
+                        && !entry.isDirectory()) {
+                    String segment = name.substring(TemplateExportAssetPathSupport.ZIP_ASSET_DIR.length());
+                    String assetKey = TemplateExportAssetPathSupport.decodePathSegment(segment);
+                    assetBinaries.put(assetKey, zip.readAllBytes());
                 } else if (!entry.isDirectory()) {
                     throw new TemplateValidationException("api.error.template.importBundleInvalid");
                 }
@@ -296,7 +357,49 @@ public class TemplateImportService {
             // Allow parse; precheck will mark MASTER_DOCX_ABSENT
             masterDocx = null;
         }
-        return new ParsedZipImport(bundle, masterDocx == null ? new byte[0] : masterDocx);
+        return new ParsedZipImport(
+                bundle,
+                masterDocx == null ? new byte[0] : masterDocx,
+                assetBinaries
+        );
+    }
+
+    private void materializeAssets(
+            TemplateExportBundleView bundle,
+            Map<String, byte[]> embeddedAssetBinaries,
+            ManagementSessionClaims session
+    ) {
+        if (embeddedAssetBinaries == null || embeddedAssetBinaries.isEmpty()) {
+            return;
+        }
+        Map<String, TemplateExportAssetKeyUsage> usageByKey = new LinkedHashMap<>();
+        List<TemplateExportAssetKeyManifestItemView> manifest =
+                bundle.assetKeyManifest() == null ? List.of() : bundle.assetKeyManifest();
+        for (TemplateExportAssetKeyManifestItemView item : manifest) {
+            if (item != null && item.referenceKey() != null && !item.referenceKey().isBlank()) {
+                usageByKey.put(item.referenceKey().trim(), item.usage());
+            }
+        }
+        for (Map.Entry<String, byte[]> entry : embeddedAssetBinaries.entrySet()) {
+            if (entry.getValue() == null || entry.getValue().length == 0) {
+                continue;
+            }
+            TemplateExportAssetKeyUsage usage = usageByKey.getOrDefault(
+                    entry.getKey(),
+                    TemplateExportAssetKeyUsage.IMAGE
+            );
+            AssetLibraryAssetClass assetClass = usage == TemplateExportAssetKeyUsage.IMAGE
+                    ? AssetLibraryAssetClass.IMAGE
+                    : AssetLibraryAssetClass.OTHER;
+            assetLibraryService.materializeImportedAsset(
+                    session,
+                    entry.getKey(),
+                    assetClass,
+                    entry.getValue(),
+                    "application/octet-stream",
+                    entry.getKey()
+            );
+        }
     }
 
     private MaterializeResult materializeClauses(
@@ -423,7 +526,10 @@ public class TemplateImportService {
                 bundle.masterPin(),
                 bundle.clauseSnapshots(),
                 bundle.renderProfile(),
-                bundle.assetKeyManifest()
+                bundle.assetKeyManifest(),
+                bundle.compositionInclusionRules(),
+                bundle.clauseNestingGraph(),
+                bundle.dependencyClosure()
         );
     }
 
@@ -460,11 +566,21 @@ public class TemplateImportService {
         }
     }
 
-    public record ParsedZipImport(TemplateExportBundleView bundle, byte[] masterDocxBytes) {
+    public record ParsedZipImport(
+            TemplateExportBundleView bundle,
+            byte[] masterDocxBytes,
+            Map<String, byte[]> assetBinaries
+    ) {
         public ParsedZipImport {
             masterDocxBytes = masterDocxBytes == null
                     ? new byte[0]
                     : com.bank.docgen.sharedkernel.api.DefensiveCopies.copyBytes(masterDocxBytes);
+            assetBinaries = assetBinaries == null ? Map.of() : Map.copyOf(assetBinaries);
+        }
+
+        /** Backward-compatible CE-E01 constructor. */
+        public ParsedZipImport(TemplateExportBundleView bundle, byte[] masterDocxBytes) {
+            this(bundle, masterDocxBytes, Map.of());
         }
     }
 }

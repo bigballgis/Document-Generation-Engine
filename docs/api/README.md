@@ -281,9 +281,9 @@ Where-used row extensions: `referenceKind` (`DIRECT`\|`NESTED`), `nestingDepth`,
 
 Management full-library export in [openapi-v1.yaml](openapi-v1.yaml) (`exportLibraryTemplates`) / [contract-outline.md](contract-outline.md) «模板导出/导入契约» CE-E03:
 
-- `POST /api/management/v1/library/export` — optional JSON body (`groupId` / `templateIds` / `includeSkipped`); success `200` `application/zip` (`template-library-export-v1-zip`: root manifest + nested E01 v2 per-template ZIPs + deduped `masters/` / `clauses/`)
+- `POST /api/management/v1/library/export` — optional JSON body (`groupId` / `templateIds` / `includeSkipped`; optional Wave 7 `dependencyClosure=PROMOTION`); success `200` `application/zip` (`template-library-export-v1-zip`: root manifest + nested E01 v2 per-template ZIPs + deduped `masters/` / `clauses/`; promotion may add root `assets/`)
 
-Schemas: `LibraryExportRequest`, `LibraryExportManifestView`. **No** library-import path. **No** `Idempotency-Key` requirement. FE/E2E out of scope (API-first).
+Schemas: `LibraryExportRequest`, `LibraryExportManifestView`. **No** library-import path. **No** `Idempotency-Key` requirement. FE/E2E out of scope for E03 itself (API-first).
 
 | Condition | HTTP | `error.messageKey` |
 | --- | --- | --- |
@@ -292,3 +292,14 @@ Schemas: `LibraryExportRequest`, `LibraryExportManifestView`. **No** library-imp
 | Caller lacks matrix §5 export-template permission | 403 | `api.error.template.accessDenied` (same boundary as single-template export) |
 
 Permission reuse: [permission-matrix.md](../security/permission-matrix.md) §5「导出模板」— no new permission code. Behavior SoT: [ce-e03-full-library-export.md](../behavior/ce-e03-full-library-export.md).
+
+### UAT→PROD promotion pack (SYS-NORM Wave 7)
+
+Additive opt-in profile on CE-E01 / CE-E03 export + existing import dry-run/commit. Companion: [contract-outline.md](contract-outline.md) «SYS-NORM Wave 7». Behavior SoT: [sys-norm-promotion-pack.md](../behavior/sys-norm-promotion-pack.md) (**BDD-SYS-NORM-PP-001…020**).
+
+- `GET /api/management/v1/templates/{templateId}/export?bundleVersion=2&format=zip&dependencyClosure=PROMOTION` — promotion ZIP (`artifacts/master.docx` + `artifacts/assets/{assetKey}` + nesting closure / optional `clauseNestingGraph`)
+- `POST /api/management/v1/library/export` with `{ "dependencyClosure": "PROMOTION", … }` — nested promotion packs + optional deduped root `assets/`
+- `POST /api/management/v1/templates/import` — unchanged path; `dryRun=true|false`; auto-detects embedded assets/graph; additive `dependencyType` `CLAUSE_NESTING` / `ASSET_BINARY`
+- Management UI: Templates **Import** dialog dry-run (**Check dependencies** → gated **Import** when `readyToCommit=true`)
+
+Permission reuse: matrix §5 export/import — **no new capability codes**. Reuses [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) Decision 5 (no brand/entity sidecar; two-phase master P2). Do **not** flip checklist **#3b/#5a**; do **not** mark **#53** Done; Wave 8 OOS.

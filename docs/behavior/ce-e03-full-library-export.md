@@ -14,8 +14,9 @@
 | **上游** | CE-E01 (#78) **Done**（`template-export-bundle-v2-json` 自包含 ZIP：母版 DOCX + 条款快照 + render profile + 资产键清单） |
 | **Owning docs** | 本文件（行为 SoT）；计划 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §7；需求 [requirements-plan.md](../requirements/requirements-plan.md)「环境迁移」；产品 [PRD.md](../product/PRD.md) §10；领域 [domain-model.md](../domain/domain-model.md) §6；API [contract-outline.md](../api/contract-outline.md) + [openapi-v1.yaml](../api/openapi-v1.yaml)（`exportLibraryTemplates` / `LibraryExportManifestView`）；权限沿用矩阵 §5 导出（无新权限码） |
 | **Frontend UI** | **Out of scope（API-first）** — 无新全库导出旅程、无管理端批量导出页、无 Playwright E2E/UIUX 义务（与 CE-E01 一致；计划 §7 未要求管理页，对比 CE-E02） |
+| **下游扩展** | **SYS-NORM Wave 7** — [sys-norm-promotion-pack.md](./sys-norm-promotion-pack.md)（**BDD-SYS-NORM-PP-006**）：body `dependencyClosure=PROMOTION` 时嵌套包为晋级包，根级可去重 `assets/{assetKey}`；默认路径仍 keys-only（E03-C10） |
 
-**完成声明约束：** 本切片关闭「只能逐模板导出、无法一次带走授权范围内可导出模板集合 + 依赖目录」缺口的最小闭环（全库 ZIP = 根 manifest + 嵌套 E01 v2 per-template bundle + 去重母版/条款目录）；**不**宣称 go-live；**不**激活 CD-3；**不**实现 CE-G05 / CE-O02；**不**交付全库导入；**不**嵌入资产二进制；**leave #50 alone**。
+**完成声明约束：** 本切片关闭「只能逐模板导出、无法一次带走授权范围内可导出模板集合 + 依赖目录」缺口的最小闭环（全库 ZIP = 根 manifest + 嵌套 E01 v2 per-template bundle + 去重母版/条款目录）；**不**宣称 go-live；**不**激活 CD-3；**不**实现 CE-G05 / CE-O02；**不**交付全库导入；**默认不**嵌入资产二进制（Wave 7 promotion profile 另立）；**leave #50 alone**。
 
 ---
 
@@ -334,3 +335,17 @@ open_questions: []
 ```
 
 **Open questions:** 无（已由 CE §7 计划卡 + E01 模式 + E02-C16 + Task #80 API/bulk 表述裁定；E03-C1…C20）。
+
+---
+
+## 15. Downstream extension — SYS-NORM Wave 7 (library promotion ZIP)
+
+本片默认（E03-C10：聚合资产**仅键**、无根级资产二进制树）保持不变。下游 Wave 7 **加法**：
+
+| 扩展点 | Wave 7 规则 | 对本片默认路径 |
+| --- | --- | --- |
+| body `dependencyClosure` | `PROMOTION` → 每个 `templates/{id}.zip` 为 E01 晋级包；根级可去重 `assets/{assetKey}` | 省略 → 仍 keys-only |
+| 导入 | 全库导入仍 out of scope；目标侧 unwrap 后走单模板 import（含 dry-run） | 不变 |
+| UI | 全库导出 UI 仍 OOS；Import dry-run UI 归 Wave 7 单模板 Import 对话框 | 不变 |
+
+权威：[sys-norm-promotion-pack.md](./sys-norm-promotion-pack.md)；契约：[openapi-v1.yaml](../api/openapi-v1.yaml) `LibraryExportRequest.dependencyClosure`。

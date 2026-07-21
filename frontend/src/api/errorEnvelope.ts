@@ -1,5 +1,6 @@
 import axios, { type AxiosError } from 'axios'
 import type { ApiEnvelope, ApiErrorDetail, ApiFieldError, ApiMetadata } from '@/types/session'
+import type { TemplateImportDependencyReport } from '@/types/template'
 
 export interface ResolvedApiError {
   error: ApiErrorDetail
@@ -21,6 +22,22 @@ function parseFieldError(value: unknown): ApiFieldError | null {
   return { field, reason, message }
 }
 
+function parseDependencyReport(value: unknown): TemplateImportDependencyReport | undefined {
+  if (!isRecord(value)) {
+    return undefined
+  }
+  if (
+    !Array.isArray(value.items) ||
+    typeof value.blockingCount !== 'number' ||
+    typeof value.warningCount !== 'number' ||
+    typeof value.infoCount !== 'number' ||
+    typeof value.readyToCommit !== 'boolean'
+  ) {
+    return undefined
+  }
+  return value as TemplateImportDependencyReport
+}
+
 function parseErrorDetail(value: unknown): ApiErrorDetail | null {
   if (!isRecord(value)) {
     return null
@@ -40,6 +57,10 @@ function parseErrorDetail(value: unknown): ApiErrorDetail | null {
     detail.fieldErrors = value.fieldErrors
       .map(parseFieldError)
       .filter((item): item is ApiFieldError => item !== null)
+  }
+  const dependencyReport = parseDependencyReport(value.dependencyReport)
+  if (dependencyReport) {
+    detail.dependencyReport = dependencyReport
   }
   return detail
 }
@@ -77,6 +98,11 @@ export function resolveApiError(error: unknown): ResolvedApiError | null {
     return null
   }
   return parseApiEnvelopeError(error.response?.data)
+}
+
+/** CE-E01 commit gate: extract dependency report from 422 envelope when present. */
+export function resolveApiDependencyReport(error: unknown): TemplateImportDependencyReport | null {
+  return resolveApiError(error)?.error.dependencyReport ?? null
 }
 
 /**

@@ -11,6 +11,7 @@ import com.bank.docgen.master.api.MasterDocumentSummaryView;
 import com.bank.docgen.master.api.MasterImpactAnalysisView;
 import com.bank.docgen.master.api.SubmitMasterReviewRequest;
 import com.bank.docgen.master.api.UpdateMasterRequest;
+import com.bank.docgen.master.domain.MasterDocumentStatus;
 import com.bank.docgen.master.persistence.MasterAnchorRepository;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
@@ -140,6 +141,38 @@ public class MasterDocumentService {
             ManagementSessionClaims session
     ) {
         return fileMutations.create(request, docxFile, session);
+    }
+
+    /**
+     * SYS-NORM Wave 7 / PP-C6 — materialize a letterhead/master from promotion pack DOCX.
+     * Landing status is always {@link MasterDocumentStatus#DRAFT}; never APPROVED via pack.
+     */
+    @Transactional
+    public MasterDocumentDetailView materializeDraftFromImport(
+            String groupCode,
+            String name,
+            String description,
+            byte[] docxBytes,
+            ManagementSessionClaims session
+    ) {
+        if (docxBytes == null || docxBytes.length == 0) {
+            throw new MasterValidationException("api.error.master.docxRequired");
+        }
+        MultipartFile docxFile = new ByteArrayMultipartFile(
+                "file",
+                "imported-master.docx",
+                MasterDocxUploadSupport.DOCX_CONTENT_TYPE,
+                docxBytes
+        );
+        MasterDocumentDetailView created = fileMutations.create(
+                new CreateMasterRequest(groupCode, name, description),
+                docxFile,
+                session
+        );
+        if (!MasterDocumentStatus.DRAFT.name().equals(created.status())) {
+            throw new MasterValidationException("api.error.master.invalidState");
+        }
+        return created;
     }
 
     @Transactional

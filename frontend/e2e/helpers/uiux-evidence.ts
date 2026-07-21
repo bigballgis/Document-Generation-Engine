@@ -1948,3 +1948,33 @@ export async function captureSysNormW5LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** SYS-NORM Wave 7 — Templates Import dry-run dialog — 1440×900 dual-brand. */
+export const SYS_NORM_W7_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'SYS-NORM-W7')
+export const SYS_NORM_W7_SCREENSHOT_DIR = path.join(SYS_NORM_W7_EVIDENCE_ROOT, 'screenshots')
+export const SYS_NORM_W7_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureSysNormW7EvidenceDirs(): void {
+  fs.mkdirSync(SYS_NORM_W7_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function sysNormW7ScreenshotPath(filename: string): string {
+  return path.join(SYS_NORM_W7_SCREENSHOT_DIR, filename)
+}
+
+export async function captureSysNormW7Screenshot(page: Page, filename: string): Promise<string> {
+  ensureSysNormW7EvidenceDirs()
+  const target = sysNormW7ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureSysNormW7LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureSysNormW7EvidenceDirs()
+  const target = sysNormW7ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

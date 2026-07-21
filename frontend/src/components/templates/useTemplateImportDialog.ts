@@ -1,18 +1,28 @@
 import { computed, reactive, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { type FormInstance, type FormRules } from 'element-plus'
+import { resolveApiDependencyReport } from '@/api/errorEnvelope'
 import { useMastersStore } from '@/stores/masters'
 import { useTemplatesStore } from '@/stores/templates'
 import {
   parseTemplateExportBundleFile,
   TemplateExportBundleParseError,
 } from '@/utils/parseTemplateExportBundleFile'
-import type { TemplateExportBundle, TemplateImportConflictPolicy } from '@/types/template'
+import type {
+  ImportTemplatePayload,
+  TemplateExportBundle,
+  TemplateImportConflictPolicy,
+  TemplateImportDependencyReport,
+} from '@/types/template'
 
 export interface UseTemplateImportDialogOptions {
   modelValue: Ref<boolean>
   emitUpdateModelValue: (value: boolean) => void
   emitImported: (templateId: string) => void
+}
+
+function isZipFile(file: File | null): boolean {
+  return !!file && file.name.toLowerCase().endsWith('.zip')
 }
 
 export function useTemplateImportDialog(options: UseTemplateImportDialogOptions) {
@@ -23,6 +33,8 @@ export function useTemplateImportDialog(options: UseTemplateImportDialogOptions)
   const selectedFile = ref<File | null>(null)
   const parsedBundle = ref<TemplateExportBundle | null>(null)
   const parseErrorKey = ref<string | null>(null)
+  const dependencyReport = ref<TemplateImportDependencyReport | null>(null)
+  const checkingDependencies = ref(false)
 
   const visible = computed({
     get: () => options.modelValue.value,
@@ -64,17 +76,32 @@ export function useTemplateImportDialog(options: UseTemplateImportDialogOptions)
     return te(key) ? t(key) : t('templates.error.import')
   })
 
+  const canCommitImport = computed(() => dependencyReport.value?.readyToCommit === true)
+
+  const dependencyBusy = computed(
+    () => checkingDependencies.value || templatesStore.submitting,
+  )
+
+  function clearDependencyReport() {
+    dependencyReport.value = null
+  }
+
+  function resetDialogState() {
+    selectedFile.value = null
+    parsedBundle.value = null
+    parseErrorKey.value = null
+    clearDependencyReport()
+    form.masterId = ''
+    form.importConflictPolicy = 'REJECT_IMPORT'
+  }
+
   watch(
     () => options.modelValue.value,
     async (open) => {
       if (!open) {
         return
       }
-      selectedFile.value = null
-      parsedBundle.value = null
-      parseErrorKey.value = null
-      form.masterId = ''
-      form.importConflictPolicy = 'REJECT_IMPORT'
+      resetDialogState()
       await mastersStore.fetchAllMasters({ sort: 'groupCodeAsc' })
     },
   )
@@ -88,16 +115,25 @@ export function useTemplateImportDialog(options: UseTemplateImportDialogOptions)
     form.masterId = matchingMaster?.id ?? approvedMasters.value[0]?.id ?? ''
   })
 
+  watch(
+    () => [form.masterId, form.importConflictPolicy] as const,
+    () => {
+      clearDependencyReport()
+    },
+  )
+
   function onFileRemove() {
     selectedFile.value = null
     parsedBundle.value = null
     parseErrorKey.value = null
+    clearDependencyReport()
   }
 
   async function onFileSelected(uploadFile: { raw?: File }) {
     selectedFile.value = uploadFile.raw ?? null
     parsedBundle.value = null
     parseErrorKey.value = null
+    clearDependencyReport()
     if (selectedFile.value) {
       await parseSelectedFile()
     }
@@ -121,27 +157,83 @@ export function useTemplateImportDialog(options: UseTemplateImportDialogOptions)
     }
   }
 
-  async function handleSubmit() {
+  function buildImportPayload(dryRun: boolean): ImportTemplatePayload | null {
+    if (!selectedFile.value || !parsedBundle.value || parseErrorKey.value) {
+      return null
+    }
+    if (isZipFile(selectedFile.value)) {
+      return {
+        masterId: form.masterId,
+        file: selectedFile.value,
+        importConflictPolicy: form.importConflictPolicy,
+        dryRun,
+      }
+    }
+    return {
+      masterId: form.masterId,
+      bundle: parsedBundle.value,
+      importConflictPolicy: form.importConflictPolicy,
+      dryRun,
+    }
+  }
+
+  async function prepareValidatedPayload(dryRun: boolean): Promise<ImportTemplatePayload | null> {
     await parseSelectedFile()
     if (!parsedBundle.value || parseErrorKey.value) {
-      return
+      return null
     }
     const valid = await formRef.value?.validate().catch(() => false)
     if (valid === false) {
+      return null
+    }
+    return buildImportPayload(dryRun)
+  }
+
+  async function handleCheckDependencies() {
+    const payload = await prepareValidatedPayload(true)
+    if (!payload) {
+      return
+    }
+    checkingDependencies.value = true
+    templatesStore.lastErrorMessageKey = null
+    try {
+      const result = await templatesStore.dryRunImportTemplate(payload)
+      dependencyReport.value = result.dependencyReport
+    } catch {
+      clearDependencyReport()
+      // Error surfaced via store message key.
+    } finally {
+      checkingDependencies.value = false
+    }
+  }
+
+  async function handleSubmit() {
+    if (!canCommitImport.value) {
+      return
+    }
+    const payload = await prepareValidatedPayload(false)
+    if (!payload) {
       return
     }
     try {
-      const result = await templatesStore.importTemplate({
-        masterId: form.masterId,
-        bundle: parsedBundle.value,
-        importConflictPolicy: form.importConflictPolicy,
-        dryRun: false,
-      })
+      const result = await templatesStore.importTemplate(payload)
       visible.value = false
       options.emitImported(result.template.id)
-    } catch {
+    } catch (error) {
+      const report = resolveApiDependencyReport(error)
+      if (report) {
+        dependencyReport.value = report
+      }
       // Error surfaced via store message key.
     }
+  }
+
+  function dependencyItemMessage(item: { messageKey: string; detail?: string | null }): string {
+    const localized = te(item.messageKey) ? t(item.messageKey) : item.messageKey
+    if (item.detail) {
+      return `${localized} (${item.detail})`
+    }
+    return localized
   }
 
   return {
@@ -150,6 +242,10 @@ export function useTemplateImportDialog(options: UseTemplateImportDialogOptions)
     formRef,
     parsedBundle,
     parseErrorKey,
+    dependencyReport,
+    checkingDependencies,
+    dependencyBusy,
+    canCommitImport,
     visible,
     form,
     formRules,
@@ -157,6 +253,8 @@ export function useTemplateImportDialog(options: UseTemplateImportDialogOptions)
     apiErrorMessage,
     onFileRemove,
     onFileSelected,
+    handleCheckDependencies,
     handleSubmit,
+    dependencyItemMessage,
   }
 }

@@ -50,7 +50,7 @@ final class TemplateImportTargetResolutionSupport {
             }
             TemplateEntity template = existingById.get();
             importAccessSupport.assertCanExport(template, session);
-            return resetExistingTemplate(template, metadata, session);
+            return resetExistingTemplate(template, metadata, targetMasterId, session);
         }
         if (existingByExternalId.isPresent()) {
             throw new TemplateValidationException("api.error.template.importConflict");
@@ -74,10 +74,12 @@ final class TemplateImportTargetResolutionSupport {
     TemplateImportService.ImportTarget resetExistingTemplate(
             TemplateEntity template,
             TemplateExportMetadataView metadata,
+            UUID targetMasterId,
             ManagementSessionClaims session
     ) {
         template.setName(metadata.name());
         template.setDescription(metadata.description());
+        template.setMasterId(targetMasterId);
         applyLocaleMetadata(template, metadata);
         template.setLifecycleStatus(TemplateLifecycleStatus.DRAFT);
         template.setReleaseVersion(null);
@@ -92,7 +94,20 @@ final class TemplateImportTargetResolutionSupport {
     }
 
     void assertMasterCompatible(MasterDocumentEntity master, TemplateExportMetadataView metadata) {
-        if (master.getStatus() != MasterDocumentStatus.APPROVED) {
+        assertMasterCompatible(master, metadata, false);
+    }
+
+    /**
+     * @param allowDraftMaterialized Wave 7 P2 — pack-materialized letterhead may be DRAFT only
+     */
+    void assertMasterCompatible(
+            MasterDocumentEntity master,
+            TemplateExportMetadataView metadata,
+            boolean allowDraftMaterialized
+    ) {
+        boolean approved = master.getStatus() == MasterDocumentStatus.APPROVED;
+        boolean draftOk = allowDraftMaterialized && master.getStatus() == MasterDocumentStatus.DRAFT;
+        if (!approved && !draftOk) {
             throw new TemplateValidationException("api.error.template.masterNotApproved");
         }
         if (!master.getGroupCode().equals(metadata.groupCode())) {

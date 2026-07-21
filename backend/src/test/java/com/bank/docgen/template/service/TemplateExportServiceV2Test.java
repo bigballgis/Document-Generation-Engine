@@ -96,6 +96,17 @@ class TemplateExportServiceV2Test {
                 contentModuleVersionRepository,
                 objectMapper
         );
+        var nestingService = org.mockito.Mockito.mock(
+                com.bank.docgen.contentmodule.service.ContentModuleNestingService.class);
+        org.mockito.Mockito.lenient()
+                .when(nestingService.extractNestedReferenceKeys(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(java.util.Set.of());
+        TemplateExportPromotionSupport promotionSupport = new TemplateExportPromotionSupport(
+                contentModuleRepository,
+                contentModuleVersionRepository,
+                nestingService,
+                objectStoragePort
+        );
         service = new TemplateExportService(
                 templateRepository,
                 apiPolicyRepository,
@@ -107,7 +118,8 @@ class TemplateExportServiceV2Test {
                 new TemplateExportAccessService(new GroupAccessService()),
                 objectMapper,
                 templateCurrentVersionResolver,
-                v2Support
+                v2Support,
+                promotionSupport
         );
         templateId = UUID.randomUUID();
         masterId = UUID.randomUUID();

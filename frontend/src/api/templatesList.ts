@@ -13,9 +13,11 @@ import type {
   ImportTemplatePayload,
   TemplateDetail,
   TemplateExportResult,
+  TemplateImportDryRunResult,
   TemplateImportResult,
   TemplateSummary,
 } from '@/types/template'
+import { isImportTemplateZipPayload } from '@/types/template'
 
 export type TemplateListQueryOptions = {
   signal?: AbortSignal
@@ -96,7 +98,43 @@ export async function exportTemplateZip(templateId: string): Promise<{ blob: Blo
   return { blob: response.data, filename }
 }
 
-export async function importTemplate(payload: ImportTemplatePayload): Promise<TemplateImportResult> {
-  const response = await http.post<ApiEnvelope<TemplateImportResult>>('/templates/import', payload)
+function buildImportMultipartFormData(payload: {
+  masterId: string
+  file: File
+  importConflictPolicy?: string
+  dryRun: boolean
+}): FormData {
+  const formData = new FormData()
+  formData.append('masterId', payload.masterId)
+  formData.append('file', payload.file)
+  if (payload.importConflictPolicy) {
+    formData.append('importConflictPolicy', payload.importConflictPolicy)
+  }
+  formData.append('dryRun', payload.dryRun ? 'true' : 'false')
+  return formData
+}
+
+export async function importTemplate(
+  payload: ImportTemplatePayload & { dryRun: true },
+): Promise<TemplateImportDryRunResult>
+export async function importTemplate(
+  payload: ImportTemplatePayload & { dryRun?: false },
+): Promise<TemplateImportResult>
+export async function importTemplate(
+  payload: ImportTemplatePayload,
+): Promise<TemplateImportResult | TemplateImportDryRunResult> {
+  if (isImportTemplateZipPayload(payload)) {
+    const response = await http.post<
+      ApiEnvelope<TemplateImportResult | TemplateImportDryRunResult>
+    >('/templates/import', buildImportMultipartFormData(payload), {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return unwrapEnvelope(response.data)
+  }
+
+  const response = await http.post<ApiEnvelope<TemplateImportResult | TemplateImportDryRunResult>>(
+    '/templates/import',
+    payload,
+  )
   return unwrapEnvelope(response.data)
 }

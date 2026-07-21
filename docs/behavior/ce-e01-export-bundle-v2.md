@@ -13,9 +13,10 @@
 | **Placement** | MAIN（merge 后） |
 | **上游** | CE-K01 (#57) **Done**（`master_revision_id` + `master_file_hash` + render profile 快照可消费） |
 | **Owning docs** | 本文件（行为 SoT）；计划 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §7；需求 [requirements-plan.md](../requirements/requirements-plan.md)「环境迁移」；产品 [PRD.md](../product/PRD.md) §10；领域 [domain-model.md](../domain/domain-model.md) §6；API [contract-outline.md](../api/contract-outline.md) + [openapi-v1.yaml](../api/openapi-v1.yaml)；权限沿用矩阵 §5 导出/导入（无新权限码） |
-| **Frontend UI** | **Out of scope（API-first）** — 无新导出/导入旅程、无 dry-run 报告页、无 Playwright E2E/UIUX 义务；既有 P14-T03 UI 继续走 v1 JSON 路径直至后续切片 |
+| **Frontend UI** | **Out of scope（API-first）** — 本片无新导出/导入旅程、无 dry-run 报告页、无 Playwright E2E/UIUX 义务；既有 P14-T03 UI 继续走 v1 JSON 路径。**Wave 7** 拥有 Import dry-run UI（见下方扩展链接）。 |
+| **下游扩展** | **SYS-NORM Wave 7** — [sys-norm-promotion-pack.md](./sys-norm-promotion-pack.md)（**BDD-SYS-NORM-PP-001…020**）：opt-in `dependencyClosure=PROMOTION` 嵌入资产二进制 + 条款嵌套闭包；Import dry-run UI；**不得**削弱本片默认 v2 fail-closed 语义 |
 
-**完成声明约束：** 本切片关闭「导出包不自包含 / 导入后半残」缺口的最小闭环（v2 ZIP 自包含载体 + 依赖预检 dry-run + 提交导入事务化）；**不**宣称 go-live；**不**激活 CD-3；**不**实现 CE-E02 资产库管理面、CE-E03 全库导出、CE-O01 PDF/A；**不**交付管理端 dry-run UI。
+**完成声明约束：** 本切片关闭「导出包不自包含 / 导入后半残」缺口的最小闭环（v2 ZIP 自包含载体 + 依赖预检 dry-run + 提交导入事务化）；**不**宣称 go-live；**不**激活 CD-3；**不**实现 CE-E02 资产库管理面、CE-E03 全库导出、CE-O01 PDF/A；**不**交付管理端 dry-run UI（由 Wave 7 交付）。
 
 ---
 
@@ -359,3 +360,17 @@ formal_phase: None
 **Handoff（Done）：** Task Master **#78** → **Done**（merge `6ae57974`）。自包含导出包 v2 + 导入 dry-run 已交付。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。**#79** CE-E02 → **Done**（merge `5bd3611e`）。下一 sole-active 建议：**#81** CE-O01（pending，勿提前激活）。
 
 **Open questions:** 无（已由 CE §7 + K01 Done + P14 基线裁定；E01-C1…C22）。
+
+---
+
+## 15. Downstream extension — SYS-NORM Wave 7 (promotion pack)
+
+本片默认行为（含 E01-C7 资产**仅键**、无管理端 dry-run UI）保持不变。下游 Wave 7 **加法**扩展：
+
+| 扩展点 | Wave 7 规则 | 对本片默认路径 |
+| --- | --- | --- |
+| 导出 profile | `dependencyClosure=PROMOTION` + `bundleVersion=2` + `format=zip` → 嵌入 `artifacts/assets/{assetKey}` + nesting closure / `clauseNestingGraph` | 省略 profile → 仍 keys-only（E01-C7） |
+| 导入 | 自动识别嵌入资产/嵌套图；dry-run/commit 报告可含 `CLAUSE_NESTING` / `ASSET_BINARY`；可物化 CE-E02 资产与 **DRAFT** 母版（禁 skip APPROVED） | 非晋级 v2 ZIP 的 fail-closed / 无半导入 **不得回退** |
+| UI | Templates Import：**Check dependencies** → 报告 → `readyToCommit` 门禁后 Import | 本片仍 API-first；UI 归 Wave 7 |
+
+权威： [sys-norm-promotion-pack.md](./sys-norm-promotion-pack.md)；契约：[openapi-v1.yaml](../api/openapi-v1.yaml) / [contract-outline.md](../api/contract-outline.md)；决策复用 [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) Decision 5。

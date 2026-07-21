@@ -2421,7 +2421,7 @@ export default {
       open: '导入模板',
       title: '导入模板包',
       description:
-        '上传来自其他环境的模板导出包。导入后模板处于草稿状态，需重新完成测试、审批与发布。',
+        '上传来自其他环境的模板导出包。导入前请先检查依赖。导入后模板处于草稿状态，需重新完成测试、审批与发布。',
       bundleFile: '包文件',
       chooseFile: '选择文件',
       fileHint: '请上传 .json 导出文件或从其他环境导出的 .zip 包。',
@@ -2437,8 +2437,17 @@ export default {
       conflictKeepId: '保留模板 ID 并创建新的开发版本',
       conflictHint:
         '当目标环境已存在相同模板 ID 时，可选择拒绝导入，或保留 ID 并从新的草稿版本继续。',
+      checkDependencies: '检查依赖',
       submit: '导入模板',
       success: '模板导入成功，当前为草稿状态。',
+      dependencies: {
+        title: '依赖报告',
+        ready: '可以导入',
+        notReady: '尚未就绪，无法导入',
+        blockingCount: '阻塞：{count}',
+        warningCount: '警告：{count}',
+        infoCount: '提示：{count}',
+      },
       validation: {
         masterRequired: '请选择目标母版。',
         fileRequired: '请选择要导入的包文件。',

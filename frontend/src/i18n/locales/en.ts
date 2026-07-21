@@ -1375,7 +1375,7 @@ export default {
       open: 'Import template',
       title: 'Import template bundle',
       description:
-        'Upload an exported template bundle from another environment. Imported templates land in draft and must complete test, approval, and publish again.',
+        'Upload an exported template bundle from another environment. Check dependencies before import. Imported templates land in draft and must complete test, approval, and publish again.',
       bundleFile: 'Bundle file',
       chooseFile: 'Choose file',
       fileHint: 'Upload a .json export file or .zip bundle exported from another environment.',
@@ -1391,8 +1391,17 @@ export default {
       conflictKeepId: 'Keep template ID and create a new development version',
       conflictHint:
         'When the target environment already contains the same template ID, choose whether to reject the import or keep the ID and start a new draft version.',
+      checkDependencies: 'Check dependencies',
       submit: 'Import template',
       success: 'Template imported successfully. It is now in draft status.',
+      dependencies: {
+        title: 'Dependency report',
+        ready: 'Ready to import',
+        notReady: 'Not ready to import',
+        blockingCount: 'Blocking: {count}',
+        warningCount: 'Warnings: {count}',
+        infoCount: 'Info: {count}',
+      },
       validation: {
         masterRequired: 'Select a target letterhead.',
         fileRequired: 'Choose a bundle file to import.',

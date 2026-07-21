@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -24,6 +26,7 @@ import com.bank.docgen.template.api.TemplateExportBundleView;
 import com.bank.docgen.template.api.TemplateExportClauseSnapshotView;
 import com.bank.docgen.template.api.TemplateExportMasterPinView;
 import com.bank.docgen.template.api.TemplateExportMetadataView;
+import com.bank.docgen.template.domain.TemplateDependencyClosure;
 import com.bank.docgen.template.domain.TemplateExportAssetKeyUsage;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
@@ -284,7 +287,7 @@ class LibraryExportServiceTest {
     void libraryExport_tempFileDeletedWhenAllEligibleFail() throws Exception {
         when(templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(List.of("RETAIL")))
                 .thenReturn(List.of(templateA));
-        when(templateExportService.buildV2ExportWithoutAudit(templateAId, groupAdmin))
+        when(templateExportService.buildV2ExportWithoutAudit(eq(templateAId), eq(groupAdmin), isNull()))
                 .thenThrow(new TemplateGovernanceException(
                         ApiErrorCodes.PINNED_MASTER_UNAVAILABLE,
                         "api.error.rendering.pinnedMasterUnavailable",
@@ -361,7 +364,7 @@ class LibraryExportServiceTest {
                             && "SKIPPED".equals(t.status())
                             && "EXPORT_NOT_ELIGIBLE".equals(t.reasonCode()));
             assertThat(zipEntryNames(zipBytes)).doesNotContain("templates/" + draftId + ".zip");
-            verify(templateExportService, never()).buildV2ExportWithoutAudit(eq(draftId), any());
+            verify(templateExportService, never()).buildV2ExportWithoutAudit(eq(draftId), any(), any());
         }
     }
 
@@ -483,7 +486,7 @@ class LibraryExportServiceTest {
     void libraryExport_onePinnedMasterMissing_othersIncluded() throws Exception {
         when(templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(List.of("RETAIL")))
                 .thenReturn(List.of(templateA, templateB));
-        when(templateExportService.buildV2ExportWithoutAudit(templateAId, groupAdmin))
+        when(templateExportService.buildV2ExportWithoutAudit(eq(templateAId), eq(groupAdmin), isNull()))
                 .thenThrow(new TemplateGovernanceException(
                         ApiErrorCodes.PINNED_MASTER_UNAVAILABLE,
                         "api.error.rendering.pinnedMasterUnavailable",
@@ -578,7 +581,7 @@ class LibraryExportServiceTest {
                 List.of(),
                 List.of()
         );
-        when(templateExportService.buildV2ExportWithoutAudit(templateAId, groupAdmin))
+        when(templateExportService.buildV2ExportWithoutAudit(eq(templateAId), eq(groupAdmin), isNull()))
                 .thenReturn(new TemplateExportService.BuiltV2Export(bundle, masterBytes, nestedZip));
         when(templateExportService.exportZip(templateAId, groupAdmin, 2))
                 .thenReturn(new TemplateExportService.TemplateExportZipArtifact("TPL-A-export.zip", nestedZip));
@@ -618,7 +621,8 @@ class LibraryExportServiceTest {
             List<TemplateExportAssetKeyManifestItemView> assets
     ) throws Exception {
         TemplateExportBundleView bundle = v2Bundle(templateId, externalId, hash, clauses, assets);
-        when(templateExportService.buildV2ExportWithoutAudit(eq(templateId), any()))
+        when(templateExportService.buildV2ExportWithoutAudit(
+                eq(templateId), any(), nullable(TemplateDependencyClosure.class)))
                 .thenReturn(new TemplateExportService.BuiltV2Export(bundle, bytes, minimalV2Zip(bytes)));
     }
 

@@ -14,6 +14,7 @@ import type {
   DeleteTemplatePayload,
   ImportTemplatePayload,
   TemplateDetail,
+  TemplateImportDryRunResult,
   TemplateImportResult,
   TemplateSummary,
   TestGeneratePayload,
@@ -127,11 +128,26 @@ export function createTemplatesCatalogActions(deps: {
     }
   }
 
+  async function dryRunImportTemplate(
+    payload: ImportTemplatePayload,
+  ): Promise<TemplateImportDryRunResult> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      return await templatesApi.importTemplate({ ...payload, dryRun: true })
+    } catch (error) {
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.import')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
   async function importTemplate(payload: ImportTemplatePayload): Promise<TemplateImportResult> {
     submitting.value = true
     lastErrorMessageKey.value = null
     try {
-      const result = await templatesApi.importTemplate(payload)
+      const result = await templatesApi.importTemplate({ ...payload, dryRun: false })
       templates.value = [
         toTemplateSummary(result.template, templates.value),
         ...templates.value.filter((item) => item.id !== result.template.id),
@@ -199,6 +215,7 @@ export function createTemplatesCatalogActions(deps: {
     fetchAllTemplates,
     fetchTemplate,
     createTemplate,
+    dryRunImportTemplate,
     importTemplate,
     deleteTemplate,
     updateTemplateMetadata,

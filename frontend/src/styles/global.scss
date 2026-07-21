@@ -100,6 +100,13 @@
   /* Element Plus token bridge */
   --el-border-radius-base: var(--radius-sm);
   --el-component-size: 36px;
+  --el-color-primary: var(--brand-primary);
+  --el-color-primary-light-3: color-mix(in srgb, var(--brand-primary) 70%, white);
+  --el-color-primary-light-5: color-mix(in srgb, var(--brand-primary) 50%, white);
+  --el-color-primary-light-7: color-mix(in srgb, var(--brand-primary) 30%, white);
+  --el-color-primary-light-8: color-mix(in srgb, var(--brand-primary) 20%, white);
+  --el-color-primary-light-9: color-mix(in srgb, var(--brand-primary) 10%, white);
+  --el-color-primary-dark-2: var(--brand-primary-hover);
 
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
@@ -152,6 +159,9 @@ p {
   --el-button-active-bg-color: var(--brand-primary-hover);
   --el-button-active-border-color: var(--brand-primary-hover);
   --el-button-text-color: var(--on-primary);
+  --el-button-disabled-bg-color: color-mix(in srgb, var(--brand-primary) 40%, white);
+  --el-button-disabled-border-color: color-mix(in srgb, var(--brand-primary) 40%, white);
+  --el-button-disabled-text-color: var(--on-primary);
 }
 
 .el-button--primary.is-plain {

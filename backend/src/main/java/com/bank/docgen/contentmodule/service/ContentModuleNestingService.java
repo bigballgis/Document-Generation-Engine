@@ -95,6 +95,15 @@ public class ContentModuleNestingService {
     }
 
     /**
+     * Extract distinct nested {@code contentModuleRef.referenceKey} values from structure JSON.
+     * Malformed JSON → fail-closed governance exception (same as write path).
+     */
+    @Transactional(readOnly = true)
+    public Set<String> extractNestedReferenceKeys(String contentStructureJson) {
+        return ContentModuleNestingStructureSupport.extractReferenceKeys(objectMapper, contentStructureJson);
+    }
+
+    /**
      * Ancestor versions that nest {@code targetModuleId} (direct or transitive), with path metadata.
      */
     @Transactional(readOnly = true)

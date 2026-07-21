@@ -208,6 +208,10 @@ public class TemplateEntity {
         this.description = description;
     }
 
+    public void setMasterId(UUID masterId) {
+        this.masterId = masterId;
+    }
+
     public void setLifecycleStatus(TemplateLifecycleStatus lifecycleStatus) {
         this.lifecycleStatus = lifecycleStatus;
     }

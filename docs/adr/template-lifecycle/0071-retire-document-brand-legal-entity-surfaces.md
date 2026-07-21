@@ -114,6 +114,7 @@ requirement** for ongoing DocumentBrand/LegalEntity management UX.
 
 - Behavior (program): [system-normalization-program.md](../../behavior/system-normalization-program.md)
 - Behavior (Wave 6 runtime SoT): [sys-norm-d1-brands.md](../../behavior/sys-norm-d1-brands.md)
+- Behavior (Wave 7 promotion pack — Decision 5 runtime SoT): [sys-norm-promotion-pack.md](../../behavior/sys-norm-promotion-pack.md)
 - Program: [system-normalization-program-2026-07.md](../../plan/system-normalization-program-2026-07.md)
 - Plan detail: [sys-norm-d1-brands.md](../../plan/detail/sys-norm-d1-brands.md)
 - Superseded surface: [0065-legal-entity-document-brand-variants.md](./0065-legal-entity-document-brand-variants.md)

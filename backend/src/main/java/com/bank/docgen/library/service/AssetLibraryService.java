@@ -157,6 +157,74 @@ public class AssetLibraryService {
         return toView(saved);
     }
 
+    /**
+     * SYS-NORM Wave 7 / PP-C8 — materialize an asset binary from a promotion pack in the
+     * same transaction as template import. Fail-closed on conflict with an ACTIVE key.
+     */
+    @Transactional
+    public AssetLibraryAssetView materializeImportedAsset(
+            ManagementSessionClaims session,
+            String assetKeyRaw,
+            AssetLibraryAssetClass assetClass,
+            byte[] bytes,
+            String contentType,
+            String originalFileName
+    ) {
+        requireUploadAccess(session, assetClass == null ? AssetLibraryAssetClass.OTHER : assetClass);
+        String assetKey = AssetLibraryUploadValidator.normalizeAssetKey(assetKeyRaw);
+        if (bytes == null || bytes.length == 0) {
+            throw new AssetLibraryValidationException(
+                    ApiErrorCodes.ASSET_LIBRARY_CONTENT_TYPE_MISMATCH,
+                    "api.error.assetLibrary.payloadEmpty"
+            );
+        }
+        if (bytes.length > AssetLibraryUploadValidator.MAX_BYTES) {
+            throw new AssetLibraryValidationException(
+                    ApiErrorCodes.ASSET_LIBRARY_PAYLOAD_TOO_LARGE,
+                    "api.error.assetLibrary.payloadTooLarge"
+            );
+        }
+        AssetLibraryAssetClass resolvedClass = assetClass == null ? AssetLibraryAssetClass.IMAGE : assetClass;
+        String resolvedType = contentType == null || contentType.isBlank() ? "application/octet-stream" : contentType;
+        String fileName = originalFileName == null || originalFileName.isBlank() ? assetKey : originalFileName;
+
+        LibraryAssetEntity existing = repository.findById(assetKey).orElse(null);
+        if (existing != null && existing.getStatus() == AssetLibraryAssetStatus.ACTIVE) {
+            // Already present — treat as idempotent success for import materialize.
+            return toView(existing);
+        }
+
+        Instant now = clock.instant();
+        String sha256 = sha256Hex(bytes);
+        storeObject(assetKey, bytes, resolvedType);
+        LibraryAssetEntity saved;
+        if (existing != null) {
+            existing.reactivate(
+                    resolvedClass,
+                    resolvedType,
+                    bytes.length,
+                    sha256,
+                    fileName,
+                    session.username(),
+                    now
+            );
+            saved = repository.save(existing);
+        } else {
+            saved = repository.save(new LibraryAssetEntity(
+                    assetKey,
+                    resolvedClass,
+                    AssetLibraryAssetStatus.ACTIVE,
+                    resolvedType,
+                    bytes.length,
+                    sha256,
+                    fileName,
+                    session.username(),
+                    now
+            ));
+        }
+        return toView(saved);
+    }
+
     @Transactional
     public AssetLibraryAssetView disable(ManagementSessionClaims session, String assetKeyRaw) {
         requireDisableAccess(session);

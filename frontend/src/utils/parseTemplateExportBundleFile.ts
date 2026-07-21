@@ -1,12 +1,22 @@
 import type { TemplateExportBundle } from '@/types/template'
 
 export const TEMPLATE_EXPORT_BUNDLE_FORMAT = 'template-export-bundle-v1-json'
+export const TEMPLATE_EXPORT_BUNDLE_FORMAT_V2 = 'template-export-bundle-v2-json'
+
+const SUPPORTED_BUNDLE_FORMATS = new Set([
+  TEMPLATE_EXPORT_BUNDLE_FORMAT,
+  TEMPLATE_EXPORT_BUNDLE_FORMAT_V2,
+])
 
 export class TemplateExportBundleParseError extends Error {
   constructor(readonly messageKey: string) {
     super(messageKey)
     this.name = 'TemplateExportBundleParseError'
   }
+}
+
+function isSupportedBundleFormat(format: unknown): format is TemplateExportBundle['format'] {
+  return typeof format === 'string' && SUPPORTED_BUNDLE_FORMATS.has(format)
 }
 
 function normalizeBundle(payload: unknown): TemplateExportBundle {
@@ -16,7 +26,7 @@ function normalizeBundle(payload: unknown): TemplateExportBundle {
 
   const record = payload as Record<string, unknown>
   const bundleCandidate =
-    record.format === TEMPLATE_EXPORT_BUNDLE_FORMAT && record.metadata
+    isSupportedBundleFormat(record.format) && record.metadata
       ? record
       : record.bundle ?? record
 
@@ -25,7 +35,7 @@ function normalizeBundle(payload: unknown): TemplateExportBundle {
   }
 
   const bundle = bundleCandidate as TemplateExportBundle
-  if (bundle.format !== TEMPLATE_EXPORT_BUNDLE_FORMAT || !bundle.metadata) {
+  if (!isSupportedBundleFormat(bundle.format) || !bundle.metadata) {
     throw new TemplateExportBundleParseError('templates.import.error.unsupportedFormat')
   }
 
