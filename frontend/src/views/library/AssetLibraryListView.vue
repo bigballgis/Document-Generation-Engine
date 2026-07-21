@@ -166,18 +166,32 @@ const {
 
       <EmptyStatePanel
         v-else
+        data-testid="asset-library-filter-empty"
         title-key="assetLibrary.list.empty"
-        description-key="assetLibrary.list.emptyDescription"
+        :description-key="
+          canUpload
+            ? 'assetLibrary.list.emptyDescription'
+            : 'assetLibrary.list.emptyDescriptionReadOnly'
+        "
       />
     </template>
 
     <EmptyStatePanel
       v-else-if="!libraryAssetsStore.loadingList"
+      data-testid="asset-library-honest-empty"
       title-key="assetLibrary.list.empty"
-      description-key="assetLibrary.list.emptyDescription"
+      :description-key="
+        canUpload
+          ? 'assetLibrary.list.emptyDescription'
+          : 'assetLibrary.list.emptyDescriptionReadOnly'
+      "
     >
       <template v-if="canUpload" #actions>
-        <el-button type="primary" @click="uploadDialogOpen = true">
+        <el-button
+          type="primary"
+          data-testid="asset-library-upload-open-empty"
+          @click="uploadDialogOpen = true"
+        >
           {{ t('assetLibrary.upload.open') }}
         </el-button>
       </template>

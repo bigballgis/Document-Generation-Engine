@@ -102,6 +102,8 @@ config:
   storageProvider: minio
   storageBucket: docgen-artifacts
   seedDemoCatalog: false
+  # SYS-NORM Wave 8: managed Asset Library seed (IMG-1/SEAL-1); keep false outside demo/验收
+  seedDemoAssetLibrary: false
   javaToolOptions: "-Djava.io.tmpdir=/tmp"
 
 # Externally managed data services — endpoints only (no credentials in ConfigMap).

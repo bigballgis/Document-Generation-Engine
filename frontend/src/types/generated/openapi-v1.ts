@@ -4609,6 +4609,11 @@ export interface components {
             assetKeyManifest?: components["schemas"]["TemplateExportAssetKeyManifestItemView"][];
             /** @description Optional Wave 7 promotion field (PP-C2). Present when nested content modules exist under promotion export; non-nested templates may omit or emit empty edges. Cycles / depth > 8 fail closed at export. */
             clauseNestingGraph?: components["schemas"]["TemplateExportClauseNestingGraphView"];
+            /**
+             * @description Optional Wave 7 marker written into promotion ZIP bundle JSON when export used `dependencyClosure=PROMOTION`. Import dry-run prefers this field over asset/nesting heuristics for promotion-carrier detection. Absent on default E01/E03 bundles. JSON export rejects query `dependencyClosure=PROMOTION` (requires `format=zip`).
+             * @enum {string|null}
+             */
+            dependencyClosure?: "PROMOTION" | null;
         };
         TemplateExportResult: {
             /** @enum {string} */

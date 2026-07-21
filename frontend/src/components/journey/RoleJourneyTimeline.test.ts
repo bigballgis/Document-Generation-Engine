@@ -76,14 +76,31 @@ describe('RoleJourneyTimeline', () => {
     expect(wrapper.find('[data-journey-guidance]').text()).toBe('Custom demo guidance')
   })
 
-  it('renders nothing when steps is empty', () => {
+  it('BDD-SYS-NORM-W8-014 — shows honest empty guidance when steps array is empty', () => {
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(RoleJourneyTimeline, {
       props: { steps: [], currentStepIndex: null },
-      global: { plugins: [i18n] },
+      global: { plugins: [i18n, ElementPlus] },
     })
 
+    expect(wrapper.find('[data-testid="journey-timeline-honest-empty"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain(en.journey.timeline.emptyTitle)
+    expect(wrapper.text()).toContain(en.journey.timeline.empty.guidance)
     expect(wrapper.find('[data-journey-timeline]').exists()).toBe(false)
+  })
+
+  it('BDD-SYS-NORM-W8-013 — empty work set shows visible guidance even when inlineHelp is false', async () => {
+    const wrapper = mountTimeline({
+      currentStepIndex: null,
+      titleKey: 'journey.roles.DOCUMENT_AUTHOR.title',
+      inlineHelp: false,
+    })
+    await flushPromises()
+
+    expect(wrapper.find('[data-journey-guidance]').exists()).toBe(true)
+    expect(wrapper.find('[data-journey-guidance]').text()).toBe(
+      en.journey.roles.DOCUMENT_AUTHOR.letterhead.empty.guidance,
+    )
   })
 
   it('clamps out-of-range currentStepIndex to the last step', async () => {

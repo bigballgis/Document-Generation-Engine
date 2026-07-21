@@ -26,6 +26,10 @@ acceptance/production must **not** silently use `docgen.ad-group-resolver.type=c
 `DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB=true` (**LAB ONLY** — not production AD). Checklist
 [#5a](./launch-readiness-checklist.md) remains **NO-GO** until implement + evidence (do **not**
 flip at docs-first) — overall checklist remains **NO-GO**; **not** a go-live claim.
+**Demo/验收 Asset Library seed + N23:** product default = honest empty; optional managed-asset
+seed and classpath `demo-images` ≠ Asset Library —
+[demo-acceptance-asset-seed.md](./demo-acceptance-asset-seed.md) (SYS-NORM Wave 8; **not**
+production default; do **not** flip **#3b** / **#5a**).
 
 ## Release gate
 

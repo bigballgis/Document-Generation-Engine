@@ -563,6 +563,9 @@ export default {
       notFoundDescription: '该修订线可能已被移除，或不在您的分组权限范围内。',
       summaryTitle: '修订概览',
       changeSummary: '变更摘要',
+      emptySummaryTitle: '尚无设计变更摘要',
+      emptySummaryDescription:
+        '此修订尚无变更摘要。可下载 DOCX 继续设计，或在提交母版审核时填写摘要。',
       updatedAt: '最后更新时间',
       updatedBy: '最后更新人',
       anchorsTitle: 'DOCX 概览 — 锚点位置',
@@ -893,7 +896,7 @@ export default {
     },
     dependencies: {
       masterRevision: {
-        title: '母版 / 信笺修订',
+        title: '母版修订',
         masterLabel: '绑定母版',
         pinned: '发布时已钉扎',
         notPinnedUntilPublish: '发布前尚未钉扎',
@@ -2008,7 +2011,7 @@ export default {
       },
       master: {
         title: '确认已关联母版',
-        description: '在配置绑定前，先确认母版文档及其版式占位符。',
+        description: '在配置绑定前，先确认母版及其版式占位符。',
         linkedMaster: '已关联母版',
         groupLabel: '分组：{groupCode}',
         anchorCount: '{count} 个版式占位符',
@@ -2948,6 +2951,11 @@ export default {
   journey: {
     timeline: {
       ariaLabel: '角色工作流程进度',
+      emptyTitle: '暂无工作流步骤',
+      empty: {
+        guidance:
+          '当前视图尚无可用的工作流旅程。请从待办列表打开任务，或使用下方快捷入口继续。',
+      },
     },
     custom: {
       demo: '自定义演示引导',
@@ -3363,6 +3371,8 @@ export default {
       help: '仅全局管理员可管理法律冻结。处于活动状态的冻结在释放前会阻止清理。',
       empty: '暂无法律冻结',
       emptyDescription: '创建法律冻结以保护调用或审计记录免于留存清理。',
+      emptyDescriptionReadOnly:
+        '当前范围内暂无法律冻结。管理员创建后将显示在此。',
       columns: {
         holdId: '冻结 ID',
         scope: '范围类型',
@@ -3433,7 +3443,10 @@ export default {
         '浏览模板绑定使用的平台图片与印章资产。可按类别或状态筛选，上传新资产，或停用不再解析的键。',
       help: '资产键与对象存储键一致，供渲染解析使用。图片建议 IMG-… 前缀，印章建议 SEAL-… 前缀。',
       empty: '暂无资产。',
-      emptyDescription: '上传 PNG 或 JPEG 资产以登记到共享资产库。',
+      emptyDescription:
+        '尚未登记受管资产库条目。请上传 PNG 或 JPEG 资产，供模板绑定使用。',
+      emptyDescriptionReadOnly:
+        '当前范围内暂无受管资产库条目。授权用户上传后将显示在此。',
       columns: {
         assetKey: '资产键',
         assetClass: '类别',

@@ -86,6 +86,7 @@
 | **E02-C11** | **权限 / 角色矩阵（本片确认）：** 见 §4.1；新 capability `manageAssetLibrary` + 路由 `route.asset-library-management`；印章上传额外角色门禁在服务层 fail-closed。 | 计划「印章类上传需审批角色」 |
 | **E02-C12** | **作用域：** 本片资产库为**平台共享目录**（无 `groupId` 分片）。后续组分片不在本片。`GROUP_ADMIN` 与 `GLOBAL_ADMIN` 对目录操作权等同（停用/全类上传）。 | M 量级收敛 |
 | **E02-C13** | **`StructuredContentImageResolver` 不变：** 不得修改 `resolveImageRef` / `resolveSealRef` 签名、`ResolvedImage` 形态、MinIO→demo classpath→fail-closed 顺序、错误码/`messageKey`。本片测试须含回归：既有 `IMG-1`/`SEAL-1` 解析与缺失 fail-closed 仍绿。 | handoff hard constraint |
+| **E02-C13a** | **N23 / Wave 8（docs lock，不改本片 API）：** classpath `rendering/demo-images/`（及 `DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED`）仅为 LAB/test **渲染回退**，**不是** Asset Library 目录内容。管理页 `/library/assets` **仅**列出 managed `library_asset` 行。产品默认零资产 = **honest empty**；可选 demo/验收 managed-asset seed 见 [demo-acceptance-asset-seed.md](../operations/demo-acceptance-asset-seed.md) 与 [sys-norm-demo-seed-terms.md](./sys-norm-demo-seed-terms.md)（W8-C1…C3）。 | SYS-NORM Wave 8 / N23 |
 | **E02-C14** | **管理页：** 新路由 canonical `/library/assets`；逻辑键 `route.asset-library-management`；列表 + 上传对话框（类选择、键输入、文件）+ 停用确认；英文优先；隐藏无权限控件；直链无权限 → Forbidden。 | 计划「管理页」+ 矩阵 §13 |
 | **E02-C15** | **审计：** 成功上传 → `ASSET_LIBRARY_UPLOAD`；停用 → `ASSET_LIBRARY_DISABLE`；DISABLED 键再上传 → `ASSET_LIBRARY_REUPLOAD`。摘要含 `assetKey`/`assetClass`/`actor`/`contentSha256`；**无**文件字节。失败授权不泄露对象是否存在（统一 403）。 | 可观测 |
 | **E02-C16** | **E01 兼容：** ACTIVE 键对 E01 ASSET_KEY 探测为存在；DISABLED 后为缺失（blocking）。本片**不**改导出包嵌入资产二进制（仍属未来/非 E03 本片范围外）。 | E01-C14 |
@@ -310,7 +311,8 @@
 | 停用不存在键 | `404` `api.error.assetLibrary.assetNotFound`（对有权管理员） |
 | 无权限探测键 | `403`，不区分存在与否 |
 | 空文件 0 字节 | `422` |
-| 解析器 demo classpath tier | 本片不改；生产 profile 保持关闭 |
+| 解析器 demo classpath tier | 本片不改；生产 profile 保持关闭；**≠** Asset Library 目录（N23 — Wave 8） |
+| 零 managed 资产 | 产品默认 honest empty（Wave 8）；可选 demo/验收 seed 见 ops 文档 |
 | 模板仍引用已停用键 | 渲染/预览 fail-closed（既有错误）；本片不自动改绑定 |
 
 ---

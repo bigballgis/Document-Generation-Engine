@@ -52,6 +52,16 @@
 **Confirmed requirement：** hold 实体双范围 + 两路 retention 豁免 + GLOBAL_ADMIN 管理 API/页 + 管理审计。  
 **Pending / out of scope：** 自动 eDiscovery、跨系统 hold 同步、GROUP_ADMIN 组范围 hold、归档到冷仓代替豁免、go-live / CD-3。
 
+### SYS-NORM Wave 8 product notes (N13 / N18) — docs lock
+
+> Owning runtime BDD: [sys-norm-demo-seed-terms.md](./sys-norm-demo-seed-terms.md)
+> (**W8-C4**, **W8-005/006**, **W8-015**). Does **not** reopen CE-G04 API scope.
+
+| ID | Confirmed product/UX note | Status |
+| --- | --- | --- |
+| **N13** | Zero holds in scope → **honest empty** (title + description). Create CTA only when the session may manage/create holds; without manage capability → honest empty **without** create CTA (not a silent blank table). | Wave 8 In Progress |
+| **N18** | Legal hold actor / username → EntityLink | **Explicitly deferred** — Wave 8 Done **must not** claim N18 closed |
+
 ---
 
 ## 3. Actor / Role

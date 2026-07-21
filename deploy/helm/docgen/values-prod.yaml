@@ -32,6 +32,7 @@ config:
   appEnvironment: prod
   asyncTransport: kafka
   seedDemoCatalog: false
+  seedDemoAssetLibrary: false
 
 externalServices:
   postgres:

@@ -169,8 +169,13 @@ const {
 
       <EmptyStatePanel
         v-else
+        data-testid="legal-hold-honest-empty"
         title-key="legalHold.list.empty"
-        description-key="legalHold.list.emptyDescription"
+        :description-key="
+          canManage
+            ? 'legalHold.list.emptyDescription'
+            : 'legalHold.list.emptyDescriptionReadOnly'
+        "
       >
         <template v-if="canManage" #actions>
           <el-button

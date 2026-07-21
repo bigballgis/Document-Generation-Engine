@@ -50,6 +50,8 @@ services:
       # TPC-C3
       APP_ENVIRONMENT: prod
       DOCGEN_SEED_DEMO_CATALOG: ${DOCGEN_SEED_DEMO_CATALOG:-false}
+      # SYS-NORM Wave 8: optional managed IMG-1/SEAL-1 Asset Library seed (demo/验收 only; default off)
+      DOCGEN_SEED_DEMO_ASSET_LIBRARY: ${DOCGEN_SEED_DEMO_ASSET_LIBRARY:-false}
       # LR-C5: ≥500 templates for catalog pagination E2E (idempotent if LOAD-TPL-0500 exists)
       DOCGEN_SEED_CATALOG_LOAD: ${DOCGEN_SEED_CATALOG_LOAD:-false}
       DOCGEN_SEED_CATALOG_LOAD_COUNT: ${DOCGEN_SEED_CATALOG_LOAD_COUNT:-500}

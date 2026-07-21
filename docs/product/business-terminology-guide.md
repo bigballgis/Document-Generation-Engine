@@ -4,25 +4,32 @@
 **Owner phase:** [P21 — Role-journey frontend redesign & business-friendly terminology](../plan/detail/P21-role-journey-frontend-redesign.md) (**Done** 2026-06-30)
 **Primary persona source:** user confirmation 2026-06-29 (two rounds).
 
-### SYS-NORM Confirmed intent (2026-07-21) — Wave 5–6 Done; Wave 8 L1 sweep pending
+### SYS-NORM Confirmed intent (2026-07-21) — Wave 5–7 Done; Wave 8 L1 sweep In Progress
 
-> Product direction locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.8 / §2.5.
-> **Do not claim L1 sweep Done** until Wave 8 `sys-norm-demo-seed-terms`.
+> Product direction locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.8 / §2.5
+> and Wave 8 BDD [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) (**W8-C5**, **W8-007…010**).
+> **L1 labels Confirmed:** EN **Letterhead** / ZH **母版**. Purge user-facing mixed “Master” /
+> “Master documents” as **L1 primary** object nouns (nav titles, page H1, primary buttons,
+> journey step object nouns for the DOCX letterhead).
+> **Do not claim L1 i18n sweep Done** until Wave 8 implementation gates + post-task sync
+> (TM **#152** `sys-norm-demo-seed-terms` — leaf **In Progress**; program **not** Done).
 > Wave 5 six-role runtime **Done** (`febb95b3`). Wave 6 D1 brand/entity retirement **Done**
-> (TM **#150** `64b0a650` — **not** program Done; Waves 7–8 remain).
+> (`64b0a650`). Wave 7 promotion pack **Done** (`11356c63` / `f795b04a`).
 
 | Topic | Confirmed | Pending | Wave |
 | --- | --- | --- | --- |
-| L1 English primary object label | **Letterhead** (purge user-facing mixed “Master” on L1 primary surfaces) | — | Intent Wave 0; sweep **Wave 8** |
-| L1 Chinese primary object label | **母版** | — | Intent Wave 0; sweep **Wave 8** |
-| API / L3 identifiers | May keep `masterId`, `MasterDocument`, routes | — | Unchanged |
-| Role `DOCUMENT_AUTHOR` | Role **ID** locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md); BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) ROLE-013) | EN/ZH **display label** finalizable — interim FE copy OK | Labels: Wave 5 interim / Wave 8 finalize |
+| L1 English primary object label | **Letterhead** (purge bare “Master” / “Master documents” on L1 primary surfaces) | FE i18n residual sweep (impl) | Intent Wave 0; sweep **Wave 8 In Progress** |
+| L1 Chinese primary object label | **母版** (not 主文档 as primary object noun) | FE i18n residual sweep (impl) | Intent Wave 0; sweep **Wave 8 In Progress** |
+| API / L3 identifiers | May keep `masterId`, `MasterDocument`, routes, audit codes | — | Unchanged (N16–N17) |
+| L2 technical field labels | “Master ID” allowed where the field intentionally exposes the technical id | — | Unchanged |
+| Role `DOCUMENT_AUTHOR` | Role **ID** locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md); BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) ROLE-013) | EN/ZH **display label** finalizable — interim FE copy OK (P-Q1) | Labels: Wave 5 interim / Wave 8 capacity residual |
 | Role merge (catalog) | Six-role compression locked (ADR-0070); runtime catalog **Done** (`febb95b3`) | — | **Wave 5 Done** |
 | Document brands / Legal entities (L1) | **Not required product surfaces** ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); do **not** use as nav/module titles | — (Wave 6 durable retire **Done** `64b0a650`) | **Wave 6 Done** `sys-norm-d1-brands` |
 | Logo / seal / letterhead legal name | Governed via **Letterhead** / **母版** (master flows) — not “Document brand” MDM | — | Wave 6+ |
 | Shell brand themes | `REDBC` / `GREENBC` remain UI-only chrome labels — not document brand MDM | — | Unchanged |
 
-§4.5 below remains the P21 canonical glossary baseline; SYS-NORM Wave 8 reconciles residual “Master” mix on L1.
+§4.5 below remains the P21 canonical glossary baseline; SYS-NORM Wave 8 removes residual
+“Master” mix on L1 primary surfaces while leaving L2/L3 technical identifiers intact.
 
 > This guide is the **single source of truth (SSOT)** for user-facing label wording on L1
 > primary surfaces. It governs message **values** only; it never changes stable i18n keys, API
@@ -83,8 +90,8 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | API credentials | Access keys / Connection accounts | 接入账号 | (credential surfaces) | avoid "credential" |
 | Access & identity | Users & permissions | 用户与权限 | `nav.groups.entitlement` | "entitlement" too IT |
 | Identity administration | User management | 用户管理 | `nav.routes.identityAdministration` | |
-| Master documents | Letterhead templates / Document masters | 母版文档 | `nav.items.masters` | bank-natural; **never** use 主文档 on L1 |
-| Master (object) | Letterhead | 母版 | `masters.*`, dashboard stats | short form for the DOCX asset |
+| Master documents | Letterhead templates | 母版文档 | `nav.items.masters` | L1 only; **never** “Master documents” / 主文档 as primary labels |
+| Master (object) | Letterhead | 母版 | `masters.*`, dashboard stats | short form for the DOCX asset; bare “Master” forbidden on L1 primary |
 | Master package | Letterhead package | 母版包 | `packageCatalog.master`, `masters.hub` | catalog row / package hub |
 | Master name | Letterhead name | 母版名称 | `masters.list.columns.name` | form/table L2 |
 | Document author (role) | Document author (interim) | 文档作者（interim） | `roles.DOCUMENT_AUTHOR` | Role ID locked; L1 final Pending (P-Q1). Retired: `roles.MASTER_DESIGNER` / `TEMPLATE_AUTHOR` |
@@ -170,8 +177,16 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 
 **Forbidden on L1 (zh-CN):** **主文档** — do not use in any user-facing bundle value.
 
-**Forbidden on L1 (en):** **master document** / **master documents** as primary labels — prefer
-**letterhead** (object) or **letterhead templates** (module).
+**Forbidden on L1 (en):** **master** / **master document** / **master documents** as primary
+object nouns — use **Letterhead** (object) or **Letterhead templates** (module). Compounds that
+already SSOT “Letterhead package” remain allowed. Do **not** mix “Master” into nav titles,
+page H1s, or primary CTAs that name the DOCX letterhead object.
+
+**Allowed on L2/L3:** `masterId` field labels (“Master ID”), API paths (`/masters`), schema
+names (`MasterDocument`), audit codes, route segments — technical identifiers are not L1 copy.
+
+**Wave 8 pointer:** runtime sweep + empty-state copy → [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md);
+ops seed / N23 → [demo-acceptance-asset-seed.md](../operations/demo-acceptance-asset-seed.md).
 
 **i18n keys touched by this glossary (representative):**
 
@@ -202,8 +217,8 @@ pages, or primary business labels going forward. Operators manage letterhead / l
 
 **L3 / historical:** `DocumentBrand`, `LegalEntity`, OpenAPI retired paths, ADR-0065 Decision body
 remain for audit; product direction follows [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)
-and [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md). Full L1 English/母版 residual sweep
-is still **Wave 8** (do not claim terminology program Done here).
+and [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md). Full L1 English/母版 residual
+i18n sweep is **Wave 8 In Progress** (TM **#152** — do not claim sweep or SYS-NORM program Done here).
 
 ## 5. Acceptance (per P21 sub-phase)
 
@@ -225,6 +240,8 @@ is still **Wave 8** (do not claim terminology program Done here).
 ## 7. Related documents
 
 - [P21 detailed plan](../plan/detail/P21-role-journey-frontend-redesign.md)
+- [SYS-NORM Wave 8 — demo seed + L1 terms](../behavior/sys-norm-demo-seed-terms.md)
+- [Demo / 验收 asset seed ops](../operations/demo-acceptance-asset-seed.md)
 - [Catalog navigation UX](./catalog-navigation-ux.md) — hybrid IA + business-terminology navigation contract
 - [Permission matrix §13.3](../security/permission-matrix.md) — behavior-typed entry visibility
 - [ADR: behavior-typed IA + business terminology](../adr/decisions/2026-06-29-behavior-typed-ia-business-terminology.md)

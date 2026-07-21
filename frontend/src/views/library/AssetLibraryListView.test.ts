@@ -161,6 +161,54 @@ describe('AssetLibraryListView', () => {
     expect(wrapper.text()).toContain('IMG-TEST')
   })
 
+  it('BDD-SYS-NORM-W8-001 — shows honest empty with Upload CTA when permitted', async () => {
+    vi.mocked(libraryAssetsApi.listLibraryAssets).mockResolvedValue(pageView([]))
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(AssetLibraryListView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(en.assetLibrary.list.empty)
+    expect(wrapper.text()).toContain(en.assetLibrary.list.emptyDescription)
+    expect(wrapper.find('[data-testid="asset-library-table"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="asset-library-upload-open-empty"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="empty-state-actions"]').exists()).toBe(true)
+  })
+
+  it('BDD-SYS-NORM-W8-001 — honest empty without Upload CTA when not permitted', async () => {
+    patchSession(['TEMPLATE_TESTER'], {
+      ...authorCapabilities,
+      authorTemplates: false,
+      decideTests: true,
+      exportTemplates: false,
+      authorContentModules: false,
+      manageAssetLibrary: false,
+    })
+    vi.mocked(libraryAssetsApi.listLibraryAssets).mockResolvedValue(pageView([]))
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(AssetLibraryListView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(en.assetLibrary.list.empty)
+    expect(wrapper.text()).toContain(en.assetLibrary.list.emptyDescriptionReadOnly)
+    expect(wrapper.find('[data-testid="asset-library-upload-open"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="asset-library-upload-open-empty"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="empty-state-actions"]').exists()).toBe(false)
+  })
+
   it('shows disable action for admins on ACTIVE rows', async () => {
     patchSession(['GLOBAL_ADMIN'], {
       ...authorCapabilities,
