@@ -12,6 +12,7 @@ adrNumber: "0071"
 topic: template-lifecycle
 related:
   - docs/behavior/system-normalization-program.md
+  - docs/behavior/sys-norm-d1-brands.md
   - docs/plan/system-normalization-program-2026-07.md
   - docs/adr/template-lifecycle/0065-legal-entity-document-brand-variants.md
   - docs/behavior/ibl-e4-entity-document-brands.md
@@ -30,8 +31,8 @@ related:
 | User confirmation | **Yes** — 2026-07-21 (LOCKED — do not reopen) |
 | Behavior SoT | [system-normalization-program.md](../../behavior/system-normalization-program.md) §2.5 / §7 |
 | Supersedes | [ADR-0065](./0065-legal-entity-document-brand-variants.md) **management UX / product surfaces** going forward |
-| Runtime simplify | **Wave 6** `sys-norm-d1-brands` |
-| Nav removal | May start **Wave 1** after this ADR Accepted |
+| Runtime simplify | **Wave 6** `sys-norm-d1-brands` — BDD **ready** [sys-norm-d1-brands.md](../../behavior/sys-norm-d1-brands.md) **BDD-SYS-NORM-D1-001…020** |
+| Nav removal | **Wave 1 Done** (nav hide); Wave 6 hard-retires routes/API/runtime |
 | Checklist | Does **not** flip **#3b** / **#5a** |
 
 `sourceOfTruth: true` while Accepted.
@@ -88,7 +89,7 @@ requirement** for ongoing DocumentBrand/LegalEntity management UX.
 | [BDD-SYS-NORM-D1-001](../../behavior/system-normalization-program.md#bdd-sys-norm-d1-001--product-surfaces-retired) | Product surfaces retired |
 | [BDD-SYS-NORM-D1-002](../../behavior/system-normalization-program.md#bdd-sys-norm-d1-002--supersede-adr-0065-management-ux-requirement) | Supersede ADR-0065 management UX requirement |
 | [BDD-SYS-NORM-D1-003](../../behavior/system-normalization-program.md#bdd-sys-norm-d1-003--shell-themes-orthogonal) | Shell themes orthogonal |
-| [BDD-SYS-NORM-D1-004](../../behavior/system-normalization-program.md#bdd-sys-norm-d1-004--runtime-simplify-fail-closed-wave-6-stub-pointer) | Runtime simplify fail-closed (Wave 6 stub) |
+| [BDD-SYS-NORM-D1-004](../../behavior/sys-norm-d1-brands.md#bdd-sys-norm-d1-004--runtime-simplify-fail-closed--letterhead-resolve) | Runtime simplify / letterhead resolve (Wave 6 SoT) |
 | [BDD-SYS-NORM-D1-005](../../behavior/system-normalization-program.md#bdd-sys-norm-d1-005--export-packs-omit-brandentity-sidecar) | Export packs omit brand/entity sidecar |
 
 ## Alternatives Considered
@@ -111,8 +112,13 @@ requirement** for ongoing DocumentBrand/LegalEntity management UX.
 
 ## Related Documents
 
-- Behavior: [system-normalization-program.md](../../behavior/system-normalization-program.md)
+- Behavior (program): [system-normalization-program.md](../../behavior/system-normalization-program.md)
+- Behavior (Wave 6 runtime SoT): [sys-norm-d1-brands.md](../../behavior/sys-norm-d1-brands.md)
 - Program: [system-normalization-program-2026-07.md](../../plan/system-normalization-program-2026-07.md)
+- Plan detail: [sys-norm-d1-brands.md](../../plan/detail/sys-norm-d1-brands.md)
 - Superseded surface: [0065-legal-entity-document-brand-variants.md](./0065-legal-entity-document-brand-variants.md)
 - Historical BDD: [ibl-e4-entity-document-brands.md](../../behavior/ibl-e4-entity-document-brands.md)
+- Permissions (Wave 6 retire notes): [permission-matrix.md](../../security/permission-matrix.md) §5.3
+- API contract: [openapi-v1.yaml](../../api/openapi-v1.yaml) · [contract-outline.md](../../api/contract-outline.md)
+- Catalog nav: [catalog-navigation-ux.md](../../product/catalog-navigation-ux.md)
 - Terminology: [business-terminology-guide.md](../../product/business-terminology-guide.md)

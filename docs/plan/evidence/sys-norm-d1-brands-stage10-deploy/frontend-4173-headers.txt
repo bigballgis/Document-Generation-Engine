@@ -1,0 +1,19 @@
+status_code=200
+content_length=1202
+
+Key                     Value
+---                     -----
+Server                  {nginx/1.27.5}
+Date                    {Tue, 21 Jul 2026 09:00:49 GMT}
+Connection              {keep-alive}
+ETag                    {"6a5f3001-4b2"}
+Content-Security-Policy {default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; worker-src 'self' b…
+X-Content-Type-Options  {nosniff}
+X-Frame-Options         {SAMEORIGIN}
+Referrer-Policy         {strict-origin-when-cross-origin}
+Accept-Ranges           {bytes}
+Content-Type            {text/html}
+Content-Length          {1202}
+Last-Modified           {Tue, 21 Jul 2026 08:38:25 GMT}
+
+

@@ -1,0 +1,76 @@
+[
+    {
+        "Id": "sha256:d835a201ee6d9ce396bd40800351f3b6a6a3bd3132098a5197aeb84994970eed",
+        "RepoTags": [
+            "documentgenerationengine-docgen-frontend:latest"
+        ],
+        "RepoDigests": [
+            "documentgenerationengine-docgen-frontend@sha256:d835a201ee6d9ce396bd40800351f3b6a6a3bd3132098a5197aeb84994970eed"
+        ],
+        "Comment": "buildkit.dockerfile.v0",
+        "Created": "2026-07-21T08:38:45.6462976Z",
+        "Config": {
+            "User": "nginx",
+            "ExposedPorts": {
+                "80/tcp": {},
+                "8080/tcp": {}
+            },
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "NGINX_VERSION=1.27.5",
+                "PKG_RELEASE=1",
+                "DYNPKG_RELEASE=1",
+                "NJS_VERSION=0.8.10",
+                "NJS_RELEASE=1"
+            ],
+            "Entrypoint": [
+                "/docker-entrypoint-hardened.sh"
+            ],
+            "WorkingDir": "/",
+            "Labels": {
+                "com.docker.compose.project": "documentgenerationengine",
+                "com.docker.compose.service": "docgen-frontend",
+                "com.docker.compose.version": "5.1.4",
+                "maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>"
+            },
+            "StopSignal": "SIGQUIT"
+        },
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 23567181,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:08000c18d16dadf9553d747a58cf44023423a9ab010aab96cf263d2216b8b350",
+                "sha256:d71eae0084c1aa823dd8fb2ecf8604d5c0f4911226c042bb1f8297e819f4b192",
+                "sha256:c56f134d380585340a68d0db2f2c170641a1c0ff72ccf2438cf2f693df756a85",
+                "sha256:e244aa659f612a80c40dd8645812301e3def6b15ec67b9e486ed2201172b51d1",
+                "sha256:b8d7d1d2263425d6044e059b2810017d062d659b9b755241f3747eda77726250",
+                "sha256:811a4dbbf4a5309e4390cf655c12db92e1a4304fb9d9731f83e7b02e95a617c6",
+                "sha256:947e805a4ac71f68e6703550c0b36c2aa2e554c4fa670ca2da6a25c6d7dccb66",
+                "sha256:0d853d50b128aa460b47e7121849463a14b18d4fd976caf5014744aae24d28aa",
+                "sha256:4fe3ff1758aa43ed5b3aeffe35aa74e25df92bd898e8d97eed144c001da38582",
+                "sha256:fc2617da26367f250423694df9aa762082dbb51d75ed7b092e519644ea2c065f",
+                "sha256:dc1e777ed2b8e528964ec7df16d238731112df517612f7d7f2d34d7da76cb469",
+                "sha256:502f061899d0371c17fad256b92a25c92cdd21a6faa88127696a9d0fcd05c687",
+                "sha256:b818ac598b8c6e46ed8367db8e062b58abcb4632e5c624f5c133ee95b2d1cc29"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-07-21T08:59:32.474813115Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.oci.image.index.v1+json",
+            "digest": "sha256:d835a201ee6d9ce396bd40800351f3b6a6a3bd3132098a5197aeb84994970eed",
+            "size": 856
+        },
+        "Identity": {
+            "Build": [
+                {
+                    "Ref": "eppv2job0oxjqog1i6scptjvm",
+                    "CreatedAt": "2026-07-21T08:59:32.523152286Z"
+                }
+            ]
+        }
+    }
+]

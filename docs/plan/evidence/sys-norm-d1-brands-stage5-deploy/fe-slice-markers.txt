@@ -1,0 +1,11 @@
+DOCUMENT_BRAND=False
+documentBrand=True
+document_brand=False
+BrandLegalEntity=False
+hard.?retire=False
+SurfaceRetired=True
+legal.?entity=True
+LEGAL_ENTITY=False
+retireDocumentBrand=False
+document-brand=True
+brands=True

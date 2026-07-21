@@ -1,0 +1,55 @@
+{
+  "result": "DEPLOY_OK",
+  "stage": 5,
+  "task_ids": [
+    "150"
+  ],
+  "slice_id": "sys-norm-d1-brands",
+  "worktree_path": "D:/working/DGE-sys-norm-d1-brands",
+  "branch": "feat/sys-norm-d1-brands",
+  "git_head": "cbea637b84c18b19e9199c2d1abb668c2d5e6fd0",
+  "local_time": "2026-07-21T16:40:39+08:00",
+  "utc_time": "2026-07-21T08:40:39Z",
+  "command": ".\\scripts\\docker-deploy-queue.ps1 -Reason \"SYS-NORM Wave 6 #150 stage5 E2E stack prep (sys-norm-d1-brands) retry after JWT remediation\"",
+  "compose_project": "documentgenerationengine",
+  "queue_after": "idle",
+  "e2e_base_url": "http://localhost:4173",
+  "ports": {
+    "backend": 8080,
+    "frontend": 4173
+  },
+  "health": {
+    "frontend_4173": {
+      "status_code": 200,
+      "content_length": 1202
+    },
+    "docgen_frontend": "healthy",
+    "healthz_8080": {
+      "body": "{\"status\":\"UP\"}",
+      "status_code": 200
+    },
+    "docgen_backend": "healthy"
+  },
+  "images": {
+    "backend": {
+      "created": "2026-07-21T08:38:44.891426722Z",
+      "digest": "sha256:aef9c6667aa150c31b9c5f34da55c485512762165a8580a5b1e8fd9825fe9929"
+    },
+    "frontend": {
+      "created": "2026-07-21T08:38:45.6462976Z",
+      "digest": "sha256:816ddf72dcdec07669a7892eb03189514742a926214140674fb1651221fe7d0f"
+    }
+  },
+  "markers": {
+    "v76_migration": "V76__retire_document_brand_legal_entity.sql",
+    "fe_markers_file": "fe-slice-markers.txt"
+  },
+  "notes": [
+    "Did NOT run mvn verify (host sole-active rule; BE already GREEN 2370/0/0/15).",
+    "First attempt FAIL: worktree .env from .env.example had insecure JWT default (BDD-OPS-JWT-SECRET-001). Synced JWT_SECRET from MAIN .env (len=64; value not recorded); FRONTEND_PORT=4173; COMPOSE_PROJECT_NAME=documentgenerationengine.",
+    "Second attempt DEPLOY_OK: host mvn package (tests skipped) + pnpm build + image package; backend/frontend recreated; stack healthy.",
+    "KAFKA_IMAGE warning (bitnamilegacy) — local/dev only; unchanged.",
+    "E2E not run (handoff to e2e-test-engineer).",
+    "No merge."
+  ]
+}

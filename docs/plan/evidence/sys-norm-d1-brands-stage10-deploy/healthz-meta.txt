@@ -1,0 +1,18 @@
+status_code=200
+content_length=15
+headers:
+
+Key                    Value
+---                    -----
+X-Trace-Id             {a94d7380-c21c-4331-8972-90bd477e378c}
+X-Content-Type-Options {nosniff}
+X-XSS-Protection       {0}
+Cache-Control          {no-store, must-revalidate, no-cache, max-age=0}
+Pragma                 {no-cache}
+X-Frame-Options        {DENY}
+Transfer-Encoding      {chunked}
+Date                   {Tue, 21 Jul 2026 09:00:49 GMT}
+Expires                {0}
+Content-Type           {application/json}
+
+

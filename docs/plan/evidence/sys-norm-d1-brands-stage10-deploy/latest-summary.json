@@ -1,0 +1,66 @@
+{
+  "result": "DEPLOY_OK",
+  "stage": 10,
+  "slice_id": "sys-norm-d1-brands",
+  "task_ids": ["150"],
+  "batch_recommendation": "solo",
+  "worktree_path": "D:/working/DGE-sys-norm-d1-brands",
+  "branch": "feat/sys-norm-d1-brands",
+  "git_head": "cbea637b84c18b19e9199c2d1abb668c2d5e6fd0",
+  "local_time": "2026-07-21T17:01:43+08:00",
+  "utc_time": "2026-07-21T09:01:43Z",
+  "command": ".\\scripts\\docker-deploy-queue.ps1 -SkipBuild -Reason \"SYS-NORM Wave 6 #150 stage10 deploy evidence (sys-norm-d1-brands) SkipBuild\"",
+  "compose_project": "documentgenerationengine",
+  "queue_after": "idle",
+  "ports": {
+    "backend": 8080,
+    "frontend": 4173
+  },
+  "e2e_base_url": "http://localhost:4173",
+  "health": {
+    "healthz_8080": {
+      "status_code": 200,
+      "body": "{\"status\":\"UP\"}"
+    },
+    "frontend_4173": {
+      "status_code": 200,
+      "content_length": 1202
+    },
+    "docgen_backend": "healthy",
+    "docgen_frontend": "healthy"
+  },
+  "images": {
+    "backend": {
+      "digest": "sha256:b7aa7c1dcc463a137a6da2f84bbd2d4f962948fceb6b86f9b0f52ca46585270f",
+      "created": "2026-07-21T08:38:44.891426722Z"
+    },
+    "frontend": {
+      "digest": "sha256:d835a201ee6d9ce396bd40800351f3b6a6a3bd3132098a5197aeb84994970eed",
+      "created": "2026-07-21T08:38:45.6462976Z"
+    }
+  },
+  "previous_known_good_stage5": {
+    "backend": "sha256:aef9c6667aa150c31b9c5f34da55c485512762165a8580a5b1e8fd9825fe9929",
+    "frontend": "sha256:816ddf72dcdec07669a7892eb03189514742a926214140674fb1651221fe7d0f"
+  },
+  "fe_asset_markers": [
+    "assets/index-D2T0kj0X.js",
+    "assets/vue-vendor-YCgdmryA.js",
+    "assets/vendor-Xw4Mn6wR.js",
+    "assets/element-icons-D44Rupkn.js",
+    "assets/element-plus-DdFImHIC.js",
+    "assets/app-vendor-BKMZwS8Q.js",
+    "assets/element-plus-CzM4-epj.css",
+    "assets/index-DgfinNic.css"
+  ],
+  "notes": [
+    "Stage 10 SkipBuild queued health evidence only; mvn verify NOT run.",
+    "Pre-check: running Stage 5 digests still present (aef9c666… / 816ddf72…); queue idle; compose working_dir = this worktree.",
+    "Queue acquired then released; idle after; no bypass; single compose project documentgenerationengine :8080/:4173.",
+    "Backend/frontend containers healthy; :8080/healthz 200 UP; :4173 200 (len=1202).",
+    "Image layer Created timestamps match Stage 5 (CACHED); manifest-list Ids refreshed on SkipBuild re-export.",
+    "KAFKA_IMAGE bitnamilegacy warning unchanged (local/dev only).",
+    "Evidence files uncommitted in feature worktree; orchestrator commits before integration-merger.",
+    "No merge. Not claiming Done."
+  ]
+}

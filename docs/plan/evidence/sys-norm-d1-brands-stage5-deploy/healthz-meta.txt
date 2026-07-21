@@ -1,0 +1,4 @@
+status_code=200
+content_type=application/json
+url=http://localhost:8080/healthz
+captured_at=2026-07-21T16:40:10.4897093+08:00

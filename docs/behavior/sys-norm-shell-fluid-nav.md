@@ -54,6 +54,10 @@ navigable EntityLink cells for task-hub entities/groups and catalog group codes.
 **Then** routing may still resolve (hard delete is Wave 6)  
 **And** the item is absent from `navGroupsCatalog`.
 
+> **Wave 6 closeout pointer:** Hard retire of legacy routes/API/runtime is specified in
+> [sys-norm-d1-brands.md](./sys-norm-d1-brands.md) **BDD-SYS-NORM-D1-006** (closes this soft
+> allowance after Wave 6 deploy).
+
 ### BDD-SYS-NORM-W1-005 — Every remaining nav item has an icon (N10)
 
 **Given** the published `NAV_GROUPS` catalog  

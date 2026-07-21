@@ -1,0 +1,5 @@
+cbea637b docs: close SYS-NORM Wave 5 doc-sync (#149)
+febb95b3 docs(evidence): SYS-NORM Wave 5 stage10 SkipBuild deploy (#149)
+3b208c61 test(e2e): SYS-NORM Wave 5 role compression evidence (#149)
+b475166d feat(frontend): ADR-0070 six-role UI catalog (#149)
+593eb59c feat(auth): ADR-0070 six-role compression runtime (#149)

@@ -189,29 +189,33 @@ API 管理由全局管理员和分组管理员承担，不设置独立 API 管�
 - 分组不存在或不在请求方可见范围内时返回 `404 GROUP_NOT_FOUND`，不泄露存在性。
 - 分组管理员对分组的任何写操作均 fail-closed，返回 `403 GROUP_MANAGEMENT_NOT_ALLOWED`。
 
-### 2.3.1 文档品牌 DocumentBrand 与法人实体 LegalEntity（IBL-E4 / ADR-0065，2026-07-20）
+### 2.3.1 文档品牌 DocumentBrand 与法人实体 LegalEntity（历史 IBL-E4 → ADR-0071 Wave 6 退役）
 
-**正交分离：** **DocumentBrand**（文档产物品牌资产）≠ 管理 UI **BrandPreset**（`REDBC` / `GREENBC` 壳层主题）。壳层主题切换不得改写文档产物品牌；文档品牌解析不得改写 `html[data-brand]` / 壳层 logo。
+> **Forward product / domain SoT (2026-07-21):** [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)
+> Accepted；Wave 6 BDD **ready** [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md)
+> **BDD-SYS-NORM-D1-001…020**。DocumentBrand / LegalEntity **不再**是所需产品目录或 runtime
+> 解析依赖。Logo / seal / 信头法定呈现由 **Letterhead（master）** 治理。**Legal holds** 保留。
+> 壳层 `REDBC`/`GREENBC` 仍为 UI-only。下列 IBL-E4 结构为 **historical**（impl Done
+> `4d810395` / `212c6be9`）；Wave 6 实施 durable hard delete / API 404|410 退役码。
 
-**DocumentBrand（组范围可治理目录）：**
+**正交分离（仍成立）：** 文档产物资产 ≠ 管理 UI **BrandPreset**（`REDBC` / `GREENBC`）。壳层主题切换不得改写文档产物；文档路径不得改写 `html[data-brand]` / 壳层 logo。
 
-- `documentBrandCode`：组内唯一、trim、大小写敏感稳定码（建议 max 64）。
-- 显示名（English-first；实现固定一种并写入 OpenAPI）。
-- `status` ∈ {`ACTIVE`,`INACTIVE`}。
-- **必选** `logoObjectRef`（已授权对象存储引用）；可选 `defaultSealObjectRef`；可选 `letterheadLegalName`（非敏感短文本，max 256）。
-- 每组迁移/初始化具备种子 `documentBrandCode=PLATFORM_DEFAULT`（ACTIVE；平台占位 logo；**不是** UI `REDBC`/`GREENBC` 码）。
+**Wave 6 确认规则（取代下列历史目录解析）：**
 
-**LegalEntity（组范围可治理目录）：**
+- generate / preview / test-generation **不得**查 LegalEntity→DocumentBrand 目录以应用品牌槽位。
+- 可选 `context.legalEntityCode` 仍为 ADR-0013 白名单不透明字段；**不**驱动目录解析；**不**产生退役目录 422（`LEGAL_ENTITY_*` / `DOCUMENT_BRAND_*` catalog 族）。
+- 模板 `allowedDocumentBrandCodes` **不再**作为 generate 门禁；管理写 fail-closed 或 strip。
+- 晋升/导出依赖闭合 **不得要求** brand/entity sidecar 目录（Wave 7 拥有 dry-run UI）。
+- 签章几何仍走 IBL-B5；显式 sealRef 等非目录绑定规则可继续适用。
 
-- `legalEntityCode`：组内唯一、trim、稳定码（建议 max 64）。
-- 显示名；`status` ∈ {`ACTIVE`,`INACTIVE`}。
-- **必填** `documentBrandCode`（引用同组存在的 DocumentBrand）。一实体同一时刻恰好绑定一个品牌；改绑可审计。
+**Historical DocumentBrand / LegalEntity（IBL-E4 / ADR-0065 — 产品面已取代）：**
 
-**组默认回落：** 组可配置可选 `defaultLegalEntityCode`。Runtime 省略 `context.legalEntityCode` 时：默认实体存在且 ACTIVE → 用其绑定品牌；否则 → `PLATFORM_DEFAULT`。**禁止**回落到 UI `REDBC`/`GREENBC`。
+- DocumentBrand：组内 `documentBrandCode`、logo/可选 seal/`letterheadLegalName`、种子 `PLATFORM_DEFAULT`（**不是** UI 主题码）。
+- LegalEntity：组内 `legalEntityCode`，曾必填绑定 `documentBrandCode`；组可选 `defaultLegalEntityCode` 曾作省略 runtime 回落。
+- 历史解析：非空白 `legalEntityCode` → LegalEntity → DocumentBrand（未知/INACTIVE → **422**）；allow-list 不匹配 → **422** `DOCUMENT_BRAND_NOT_ALLOWED`。
 
-**解析与应用：** 非空白 `legalEntityCode` → 同组 LegalEntity → 绑定 DocumentBrand（未知/INACTIVE → **422** 稳定码）；解析成功后在 generate / preview / test-generation **同一路径**将 logo / 可选默认 seal / 信头法定名称应用到文档品牌槽位。显式 sealRef **优先于**品牌默认 seal；签章几何仍走 IBL-B5。模板包可选 `allowedDocumentBrandCodes`；空/缺省 = 允许组内任一 ACTIVE 文档品牌；非空且解析品牌不在名单 → **422** `DOCUMENT_BRAND_NOT_ALLOWED`。路径仍钉扎模板版本，**不**按法人自动选包。
-
-行为 SoT：[ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)；决策：[ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)。impl **Done**（`4d810395` / `212c6be9`）；F27 的 `effectiveFrom`/bulk 半幅已由 **IBL-E5** 关闭（`688f9e58` / `20ead1ce`）。
+行为 SoT（Wave 6）：[sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md)；决策：[ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)。  
+历史证据：[ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)；[ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)（Decision 正文保留）。
 
 ### 2.4 AD Group
 
@@ -539,7 +543,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - **CE-G05：** 下一年度复核到期日 `nextReviewDue`（API camelCase；DB `next_review_due`，UTC 日历日 DATE；可空）。挂在 **template 行**（非单 release 行）——年检是模板治理周期，不是单版本生命周期态。
 - **IBL-E1 / PD-4：** 正文语种 `locale`（BCP-47 字符串，挂在 **template 包行**，创建必填；存量迁移默认 `zh-CN`）与可选 `localeVariantFamilyId`（同组同家族内 locale 唯一）。每个 locale 变体仍是独立模板包，独立版本线/测试/审批/发布；**不**在一包内多正文，**不** runtime 按 locale 静默换包。运行时路径仍钉扎具体模板；非空 `context.locale` 须与模板 `locale` 语言兼容（primary language），否则 fail-closed。详情与场景见行为规格 / ADR-0062。
 - **IBL-E2 / PD-5：** 模板版本可挂载 Composition Inclusion Rules（辖区/产品/渠道驱动的钉扎 CM 纳入）；见 §2.9 与 [ADR-0063](../adr/template-lifecycle/0063-jurisdiction-product-channel-composition-rules.md)。与 IBL-E1 locale **正交**。
-- **IBL-E4 / PD-9：** 模板包级可选 `allowedDocumentBrandCodes`（文档品牌 allow-list）；见 §2.3.1 与 [ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)。与 UI `REDBC`/`GREENBC` 壳层主题 **正交**；与 IBL-E1 locale / IBL-E2 inclusion / IBL-E3 审批矩阵 **正交**。
+- **IBL-E4 / PD-9（historical）→ ADR-0071 Wave 6：** 模板包级 `allowedDocumentBrandCodes` 曾为文档品牌 allow-list；Wave 6 后 generate **忽略**该字段（见 §2.3.1）。与 UI `REDBC`/`GREENBC` 壳层主题 **正交**；与 IBL-E1 locale / IBL-E2 inclusion / IBL-E3 审批矩阵 **正交**。
 
 已确认规则：
 
@@ -1290,7 +1294,7 @@ Sensitive Data Classification -- constrains --> API Response / Audit Log / Manag
 已确认规则：
 
 - 动态 API v1 请求字段命名基线采用 `output.format`、`output.mode`、`variables`、`encryption`、`requestId`、`idempotencyKey`、`items[].itemId` 和 `context`。
-- `context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`、`jurisdiction`、`product`、`legalEntityCode`；字段值均为字符串。其中 `jurisdiction` / `product` / `channel` 可作为组合纳入控制输入（IBL-E2 / ADR-0063；非 PII、非模板变量）；`locale` 仍用于 compute / 语言兼容（ADR-0062）；`legalEntityCode` 用于法人→文档品牌解析（IBL-E4 / ADR-0065；非 PII、非选包）。`context` 不得包含客户姓名、证件号、账号、金额、密码、模板变量原值、完整请求体、API secret、完整下载地址或完整 AD Group 成员等敏感内容；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。
+- `context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`、`jurisdiction`、`product`、`legalEntityCode`；字段值均为字符串。其中 `jurisdiction` / `product` / `channel` 可作为组合纳入控制输入（IBL-E2 / ADR-0063；非 PII、非模板变量）；`locale` 仍用于 compute / 语言兼容（ADR-0062）；`legalEntityCode` 为可选不透明非 PII 上下文字段（ADR-0013；历史 IBL-E4 轴）——**ADR-0071 / Wave 6 后不驱动** LegalEntity→DocumentBrand 目录解析、不选包、不改 UI chrome。`context` 不得包含客户姓名、证件号、账号、金额、密码、模板变量原值、完整请求体、API secret、完整下载地址或完整 AD Group 成员等敏感内容；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。
 - 模板标识和发布版本号只通过路径表达，生成请求体不得重复传入 `templateId` 或 `releaseVersion`。
 - 正式 API 契约 Schema 采用 OpenAPI 3.1 YAML 维护；Markdown 文档负责解释、索引、决策背景和示例说明。
 - v1 请求采用严格字段校验，契约 Schema 之外的未知字段返回 `400 REQUEST_BODY_INVALID`。

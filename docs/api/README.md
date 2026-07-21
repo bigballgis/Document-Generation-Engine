@@ -231,19 +231,21 @@ Runtime `context` whitelist adds optional `jurisdiction` / `product`; existing `
 
 Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `Context`, `CompositionInclusionRuleView`, `PublishGateCheckCode`, `ErrorCode`. Companion: [contract-outline.md](contract-outline.md) IBL-E2 bullet + context whitelist table. Behavior SoT: [ibl-e2-jurisdiction-rule-engine.md](../behavior/ibl-e2-jurisdiction-rule-engine.md)（BDD-IBL-E2-001…016）. `frontend_ui_in_scope=false`. Accepted ADR ≠ impl Done; formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
 
-### Per-legal-entity document brand variants (IBL-E4)
+### Per-legal-entity document brand variants (IBL-E4) — historical; Wave 6 retire
 
-Runtime `context` whitelist adds optional `legalEntityCode` ([ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md) / ADR-0013 Amendment). Management catalog APIs: DocumentBrand + LegalEntity + group `defaultLegalEntityCode`. Template package optional `allowedDocumentBrandCodes`. Resolve applies to **document artifact** brand slots only — orthogonal to UI `REDBC`/`GREENBC` chrome.
+**Historical IBL-E4** ([ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md) / #131 Done): optional `context.legalEntityCode`, DocumentBrand/LegalEntity catalogs, `allowedDocumentBrandCodes`, catalog 422 codes. Evidence: [ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md).
+
+**SYS-NORM Wave 6 / D1** ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) Accepted; BDD [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) **ready** **D1-001…020**; TM **#150**): management brand/entity + group `defaultLegalEntityCode` APIs **retired** (404/410 + surface-retired codes). Runtime simplify — letterhead/logo/seal from **Letterhead (master)**; `legalEntityCode` opaque non-driving; allow-list ignored at generate. Promotion/export **must not** require brand/entity sidecar (Wave 7 owns dry-run UI). Legal holds kept. UI `REDBC`/`GREENBC` orthogonal.
 
 | Condition | HTTP | `error.code` (stable) |
 | --- | --- | --- |
 | Unknown `context` field | 400 | `REQUEST_BODY_INVALID` |
-| Unknown legal entity | 422 | `LEGAL_ENTITY_UNKNOWN` |
-| Inactive legal entity | 422 | `LEGAL_ENTITY_INACTIVE` |
-| Bound document brand inactive/missing | 422 | `DOCUMENT_BRAND_INACTIVE` |
-| Resolved brand ∉ template allow-list | 422 | `DOCUMENT_BRAND_NOT_ALLOWED` |
+| DocumentBrand management surface called | 404 or 410 | `DOCUMENT_BRAND_SURFACE_RETIRED` |
+| LegalEntity / defaultLegalEntity management surface called | 404 or 410 | `LEGAL_ENTITY_SURFACE_RETIRED` |
+| Catalog resolve 422 family (`LEGAL_ENTITY_UNKNOWN` / `INACTIVE` / `DOCUMENT_BRAND_*`) | — | **Not produced** from retired catalogs after Wave 6 |
+| Non-empty `allowedDocumentBrandCodes` write (if not stripped) | 422 (or strip) | `DOCUMENT_BRAND_SURFACE_RETIRED` (or empty strip — implement one) |
 
-Formal schema: [openapi-v1.yaml](openapi-v1.yaml) `Context`, `DocumentBrandView`, `LegalEntityView`, `ErrorCode`, template `allowedDocumentBrandCodes`, metadata `resolvedLegalEntityCode` / `resolvedDocumentBrandCode`. Companion: [contract-outline.md](contract-outline.md) IBL-E4 bullet + context whitelist table. Behavior SoT: [ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)（BDD-IBL-E4-001…017）. `frontend_ui_in_scope=true`. Accepted ADR ≠ impl Done; formal phase **None**; **not** go-live; do **not** flip **#3b/#5a GO**.
+Formal schema: [openapi-v1.yaml](openapi-v1.yaml) retired ops + `ErrorCode` surface-retired values + `Context.legalEntityCode`. Companion: [contract-outline.md](contract-outline.md) Wave 6 / D1 bullet. `frontend_ui_in_scope=true` for FE hard retire. Formal phase **None**; do **not** flip **#3b/#5a GO**; do **not** claim SYS-NORM program Done.
 
 ### Future `effectiveFrom` publish gate + bulk re-pin (IBL-E5)
 

@@ -16,10 +16,14 @@
 > `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` → `DOCUMENT_AUTHOR` (capability union). Retired codes are
 > **not** assignable — fail-closed **422** `ROLE_NOT_ASSIGNABLE` (ROLE-005).
 >
-> **ADR-0071 cross-ref (Wave 1 nav hide Done — 2026-07-21):** Management **Security** nav no
-> longer lists Document brands / Legal entities product surfaces
-> ([ADR-0071 Accepted](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md);
-> SYS-NORM Wave 1 TM **#145**). **Legal holds** remain. Full D1 runtime/API retirement = Wave 6.
+> **ADR-0071 / SYS-NORM Wave 6 (D1 — docs-first 2026-07-21; TM #150 In Progress):** DocumentBrand /
+> LegalEntity **catalog read/write product surfaces are retired** — no management nav, no
+> catalog CRUD permission rows as live product capabilities, **no new role bits**. Logo / seal /
+> letterhead legal presentation are governed via **Letterhead (master)** only. **Legal holds**
+> remain (unchanged). Shell `REDBC`/`GREENBC` stay UI-only (orthogonal). Wave 1 nav hide
+> (**#145**) remains; Wave 6 hard-retires APIs/routes/runtime
+> ([sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) **BDD-SYS-NORM-D1-001…020**).
+> Do **not** flip **#3b/#5a**; do **not** mark **#53** Done.
 
 ## 相关文档
 
@@ -30,15 +34,16 @@
 - [文档治理规则](../governance.md)
 - [ADR-0070 Role compression (six roles)](../adr/authorization-security/0070-role-compression-six-roles.md)（Accepted — Wave 5 impl **Done** `febb95b3`）
 - [SYS-NORM Wave 5 roles BDD](../behavior/sys-norm-roles.md)（**ready**/delivered — **BDD-SYS-NORM-ROLE-001…018**）
-- [System Normalization program](../plan/system-normalization-program-2026-07.md)（Waves **0–5 Done**; Waves **6–8 Not Started**）
-- [ADR-0071 Retire document brand / legal entity surfaces](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)（Accepted — Wave 1 nav hide Done `#145`; Wave 6 runtime）
+- [System Normalization program](../plan/system-normalization-program-2026-07.md)（Waves **0–5 Done**; Wave **6 In Progress** `#150`; Waves **7–8 Not Started**）
+- [ADR-0071 Retire document brand / legal entity surfaces](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)（Accepted — Wave 1 nav hide Done `#145`; Wave 6 runtime SoT [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md)）
+- [SYS-NORM Wave 6 D1 brands BDD](../behavior/sys-norm-d1-brands.md)（**ready** — **BDD-SYS-NORM-D1-001…020**；TM **#150**）
 - [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
 - [LR-D1 行为规格](../behavior/lrp-d1-audit-retention.md)
 - [CE-G04 Legal hold 行为规格](../behavior/ce-g04-legal-hold.md)（BDD-CE-G04；#75 — retention 豁免叠加，不改 ADR-0040/0048 正文）
 - [CE-G05 模板年检 + 条款正文全文检索](../behavior/ce-g05-annual-review-fts.md)（BDD-CE-G05；#77 — 无新 capability；复用 `authorTemplates` / §5.1 目录浏览）
 - [PRR-D01c Dashboard summary API](../behavior/prod-dashboard-summary-api.md)（BDD-PRR-D01C；#136 — 无新 capability；会话认证 + catalog 同款 group-scope；§13.1.3）
 - [IBL-E3 法务→合规审批矩阵](../behavior/ibl-e3-legal-approval-matrix.md)（BDD-IBL-E3；#130 — `LEGAL_REVIEWER` + `decideLegalApprovals`；COMPLIANCE / 单级正常路径 = `GROUP_ADMIN`（吸收原 `TEMPLATE_APPROVER`）；[ADR-0064 Accepted](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md)）
-- [IBL-E4 法人实体文档品牌变体](../behavior/ibl-e4-entity-document-brands.md)（BDD-IBL-E4；#131 — **无新角色**；目录写 = 管理员；allow-list 写 = 既有模板编排写边界；[ADR-0065 Accepted](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)；产品面将由 Wave 6 / ADR-0071 退役）
+- [IBL-E4 法人实体文档品牌变体](../behavior/ibl-e4-entity-document-brands.md)（historical IBL-E4；产品面由 ADR-0071 / Wave 6 退役；**无新角色**）
 - [IBL-E5 effectiveFrom 发布门禁 + bulk re-pin](../behavior/ibl-e5-effectivefrom-bulk-repin.md)（BDD-IBL-E5；#132 — **无新角色 / capability**；bulk-repin 与发布门禁评估复用 `authorTemplates`；[ADR-0066 Accepted](../adr/template-lifecycle/0066-effectivefrom-publish-and-bulk-repin.md)）
 - [IBL-E6 条款嵌套模块图治理](../behavior/ibl-e6-clause-nesting-governance.md)（BDD-IBL-E6；#133 — **无新角色 / capability**；结构写复用 `authorContentModules`；深度 where-used 复用 §5.1 目录浏览；发布嵌套硬项复用既有模板编排边界；[ADR-0067 Accepted](../adr/template-lifecycle/0067-clause-nesting-module-graph-governance.md)）
 
@@ -138,7 +143,7 @@
 | 更新模板基础信息 | 是 | 被授权组范围内 | 否 | 否 | 否 | 普通模板基础信息更新由管理员执行。 |
 | 完成模板年检 / 查看年到期待办（CE-G05） | 是 | 被授权组范围内 | 是 | 否 | 否 | **无新 capability bit。** 复用 `authorTemplates`。测试人员 / 法务审阅人默认不可见待办、不可 complete（403）。行为：[ce-g05-annual-review-fts.md](../behavior/ce-g05-annual-review-fts.md)。 |
 | 配置审批矩阵模式 `approvalMatrixMode`（IBL-E3） | 是 | 被授权组范围内 | 是 | 否 | 否 | 包级 `SINGLE_TRACK` \| `LEGAL_THEN_COMPLIANCE`；仅 `DRAFT` 或 `APPROVAL`+`PENDING_SUBMIT` 可写。测试/法务角色无配置权。多级阶段判定见 §5.2。 |
-| 配置模板文档品牌 allow-list `allowedDocumentBrandCodes`（IBL-E4） | 是 | 被授权组范围内 | 是 | 否 | 否 | 复用既有模板编排写边界；目录维护见 §5.3。产品面退役见 ADR-0071 / Wave 6。 |
+| 配置模板文档品牌 allow-list `allowedDocumentBrandCodes`（IBL-E4 → **retired Wave 6**） | — | — | — | — | — | **产品面退役（ADR-0071 / D1）。** Generate 不再按 allow-list 门禁；FE 不再提供品牌 allow-list 编辑器；管理写 fail-closed 或 strip（见 §5.3 / OpenAPI）。**无新角色 / capability。** |
 | 批量改钉内容模块引用 bulk-repin（IBL-E5） | 是 | 被授权组范围内 | 是 | 否 | 否 | **无新 capability bit。** 复用 `authorTemplates`；测试/法务角色无调用权。 |
 
 ### 5.1 条款或内容模块权限矩阵
@@ -177,21 +182,26 @@
 
 Capability：`decideLegalApprovals` = {`GLOBAL_ADMIN`,`GROUP_ADMIN`,`LEGAL_REVIEWER`}；`decideApprovals` = {`GLOBAL_ADMIN`,`GROUP_ADMIN`}（COMPLIANCE / 单级；**无**独立 `TEMPLATE_APPROVER`）。行为 SoT：[ibl-e3-legal-approval-matrix.md](../behavior/ibl-e3-legal-approval-matrix.md)；角色压缩：[sys-norm-roles.md](../behavior/sys-norm-roles.md)。
 
-### 5.3 IBL-E4 文档品牌与法人实体目录（ADR-0065）
+### 5.3 DocumentBrand / LegalEntity 产品面退役（ADR-0071 / Wave 6）与历史 IBL-E4
 
-**已确认（2026-07-20 / PD-9 / BDD-IBL-E4）：** DocumentBrand / LegalEntity 为组范围主数据目录；**无新角色**、**无新 capability bit**。壳层 `REDBC`/`GREENBC` 主题切换权不变（UI-only）。impl **Done**（`4d810395` / `212c6be9`）；**不**翻转 #3b/#5a。产品面退役方向见 [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)（Wave 6 runtime）。
+**已确认（2026-07-21 / ADR-0071 Accepted / Wave 6 BDD ready）：** DocumentBrand 与 LegalEntity
+**不再**是所需产品目录（nav / 管理 API / runtime 目录依赖）。**无新角色**、**无新 capability bit**。
+Logo / seal / 信头法定呈现资产由 **Letterhead（master）** 治理。壳层 `REDBC`/`GREENBC` 主题切换权不变（UI-only）。
+**Legal holds** 权限与行为**保持**（见 CE-G04 / Security nav）。**不**翻转 #3b/#5a；**不**将 #53 标 Done。
 
 | 操作 | 全局管理员 | 分组管理员 | 文档作者 | 测试/法务 | 说明 |
 | --- | --- | --- | --- | --- | --- |
-| DocumentBrand 目录 list/get | 是 | 被授权组范围内 | 是（只读） | 否（除非兼管理员） | 只读供选择器/allow-list 配置；写见下行。 |
-| DocumentBrand 创建/更新/启停 | 是 | 被授权组范围内 | **否**（403/404） | **否** | 含 logo/可选 seal/letterheadLegalName；种子 `PLATFORM_DEFAULT` 由迁移保障。 |
-| LegalEntity 目录 list/get | 是 | 被授权组范围内 | 是（只读） | 否（除非兼管理员） | 详情回显绑定 `documentBrandCode`。 |
-| LegalEntity 创建/更新/改绑/启停 | 是 | 被授权组范围内 | **否** | **否** | 创建必须绑定品牌；改绑写管理审计（旧→新 code）。 |
-| 组 `defaultLegalEntityCode` 读写 | 是 | 被授权组范围内 | **否** | **否** | 省略 runtime `legalEntityCode` 时的回落；无效/缺省 → `PLATFORM_DEFAULT`。 |
-| 模板 `allowedDocumentBrandCodes` | 是 | 被授权组范围内 | 是 | 否 | 复用既有模板编排写边界；见 §5 表行。 |
-| Runtime/preview 提交 `context.legalEntityCode` | — | — | — | — | API 调用方/测试生成路径；解析失败 **422**；摘要回显 resolved codes。非目录写权限。 |
+| DocumentBrand 目录 list/get/create/update | **否**（表面退役） | **否** | **否** | **否** | 管理 API **404/410** + `DOCUMENT_BRAND_SURFACE_RETIRED`；无可用目录载荷。历史 IBL-E4 证据见 ADR-0065。 |
+| LegalEntity 目录 list/get/create/update | **否**（表面退役） | **否** | **否** | **否** | 管理 API **404/410** + `LEGAL_ENTITY_SURFACE_RETIRED`；不得再持久化实体↔品牌绑定。 |
+| 组 `defaultLegalEntityCode` 读写 | **否**（表面退役） | **否** | **否** | **否** | 同 LegalEntity 退役家族码；不得再作为 DocumentBrand 回落配置面。 |
+| 模板 `allowedDocumentBrandCodes` 配置 | **否**（产品编辑退役） | **否** | **否** | **否** | Generate **忽略**历史 allow-list；FE 编辑器移除；写 fail-closed 或 strip（OpenAPI 对齐）。 |
+| Letterhead（master）logo / seal 治理 | 是 | 被授权组范围内 | 所属/授权组（既有母版写边界） | 否 | **D1 后唯一**信头/logo/seal 产品治理路径；复用既有 master 权限行，**不**新增 capability。 |
+| Legal holds 创建/查看/释放 | 是 | 被授权组范围内 | 否 | 否（除非兼管理员） | **Keep** — 不在 D1 退役范围；见 CE-G04 / §Security。 |
+| Runtime/preview `context.legalEntityCode` | — | — | — | — | 白名单可选不透明字段（ADR-0013）；**不**驱动目录解析；**不**产生退役目录 422（`LEGAL_ENTITY_*` / `DOCUMENT_BRAND_*` catalog 族）。非目录写权限。 |
+| 壳层 `REDBC`/`GREENBC` 主题切换 | 是（已认证会话） | 是 | 是 | 是 | UI-only chrome；**不是** DocumentBrand MDM。 |
 
-行为 SoT：[ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)；决策：[ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)。
+**Historical (IBL-E4 Done — not ongoing product requirement):** [ibl-e4-entity-document-brands.md](../behavior/ibl-e4-entity-document-brands.md)；[ADR-0065](../adr/template-lifecycle/0065-legal-entity-document-brand-variants.md)（Decision 正文保留；产品面由 ADR-0071 取代）。  
+**Wave 6 SoT:** [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md)；决策：[ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)。
 
 ## 6. API 权限矩阵
 

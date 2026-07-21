@@ -4,11 +4,12 @@
 **Owner phase:** [P21 — Role-journey frontend redesign & business-friendly terminology](../plan/detail/P21-role-journey-frontend-redesign.md) (**Done** 2026-06-30)
 **Primary persona source:** user confirmation 2026-06-29 (two rounds).
 
-### SYS-NORM Confirmed intent (2026-07-21) — Wave 5 matrix rewritten; runtime code In Progress
+### SYS-NORM Confirmed intent (2026-07-21) — Wave 5 Done; Wave 6 D1 docs-first
 
-> Product direction locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.8.
+> Product direction locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.8 / §2.5.
 > **Do not claim L1 sweep Done** until Wave 8 `sys-norm-demo-seed-terms`.
-> **Do not claim Wave 5 Done** — matrix rewrite landed; Flyway/FE enums remain TM **#149**.
+> Wave 5 six-role runtime **Done** (`febb95b3`). Wave 6 D1 brand/entity retirement = TM **#150**
+> (BDD **ready**; docs-first; impl pending — **not** program Done).
 
 | Topic | Confirmed | Pending | Wave |
 | --- | --- | --- | --- |
@@ -16,7 +17,10 @@
 | L1 Chinese primary object label | **母版** | — | Intent Wave 0; sweep **Wave 8** |
 | API / L3 identifiers | May keep `masterId`, `MasterDocument`, routes | — | Unchanged |
 | Role `DOCUMENT_AUTHOR` | Role **ID** locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md); BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) ROLE-013) | EN/ZH **display label** finalizable — interim FE copy OK | Labels: Wave 5 interim / Wave 8 finalize |
-| Role merge (catalog) | Six-role compression locked (ADR-0070); matrix tables rewritten ([permission-matrix.md](../security/permission-matrix.md) stage 3) | Runtime `ManagementRole` / migration / FE pickers still Wave 5 code | **Wave 5** `sys-norm-roles` In Progress |
+| Role merge (catalog) | Six-role compression locked (ADR-0070); runtime catalog **Done** (`febb95b3`) | — | **Wave 5 Done** |
+| Document brands / Legal entities (L1) | **Not required product surfaces** ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); do **not** use as nav/module titles | Legacy L3 codes may linger until Wave 6 durable delete | **Wave 6** `sys-norm-d1-brands` |
+| Logo / seal / letterhead legal name | Governed via **Letterhead** / **母版** (master flows) — not “Document brand” MDM | — | Wave 6+ |
+| Shell brand themes | `REDBC` / `GREENBC` remain UI-only chrome labels — not document brand MDM | — | Unchanged |
 
 §4.5 below remains the P21 canonical glossary baseline; SYS-NORM Wave 8 reconciles residual “Master” mix on L1.
 
@@ -183,6 +187,23 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 
 **Code / docs (L3 — unchanged):** `MasterDocument`, `master_document`, `GET /masters`, Flyway table
 names, audit event codes, OpenAPI schema `MasterDocumentResponse`.
+
+### 4.6 DocumentBrand / LegalEntity — retired product terms (ADR-0071 / Wave 6)
+
+**Confirmed:** Document brands and Legal entities are **not** required L1 nav modules, catalog
+pages, or primary business labels going forward. Operators manage letterhead / logo / seal via
+**Letterhead** / **母版** (see §4.5). **Legal holds** remain a Security surface (keep the term).
+
+| Do not use on L1 (going forward) | Prefer | Notes |
+| --- | --- | --- |
+| Document brands / 文档品牌（as catalog/nav） | Letterhead / 母版 | Logo/seal SoT = Letterhead (master) |
+| Legal entities / 法人实体（as catalog/nav） | — (surface retired) | Opaque `legalEntityCode` may remain L3 API context only |
+| Brand allow-list editor copy | Remove | Wave 6 FE hard retire |
+
+**L3 / historical:** `DocumentBrand`, `LegalEntity`, OpenAPI retired paths, ADR-0065 Decision body
+remain for audit; product direction follows [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)
+and [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md). Full L1 English/母版 residual sweep
+is still **Wave 8** (do not claim terminology program Done here).
 
 ## 5. Acceptance (per P21 sub-phase)
 

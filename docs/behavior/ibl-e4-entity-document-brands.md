@@ -1,8 +1,18 @@
 # BDD 行为规格：IBL-E4 — Per-legal-entity document brand variants（F27 / PD-9）
 
+> **SYS-NORM D1 supersession (2026-07-21):** Ongoing **DocumentBrand / LegalEntity product
+> surfaces** are **superseded / withdrawn** by
+> [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)
+> (**Accepted**). **Wave 6 runtime / API / catalog retirement SoT (BDD ready):**
+> [sys-norm-d1-brands.md](./sys-norm-d1-brands.md) **`bdd_readiness: ready`** —
+> **BDD-SYS-NORM-D1-001…020** (TM **#150** In Progress; docs-first stage 3; impl pending).
+> This file remains **historical** IBL-E4 delivery acceptance evidence; do **not** treat
+> E4-C* dual-catalog management UX as an ongoing product requirement. New implementers
+> follow Wave 6 + ADR-0071, not E4-C* catalog permissions.
+
 | Field | Value |
 | --- | --- |
-| **文件状态** | `ready` |
+| **文件状态** | `ready`（historical IBL-E4; product surface superseded by ADR-0071 / Wave 6） |
 | **BDD ID 前缀** | `BDD-IBL-E4` |
 | **编写日期** | 2026-07-20 |
 | **程序 / 队列** | IBL Wave E · **IBL-E4** / F27（`ibl-e4-entity-document-brands`） |

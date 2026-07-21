@@ -1,0 +1,4 @@
+Id=sha256:d835a201ee6d9ce396bd40800351f3b6a6a3bd3132098a5197aeb84994970eed
+Created=2026-07-21T08:38:45.6462976Z
+RepoDigests=["documentgenerationengine-docgen-frontend@sha256:d835a201ee6d9ce396bd40800351f3b6a6a3bd3132098a5197aeb84994970eed"]
+Size=23567181

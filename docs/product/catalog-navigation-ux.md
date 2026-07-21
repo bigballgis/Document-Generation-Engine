@@ -23,7 +23,7 @@
 | Intent | Confirmed decision | Implementation status | Wave |
 | --- | --- | --- | --- |
 | **Layout** | All management pages are **fluid** (system-wide; supersedes catalog=fluid / detail=contained for management `AppPageLayout`) | **Done** (2026-07-21; `#145` / `7a62be44`) | 1 `sys-norm-shell-fluid-nav` |
-| **Security nav trim + D1 nav hide** | Security = Audit + Legal holds; Document brands + Legal entities absent from nav catalog ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); routes may still resolve until Wave 6 | **Done** (nav hide; 2026-07-21) | 1 (nav hide) / 6 (runtime) |
+| **Security nav trim + D1 nav hide** | Security = Audit + Legal holds; Document brands + Legal entities **not required surfaces** ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); Letterhead (master) owns logo/seal; shell REDBC/GREENBC UI-only | **Done** (nav hide; 2026-07-21) | 1 (nav hide) / 6 (hard retire) |
 | **Nav icon contract + Edit/More + EntityLink N1–N3** | Every remaining nav item has an icon; Users/Groups Edit+More shared primitive; task-hub + catalog `groupCode` EntityLink | **Done** (2026-07-21); **N18** Legal-hold actor EntityLink **deferred** | 1 |
 | **Hub primary** | Version lines only (fluid) | **Done** (2026-07-21; `#146` / `5d77db80`) | 2 `sys-norm-hub-ia` |
 | **Properties** | Hub header control → **right drawer** (content formerly Overview tab) | **Done** (2026-07-21) | 2 |
@@ -31,7 +31,7 @@
 | **Dependencies** | Live on **per-version** surfaces (release / dev detail), not package hub tab | **Done** (2026-07-21) | 2 |
 | **API model A** | Package-level API settings SoT under External services; hub **API settings** jump to `/api/packages/:templateId/settings` shell; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities; legacy `?tab=apiAccess` / `#apiAccess` / `/api/policies/:templateId` → settings shell | **Done** IA shell + redirects (Wave 2) + full settings home (Wave 3; `#147` / `18a9e3b2`) | 2 (+ 3 settings) |
 | **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **Done** (2026-07-21; `#147` / `18a9e3b2` / `f21dda5e`; [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md)) | 3 `sys-norm-external-ops` |
-| **D1 brands/entities runtime** | Full product-surface + runtime retirement per ADR-0071 (beyond nav hide) | **Not Started** | 6 `sys-norm-d1-brands` |
+| **D1 brands/entities runtime** | Full product-surface + runtime retirement per ADR-0071 — hard-retire routes/APIs/catalogs; Letterhead (master) SoT for logo/seal; Legal holds kept; no brand/entity sidecar for promotion/export ([sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) **D1-001…020**) | **In Progress** (TM **#150**; BDD **ready**; docs-first stage 3; impl pending) | 6 `sys-norm-d1-brands` |
 
 ## Design principle
 

@@ -117,9 +117,11 @@ test.describe('SYS-NORM Wave 1 — shell fluid + nav + EntityLink / Actions', ()
     await expectNavItemHasIcon(nav, ASSET_LIBRARY)
   })
 
-  test('BDD-SYS-NORM-W1-004: legacy brand/entity routes still resolve outside nav', async ({
+  test('BDD-SYS-NORM-W1-004 → D1-006: legacy brand/entity bookmarks hard-retired (not Forbidden)', async ({
     page,
   }) => {
+    // Wave 1 soft "catalog may still resolve" closed by Wave 6 (ADR-0071 / D1-006).
+    // Canonical coverage: e2e/SYS-NORM-W6-d1-brands.spec.ts
     await loginAsGlobalAdmin(page)
 
     const nav = managementNav(page)
@@ -128,15 +130,13 @@ test.describe('SYS-NORM Wave 1 — shell fluid + nav + EntityLink / Actions', ()
 
     await page.goto('/governance/document-brands')
     await expect(page).not.toHaveURL(/\/forbidden/, { timeout: 15_000 })
-    await expect(page.getByRole('heading', { name: DOCUMENT_BRANDS })).toBeVisible({
-      timeout: 30_000,
-    })
+    await expect(page.getByTestId('surface-retired-view')).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByText(/document brands catalog retired/i)).toBeVisible()
 
     await page.goto('/governance/legal-entities')
     await expect(page).not.toHaveURL(/\/forbidden/, { timeout: 15_000 })
-    await expect(page.getByRole('heading', { name: LEGAL_ENTITIES })).toBeVisible({
-      timeout: 30_000,
-    })
+    await expect(page.getByTestId('surface-retired-view')).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByText(/legal entities catalog retired/i)).toBeVisible()
   })
 
   test('BDD-SYS-NORM-W1-001/002: catalog + detail workspaces are fluid (no 1440 inner)', async ({
