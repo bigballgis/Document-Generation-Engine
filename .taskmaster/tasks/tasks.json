@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: NON-CE #147 SYS-NORM Wave 3 (sys-norm-external-ops) in-progress — do not treat #53 as delivery leaf. Prior NON-CE #146 SYS-NORM Wave 2 Done 5d77db80 / 992f6822; prior #145 Wave 1 Done 7a62be44 / f1594f2a / ce2cb9f0; prior #144 PTA Done ac36ecbc / 6bc74ff1; prior #143 Wave 0 Done f8e898ad / 28d4abe1 / ade18bdb; prior #142 Wave B Done 288ce98f; #141 Wave A Done aa88170f; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done. Do NOT treat #53 as delivery leaf. Do NOT auto-activate CE-O02. Do NOT mark #53 Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: NON-CE #147 SYS-NORM Wave 3 (sys-norm-external-ops) in-progress. Prior NON-CE #146 Wave 2 Done 5d77db80 / 992f6822; #145 Wave 1 Done; #144 PTA Done; #143 Wave 0 Done. Do NOT claim program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done.",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: cleared (prior NON-CE #147 SYS-NORM Wave 3 Done 18a9e3b2 / f21dda5e) — do not treat #53 as delivery leaf. Prior NON-CE #146 SYS-NORM Wave 2 Done 5d77db80 / 992f6822; prior #145 Wave 1 Done 7a62be44 / f1594f2a / ce2cb9f0; prior #144 PTA Done ac36ecbc / 6bc74ff1; prior #143 Wave 0 Done f8e898ad / 28d4abe1 / ade18bdb; prior #142 Wave B Done 288ce98f; #141 Wave A Done aa88170f; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done. Do NOT treat #53 as delivery leaf. Do NOT auto-activate CE-O02. Do NOT mark #53 Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: cleared (prior NON-CE #147 Wave 3 Done 18a9e3b2 / f21dda5e). Prior NON-CE #146 Wave 2 Done 5d77db80 / 992f6822; #145 Wave 1 Done; #144 PTA Done; #143 Wave 0 Done. Do NOT claim program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-21T07:20:00.000Z"
+        "updatedAt": "2026-07-21T08:30:00.000Z"
       },
       {
         "id": "54",
@@ -2018,27 +2018,27 @@
       {
         "id": "147",
         "title": "SYS-NORM Wave 3 — External services ops (sys-norm-external-ops)",
-        "description": "IN PROGRESS 2026-07-21. NON-CE System Normalization Program Wave 3 — FE External services ops leaf. Slice sys-norm-external-ops; placement ISOLATED; worktree D:/working/DGE-sys-norm-external-ops · feat/sys-norm-external-ops (base local main 10901432). Batch recommendation solo (member_task_ids: [\"147\"]; proposed_slice_id: sys-norm-external-ops; shared_acceptance_surface: External services dashboard + invocations + package settings; evidence_amortization: one FE+E2E+deploy run; vetoes_applied: do-not-fold-wave-4, CE-#53-registry-only; on_red_split_hint: Peel dashboard polish if red/file-cap; keep invocations + settings). Scope: External services dashboard; invocation records page; complete package API settings; nav; redirects. BDD ready docs/behavior/sys-norm-external-ops.md BDD-SYS-NORM-W3-001…018. frontend_ui_in_scope=true. Depends on Wave 2 #146 Done (5d77db80 / 992f6822). Host sole-active delivery leaf = this task. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT mega-merge Wave 4. Do NOT claim go-live / SYS-NORM program Done. Waves 4–8 remain Not Started.",
-        "details": "ACTIVATED 2026-07-21 (stage 2 plan-orchestrator). Slice id: sys-norm-external-ops. Status: in-progress. Sole-active NON-CE delivery leaf. Batch solo open (member_task_ids: [\"147\"]). BDD ready (docs/behavior/sys-norm-external-ops.md; BDD-SYS-NORM-W3-001…018). Program: docs/plan/system-normalization-program-2026-07.md Wave 3 In Progress. Dependency #146 Done. Formal phase remains None. Umbrella #53 registry only. Vetoes held: CE-O02; checklist-#3b/#5a-GO; RTL; do-not-fold-wave-4; do not mark #53 Done. Next: stage 3 doc-keeper if SoT gaps else stage 4 frontend-engineer. Do NOT mark Wave 3 Done until gates + merge + MAIN doc-sync.",
-        "testStrategy": "1. BDD ready confirmed (docs/behavior/sys-norm-external-ops.md; BDD-SYS-NORM-W3-001…018). 2. Program plan Wave 3 In Progress; sole-active #147. 3. FE gates + E2E + UIUX + Stage 5/10 DEPLOY_OK before Done. 4. Stage 11 merge + MAIN doc-sync before Done. 5. Do NOT flip #3b/#5a GO; do NOT fold Wave 4; do NOT mark #53 Done.",
+        "description": "DONE 2026-07-21. NON-CE System Normalization Program Wave 3 — FE External services ops leaf closed. Slice sys-norm-external-ops; MAIN merge 18a9e3b2 (includes feature f21dda5e); worktree REMOVED; origin/main PUSHED. Batch recommendation solo (member_task_ids: [\"147\"]; proposed_slice_id: sys-norm-external-ops) closed. Scope delivered: External services dashboard; invocation records page; complete package API settings; nav; redirects; group-scope fail-closed; honest empty/error. BDD ready docs/behavior/sys-norm-external-ops.md BDD-SYS-NORM-W3-001…018. frontend_ui_in_scope=true. Gates: FE lint/type-check/test/build PASS (1643 tests); E2E SYS-NORM-W3 10/10 + hard-nav SPA; UIUX PASS Critical=0; architecture PASS_WITH_FINDINGS merge_go=yes (loadFailed honesty fixed pre-merge); Stage 5+10 DEPLOY_OK. Wave 3 → Done; Wave 4 sys-norm-test-artifacts remains Not Started (not activated). Sole-active cleared. Do NOT fold Wave 4; do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT claim SYS-NORM program Done.",
+        "details": "COMPLETED 2026-07-21 (stage 12 post-task-doc-sync on MAIN). Slice id: sys-norm-external-ops. Merge: 18a9e3b2 → origin/main; feature tip f21dda5e; worktree removed (stage 11). Batch solo closed. Delivered: External services dashboard (readiness/alerts + ops cards); separate invocations page; package API settings completion at /api/packages/:templateId/settings; External services nav; legacy redirects; CORP scope fail-closed. Gates: FE lint/type-check/test/build PASS (1643); E2E 10/10; UIUX PASS; arch PASS_WITH_FINDINGS merge_go=yes; Stage 5+10 DEPLOY_OK. Sole-active cleared. Next leaf (notes only, not activated): sys-norm-test-artifacts (Wave 4). Vetoes held: CE-O02; checklist-#3b/#5a-GO; RTL; do-not-fold-wave-4; do not mark #53 Done. Formal phase remains None. Doc lag closed this sync: catalog-navigation-ux External services → Done; ADR-0040 Wave-3 IA amendment (settings complete + invocations route; package-first unchanged).",
+        "testStrategy": "1. BDD ready confirmed (docs/behavior/sys-norm-external-ops.md; BDD-SYS-NORM-W3-001…018). 2. Program plan Wave 3 Done; next Wave 4 Not Started. 3. FE gates + E2E 10/10 + UIUX PASS + arch PASS_WITH_FINDINGS + Stage 5/10 DEPLOY_OK. 4. Evidence frontend/e2e/evidence/SYS-NORM-W3*. 5. Stage 11 merge 18a9e3b2 + MAIN doc-sync before Done. 6. Do NOT flip #3b/#5a GO; do NOT activate Wave 4; do NOT fold Wave 4.",
         "priority": "high",
         "dependencies": [
           "146"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-21T07:20:00.000Z"
+        "updatedAt": "2026-07-21T08:30:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-21T07:20:00.000Z",
+      "lastModified": "2026-07-21T08:30:00.000Z",
       "taskCount": 147,
-      "completedCount": 143,
+      "completedCount": 144,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-21T07:20:00.000Z"
+      "updated": "2026-07-21T08:30:00.000Z"
     }
   }
 }

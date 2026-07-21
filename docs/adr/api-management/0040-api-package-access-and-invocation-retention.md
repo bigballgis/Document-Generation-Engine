@@ -11,6 +11,7 @@ topic: api-management
 related:
 	- docs/behavior/api-package-access-and-invocation-records.md
 	- docs/behavior/sys-norm-hub-ia.md
+	- docs/behavior/sys-norm-external-ops.md
 	- docs/adr/api-management/0002-api-management-template-scope.md
 	- docs/adr/api-management/0016-api-management-ui-and-audit-format.md
 	- docs/adr/api/0004-api-idempotency-strategy.md
@@ -98,16 +99,31 @@ Callers also need durable **invocation records** (parameters + optional artifact
 | Canonical edit shell | `/api/packages/:templateId/settings` (optional `?panel=` / `?releaseVersion=`) |
 | Legacy hub `?tab=apiAccess` / `#apiAccess` | Redirect → settings shell |
 | Legacy `/api/policies/:templateId` | Redirect → settings shell (replaces prior redirect-to-hub-tab) |
-| Full settings panels + invocation dashboard | Wave 3 (`sys-norm-external-ops`) — shell may be interim until then |
+| Full settings panels + invocation dashboard | Wave 3 (`sys-norm-external-ops`) — see [Amendment — 2026-07-21 (Wave 3)](#amendment--2026-07-21-ia-completion-sys-norm-wave-3) |
 
 Behavior: [sys-norm-hub-ia.md](../../behavior/sys-norm-hub-ia.md); redirect table sync in [api-package-access-and-invocation-records.md](../../behavior/api-package-access-and-invocation-records.md) §15. Does **not** flip checklist **#3b** / **#5a**. Does **not** reopen per-version ApiPolicy entities.
+
+## Amendment — 2026-07-21 (IA completion; SYS-NORM Wave 3)
+
+**Unchanged package-first decision:** API configuration remains **package-scoped** (not a standalone policy catalog); `/api/policies` remains cross-package monitoring / dashboard only; auto-materialize / retention / invocation semantics in the Decision body above are **unchanged**.
+
+**Amended IA completeness (navigation + surfaces only):** SYS-NORM Wave 3 completes the Wave 2 settings shell and adds the separate invocations surface:
+
+| Surface | Role after Wave 3 |
+| --- | --- |
+| Package API settings | **Complete** edit home at `/api/packages/:templateId/settings` (panels + deep-link; no interim “shell only” banner) |
+| Invocation records | **Separate** management page (dashboard-like list/filters/detail summary-only) |
+| External services nav | Overview (ops dashboard) + Invocations membership |
+| `/api/policies` | Cross-package readiness/alerts monitoring entry (not a second catalog) |
+
+Behavior: [sys-norm-external-ops.md](../../behavior/sys-norm-external-ops.md) (**BDD-SYS-NORM-W3-001…018**); TM **#147** Done (`18a9e3b2` / `f21dda5e`). Does **not** flip checklist **#3b** / **#5a**. Does **not** reopen per-version ApiPolicy entities. Does **not** invent NFR SLOs.
 
 ## Consequences
 
 - Publish gate logic must materialize policy **before** «policy must exist» checks (see BDD R1).
 - Runtime and cleanup jobs must implement separate schedulers for idempotency (7d), artifacts (package doc TTL), and invocation rows (package record TTL).
 - OpenAPI v1 and management APIs gain invocation list/detail paths and retention fields on `api_policy`.
-- Standalone API catalog UX is demoted; management edit journeys anchor on the package API settings route (`/api/packages/:templateId/settings`) after SYS-NORM Wave 2 (historical hub External access tab retired).
+- Standalone API catalog UX is demoted; management edit journeys anchor on the package API settings route (`/api/packages/:templateId/settings`) after SYS-NORM Wave 2–3 (historical hub External access tab retired; Wave 3 completes settings + separate invocations page).
 
 ## Alternatives Considered
 

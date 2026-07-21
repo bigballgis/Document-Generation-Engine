@@ -8,15 +8,17 @@
 
 **Package list pagination (LR-C5, 2026-07-11):** Templates / Masters / Content-modules **package lists** use server-side `PageView` pagination + filter/search (default `size=20`, max 100; default sort group-first `groupCode ASC, updatedAt DESC`). Contract: [openapi-v1.yaml](../api/openapi-v1.yaml) `listTemplates` / `listMasters` / `listContentModules`; behavior [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md). Does not change package-hub version/revision-line pagination already specified below. Does **not** define LR-C6 command-palette API.
 
-### SYS-NORM Confirmed intent (2026-07-21) — Waves 0–2 Done; Waves 3+ queued
+### SYS-NORM Confirmed intent (2026-07-21) — Waves 0–3 Done; Waves 4+ queued
 
 > Locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.1–2.3.
 > Historical hub-tab narrative below is **superseded for Hub IA** by Wave 2; External services
-> dashboard / full settings panels remain Wave 3.
+> dashboard / full settings panels delivered by Wave 3.
 > Program: [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md).
 > Wave 1 leaf TM **#145** `sys-norm-shell-fluid-nav` → **Done** (`7a62be44`).
 > Wave 2 leaf TM **#146** `sys-norm-hub-ia` → **Done** (`5d77db80` / `992f6822`); BDD
 > [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md) (**BDD-SYS-NORM-W2-001…018**).
+> Wave 3 leaf TM **#147** `sys-norm-external-ops` → **Done** (`18a9e3b2` / `f21dda5e`); BDD
+> [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md) (**BDD-SYS-NORM-W3-001…018**).
 
 | Intent | Confirmed decision | Implementation status | Wave |
 | --- | --- | --- | --- |
@@ -27,8 +29,8 @@
 | **Properties** | Hub header control → **right drawer** (content formerly Overview tab) | **Done** (2026-07-21) | 2 |
 | **Remove hub tabs** | Overview, Dependencies, External access | **Done** (2026-07-21) | 2 |
 | **Dependencies** | Live on **per-version** surfaces (release / dev detail), not package hub tab | **Done** (2026-07-21) | 2 |
-| **API model A** | Package-level API settings SoT under External services; hub **API settings** jump to `/api/packages/:templateId/settings` shell; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities; legacy `?tab=apiAccess` / `#apiAccess` / `/api/policies/:templateId` → settings shell | **Done** IA shell + redirects (2026-07-21); Wave 3 fills full settings home + invocation dashboard | 2 (+ 3 for dashboard) |
-| **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **BDD ready** ([sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md)); impl **Not Started** | 3 `sys-norm-external-ops` |
+| **API model A** | Package-level API settings SoT under External services; hub **API settings** jump to `/api/packages/:templateId/settings` shell; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities; legacy `?tab=apiAccess` / `#apiAccess` / `/api/policies/:templateId` → settings shell | **Done** IA shell + redirects (Wave 2) + full settings home (Wave 3; `#147` / `18a9e3b2`) | 2 (+ 3 settings) |
+| **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **Done** (2026-07-21; `#147` / `18a9e3b2` / `f21dda5e`; [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md)) | 3 `sys-norm-external-ops` |
 | **D1 brands/entities runtime** | Full product-surface + runtime retirement per ADR-0071 (beyond nav hide) | **Not Started** | 6 `sys-norm-d1-brands` |
 
 ## Design principle
@@ -176,7 +178,8 @@ Package-level surface (BDD-TEMPLATE-PACKAGE-NAV-001). **Default primary surface:
 - **Dependencies** move to per-version release + development surfaces.
 - **API model A:** hub header **API settings** → package settings route shell
   `/api/packages/:templateId/settings` (optional `?panel=` / `?releaseVersion=`); per-version API
-  perspective + deep-link; **no** per-version ApiPolicy entities. Full invocation dashboard = Wave 3.
+  perspective + deep-link; **no** per-version ApiPolicy entities. Full invocation dashboard +
+  complete settings = Wave 3 **Done** (`#147` / `18a9e3b2`).
 - Legacy `?tab=apiAccess`, `#apiAccess`, and `/api/policies/:templateId` → redirect to settings shell.
 - Master hub **N14** parity: Properties drawer + revision-lines primary; no Template External access on Master.
 

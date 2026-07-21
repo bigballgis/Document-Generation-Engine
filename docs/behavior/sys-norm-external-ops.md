@@ -19,8 +19,8 @@ related:
 
 # SYS-NORM Wave 3 — External services ops (dashboard + invocations + package settings)
 
-> **TM:** Task Master **#147** · slice `sys-norm-external-ops` (register / activate via
-> plan-orchestrator — this BDD does **not** flip TM status).  
+> **TM:** Task Master **#147** · slice `sys-norm-external-ops` → **Done** (MAIN merge
+> `18a9e3b2` / feature `f21dda5e`; sole-active **cleared**).  
 > **Locks:** Program charter [system-normalization-program.md](./system-normalization-program.md)
 > §2.3; plan [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md);
 > Wave 2 shell [sys-norm-hub-ia.md](./sys-norm-hub-ia.md) **do not reopen**.  
