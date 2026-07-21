@@ -1,6 +1,7 @@
 import { computed, reactive, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { UploadFile, UploadUserFile } from 'element-plus'
+import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import type { LibraryAssetClass } from '@/types/libraryAsset'
 import {
   LIBRARY_ASSET_ACCEPTED_MIME,
@@ -9,6 +10,7 @@ import {
 } from '@/types/libraryAsset'
 
 export interface AssetLibraryUploadForm {
+  groupCode: string
   assetKey: string
   assetClass: LibraryAssetClass | ''
   file: File | null
@@ -21,12 +23,19 @@ export function useAssetLibraryUploadDialog(options: {
   canUploadImageOrOther: Ref<boolean>
   canUploadSeal: Ref<boolean>
   emitModelValue: (value: boolean) => void
-  emitSubmit: (payload: { assetKey: string; assetClass: LibraryAssetClass; file: File }) => void
+  emitSubmit: (payload: {
+    groupCode: string
+    assetKey: string
+    assetClass: LibraryAssetClass
+    file: File
+  }) => void
   emitClearServerError: () => void
 }) {
   const { t } = useI18n()
+  const { resolveDefaultGroupCode, ensureGroupCatalog } = useScopedGroupOptions()
 
   const form = reactive<AssetLibraryUploadForm>({
+    groupCode: '',
     assetKey: '',
     assetClass: '',
     file: null,
@@ -85,7 +94,7 @@ export function useAssetLibraryUploadDialog(options: {
     if (options.loading.value) {
       return false
     }
-    if (!form.assetKey.trim() || !form.assetClass || !form.file) {
+    if (!form.groupCode.trim() || !form.assetKey.trim() || !form.assetClass || !form.file) {
       return false
     }
     if (form.assetClass === 'SEAL' && !options.canUploadSeal.value) {
@@ -100,7 +109,9 @@ export function useAssetLibraryUploadDialog(options: {
     return inlineErrorKey.value == null
   })
 
-  function resetForm() {
+  async function resetForm() {
+    await ensureGroupCatalog()
+    form.groupCode = resolveDefaultGroupCode()
     form.assetKey = ''
     form.assetClass = assetClassOptions.value[0]?.value ?? ''
     form.file = null
@@ -160,6 +171,11 @@ export function useAssetLibraryUploadDialog(options: {
 
   function submitUpload() {
     options.emitClearServerError()
+    const groupCode = form.groupCode.trim()
+    if (!groupCode) {
+      inlineErrorKey.value = 'assetLibrary.upload.validation.groupCodeRequired'
+      return
+    }
     const assetKey = form.assetKey.trim()
     if (!LIBRARY_ASSET_KEY_PATTERN.test(assetKey)) {
       inlineErrorKey.value = 'assetLibrary.upload.validation.assetKeyInvalid'
@@ -191,6 +207,7 @@ export function useAssetLibraryUploadDialog(options: {
     }
     inlineErrorKey.value = null
     options.emitSubmit({
+      groupCode,
       assetKey,
       assetClass: form.assetClass,
       file: form.file,
@@ -201,7 +218,7 @@ export function useAssetLibraryUploadDialog(options: {
     () => options.modelValue.value,
     (open) => {
       if (open) {
-        resetForm()
+        void resetForm()
       }
     },
     { immediate: true },

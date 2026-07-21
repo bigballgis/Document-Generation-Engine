@@ -152,7 +152,7 @@ class DocumentGenerationEngineTest {
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(VERSION_ID)).thenReturn(List.of());
         when(contentModuleReferenceService.resolvePinnedContentStructures(VERSION_ID)).thenReturn(java.util.Map.of());
         when(objectStoragePort.get("masters/master.docx")).thenReturn(new ByteArrayInputStream(docx));
-        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(docx);
+        when(docxAssembler.assembleStructured(any(), any(), any(), any(), any())).thenReturn(docx);
         when(renderProfileService.resolveEffectiveProfile(any(), any()))
                 .thenReturn(new com.bank.docgen.sharedkernel.document.RenderProfile(
                         "rp-v1",
@@ -231,7 +231,7 @@ class DocumentGenerationEngineTest {
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(VERSION_ID)).thenReturn(List.of());
         when(contentModuleReferenceService.resolvePinnedContentStructures(VERSION_ID)).thenReturn(java.util.Map.of());
         when(objectStoragePort.get("masters/master.docx")).thenReturn(new ByteArrayInputStream(docx));
-        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(docx);
+        when(docxAssembler.assembleStructured(any(), any(), any(), any(), any())).thenReturn(docx);
         when(renderProfileService.resolveEffectiveProfile(any(), any()))
                 .thenReturn(new com.bank.docgen.sharedkernel.document.RenderProfile(
                         "rp-v1",
@@ -293,7 +293,7 @@ class DocumentGenerationEngineTest {
                         "PROPORTIONAL_FIT",
                         "SEMANTIC_FIDELITY",
                         "BLOCKERS_PREVENT_PUBLISH", false, com.bank.docgen.sharedkernel.document.PdfArchivalProfile.NONE));
-        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenThrow(
+        when(docxAssembler.assembleStructured(any(), any(), any(), any(), any())).thenThrow(
                 new DocxAssemblyException(
                         ApiErrorCodes.OOXML_VALIDATION_FAILED,
                         ApiErrorCategories.RENDERING,

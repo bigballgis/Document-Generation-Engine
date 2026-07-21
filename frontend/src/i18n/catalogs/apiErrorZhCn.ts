@@ -303,6 +303,7 @@ export const apiErrorZhCn = {
     accessDenied: "您无权访问资产库。",
     assetKeyInvalid: "资产键无效。",
     assetKeyConflict: "已存在使用该键的启用资产。",
+    groupCodeRequired: "上传或停用资产库条目时必须提供分组代码。",
     contentTypeUnsupported: "不支持的上传内容类型。",
     contentTypeMismatch: "上传内容类型与文件内容不一致。",
     payloadTooLarge: "上传文件超过最大允许大小 5 MiB。",

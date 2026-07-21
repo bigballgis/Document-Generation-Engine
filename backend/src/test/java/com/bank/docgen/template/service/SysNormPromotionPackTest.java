@@ -502,7 +502,7 @@ class SysNormPromotionPackTest {
         assertThat(entry).isEqualTo("artifacts/assets/LOGO-1");
         assertThat(TemplateExportAssetPathSupport.decodePathSegment("LOGO-1")).isEqualTo("LOGO-1");
         verify(assetLibraryService, org.mockito.Mockito.never()).materializeImportedAsset(
-                any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any());
         verify(masterDocumentService, org.mockito.Mockito.never()).materializeDraftFromImport(
                 any(), any(), any(), any(), any());
     }

@@ -4309,19 +4309,24 @@ paths:
     get:
       tags: [Admin]
       operationId: listLibraryAssets
-      summary: List platform asset-library catalog entries (CE-E02)
+      summary: List group-scoped asset-library catalog entries (CE-E02 + ALGI)
       description: >-
-        Returns a management `PageView` of shared MinIO asset catalog rows
-        (metadata only; no binary). Default `status=ACTIVE` when omitted;
-        `DISABLED` or `ALL` must be explicit. Optional filters: `assetClass`,
+        Returns a management `PageView` of group-owned MinIO asset catalog rows
+        (metadata only; no binary). Platform-shared catalog is withdrawn (ALGI).
+        Default `status=ACTIVE` when omitted; `DISABLED` or `ALL` must be
+        explicit. Optional filters: `groupCode` (exact), `assetClass`,
         `q` (case-insensitive contains on `assetKey` / `originalFileName`).
-        Requires `manageAssetLibrary` / `route.asset-library-management`;
-        `TEMPLATE_TESTER` is ACTIVE-only. Does not change
-        `StructuredContentImageResolver` protocol. Behavior SoT:
-        docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-010…012).
+        Non-GLOBAL actors: results ∩ authorized groups; unauthorized
+        `groupCode` → empty page (no leak). GLOBAL_ADMIN: omit `groupCode` →
+        all groups; with filter → that group only. Each item includes
+        `groupCode`. Requires `manageAssetLibrary` /
+        `route.asset-library-management`; `TEMPLATE_TESTER` is ACTIVE-only.
+        Behavior SoT: docs/behavior/asset-library-group-isolation.md
+        (BDD-ALGI-005…007, 018).
       parameters:
         - $ref: '#/components/parameters/CatalogPageQuery'
         - $ref: '#/components/parameters/CatalogSizeQuery'
+        - $ref: '#/components/parameters/CatalogGroupCodeQuery'
         - name: assetClass
           in: query
           required: false
@@ -4348,7 +4353,7 @@ paths:
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
         '200':
-          description: Paginated asset catalog metadata.
+          description: Paginated asset catalog metadata (items include groupCode).
           content:
             application/json:
               schema:
@@ -4362,29 +4367,34 @@ paths:
     post:
       tags: [Admin]
       operationId: uploadLibraryAsset
-      summary: Upload a platform asset-library object (CE-E02)
+      summary: Upload a group-scoped asset-library object (CE-E02 + ALGI)
       description: >-
-        Multipart upload of an IMAGE / SEAL / OTHER asset. Logical `assetKey`
-        (trim) is the MinIO resolvable object key — must match
-        `^[A-Za-z][A-Za-z0-9._-]{0,127}$`; no forced `library/` prefix.
-        Allowed MIME `image/png` | `image/jpeg`; application-layer max 5 MiB →
-        422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. ACTIVE key conflict → 409
-        `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; DISABLED key may re-upload and
-        reactivate (audit `ASSET_LIBRARY_REUPLOAD`). SEAL upload requires
-        GLOBAL_ADMIN / GROUP_ADMIN (fail-closed 403; former TEMPLATE_APPROVER absorbed).
-        Does not modify `StructuredContentImageResolver`. Header
-        `Idempotency-Key` is reserved for a future slice and is
-        **not enforced** in CE-E02 (accepted if present; ignored —
-        no claim/replay/dedup). Behavior SoT:
-        docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-001…009, 021–022).
+        Multipart upload of an IMAGE / SEAL / OTHER asset into an owning
+        business `groupCode` (required). Natural identity is
+        `(groupCode, assetKey)` (both trim). Logical `assetKey` must match
+        `^[A-Za-z][A-Za-z0-9._-]{0,127}$`; bindings stay bare `assetKey`
+        (no `groupCode/` prefix). Physical MinIO object key is
+        `{groupCode}/{assetKey}` (± extension candidates). Allowed MIME
+        `image/png` | `image/jpeg`; application-layer max 5 MiB →
+        422 `ASSET_LIBRARY_PAYLOAD_TOO_LARGE`. Missing/blank `groupCode` →
+        422 `ASSET_LIBRARY_GROUP_CODE_REQUIRED`. Unauthorized group → 403.
+        ACTIVE conflict **within the same group** → 409
+        `ASSET_LIBRARY_ASSET_KEY_CONFLICT`; same `(groupCode, assetKey)` when
+        DISABLED may re-upload and reactivate (audit `ASSET_LIBRARY_REUPLOAD`).
+        Same `assetKey` in a different group is allowed. SEAL upload requires
+        GLOBAL_ADMIN / GROUP_ADMIN authorized for that group (fail-closed 403;
+        former TEMPLATE_APPROVER absorbed). Header `Idempotency-Key` is
+        reserved / **not enforced** (accepted if present; ignored). Behavior
+        SoT: docs/behavior/asset-library-group-isolation.md
+        (BDD-ALGI-001…004, 009, 014).
       parameters:
         - name: Idempotency-Key
           in: header
           required: false
           description: >-
-            Reserved / not enforced in CE-E02. May be sent on the
-            management upload path; the server ignores it (no
-            idempotency store, replay, or conflict semantics).
+            Reserved / not enforced. May be sent on the management upload
+            path; the server ignores it (no idempotency store, replay, or
+            conflict semantics).
           schema:
             type: string
             minLength: 1
@@ -4401,7 +4411,9 @@ paths:
                 contentType: image/png, image/jpeg
       responses:
         '201':
-          description: Asset stored ACTIVE; catalog row returned (no binary).
+          description: >-
+            Asset stored ACTIVE under owning groupCode; catalog row returned
+            (includes groupCode; no binary).
           content:
             application/json:
               schema:
@@ -4412,7 +4424,7 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '409':
           description: >-
-            ACTIVE `assetKey` already exists
+            ACTIVE `(groupCode, assetKey)` already exists
             (`ASSET_LIBRARY_ASSET_KEY_CONFLICT` /
             `api.error.assetLibrary.assetKeyConflict`).
           content:
@@ -4421,8 +4433,9 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '422':
           description: >-
-            Validation failure (invalid key, unsupported/mismatched content
-            type, empty file, or application-layer payload > 5 MiB).
+            Validation failure (missing groupCode, invalid key,
+            unsupported/mismatched content type, empty file, or
+            application-layer payload > 5 MiB).
           content:
             application/json:
               schema:
@@ -4433,28 +4446,40 @@ paths:
     post:
       tags: [Admin]
       operationId: disableLibraryAsset
-      summary: Disable a platform asset-library entry (CE-E02)
+      summary: Disable a group-scoped asset-library entry (CE-E02 + ALGI)
       description: >-
-        Marks catalog row DISABLED and deletes resolvable MinIO object key(s)
-        so `StructuredContentImageResolver` fail-closes with existing
-        IMAGE_ASSET_NOT_FOUND / SEAL_ASSET_NOT_FOUND. Admin-only
-        (GLOBAL_ADMIN / GROUP_ADMIN). Unauthorized callers receive 403 without
-        existence leakage. Behavior SoT:
-        docs/behavior/ce-e02-asset-library.md (BDD-CE-E02-013…014).
-        Disable of an already-DISABLED key is idempotent HTTP 200
-        (catalog remains DISABLED; resolvable objects re-checked for deletion).
+        Marks catalog identity `(groupCode, assetKey)` DISABLED and deletes
+        namespaced resolvable MinIO object key(s) so template resolve
+        fail-closes with existing IMAGE_ASSET_NOT_FOUND / SEAL_ASSET_NOT_FOUND.
+        `groupCode` is required as a query parameter (locked OpenAPI shape).
+        Admin-only (GLOBAL_ADMIN / GROUP_ADMIN authorized for that group).
+        Unauthorized callers receive 403 without existence leakage. Behavior
+        SoT: docs/behavior/asset-library-group-isolation.md
+        (BDD-ALGI-008…009). Disable of an already-DISABLED identity is
+        idempotent HTTP 200 (catalog remains DISABLED; resolvable objects
+        re-checked for deletion).
       parameters:
         - name: assetKey
           in: path
           required: true
-          description: Logical asset key (same grammar as upload).
+          description: Logical asset key (same grammar as upload; bare binding key).
           schema:
             type: string
             pattern: '^[A-Za-z][A-Za-z0-9._-]{0,127}$'
+        - name: groupCode
+          in: query
+          required: true
+          description: >-
+            Owning business groupCode for the asset identity (trim). Required
+            to disambiguate composite uniqueness `(groupCode, assetKey)`.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
         '200':
-          description: Asset disabled; catalog metadata returned (no binary).
+          description: Asset disabled; catalog metadata returned (includes groupCode; no binary).
           content:
             application/json:
               schema:
@@ -4465,7 +4490,7 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '404':
           description: >-
-            Key not found for authorized admin
+            Identity not found for authorized admin
             (`ASSET_LIBRARY_ASSET_NOT_FOUND` /
             `api.error.assetLibrary.assetNotFound`).
           content:
@@ -10972,26 +10997,31 @@ components:
           $ref: '#/components/schemas/LegalHoldView'
     AssetLibraryAssetClass:
       type: string
-      description: CE-E02 platform asset class (UPPER_SNAKE_CASE). SEAL is image seal/signature asset, not cryptographic e-seal.
+      description: >-
+        CE-E02 / ALGI asset class (UPPER_SNAKE_CASE). SEAL is image
+        seal/signature asset, not cryptographic e-seal.
       enum: [IMAGE, SEAL, OTHER]
     AssetLibraryAssetStatus:
       type: string
-      description: CE-E02 catalog row status.
+      description: CE-E02 / ALGI catalog row status.
       enum: [ACTIVE, DISABLED]
     AssetLibraryListStatusFilter:
       type: string
       description: >-
-        List filter for CE-E02. Omit/`ACTIVE` defaults to ACTIVE-only;
+        List filter for CE-E02 / ALGI. Omit/`ACTIVE` defaults to ACTIVE-only;
         `ALL` returns ACTIVE ∪ DISABLED.
       enum: [ACTIVE, DISABLED, ALL]
     AssetLibraryAssetView:
       type: object
       additionalProperties: false
       description: >-
-        CE-E02 catalog metadata row. Binary bytes are never returned.
-        `assetKey` is the MinIO-resolvable object key consumed unchanged by
-        StructuredContentImageResolver.
+        Group-scoped catalog metadata row (CE-E02 + ALGI). Binary bytes are
+        never returned. Natural identity is `(groupCode, assetKey)`.
+        `assetKey` is the logical binding key used bare in template
+        `imageRef`/`sealRef`; physical MinIO object key is
+        `{groupCode}/{assetKey}` (± extension candidates).
       required:
+        - groupCode
         - assetKey
         - assetClass
         - status
@@ -11002,10 +11032,17 @@ components:
         - uploadedBy
         - uploadedAt
       properties:
+        groupCode:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Owning business groupCode (trim on write; hard isolation v1).
         assetKey:
           type: string
           pattern: '^[A-Za-z][A-Za-z0-9._-]{0,127}$'
-          description: Logical key ≡ storage object key (trim on write).
+          description: >-
+            Logical binding key (trim on write). Must not embed a `groupCode/`
+            prefix; storage is namespaced separately.
         assetClass:
           $ref: '#/components/schemas/AssetLibraryAssetClass'
         status:
@@ -11033,7 +11070,9 @@ components:
     AssetLibraryAssetPageResponse:
       type: object
       additionalProperties: false
-      description: CE-E02 list envelope for `GET /api/management/v1/library/assets`.
+      description: >-
+        Group-scoped list envelope for `GET /api/management/v1/library/assets`
+        (CE-E02 + ALGI).
       required: [metadata, result]
       properties:
         metadata:
@@ -11052,7 +11091,7 @@ components:
     AssetLibraryAssetResponse:
       type: object
       additionalProperties: false
-      description: CE-E02 single-asset envelope (upload / disable).
+      description: Group-scoped single-asset envelope (upload / disable; CE-E02 + ALGI).
       required: [metadata, result]
       properties:
         metadata:
@@ -11062,7 +11101,7 @@ components:
     AssetLibraryUploadRequest:
       type: object
       additionalProperties: false
-      required: [file, assetKey, assetClass]
+      required: [file, assetKey, assetClass, groupCode]
       properties:
         file:
           type: string
@@ -11073,6 +11112,14 @@ components:
           pattern: '^[A-Za-z][A-Za-z0-9._-]{0,127}$'
         assetClass:
           $ref: '#/components/schemas/AssetLibraryAssetClass'
+        groupCode:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: >-
+            Owning business groupCode (required). Actor must be authorized for
+            this group (GLOBAL always). Missing/blank → 422
+            `ASSET_LIBRARY_GROUP_CODE_REQUIRED`.
     LibraryExportRequest:
       type: object
       additionalProperties: false
@@ -12781,6 +12828,7 @@ components:
         - SPECIMEN_WATERMARK_FAILED
         - PRODUCTION_REISSUE_REASON_REQUIRED
         - INVOCATION_RECORD_EXPIRED
+        - ASSET_LIBRARY_GROUP_CODE_REQUIRED
         - ASSET_LIBRARY_ASSET_KEY_INVALID
         - ASSET_LIBRARY_ASSET_KEY_CONFLICT
         - ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED

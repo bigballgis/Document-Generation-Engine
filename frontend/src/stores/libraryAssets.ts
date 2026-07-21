@@ -29,6 +29,7 @@ export const useLibraryAssetsStore = defineStore('libraryAssets', () => {
     page = assetListPage.value,
     size = assetListSize.value,
     options: AbortableRequestOptions & {
+      groupCode?: string
       assetClass?: LibraryAssetClass
       status?: LibraryAssetListStatusFilter
       q?: string
@@ -57,6 +58,7 @@ export const useLibraryAssetsStore = defineStore('libraryAssets', () => {
   }
 
   async function uploadAsset(payload: {
+    groupCode: string
     assetKey: string
     assetClass: LibraryAssetClass
     file: File
@@ -76,11 +78,11 @@ export const useLibraryAssetsStore = defineStore('libraryAssets', () => {
     }
   }
 
-  async function disableAsset(assetKey: string): Promise<LibraryAssetView> {
+  async function disableAsset(assetKey: string, groupCode: string): Promise<LibraryAssetView> {
     submitting.value = true
     lastMutationErrorMessageKey.value = null
     try {
-      return await libraryAssetsApi.disableLibraryAsset(assetKey)
+      return await libraryAssetsApi.disableLibraryAsset(assetKey, groupCode)
     } catch (error) {
       lastMutationErrorMessageKey.value = resolveStoreErrorMessageKey(
         error,

@@ -44,6 +44,8 @@ public final class ManagementAuditEventTypes {
     public static final String ASSET_LIBRARY_DISABLE = "ASSET_LIBRARY_DISABLE";
     /** CE-E02: DISABLED key re-upload reactivation. */
     public static final String ASSET_LIBRARY_REUPLOAD = "ASSET_LIBRARY_REUPLOAD";
+    /** ALGI-M1: legacy platform-shared row quarantined (DISABLED + object purge). */
+    public static final String ASSET_LIBRARY_MIGRATE_QUARANTINE = "ASSET_LIBRARY_MIGRATE_QUARANTINE";
     /** CE-E03: full-library export (including partial success). */
     public static final String LIBRARY_EXPORT = "LIBRARY_EXPORT";
     /** CE-G04: legal hold created. */

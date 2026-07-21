@@ -138,6 +138,8 @@ public final class ApiErrorCodes {
     public static final String ASSET_LIBRARY_PAYLOAD_TOO_LARGE = "ASSET_LIBRARY_PAYLOAD_TOO_LARGE";
     /** CE-E02: catalog key not found for authorized admin. */
     public static final String ASSET_LIBRARY_ASSET_NOT_FOUND = "ASSET_LIBRARY_ASSET_NOT_FOUND";
+    /** ALGI: upload/disable missing required owning groupCode. */
+    public static final String ASSET_LIBRARY_GROUP_CODE_REQUIRED = "ASSET_LIBRARY_GROUP_CODE_REQUIRED";
 
     /** CE-E03: full-library export produced no INCLUDED templates. */
     public static final String LIBRARY_EXPORT_EMPTY = "LIBRARY_EXPORT_EMPTY";

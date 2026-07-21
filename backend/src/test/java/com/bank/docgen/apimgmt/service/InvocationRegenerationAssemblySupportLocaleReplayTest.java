@@ -174,7 +174,7 @@ class InvocationRegenerationAssemblySupportLocaleReplayTest {
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> resolvedCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(docxAssembler).assembleStructured(any(), any(), resolvedCaptor.capture(), any());
+        verify(docxAssembler).assembleStructured(any(), any(), resolvedCaptor.capture(), any(), any());
         Map<String, Object> resolved = resolvedCaptor.getValue();
 
         Map<String, Object> bindings = Map.of(
@@ -330,7 +330,7 @@ class InvocationRegenerationAssemblySupportLocaleReplayTest {
         when(objectStoragePort.get("masters/pinned.docx")).thenReturn(new ByteArrayInputStream(masterDocx));
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(VERSION_ID)).thenReturn(List.of());
         when(contentModuleReferenceService.resolvePinnedContentStructures(VERSION_ID)).thenReturn(Map.of());
-        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(masterDocx);
+        when(docxAssembler.assembleStructured(any(), any(), any(), any(), any())).thenReturn(masterDocx);
         when(renderProfileService.resolveEffectiveProfile(any(), any())).thenReturn(renderProfile());
         doAnswer(inv -> null).when(objectStoragePort).put(anyString(), any(InputStream.class), anyLong(), anyString());
     }

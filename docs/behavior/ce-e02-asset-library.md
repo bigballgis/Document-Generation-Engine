@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| **文件状态** | `ready` |
+| **文件状态** | `ready`（historical CE-E02 shipped；**scope superseded** by ALGI — see §15） |
 | **BDD ID 前缀** | `BDD-CE-E02` |
 | **编写日期** | 2026-07-16 |
 | **程序** | [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §7 Wave CE-E · CE-E02 |
@@ -12,10 +12,17 @@
 | **Formal phase** | **None**（CE 程序切片；不发明 sole-active 正式 P-phase） |
 | **Placement** | MAIN（merge 后） |
 | **上游** | CE-E01 (#78) **Done**（资产键清单 / 导入 ASSET_KEY 探测可消费本片 ACTIVE 对象）；F1-A3 `StructuredContentImageResolver` 已生产化 |
-| **Owning docs** | 本文件（行为 SoT）；计划 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §7；需求 [requirements-plan.md](../requirements/requirements-plan.md)；产品 [PRD.md](../product/PRD.md)；领域 [domain-model.md](../domain/domain-model.md)；权限 [permission-matrix.md](../security/permission-matrix.md)；API [contract-outline.md](../api/contract-outline.md) + [openapi-v1.yaml](../api/openapi-v1.yaml)（实现时扩展） |
+| **Owning docs** | 本文件（CE-E02 historical SoT）+ **ongoing scope SoT** [asset-library-group-isolation.md](./asset-library-group-isolation.md)；计划 [core-excellence-program-2026-07.md](../plan/core-excellence-program-2026-07.md) §7；需求 [requirements-plan.md](../requirements/requirements-plan.md)；产品 [PRD.md](../product/PRD.md)；领域 [domain-model.md](../domain/domain-model.md)；权限 [permission-matrix.md](../security/permission-matrix.md)；API [contract-outline.md](../api/contract-outline.md) + [openapi-v1.yaml](../api/openapi-v1.yaml) |
 | **Frontend UI** | **In scope** — 管理端资产库页 + Playwright E2E/UIUX（用户可见面） |
+| **Amendment** | **§15 ALGI (2026-07-22)** — supersedes **E02-C12** platform-shared catalog; amends C1/C7/C13 for group-scoped identity + resolve |
 
-**完成声明约束：** 本切片关闭「资产库无管理面」缺口（MinIO 目录 API 上传/列表/停用 + 键名约定固化 + 管理页 + 印章类上传审批角色门禁）；**不**宣称 go-live；**不**激活 CD-3；**不**实现 CE-E03 全库导出、CE-O01 PDF/A；**不**修改 `StructuredContentImageResolver` 对外协议与解析顺序。
+> **Ongoing product scope (2026-07-22):** Platform-shared Asset Library (**E02-C12**) is
+> **superseded** by group isolation. Authoritative decisions for ownership, uniqueness,
+> resolve, migration, and FE group filter: [asset-library-group-isolation.md](./asset-library-group-isolation.md)
+> (`BDD-ALGI-001…018`, TM **#154**). Historical CE-E02 scenarios remain evidence of the
+> shipped baseline; implementers must not reintroduce platform-shared catalog behavior.
+
+**完成声明约束：** 本切片关闭「资产库无管理面」缺口（MinIO 目录 API 上传/列表/停用 + 键名约定固化 + 管理页 + 印章类上传审批角色门禁）；**不**宣称 go-live；**不**激活 CD-3；**不**实现 CE-E03 全库导出、CE-O01 PDF/A。**历史**约束「不修改 `StructuredContentImageResolver` 对外协议」对 **CE-E02 交付当时**成立；ALGI 明确允许为模板 `groupCode` 增加组作用域解析门禁（见 §15 / ALGI-C5），错误码/`messageKey` 家族保持 not-found 同形。
 
 ---
 
@@ -84,7 +91,7 @@
 | **E02-C9** | **API（管理前缀）：** `GET /api/management/v1/library/assets`（分页 `page`/`size`，过滤 `assetClass`/`status`/`q`）；`POST /api/management/v1/library/assets`（`multipart/form-data`：`file`、`assetKey`、`assetClass`）；`POST /api/management/v1/library/assets/{assetKey}/disable`。统一 envelope。`Idempotency-Key` 于 POST 上传为**预留头、本片不强制/不生效**（可传、服务端忽略；无 claim/replay/dedup）。 | 计划卡 upload/list/disable |
 | **E02-C10** | **列表默认：** `status=ACTIVE`（省略时）；`status=DISABLED` 或 `ALL` 显式查询。返回项至少：`assetKey`、`assetClass`、`status`、`contentType`、`sizeBytes`、`contentSha256`（小写 hex）、`originalFileName`、`uploadedBy`、`uploadedAt`。**不**返回二进制。 | 可测 |
 | **E02-C11** | **权限 / 角色矩阵（本片确认）：** 见 §4.1；新 capability `manageAssetLibrary` + 路由 `route.asset-library-management`；印章上传额外角色门禁在服务层 fail-closed。 | 计划「印章类上传需审批角色」 |
-| **E02-C12** | **作用域：** 本片资产库为**平台共享目录**（无 `groupId` 分片）。后续组分片不在本片。`GROUP_ADMIN` 与 `GLOBAL_ADMIN` 对目录操作权等同（停用/全类上传）。 | M 量级收敛 |
+| **E02-C12** | **作用域（HISTORICAL — superseded 2026-07-22）：** 本片交付时资产库为**平台共享目录**（无 `groupId` 分片）。~~后续组分片不在本片。`GROUP_ADMIN` 与 `GLOBAL_ADMIN` 对目录操作权等同。~~ → **Superseded by ALGI-C1…C3** in [asset-library-group-isolation.md](./asset-library-group-isolation.md): hard group isolation; composite identity `(groupCode, assetKey)`; `GROUP_ADMIN` scoped to authorized groups only. | M 量级收敛 → **withdrawn for ongoing product** |
 | **E02-C13** | **`StructuredContentImageResolver` 不变：** 不得修改 `resolveImageRef` / `resolveSealRef` 签名、`ResolvedImage` 形态、MinIO→demo classpath→fail-closed 顺序、错误码/`messageKey`。本片测试须含回归：既有 `IMG-1`/`SEAL-1` 解析与缺失 fail-closed 仍绿。 | handoff hard constraint |
 | **E02-C13a** | **N23 / Wave 8（docs lock，不改本片 API）：** classpath `rendering/demo-images/`（及 `DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED`）仅为 LAB/test **渲染回退**，**不是** Asset Library 目录内容。管理页 `/library/assets` **仅**列出 managed `library_asset` 行。产品默认零资产 = **honest empty**；可选 demo/验收 managed-asset seed 见 [demo-acceptance-asset-seed.md](../operations/demo-acceptance-asset-seed.md) 与 [sys-norm-demo-seed-terms.md](./sys-norm-demo-seed-terms.md)（W8-C1…C3）。 | SYS-NORM Wave 8 / N23 |
 | **E02-C14** | **管理页：** 新路由 canonical `/library/assets`；逻辑键 `route.asset-library-management`；列表 + 上传对话框（类选择、键输入、文件）+ 停用确认；英文优先；隐藏无权限控件；直链无权限 → Forbidden。 | 计划「管理页」+ 矩阵 §13 |
@@ -377,3 +384,43 @@ next_sole_active_recommend: #81 CE-O01 (pending/parked — do not activate in th
 ```
 
 **Handoff（Done）：** Task Master **#79** → **Done**（merge `5bd3611e`）。资产库 MinIO 目录 API + 管理端 `/library/assets` 已交付；resolver 协议不变。正式 phase 保持 **None**；不宣称 go-live；不激活 CD-3。下一 sole-active 建议：**#81** CE-O01（pending，勿提前激活）。
+
+---
+
+## 15. Amendment ALGI — Asset library group isolation (2026-07-22)
+
+| Field | Value |
+| --- | --- |
+| **Amendment status** | `ready` (behavior locked) |
+| **Slice** | `asset-library-group-isolation` |
+| **Task Master** | **#154** |
+| **Behavior SoT** | [asset-library-group-isolation.md](./asset-library-group-isolation.md) `BDD-ALGI-001…018` |
+| **User confirmation** | Asset library **SHOULD/MUST** have group isolation (CE-E02 platform-shared withdrawn) |
+
+### 15.1 Decisions superseded / amended
+
+| CE-E02 ID | Change |
+| --- | --- |
+| **E02-C12** | **Superseded / withdrawn** for ongoing product — no platform-shared catalog |
+| **E02-C1** | **Amended:** logical binding `assetKey` remains bare; physical MinIO key is **`{groupCode}/{assetKey}`** (± extension candidates). Bindings must not embed `groupCode/` |
+| **E02-C7** | **Amended:** ACTIVE conflict and DISABLED re-upload are scoped to **`(groupCode, assetKey)`** |
+| **E02-C9 / C10** | **Amended (contract):** list/upload/disable carry `groupCode`; upload requires `groupCode`; list items return `groupCode`; disable identifies owning group |
+| **E02-C11 / §4.1** | **Amended:** actions ∩ authorized groups; GLOBAL may list all or filter; Wave 5 role codes (`DOCUMENT_AUTHOR`, etc.). **permission-matrix §13.2 updated (doc-keeper 2026-07-22)** |
+| **E02-C13** | **Amended (call-site):** resolve for a template must be gated by template `groupCode` + ACTIVE catalog membership (ALGI-C5). Error `messageKey` family for missing assets **unchanged**. Demo classpath tier / N23 unchanged |
+| **E02-C17** | **Amended:** “组分片资产库” is **no longer** a non-goal — it is the ALGI slice goal. Other E02-C17 non-goals remain |
+
+### 15.2 Migration pointer
+
+**ALGI-M1** (locked): quarantine-disable + admin rehome — see
+[asset-library-group-isolation.md](./asset-library-group-isolation.md) §6. Do **not** silently
+ACTIVE-assign all legacy rows to `PLATFORM` or `CORP`.
+
+### 15.3 Scenario ownership
+
+| Set | Status |
+| --- | --- |
+| `BDD-CE-E02-001…022` | Historical acceptance for platform-shared baseline (shipped #79) |
+| `BDD-ALGI-001…018` | **Authoritative** for group isolation delivery (#154) |
+
+Implementers treat ALGI scenarios as the Red-test corpus for this leaf; where ALGI and
+historical E02 conflict on scope/identity/resolve, **ALGI wins**.

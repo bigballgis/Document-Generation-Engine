@@ -2,8 +2,9 @@ export type LibraryAssetClass = 'IMAGE' | 'SEAL' | 'OTHER'
 export type LibraryAssetStatus = 'ACTIVE' | 'DISABLED'
 export type LibraryAssetListStatusFilter = 'ACTIVE' | 'DISABLED' | 'ALL'
 
-/** CE-E02 catalog metadata row — binary bytes are never returned. */
+/** Group-scoped catalog metadata row (CE-E02 + ALGI). Binary bytes are never returned. */
 export interface LibraryAssetView {
+  groupCode: string
   assetKey: string
   assetClass: LibraryAssetClass
   status: LibraryAssetStatus
@@ -17,6 +18,7 @@ export interface LibraryAssetView {
 
 export interface LibraryAssetListQueryOptions {
   signal?: AbortSignal
+  groupCode?: string
   assetClass?: LibraryAssetClass
   status?: LibraryAssetListStatusFilter
   q?: string

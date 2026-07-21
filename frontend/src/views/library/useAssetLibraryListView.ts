@@ -4,7 +4,9 @@ import { ElMessage } from 'element-plus'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useCapabilities } from '@/composables/useCapabilities'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
+import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { useLibraryAssetsStore } from '@/stores/libraryAssets'
 import type {
@@ -18,6 +20,8 @@ export function useAssetLibraryListView() {
   const { t, te } = useI18n()
   const { formatDateTime, formatNumber } = useLocaleFormatters()
   const { confirmAction } = useConfirmAction()
+  const { groupCatalogLink } = useEntityLinkTargets()
+  const { ensureGroupCatalog, isGroupLocked, resolveDefaultGroupCode } = useScopedGroupOptions()
   const libraryAssetsStore = useLibraryAssetsStore()
   const {
     uploadAnyLibraryAsset,
@@ -31,6 +35,7 @@ export function useAssetLibraryListView() {
   const uploadFailurePending = ref(false)
   const currentPage = ref(1)
   const listHydrated = ref(false)
+  const listGroupCode = ref('')
 
   const allAssets = computed(() => libraryAssetsStore.assets)
 
@@ -86,6 +91,8 @@ export function useAssetLibraryListView() {
         libraryAssetsStore.assets.length > 0),
   )
 
+  const showGroupFilter = computed(() => listHydrated.value && !showListLoadError.value)
+
   function buildListQuery() {
     const statusRaw = filters.status?.trim()
     let status: LibraryAssetListStatusFilter | undefined
@@ -93,7 +100,9 @@ export function useAssetLibraryListView() {
       status = statusRaw as LibraryAssetListStatusFilter
     }
     const assetClassRaw = filters.assetClass?.trim()
+    const groupCode = listGroupCode.value.trim() || undefined
     return {
+      groupCode,
       q: searchQuery.value.trim() || undefined,
       assetClass: (assetClassRaw || undefined) as LibraryAssetClass | undefined,
       status,
@@ -102,6 +111,7 @@ export function useAssetLibraryListView() {
 
   const canUpload = computed(() => uploadAnyLibraryAsset.value)
   const canDisable = computed(() => disableAssetLibrary.value)
+  const canClearGroupFilter = computed(() => !isGroupLocked.value)
 
   const errorMessage = computed(() => {
     const key = libraryAssetsStore.lastErrorMessageKey
@@ -135,7 +145,7 @@ export function useAssetLibraryListView() {
   })
 
   watch(
-    [searchQuery, filters],
+    [searchQuery, filters, listGroupCode],
     async () => {
       if (!listHydrated.value) {
         return
@@ -150,6 +160,8 @@ export function useAssetLibraryListView() {
   )
 
   onMounted(async () => {
+    await ensureGroupCatalog()
+    listGroupCode.value = resolveDefaultGroupCode(listGroupCode.value)
     await reloadAssets()
   })
 
@@ -191,6 +203,7 @@ export function useAssetLibraryListView() {
   }
 
   async function handleUpload(payload: {
+    groupCode: string
     assetKey: string
     assetClass: LibraryAssetClass
     file: File
@@ -218,7 +231,7 @@ export function useAssetLibraryListView() {
     const confirmed = await confirmAction({
       titleKey: 'assetLibrary.disable.confirmTitle',
       messageKey: 'assetLibrary.disable.confirmMessage',
-      messageParams: { assetKey: asset.assetKey },
+      messageParams: { assetKey: asset.assetKey, groupCode: asset.groupCode },
       confirmButtonKey: 'assetLibrary.disable.confirm',
       type: 'warning',
     })
@@ -226,7 +239,7 @@ export function useAssetLibraryListView() {
       return
     }
     try {
-      await libraryAssetsStore.disableAsset(asset.assetKey)
+      await libraryAssetsStore.disableAsset(asset.assetKey, asset.groupCode)
       ElMessage.success(t('assetLibrary.disable.success'))
       await reloadAssets()
     } catch {
@@ -243,6 +256,11 @@ export function useAssetLibraryListView() {
     uploadDialogOpen,
     currentPage,
     allAssets,
+    listHydrated,
+    listGroupCode,
+    showGroupFilter,
+    canClearGroupFilter,
+    groupCatalogLink,
     searchQuery,
     filters,
     activeSortKey,

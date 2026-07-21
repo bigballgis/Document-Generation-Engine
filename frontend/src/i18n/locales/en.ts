@@ -3512,14 +3512,19 @@ export default {
     list: {
       title: 'Asset library',
       description:
-        'Browse platform image and seal assets used by template bindings. Filter by class or status, upload new assets, or disable keys that should no longer resolve.',
-      help: 'Asset keys match object-storage keys consumed by rendering. Prefer IMG-… for images and SEAL-… for seals.',
+        'Browse group-scoped image and seal assets used by template bindings. Filter by group, class, or status; upload into an authorized group; or disable keys that should no longer resolve.',
+      help: 'Asset keys are logical binding refs within a group. Prefer IMG-… for images and SEAL-… for seals. Global admins may clear the group filter to see all groups.',
       empty: 'No assets yet.',
       emptyDescription:
-        'No managed library assets are registered yet. Upload a PNG or JPEG asset to register it for template bindings.',
+        'No managed library assets are registered yet. Select an authorized group and upload a PNG or JPEG asset for template bindings.',
       emptyDescriptionReadOnly:
-        'No managed library assets are in scope right now. Assets appear here after an authorized user uploads them to the shared library.',
+        'No managed library assets are in scope right now. Assets appear here after an authorized user uploads them for an authorized group.',
+      filters: {
+        group: 'Group',
+        groupPlaceholder: 'All groups',
+      },
       columns: {
+        group: 'Group',
         assetKey: 'Asset key',
         assetClass: 'Class',
         status: 'Status',
@@ -3548,6 +3553,8 @@ export default {
     upload: {
       open: 'Upload asset',
       title: 'Upload library asset',
+      groupCode: 'Group',
+      groupCodePlaceholder: 'Select group',
       assetClass: 'Asset class',
       assetClassPlaceholder: 'Select class',
       assetKey: 'Asset key',
@@ -3562,6 +3569,7 @@ export default {
       submit: 'Upload',
       success: 'Asset uploaded.',
       validation: {
+        groupCodeRequired: 'Select a group before uploading.',
         assetKeyInvalid: 'Enter a valid asset key (1–128 characters; start with a letter).',
         assetClassRequired: 'Select an asset class.',
         fileRequired: 'Choose a PNG or JPEG file.',
@@ -3576,7 +3584,7 @@ export default {
       action: 'Disable',
       confirmTitle: 'Disable asset',
       confirmMessage:
-        'Disabling {assetKey} removes the resolvable object. Templates that still reference this key will fail closed. Continue?',
+        'Disabling {assetKey} in group {groupCode} removes the resolvable object. Templates in that group that still reference this key will fail closed. Continue?',
       confirm: 'Disable',
       success: 'Asset disabled.',
     },

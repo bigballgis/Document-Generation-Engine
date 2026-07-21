@@ -174,7 +174,8 @@ final class PreviewGenerationAssemblySupport {
                     masterStream,
                     bindingJson,
                     resolvedVariables,
-                    pinnedModuleStructures
+                    pinnedModuleStructures,
+                    template.groupCode()
             );
         }
         // CE-G02: SPECIMEN watermark — preview path only (fail-closed).

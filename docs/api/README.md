@@ -164,26 +164,28 @@ Authorization: `requireReadableSnapshot` (fail-closed). **Not** lifecycle-gated 
 
 Behavior SoT: [published-template-test-artifacts.md](../behavior/published-template-test-artifacts.md); journey pattern: [preview-success-artifact-download-journey.md](../behavior/preview-success-artifact-download-journey.md).
 
-### Platform asset library catalog (CE-E02)
+### Group-scoped asset library catalog (CE-E02 + ALGI)
 
-Management asset catalog routes in [openapi-v1.yaml](openapi-v1.yaml) / [contract-outline.md](contract-outline.md) «资产库管理契约（CE-E02）」:
+Management asset catalog routes in [openapi-v1.yaml](openapi-v1.yaml) / [contract-outline.md](contract-outline.md) «资产库管理契约（CE-E02 + ALGI）」. Platform-shared catalog is **withdrawn**.
 
-- `GET /api/management/v1/library/assets` — paginated metadata (`PageView`; default `status=ACTIVE`)
-- `POST /api/management/v1/library/assets` — multipart upload (`file` + `assetKey` + `assetClass`)
-- `POST /api/management/v1/library/assets/{assetKey}/disable` — disable + remove resolvable MinIO keys
+- `GET /api/management/v1/library/assets` — paginated metadata (`PageView`; default `status=ACTIVE`; optional exact `groupCode`; items include `groupCode`; non-GLOBAL ∩ authorized groups)
+- `POST /api/management/v1/library/assets` — multipart upload (`file` + `assetKey` + `assetClass` + **required `groupCode`**)
+- `POST /api/management/v1/library/assets/{assetKey}/disable?groupCode={groupCode}` — disable identity `(groupCode, assetKey)` + remove namespaced resolvable MinIO keys
 
-`assetKey` ≡ MinIO-resolvable object key (`^[A-Za-z][A-Za-z0-9._-]{0,127}$`). **Does not** change `StructuredContentImageResolver` protocol. Virus scan pending (OOS). Disable-already-DISABLED is **confirmed idempotent HTTP 200** (catalog remains `DISABLED`; resolvable objects re-checked for deletion). Upload `Idempotency-Key` is **reserved / not enforced** in CE-E02.
+Natural uniqueness is **`(groupCode, assetKey)`**. Logical binding `assetKey` grammar unchanged (`^[A-Za-z][A-Za-z0-9._-]{0,127}$`); physical object key is **`{groupCode}/{assetKey}`**. Template `imageRef`/`sealRef` stay bare `assetKey`; resolve succeeds only for ACTIVE catalog membership in the template's group. Virus scan pending (OOS). Disable-already-DISABLED is **confirmed idempotent HTTP 200**. Upload `Idempotency-Key` is **reserved / not enforced**. Binding editor / Auto `referenceKey` out of scope.
 
 | Condition | HTTP | `error.messageKey` |
 | --- | --- | --- |
+| Missing/blank `groupCode` on upload | 422 | `api.error.assetLibrary.groupCodeRequired` |
 | Invalid `assetKey` | 422 | `api.error.assetLibrary.assetKeyInvalid` |
-| ACTIVE key conflict | 409 | `api.error.assetLibrary.assetKeyConflict` |
+| ACTIVE `(groupCode, assetKey)` conflict | 409 | `api.error.assetLibrary.assetKeyConflict` |
 | Unsupported content type | 422 | `api.error.assetLibrary.contentTypeUnsupported` |
 | Magic / Content-Type mismatch | 422 | `api.error.assetLibrary.contentTypeMismatch` |
 | Application payload > 5 MiB | 422 | `api.error.assetLibrary.payloadTooLarge` |
 | Not found (authorized admin) | 404 | `api.error.assetLibrary.assetNotFound` |
+| Unauthorized group (upload/disable) | 403 | (access denied; no existence leak) |
 
-Behavior SoT: [ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md). Permissions: [permission-matrix.md](../security/permission-matrix.md) §13.2.
+Behavior SoT: [asset-library-group-isolation.md](../behavior/asset-library-group-isolation.md) (`BDD-ALGI-001…018`); CE-E02 §15: [ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md). Permissions: [permission-matrix.md](../security/permission-matrix.md) §13.2.
 
 ### Runtime fail-closed variable validation (IBL-A1)
 

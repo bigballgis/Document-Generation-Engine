@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import type { APIRequestContext } from '@playwright/test'
 
-import { E2E_ADMIN } from './auth'
+import { DEMO_GROUP_CODE, E2E_ADMIN } from './auth'
 import { E2E_API_BASE_URL } from './masters-api'
 
 const FIXTURES_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures')
@@ -15,6 +15,7 @@ export type LibraryAssetClass = 'IMAGE' | 'SEAL' | 'OTHER'
 export type LibraryAssetStatus = 'ACTIVE' | 'DISABLED'
 
 export interface LibraryAssetView {
+  groupCode: string
   assetKey: string
   assetClass: LibraryAssetClass
   status: LibraryAssetStatus
@@ -59,15 +60,19 @@ export async function uploadLibraryAssetViaApi(
   options: {
     assetKey: string
     assetClass: LibraryAssetClass
+    /** Owning business group (required by ALGI). Defaults to RETAIL demo group. */
+    groupCode?: string
     credentials?: { username: string; password: string }
     filePath?: string
   },
 ): Promise<{ status: number; asset?: LibraryAssetView; bodyText: string }> {
   const token = await apiLogin(request, options.credentials ?? E2E_ADMIN)
   const filePath = options.filePath ?? E2E_ASSET_PNG_PATH
+  const groupCode = (options.groupCode ?? DEMO_GROUP_CODE).trim()
   const response = await request.post(`${E2E_API_BASE_URL}/library/assets`, {
     headers: { Authorization: `Bearer ${token}` },
     multipart: {
+      groupCode,
       assetKey: options.assetKey,
       assetClass: options.assetClass,
       file: {
@@ -91,6 +96,7 @@ export async function listLibraryAssetsViaApi(
     q?: string
     status?: 'ACTIVE' | 'DISABLED' | 'ALL'
     assetClass?: LibraryAssetClass
+    groupCode?: string
     credentials?: { username: string; password: string }
   } = {},
 ): Promise<LibraryAssetView[]> {
@@ -104,6 +110,9 @@ export async function listLibraryAssetsViaApi(
   }
   if (options.assetClass) {
     params.set('assetClass', options.assetClass)
+  }
+  if (options.groupCode?.trim()) {
+    params.set('groupCode', options.groupCode.trim())
   }
   const response = await request.get(`${E2E_API_BASE_URL}/library/assets?${params}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -120,12 +129,15 @@ export async function ensureActiveLibraryAsset(
   options: {
     assetKey: string
     assetClass?: LibraryAssetClass
+    groupCode?: string
     credentials?: { username: string; password: string }
   },
 ): Promise<LibraryAssetView> {
+  const groupCode = (options.groupCode ?? DEMO_GROUP_CODE).trim()
   const uploaded = await uploadLibraryAssetViaApi(request, {
     assetKey: options.assetKey,
     assetClass: options.assetClass ?? 'IMAGE',
+    groupCode,
     credentials: options.credentials,
   })
   if (uploaded.status === 201 && uploaded.asset) {
@@ -135,31 +147,39 @@ export async function ensureActiveLibraryAsset(
     const existing = await listLibraryAssetsViaApi(request, {
       q: options.assetKey,
       status: 'ACTIVE',
+      groupCode,
       credentials: options.credentials,
     })
-    const hit = existing.find((row) => row.assetKey === options.assetKey)
+    const hit = existing.find(
+      (row) => row.assetKey === options.assetKey && row.groupCode === groupCode,
+    )
     if (hit) {
       return hit
     }
   }
   throw new Error(
-    `Failed to seed library asset ${options.assetKey} (${uploaded.status}): ${uploaded.bodyText}`,
+    `Failed to seed library asset ${groupCode}/${options.assetKey} (${uploaded.status}): ${uploaded.bodyText}`,
   )
 }
 
 export async function disableLibraryAssetViaApi(
   request: APIRequestContext,
   assetKey: string,
-  credentials: { username: string; password: string } = E2E_ADMIN,
+  options: {
+    groupCode?: string
+    credentials?: { username: string; password: string }
+  } = {},
 ): Promise<LibraryAssetView> {
+  const credentials = options.credentials ?? E2E_ADMIN
+  const groupCode = (options.groupCode ?? DEMO_GROUP_CODE).trim()
   const token = await apiLogin(request, credentials)
   const response = await request.post(
-    `${E2E_API_BASE_URL}/library/assets/${encodeURIComponent(assetKey)}/disable`,
+    `${E2E_API_BASE_URL}/library/assets/${encodeURIComponent(assetKey)}/disable?groupCode=${encodeURIComponent(groupCode)}`,
     { headers: { Authorization: `Bearer ${token}` } },
   )
   if (!response.ok()) {
     throw new Error(
-      `POST /library/assets/${assetKey}/disable failed (${response.status()}): ${await response.text()}`,
+      `POST /library/assets/${assetKey}/disable?groupCode=${groupCode} failed (${response.status()}): ${await response.text()}`,
     )
   }
   return ((await response.json()) as ApiEnvelope<LibraryAssetView>).result
@@ -180,7 +200,10 @@ export async function disableAllActiveLibraryAssetsViaApi(
       break
     }
     for (const row of rows) {
-      await disableLibraryAssetViaApi(request, row.assetKey, credentials)
+      await disableLibraryAssetViaApi(request, row.assetKey, {
+        groupCode: row.groupCode,
+        credentials,
+      })
       disabled += 1
     }
   }

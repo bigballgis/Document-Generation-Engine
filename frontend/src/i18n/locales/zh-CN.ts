@@ -3443,14 +3443,19 @@ export default {
     list: {
       title: '资产库',
       description:
-        '浏览模板绑定使用的平台图片与印章资产。可按类别或状态筛选，上传新资产，或停用不再解析的键。',
-      help: '资产键与对象存储键一致，供渲染解析使用。图片建议 IMG-… 前缀，印章建议 SEAL-… 前缀。',
+        '浏览按分组隔离的图片与印章资产（供模板绑定使用）。可按分组、类别或状态筛选；上传到授权分组；或停用不再解析的键。',
+      help: '资产键是分组内的逻辑绑定引用。图片建议 IMG-… 前缀，印章建议 SEAL-… 前缀。全局管理员可清空分组筛选以查看全部分组。',
       empty: '暂无资产。',
       emptyDescription:
-        '尚未登记受管资产库条目。请上传 PNG 或 JPEG 资产，供模板绑定使用。',
+        '尚未登记受管资产库条目。请选择授权分组并上传 PNG 或 JPEG 资产，供模板绑定使用。',
       emptyDescriptionReadOnly:
-        '当前范围内暂无受管资产库条目。授权用户上传后将显示在此。',
+        '当前范围内暂无受管资产库条目。授权用户向授权分组上传后将显示在此。',
+      filters: {
+        group: '分组',
+        groupPlaceholder: '全部分组',
+      },
       columns: {
+        group: '分组',
         assetKey: '资产键',
         assetClass: '类别',
         status: '状态',
@@ -3479,6 +3484,8 @@ export default {
     upload: {
       open: '上传资产',
       title: '上传资产库文件',
+      groupCode: '分组',
+      groupCodePlaceholder: '选择分组',
       assetClass: '资产类别',
       assetClassPlaceholder: '选择类别',
       assetKey: '资产键',
@@ -3493,6 +3500,7 @@ export default {
       submit: '上传',
       success: '资产已上传。',
       validation: {
+        groupCodeRequired: '上传前请选择分组。',
         assetKeyInvalid: '请输入有效资产键（1–128 个字符，且以字母开头）。',
         assetClassRequired: '请选择资产类别。',
         fileRequired: '请选择 PNG 或 JPEG 文件。',
@@ -3507,7 +3515,7 @@ export default {
       action: '停用',
       confirmTitle: '停用资产',
       confirmMessage:
-        '停用 {assetKey} 将移除可解析对象。仍引用该键的模板将 fail-closed。是否继续？',
+        '停用分组 {groupCode} 中的 {assetKey} 将移除可解析对象。该分组内仍引用该键的模板将 fail-closed。是否继续？',
       confirm: '停用',
       success: '资产已停用。',
     },

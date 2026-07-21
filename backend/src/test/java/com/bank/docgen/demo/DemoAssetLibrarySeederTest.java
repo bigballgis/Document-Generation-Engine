@@ -4,9 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.authorization.management.domain.GroupDimension;
+import com.bank.docgen.authorization.management.persistence.BusinessGroupEntity;
+import com.bank.docgen.authorization.management.persistence.BusinessGroupRepository;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.library.api.AssetLibraryAssetView;
 import com.bank.docgen.library.domain.AssetLibraryAssetClass;
@@ -16,7 +20,9 @@ import com.bank.docgen.library.persistence.LibraryAssetRepository;
 import com.bank.docgen.library.service.AssetLibraryService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,10 +35,10 @@ class DemoAssetLibrarySeederTest {
 
     @Mock
     private LibraryAssetRepository libraryAssetRepository;
-
+    @Mock
+    private BusinessGroupRepository businessGroupRepository;
     @Mock
     private AssetLibraryService assetLibraryService;
-
     @Mock
     private ObjectStoragePort objectStoragePort;
 
@@ -46,72 +52,80 @@ class DemoAssetLibrarySeederTest {
         seeder = new DemoAssetLibrarySeeder(
                 properties,
                 libraryAssetRepository,
+                businessGroupRepository,
                 assetLibraryService,
                 objectStoragePort
         );
     }
 
     @Test
-    void seedIfNeededUploadsManagedImg1AndSeal1() throws Exception {
-        // BDD-SYS-NORM-W8-002 — enabled seed inserts managed library assets.
-        when(libraryAssetRepository.findById(any())).thenReturn(Optional.empty());
+    void seedIfNeededUploadsManagedImg1AndSeal1PerGroup() throws Exception {
+        // BDD-ALGI-017 / BDD-SYS-NORM-W8-002
+        when(businessGroupRepository.findByDeletedAtIsNullOrderByGroupCodeAsc())
+                .thenReturn(List.of(group("CORP"), group("RETAIL")));
+        when(libraryAssetRepository.findByGroupCodeAndAssetKeyAndDeletedAtIsNull(any(), any()))
+                .thenReturn(Optional.empty());
         when(objectStoragePort.exists(any())).thenReturn(false);
-        when(assetLibraryService.upload(any(), any(), any(), any()))
-                .thenReturn(view("IMG-1", AssetLibraryAssetClass.IMAGE))
-                .thenReturn(view("SEAL-1", AssetLibraryAssetClass.SEAL));
+        when(assetLibraryService.upload(any(), any(), any(), any(), any()))
+                .thenReturn(view("CORP", "IMG-1", AssetLibraryAssetClass.IMAGE));
 
         seeder.seedIfNeeded();
 
-        verify(assetLibraryService).upload(
+        verify(assetLibraryService, times(2)).upload(
                 any(ManagementSessionClaims.class),
                 any(MultipartFile.class),
                 eq(DemoAssetLibrarySeeder.DEMO_IMAGE_ASSET_KEY),
-                eq(AssetLibraryAssetClass.IMAGE)
+                eq(AssetLibraryAssetClass.IMAGE),
+                any()
         );
-        verify(assetLibraryService).upload(
+        verify(assetLibraryService, times(2)).upload(
                 any(ManagementSessionClaims.class),
                 any(MultipartFile.class),
                 eq(DemoAssetLibrarySeeder.DEMO_SEAL_ASSET_KEY),
-                eq(AssetLibraryAssetClass.SEAL)
+                eq(AssetLibraryAssetClass.SEAL),
+                any()
         );
+        verify(assetLibraryService).upload(any(), any(), eq("IMG-1"), eq(AssetLibraryAssetClass.IMAGE), eq("CORP"));
+        verify(assetLibraryService).upload(any(), any(), eq("IMG-1"), eq(AssetLibraryAssetClass.IMAGE), eq("RETAIL"));
     }
 
     @Test
     void seedIfNeededClearsOrphanStorageObjectBeforeUpload() throws Exception {
-        when(libraryAssetRepository.findById(DemoAssetLibrarySeeder.DEMO_IMAGE_ASSET_KEY))
+        when(businessGroupRepository.findByDeletedAtIsNullOrderByGroupCodeAsc())
+                .thenReturn(List.of(group("CORP")));
+        when(libraryAssetRepository.findByGroupCodeAndAssetKeyAndDeletedAtIsNull(any(), any()))
                 .thenReturn(Optional.empty());
-        when(libraryAssetRepository.findById(DemoAssetLibrarySeeder.DEMO_SEAL_ASSET_KEY))
-                .thenReturn(Optional.empty());
-        when(objectStoragePort.exists(DemoAssetLibrarySeeder.DEMO_IMAGE_ASSET_KEY)).thenReturn(true);
-        when(objectStoragePort.exists(DemoAssetLibrarySeeder.DEMO_SEAL_ASSET_KEY)).thenReturn(false);
-        when(assetLibraryService.upload(any(), any(), any(), any()))
-                .thenReturn(view("IMG-1", AssetLibraryAssetClass.IMAGE))
-                .thenReturn(view("SEAL-1", AssetLibraryAssetClass.SEAL));
+        when(objectStoragePort.exists("CORP/IMG-1")).thenReturn(true);
+        when(objectStoragePort.exists("IMG-1")).thenReturn(true);
+        when(objectStoragePort.exists("CORP/SEAL-1")).thenReturn(false);
+        when(objectStoragePort.exists("SEAL-1")).thenReturn(false);
+        when(assetLibraryService.upload(any(), any(), any(), any(), any()))
+                .thenReturn(view("CORP", "IMG-1", AssetLibraryAssetClass.IMAGE));
 
         seeder.seedIfNeeded();
 
-        verify(objectStoragePort).delete(DemoAssetLibrarySeeder.DEMO_IMAGE_ASSET_KEY);
-        verify(objectStoragePort, never()).delete(DemoAssetLibrarySeeder.DEMO_SEAL_ASSET_KEY);
+        verify(objectStoragePort).delete("CORP/IMG-1");
+        verify(objectStoragePort).delete("IMG-1");
     }
 
     @Test
     void seedIfNeededSkipsAlreadyActiveManagedKeys() throws Exception {
-        LibraryAssetEntity activeImage = activeEntity(
-                DemoAssetLibrarySeeder.DEMO_IMAGE_ASSET_KEY,
-                AssetLibraryAssetClass.IMAGE
-        );
-        LibraryAssetEntity activeSeal = activeEntity(
-                DemoAssetLibrarySeeder.DEMO_SEAL_ASSET_KEY,
-                AssetLibraryAssetClass.SEAL
-        );
-        when(libraryAssetRepository.findById(DemoAssetLibrarySeeder.DEMO_IMAGE_ASSET_KEY))
+        when(businessGroupRepository.findByDeletedAtIsNullOrderByGroupCodeAsc())
+                .thenReturn(List.of(group("CORP")));
+        LibraryAssetEntity activeImage = activeEntity("CORP", DemoAssetLibrarySeeder.DEMO_IMAGE_ASSET_KEY,
+                AssetLibraryAssetClass.IMAGE);
+        LibraryAssetEntity activeSeal = activeEntity("CORP", DemoAssetLibrarySeeder.DEMO_SEAL_ASSET_KEY,
+                AssetLibraryAssetClass.SEAL);
+        when(libraryAssetRepository.findByGroupCodeAndAssetKeyAndDeletedAtIsNull(
+                "CORP", DemoAssetLibrarySeeder.DEMO_IMAGE_ASSET_KEY))
                 .thenReturn(Optional.of(activeImage));
-        when(libraryAssetRepository.findById(DemoAssetLibrarySeeder.DEMO_SEAL_ASSET_KEY))
+        when(libraryAssetRepository.findByGroupCodeAndAssetKeyAndDeletedAtIsNull(
+                "CORP", DemoAssetLibrarySeeder.DEMO_SEAL_ASSET_KEY))
                 .thenReturn(Optional.of(activeSeal));
 
         seeder.seedIfNeeded();
 
-        verify(assetLibraryService, never()).upload(any(), any(), any(), any());
+        verify(assetLibraryService, never()).upload(any(), any(), any(), any(), any());
         verify(objectStoragePort, never()).delete(any());
     }
 
@@ -121,21 +135,25 @@ class DemoAssetLibrarySeederTest {
 
         seeder.run(null);
 
-        verify(assetLibraryService, never()).upload(any(), any(), any(), any());
-        verify(libraryAssetRepository, never()).findById(any());
+        verify(assetLibraryService, never()).upload(any(), any(), any(), any(), any());
+        verify(libraryAssetRepository, never()).findByGroupCodeAndAssetKeyAndDeletedAtIsNull(any(), any());
     }
 
     @Test
     void seededKeysAreNotClasspathGhostPaths() {
-        // BDD-SYS-NORM-W8-003 — managed keys are catalog keys, not rendering/demo-images/ paths.
         assertThat(DemoAssetLibrarySeeder.DEMO_IMAGE_ASSET_KEY).isEqualTo("IMG-1");
         assertThat(DemoAssetLibrarySeeder.DEMO_SEAL_ASSET_KEY).isEqualTo("SEAL-1");
         assertThat(DemoAssetLibrarySeeder.DEMO_IMAGE_ASSET_KEY).doesNotContain("demo-images");
         assertThat(DemoAssetLibrarySeeder.DEMO_SEAL_ASSET_KEY).doesNotContain("/");
     }
 
-    private static AssetLibraryAssetView view(String key, AssetLibraryAssetClass assetClass) {
+    private static BusinessGroupEntity group(String code) {
+        return new BusinessGroupEntity(UUID.randomUUID(), code, code, GroupDimension.BUSINESS_LINE);
+    }
+
+    private static AssetLibraryAssetView view(String group, String key, AssetLibraryAssetClass assetClass) {
         return new AssetLibraryAssetView(
+                group,
                 key,
                 assetClass,
                 AssetLibraryAssetStatus.ACTIVE,
@@ -148,8 +166,13 @@ class DemoAssetLibrarySeederTest {
         );
     }
 
-    private static LibraryAssetEntity activeEntity(String key, AssetLibraryAssetClass assetClass) {
+    private static LibraryAssetEntity activeEntity(
+            String groupCode,
+            String key,
+            AssetLibraryAssetClass assetClass
+    ) {
         return new LibraryAssetEntity(
+                groupCode,
                 key,
                 assetClass,
                 AssetLibraryAssetStatus.ACTIVE,

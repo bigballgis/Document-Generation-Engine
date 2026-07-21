@@ -2113,17 +2113,31 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-21T19:09:28.000Z"
+      },
+      {
+        "id": "154",
+        "title": "Asset library group isolation",
+        "description": "IN PROGRESS 2026-07-22. NON-CE post-SYS-NORM §4a Asset library group isolation (parked #2 activated). Slice asset-library-group-isolation; placement ISOLATED; worktree D:/working/DGE-asset-library-group-isolation · branch feat/asset-library-group-isolation; base_sha 2fcd3f74897a55749f18dea979c92d391806ef6b. Batch solo (member_task_ids: [\"154\"]; proposed_slice_id: asset-library-group-isolation; vetoes: Binding editor / Auto referenceKey / checklist-#3b/#5a / CE-O02 / #53). BDD ready docs/behavior/asset-library-group-isolation.md BDD-ALGI-001…018 + CE-E02 §15 amendment. Behavior: group-scoped asset library superseding CE-E02 platform-shared catalog; composite identity (groupCode, assetKey); group-scoped resolve; migration ALGI-M1 quarantine-disable + admin rehome. frontend_ui_in_scope=true; backend_api_contract_change=true. Host sole-active = this leaf. Formal phase None. Do NOT mark Done from plan-orchestrator. Do NOT activate Binding editor / Auto referenceKey. Do NOT mark #53 Done; do NOT flip #3b/#5a.",
+        "details": "ACTIVATED 2026-07-22 (stage 2 plan-orchestrator). Slice id: asset-library-group-isolation. Placement ISOLATED. Worktree: D:/working/DGE-asset-library-group-isolation · feat/asset-library-group-isolation (base 2fcd3f74). Plan: docs/plan/detail/asset-library-group-isolation.md In Progress; program docs/plan/system-normalization-program-2026-07.md §4a Asset library → In Progress (sole-active). BDD SoT: docs/behavior/asset-library-group-isolation.md (ready). Migration ALGI-M1 locked. Batch solo open. Siblings Binding editor / Auto referenceKey remain Parked. Formal phase remains None. Umbrella #53 CE remains in-progress registry-only. Gate evidence: [] (implementation not started).",
+        "testStrategy": "1. BDD ready ALGI-001…018. 2. Doc-keeper: permission-matrix / domain / OpenAPI / PRD CE-E02 wording for group scope. 3. BE TDD: Flyway groupCode + composite uniqueness + ALGI-M1 quarantine; list/upload/disable/resolve group-scoped. 4. FE TDD: ScopedGroupSelect filter + upload requires group. 5. mvn verify + FE lint/type-check/test/build GREEN. 6. E2E ALGI-015/016 + UIUX. 7. Queued docker-deploy-queue DEPLOY_OK. 8. Merge + MAIN doc-sync. 9. Do NOT flip #3b/#5a; do NOT mark #53 Done; do NOT activate Binding editor / Auto referenceKey.",
+        "priority": "high",
+        "dependencies": [
+          "153"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-21T19:22:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-22T01:20:00.000Z",
-      "taskCount": 153,
+      "lastModified": "2026-07-22T03:22:00.000Z",
+      "taskCount": 154,
       "completedCount": 149,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-22T01:20:00.000Z"
+      "updated": "2026-07-22T03:22:00.000Z"
     }
   }
 }

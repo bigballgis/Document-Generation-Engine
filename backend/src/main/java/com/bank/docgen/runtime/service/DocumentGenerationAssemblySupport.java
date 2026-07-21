@@ -223,7 +223,8 @@ final class DocumentGenerationAssemblySupport {
                     masterStream,
                     bindingJson,
                     resolvedVariables,
-                    pinnedModuleStructures
+                    pinnedModuleStructures,
+                    template.getGroupCode()
             );
         } catch (DocxAssemblyException | RenderingOperationException ex) {
             // Preserve CE-K01 pinnedMasterUnavailable (and assembly-domain failures) — do not

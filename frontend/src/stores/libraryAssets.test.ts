@@ -22,6 +22,7 @@ describe('libraryAssets store', () => {
     vi.mocked(libraryAssetsApi.listLibraryAssets).mockResolvedValue({
       content: [
         {
+          groupCode: 'RETAIL',
           assetKey: 'IMG-1',
           assetClass: 'IMAGE',
           status: 'ACTIVE',
@@ -40,13 +41,15 @@ describe('libraryAssets store', () => {
     })
 
     const store = useLibraryAssetsStore()
-    await store.fetchAssets(0, 20, { q: 'IMG', status: 'ACTIVE' })
+    await store.fetchAssets(0, 20, { groupCode: 'RETAIL', q: 'IMG', status: 'ACTIVE' })
 
     expect(libraryAssetsApi.listLibraryAssets).toHaveBeenCalledWith(0, 20, {
+      groupCode: 'RETAIL',
       q: 'IMG',
       status: 'ACTIVE',
     })
     expect(store.assets).toHaveLength(1)
+    expect(store.assets[0]?.groupCode).toBe('RETAIL')
     expect(store.assetListTotalElements).toBe(1)
     expect(store.lastErrorMessageKey).toBeNull()
   })
@@ -64,8 +67,9 @@ describe('libraryAssets store', () => {
     expect(store.assets).toEqual([])
   })
 
-  it('uploads and disables assets through the API module', async () => {
+  it('uploads and disables assets through the API module with groupCode', async () => {
     const uploaded = {
+      groupCode: 'RETAIL',
       assetKey: 'IMG-2',
       assetClass: 'IMAGE' as const,
       status: 'ACTIVE' as const,
@@ -85,8 +89,17 @@ describe('libraryAssets store', () => {
     const store = useLibraryAssetsStore()
     const file = new File([new Uint8Array([1])], 'b.png', { type: 'image/png' })
     await expect(
-      store.uploadAsset({ assetKey: 'IMG-2', assetClass: 'IMAGE', file }),
+      store.uploadAsset({ groupCode: 'RETAIL', assetKey: 'IMG-2', assetClass: 'IMAGE', file }),
     ).resolves.toEqual(uploaded)
-    await expect(store.disableAsset('IMG-2')).resolves.toMatchObject({ status: 'DISABLED' })
+    expect(libraryAssetsApi.uploadLibraryAsset).toHaveBeenCalledWith({
+      groupCode: 'RETAIL',
+      assetKey: 'IMG-2',
+      assetClass: 'IMAGE',
+      file,
+    })
+    await expect(store.disableAsset('IMG-2', 'RETAIL')).resolves.toMatchObject({
+      status: 'DISABLED',
+    })
+    expect(libraryAssetsApi.disableLibraryAsset).toHaveBeenCalledWith('IMG-2', 'RETAIL')
   })
 })

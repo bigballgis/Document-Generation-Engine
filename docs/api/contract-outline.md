@@ -354,17 +354,17 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 - 生命周期状态前置条件不满足返回 `409 CONTENT_MODULE_STATE_TRANSITION_DENIED`。
 - 请求体解析失败或必要字段缺失返回 `422 CONTENT_MODULE_REQUEST_INVALID`。
 
-## 资产库管理契约（CE-E02）
+## 资产库管理契约（CE-E02 + ALGI）
 
-**CE-E02（2026-07-16 确认 / BDD `ready`）：** 平台共享资产目录管理 API。权威行为：[ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md)。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准。
+**CE-E02（2026-07-16）+ ALGI（2026-07-22 / TM #154 / BDD `ready`）：** **组作用域**资产目录管理 API（平台共享目录 **已撤回**）。权威行为：[asset-library-group-isolation.md](../behavior/asset-library-group-isolation.md)；CE-E02 §15 修正：[ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md)。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准。
 
 | 操作 | 方法 / 路径 | 说明 |
 | --- | --- | --- |
-| 列表 | `GET /api/management/v1/library/assets` | 分页 `page`/`size`；过滤 `assetClass` / `status`（默认 `ACTIVE`；`DISABLED`\|`ALL` 显式）/ `q`；统一 envelope + `PageView` |
-| 上传 | `POST /api/management/v1/library/assets` | multipart：`file` + `assetKey` + `assetClass`；`201`；`Idempotency-Key` **预留 / CE-E02 不强制不生效**（可传、忽略） |
-| 停用 | `POST /api/management/v1/library/assets/{assetKey}/disable` | `ACTIVE`→`DISABLED`；移除可解析 MinIO 键；已 `DISABLED` → **已确认**幂等 `200` |
+| 列表 | `GET /api/management/v1/library/assets` | 分页 `page`/`size`；过滤 `groupCode`（可选精确）/ `assetClass` / `status`（默认 `ACTIVE`；`DISABLED`\|`ALL` 显式）/ `q`；条目含 `groupCode`；非 GLOBAL 结果 ∩ 授权组；未授权 `groupCode` → 空页；统一 envelope + `PageView` |
+| 上传 | `POST /api/management/v1/library/assets` | multipart：`file` + `assetKey` + `assetClass` + **`groupCode`（必填）**；`201`；`result.groupCode`；同组 ACTIVE 冲突 → `409`；缺 `groupCode` → `422`；`Idempotency-Key` **预留 / 不强制不生效** |
+| 停用 | `POST /api/management/v1/library/assets/{assetKey}/disable?groupCode={groupCode}` | 身份 `(groupCode, assetKey)`（**required query** `groupCode`）；`ACTIVE`→`DISABLED`；移除 namespaced 可解析 MinIO 键；已 `DISABLED` → **已确认**幂等 `200`；越权组 → `403` |
 
-**键与类：** `assetKey` ≡ 可被 `StructuredContentImageResolver` 命中的对象键（语法 `^[A-Za-z][A-Za-z0-9._-]{0,127}$`，E02-C2）；`assetClass`=`IMAGE`\|`SEAL`\|`OTHER`。MIME：`image/png`\|`image/jpeg`；应用层单文件上限 **5 MiB** → `422` `api.error.assetLibrary.payloadTooLarge`（nginx/Spring 边界超限仍可能为 413，须可读可翻译）。**不**改变 `StructuredContentImageResolver` 协议。权限见 [permission-matrix.md](../security/permission-matrix.md) §13.2 CE-E02。错误码（`error.code`）与 messageKey：`ASSET_LIBRARY_ASSET_KEY_INVALID` / `ASSET_LIBRARY_ASSET_KEY_CONFLICT` / `ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED` / `ASSET_LIBRARY_CONTENT_TYPE_MISMATCH` / `ASSET_LIBRARY_PAYLOAD_TOO_LARGE` / `ASSET_LIBRARY_ASSET_NOT_FOUND`（messageKey 前缀 `api.error.assetLibrary.*`）。
+**键与类：** 逻辑绑定 `assetKey` 语法 `^[A-Za-z][A-Za-z0-9._-]{0,127}$`（E02-C2；模板 `imageRef`/`sealRef` 仍为裸键）；自然唯一 **`(groupCode, assetKey)`**；物理对象键 **`{groupCode}/{assetKey}`**（± 扩展名候选）。`assetClass`=`IMAGE`\|`SEAL`\|`OTHER`。MIME：`image/png`\|`image/jpeg`；应用层单文件上限 **5 MiB** → `422` `api.error.assetLibrary.payloadTooLarge`（nginx/Spring 边界超限仍可能为 413，须可读可翻译）。解析须模板组内 ACTIVE 目录命中（ALGI-C5）；既有 not-found `messageKey` 家族不变。权限见 [permission-matrix.md](../security/permission-matrix.md) §13.2 CE-E02 + ALGI。错误码（`error.code`）与 messageKey：`ASSET_LIBRARY_GROUP_CODE_REQUIRED` / `ASSET_LIBRARY_ASSET_KEY_INVALID` / `ASSET_LIBRARY_ASSET_KEY_CONFLICT` / `ASSET_LIBRARY_CONTENT_TYPE_UNSUPPORTED` / `ASSET_LIBRARY_CONTENT_TYPE_MISMATCH` / `ASSET_LIBRARY_PAYLOAD_TOO_LARGE` / `ASSET_LIBRARY_ASSET_NOT_FOUND`（messageKey 前缀 `api.error.assetLibrary.*`，含 `groupCodeRequired`）。
 
 ## Legal hold 管理契约（CE-G04）
 

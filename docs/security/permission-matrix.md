@@ -611,12 +611,19 @@ Wave 5：可见性列对齐六角色（审批队列 → `GROUP_ADMIN`；整改/�
 - **Dashboard Overview：** 不得挂载催办时限配置面板；协作待办/超时跟进队列可见性仍由 `viewCollaborationWorkItems` + §13.1.2 行为型入口规则决定。
 - 无 capability 角色：导航与控件均隐藏；直链仍 Forbidden。行为 SoT：[reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md)；导航：[catalog-navigation-ux.md](../product/catalog-navigation-ux.md)。
 
-**CE-E02 资产库管理面（2026-07-16；Wave 5 角色修正）：**
+**CE-E02 资产库管理面（2026-07-16；Wave 5 角色修正）+ ALGI 组隔离（2026-07-22 / TM #154）：**
 
-- 新逻辑路由 `route.asset-library-management` → canonical `/library/assets`；新 capability `manageAssetLibrary`（上表）。
-- **动作细粒度（服务层强制，非仅 capability）：** 上传 `IMAGE`/`OTHER` → GLOBAL / GROUP / DOCUMENT_AUTHOR；上传 `SEAL` → GLOBAL / GROUP（吸收原 `TEMPLATE_APPROVER` SEAL 特权）；停用 → 仅 GLOBAL / GROUP；列表 → 有路由角色（`TEMPLATE_TESTER` **仅 ACTIVE**）。
-- `AUDIT_ADMIN` **无**资产库路由；经 §10 审计查询看 `ASSET_LIBRARY_*` 事件。
-- 行为 SoT：[ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md) `BDD-CE-E02-001…022`。
+- 逻辑路由 `route.asset-library-management` → canonical `/library/assets`；capability `manageAssetLibrary`（上表）仍门禁路由可见性。
+- **组作用域（已确认，supersedes CE-E02 平台共享目录 E02-C12）：** 每条资产归属唯一业务 `groupCode`；自然身份 `(groupCode, assetKey)`；v1 **硬隔离**（无跨组共享/只读池）。服务层对列表 / 上传 / 停用强制 **动作 ∩ 授权组**（fail-closed）；`GROUP_ADMIN` **不等同**于跨组 `GLOBAL_ADMIN`。
+- **动作细粒度（服务层强制，非仅 capability；SEAL 角色门禁保留且组内生效）：**
+  - 列表（含显式 `DISABLED`/`ALL` 查询）→ GLOBAL（全部组，可选 `groupCode` 过滤）/ GROUP / DOCUMENT_AUTHOR（仅授权组；未授权 `groupCode` 过滤 → 空页不泄露）/ TEMPLATE_TESTER（仅授权组 **ACTIVE**）。
+  - 上传 `IMAGE`/`OTHER` → GLOBAL / GROUP / DOCUMENT_AUTHOR，且 multipart **必须**带目标 `groupCode`（GLOBAL 任意组；其余仅授权组）；缺省/空白 → `422` `api.error.assetLibrary.groupCodeRequired`；越权组 → `403`。
+  - 上传 `SEAL` → 仅 GLOBAL / GROUP（吸收原 `TEMPLATE_APPROVER` SEAL 特权），且同样组作用域。
+  - 停用 → 仅 GLOBAL / GROUP，目标身份 `(groupCode, assetKey)`，且对 `groupCode` 有授权；越权 → `403`（无存在性 oracle）。
+- `AUDIT_ADMIN` / `LEGAL_REVIEWER` **无**资产库路由；经 §10 审计查询看 `ASSET_LIBRARY_*`（含 `ASSET_LIBRARY_MIGRATE_QUARANTINE`）事件。
+- 渲染解析：模板 `imageRef`/`sealRef`（裸 `assetKey`）仅在该模板拥有组内存在 **ACTIVE** `(groupCode, assetKey)` 时成功；跨组 ACTIVE **不得**满足解析（fail-closed，既有 not-found `messageKey` 家族）。
+- **本切片非目标：** Binding editor 重排；Auto `referenceKey`。
+- 行为 SoT：[asset-library-group-isolation.md](../behavior/asset-library-group-isolation.md) `BDD-ALGI-001…018`（权威）；历史基线：[ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md) §15 Amendment ALGI + `BDD-CE-E02-001…022`。
 
 **CE-G01 同人审批阻断 / 例外干预（2026-07-14；Wave 5 角色修正）：**
 

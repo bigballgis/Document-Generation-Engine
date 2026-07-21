@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { expect, test, type Page } from '@playwright/test'
 
 import {
+  DEMO_GROUP_CODE,
   E2E_ADMIN,
   E2E_AUDIT_ADMIN,
   E2E_TEMPLATE_APPROVER,
@@ -18,7 +19,7 @@ import {
   uniqueE2eAssetKey,
   uploadLibraryAssetViaApi,
 } from './helpers/library-assets-api'
-import { reLoginAs, selectElementPlusOption } from './helpers/ui'
+import { reLoginAs } from './helpers/ui'
 
 /**
  * CE-E02 — Asset library management surface (Task #79).
@@ -48,15 +49,49 @@ function uploadDialog(page: Page) {
   return page.getByRole('dialog', { name: /upload library asset/i })
 }
 
+async function closeOpenSelectDropdowns(page: Page) {
+  if ((await page.locator('.el-select-dropdown:visible').count()) > 0) {
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.el-select-dropdown:visible')).toHaveCount(0)
+  }
+}
+
+async function selectVisibleOption(page: Page, optionText: string | RegExp) {
+  const dropdown = page.locator('.el-select-dropdown:visible').last()
+  await expect(dropdown).toBeVisible()
+  await dropdown.getByRole('option', { name: optionText }).click()
+  await expect(page.locator('.el-select-dropdown:visible')).toHaveCount(0)
+}
+
+async function selectUploadGroup(page: Page, groupCode: string) {
+  const dialog = uploadDialog(page)
+  const group = dialog.getByTestId('asset-library-upload-group')
+  await expect(group).toBeVisible()
+  // Locked single-group actors may already have the group selected.
+  if (await group.getByText(groupCode, { exact: true }).isVisible().catch(() => false)) {
+    return
+  }
+  await closeOpenSelectDropdowns(page)
+  await group.locator('.el-select').click()
+  await selectVisibleOption(page, groupCode)
+  await expect(group).toContainText(groupCode)
+}
+
 async function fillUploadForm(
   page: Page,
-  options: { assetKey: string; assetClass?: RegExp; filePath?: string },
+  options: { assetKey: string; assetClass?: RegExp; filePath?: string; groupCode?: string },
 ) {
   const dialog = uploadDialog(page)
   await expect(dialog).toBeVisible()
+  await expect(dialog.getByTestId('asset-library-upload-form')).toBeVisible()
+  await selectUploadGroup(page, options.groupCode ?? DEMO_GROUP_CODE)
   if (options.assetClass) {
-    await dialog.locator('.el-select').click()
-    await selectElementPlusOption(page, options.assetClass)
+    const classSelect = dialog
+      .locator('.el-form-item')
+      .filter({ hasText: /asset class/i })
+      .locator('.el-select')
+    await classSelect.click()
+    await selectVisibleOption(page, options.assetClass)
   }
   await dialog.getByRole('textbox', { name: /asset key/i }).fill(options.assetKey)
   await dialog.locator('input[type="file"]').setInputFiles(options.filePath ?? E2E_ASSET_PNG_PATH)
@@ -111,11 +146,12 @@ test.describe('CE-E02 asset library management', () => {
     await expect(uploadDialog(page)).toHaveCount(0)
 
     await searchAssetLibrary(page, assetKey)
-    await expect(page.getByTestId('asset-library-table').getByText(assetKey)).toBeVisible({
-      timeout: 20_000,
+    const imageRow = page.getByTestId('asset-library-table').locator('.el-table__row').filter({
+      hasText: assetKey,
     })
-    await expect(page.getByTestId('asset-library-table').getByText(/^image$/i)).toBeVisible()
-    await expect(page.getByTestId('asset-library-table').getByText(/^active$/i).first()).toBeVisible()
+    await expect(imageRow).toBeVisible({ timeout: 20_000 })
+    await expect(imageRow.getByText(/^image$/i)).toBeVisible()
+    await expect(imageRow.getByText(/^active$/i)).toBeVisible()
 
     expect(pageErrors, `Unexpected page errors: ${pageErrors.join('; ')}`).toEqual([])
     await page.screenshot({
@@ -130,6 +166,7 @@ test.describe('CE-E02 asset library management', () => {
     const authorDenied = await uploadLibraryAssetViaApi(request, {
       assetKey,
       assetClass: 'SEAL',
+      groupCode: DEMO_GROUP_CODE,
       credentials: E2E_TEMPLATE_AUTHOR,
     })
     expect(authorDenied.status).toBe(403)
@@ -139,36 +176,48 @@ test.describe('CE-E02 asset library management', () => {
     await page.getByTestId('asset-library-upload-open').click()
     const authorDialog = uploadDialog(page)
     await expect(authorDialog).toBeVisible()
-    // Click the EP select wrapper — the inner combobox input is intercepted by the placeholder.
-    await authorDialog.locator('.el-select').click()
-    const authorDropdown = page.locator('.el-select-dropdown:visible')
+    // Asset class select (group ScopedGroupSelect is separate).
+    await authorDialog
+      .locator('.el-form-item')
+      .filter({ hasText: /asset class/i })
+      .locator('.el-select')
+      .click()
+    const authorDropdown = page.locator('.el-select-dropdown:visible').last()
     await expect(authorDropdown.getByRole('option', { name: /^image$/i })).toBeVisible()
     await expect(authorDropdown.getByRole('option', { name: /^other$/i })).toBeVisible()
     await expect(authorDropdown.getByRole('option', { name: /^seal$/i })).toHaveCount(0)
-    await page.keyboard.press('Escape')
+    await closeOpenSelectDropdowns(page)
     await authorDialog.getByRole('button', { name: /^cancel$/i }).click()
 
     await reLoginAs(page, loginAs, E2E_TEMPLATE_APPROVER)
     await openAssetLibrary(page)
     await page.getByTestId('asset-library-upload-open').click()
-    // Approver options are SEAL-only; class is pre-selected — only key + file needed.
-    await fillUploadForm(page, { assetKey })
+    // Wave 5: former TEMPLATE_APPROVER is GROUP_ADMIN — can upload IMAGE/OTHER/SEAL; pick SEAL.
+    await fillUploadForm(page, {
+      assetKey,
+      assetClass: /^seal$/i,
+      groupCode: DEMO_GROUP_CODE,
+    })
     await uploadDialog(page).getByRole('button', { name: /^upload$/i }).click()
 
     await expect(page.getByText(/asset uploaded/i)).toBeVisible({ timeout: 20_000 })
     await searchAssetLibrary(page, assetKey)
-    await expect(page.getByTestId('asset-library-table').getByText(assetKey)).toBeVisible({
-      timeout: 20_000,
+    const sealRow = page.getByTestId('asset-library-table').locator('.el-table__row').filter({
+      hasText: assetKey,
     })
-    await expect(page.getByTestId('asset-library-table').getByText(/^seal$/i)).toBeVisible()
+    await expect(sealRow).toBeVisible({ timeout: 20_000 })
+    await expect(sealRow.getByText(/^seal$/i)).toBeVisible({ timeout: 10_000 })
 
     const listed = await listLibraryAssetsViaApi(request, {
       q: assetKey,
       status: 'ACTIVE',
       assetClass: 'SEAL',
+      groupCode: DEMO_GROUP_CODE,
       credentials: E2E_ADMIN,
     })
-    expect(listed.some((row) => row.assetKey === assetKey)).toBe(true)
+    expect(listed.some((row) => row.assetKey === assetKey && row.groupCode === DEMO_GROUP_CODE)).toBe(
+      true,
+    )
 
     await page.screenshot({
       path: path.join(EVIDENCE_DIR, 'BDD-CE-E02-019-seal-gate.png'),
@@ -181,7 +230,11 @@ test.describe('CE-E02 asset library management', () => {
     request,
   }) => {
     const assetKey = uniqueE2eAssetKey('E2E-DIS')
-    await ensureActiveLibraryAsset(request, { assetKey, assetClass: 'IMAGE' })
+    await ensureActiveLibraryAsset(request, {
+      assetKey,
+      assetClass: 'IMAGE',
+      groupCode: DEMO_GROUP_CODE,
+    })
 
     await loginAs(page, E2E_ADMIN)
     await openAssetLibrary(page)

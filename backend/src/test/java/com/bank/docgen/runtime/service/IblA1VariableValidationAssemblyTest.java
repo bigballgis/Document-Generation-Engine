@@ -201,7 +201,8 @@ class IblA1VariableValidationAssemblyTest {
         );
 
         assertThat(generated.documentId()).startsWith("DOC-");
-        verify(docxAssembler).assembleStructured(any(), any(), eq(Map.of("customerName", "Acme Bank Ltd")), any());
+        verify(docxAssembler).assembleStructured(
+                any(), any(), eq(Map.of("customerName", "Acme Bank Ltd")), any(), any());
         verify(objectStoragePort).put(anyString(), any(InputStream.class), anyLong(), anyString());
     }
 
@@ -254,7 +255,7 @@ class IblA1VariableValidationAssemblyTest {
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(VERSION_ID)).thenReturn(List.of());
         when(contentModuleReferenceService.resolvePinnedContentStructures(VERSION_ID)).thenReturn(Map.of());
         when(objectStoragePort.get("masters/master.docx")).thenReturn(new ByteArrayInputStream(docx));
-        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(docx);
+        when(docxAssembler.assembleStructured(any(), any(), any(), any(), any())).thenReturn(docx);
         when(renderProfileService.resolveEffectiveProfile(any(), any()))
                 .thenReturn(new com.bank.docgen.sharedkernel.document.RenderProfile(
                         "rp-v1",
