@@ -4,14 +4,16 @@
 
 本文档用于整理金融信函低代码文档生成平台的角色、分组、对象权限和权限边界。当前内容仅基于已确认需求，不自行扩展未确认权限。
 
-> **SYS-NORM Confirmed intent (2026-07-21) — Pending implementation (Wave 5):** Management
-> role catalog compression to **six** roles is **Confirmed** — see
-> [ADR-0070 Accepted](../adr/authorization-security/0070-role-compression-six-roles.md)
-> and [system-normalization-program.md](../behavior/system-normalization-program.md) §2.6 / §6.
-> **Matrix table rewrite = Wave 5** `sys-norm-roles` (after Wave 5 BDD `ready`).
-> Until then, §3 / §13 / capability tables below remain the **current 8-role runtime baseline**.
-> Do **not** treat Wave 0 as having rewritten these tables. `DOCUMENT_AUTHOR` L1 display
-> labels remain **Pending** finalize.
+> **SYS-NORM Confirmed intent (2026-07-21) — Pending matrix rewrite / implementation (Wave 5):**
+> Management role catalog compression to **six** roles is **Confirmed** — see
+> [ADR-0070 Accepted](../adr/authorization-security/0070-role-compression-six-roles.md),
+> charter [system-normalization-program.md](../behavior/system-normalization-program.md) §2.6 / §6,
+> and Wave 5 BDD **ready** [sys-norm-roles.md](../behavior/sys-norm-roles.md)
+> (**BDD-SYS-NORM-ROLE-001…018**).
+> **Matrix table rewrite = Wave 5** `sys-norm-roles` **doc-keeper stage 3** (this file’s §3 / §13
+> tables — **not** yet rewritten below). Until the rewrite lands, tables remain the **current
+> 8-role runtime baseline**. `DOCUMENT_AUTHOR` L1 display labels remain **Pending** finalize
+> (non-blocking; interim FE copy allowed per ROLE-013).
 >
 > **ADR-0071 cross-ref (Wave 1 nav hide Done — 2026-07-21):** Management **Security** nav no
 > longer lists Document brands / Legal entities product surfaces
@@ -29,6 +31,7 @@
 - [领域模型](../domain/domain-model.md)
 - [文档治理规则](../governance.md)
 - [ADR-0070 Role compression (six roles)](../adr/authorization-security/0070-role-compression-six-roles.md)（Accepted — Wave 5 impl）
+- [SYS-NORM Wave 5 roles BDD](../behavior/sys-norm-roles.md)（**ready** — **BDD-SYS-NORM-ROLE-001…018**; matrix rewrite next）
 - [ADR-0071 Retire document brand / legal entity surfaces](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)（Accepted — Wave 1 nav hide Done `#145`; Wave 6 runtime）
 - [System Normalization program](../plan/system-normalization-program-2026-07.md)
 - [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
@@ -69,12 +72,14 @@
 
 ## 3. 角色清单
 
-> **Pending implementation (Wave 5):** Assignable catalog compression to six roles is
-> **Confirmed** by [ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md)
+> **Pending matrix rewrite / implementation (Wave 5):** Assignable catalog compression to six
+> roles is **Confirmed** by [ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md)
 > (`TEMPLATE_APPROVER` → `GROUP_ADMIN`; `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` →
 > `DOCUMENT_AUTHOR`; keep `TEMPLATE_TESTER` / `LEGAL_REVIEWER` / `AUDIT_ADMIN` /
-> `GLOBAL_ADMIN` / `GROUP_ADMIN`). **Do not** rewrite the tables below in Wave 0 — full
-> capability remap lands with Wave 5 BDD + matrix rewrite.
+> `GLOBAL_ADMIN` / `GROUP_ADMIN`). Wave 5 BDD is **ready**
+> ([sys-norm-roles.md](../behavior/sys-norm-roles.md)). **Do not** treat the tables below as
+> already rewritten — full capability remap = doc-keeper stage 3 + implementers in
+> `sys-norm-roles`.
 
 | 角色 | 已确认说明 |
 | --- | --- |

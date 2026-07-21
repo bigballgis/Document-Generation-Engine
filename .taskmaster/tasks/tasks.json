@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: cleared (prior NON-CE #148 SYS-NORM Wave 4 Done dac9dcd9 / 5c71acc0; worktree REMOVED) — do not treat #53 as delivery leaf. Prior NON-CE #147 SYS-NORM Wave 3 Done 18a9e3b2 / f21dda5e; prior #146 Wave 2 Done 5d77db80 / 992f6822; prior #145 Wave 1 Done 7a62be44 / f1594f2a / ce2cb9f0; prior #144 PTA Done ac36ecbc / 6bc74ff1; prior #143 Wave 0 Done f8e898ad / 28d4abe1 / ade18bdb; prior #142 Wave B Done 288ce98f; #141 Wave A Done aa88170f; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done. Do NOT treat #53 as delivery leaf. Do NOT auto-activate CE-O02. Do NOT mark #53 Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: cleared (prior NON-CE #148 Wave 4 Done dac9dcd9 / 5c71acc0). Prior NON-CE #147 Wave 3 Done 18a9e3b2 / f21dda5e. Prior NON-CE #146 Wave 2 Done 5d77db80 / 992f6822; #145 Wave 1 Done; #144 PTA Done; #143 Wave 0 Done. Do NOT claim program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done.",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: NON-CE #149 SYS-NORM Wave 5 (sys-norm-roles) In Progress — do not treat #53 as delivery leaf. Prior NON-CE #148 Wave 4 Done dac9dcd9 / 5c71acc0; prior #147 Wave 3 Done 18a9e3b2 / f21dda5e; prior #146 Wave 2 Done 5d77db80 / 992f6822; prior #145 Wave 1 Done 7a62be44 / f1594f2a / ce2cb9f0; prior #144 PTA Done ac36ecbc / 6bc74ff1; prior #143 Wave 0 Done f8e898ad / 28d4abe1 / ade18bdb; prior #142 Wave B Done 288ce98f; #141 Wave A Done aa88170f; #140 CD-HARD-T06 Done b933965c; Wave CD-3 Done. Do NOT treat #53 as delivery leaf. Do NOT auto-activate CE-O02. Do NOT mark #53 Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: NON-CE #149 SYS-NORM Wave 5 (sys-norm-roles) In Progress. Prior NON-CE #148 Wave 4 Done dac9dcd9 / 5c71acc0. Prior NON-CE #147 Wave 3 Done 18a9e3b2 / f21dda5e. Prior NON-CE #146 Wave 2 Done 5d77db80 / 992f6822; #145 Wave 1 Done; #144 PTA Done; #143 Wave 0 Done. Do NOT claim program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-21T01:50:00.000Z"
+        "updatedAt": "2026-07-21T02:05:00.000Z"
       },
       {
         "id": "54",
@@ -2043,17 +2043,31 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-21T01:50:00.000Z"
+      },
+      {
+        "id": "149",
+        "title": "SYS-NORM Wave 5 — Six-role compression (sys-norm-roles)",
+        "description": "IN PROGRESS 2026-07-21. NON-CE System Normalization Program Wave 5 — sole-active delivery leaf. Slice sys-norm-roles; placement ISOLATED; worktree D:/working/DGE-sys-norm-roles · feat/sys-norm-roles (base origin/main @ 32ead955). Batch recommendation solo (member_task_ids: [\"149\"]; proposed_slice_id: sys-norm-roles). Scope: implement ADR-0070 six-role compression — permission-matrix rewrite (doc-keeper stage 3 BEFORE code) + migration remap + JWT/capabilities + FE role pickers/journeys + ROLE_NOT_ASSIGNABLE fail-closed; SoD TEMPLATE_TESTER retained. BDD ready docs/behavior/sys-norm-roles.md BDD-SYS-NORM-ROLE-001…018. frontend_ui_in_scope=true. Depends on Wave 4 #148 Done. Wave 5 → In Progress; Waves 0–4 Done; Waves 6–8 Not Started. Next after this leaf: sys-norm-d1-brands (Wave 6) — NOT activated. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Formal phase None. Do NOT flip #3b/#5a GO. Do NOT claim go-live / SYS-NORM program Done. Do NOT fold Wave 6/7/8 into this leaf.",
+        "details": "ACTIVATED 2026-07-21 (stage 2 plan-orchestrator). Slice id: sys-norm-roles. Batch solo. Gate order locked: matrix rewrite (doc-keeper) + BDD ready BEFORE production role-catalog / Flyway / FE enum code. Plan: docs/plan/system-normalization-program-2026-07.md Wave 5; detail docs/plan/detail/sys-norm-roles.md. ADR-0070 Accepted. Formal phase remains None. Host sole-active = this leaf. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT claim SYS-NORM program Done; do NOT activate Wave 6.",
+        "testStrategy": "1. BDD ready confirmed (docs/behavior/sys-norm-roles.md; BDD-SYS-NORM-ROLE-001…018). 2. Doc-keeper matrix rewrite before production code. 3. FE+BE gates + E2E + UIUX + Stage 5/10 DEPLOY_OK when implemented. 4. Migration remap evidence + ROLE_NOT_ASSIGNABLE. 5. Stage 11 merge + MAIN doc-sync before Done. 6. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT claim SYS-NORM program Done; do NOT fold Wave 6+.",
+        "priority": "high",
+        "dependencies": [
+          "148"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-21T02:05:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-21T01:50:00.000Z",
-      "taskCount": 148,
+      "lastModified": "2026-07-21T02:05:00.000Z",
+      "taskCount": 149,
       "completedCount": 145,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-21T01:50:00.000Z"
+      "updated": "2026-07-21T02:05:00.000Z"
     }
   }
 }

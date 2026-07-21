@@ -14,8 +14,8 @@
 | L1 English primary object label | **Letterhead** (purge user-facing mixed “Master” on L1 primary surfaces) | — | Intent Wave 0; sweep **Wave 8** |
 | L1 Chinese primary object label | **母版** | — | Intent Wave 0; sweep **Wave 8** |
 | API / L3 identifiers | May keep `masterId`, `MasterDocument`, routes | — | Unchanged |
-| Role `DOCUMENT_AUTHOR` | Role **ID** direction locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md)) | EN/ZH **display label** finalizable | Labels with Wave 5 / 8 |
-| Role merge (catalog) | Six-role compression direction locked (ADR-0070) | Runtime catalog + matrix still 8-role until Wave 5 | **Wave 5** `sys-norm-roles` |
+| Role `DOCUMENT_AUTHOR` | Role **ID** direction locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md); BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) ROLE-013) | EN/ZH **display label** finalizable — interim FE copy OK | Labels finalize Wave 5 interim / Wave 8 |
+| Role merge (catalog) | Six-role compression direction locked (ADR-0070); Wave 5 BDD **ready** | Runtime catalog + matrix still 8-role until Wave 5 impl | **Wave 5** `sys-norm-roles` |
 
 §4.5 below remains the P21 canonical glossary baseline; SYS-NORM Wave 8 reconciles residual “Master” mix on L1.
 

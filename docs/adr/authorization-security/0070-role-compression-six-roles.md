@@ -11,6 +11,7 @@ owners:
 adrNumber: "0070"
 topic: authorization-security
 related:
+  - docs/behavior/sys-norm-roles.md
   - docs/behavior/system-normalization-program.md
   - docs/plan/system-normalization-program-2026-07.md
   - docs/security/permission-matrix.md
@@ -27,14 +28,17 @@ related:
 | Gate | Note |
 | --- | --- |
 | User confirmation | **Yes** — 2026-07-21 (LOCKED — do not reopen) |
-| Behavior SoT | [system-normalization-program.md](../../behavior/system-normalization-program.md) §2.6 / §6 |
-| Implementation wave | **Wave 5** `sys-norm-roles` — **not** Wave 0 |
-| Matrix rewrite | Wave 5 (permission-matrix tables); Wave 0 records Confirmed intent only |
+| Behavior SoT (decision) | [system-normalization-program.md](../../behavior/system-normalization-program.md) §2.6 / §6 |
+| Runtime BDD SoT | [sys-norm-roles.md](../../behavior/sys-norm-roles.md) **ready** — **BDD-SYS-NORM-ROLE-001…018** |
+| Implementation wave | **Wave 5** `sys-norm-roles` — BDD ready; slice **Not Started** until activate |
+| Matrix rewrite | Wave 5 (permission-matrix tables; doc-keeper after BDD `ready`); Wave 0 recorded Confirmed intent only |
 | Checklist | Does **not** flip **#3b** / **#5a** |
 
 `sourceOfTruth: true` while Accepted.
 
-**Accepted ≠ Wave 5 Done.** Production role catalog, migration SQL, and FE labels remain Wave 5 delivery after matrix + Wave 5 BDD are `ready`.
+**Accepted ≠ Wave 5 Done.** Production role catalog, migration SQL, and FE labels remain Wave 5
+delivery after matrix rewrite + this wave BDD (`ready`) — code follows plan-orchestrator /
+doc-keeper / implementers.
 
 ## Context
 
@@ -85,15 +89,18 @@ retaining separation of duties for testing, legal review, and audit.
 
 ## Acceptance scenarios (decision lock)
 
-Normative Given/When/Then live in the behavior charter; ADR owns the decision.
+Normative Given/When/Then for implementation: [sys-norm-roles.md](../../behavior/sys-norm-roles.md)
+(**BDD-SYS-NORM-ROLE-001…018**, `ready`). Charter §6.3 keeps decision-lock sketches. ADR owns
+the architectural decision only.
 
 | ID | Summary |
 | --- | --- |
-| [BDD-SYS-NORM-ROLE-001](../../behavior/system-normalization-program.md#bdd-sys-norm-role-001--approver--group-admin) | Approver → Group Admin |
-| [BDD-SYS-NORM-ROLE-002](../../behavior/system-normalization-program.md#bdd-sys-norm-role-002--designer--author--document_author) | Designer ∪ Author → `DOCUMENT_AUTHOR` |
-| [BDD-SYS-NORM-ROLE-003](../../behavior/system-normalization-program.md#bdd-sys-norm-role-003--tester-retained) | Tester retained |
-| [BDD-SYS-NORM-ROLE-004](../../behavior/system-normalization-program.md#bdd-sys-norm-role-004--legal-and-audit-untouched-by-merge) | Legal and Audit untouched by merge |
-| [BDD-SYS-NORM-ROLE-005](../../behavior/system-normalization-program.md#bdd-sys-norm-role-005--fail-closed-unknown-legacy-role-assignment-api) | Fail-closed unknown legacy role assignment |
+| [BDD-SYS-NORM-ROLE-001](../../behavior/sys-norm-roles.md#bdd-sys-norm-role-001--approver--group-admin) | Approver → Group Admin |
+| [BDD-SYS-NORM-ROLE-002](../../behavior/sys-norm-roles.md#bdd-sys-norm-role-002--designer--author--document_author) | Designer ∪ Author → `DOCUMENT_AUTHOR` |
+| [BDD-SYS-NORM-ROLE-003](../../behavior/sys-norm-roles.md#bdd-sys-norm-role-003--tester-retained-sod) | Tester retained (SoD) |
+| [BDD-SYS-NORM-ROLE-004](../../behavior/sys-norm-roles.md#bdd-sys-norm-role-004--legal-and-audit-untouched-by-merge) | Legal and Audit untouched by merge |
+| [BDD-SYS-NORM-ROLE-005](../../behavior/sys-norm-roles.md#bdd-sys-norm-role-005--fail-closed-unknown--retired-legacy-role-on-assignment-api) | Fail-closed unknown/retired legacy role assignment |
+| ROLE-006…018 | Idempotency, matrix gate, JWT/capabilities, FE pickers/journeys, seeds, OpenAPI, governance boundaries — see Wave 5 BDD |
 
 ## Alternatives Considered
 
@@ -114,8 +121,9 @@ Normative Given/When/Then live in the behavior charter; ADR owns the decision.
 
 ## Related Documents
 
-- Behavior: [system-normalization-program.md](../../behavior/system-normalization-program.md)
+- Wave 5 runtime BDD: [sys-norm-roles.md](../../behavior/sys-norm-roles.md) (`ready`)
+- Behavior charter: [system-normalization-program.md](../../behavior/system-normalization-program.md)
 - Program: [system-normalization-program-2026-07.md](../../plan/system-normalization-program-2026-07.md)
-- Permissions: [permission-matrix.md](../../security/permission-matrix.md)
+- Permissions: [permission-matrix.md](../../security/permission-matrix.md) (rewrite = Wave 5 stage 3)
 - Legal approval: [0064-legal-compliance-approval-matrix.md](../template-lifecycle/0064-legal-compliance-approval-matrix.md)
 - Terminology: [business-terminology-guide.md](../../product/business-terminology-guide.md)
