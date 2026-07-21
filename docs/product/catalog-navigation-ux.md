@@ -8,7 +8,7 @@
 
 **Package list pagination (LR-C5, 2026-07-11):** Templates / Masters / Content-modules **package lists** use server-side `PageView` pagination + filter/search (default `size=20`, max 100; default sort group-first `groupCode ASC, updatedAt DESC`). Contract: [openapi-v1.yaml](../api/openapi-v1.yaml) `listTemplates` / `listMasters` / `listContentModules`; behavior [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md). Does not change package-hub version/revision-line pagination already specified below. Does **not** define LR-C6 command-palette API.
 
-### SYS-NORM Confirmed intent (2026-07-21) — Waves 0–7 Done; Wave 8 In Progress
+### SYS-NORM Confirmed intent (2026-07-21) — Waves 0–8 Done; post-program Reminder timing IA
 
 > Locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.1–2.3 / §2.8–2.9.
 > Historical hub-tab narrative below is **superseded for Hub IA** by Wave 2; External services
@@ -22,6 +22,9 @@
 > Wave 8 leaf TM **#152** `sys-norm-demo-seed-terms` → **Done** (`8aca145b` / `7df6c563`; BDD
 > [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) **W8-001…018**;
 > SYS-NORM program Waves **0–8 Done**; **N18 deferred**).
+> Post-program §4a Reminder timing IA — TM **#153** `reminder-timing-settings-ia` → **In Progress**
+> (BDD [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md)
+> **BDD-RT-IA-001…016**; FE impl pending — docs-first Confirmed below).
 
 | Intent | Confirmed decision | Implementation status | Wave |
 | --- | --- | --- | --- |
@@ -35,7 +38,8 @@
 | **API model A** | Package-level API settings SoT under External services; hub **API settings** jump to `/api/packages/:templateId/settings` shell; per-version perspective + deep-link; **forbidden** per-version ApiPolicy entities; legacy `?tab=apiAccess` / `#apiAccess` / `/api/policies/:templateId` → settings shell | **Done** IA shell + redirects (Wave 2) + full settings home (Wave 3; `#147` / `18a9e3b2`) | 2 (+ 3 settings) |
 | **External services** | Invocation records = **separate page** (dashboard-like); package API settings = single edit surface | **Done** (2026-07-21; `#147` / `18a9e3b2` / `f21dda5e`; [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md)) | 3 `sys-norm-external-ops` |
 | **D1 brands/entities runtime** | Full product-surface + runtime retirement per ADR-0071 — hard-retire routes/APIs/catalogs; Letterhead (master) SoT for logo/seal; Legal holds kept; no brand/entity sidecar for promotion/export ([sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) **D1-001…020**) | **Done** (TM **#150** `64b0a650`; BDD **ready/Done**) | 6 `sys-norm-d1-brands` |
-| **L1 Letterhead / 母版 + honest empties** | L1 EN **Letterhead** / ZH **母版**; purge L1 Master mix; Asset Library / Legal hold / revision design / journey honest empties; optional demo seed ops; N23 classpath ≠ library | **In Progress** (docs locked; FE/BE impl pending) — **N18 deferred**; parked UX OOS | 8 `sys-norm-demo-seed-terms` |
+| **L1 Letterhead / 母版 + honest empties** | L1 EN **Letterhead** / ZH **母版**; purge L1 Master mix; Asset Library / Legal hold / revision design / journey honest empties; optional demo seed ops; N23 classpath ≠ library | **Done** (2026-07-22; `#152` / `8aca145b` / `7df6c563`) — **N18 deferred**; parked UX OOS | 8 `sys-norm-demo-seed-terms` |
+| **Reminder timing settings IA** | Relocate **Reminder timing** off Dashboard Overview: Global Admin **System settings** full page (Global default only); Group Admin **Team settings** dialog on Groups/team surface (group override only); API unchanged | **In Progress** (docs Confirmed; FE pending) — TM **#153**; BDD **BDD-RT-IA-001…016** | post-program §4a |
 
 ### Wave 8 empty-state product notes (N13 / N15 / N21)
 
@@ -311,7 +315,8 @@ single `/dashboard` task hub remains the one authoritative work entry (behavior 
 Left navigation IA
 ├── Resource-typed (business functions)
 │     Users & permissions · Letterhead templates (Masters) · Templates ·
-│     External services (API management) · Activity log (Audit)
+│     External services (API management) · Activity log (Audit) ·
+│     System settings (GLOBAL_ADMIN + maintainCollaborationTimeoutConfig only)
 └── Behavior-typed (my to-dos) — filtered task-hub views
       Waiting on my testing · Waiting on my approval · Waiting on my fixes ·
       Waiting to confirm go-live · Masters to review · Overdue to follow up
@@ -324,6 +329,32 @@ Left navigation IA
   only message values change.
 - Each role also gets a guided `RoleJourneyTimeline` (current step, available actions, waiting
   items) reachable from the task hub.
+- **System settings** is **not** a behavior-typed / Dashboard entry — see Reminder timing IA below.
+
+### Reminder timing settings IA (System / Team) — Confirmed 2026-07-21
+
+**Status:** Confirmed product IA (user 2026-07-21) | **Implementation:** **In Progress** — TM **#153**
+`reminder-timing-settings-ia` (BDD [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md)
+**BDD-RT-IA-001…016**; FE pending).  
+**Supersedes:** P14-T02d / P21 Dashboard Overview hosting of `CollaborationTimeoutConfigPanel`
+(historical delivery remains valid; **current** IA must not keep Reminder timing on Overview).
+
+| Surface | Actor | Entry pattern | Scope locked in UI | Route / host |
+| --- | --- | --- | --- | --- |
+| **System settings** (en) / **系统设置** (zh-CN) | `GLOBAL_ADMIN` with `maintainCollaborationTimeoutConfig` | Sidebar nav → dedicated **full page** (fluid `AppPageLayout`; not a dialog) | **Global default** only (`scopeType=GLOBAL`); no GLOBAL/GROUP radio; no group-code override editor | Canonical `/system/settings/reminder-timing` |
+| **Team settings** (en) / **团队设置** (zh-CN) | `GROUP_ADMIN` with `maintainCollaborationTimeoutConfig` | Control on **Groups/team** surface (`/entitlement/groups` or equivalent Entitlement team surface) — page header / top action rail | **Group override** only (`scopeType=GROUP`) for authorized group | Dialog/modal over Groups list — **not** on Dashboard |
+| Dashboard Overview | Any entitled admin | — | — | **Must not** mount `CollaborationTimeoutConfigPanel` (collaboration to-do queues remain) |
+
+**Fail-closed visibility (capability unchanged):**
+
+- Roles without `maintainCollaborationTimeoutConfig` — hide System settings nav and Team settings control; deep-link to System settings route → Forbidden / route-guard fail-closed.
+- `GROUP_ADMIN` — **no** System settings nav; deep-link to `/system/settings/reminder-timing` → fail-closed; Group override only via Team settings dialog.
+- `GLOBAL_ADMIN` System settings page does **not** offer Group override editing.
+- Team settings control does **not** appear on Dashboard Overview / Tasks.
+
+**API (unchanged):** `GET`/`PUT /api/management/v1/collaboration-timeout-config` — no OpenAPI breaking change in this leaf. Capability remains notifications-only (overdue reminders do not mutate workflow status).
+
+**L1 copy SSOT:** [business-terminology-guide.md](./business-terminology-guide.md) §4.3 — Reminder timing / System settings / Team settings.
 
 ### Navigation terminology (business-friendly, P21)
 
@@ -338,8 +369,10 @@ Full mapping: [business-terminology-guide.md](./business-terminology-guide.md).
 
 ## Related docs
 
-- `docs/domain/domain-model.md` §2.5 (master), §2.10–2.11 (template versions)
+- `docs/domain/domain-model.md` §2.5 (master), §2.9.4 (collaboration + Reminder timing IA), §2.10–2.11 (template versions)
 - `docs/product/business-terminology-guide.md` (business-friendly terminology SSOT)
+- `docs/behavior/reminder-timing-settings-ia.md` (System / Team Reminder timing IA — BDD-RT-IA-001…016)
+- `docs/plan/detail/reminder-timing-settings-ia.md` (TM **#153** delivery detail)
 - `docs/plan/detail/P2-master-management.md`
 - `docs/plan/detail/P3-template-authoring.md` (BDD-TEMPLATE-PACKAGE-NAV-001 implementation target)
 - `docs/plan/detail/P16-lifecycle-version-governance.md`

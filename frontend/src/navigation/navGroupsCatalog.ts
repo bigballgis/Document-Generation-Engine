@@ -101,4 +101,16 @@ export const NAV_GROUPS: NavGroupDefinition[] = [
       // Wave 6 hard runtime retire). Security = audit + legal holds only.
     ],
   },
+  {
+    id: 'system',
+    labelKey: 'nav.groups.system',
+    items: [
+      {
+        id: 'system-settings',
+        routeKey: ROUTE_KEYS.systemSettingsReminderTiming,
+        path: '/system/settings/reminder-timing',
+        labelKey: 'nav.items.systemSettings',
+      },
+    ],
+  },
 ]

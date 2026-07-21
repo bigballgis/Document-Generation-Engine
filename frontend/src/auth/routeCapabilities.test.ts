@@ -365,6 +365,63 @@ describe('routeCapabilities', () => {
     expect(denied).toBe(false)
   })
 
+  it('allows System settings Reminder timing for GLOBAL_ADMIN with maintain capability without visibleRoutes', () => {
+    const allowed = canAccessRouteWithCapability(
+      ROUTE_KEYS.systemSettingsReminderTiming,
+      session({
+        roles: ['GLOBAL_ADMIN'],
+        visibleRoutes: [ROUTE_KEYS.dashboardHome],
+        capabilities: undefined,
+      }),
+    )
+    expect(allowed).toBe(true)
+  })
+
+  it('denies System settings Reminder timing for GROUP_ADMIN (BDD-RT-IA-007)', () => {
+    const denied = canAccessRouteWithCapability(
+      ROUTE_KEYS.systemSettingsReminderTiming,
+      session({
+        roles: ['GROUP_ADMIN'],
+        visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.identityAdministration],
+        capabilities: undefined,
+      }),
+    )
+    expect(denied).toBe(false)
+  })
+
+  it('denies System settings Reminder timing when maintain capability is false (BDD-RT-IA-006)', () => {
+    const denied = canAccessRouteWithCapability(
+      ROUTE_KEYS.systemSettingsReminderTiming,
+      session({
+        roles: ['GLOBAL_ADMIN'],
+        visibleRoutes: [ROUTE_KEYS.dashboardHome],
+        capabilities: {
+          manageMasters: true,
+          reviewMasters: true,
+          authorTemplates: true,
+          decideTests: true,
+          decideApprovals: true,
+          decideLegalApprovals: false,
+          publishTemplates: true,
+          stopTemplates: true,
+          restoreOrDeprecateTemplates: true,
+          deleteTemplates: true,
+          exportTemplates: true,
+          viewCollaborationWorkItems: true,
+          maintainCollaborationTimeoutConfig: false,
+          authorContentModules: true,
+          decideContentModuleReviews: true,
+          manageContentModuleLifecycle: true,
+          manageApiPolicy: true,
+          readAudit: true,
+          manageAssetLibrary: true,
+          manageLegalHold: true,
+        },
+      }),
+    )
+    expect(denied).toBe(false)
+  })
+
   it('denies asset library for AUDIT_ADMIN even when listed in visibleRoutes', () => {
     const denied = canAccessRouteWithCapability(
       ROUTE_KEYS.assetLibraryManagement,

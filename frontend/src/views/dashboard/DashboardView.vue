@@ -144,7 +144,6 @@ function openTask(path: string) {
       :stats="stats"
       :loading="loading"
       :show-stats-section="showStatsSection"
-      :show-timeout-config="showTimeoutConfig"
     />
 
     <DashboardWorkflowTab

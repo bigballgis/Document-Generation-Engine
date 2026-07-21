@@ -53,7 +53,6 @@ const journeyTimelineStub = {
 const defaultStubs = {
   DashboardStatCards: true,
   LoadErrorPanel: true,
-  CollaborationTimeoutConfigPanel: true,
   TaskHubPartitionSection: true,
   RoleJourneyTimeline: journeyTimelineStub,
   ElCard: { template: '<div><slot /></div>' },

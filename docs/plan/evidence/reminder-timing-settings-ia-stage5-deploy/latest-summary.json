@@ -1,0 +1,32 @@
+{
+  "result": "DEPLOY_OK",
+  "stage": 5,
+  "task_ids": [
+    "153"
+  ],
+  "slice_id": "reminder-timing-settings-ia",
+  "worktree": "D:\\working\\DGE-reminder-timing-settings-ia",
+  "branch": "feat/reminder-timing-settings-ia",
+  "tip_sha": "2b5f0ac1258c50012771552687244681d57e3513",
+  "tip_note": "uncommitted FE WIP packaged into images via host pnpm build",
+  "local_time": "2026-07-22T02:05+08:00",
+  "command": ".\\scripts\\docker-deploy-queue.ps1 -Reason \"stage5 reminder-timing-settings-ia E2E prep (retry after JWT sync)\"",
+  "compose_project": "documentgenerationengine",
+  "ports": {
+    "frontend": 4173,
+    "backend": 8080
+  },
+  "health": {
+    "healthz_status": 200,
+    "healthz_body": "{\"status\":\"UP\"}",
+    "frontend_4173_status": 200,
+    "frontend_4173_bytes": 1202
+  },
+  "images": {
+    "frontend_id": "sha256:0d17c09b7c874dbb2de8a1d8598b00009bd595160a8445b9c50fc812a9e72026",
+    "backend_id": "sha256:4d772edda7d40842ae15584ccaa8a0c83ee0fe7d32aa9ad06177ee91cc5d5c0d"
+  },
+  "mvn_verify": "not run (package -Dmaven.test.skip=true only; no Java behavior change)",
+  "force_rebuild": false,
+  "next": "e2e-test-engineer"
+}

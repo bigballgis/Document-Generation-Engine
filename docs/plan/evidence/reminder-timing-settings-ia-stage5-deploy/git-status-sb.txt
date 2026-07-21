@@ -1,0 +1,42 @@
+## feat/reminder-timing-settings-ia...origin/main
+ M .taskmaster/tasks/tasks.json
+ M docs/README.md
+ M docs/domain/domain-model.md
+ M docs/domain/lifecycle-review.md
+ M docs/plan/README.md
+ M docs/plan/detail/P14-confirmed-large-domains.md
+ M docs/plan/detail/P21-role-journey-frontend-redesign.md
+ M docs/plan/execution-sync-ledger.md
+ M docs/plan/master-plan.md
+ M docs/plan/system-normalization-program-2026-07.md
+ M docs/product/PRD.md
+ M docs/product/README.md
+ M docs/product/business-terminology-guide.md
+ M docs/product/catalog-navigation-ux.md
+ M docs/requirements/requirements-plan.md
+ M docs/security/permission-matrix.md
+ M frontend/e2e/collaboration-todos.spec.ts
+ M frontend/src/auth/routeCapabilities.test.ts
+ M frontend/src/auth/routeCapabilities.ts
+ M frontend/src/auto-imports.d.ts
+ M frontend/src/components/collaboration/CollaborationTimeoutConfigPanel.test.ts
+ M frontend/src/components/collaboration/CollaborationTimeoutConfigPanel.vue
+ M frontend/src/components/dashboard/DashboardOverviewTab.vue
+ M frontend/src/i18n/locales/en.ts
+ M frontend/src/i18n/locales/zh-CN.ts
+ M frontend/src/navigation/navGroupsCatalog.ts
+ M frontend/src/navigation/navIcons.ts
+ M frontend/src/navigation/navStructure.test.ts
+ M frontend/src/navigation/navStructure.ts
+ M frontend/src/router/index.ts
+ M frontend/src/routing/routeKeys.ts
+ M frontend/src/views/dashboard/DashboardView.vue
+ M frontend/src/views/dashboard/dashboardViewTestSupport.ts
+ M frontend/src/views/identity/GroupManagementView.test.ts
+ M frontend/src/views/identity/GroupManagementView.vue
+?? docs/behavior/reminder-timing-settings-ia.md
+?? docs/plan/detail/reminder-timing-settings-ia.md
+?? docs/plan/evidence/reminder-timing-settings-ia-stage5-deploy/
+?? frontend/src/components/collaboration/TeamSettingsReminderTimingDialog.test.ts
+?? frontend/src/components/collaboration/TeamSettingsReminderTimingDialog.vue
+?? frontend/src/views/system/

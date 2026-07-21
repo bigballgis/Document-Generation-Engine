@@ -87,6 +87,8 @@ export function buildDashboardJourneyPath(input: {
     switch (activeStepId) {
       case 'manageUsersGroups':
         return ROUTE_PATH_BY_KEY[ROUTE_KEYS.identityAdministration]
+      case 'setReminderDefaults':
+        return ROUTE_PATH_BY_KEY[ROUTE_KEYS.systemSettingsReminderTiming]
       case 'monitorOverdue':
         return '/dashboard?queue=ESCALATION#tasks-section'
       case 'reviewAllTodos':

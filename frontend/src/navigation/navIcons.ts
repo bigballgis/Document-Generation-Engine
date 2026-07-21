@@ -11,6 +11,7 @@ import {
   FolderOpened,
   Lock,
   List,
+  Setting,
 } from '@element-plus/icons-vue'
 
 /** Icon map for user-facing nav item ids in `NAV_GROUPS`. */
@@ -26,6 +27,7 @@ export const NAV_ICON_MAP: Record<string, Component> = {
   'api-invocations': List,
   audit: Histogram,
   'legal-holds': Lock,
+  'system-settings': Setting,
 }
 
 export function getNavIcon(itemId: string): Component | undefined {

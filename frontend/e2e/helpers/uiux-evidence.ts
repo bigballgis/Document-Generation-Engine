@@ -1978,3 +1978,44 @@ export async function captureSysNormW7LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** Reminder timing settings IA / #153 — System settings page + Team settings dialog @1440. */
+export const REMINDER_TIMING_IA_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'reminder-timing-settings-ia',
+)
+export const REMINDER_TIMING_IA_SCREENSHOT_DIR = path.join(
+  REMINDER_TIMING_IA_EVIDENCE_ROOT,
+  'screenshots',
+)
+export const REMINDER_TIMING_IA_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureReminderTimingIaEvidenceDirs(): void {
+  fs.mkdirSync(REMINDER_TIMING_IA_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function reminderTimingIaScreenshotPath(filename: string): string {
+  return path.join(REMINDER_TIMING_IA_SCREENSHOT_DIR, filename)
+}
+
+export async function captureReminderTimingIaScreenshot(
+  page: Page,
+  filename: string,
+): Promise<string> {
+  ensureReminderTimingIaEvidenceDirs()
+  const target = reminderTimingIaScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureReminderTimingIaLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureReminderTimingIaEvidenceDirs()
+  const target = reminderTimingIaScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

@@ -19,9 +19,9 @@ test.describe('P21-T09b reminder timing + confirm on behalf L1 copy', () => {
     await requireDockerStack(request, { frontendBaseUrl: FRONTEND_BASE_URL, skipMessage: `Stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Start backend and frontend before running E2E.` })
   })
 
-  test('reminder timing panel avoids IT jargon on primary surface', async ({ page }) => {
+  test('reminder timing panel avoids IT jargon on System settings surface', async ({ page }) => {
     await loginAs(page, E2E_ADMIN)
-    await page.goto('/dashboard')
+    await page.goto('/system/settings/reminder-timing')
 
     const timeoutPanel = page.locator('.timeout-config-card')
     await expect(timeoutPanel.getByRole('heading', { name: /reminder timing/i })).toBeVisible()

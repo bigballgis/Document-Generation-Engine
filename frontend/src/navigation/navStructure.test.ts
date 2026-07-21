@@ -331,6 +331,7 @@ describe('navStructure', () => {
         'documentContent',
         'api',
         'security',
+        'system',
       ])
 
       const resourceItems = NAV_GROUPS.flatMap((group) =>
@@ -369,7 +370,37 @@ describe('navStructure', () => {
           routeKey: ROUTE_KEYS.legalHoldAdministration,
           path: '/governance/legal-holds',
         },
+        {
+          id: 'system-settings',
+          routeKey: ROUTE_KEYS.systemSettingsReminderTiming,
+          path: '/system/settings/reminder-timing',
+        },
       ])
+    })
+
+    it('shows System settings only for GLOBAL_ADMIN with maintain capability (BDD-RT-IA-014)', () => {
+      const globalGroups = buildVisibleNavGroups(
+        [dashboardRoute],
+        ['GLOBAL_ADMIN'],
+        globalAdminCapabilities,
+      )
+      expect(globalGroups.find((group) => group.id === 'system')?.items.map((item) => item.id)).toEqual([
+        'system-settings',
+      ])
+
+      const groupAdminGroups = buildVisibleNavGroups(
+        [dashboardRoute, ROUTE_KEYS.identityAdministration],
+        ['GROUP_ADMIN'],
+        globalAdminCapabilities,
+      )
+      expect(groupAdminGroups.find((group) => group.id === 'system')).toBeUndefined()
+
+      const authorGroups = buildVisibleNavGroups(
+        [dashboardRoute],
+        ['DOCUMENT_AUTHOR'],
+        { ...globalAdminCapabilities, maintainCollaborationTimeoutConfig: false },
+      )
+      expect(authorGroups.find((group) => group.id === 'system')).toBeUndefined()
     })
 
     it('hides Document brands and Legal entities from Security nav (BDD-SYS-NORM-W1-003)', () => {
@@ -465,6 +496,15 @@ describe('navStructure', () => {
       expect(en.nav.behaviorItems.testing).toBe('Waiting on my testing')
       expect(zhCN.nav.groups.myTodos).toBe('我的待办')
       expect(zhCN.nav.behaviorItems.testing).toBe('待我测试')
+    })
+
+    it('includes System settings / Team settings L1 copy (BDD-RT-IA-011)', () => {
+      expect(en.nav.groups.system).toBe('System')
+      expect(en.nav.items.systemSettings).toBe('System settings')
+      expect(en.identity.groups.teamSettings).toBe('Team settings')
+      expect(zhCN.nav.groups.system).toBe('系统')
+      expect(zhCN.nav.items.systemSettings).toBe('系统设置')
+      expect(zhCN.identity.groups.teamSettings).toBe('团队设置')
     })
 
     it('passes forbidden L1 token grep on in-scope en values', () => {

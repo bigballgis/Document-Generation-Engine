@@ -186,13 +186,13 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | P21-T08 | B1 Approver journey: "waiting on my approval" entry + controlled approval decision + `approvalSubState` (PENDING_SUBMIT vs PENDING_DECISION) dual-substate UI | lifecycle panel, decision forms | Required | Done (2026-06-30) |
 | P21-T09 | B2 Team-lead / API management journey: master review tasks; "waiting to confirm go-live" entry + pre-release checks + go-live summary confirm | lifecycle panel, dashboard | Required | Done (2026-06-30) |
 | P21-T09a | API management / access-keys journey: full L1 copy replacement of API policy/credential surfaces | `ApiPolicyDetailView`, api policy components, `en.ts`, `zh-CN.ts` | Required | Done (2026-06-30) |
-| P21-T09b | Reminder timing config + overdue-reminder queue visibility + exception handling ("confirm on behalf" + audit trail copy, not "exception intervention") | `CollaborationTimeoutConfigPanel`, dashboard | Required | Done (2026-06-30) |
+| P21-T09b | Reminder timing config + overdue-reminder queue visibility + exception handling ("confirm on behalf" + audit trail copy, not "exception intervention") | `CollaborationTimeoutConfigPanel`, dashboard (**IA supersession:** edit surface → System/Team settings per TM #153; queues stay on dashboard) | Required | Done (2026-06-30) |
 
 ### Sub-phase C — Cluster ③ Global admin
 
 | ID | Task | Key files | Behavior spec | Status |
 | --- | --- | --- | --- | --- |
-| P21-T10 | Bank-wide overview, users & groups management, template deletion, bank-wide reminder defaults, bank-wide overdue monitoring, global to-do view; reuse/extend cluster ② components; copy avoids governance/platform jargon | entitlement views, dashboard | Required | Done (2026-06-30) |
+| P21-T10 | Bank-wide overview, users & groups management, template deletion, bank-wide reminder defaults, bank-wide overdue monitoring, global to-do view; reuse/extend cluster ② components; copy avoids governance/platform jargon | entitlement views, dashboard (**current:** bank-wide reminder defaults edit via System settings; group override via Team settings on Groups — TM #153) | Required | Done (2026-06-30) |
 
 ### Sub-phase D — Cluster ④ Audit
 
@@ -929,8 +929,9 @@ AUD-H01..H07 closed. Gates: Vitest **280+**; Playwright T01a **6/6** + UIUX mani
     task hub still renders if collaboration/masters-for-tasks succeeded.
   - templates fetch fail → same pattern for template stats.
   - collaboration fetch fail → show `LoadErrorPanel` with `collaborationStore.workItemsErrorMessageKey`
-    (fallback `collaboration.workItems.error.load`) **inside** `#tasks-section`; stats cards and
-    timeout config panel remain when their data loaded.
+    (fallback `collaboration.workItems.error.load`) **inside** `#tasks-section`; stats cards remain
+    when their data loaded. (**IA note TM #153:** Reminder timing edit UI is no longer on Dashboard
+    Overview — do not require a timeout config panel to remain on Overview after #153 ships.)
   - retry actions scoped per segment (collaboration retry re-invokes `fetchWorkItems` with current
     route queue param).
 - **System responses (success):** global `loadError` no longer suppresses entire `#tasks-section` and
@@ -2124,6 +2125,12 @@ E2E helper.
 ### P21-T09b completion (2026-06-30)
 
 **Scope:** Reminder timing L1 copy + overdue-reminder queue visibility (T01a task-hub partitioning retained) + "confirm on behalf" exception copy; GLOBAL_ADMIN + GROUP_ADMIN can see confirm-on-behalf in `TemplateLifecycleDecisionDialog`.
+
+> **IA supersession (Confirmed 2026-07-21 / TM #153):** L1 copy and overdue-reminder **queue**
+> behavior from T09b remain; **edit placement** of Reminder timing moves to System settings
+> (GLOBAL) + Team settings dialog (GROUP). Dashboard Overview must not host
+> `CollaborationTimeoutConfigPanel` after #153. See
+> [reminder-timing-settings-ia.md](../../behavior/reminder-timing-settings-ia.md).
 
 **Deliverables:** `en.ts` + `zh-CN.ts` (reminder timing / overdue / confirm-on-behalf L1 values); `TemplateLifecycleDecisionDialog.vue` (+ Vitest); `CollaborationTimeoutConfigPanel.test.ts`; `navStructure.test.ts` grep audit; Playwright `P21-T09b-reminder-exception-l1.spec.ts` + updated `collaboration-todos.spec.ts`.
 

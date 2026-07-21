@@ -173,6 +173,7 @@ export default {
       content: '文档内容',
       apiAccess: '对外服务',
       security: '安全与操作记录',
+      system: '系统',
     },
     items: {
       dashboard: '我的任务',
@@ -188,6 +189,7 @@ export default {
       apiInvocations: '调用记录',
       audit: '操作记录',
       legalHolds: '法律冻结',
+      systemSettings: '系统设置',
     },
     behaviorItems: {
       allTasks: '全部任务',
@@ -3314,6 +3316,7 @@ export default {
     groups: {
       readOnlyHint: '您可查看授权范围内的分组。分组变更需全局管理员权限。',
       searchPlaceholder: '按分组代码或显示名称搜索',
+      teamSettings: '团队设置',
       columns: {
         groupCode: '分组代码',
         displayName: '显示名称',
