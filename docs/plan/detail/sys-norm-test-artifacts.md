@@ -2,12 +2,12 @@
 
 **Program / slice:** `sys-norm-test-artifacts` (SYS-NORM Wave **4**; **NON-CE**; **not** a formal P-phase)  
 **Formal plan phase:** **None**  
-**Task Master:** **#148** → **Done** (2026-07-21; plan/docs-close)  
-**Active delivery slice:** sole-active until stage 11 merge (`D:/working/DGE-sys-norm-test-artifacts` · `feat/sys-norm-test-artifacts`)  
+**Task Master:** **#148** → **Done** (2026-07-21; plan/docs-close; MAIN merge `dac9dcd9` / feature tip `5c71acc0`; worktree **REMOVED**)  
+**Active delivery slice:** **none** — sole-active **cleared**  
 **Leaf kind:** **docs-close** — product §5.1 already shipped by **#144** PTA  
 **BDD:** [sys-norm-test-artifacts.md](../../behavior/sys-norm-test-artifacts.md) — **ready** (`BDD-SYS-NORM-W4-001…010` → `BDD-PTA-001…009`); `frontend_ui_in_scope=false`  
 **Product acceptance SoT:** [published-template-test-artifacts.md](../../behavior/published-template-test-artifacts.md) (**#144** Done)  
-**Batch recommendation:** **split** (`member_task_ids: ["148"]`; `proposed_slice_id: sys-norm-test-artifacts`; vetoes_applied: **do-not-merge-wave4-with-roles**, **checklist-#3b/#5a**, **CE-O02**, **#53**; `evidence_amortization: reuse #144 E2E/deploy; this leaf docs-only`)
+**Batch recommendation:** **split** (`member_task_ids: ["148"]`; `proposed_slice_id: sys-norm-test-artifacts`; vetoes_applied: **do-not-merge-wave4-with-roles**, **checklist-#3b/#5a**, **CE-O02**, **#53**; `evidence_amortization: reuse #144 E2E/deploy; this leaf docs-only`) — **closed**
 
 ---
 
@@ -23,9 +23,9 @@ FE/BE residual in this leaf.
 
 | Item | Value |
 | --- | --- |
-| Leaf status | **Done** (plan/docs; product evidence **#144** `ac36ecbc` / `6bc74ff1`) |
+| Leaf status | **Done** (plan/docs; MAIN `dac9dcd9` / feature `5c71acc0`; product evidence **#144** `ac36ecbc` / `6bc74ff1`; worktree **REMOVED**) |
 | Formal phase | **None** |
-| Host sole-active | **#148** this leaf until merge — then clear |
+| Host sole-active | **cleared** |
 | Next queue head | `sys-norm-roles` (Wave 5) — **Not Started** / **not** activated |
 | Program | Waves **0–4 Done**; Waves **5–8 Not Started** — program **not** Done |
 
@@ -50,4 +50,5 @@ FE/BE residual in this leaf.
 - **E2E:** TM144 **4/4** PASS
 - **UIUX:** **PASS** Critical=0
 - **Deploy:** Stage 5 + 10 **DEPLOY_OK**
-- **Merge (product):** MAIN `ac36ecbc`; feature `6bc74ff1`
+- **Merge (product #144):** MAIN `ac36ecbc`; feature `6bc74ff1`
+- **Merge (this leaf #148):** MAIN `dac9dcd9`; feature tip `5c71acc0`; worktree **REMOVED**
