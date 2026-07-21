@@ -1,0 +1,1 @@
+Name=/docgen-frontend Image=documentgenerationengine-docgen-frontend Status=running Health=healthy

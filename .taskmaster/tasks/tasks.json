@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: cleared — NON-CE #152 SYS-NORM Wave 8 Done 8aca145b / 7df6c563; SYS-NORM program Waves 0–8 Done; do not treat #53 as delivery leaf. Prior NON-CE #151 Wave 7 Done 11356c63 / f795b04a; prior #150 Wave 6 Done 64b0a650; prior #149 Wave 5 Done febb95b3; prior #148 Wave 4 Done dac9dcd9 / 5c71acc0; prior #147 Wave 3 Done 18a9e3b2 / f21dda5e; prior #146 Wave 2 Done 5d77db80 / 992f6822; prior #145 Wave 1 Done 7a62be44 / f1594f2a / ce2cb9f0; prior #144 PTA Done ac36ecbc / 6bc74ff1; prior #143 Wave 0 Done. Post-program parked queue (SYS-NORM §4a, not activated): Reminder timing; Asset library group isolation; Binding editor re-layout; Auto referenceKey. N18 deferred. Do NOT mark #53 Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: cleared — NON-CE #152 SYS-NORM Wave 8 Done (MAIN 8aca145b / feature 7df6c563; worktree REMOVED; BDD ready docs/behavior/sys-norm-demo-seed-terms.md W8-001…018; SYS-NORM program Waves 0–8 Done). Prior NON-CE #151 Wave 7 Done 11356c63 / f795b04a; prior #150 Wave 6 Done 64b0a650; prior #149 Wave 5 Done febb95b3; prior #148 Wave 4 Done dac9dcd9 / 5c71acc0. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT claim parked UX Done.",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: NON-CE #153 reminder-timing-settings-ia In Progress (post-SYS-NORM §4a); prior NON-CE #152 SYS-NORM Wave 8 Done 8aca145b / 7df6c563; SYS-NORM program Waves 0–8 Done; do not treat #53 as delivery leaf. Prior NON-CE #151 Wave 7 Done 11356c63 / f795b04a; prior #150 Wave 6 Done 64b0a650; prior #149 Wave 5 Done febb95b3; prior #148 Wave 4 Done dac9dcd9 / 5c71acc0; prior #147 Wave 3 Done 18a9e3b2 / f21dda5e; prior #146 Wave 2 Done 5d77db80 / 992f6822; prior #145 Wave 1 Done 7a62be44 / f1594f2a / ce2cb9f0; prior #144 PTA Done ac36ecbc / 6bc74ff1; prior #143 Wave 0 Done. Post-program parked queue (SYS-NORM §4a): Reminder timing In Progress (#153); siblings Parked — Asset library group isolation; Binding editor re-layout; Auto referenceKey. N18 deferred. Do NOT mark #53 Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: NON-CE #153 reminder-timing-settings-ia In Progress (post-SYS-NORM §4a; worktree D:/working/DGE-reminder-timing-settings-ia · feat/reminder-timing-settings-ia; BDD ready docs/behavior/reminder-timing-settings-ia.md RT-IA-001…016). Prior NON-CE #152 SYS-NORM Wave 8 Done (MAIN 8aca145b / feature 7df6c563; SYS-NORM Waves 0–8 Done). Prior NON-CE #151 Wave 7 Done 11356c63 / f795b04a; prior #150 Wave 6 Done 64b0a650; prior #149 Wave 5 Done febb95b3; prior #148 Wave 4 Done dac9dcd9 / 5c71acc0. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT claim parked UX Done.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-21T16:59:12.396Z"
+        "updatedAt": "2026-07-22T01:20:00.000Z"
       },
       {
         "id": "54",
@@ -2099,17 +2099,31 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-21T16:59:12.396Z"
+      },
+      {
+        "id": "153",
+        "title": "Reminder timing settings IA — System settings + Team settings (reminder-timing-settings-ia)",
+        "description": "IN PROGRESS 2026-07-22. NON-CE post-SYS-NORM parked UX §4a sole-active leaf. Slice reminder-timing-settings-ia; placement ISOLATED; worktree D:/working/DGE-reminder-timing-settings-ia · feat/reminder-timing-settings-ia. Batch solo (member_task_ids: [\"153\"]; proposed_slice_id: reminder-timing-settings-ia; vetoes: parked-#2-asset-library-group-isolation / parked-#3-binding-editor-re-layout / parked-#4-auto-referenceKey / checklist-#3b/#5a / CE-O02 / #53) open. Scope: GLOBAL_ADMIN System settings full page for Global default; GROUP_ADMIN Team settings dialog for group override; remove CollaborationTimeoutConfigPanel from Dashboard Overview. API unchanged — reuse GET/PUT /api/management/v1/collaboration-timeout-config. BDD ready docs/behavior/reminder-timing-settings-ia.md BDD-RT-IA-001…016. frontend_ui_in_scope=true; backend_api_contract_change=false. SYS-NORM Waves 0–8 remain Done — program Done; §4a Reminder timing In Progress; siblings #2–4 stay Parked. Formal phase None. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. Do NOT flip #3b/#5a GO. Do NOT activate CE-O02 / parked #2–4. Do NOT claim Done until gates + merge + MAIN doc-sync.",
+        "details": "Activated 2026-07-22 (stage 2 plan-orchestrator on feature worktree). Plan: docs/plan/system-normalization-program-2026-07.md §4a Reminder timing → In Progress; detail docs/plan/detail/reminder-timing-settings-ia.md; ledger activation note. Formal phase remains None. Host sole-active = #153 only. Next pipeline: doc-keeper (if needed) then frontend-engineer. Do NOT flip #3b/#5a GO; do NOT mark #53 Done; do NOT activate CE-O02 / parked #2–4; do NOT implement until after plan sync handoff.",
+        "testStrategy": "1. BDD ready RT-IA-001…016. 2. FE TDD for System settings page + Team settings dialog + Dashboard Overview panel removal. 3. FE lint/type-check/test/build + BE mvn verify GREEN (no API contract change). 4. E2E + UIUX for relocated IA. 5. Queued docker-deploy-queue DEPLOY_OK. 6. Merge + MAIN doc-sync. 7. Do NOT flip #3b/#5a; do NOT mark #53 Done.",
+        "priority": "high",
+        "dependencies": [
+          "152"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-22T01:20:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-21T16:59:12.396Z",
-      "taskCount": 152,
+      "lastModified": "2026-07-22T01:20:00.000Z",
+      "taskCount": 153,
       "completedCount": 149,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-21T16:59:12.396Z"
+      "updated": "2026-07-22T01:20:00.000Z"
     }
   }
 }

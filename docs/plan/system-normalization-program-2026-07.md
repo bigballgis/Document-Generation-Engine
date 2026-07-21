@@ -15,7 +15,7 @@
 | **Wave 6 leaf** | TM **#150** · `sys-norm-d1-brands` → **Done** (MAIN merge `64b0a650`; worktree **REMOVED**) |
 | **Wave 7 leaf** | TM **#151** · `sys-norm-promotion-pack` → **Done** (MAIN merge `11356c63` / feature `f795b04a`; worktree **REMOVED**) |
 | **Wave 8 leaf** | TM **#152** · `sys-norm-demo-seed-terms` → **Done** (MAIN merge `8aca145b` / feature `7df6c563`; worktree **REMOVED**) |
-| **Sole-active** | **cleared** — no SYS-NORM delivery leaf In Progress |
+| **Sole-active** | Host NON-CE **#153** `reminder-timing-settings-ia` **In Progress** (post-program §4a; SYS-NORM waves remain **Done**) |
 | **Batch (Wave 8)** | **solo** · `member_task_ids: ["152"]` · `proposed_slice_id: sys-norm-demo-seed-terms` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / parked-UX-not-in-W8 — **closed** |
 | **Batch (Wave 7)** | **solo** · `member_task_ids: ["151"]` · `proposed_slice_id: sys-norm-promotion-pack` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-8 / parked UX — **closed** |
 | **Batch (Wave 6)** | **solo** · `member_task_ids: ["150"]` · `proposed_slice_id: sys-norm-d1-brands` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-7 / Wave-8 / parked UX — **closed** |
@@ -24,7 +24,7 @@
 | **Batch (Wave 3)** | **solo** · `member_task_ids: ["147"]` · `proposed_slice_id: sys-norm-external-ops` — **closed** |
 | **Batch (Wave 2)** | **solo** · `member_task_ids: ["146"]` · `proposed_slice_id: sys-norm-hub-ia` — **closed** |
 | **Batch (Wave 1)** | **solo** · `member_task_ids: ["145"]` · `proposed_slice_id: sys-norm-shell-fluid-nav` — **closed** |
-| **Next queue head** | Post-program parked queue (§4a) — **Not Started** / **not** activated (serial deliver + Batch Recommendation required) |
+| **Next queue head** | §4a Reminder timing **In Progress** (TM **#153**); siblings Asset library / Binding editor / Auto `referenceKey` remain **Parked** |
 | **Queue (Wave 8)** | BDD SoT [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) **BDD-SYS-NORM-W8-001…018** — wave **Done**; detail [detail/sys-norm-demo-seed-terms.md](./detail/sys-norm-demo-seed-terms.md) |
 | **Parked worktrees** | Prior hub WIP worktrees **removed** — do **not** revive or fold stale hub WIP |
 | **CE umbrella** | TM **#53** remains **in-progress** registry-only — **not** this program's delivery leaf; **do not** mark **#53** Done |
@@ -176,7 +176,7 @@ Do **not** activate CE-O02.
 
 | Note | Theme | Status |
 | --- | --- | --- |
-| Reminder timing | System / Team settings IA for reminder timing | **Parked** — Not Started |
+| Reminder timing | System / Team settings IA for reminder timing | **In Progress** — sole-active leaf TM **#153** `reminder-timing-settings-ia` (BDD **ready** — [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md) **BDD-RT-IA-001…016**; Batch **solo** open; worktree `D:/working/DGE-reminder-timing-settings-ia` · `feat/reminder-timing-settings-ia`; detail [detail/reminder-timing-settings-ia.md](./detail/reminder-timing-settings-ia.md); do **not** claim Done) |
 | Asset library group isolation | Group-scoped asset library isolation | **Parked** — Not Started |
 | Binding editor re-layout | Binding editor layout remedi | **Parked** — Not Started |
 | Auto `referenceKey` generation | Auto-generate `referenceKey` | **Parked** — Not Started |
@@ -184,8 +184,10 @@ Do **not** activate CE-O02.
 **Also deferred (not parked-UX, does not block program Done):** **N18** Legal-hold actor
 EntityLink — later leaf + BDD.
 
-**Sole-active (program waves):** **cleared**. Wave 8 TM **#152** → **Done** `8aca145b` /
-`7df6c563`. Parked UX remains **not** activated.
+**Sole-active (host delivery leaf):** **#153** only. SYS-NORM Wave 8 TM **#152** → **Done**
+`8aca145b` / `7df6c563` (program waves remain **Done**). §4a Reminder timing **activated**;
+siblings **#2–4** stay **Parked**. Do **not** fold into **#53**; do **not** flip **#3b** /
+**#5a**; do **not** activate CE-O02.
 
 ---
 

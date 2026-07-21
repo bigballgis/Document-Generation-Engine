@@ -129,13 +129,13 @@ test.describe('P14-T02 collaboration to-dos', () => {
     await expect(row.getByText(/overdue reminder/i)).toBeVisible()
   })
 
-  test('admin configures reminder timing on dashboard', async ({ page, request }) => {
+  test('admin configures reminder timing on System settings page', async ({ page, request }) => {
     const uniqueHours = 47 + (Date.now() % 10)
 
     await loginAs(page, E2E_ADMIN)
-    await page.goto('/dashboard')
+    await page.goto('/system/settings/reminder-timing')
 
-    await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /reminder timing/i })).toBeVisible()
     const timeoutPanel = page.locator('.timeout-config-card')
     await expect(timeoutPanel.getByRole('heading', { name: /reminder timing/i })).toBeVisible()
 

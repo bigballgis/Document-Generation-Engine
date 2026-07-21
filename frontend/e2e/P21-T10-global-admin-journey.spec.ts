@@ -38,13 +38,19 @@ test.describe('P21-T10 Global admin journey (§12.10)', () => {
     ).toBeVisible()
   })
 
-  test('CollaborationTimeoutConfigPanel visible for global admin reminder timing', async ({
+  test('Reminder timing lives on System settings; absent from Dashboard Overview', async ({
     page,
   }) => {
     await loginAsGlobalAdmin(page)
     await page.goto('/dashboard')
+    await expect(page.locator('.timeout-config-card')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: /reminder timing/i })).toHaveCount(0)
 
-    await expect(page.getByRole('heading', { name: /reminder timing/i })).toBeVisible()
+    await page.goto('/system/settings/reminder-timing')
+    await expect(page.getByRole('heading', { level: 1, name: /reminder timing/i })).toBeVisible()
+    await expect(
+      page.locator('.timeout-config-card').getByRole('heading', { name: /reminder timing/i }),
+    ).toBeVisible()
   })
 
   test('behavior nav escalation label is Overdue to follow up', async ({ page }) => {

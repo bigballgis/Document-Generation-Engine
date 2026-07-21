@@ -177,6 +177,7 @@ export default {
       content: 'Document content',
       apiAccess: 'External services',
       security: 'Security & activity',
+      system: 'System',
     },
     items: {
       dashboard: 'My tasks',
@@ -192,6 +193,7 @@ export default {
       apiInvocations: 'Invocation records',
       audit: 'Activity log',
       legalHolds: 'Legal holds',
+      systemSettings: 'System settings',
     },
     behaviorItems: {
       allTasks: 'All tasks',
@@ -3380,6 +3382,7 @@ export default {
     groups: {
       readOnlyHint: 'You can view groups within your authorized scope. Group changes require a global administrator.',
       searchPlaceholder: 'Search by group code or display name',
+      teamSettings: 'Team settings',
       columns: {
         groupCode: 'Group code',
         displayName: 'Display name',

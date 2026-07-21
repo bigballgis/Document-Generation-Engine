@@ -603,6 +603,14 @@ Wave 5：可见性列对齐六角色（审批队列 → `GROUP_ADMIN`；整改/�
 
 **IBL-E3 / ADR-0064 + Wave 5：** `decideLegalApprovals` 不变。`decideApprovals` **不**授予 LEGAL 阶段，且**不再**含 `TEMPLATE_APPROVER`（已吸收至 `GROUP_ADMIN`）。阶段错位 → 403/409/422 稳定码见 §5.2。
 
+**Reminder timing settings IA（2026-07-21 / TM #153 — capability 不变，仅澄清 UI 可见性）：**
+
+- **无新 capability bit / 无新角色。** 仍为 `maintainCollaborationTimeoutConfig` → GLOBAL, GROUP；API `GET`/`PUT /api/management/v1/collaboration-timeout-config` 授权语义不变。
+- **System settings（系统设置）导航：** 仅 `GLOBAL_ADMIN` **且** `maintainCollaborationTimeoutConfig=true` 可见；落地全页 Canonical `/system/settings/reminder-timing`，仅编辑 **Global default**。`GROUP_ADMIN` 不得见该导航；深链同路由 → Forbidden / 路由守卫 fail-closed。
+- **Team settings（团队设置）控件：** 仅 `GROUP_ADMIN` **且** capability=true，出现在 Groups/team 表面（`/entitlement/groups` 等 Entitlement 团队表面）页头/顶栏；打开对话框仅编辑 **Group override**。**不**出现在 Dashboard Overview / Tasks。
+- **Dashboard Overview：** 不得挂载催办时限配置面板；协作待办/超时跟进队列可见性仍由 `viewCollaborationWorkItems` + §13.1.2 行为型入口规则决定。
+- 无 capability 角色：导航与控件均隐藏；直链仍 Forbidden。行为 SoT：[reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md)；导航：[catalog-navigation-ux.md](../product/catalog-navigation-ux.md)。
+
 **CE-E02 资产库管理面（2026-07-16；Wave 5 角色修正）：**
 
 - 新逻辑路由 `route.asset-library-management` → canonical `/library/assets`；新 capability `manageAssetLibrary`（上表）。

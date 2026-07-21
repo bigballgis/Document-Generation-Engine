@@ -5,7 +5,6 @@ import { ElMessage } from 'element-plus'
 import * as collaborationApi from '@/api/collaboration'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { canMaintainCollaborationTimeoutConfig } from '@/auth/roles'
-import { MANAGEMENT_ROLES } from '@/auth/roles'
 import { useSessionStore } from '@/stores/session'
 import type {
   CollaborationTimeoutConfig,
@@ -13,6 +12,8 @@ import type {
 } from '@/types/collaboration'
 
 const props = defineProps<{
+  /** Locked IA mode — global page or group dialog (no scope switcher). */
+  mode: 'global' | 'group'
   groupCode?: string | null
 }>()
 
@@ -24,12 +25,12 @@ const loading = ref(false)
 const saving = ref(false)
 const config = ref<CollaborationTimeoutConfig | null>(null)
 
-const isGlobalAdmin = computed(() => context.value.roles.includes(MANAGEMENT_ROLES.GLOBAL_ADMIN))
-const isGroupAdmin = computed(() => context.value.roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN))
 const canMaintain = computed(() => canMaintainCollaborationTimeoutConfig(context.value))
+const lockedScope = computed<CollaborationTimeoutScopeType>(() =>
+  props.mode === 'global' ? 'GLOBAL' : 'GROUP',
+)
 
 const form = reactive({
-  scopeType: 'GROUP' as CollaborationTimeoutScopeType,
   groupCode: props.groupCode ?? '',
   testThresholdHours: 72,
   approvalThresholdHours: 72,
@@ -37,16 +38,20 @@ const form = reactive({
   remediationThresholdHours: 168,
 })
 
+function resolveGroupCode(): string | undefined {
+  if (lockedScope.value !== 'GROUP') {
+    return undefined
+  }
+  return form.groupCode || props.groupCode || undefined
+}
+
 async function loadConfig() {
   if (!canMaintain.value) {
     return
   }
   loading.value = true
   try {
-    const groupCode =
-      form.scopeType === 'GROUP' ? form.groupCode || props.groupCode || undefined : undefined
-    config.value = await collaborationApi.getCollaborationTimeoutConfig(groupCode)
-    form.scopeType = config.value.scopeType
+    config.value = await collaborationApi.getCollaborationTimeoutConfig(resolveGroupCode())
     form.groupCode = config.value.groupCode ?? form.groupCode
     form.testThresholdHours = config.value.testThresholdHours
     form.approvalThresholdHours = config.value.approvalThresholdHours
@@ -63,8 +68,8 @@ async function saveConfig() {
   saving.value = true
   try {
     config.value = await collaborationApi.upsertCollaborationTimeoutConfig({
-      scopeType: form.scopeType,
-      groupCode: form.scopeType === 'GROUP' ? form.groupCode || props.groupCode || null : null,
+      scopeType: lockedScope.value,
+      groupCode: lockedScope.value === 'GROUP' ? resolveGroupCode() ?? null : null,
       testThresholdHours: form.testThresholdHours,
       approvalThresholdHours: form.approvalThresholdHours,
       pendingReleaseThresholdHours: form.pendingReleaseThresholdHours,
@@ -79,12 +84,12 @@ async function saveConfig() {
 }
 
 onMounted(() => {
-  if (isGlobalAdmin.value) {
-    form.scopeType = 'GLOBAL'
-  } else if (props.groupCode) {
-    form.groupCode = props.groupCode
-  } else if (sessionStore.session?.authorizedGroupCodes.length) {
-    form.groupCode = sessionStore.session.authorizedGroupCodes[0] ?? ''
+  if (props.mode === 'group') {
+    form.groupCode =
+      props.groupCode ??
+      sessionStore.session?.authorizedGroupCodes.find((code) => code !== '*') ??
+      sessionStore.session?.authorizedGroupCodes[0] ??
+      ''
   }
   void loadConfig()
 })
@@ -104,22 +109,14 @@ onMounted(() => {
 
     <div v-loading="loading" class="timeout-config-body">
       <el-form label-position="top">
-        <el-form-item v-if="isGlobalAdmin" :label="t('collaboration.timeoutConfig.scopeType')">
-          <el-radio-group v-model="form.scopeType" @change="loadConfig">
-            <el-radio value="GLOBAL">{{ t('collaboration.timeoutConfig.scopeGlobal') }}</el-radio>
-            <el-radio value="GROUP">{{ t('collaboration.timeoutConfig.scopeGroup') }}</el-radio>
-          </el-radio-group>
-        </el-form-item>
-
         <el-form-item
-          v-if="form.scopeType === 'GROUP'"
+          v-if="mode === 'group'"
           :label="t('collaboration.timeoutConfig.groupCode')"
         >
           <el-input
             v-model="form.groupCode"
-            :readonly="!isGlobalAdmin && isGroupAdmin"
+            readonly
             :placeholder="t('collaboration.timeoutConfig.groupCodePlaceholder')"
-            @change="loadConfig"
           />
         </el-form-item>
 
@@ -152,7 +149,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .timeout-config-card {
-  margin-top: 1.5rem;
+  margin-top: 0;
 }
 
 .timeout-config-header {

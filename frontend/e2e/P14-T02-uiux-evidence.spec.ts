@@ -100,6 +100,10 @@ test.describe('P14-T02 UIUX evidence', () => {
     await reLoginAs(page, loginAs, E2E_ADMIN)
     await page.goto('/dashboard')
     await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
+    await expect(page.locator('.timeout-config-card')).toHaveCount(0)
+
+    await page.goto('/system/settings/reminder-timing')
+    await expect(page.getByRole('heading', { level: 1, name: /reminder timing/i })).toBeVisible()
     const timeoutPanel = page.locator('.timeout-config-card')
     await expect(
       timeoutPanel.getByRole('heading', { name: /reminder timing/i }),
@@ -107,16 +111,16 @@ test.describe('P14-T02 UIUX evidence', () => {
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
     await captureP14T02LocatorScreenshot(
       timeoutPanel,
-      '08-dashboard-timeout-config-panel-greenbc-1440x900.png',
+      '08-system-settings-timeout-config-panel-greenbc-1440x900.png',
     )
 
     await switchBrand(page, 'REDBC')
     await captureP14T02LocatorScreenshot(
       timeoutPanel,
-      '09-dashboard-timeout-config-panel-redbc-1440x900.png',
+      '09-system-settings-timeout-config-panel-redbc-1440x900.png',
     )
 
-    await expect(timeoutPanel.getByRole('button', { name: /save thresholds/i })).toBeVisible()
-    await expect(timeoutPanel.getByLabel(/testing threshold/i)).toBeVisible()
+    await expect(timeoutPanel.getByRole('button', { name: /save reminder timing/i })).toBeVisible()
+    await expect(timeoutPanel.getByText(/testing reminder after/i)).toBeVisible()
   })
 })

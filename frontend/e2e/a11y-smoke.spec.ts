@@ -68,12 +68,15 @@ test.describe('management shell accessibility smoke', () => {
     await expect(page.getByText(/unable to load templates/i)).not.toBeVisible()
   })
 
-  test('dashboard timeout config panel exposes heading for global admin', async ({ page }) => {
+  test('System settings Reminder timing exposes heading for global admin', async ({ page }) => {
     await page.setViewportSize(P14_T01_VIEWPORT)
     await loginAs(page, E2E_ADMIN)
     await page.goto('/dashboard')
-
     await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
+    await expect(page.locator('.timeout-config-card')).toHaveCount(0)
+
+    await page.goto('/system/settings/reminder-timing')
+    await expect(page.getByRole('heading', { level: 1, name: /reminder timing/i })).toBeVisible()
     await expect(
       page
         .locator('.timeout-config-card')

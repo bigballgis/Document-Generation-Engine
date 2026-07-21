@@ -1,0 +1,52 @@
+{
+  "result": "DEPLOY_OK",
+  "stage": 10,
+  "task_ids": [
+    "153"
+  ],
+  "slice_id": "reminder-timing-settings-ia",
+  "worktree": "D:/working/DGE-reminder-timing-settings-ia",
+  "branch": "feat/reminder-timing-settings-ia",
+  "git_head": "2b5f0ac1258c50012771552687244681d57e3513",
+  "local_time": "2026-07-22T03:02+08:00",
+  "command": ".\\scripts\\docker-deploy-queue.ps1 -Reason \"Stage10 #153 reminder-timing-settings-ia tip rebuild\"",
+  "force_rebuild": false,
+  "skip_build": false,
+  "mvn_verify": "not run (package -Dmaven.test.skip=true only)",
+  "compose_project": "documentgenerationengine",
+  "health": {
+    "healthz": {
+      "status": 200,
+      "body": "{\"status\":\"UP\"}"
+    },
+    "backend_container": "healthy",
+    "frontend_4173": {
+      "status": 200
+    },
+    "frontend_container": "healthy"
+  },
+  "images": {
+    "backend": {
+      "tag": "documentgenerationengine-docgen-backend:latest",
+      "id": "sha256:936817562fa149727526a59ea39b2d54e2f9ff2f28db4c0c9806a6b18180bdba"
+    },
+    "frontend": {
+      "tag": "documentgenerationengine-docgen-frontend:latest",
+      "id": "sha256:b51abf6194464350a1e853b877724bc7b5dddee3211120e1947c5cf7678389b7"
+    }
+  },
+  "tip_currency": {
+    "host_pnpm_build": true,
+    "frontend_image_rebuilt": true,
+    "stage10_frontend_id": "sha256:b51abf6194464350a1e853b877724bc7b5dddee3211120e1947c5cf7678389b7",
+    "stage5_frontend_id": "sha256:0d17c09b7c874dbb2de8a1d8598b00009bd595160a8445b9c50fc812a9e72026",
+    "container_serves_dashboard": "DashboardView-BJje1P76.js",
+    "container_serves_dist_index": "index-naEwqKMr.js",
+    "frontend_id_changed_from_stage5": true
+  },
+  "notes": [
+    "Full rebuild (not SkipBuild) after post-stage5 FE tip changes (journey CTA + UIUX evidence specs).",
+    "ForceRebuild not used; host pnpm build + docker package refreshed FE layers.",
+    "No merge. Task #153 not marked Done."
+  ]
+}

@@ -9,6 +9,7 @@ import {
   canDecideContentModuleReviews,
   canDecideLegalApprovals,
   canDecideTests,
+  canMaintainCollaborationTimeoutConfig,
   canManageAssetLibrary,
   canManageContentModuleLifecycle,
   canManageLegalHold,
@@ -154,13 +155,31 @@ const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContext) => b
   [ROUTE_KEYS.identityAdministration]: (context) =>
     isGlobalAdmin(context.roles) || context.roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN),
   [ROUTE_KEYS.legalHoldAdministration]: canManageLegalHold,
+  // BDD-RT-IA-001/006/007 — capability + GLOBAL_ADMIN; not emitted by RouteVisibilityService.
+  [ROUTE_KEYS.systemSettingsReminderTiming]: (context) =>
+    isGlobalAdmin(context.roles) && canMaintainCollaborationTimeoutConfig(context),
+}
+
+/**
+ * System settings Reminder timing is capability-gated on the client (GLOBAL_ADMIN +
+ * maintainCollaborationTimeoutConfig). It is intentionally absent from backend
+ * {@code visibleRoutes} / {@code ManagementRoute} — API contract unchanged for this leaf.
+ */
+function canAccessSystemSettingsReminderTiming(session: ManagementSession): boolean {
+  return ROUTE_CAPABILITY_GUARD[ROUTE_KEYS.systemSettingsReminderTiming](sessionContext(session))
 }
 
 export function canAccessRouteWithCapability(
   routeKey: string,
   session: ManagementSession | null,
 ): boolean {
-  if (!session?.visibleRoutes.includes(routeKey)) {
+  if (!session) {
+    return false
+  }
+  if (routeKey === ROUTE_KEYS.systemSettingsReminderTiming) {
+    return canAccessSystemSettingsReminderTiming(session)
+  }
+  if (!session.visibleRoutes.includes(routeKey)) {
     return false
   }
   const guard = ROUTE_CAPABILITY_GUARD[routeKey as RouteKey]

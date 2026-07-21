@@ -1,0 +1,10 @@
+SystemSettingsReminderTiming: local_dist_matches=2
+TeamSettingsReminderTiming: local_dist_matches=1
+reminder-timing: local_dist_matches=2
+system-settings: local_dist_matches=2
+CollaborationTimeoutConfigPanel: local_dist_matches=4
+TeamSettingsReminderTimingDialog: local_dist_matches=1
+SYSTEM_SETTINGS: local_dist_matches=0
+reminderTiming: local_dist_matches=5
+timeoutConfig: local_dist_matches=8
+CollaborationTimeoutConfigPanel_in_dist_chunks=4

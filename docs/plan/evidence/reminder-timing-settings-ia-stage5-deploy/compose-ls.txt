@@ -1,0 +1,2 @@
+NAME                       STATUS              CONFIG FILES
+documentgenerationengine   running(6)          D:\working\DGE-reminder-timing-settings-ia\docker-compose.yml,D:\working\DGE-reminder-timing-settings-ia\docker-compose.prod.yml,D:\working\DGE-reminder-timing-settings-ia\docker-compose.lab.yml,D:\working\DGE-sys-norm-demo-seed-terms\docker-compose.yml,D:\working\DGE-sys-norm-demo-seed-terms\docker-compose.prod.yml,D:\working\DGE-sys-norm-demo-seed-terms\docker-compose.lab.yml

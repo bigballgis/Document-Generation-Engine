@@ -1,0 +1,5 @@
+documentgenerationengine-docgen-backend:latest
+documentgenerationengine-docgen-backend:latest 4d772edda7d4 sha256:4d772edda7d40842ae15584ccaa8a0c83ee0fe7d32aa9ad06177ee91cc5d5c0d 2 minutes ago
+
+documentgenerationengine-docgen-frontend:latest
+documentgenerationengine-docgen-frontend:latest 0d17c09b7c87 sha256:0d17c09b7c874dbb2de8a1d8598b00009bd595160a8445b9c50fc812a9e72026 2 minutes ago

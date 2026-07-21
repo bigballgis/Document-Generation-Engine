@@ -1,7 +1,9 @@
 import {
   canAccessContentModuleManagement,
+  canMaintainCollaborationTimeoutConfig,
   type CapabilityContext,
 } from '@/auth/roles'
+import { isGlobalAdmin } from '@/auth/identityRoles'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import {
   BEHAVIOR_NAV_ITEM_SPECS,
@@ -72,6 +74,14 @@ export function buildVisibleNavGroups(
     !allowed.has(ROUTE_KEYS.contentModuleManagement)
   ) {
     allowed.add(ROUTE_KEYS.contentModuleManagement)
+  }
+  // BDD-RT-IA-014 — System settings nav is capability-gated (not backend visibleRoutes).
+  if (
+    isGlobalAdmin(roles) &&
+    canMaintainCollaborationTimeoutConfig(context) &&
+    !allowed.has(ROUTE_KEYS.systemSettingsReminderTiming)
+  ) {
+    allowed.add(ROUTE_KEYS.systemSettingsReminderTiming)
   }
   const resourceGroups = NAV_GROUPS.map((group) => ({
     ...group,

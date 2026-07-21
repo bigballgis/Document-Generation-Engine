@@ -70,4 +70,66 @@ describe('GroupManagementView', () => {
     expect(wrapper.text()).toContain('Group management')
     expect(wrapper.text()).not.toContain('User management')
   })
+
+  it('shows Team settings for GROUP_ADMIN with maintain capability (BDD-RT-IA-003/014)', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      session: {
+        username: '10000002',
+        displayName: 'Group Admin',
+        email: 'group@example.com',
+        authSource: 'LOCAL',
+        roles: ['GROUP_ADMIN'],
+        authorizedGroupCodes: ['RETAIL'],
+        defaultRoute: ROUTE_KEYS.identityAdministration,
+        visibleRoutes: [ROUTE_KEYS.identityAdministration],
+        expiresAt: new Date().toISOString(),
+      },
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/entitlement/groups', component: { template: '<div />' } }],
+    })
+    await router.push('/entitlement/groups')
+    await router.isReady()
+
+    const wrapper = mount(GroupManagementView, {
+      global: {
+        plugins: [i18n, ElementPlus, router],
+        stubs: {
+          TeamSettingsReminderTimingDialog: true,
+          GroupManagementPanel: true,
+        },
+      },
+    })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="team-settings-button"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Team settings')
+  })
+
+  it('hides Team settings for GLOBAL_ADMIN (uses System settings page instead)', async () => {
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/entitlement/groups', component: { template: '<div />' } }],
+    })
+    await router.push('/entitlement/groups')
+    await router.isReady()
+
+    const wrapper = mount(GroupManagementView, {
+      global: {
+        plugins: [i18n, ElementPlus, router],
+        stubs: {
+          TeamSettingsReminderTimingDialog: true,
+          GroupManagementPanel: true,
+        },
+      },
+    })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="team-settings-button"]').exists()).toBe(false)
+  })
 })

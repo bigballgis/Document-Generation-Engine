@@ -61,6 +61,14 @@ Implementation mapping (`reviewState` + `lifecycleState`, API `SUBMITTED` / `ACT
 
 **Slice status:** **Done** (2026-06-27) — T02a work item entity + role-queue API, T02b timeout config API, T02c escalation scheduler (notification-only), T02d management UI (collaboration work items on Dashboard + admin timeout config), E2E **3/3** (`collaboration-todos.spec.ts`); backend verify **481** tests; frontend lint/type-check/test (**235**) / build green.
 
+> **IA supersession (Confirmed 2026-07-21 / TM #153 — not a P14 reopen):** Reminder timing edit UI
+> relocates off Dashboard Overview to **System settings** full page (GLOBAL default) + **Team settings**
+> dialog on Groups/team surface (GROUP override). Collaboration to-do queues on Dashboard remain.
+> API / notification-only semantics from T02b–T02c **unchanged**. Current IA:
+> [reminder-timing-settings-ia.md](../../behavior/reminder-timing-settings-ia.md);
+> [catalog-navigation-ux.md](../../product/catalog-navigation-ux.md). Historical T02d row below
+> records what shipped in 2026-06-27.
+
 ### Behavior (confirmed)
 
 - In-app to-do queues by role (author → submit/fix; tester → test queue; approver → approval
@@ -68,6 +76,8 @@ Implementation mapping (`reviewState` + `lifecycleState`, API `SUBMITTED` / `ACT
 - Timeout thresholds configurable by GLOBAL/GROUP admin; escalation is **notification only**
   (no auto-decision, no proxy approval, no state change).
 - To-do payload: non-sensitive summary only (no variable values, customer data, full content).
+- **Current UI placement (post-#153 IA):** Global default on System settings page; group override via
+  Team settings dialog — **not** Dashboard Overview config chrome.
 
 ### Acceptance scenarios
 
@@ -83,7 +93,7 @@ Implementation mapping (`reviewState` + `lifecycleState`, API `SUBMITTED` / `ACT
 | P14-T02a | To-do entity + query API by role queue | Done (2026-06-26) | Flyway `V28__collaboration_work_item.sql`; `CollaborationWorkItemEntity` / `CollaborationWorkItemRepository` / `CollaborationWorkItemService` / `CollaborationWorkItemController`; `GET /api/management/v1/collaboration-work-items` with role queue filtering; `CollaborationWorkItem*Test` **18**; `mvn -B -ntp -f backend/pom.xml verify` — **471** BUILD SUCCESS (2026-06-26) |
 | P14-T02b | Timeout config API (global + group override) | Done (2026-06-26) | Flyway `V29__collaboration_timeout_config.sql`; `CollaborationTimeoutConfigEntity` / `CollaborationTimeoutConfigRepository` / `CollaborationTimeoutConfigService` / `CollaborationTimeoutConfigController`; GET/PUT `/api/management/v1/collaboration-timeout-config` (global + group override); `CollaborationTimeoutResolver`; `GroupAccessService.canMaintainCollaborationTimeoutConfig`; OpenAPI v1 extended; `CollaborationTimeoutConfigServiceTest` (6), `CollaborationTimeoutConfigControllerTest` (4), `GroupAccessServiceTest` collaborationTimeout (1) = **11** T02b tests; `mvn -B -ntp -f backend/pom.xml verify` — **471** BUILD SUCCESS (2026-06-26) |
 | P14-T02c | Escalation scheduler (no state mutation) | Done (2026-06-26) | Flyway `V30__collaboration_work_item_escalation_source.sql`; `CollaborationEscalationService` / `CollaborationEscalationScheduler` / `CollaborationSchedulingConfig`; `source_work_item_id` dedup + `findOpenEscalationCandidates` / `existsOpenEscalationForSource`; notification-only escalation (no source state mutation); `ManagementAuditRecorder.recordCollaborationTimeoutEscalation`; `CollaborationEscalationServiceTest` (5), `CollaborationEscalationServiceDataJpaTest` (3), `CollaborationEscalationSchedulerTest` (1), `CollaborationWorkItemRepositoryTest` escalation queries (2) = **11** T02c tests; full `mvn -B -ntp -f backend/pom.xml verify` — **475** BUILD SUCCESS (2026-06-27; environment fix `TEMP`→`D:\temp`, no code change) |
-| P14-T02d | UI: collaboration on Dashboard + admin config | Done (2026-06-27) | Collaboration work items on `DashboardView` tasks section (COR-T11); `CollaborationTimeoutConfigPanel` on Dashboard (GLOBAL/GROUP admin); `collaboration` store/API/types + `useWorkflowTasks`; legacy workbench routes redirect to `/dashboard#tasks-section`; Vitest — `CollaborationTimeoutConfigPanel.test.ts`, `collaboration.test.ts`, `DashboardView.test.ts`, `useWorkflowTasks.test.ts`; gates green (2026-06-27); backend verify **475**→**481** |
+| P14-T02d | UI: collaboration on Dashboard + admin config | Done (2026-06-27) | Collaboration work items on `DashboardView` tasks section (COR-T11); **historical:** `CollaborationTimeoutConfigPanel` on Dashboard (GLOBAL/GROUP admin) — **superseded for current IA by TM #153** (System settings page + Team settings dialog; panel removed from Overview); `collaboration` store/API/types + `useWorkflowTasks`; legacy workbench routes redirect to `/dashboard#tasks-section`; Vitest — `CollaborationTimeoutConfigPanel.test.ts`, `collaboration.test.ts`, `DashboardView.test.ts`, `useWorkflowTasks.test.ts`; gates green (2026-06-27); backend verify **475**→**481** |
 | P14-T02 E2E | Collaboration to-do functional journeys | Done (2026-06-27) | `frontend/e2e/collaboration-todos.spec.ts` **3/3** Docker 4173; report `playwright-report/docker/index.html`. **Remediation:** backend — `BatchTestRunEntity` FK alignment, `CollaborationWorkItemWriter` submit-for-test upsert (`mvn verify` **481**); frontend — `roles.ts` `canAccessTesterWorkbench` / `canAccessApproverWorkbench` / `canAccessCollaborationEscalationWorkbench` / `canAccessLogicalRoute` workbench guards (`pnpm test` **235**) |
 
 ---

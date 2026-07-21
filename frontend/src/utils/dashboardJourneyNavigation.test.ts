@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { ROUTE_KEYS, ROUTE_PATH_BY_KEY } from '@/routing/routeKeys'
 import { buildDashboardJourneyPath } from '@/utils/dashboardJourneyNavigation'
 
 describe('dashboardJourneyNavigation', () => {
@@ -40,5 +41,39 @@ describe('dashboardJourneyNavigation', () => {
         activeStepId: 'monitorOverdue',
       }),
     ).toBe('/dashboard?queue=ESCALATION#tasks-section')
+  })
+
+  it('deep-links GLOBAL_ADMIN setReminderDefaults to System settings Reminder timing', () => {
+    expect(
+      buildDashboardJourneyPath({
+        kind: 'GLOBAL_ADMIN',
+        activeStepId: 'setReminderDefaults',
+      }),
+    ).toBe(ROUTE_PATH_BY_KEY[ROUTE_KEYS.systemSettingsReminderTiming])
+    expect(ROUTE_PATH_BY_KEY[ROUTE_KEYS.systemSettingsReminderTiming]).toBe(
+      '/system/settings/reminder-timing',
+    )
+  })
+
+  it('does not send GROUP_ADMIN reminder edit to System settings', () => {
+    expect(
+      buildDashboardJourneyPath({
+        kind: 'GROUP_ADMIN',
+        activeStepId: 'setReminderDefaults',
+      }),
+    ).toBeNull()
+    expect(
+      buildDashboardJourneyPath({
+        kind: 'GROUP_ADMIN',
+        activeStepId: 'confirmGoLive',
+        targetTemplateId: 'tpl-1',
+      }),
+    ).toBe('/templates/tpl-1')
+    expect(
+      buildDashboardJourneyPath({
+        kind: 'GROUP_ADMIN',
+        activeStepId: 'setReminderDefaults',
+      }),
+    ).not.toBe(ROUTE_PATH_BY_KEY[ROUTE_KEYS.systemSettingsReminderTiming])
   })
 })

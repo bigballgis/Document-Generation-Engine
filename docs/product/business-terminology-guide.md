@@ -133,7 +133,9 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | PENDING_RELEASE | Waiting to confirm go-live | 待确认上线 | GROUP, GLOBAL |
 | ESCALATION | Overdue to follow up | 超时待跟进 | GROUP, GLOBAL |
 | (master review) | Letterheads to review | 待审核母版 | GROUP, GLOBAL (+ DOCUMENT_AUTHOR for own rework) |
-| Collaboration timeout config | Reminder timing | 催办时限设置 | GROUP, GLOBAL |
+| Collaboration timeout config | Reminder timing | 催办时限设置 | GROUP, GLOBAL — editor **not** on Dashboard Overview ([reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md) **BDD-RT-IA-001…016**) |
+| System settings (Reminder timing IA) | System settings | 系统设置 | `GLOBAL_ADMIN` + `maintainCollaborationTimeoutConfig` sidebar nav → full page `/system/settings/reminder-timing` for **Global default** only |
+| Team settings (Reminder timing IA) | Team settings | 团队设置 | `GROUP_ADMIN` + capability control on Groups/team surface (`/entitlement/groups`) → dialog for **Group override** only; **not** on Dashboard |
 | Escalation (concept) | Overdue reminder | 超时提醒 | notification, not system escalation |
 | Exception intervention | Confirm on behalf (with audit trail) | 代为确认（留痕） | GROUP, GLOBAL |
 

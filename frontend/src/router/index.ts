@@ -63,6 +63,12 @@ const router = createRouter({
       meta: { logicalRoute: ROUTE_KEYS.identityAdministration },
     },
     {
+      path: '/system/settings/reminder-timing',
+      name: 'system-settings-reminder-timing',
+      component: () => import('@/views/system/ReminderTimingSettingsView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.systemSettingsReminderTiming },
+    },
+    {
       path: '/api/policies',
       name: 'api-policy-management',
       component: () => import('@/views/api/ApiPolicyHomeView.vue'),
@@ -237,6 +243,7 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
   'api-policy-management': 'apiPolicy.home.title',
   'entitlement-users': 'identity.usersPageTitle',
   'entitlement-groups': 'identity.groupsPageTitle',
+  'system-settings-reminder-timing': 'collaboration.timeoutConfig.title',
   'content-module-list': 'contentModules.list.title',
   'asset-library-list': 'assetLibrary.list.title',
   login: 'login.title',
