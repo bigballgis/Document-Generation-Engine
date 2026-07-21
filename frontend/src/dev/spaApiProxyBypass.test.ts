@@ -10,35 +10,45 @@ const frontendRoot = resolve(thisDir, '../..')
 const repoRoot = resolve(frontendRoot, '..')
 
 describe('bypassSpaApiRoutes (Vite hard-refresh)', () => {
-  it('serves SPA index for /api/policies and /api/packages routes', () => {
+  it('serves SPA index for /api/policies, /api/packages, and /api/invocations routes', () => {
     expect(bypassSpaApiRoutes('/api/policies')).toBe('/index.html')
     expect(bypassSpaApiRoutes('/api/policies/tpl-1')).toBe('/index.html')
     expect(bypassSpaApiRoutes('/api/packages/tpl-1/settings')).toBe('/index.html')
     expect(bypassSpaApiRoutes('/api/packages/tpl-1/settings?panel=domain')).toBe('/index.html')
+    expect(bypassSpaApiRoutes('/api/invocations')).toBe('/index.html')
+    expect(bypassSpaApiRoutes('/api/invocations/')).toBe('/index.html')
   })
 
   it('does not bypass real management/runtime API paths', () => {
     expect(bypassSpaApiRoutes('/api/management/v1/templates')).toBeUndefined()
     expect(bypassSpaApiRoutes('/api/management/v1/session')).toBeUndefined()
     expect(bypassSpaApiRoutes('/api/v1/runtime/generate')).toBeUndefined()
+    expect(
+      bypassSpaApiRoutes('/api/management/v1/templates/tpl-1/api/invocations'),
+    ).toBeUndefined()
   })
 })
 
 describe('nginx SPA /api exceptions (Critical #1 regression)', () => {
-  it('docker nginx.conf try_files /api/policies and /api/packages before /api/ proxy', () => {
+  it('docker nginx.conf try_files /api/policies, /api/packages, /api/invocations before /api/ proxy', () => {
     const nginx = readFileSync(resolve(frontendRoot, 'nginx.conf'), 'utf8')
+    expect(nginx).toMatch(/location\s+=\s+\/api\/invocations\b/)
     expect(nginx).toMatch(/location\s+\^~\s+\/api\/policies\//)
     expect(nginx).toMatch(/location\s+\^~\s+\/api\/packages\//)
+    expect(nginx).toMatch(/location\s+\^~\s+\/api\/invocations\//)
     expect(nginx).toMatch(/try_files\s+\$uri\s+\$uri\/\s+\/index\.html/)
 
     const policiesIdx = nginx.indexOf('location ^~ /api/policies/')
     const packagesIdx = nginx.indexOf('location ^~ /api/packages/')
+    const invocationsIdx = nginx.indexOf('location ^~ /api/invocations/')
     const apiProxyIdx = nginx.indexOf('location /api/ {')
     expect(policiesIdx).toBeGreaterThan(-1)
     expect(packagesIdx).toBeGreaterThan(-1)
+    expect(invocationsIdx).toBeGreaterThan(-1)
     expect(apiProxyIdx).toBeGreaterThan(-1)
     expect(policiesIdx).toBeLessThan(apiProxyIdx)
     expect(packagesIdx).toBeLessThan(apiProxyIdx)
+    expect(invocationsIdx).toBeLessThan(apiProxyIdx)
   })
 
   it('Helm frontend-nginx-configmap includes the same SPA exceptions', () => {
@@ -46,12 +56,16 @@ describe('nginx SPA /api exceptions (Critical #1 regression)', () => {
       resolve(repoRoot, 'deploy/helm/docgen/templates/frontend-nginx-configmap.yaml'),
       'utf8',
     )
+    expect(helm).toMatch(/location\s+=\s+\/api\/invocations\b/)
     expect(helm).toMatch(/location\s+\^~\s+\/api\/policies\//)
     expect(helm).toMatch(/location\s+\^~\s+\/api\/packages\//)
+    expect(helm).toMatch(/location\s+\^~\s+\/api\/invocations\//)
     const policiesIdx = helm.indexOf('location ^~ /api/policies/')
     const packagesIdx = helm.indexOf('location ^~ /api/packages/')
+    const invocationsIdx = helm.indexOf('location ^~ /api/invocations/')
     const apiProxyIdx = helm.indexOf('location /api/ {')
     expect(policiesIdx).toBeLessThan(apiProxyIdx)
     expect(packagesIdx).toBeLessThan(apiProxyIdx)
+    expect(invocationsIdx).toBeLessThan(apiProxyIdx)
   })
 })

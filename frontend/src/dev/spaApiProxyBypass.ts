@@ -16,5 +16,8 @@ export function bypassSpaApiRoutes(url: string | undefined): string | undefined 
   if (path === '/api/packages' || path.startsWith('/api/packages/')) {
     return '/index.html'
   }
+  if (path === '/api/invocations' || path.startsWith('/api/invocations/')) {
+    return '/index.html'
+  }
   return undefined
 }

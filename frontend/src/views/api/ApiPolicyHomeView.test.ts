@@ -5,6 +5,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ApiPolicyHomeView from '@/views/api/ApiPolicyHomeView.vue'
 import * as apiPolicyApi from '@/api/apiPolicy'
+import * as templatesApi from '@/api/templates'
 import en from '@/i18n/locales/en'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useSessionStore } from '@/stores/session'
@@ -20,6 +21,12 @@ vi.mock('vue-router', () => ({
 vi.mock('@/api/apiPolicy', () => ({
   fetchAlerts: vi.fn(),
   fetchReadinessSummary: vi.fn(),
+  listInvocations: vi.fn(),
+}))
+
+vi.mock('@/api/templates', () => ({
+  listAllTemplates: vi.fn(),
+  listTemplates: vi.fn(),
 }))
 
 const sampleAlerts = [
@@ -83,7 +90,55 @@ describe('ApiPolicyHomeView', () => {
     routerPush.mockReset()
     vi.mocked(apiPolicyApi.fetchAlerts).mockReset()
     vi.mocked(apiPolicyApi.fetchReadinessSummary).mockReset()
+    vi.mocked(apiPolicyApi.listInvocations).mockReset()
+    vi.mocked(templatesApi.listAllTemplates).mockReset()
     vi.mocked(apiPolicyApi.fetchReadinessSummary).mockResolvedValue(sampleSummary)
+    vi.mocked(templatesApi.listAllTemplates).mockResolvedValue({
+      content: [
+        {
+          id: 'tpl-1',
+          externalId: 'RETAIL-ACCOUNT-OPEN',
+          groupCode: 'RETAIL',
+          name: 'Retail account open',
+          lifecycleStatus: 'PUBLISHED',
+          releaseVersion: '1.0.0',
+          releaseVersionCount: 1,
+          masterId: 'm1',
+          updatedBy: 'admin',
+          updatedAt: '2026-07-20T00:00:00Z',
+        },
+      ],
+      totalElements: 1,
+      truncated: false,
+    })
+    vi.mocked(apiPolicyApi.listInvocations).mockResolvedValue({
+      content: [
+        {
+          invocationId: 'inv-1',
+          invocationKind: 'SINGLE',
+          status: 'SUCCEEDED',
+          requestId: 'req-1',
+          resolvedReleaseVersion: '1.0.0',
+          routeType: 'DEFAULT',
+          createdAt: '2026-07-20T12:00:00Z',
+          accessAccountSummary: 'acct',
+        },
+        {
+          invocationId: 'inv-2',
+          invocationKind: 'SINGLE',
+          status: 'FAILED',
+          requestId: 'req-2',
+          resolvedReleaseVersion: '1.0.0',
+          routeType: 'DEFAULT',
+          createdAt: '2026-07-20T13:00:00Z',
+          accessAccountSummary: 'acct',
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 2,
+      totalPages: 1,
+    })
   })
 
   it('SCEN-AOD-06: renders readiness summary cards above alerts', async () => {
@@ -100,6 +155,19 @@ describe('ApiPolicyHomeView', () => {
     expect(wrapper.text()).toContain('Published in scope')
     expect(wrapper.text()).toContain('Need attention')
     expect(wrapper.text()).toContain('Pending release needing setup')
+  })
+
+  it('BDD-SYS-NORM-W3-001: renders performance / failure / artifacts ops summaries', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockResolvedValue(sampleAlerts)
+    const wrapper = mountHome()
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="api-ops-summary"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="ops-card-performance"]').text()).toContain('2')
+    expect(wrapper.find('[data-testid="ops-card-failureRate"]').text()).toContain('50%')
+    expect(wrapper.find('[data-testid="ops-card-artifacts"]').text()).toContain('1')
+    expect(wrapper.text()).not.toContain('p95')
+    expect(wrapper.text()).not.toContain('error budget')
   })
 
   it('SCEN-AOD-07: does not render a paginated template catalog', async () => {

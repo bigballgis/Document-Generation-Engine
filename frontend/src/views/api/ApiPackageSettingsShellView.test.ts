@@ -15,7 +15,22 @@ vi.mock('@/api/templates', () => ({
 
 vi.mock('@/stores/apiPolicy', () => ({
   useApiPolicyStore: () => ({
-    apiPolicy: null,
+    apiPolicy: {
+      templateId: 'tpl-1',
+      policyVersion: 1,
+      allowedAdGroups: ['RETAIL-CALLERS'],
+      defaultRouteReleaseVersion: '1.0.0',
+      outputFormats: ['PDF'],
+      outputModes: ['SYNC'],
+      batchEnabled: false,
+      maxBatchSize: 1,
+      docxEncryptionEnabled: false,
+      pdfEncryptionEnabled: false,
+      saveGeneratedDocuments: true,
+      invocationRecordRetentionDays: 90,
+      documentRetentionDays: 90,
+      updatedAt: '2026-07-20T00:00:00Z',
+    },
     credentials: [],
     loadingPolicy: false,
     submitting: false,
@@ -32,16 +47,17 @@ vi.mock('@/stores/apiPolicy', () => ({
 }))
 
 const routerPush = vi.fn()
+const routeQuery = { releaseVersion: '1.0.0', panel: 'not-a-real-panel' as string | undefined }
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({
     params: { templateId: 'tpl-1' },
-    query: { releaseVersion: '1.0.0' },
+    query: routeQuery,
   }),
   useRouter: () => ({ push: routerPush }),
 }))
 
-describe('ApiPackageSettingsShellView (BDD-SYS-NORM-W2-007)', () => {
+describe('ApiPackageSettingsShellView (BDD-SYS-NORM-W3-008…010)', () => {
   let pinia: ReturnType<typeof createPinia>
 
   beforeEach(() => {
@@ -55,6 +71,8 @@ describe('ApiPackageSettingsShellView (BDD-SYS-NORM-W2-007)', () => {
       capabilities: { manageApiPolicy: true },
     } as never
     routerPush.mockReset()
+    routeQuery.releaseVersion = '1.0.0'
+    routeQuery.panel = 'not-a-real-panel'
     vi.mocked(templatesApi.getTemplate).mockResolvedValue({
       id: 'tpl-1',
       externalId: 'TPL-1',
@@ -74,17 +92,19 @@ describe('ApiPackageSettingsShellView (BDD-SYS-NORM-W2-007)', () => {
     })
   })
 
-  it('renders honest interim package settings shell with version context', async () => {
+  it('renders complete settings home without interim framing', async () => {
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(ApiPackageSettingsShellView, {
       global: { plugins: [pinia, i18n, ElementPlus] },
     })
     await flushPromises()
 
-    expect(wrapper.find('[data-testid="api-package-settings-interim-banner"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="api-package-settings-interim-banner"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="api-package-settings-release-context"]').text()).toContain(
       '1.0.0',
     )
+    expect(wrapper.find('[data-testid="api-package-settings-unknown-panel"]').exists()).toBe(true)
     expect(wrapper.text()).toContain('Retail letter')
+    expect(wrapper.text()).toContain('Edit package-level external access')
   })
 })

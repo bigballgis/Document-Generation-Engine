@@ -73,6 +73,12 @@ export const NAV_GROUPS: NavGroupDefinition[] = [
         path: '/api/policies',
         labelKey: 'nav.items.apiPolicies',
       },
+      {
+        id: 'api-invocations',
+        routeKey: ROUTE_KEYS.apiPolicyManagement,
+        path: '/api/invocations',
+        labelKey: 'nav.items.apiInvocations',
+      },
     ],
   },
   {

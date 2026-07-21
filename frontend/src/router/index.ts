@@ -69,6 +69,12 @@ const router = createRouter({
       meta: { logicalRoute: ROUTE_KEYS.apiPolicyManagement },
     },
     {
+      path: '/api/invocations',
+      name: 'api-invocations',
+      component: () => import('@/views/api/ApiInvocationsView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.apiPolicyManagement },
+    },
+    {
       path: '/api/packages/:templateId/settings',
       name: 'api-package-settings',
       component: () => import('@/views/api/ApiPackageSettingsShellView.vue'),
