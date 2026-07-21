@@ -19,8 +19,9 @@
 > [sys-norm-hub-ia.md](../behavior/sys-norm-hub-ia.md) (**BDD-SYS-NORM-W2-001…018**).
 > Wave 3 leaf TM **#147** `sys-norm-external-ops` → **Done** (`18a9e3b2` / `f21dda5e`); BDD
 > [sys-norm-external-ops.md](../behavior/sys-norm-external-ops.md) (**BDD-SYS-NORM-W3-001…018**).
-> Wave 8 leaf TM **#152** `sys-norm-demo-seed-terms` → **In Progress** (BDD
-> [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) **W8-001…018**).
+> Wave 8 leaf TM **#152** `sys-norm-demo-seed-terms` → **Done** (`8aca145b` / `7df6c563`; BDD
+> [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) **W8-001…018**;
+> SYS-NORM program Waves **0–8 Done**; **N18 deferred**).
 
 | Intent | Confirmed decision | Implementation status | Wave |
 | --- | --- | --- | --- |

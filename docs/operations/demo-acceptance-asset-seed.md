@@ -1,7 +1,7 @@
 # Demo / 验收 managed-asset seed (SYS-NORM Wave 8)
 
-**Status:** Confirmed ops contract (docs-first, 2026-07-21) — **implementation In Progress** (TM **#152**); not production-default.  
-**Program:** [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md) Wave **8**  
+**Status:** Confirmed ops contract — **implemented** (TM **#152** Done; MAIN merge `8aca145b` / feature `7df6c563`); not production-default.  
+**Program:** [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md) Wave **8 Done**  
 **Behavior SoT:** [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) (**BDD-SYS-NORM-W8-001…018**; W8-C1…C3)  
 **Related:** [ce-e02-asset-library.md](../behavior/ce-e02-asset-library.md) · [core-fortress-f1-rendering-correctness.md](../behavior/core-fortress-f1-rendering-correctness.md) F1-C5 · [prod-true-prod-contract.md](../behavior/prod-true-prod-contract.md) TPC-C7
 

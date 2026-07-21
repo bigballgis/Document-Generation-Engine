@@ -4,22 +4,22 @@
 **Owner phase:** [P21 — Role-journey frontend redesign & business-friendly terminology](../plan/detail/P21-role-journey-frontend-redesign.md) (**Done** 2026-06-30)
 **Primary persona source:** user confirmation 2026-06-29 (two rounds).
 
-### SYS-NORM Confirmed intent (2026-07-21) — Wave 5–7 Done; Wave 8 L1 sweep In Progress
+### SYS-NORM Confirmed intent (2026-07-21) — Waves 0–8 Done; L1 Letterhead/母版 sweep Done
 
 > Product direction locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.8 / §2.5
 > and Wave 8 BDD [sys-norm-demo-seed-terms.md](../behavior/sys-norm-demo-seed-terms.md) (**W8-C5**, **W8-007…010**).
 > **L1 labels Confirmed:** EN **Letterhead** / ZH **母版**. Purge user-facing mixed “Master” /
 > “Master documents” as **L1 primary** object nouns (nav titles, page H1, primary buttons,
 > journey step object nouns for the DOCX letterhead).
-> **Do not claim L1 i18n sweep Done** until Wave 8 implementation gates + post-task sync
-> (TM **#152** `sys-norm-demo-seed-terms` — leaf **In Progress**; program **not** Done).
+> **L1 i18n sweep Done** (TM **#152** `sys-norm-demo-seed-terms` — MAIN `8aca145b` / `7df6c563`;
+> SYS-NORM program Waves **0–8 Done**).
 > Wave 5 six-role runtime **Done** (`febb95b3`). Wave 6 D1 brand/entity retirement **Done**
 > (`64b0a650`). Wave 7 promotion pack **Done** (`11356c63` / `f795b04a`).
 
 | Topic | Confirmed | Pending | Wave |
 | --- | --- | --- | --- |
-| L1 English primary object label | **Letterhead** (purge bare “Master” / “Master documents” on L1 primary surfaces) | FE i18n residual sweep (impl) | Intent Wave 0; sweep **Wave 8 In Progress** |
-| L1 Chinese primary object label | **母版** (not 主文档 as primary object noun) | FE i18n residual sweep (impl) | Intent Wave 0; sweep **Wave 8 In Progress** |
+| L1 English primary object label | **Letterhead** (purge bare “Master” / “Master documents” on L1 primary surfaces) | — | Intent Wave 0; sweep **Wave 8 Done** |
+| L1 Chinese primary object label | **母版** (not 主文档 as primary object noun) | — | Intent Wave 0; sweep **Wave 8 Done** |
 | API / L3 identifiers | May keep `masterId`, `MasterDocument`, routes, audit codes | — | Unchanged (N16–N17) |
 | L2 technical field labels | “Master ID” allowed where the field intentionally exposes the technical id | — | Unchanged |
 | Role `DOCUMENT_AUTHOR` | Role **ID** locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md); BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) ROLE-013) | EN/ZH **display label** finalizable — interim FE copy OK (P-Q1) | Labels: Wave 5 interim / Wave 8 capacity residual |

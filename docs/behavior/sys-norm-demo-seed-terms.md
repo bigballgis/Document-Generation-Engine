@@ -24,18 +24,17 @@ related:
 
 # SYS-NORM Wave 8 — Demo/验收 seed · honest empty · L1 Letterhead/母版
 
-> **Slice:** `sys-norm-demo-seed-terms` · TM **#152** (register/activate via plan-orchestrator;
-> this BDD does **not** mark the wave Done).  
-> **Placement:** ISOLATED · worktree `D:/working/DGE-sys-norm-demo-seed-terms` ·
-> branch `feat/sys-norm-demo-seed-terms`.  
+> **Slice:** `sys-norm-demo-seed-terms` · TM **#152** → **Done** (MAIN `8aca145b` / feature
+> `7df6c563`; worktree **REMOVED**; SYS-NORM Waves **0–8 Done** — **program Done**).  
+> **Placement:** merged · sole-active **cleared**.  
 > **Locks:** charter [system-normalization-program.md](./system-normalization-program.md)
 > §2.8 / §2.9; plan [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md)
 > Wave 8 + N13 / N15 / N16–N17 / N21 / N23; terminology
 > [business-terminology-guide.md](../product/business-terminology-guide.md).  
 > **Formal phase:** **None**.  
-> **Do not:** flip checklist **#3b** / **#5a**; mark **#53** Done; claim SYS-NORM program Done;
-> implement parked UX (Reminder timing / Asset group isolation / Binding re-layout / Auto
-> `referenceKey`); claim **N18** Done.
+> **Still do not:** flip checklist **#3b** / **#5a**; mark **#53** Done; claim parked UX Done
+> (Reminder timing / Asset group isolation / Binding re-layout / Auto `referenceKey`);
+> claim **N18** Done; activate CE-O02.
 
 ```
 bdd_readiness: ready

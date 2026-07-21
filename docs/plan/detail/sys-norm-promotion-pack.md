@@ -30,7 +30,7 @@ without breaking non-promotion paths.
 | Leaf status | **Done** (MAIN `11356c63` / feature `f795b04a`; worktree **REMOVED**) |
 | Formal phase | **None** |
 | Host sole-active | **cleared** |
-| Program | Waves **0–7 Done**; Wave **8 Not Started** — program **not** Done |
+| Program | Waves **0–8 Done** — program **Done** (Wave 8 TM **#152** `8aca145b`) |
 | Next after this leaf | Wave 8 `sys-norm-demo-seed-terms` — **Not Started** / **not** activated |
 
 ---
