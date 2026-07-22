@@ -2060,3 +2060,47 @@ export async function captureAssetLibraryGroupIsolationLocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** Binding editor IA / #155+#156 — sticky rail, compact toolbar, preview @1920 dual-brand. */
+export const BINDING_EDITOR_IA_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'binding-editor-ia',
+)
+export const BINDING_EDITOR_IA_SCREENSHOT_DIR = path.join(
+  BINDING_EDITOR_IA_EVIDENCE_ROOT,
+  'screenshots',
+)
+/** BDD-BEI-020 / BEI-C15: dual-brand UIUX target viewport. */
+export const BINDING_EDITOR_IA_VIEWPORT = { width: 1920, height: 1080 } as const
+export const BINDING_EDITOR_IA_DESKTOP_VIEWPORT = { width: 1440, height: 900 } as const
+export const BINDING_EDITOR_IA_NARROW_VIEWPORT = { width: 375, height: 812 } as const
+
+export function ensureBindingEditorIaEvidenceDirs(): void {
+  fs.mkdirSync(BINDING_EDITOR_IA_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function bindingEditorIaScreenshotPath(filename: string): string {
+  return path.join(BINDING_EDITOR_IA_SCREENSHOT_DIR, filename)
+}
+
+export async function captureBindingEditorIaScreenshot(
+  page: Page,
+  filename: string,
+): Promise<string> {
+  ensureBindingEditorIaEvidenceDirs()
+  const target = bindingEditorIaScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureBindingEditorIaLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureBindingEditorIaEvidenceDirs()
+  const target = bindingEditorIaScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

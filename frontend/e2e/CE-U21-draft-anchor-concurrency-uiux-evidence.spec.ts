@@ -298,7 +298,7 @@ test.describe('CE-U21 draft-anchor concurrency UIUX evidence @1920 dual-brand', 
         response.status() === 409,
       { timeout: 60_000 },
     )
-    await page.locator('.binding-editor__toolbar').getByRole('button', { name: /^save$/i }).click()
+    await page.getByTestId('binding-editor-save').click()
     await conflictResponsePromise
 
     const dialog = bindingVersionConflictDialog(page)
@@ -339,7 +339,7 @@ test.describe('CE-U21 draft-anchor concurrency UIUX evidence @1920 dual-brand', 
         response.status() === 409,
       { timeout: 60_000 },
     )
-    await page.locator('.binding-editor__toolbar').getByRole('button', { name: /^save$/i }).click()
+    await page.getByTestId('binding-editor-save').click()
     await conflict2Promise
 
     const dialogGreen = bindingVersionConflictDialog(page)

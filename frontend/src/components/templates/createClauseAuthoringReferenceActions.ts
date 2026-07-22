@@ -1,4 +1,4 @@
-import { type Ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import * as contentModulesApi from '@/api/contentModules'
 import { canAccessContentModuleManagement } from '@/auth/roles'
 import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
@@ -7,6 +7,7 @@ import { useSessionStore } from '@/stores/session'
 import type { ContentModuleSummary, ContentModuleVersion } from '@/types/contentModule'
 import type { TemplateContentModuleReference } from '@/types/template'
 import { ElMessage } from 'element-plus'
+import { suggestReferenceKey } from '@/utils/referenceKeyFromModuleCode'
 import type {
   ClauseAuthoringPanelEmit,
   ClauseAuthoringPanelProps,
@@ -45,6 +46,36 @@ export function createClauseAuthoringReferenceActions(options: {
     saving,
     references,
   } = options
+
+  /** Create-dialog session flag: Advanced custom key must not be clobbered (BEI-C10). */
+  const referenceKeyUserOverridden = ref(false)
+
+  function existingReferenceKeys(): string[] {
+    return references.value.map((item) => item.referenceKey)
+  }
+
+  function applyAutoReferenceKey(moduleId: string) {
+    if (editingReferenceKey.value || referenceKeyUserOverridden.value) {
+      return
+    }
+    const module = moduleOptions.value.find((item) => item.moduleId === moduleId)
+    form.referenceKey = suggestReferenceKey(module?.moduleCode ?? '', existingReferenceKeys())
+  }
+
+  function markReferenceKeyOverridden() {
+    if (editingReferenceKey.value) {
+      return
+    }
+    referenceKeyUserOverridden.value = true
+  }
+
+  function clearReferenceKeyOverride() {
+    if (editingReferenceKey.value) {
+      return
+    }
+    referenceKeyUserOverridden.value = false
+    applyAutoReferenceKey(form.moduleId)
+  }
 
   function moduleOptionLabel(module: ContentModuleSummary): string {
     const base = `${module.moduleCode} — ${module.name}`
@@ -114,6 +145,7 @@ export function createClauseAuthoringReferenceActions(options: {
     form.moduleId = ''
     form.semanticVersion = ''
     versionOptions.value = []
+    referenceKeyUserOverridden.value = false
   }
 
   function openCreateDialog() {
@@ -128,6 +160,7 @@ export function createClauseAuthoringReferenceActions(options: {
       return
     }
     editingReferenceKey.value = reference.referenceKey
+    referenceKeyUserOverridden.value = false
     form.referenceKey = reference.referenceKey
     form.moduleId = reference.moduleId
     form.semanticVersion = reference.semanticVersion
@@ -139,6 +172,7 @@ export function createClauseAuthoringReferenceActions(options: {
   async function handleModuleChange(moduleId: string) {
     form.moduleId = moduleId
     form.semanticVersion = ''
+    applyAutoReferenceKey(moduleId)
     await loadVersionOptions(moduleId)
   }
 
@@ -179,5 +213,8 @@ export function createClauseAuthoringReferenceActions(options: {
     openEditReferenceDialog,
     handleModuleChange,
     handleSubmitReference,
+    referenceKeyUserOverridden,
+    markReferenceKeyOverridden,
+    clearReferenceKeyOverride,
   }
 }

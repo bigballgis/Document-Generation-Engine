@@ -11,5 +11,9 @@ When building or refactoring detail/workspace pages (template dev editor, master
 2. **Top-level workspace tabs** = work phases — one right-aligned action rail on the tab row.
 3. **Nested sub-tabs** = content navigation only — no buttons.
 4. **Supplemental input** = modal/dialog — never inline textarea in workflow bars.
+5. **Binding editor (Design → Bindings configure):** page-level sticky Back / title / Save rail
+   and preview Refresh live on the binding-editor surface only — never on Design nested
+   sub-tab rows. See `docs/behavior/binding-editor-ia.md` (BEI-C6) and
+   `docs/architecture/management-ui-constitution.md` § Binding editor page chrome.
 
 Reference: `WorkspaceTabShell.vue`, `TemplateDetailDevWorkspace.vue`, `docs/architecture/management-ui-constitution.md`.

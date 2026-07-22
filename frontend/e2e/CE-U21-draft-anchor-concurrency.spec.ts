@@ -295,7 +295,7 @@ test.describe('CE-U21 draft-anchor concurrency (BDD-CE-U21-DAC)', () => {
         response.url().includes(`/templates/${fixture.templateId}/bindings/${fixture.anchorA}`),
       { timeout: 60_000 },
     )
-    await page.locator('.binding-editor__toolbar').getByRole('button', { name: /^save$/i }).click()
+    await page.getByTestId('binding-editor-save').click()
     const saveResponse = await saveResponsePromise
     expect(saveResponse.ok()).toBeTruthy()
     await expect(page.getByTestId('controlled-structured-content-editor')).toHaveCount(0, {
@@ -338,7 +338,7 @@ test.describe('CE-U21 draft-anchor concurrency (BDD-CE-U21-DAC)', () => {
         response.status() === 409,
       { timeout: 60_000 },
     )
-    await page.locator('.binding-editor__toolbar').getByRole('button', { name: /^save$/i }).click()
+    await page.getByTestId('binding-editor-save').click()
     const conflictResponse = await conflictResponsePromise
     const envelope = (await conflictResponse.json()) as {
       error?: { code?: string; messageKey?: string; category?: string }
@@ -396,7 +396,7 @@ test.describe('CE-U21 draft-anchor concurrency (BDD-CE-U21-DAC)', () => {
         response.status() === 409,
       { timeout: 60_000 },
     )
-    await page.locator('.binding-editor__toolbar').getByRole('button', { name: /^save$/i }).click()
+    await page.getByTestId('binding-editor-save').click()
     await conflictResponsePromise
 
     const dialog = bindingVersionConflictDialog(page)
@@ -430,7 +430,7 @@ test.describe('CE-U21 draft-anchor concurrency (BDD-CE-U21-DAC)', () => {
         response.ok(),
       { timeout: 60_000 },
     )
-    await page.locator('.binding-editor__toolbar').getByRole('button', { name: /^save$/i }).click()
+    await page.getByTestId('binding-editor-save').click()
     const saveResponse = await saveResponsePromise
     expect(saveResponse.ok()).toBeTruthy()
     await expect(page.getByTestId('controlled-structured-content-editor')).toHaveCount(0, {

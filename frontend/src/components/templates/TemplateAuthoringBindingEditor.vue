@@ -51,6 +51,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const structuredEditorRef = ref<InstanceType<typeof ControlledStructuredContentEditor> | null>(null)
+const visibilityAdvancedNames = ref<string[]>([])
 const visibilityVariableKeys = computed(() => props.variables.map((item) => item.variableKey))
 
 function markPristine() {
@@ -62,9 +63,11 @@ defineExpose({ markPristine })
 
 <template>
   <div class="binding-editor" data-testid="binding-editor">
-    <div class="binding-editor__toolbar">
-      <el-button @click="emit('back')">{{ t('common.back') }}</el-button>
-      <div class="binding-editor__title">
+    <header class="binding-editor__action-rail" data-testid="binding-editor-action-rail">
+      <el-button data-testid="binding-editor-back" @click="emit('back')">
+        {{ t('common.back') }}
+      </el-button>
+      <div class="binding-editor__title" data-testid="binding-editor-anchor-title">
         <strong>{{ editingRow?.anchorId }}</strong>
         <span v-if="editingRow?.displayLabel" class="binding-editor__subtitle">
           {{ editingRow.displayLabel }}
@@ -79,46 +82,59 @@ defineExpose({ markPristine })
       >
         {{ t('common.save') }}
       </el-button>
-    </div>
+    </header>
 
     <p class="binding-editor__hint">{{ t('templates.authoring.bindingEditorSubtitle') }}</p>
 
-    <AuthoringSideBySideLayout>
+    <AuthoringSideBySideLayout class="binding-editor__layout">
       <template #editor>
-        <el-form label-position="top" class="binding-form">
-          <el-form-item :label="t('templates.authoring.contentType')">
-            <AppSearchSelect v-model="declaredContentType" style="width: 100%">
-              <el-option v-for="type in contentTypes" :key="type" :label="type" :value="type" />
-            </AppSearchSelect>
-          </el-form-item>
-
-          <div class="visibility-section">
-            <h4>{{ t('templates.authoring.visibilityCondition.title') }}</h4>
-            <p class="visibility-section__hint">
-              {{ t('templates.authoring.visibilityCondition.description') }}
-            </p>
-            <el-form-item>
-              <el-checkbox
-                v-model="visibilityEnabled"
-                data-testid="enable-visibility-checkbox"
-              >
-                {{ t('templates.authoring.visibilityCondition.enable') }}
-              </el-checkbox>
+        <el-form label-position="top" class="binding-form" data-testid="binding-editor-form">
+          <section class="binding-editor__section" data-testid="binding-editor-content-type">
+            <el-form-item :label="t('templates.authoring.contentType')">
+              <AppSearchSelect v-model="declaredContentType" style="width: 100%">
+                <el-option v-for="type in contentTypes" :key="type" :label="type" :value="type" />
+              </AppSearchSelect>
             </el-form-item>
-            <el-form-item
-              v-if="visibilityEnabled"
-              :label="t('templates.authoring.visibilityCondition.expression')"
+          </section>
+
+          <el-collapse
+            v-model="visibilityAdvancedNames"
+            class="binding-editor__visibility-advanced"
+            data-testid="binding-editor-visibility-advanced"
+          >
+            <el-collapse-item
+              :title="t('templates.authoring.visibilityCondition.advancedTitle')"
+              name="visibility"
             >
-              <ConditionExpressionInput
-                v-model="visibilityExpression"
-                :variable-keys="visibilityVariableKeys"
-                test-id="visibility-expression-input"
-                :placeholder="t('templates.authoring.visibilityCondition.expressionPlaceholder')"
-              />
-            </el-form-item>
-          </div>
+              <p class="binding-editor__section-hint">
+                {{ t('templates.authoring.visibilityCondition.description') }}
+              </p>
+              <el-form-item>
+                <el-checkbox
+                  v-model="visibilityEnabled"
+                  data-testid="enable-visibility-checkbox"
+                >
+                  {{ t('templates.authoring.visibilityCondition.enable') }}
+                </el-checkbox>
+              </el-form-item>
+              <el-form-item
+                v-if="visibilityEnabled"
+                :label="t('templates.authoring.visibilityCondition.expression')"
+              >
+                <ConditionExpressionInput
+                  v-model="visibilityExpression"
+                  :variable-keys="visibilityVariableKeys"
+                  test-id="visibility-expression-input"
+                  :placeholder="t('templates.authoring.visibilityCondition.expressionPlaceholder')"
+                />
+              </el-form-item>
+            </el-collapse-item>
+          </el-collapse>
 
-          <el-form-item :label="t('templates.authoring.structuredContentEditor')">
+          <section class="binding-editor__section" data-testid="binding-editor-structured">
+            <h3 class="binding-editor__section-title">
+              {{ t('templates.authoring.structuredContentEditor') }}
+            </h3>
             <el-alert
               v-if="editingPasteResidueBlocked"
               type="error"
@@ -159,11 +175,12 @@ defineExpose({ markPristine })
               :variables="variables"
               :content-module-reference-keys="contentModuleReferenceKeys"
               :baseline="baselineStructuredContentJson"
+              compact-toolbar
               @dirty-change="emit('dirty-change', $event)"
               @structure-change="emit('structure-change')"
               @paste-accepted="emit('paste-accepted', $event)"
             />
-          </el-form-item>
+          </section>
         </el-form>
       </template>
 

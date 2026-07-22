@@ -8,7 +8,7 @@
 
 **Package list pagination (LR-C5, 2026-07-11):** Templates / Masters / Content-modules **package lists** use server-side `PageView` pagination + filter/search (default `size=20`, max 100; default sort group-first `groupCode ASC, updatedAt DESC`). Contract: [openapi-v1.yaml](../api/openapi-v1.yaml) `listTemplates` / `listMasters` / `listContentModules`; behavior [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md). Does not change package-hub version/revision-line pagination already specified below. Does **not** define LR-C6 command-palette API.
 
-### SYS-NORM Confirmed intent (2026-07-21) — Waves 0–8 Done; post-program Reminder timing IA
+### SYS-NORM Confirmed intent (2026-07-21) — Waves 0–8 Done; post-program §4a UX
 
 > Locked by [system-normalization-program.md](../behavior/system-normalization-program.md) §2.1–2.3 / §2.8–2.9.
 > Historical hub-tab narrative below is **superseded for Hub IA** by Wave 2; External services
@@ -25,6 +25,11 @@
 > Post-program §4a Reminder timing IA — TM **#153** `reminder-timing-settings-ia` → **Done**
 > (`d213834f` / `807d8213`; BDD [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md)
 > **BDD-RT-IA-001…016**; FE **Done**).
+> Post-program §4a Binding editor IA + auto `referenceKey` — TM **#155**+**#156** merge leaf
+> `binding-editor-ia` → **In Progress** (BDD [binding-editor-ia.md](../behavior/binding-editor-ia.md)
+> **BDD-BEI-001…020**; detail [binding-editor-ia.md](../plan/detail/binding-editor-ia.md)).
+> Does **not** add catalog/hub nav entries — authoring chrome only on the existing
+> Design → Bindings / clause-reference surfaces.
 
 | Intent | Confirmed decision | Implementation status | Wave |
 | --- | --- | --- | --- |
@@ -40,6 +45,7 @@
 | **D1 brands/entities runtime** | Full product-surface + runtime retirement per ADR-0071 — hard-retire routes/APIs/catalogs; Letterhead (master) SoT for logo/seal; Legal holds kept; no brand/entity sidecar for promotion/export ([sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md) **D1-001…020**) | **Done** (TM **#150** `64b0a650`; BDD **ready/Done**) | 6 `sys-norm-d1-brands` |
 | **L1 Letterhead / 母版 + honest empties** | L1 EN **Letterhead** / ZH **母版**; purge L1 Master mix; Asset Library / Legal hold / revision design / journey honest empties; optional demo seed ops; N23 classpath ≠ library | **Done** (2026-07-22; `#152` / `8aca145b` / `7df6c563`) — **N18 deferred**; parked UX OOS | 8 `sys-norm-demo-seed-terms` |
 | **Reminder timing settings IA** | Relocate **Reminder timing** off Dashboard Overview: Global Admin **System settings** full page (Global default only); Group Admin **Team settings** dialog on Groups/team surface (group override only); API unchanged | **Done** (2026-07-22; `#153` / `d213834f` / `807d8213`) — BDD **BDD-RT-IA-001…016** | post-program §4a |
+| **Binding editor IA + auto `referenceKey`** | No new catalog/hub routes. Dev Design → Bindings configure: sticky page action rail + compact editor + sticky preview; Add clause reference auto-fills `referenceKey` (client-side). WorkspaceTabShell nested Design tabs stay CTA-free | **In Progress** (2026-07-22; `#155`+`#156` / `binding-editor-ia`) — BDD **BDD-BEI-001…020** | post-program §4a |
 
 ### Wave 8 empty-state product notes (N13 / N15 / N21)
 
@@ -219,6 +225,13 @@ Authoring surface for one **in-flight** dev line (`DRAFT`, `TESTING`, `APPROVAL`
 2. **Authoring** — variables, anchor bindings, composition rules, structured content (existing P3/P18 authoring scope)
 3. **Workflow actions** — submit test, lifecycle decisions, publish gate (capability-gated; unchanged lifecycle semantics)
 
+**Binding editor chrome (BEI, In Progress):** Design nested sub-tabs (Variables / Bindings /
+Content modules) remain content navigation only. Configure/Edit binding opens a child
+surface with its own sticky Back · title · Save rail and sticky final-chain preview;
+clause-reference Add dialog auto-suggests `referenceKey` from `moduleCode`. Behavior SoT:
+[binding-editor-ia.md](../behavior/binding-editor-ia.md). No new package-hub or catalog
+navigation entries.
+
 ### Template release version detail — `/templates/:templateId/releases/:releaseVersion`
 
 Read-only surface for one **published** (or published-then-`STOPPED`) release line.
@@ -373,6 +386,8 @@ Full mapping: [business-terminology-guide.md](./business-terminology-guide.md).
 - `docs/product/business-terminology-guide.md` (business-friendly terminology SSOT)
 - `docs/behavior/reminder-timing-settings-ia.md` (System / Team Reminder timing IA — BDD-RT-IA-001…016)
 - `docs/plan/detail/reminder-timing-settings-ia.md` (TM **#153** delivery detail)
+- `docs/behavior/binding-editor-ia.md` (Binding editor IA + auto `referenceKey` — BDD-BEI-001…020)
+- `docs/plan/detail/binding-editor-ia.md` (TM **#155**+**#156** delivery detail)
 - `docs/plan/detail/P2-master-management.md`
 - `docs/plan/detail/P3-template-authoring.md` (BDD-TEMPLATE-PACKAGE-NAV-001 implementation target)
 - `docs/plan/detail/P16-lifecycle-version-governance.md`

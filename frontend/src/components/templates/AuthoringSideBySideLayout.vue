@@ -88,10 +88,21 @@ function togglePreviewCollapsed() {
   }
 
   &__preview {
+    position: sticky;
+    top: var(--space-3);
+    align-self: start;
+    max-height: calc(100vh - 6rem);
+    overflow: auto;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     background: var(--surface-muted);
     padding: var(--space-3);
+  }
+
+  &--stacked &__preview {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 
   &__preview--collapsed {

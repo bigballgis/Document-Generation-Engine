@@ -1309,10 +1309,17 @@ export default {
       form: {
         referenceKey: '引用键',
         referenceKeyPlaceholder: 'LOAN_DISCLOSURE',
+        referenceKeyAutoHint: '已根据所选模块编码自动生成。展开“高级”可自定义。',
+        referenceKeyLockedHint: '编辑此固定引用时不可重命名引用键。',
         moduleId: '标准条款',
         moduleIdPlaceholder: '选择已批准条款',
         semanticVersion: '语义版本',
         semanticVersionPlaceholder: '选择已批准版本',
+        advancedTitle: '高级',
+        advancedHint:
+          '可选：覆盖自动生成的引用键。更改模块时将保留自定义键，直到你重置。',
+        customReferenceKey: '自定义引用键',
+        resetAutoKey: '使用自动生成的键',
       },
       validation: {
         required: '引用键、条款模块与已批准版本均为必填项。',
@@ -1712,6 +1719,7 @@ export default {
       computeSampleFailed: '样例求值失败。',
       visibilityCondition: {
         title: '可见性条件',
+        advancedTitle: '可见性（高级）',
         description: '可选：仅当表达式为真时显示此占位符。',
         enable: '启用条件可见性',
         expression: '条件表达式',

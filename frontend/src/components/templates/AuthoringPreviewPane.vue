@@ -61,7 +61,6 @@ function handleRefresh() {
 
     <div class="authoring-preview-pane__actions">
       <el-button
-        type="primary"
         :loading="refreshing"
         :disabled="refreshDisabled"
         data-testid="authoring-preview-refresh"

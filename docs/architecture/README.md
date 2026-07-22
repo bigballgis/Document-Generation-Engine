@@ -94,7 +94,7 @@ Architecture views describe current architectural facts, boundaries, responsibil
 | [Async Messaging View](async-messaging-view.md) | Kafka usage, message boundaries, asynchronous processing, retries, and DLQ expectations | Accepted baseline |
 | [Security View](security-view.md) | Authentication, authorization, sensitive data handling, audit, and fail-closed boundaries | Accepted baseline |
 | [AI Development Guide](ai-development-guide.md) | AI reading paths, documentation-first implementation workflow, and rebuildability checklist | Accepted baseline |
-| [Management UI Constitution](management-ui-constitution.md) | Shell delivery sequence, workspace tab shell, entity-display cross-link | Accepted baseline |
+| [Management UI Constitution](management-ui-constitution.md) | Shell delivery sequence, workspace tab shell, binding-editor page chrome (BEI), entity-display cross-link | Accepted baseline |
 | [UX Entity Display Constitution](ux-entity-display-constitution.md) | Entity columns, navigable links, filter matrix, fluid vs contained layout; **Phases 0–3 Done**, Phase 4 In Progress (2026-07-08) | Accepted baseline |
 
 ## Source-of-Truth Boundary

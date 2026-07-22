@@ -145,6 +145,19 @@ export async function listTemplateVersionLines(
   return page.content
 }
 
+/** Resolve the IN_FLIGHT line's `devVersionId` for a template (throws if missing). */
+export async function resolveInFlightDevVersionId(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<string> {
+  const lines = await listTemplateVersionLines(request, templateId)
+  const inFlight = lines.find((line) => line.lineKind === 'IN_FLIGHT')
+  if (!inFlight?.devVersionId) {
+    throw new Error(`IN_FLIGHT devVersion for ${templateId} not found`)
+  }
+  return inFlight.devVersionId
+}
+
 export async function cloneReleaseVersion(
   request: APIRequestContext,
   templateId: string,

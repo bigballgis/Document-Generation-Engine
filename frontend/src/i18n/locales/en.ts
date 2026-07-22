@@ -1638,6 +1638,7 @@ export default {
       computeSampleFailed: 'Sample evaluation failed.',
       visibilityCondition: {
         title: 'Visibility condition',
+        advancedTitle: 'Visibility (advanced)',
         description: 'Optionally show this placeholder only when the expression evaluates to true.',
         enable: 'Enable conditional visibility',
         expression: 'Condition expression',
@@ -2209,10 +2210,17 @@ export default {
       form: {
         referenceKey: 'Reference key',
         referenceKeyPlaceholder: 'LOAN_DISCLOSURE',
+        referenceKeyAutoHint: 'Generated from the selected module code. Expand Advanced to customize.',
+        referenceKeyLockedHint: 'Reference key cannot be renamed while editing this pin.',
         moduleId: 'Content module',
         moduleIdPlaceholder: 'Select an approved module',
         semanticVersion: 'Version',
         semanticVersionPlaceholder: 'Select an approved version',
+        advancedTitle: 'Advanced',
+        advancedHint:
+          'Optionally override the auto-generated reference key. Changing the module will keep your custom key until you reset.',
+        customReferenceKey: 'Custom reference key',
+        resetAutoKey: 'Use auto-generated key',
       },
       validation: {
         required: 'Reference key, module, and approved version are required.',

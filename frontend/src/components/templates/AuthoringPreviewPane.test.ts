@@ -105,6 +105,12 @@ describe('AuthoringPreviewPane', () => {
     expect(wrapper.emitted('refresh')).toHaveLength(1)
   })
 
+  it('BDD-BEI-006 Refresh is secondary (not primary) relative to Save', () => {
+    const wrapper = mountPane({ preview, stale: true })
+    const refresh = wrapper.get('[data-testid="authoring-preview-refresh"]')
+    expect(refresh.classes().join(' ')).not.toMatch(/el-button--primary/)
+  })
+
   it('BDD-F7-B2-006 disables refresh while in-flight', async () => {
     const wrapper = mountPane({ preview, refreshing: true })
 

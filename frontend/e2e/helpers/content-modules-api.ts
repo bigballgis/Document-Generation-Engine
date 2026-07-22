@@ -130,7 +130,8 @@ async function authorizedPut<T>(
   return body.result
 }
 
-function uniqueModuleCode(prefix: string): string {
+/** UPPER_SNAKE-friendly E2E module codes (shared by content-module + binding-editor fixtures). */
+export function uniqueModuleCode(prefix: string): string {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}`.replace(/[^A-Z0-9_-]/g, '-')
 }
 
@@ -487,7 +488,7 @@ export async function createApprovedContentModule(
     `/content-modules/${created.moduleId}/review/transition`,
     {
       operation: 'SUBMIT_FOR_REVIEW',
-      actorRole: 'TEMPLATE_AUTHOR',
+      actorRole: 'DOCUMENT_AUTHOR',
       actorId: E2E_TEMPLATE_AUTHOR.username,
       changeDescription: 'Ready for E2E approval',
     },
@@ -650,7 +651,7 @@ export async function createSubmittedContentModuleForReview(
     `/content-modules/${created.moduleId}/review/transition`,
     {
       operation: 'SUBMIT_FOR_REVIEW',
-      actorRole: 'TEMPLATE_AUTHOR',
+      actorRole: 'DOCUMENT_AUTHOR',
       actorId: E2E_TEMPLATE_AUTHOR.username,
       changeDescription: 'Ready for CE-U08 review E2E',
     },
@@ -835,7 +836,7 @@ export async function createAndApproveAdditionalContentModuleVersion(
     `/content-modules/${moduleId}/review/transition`,
     {
       operation: 'SUBMIT_FOR_REVIEW',
-      actorRole: 'TEMPLATE_AUTHOR',
+      actorRole: 'DOCUMENT_AUTHOR',
       actorId: E2E_TEMPLATE_AUTHOR.username,
       changeDescription: `Ready for E2E approval ${semanticVersion}`,
     },

@@ -44,6 +44,9 @@ const {
   openEditReferenceDialog,
   handleModuleChange,
   handleSubmitReference,
+  referenceKeyUserOverridden,
+  markReferenceKeyOverridden,
+  clearReferenceKeyOverride,
   bumpReference,
   bumpAllOutdatedReferences,
   openPreviewDialog,
@@ -106,8 +109,11 @@ const {
       :preview-content-json="previewContentJson"
       :clause-edit-readonly="clauseEditReadonly"
       :saving-clause="savingClause"
+      :reference-key-user-overridden="referenceKeyUserOverridden"
       @module-change="handleModuleChange"
       @submit-reference="handleSubmitReference"
+      @reference-key-override="markReferenceKeyOverridden"
+      @clear-key-override="clearReferenceKeyOverride"
       @save-clause="handleSaveClauseContent"
     />
   </div>

@@ -20,6 +20,8 @@ export interface ControlledStructuredContentEditorProps {
   readonly?: boolean
   /** Saved baseline JSON; when omitted, initial modelValue is the baseline. */
   baseline?: string
+  /** Binding-editor IA — single-plane compact toolbar (BEI-C3 / BDD-BEI-004). */
+  compactToolbar?: boolean
 }
 
 export type ControlledStructuredContentEditorEmit = {

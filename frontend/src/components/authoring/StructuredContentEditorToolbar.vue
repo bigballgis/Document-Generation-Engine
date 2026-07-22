@@ -13,6 +13,8 @@ defineProps<{
   loadingCatalog: boolean
   styleLabel: (styleKey: string) => string
   nodeLabel: (type: ConfirmedNodeType | string) => string
+  /** Single cohesive toolbar plane — avoid stacked bordered groups (BEI-C3). */
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -36,11 +38,13 @@ function openPastePicker() {
 <template>
   <div
     class="toolbar"
+    :class="{ 'toolbar--compact': compact }"
     role="toolbar"
+    data-testid="structured-editor-toolbar"
     :aria-label="t('templates.structuredEditor.toolbar.label')"
   >
-    <div class="toolbar-group">
-      <span class="group-label">{{ t('templates.structuredEditor.toolbar.history') }}</span>
+    <div class="toolbar-group" data-testid="structured-editor-toolbar-history">
+      <span v-if="!compact" class="group-label">{{ t('templates.structuredEditor.toolbar.history') }}</span>
       <el-button
         size="small"
         data-testid="structured-editor-undo"
@@ -63,8 +67,8 @@ function openPastePicker() {
       </el-button>
     </div>
 
-    <div class="toolbar-group">
-      <span class="group-label">{{ t('templates.structuredEditor.toolbar.blocks') }}</span>
+    <div class="toolbar-group" data-testid="structured-editor-toolbar-blocks">
+      <span v-if="!compact" class="group-label">{{ t('templates.structuredEditor.toolbar.blocks') }}</span>
       <el-button
         v-for="type in blockNodeTypes"
         :key="type"
@@ -76,8 +80,8 @@ function openPastePicker() {
       </el-button>
     </div>
 
-    <div class="toolbar-group">
-      <span class="group-label">{{ t('templates.structuredEditor.toolbar.inline') }}</span>
+    <div class="toolbar-group" data-testid="structured-editor-toolbar-inline">
+      <span v-if="!compact" class="group-label">{{ t('templates.structuredEditor.toolbar.inline') }}</span>
       <el-button size="small" data-testid="insert-variable" @click="emit('insert-inline', 'variable')">
         {{ nodeLabel('variable') }}
       </el-button>
@@ -89,8 +93,8 @@ function openPastePicker() {
       </el-button>
     </div>
 
-    <div class="toolbar-group">
-      <span class="group-label">{{ t('templates.structuredEditor.toolbar.style') }}</span>
+    <div class="toolbar-group" data-testid="structured-editor-toolbar-style">
+      <span v-if="!compact" class="group-label">{{ t('templates.structuredEditor.toolbar.style') }}</span>
       <el-select
         :model-value="selectedStyleKey"
         size="small"
@@ -111,8 +115,8 @@ function openPastePicker() {
       </el-button>
     </div>
 
-    <div class="toolbar-group">
-      <span class="group-label">{{ t('templates.structuredEditor.toolbar.paste') }}</span>
+    <div class="toolbar-group" data-testid="structured-editor-toolbar-paste">
+      <span v-if="!compact" class="group-label">{{ t('templates.structuredEditor.toolbar.paste') }}</span>
       <input
         ref="pasteInputRef"
         type="file"
@@ -132,18 +136,40 @@ function openPastePicker() {
 .toolbar {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 0.75rem;
+  gap: var(--space-3);
+  padding: var(--space-3);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   background: var(--surface-muted);
+
+  &--compact {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    box-shadow: inset 0 0 0 1px var(--border-color);
+  }
 }
 
 .toolbar-group {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
+}
+
+.toolbar--compact .toolbar-group {
+  padding-right: var(--space-2);
+  border-right: 1px solid var(--border-color);
+
+  &:last-child {
+    padding-right: 0;
+    border-right: none;
+  }
 }
 
 .group-label {
