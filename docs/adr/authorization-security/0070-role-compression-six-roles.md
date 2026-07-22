@@ -44,8 +44,8 @@ merge/SoD text below are unchanged** (do not reopen merges).
 **P-Q1 L1 labels — Confirmed (2026-07-22):** `DOCUMENT_AUTHOR` L1 display strings locked as
 EN **Document author** / ZH **文档作者** (role ID unchanged). Behavior SoT
 [sys-norm-n18-role-l1.md](../../behavior/sys-norm-n18-role-l1.md)
-**BDD-N18-L1-008…010**; delivery leaf `sys-norm-n18-role-l1` TM **#157**+**#158** (**In Progress** —
-governance Confirmed here; runtime i18n/code Done is not claimed by this ADR note).
+**BDD-N18-L1-008…010**; delivery leaf `sys-norm-n18-role-l1` TM **#157**+**#158** → **Done**
+(`a4f59c4d` / `b54281b1` — governance Confirmed here; runtime i18n/EntityLink delivered on that leaf).
 
 ## Context
 
