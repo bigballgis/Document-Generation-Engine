@@ -1,0 +1,17 @@
+{
+  "result": "DEPLOY_OK",
+  "verified_at": "2026-07-22T18:14:45+08:00",
+  "slice_id": "sys-norm-n18-role-l1",
+  "task_ids": ["157","158"],
+  "mode": "SkipBuild",
+  "compose_project": "documentgenerationengine",
+  "healthz": {"status": 200, "body": {"status": "UP"}},
+  "ui": {"status": 200, "port": 4173},
+  "images": {
+    "backend": "sha256:49e7d4d5c26183558a65d2ff2dad6f78b9b942a59417d68bff975de0bc81eae0",
+    "frontend": "sha256:5f8a1496c2a658bfdd43a2d439c541a884f00e32d4f514c1acfc0f8f3c85da0d"
+  },
+  "branch": "feat/sys-norm-n18-role-l1",
+  "tip": "c4af526d",
+  "queue": "idle"
+}

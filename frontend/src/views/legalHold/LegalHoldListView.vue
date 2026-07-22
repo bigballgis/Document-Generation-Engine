@@ -25,6 +25,8 @@ const {
   scopeLabel,
   scopeSummary,
   templateLinkTo,
+  createdByLabel,
+  createdByLinkTo,
   confirmRelease,
   handleCreated,
 } = useLegalHoldListView()
@@ -133,7 +135,11 @@ const {
             show-overflow-tooltip
           >
             <template #default="{ row }">
-              {{ row.createdByUsername }}
+              <EntityLinkCell
+                data-testid="legal-hold-created-by"
+                :label="createdByLabel(row)"
+                :to="createdByLinkTo(row)"
+              />
             </template>
           </el-table-column>
           <el-table-column :label="t('legalHold.list.columns.createdAt')" width="200">

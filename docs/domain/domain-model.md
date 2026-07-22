@@ -95,7 +95,7 @@ ManagementUser 是后台治理与管理界面的本地账户对象，也是平�
 | --- | --- |
 | `GLOBAL_ADMIN` | 全局管理员；系统最大权限。 |
 | `GROUP_ADMIN` | 分组管理员；管理范围由显式授权组决定；**吸收**原 `TEMPLATE_APPROVER`（合规/单级审批、SEAL 等）。 |
-| `DOCUMENT_AUTHOR` | 文档作者；原 `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` 能力并集。L1 EN/ZH **Pending**。 |
+| `DOCUMENT_AUTHOR` | 文档作者；原 `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` 能力并集。L1 显示名 **Confirmed**：EN **Document author** / ZH **文档作者**（[sys-norm-n18-role-l1.md](../behavior/sys-norm-n18-role-l1.md) **BDD-N18-L1-008…010**；ADR-0070 P-Q1 closed）。 |
 | `TEMPLATE_TESTER` | 测试人员；正常 `decideTests`（SoD，不并入作者）。 |
 | `LEGAL_REVIEWER` | 法务审阅人；多级 LEGAL 阶段（ADR-0064；压缩未改动）。 |
 | `AUDIT_ADMIN` | 审计管理员；压缩未改动。 |
@@ -116,8 +116,9 @@ API 管理由全局管理员和分组管理员承担，不设置独立 API 管�
 
 待确认（不作为已确认领域规则）：
 
-- `DOCUMENT_AUTHOR` L1 EN/ZH 显示名最终文案（P-Q1；interim OK）。
 - 角色关键任务完成时间指标的量化口径和阈值。
+
+已确认补充（2026-07-22，P-Q1）：`DOCUMENT_AUTHOR` L1 EN **Document author** / ZH **文档作者**；角色 ID 不变。
 
 ### 2.2.1 路由可见性与禁止访问判定 Route Visibility and Forbidden Decision
 

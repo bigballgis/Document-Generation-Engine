@@ -27,17 +27,18 @@ related:
 > **Gate order (completed):** permission-matrix **rewrite** (doc-keeper stage 3) + this BDD
 > **`ready`** before production role-catalog / Flyway / FE enum code — all met.  
 > **Formal phase:** **None**.  
-> **Do not:** reopen ADR-0070 merges; merge `TEMPLATE_TESTER` into author; invent final
-> `DOCUMENT_AUTHOR` L1 EN/ZH strings (Pending — interim OK); flip **#3b** / **#5a**;
-> mark **#53** Done; claim SYS-NORM program Done; fold Wave 6 D1 / Wave 7 promotion /
-> Wave 8 terminology into a closed leaf.
+> **Do not:** reopen ADR-0070 merges; merge `TEMPLATE_TESTER` into author; flip **#3b** /
+> **#5a**; mark **#53** Done; fold closed-wave scope into this leaf.  
+> **P-Q1 supersession (2026-07-22):** `DOCUMENT_AUTHOR` L1 EN **Document author** / ZH
+> **文档作者** are **Confirmed** in [sys-norm-n18-role-l1.md](./sys-norm-n18-role-l1.md)
+> **BDD-N18-L1-008…010** (ROLE-013 interim allowance was Wave 5 only).
 
 ```
 bdd_readiness: ready
 frontend_ui_in_scope: true
 open_questions: []
-pending_non_blocking:
-  - DOCUMENT_AUTHOR L1 EN/ZH display labels (P-Q1) — role ID locked; interim i18n OK
+pending_non_blocking: []
+p_q1_behavior_sot: docs/behavior/sys-norm-n18-role-l1.md
 owning_doc: docs/behavior/sys-norm-roles.md
 task_ids: ["149"]
 queue_slice_id: sys-norm-roles
@@ -72,7 +73,7 @@ Group isolation remains fail-closed (`GroupAccessService` / rewritten matrix).
 
 1. Persist **exactly six** assignable management roles after Wave 5 migration.  
 2. Remap durable user-role rows + JWT/session capabilities + FE role pickers / journey labels
-   (interim L1 strings allowed for `DOCUMENT_AUTHOR`).  
+   (Wave 5 allowed interim L1 for `DOCUMENT_AUTHOR`; P-Q1 now Confirmed via BDD-N18-L1-008…010).  
 3. Retire `TEMPLATE_APPROVER`, `MASTER_DESIGNER`, `TEMPLATE_AUTHOR` from the assignable
    catalog with fail-closed assignment API behavior.  
 4. Keep SoD: authors do **not** gain `decideTests`; tester remains distinct.  
@@ -285,13 +286,17 @@ matrix (privilege expansion **accepted**)
 
 #### BDD-SYS-NORM-ROLE-013 — DOCUMENT_AUTHOR interim L1 labels (Pending-finalizable)
 
+> **Historical Wave 5 acceptance only.** P-Q1 L1 strings are **Confirmed** 2026-07-22 —
+> normative SoT [sys-norm-n18-role-l1.md](./sys-norm-n18-role-l1.md) **BDD-N18-L1-008…010**
+> (EN **Document author** / ZH **文档作者**; no interim suffix).
+
 **Given** `DOCUMENT_AUTHOR` role ID is locked and L1 EN/ZH strings are still **Pending**
-(P-Q1 / terminology guide)  
+(P-Q1 / terminology guide) — *Wave 5 delivery context*  
 **When** FE renders role chips / pickers / journey copy for `DOCUMENT_AUTHOR`  
 **Then** the UI may use an **interim** English-first i18n string (or visible role ID) that
 clearly identifies the merged author role  
 **And** implementers do **not** invent a “final” Confirmed L1 brand string in this wave  
-**And** Wave 8 terminology may replace interim copy without changing the role ID  
+**And** later residual leaf may replace interim copy without changing the role ID  
 **And** Pending labels do **not** block Wave 5 `ready` or implementation
 
 #### BDD-SYS-NORM-ROLE-014 — Journey / onboarding maps retire eight-role entries
@@ -379,7 +384,7 @@ final L1 terminology sweep beyond interim `DOCUMENT_AUTHOR` copy
 | Charter decisions | [system-normalization-program.md](./system-normalization-program.md) §2.6 / §6 |
 | Program wave | [system-normalization-program-2026-07.md](../plan/system-normalization-program-2026-07.md) Wave 5 |
 | Matrix (rewrite = stage 3) | [permission-matrix.md](../security/permission-matrix.md) |
-| Terminology (L1 Pending) | [business-terminology-guide.md](../product/business-terminology-guide.md) |
+| Terminology (L1; P-Q1 Confirmed via N18-L1) | [business-terminology-guide.md](../product/business-terminology-guide.md); [sys-norm-n18-role-l1.md](./sys-norm-n18-role-l1.md) |
 | Legal track unchanged | [ADR-0064](../adr/template-lifecycle/0064-legal-compliance-approval-matrix.md) |
 | Slice / branch | `sys-norm-roles` / MAIN `febb95b3` (feature worktree **REMOVED**) |
 | Task Master | **#149** (**Done**) |
@@ -388,7 +393,8 @@ final L1 terminology sweep beyond interim `DOCUMENT_AUTHOR` copy
 
 ## 10. Out of scope
 
-- Final Confirmed EN/ZH L1 marketing strings for `DOCUMENT_AUTHOR` (Pending → Wave 8 OK).  
+- Final Confirmed EN/ZH L1 marketing strings for `DOCUMENT_AUTHOR` — **moved** to residual
+  leaf `sys-norm-n18-role-l1` / **BDD-N18-L1-008…010** (no longer Pending for governance).  
 - Wave 6 Document brands / Legal entities runtime retirement.  
 - Wave 7 UAT→PROD promotion pack UI.  
 - Reopening eight-role catalog or merging tester into author.  

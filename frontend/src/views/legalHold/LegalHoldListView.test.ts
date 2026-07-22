@@ -2,11 +2,14 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
+import { createRouter, createWebHistory } from 'vue-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import LegalHoldListView from '@/views/legalHold/LegalHoldListView.vue'
 import en from '@/i18n/locales/en'
 import * as legalHoldsApi from '@/api/legalHolds'
+import { USERS_CATALOG_PATH } from '@/composables/useEntityLinkTargets'
 import { useSessionStore } from '@/stores/session'
+import type { LegalHoldView } from '@/types/legalHold'
 import type { ManagementCapabilities } from '@/types/session'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 
@@ -63,31 +66,89 @@ function pageView<T>(content: T[], totalElements = content.length) {
   }
 }
 
-function patchSession(roles: string[], capabilities: ManagementCapabilities, routes?: string[]) {
-  const sessionStore = useSessionStore()
-  sessionStore.$patch({
-    accessToken: 'token',
-    session: {
-      username: '10000001',
-      displayName: 'Global Admin',
-      email: 'admin@example.com',
-      authSource: 'LOCAL',
-      roles,
-      authorizedGroupCodes: ['*'],
-      defaultRoute: ROUTE_KEYS.dashboardHome,
-      visibleRoutes: routes ?? [
-        ROUTE_KEYS.dashboardHome,
-        ROUTE_KEYS.legalHoldAdministration,
-        ROUTE_KEYS.templateManagement,
-      ],
-      capabilities,
-      expiresAt: '2099-01-01T00:00:00Z',
-    },
-  })
+function sampleHold(overrides: Partial<LegalHoldView> = {}): LegalHoldView {
+  return {
+    id: 'hold-1',
+    holdExternalId: 'LH-001',
+    scopeType: 'TEMPLATE_WINDOW',
+    status: 'ACTIVE',
+    reason: 'Litigation freeze',
+    templateId: 'tpl-1',
+    templateExternalId: 'TPL-001',
+    effectiveFrom: '2026-01-01T00:00:00Z',
+    effectiveTo: null,
+    invocationExternalIds: [],
+    invocationCount: 0,
+    createdAt: '2026-07-16T10:00:00Z',
+    createdByUsername: '10000001',
+    releasedAt: null,
+    releasedByUsername: null,
+    ...overrides,
+  }
 }
 
 describe('LegalHoldListView', () => {
   let pinia: ReturnType<typeof createPinia>
+
+  function patchSession(roles: string[], capabilities: ManagementCapabilities, routes?: string[]) {
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      accessToken: 'token',
+      session: {
+        username: '10000001',
+        displayName: 'Global Admin',
+        email: 'admin@example.com',
+        authSource: 'LOCAL',
+        roles,
+        authorizedGroupCodes: ['*'],
+        defaultRoute: ROUTE_KEYS.dashboardHome,
+        visibleRoutes: routes ?? [
+          ROUTE_KEYS.dashboardHome,
+          ROUTE_KEYS.legalHoldAdministration,
+          ROUTE_KEYS.templateManagement,
+        ],
+        capabilities,
+        expiresAt: '2099-01-01T00:00:00Z',
+      },
+    })
+  }
+
+  async function mountListView(options?: { withRouter?: boolean }) {
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    let router: ReturnType<typeof createRouter> | undefined
+    if (options?.withRouter) {
+      router = createRouter({
+        history: createWebHistory(),
+        routes: [
+          { path: '/', component: { template: '<div />' } },
+          {
+            path: USERS_CATALOG_PATH,
+            component: { template: '<div data-testid="users-catalog" />' },
+          },
+        ],
+      })
+      await router.push('/')
+      await router.isReady()
+    }
+    const wrapper = mount(LegalHoldListView, {
+      global: {
+        plugins: router ? [pinia, i18n, ElementPlus, router] : [pinia, i18n, ElementPlus],
+        stubs: options?.withRouter
+          ? { LegalHoldCreateDialog: true }
+          : {
+              LegalHoldCreateDialog: true,
+              RouterLink: {
+                props: ['to'],
+                template:
+                  '<a class="router-link-stub" :data-to="JSON.stringify(to)"><slot /></a>',
+              },
+            },
+      },
+    })
+    await flushPromises()
+    await flushPromises()
+    return { wrapper, router }
+  }
 
   beforeEach(() => {
     pinia = createPinia()
@@ -99,58 +160,16 @@ describe('LegalHoldListView', () => {
   })
 
   it('renders holds, create action, and releases after confirm for GLOBAL_ADMIN', async () => {
-    vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(
-      pageView([
-        {
-          id: 'hold-1',
-          holdExternalId: 'LH-001',
-          scopeType: 'TEMPLATE_WINDOW',
-          status: 'ACTIVE',
-          reason: 'Litigation freeze',
-          templateId: 'tpl-1',
-          templateExternalId: 'TPL-001',
-          effectiveFrom: '2026-01-01T00:00:00Z',
-          effectiveTo: null,
-          invocationExternalIds: [],
-          invocationCount: 0,
-          createdAt: '2026-07-16T10:00:00Z',
-          createdByUsername: '10000001',
-          releasedAt: null,
-          releasedByUsername: null,
-        },
-      ]),
+    vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(pageView([sampleHold()]))
+    vi.mocked(legalHoldsApi.releaseLegalHold).mockResolvedValue(
+      sampleHold({
+        status: 'RELEASED',
+        releasedAt: '2026-07-16T12:00:00Z',
+        releasedByUsername: '10000001',
+      }),
     )
-    vi.mocked(legalHoldsApi.releaseLegalHold).mockResolvedValue({
-      id: 'hold-1',
-      holdExternalId: 'LH-001',
-      scopeType: 'TEMPLATE_WINDOW',
-      status: 'RELEASED',
-      reason: 'Litigation freeze',
-      templateId: 'tpl-1',
-      templateExternalId: 'TPL-001',
-      effectiveFrom: '2026-01-01T00:00:00Z',
-      effectiveTo: null,
-      invocationExternalIds: [],
-      invocationCount: 0,
-      createdAt: '2026-07-16T10:00:00Z',
-      createdByUsername: '10000001',
-      releasedAt: '2026-07-16T12:00:00Z',
-      releasedByUsername: '10000001',
-    })
 
-    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
-    const wrapper = mount(LegalHoldListView, {
-      global: {
-        plugins: [pinia, i18n, ElementPlus],
-        stubs: {
-          LegalHoldCreateDialog: true,
-          RouterLink: { template: '<a><slot /></a>' },
-        },
-      },
-    })
-
-    await flushPromises()
-    await flushPromises()
+    const { wrapper } = await mountListView()
 
     expect(legalHoldsApi.listLegalHolds).toHaveBeenCalled()
     expect(wrapper.text()).toContain('LH-001')
@@ -168,19 +187,7 @@ describe('LegalHoldListView', () => {
   it('BDD-SYS-NORM-W8-005 — honest empty with Create CTA when manageLegalHold', async () => {
     vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(pageView([]))
 
-    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
-    const wrapper = mount(LegalHoldListView, {
-      global: {
-        plugins: [pinia, i18n, ElementPlus],
-        stubs: {
-          LegalHoldCreateDialog: true,
-          RouterLink: { template: '<a><slot /></a>' },
-        },
-      },
-    })
-
-    await flushPromises()
-    await flushPromises()
+    const { wrapper } = await mountListView()
 
     expect(wrapper.text()).toContain(en.legalHold.list.empty)
     expect(wrapper.text()).toContain(en.legalHold.list.emptyDescription)
@@ -193,19 +200,7 @@ describe('LegalHoldListView', () => {
     patchSession(['GROUP_ADMIN'], { ...adminCapabilities, manageLegalHold: false })
     vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(pageView([]))
 
-    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
-    const wrapper = mount(LegalHoldListView, {
-      global: {
-        plugins: [pinia, i18n, ElementPlus],
-        stubs: {
-          LegalHoldCreateDialog: true,
-          RouterLink: { template: '<a><slot /></a>' },
-        },
-      },
-    })
-
-    await flushPromises()
-    await flushPromises()
+    const { wrapper } = await mountListView()
 
     expect(wrapper.text()).toContain(en.legalHold.list.empty)
     expect(wrapper.text()).toContain(en.legalHold.list.emptyDescriptionReadOnly)
@@ -219,41 +214,180 @@ describe('LegalHoldListView', () => {
     patchSession(['GROUP_ADMIN'], { ...adminCapabilities, manageLegalHold: false })
     vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(
       pageView([
-        {
+        sampleHold({
           id: 'hold-2',
           holdExternalId: 'LH-002',
           scopeType: 'INVOCATION_SET',
-          status: 'ACTIVE',
           reason: null,
           templateId: null,
           templateExternalId: null,
           effectiveFrom: null,
-          effectiveTo: null,
           invocationExternalIds: ['INV-1'],
           invocationCount: 1,
           createdAt: '2026-07-16T11:00:00Z',
-          createdByUsername: '10000001',
-          releasedAt: null,
-          releasedByUsername: null,
-        },
+        }),
       ]),
     )
 
-    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
-    const wrapper = mount(LegalHoldListView, {
-      global: {
-        plugins: [pinia, i18n, ElementPlus],
-        stubs: {
-          LegalHoldCreateDialog: true,
-          RouterLink: { template: '<a><slot /></a>' },
-        },
-      },
-    })
-
-    await flushPromises()
-    await flushPromises()
+    const { wrapper } = await mountListView()
 
     expect(wrapper.find('[data-testid="legal-hold-create-open"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="legal-hold-release"]').exists()).toBe(false)
+  })
+
+  describe('N18 Created by EntityLink (BDD-N18-L1-001…007)', () => {
+    it('BDD-N18-L1-001 — Created by uses EntityLinkCell', async () => {
+      vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(pageView([sampleHold()]))
+
+      const { wrapper } = await mountListView()
+      const cell = wrapper.find('[data-testid="legal-hold-created-by"]')
+
+      expect(cell.exists()).toBe(true)
+      expect(cell.classes()).toContain('entity-link-cell')
+    })
+
+    it('BDD-N18-L1-002 — display name preferred as label', async () => {
+      patchSession(
+        ['GLOBAL_ADMIN'],
+        adminCapabilities,
+        [
+          ROUTE_KEYS.dashboardHome,
+          ROUTE_KEYS.legalHoldAdministration,
+          ROUTE_KEYS.identityAdministration,
+        ],
+      )
+      vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(
+        pageView([
+          sampleHold({
+            createdByUsername: '10000001',
+            createdByDisplayName: 'Alice Author',
+          }),
+        ]),
+      )
+
+      const { wrapper } = await mountListView()
+      const cell = wrapper.find('[data-testid="legal-hold-created-by"]')
+
+      expect(cell.text()).toContain('Alice Author')
+      expect(cell.text()).not.toContain('10000001')
+    })
+
+    it('BDD-N18-L1-003 — username fallback when display name missing', async () => {
+      patchSession(
+        ['GLOBAL_ADMIN'],
+        adminCapabilities,
+        [
+          ROUTE_KEYS.dashboardHome,
+          ROUTE_KEYS.legalHoldAdministration,
+          ROUTE_KEYS.identityAdministration,
+        ],
+      )
+      vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(
+        pageView([sampleHold({ createdByUsername: '10000001', createdByDisplayName: null })]),
+      )
+
+      const { wrapper } = await mountListView()
+      const cell = wrapper.find('[data-testid="legal-hold-created-by"]')
+
+      expect(cell.text()).toContain('10000001')
+    })
+
+    it('BDD-N18-L1-004 — link when identity administration permitted', async () => {
+      patchSession(
+        ['GLOBAL_ADMIN'],
+        adminCapabilities,
+        [
+          ROUTE_KEYS.dashboardHome,
+          ROUTE_KEYS.legalHoldAdministration,
+          ROUTE_KEYS.identityAdministration,
+        ],
+      )
+      vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(
+        pageView([sampleHold({ createdByUsername: '10000001' })]),
+      )
+
+      const { wrapper } = await mountListView()
+      const cell = wrapper.find('[data-testid="legal-hold-created-by"]')
+      const link = cell.find('.entity-link-cell__link, .router-link-stub')
+
+      expect(link.exists()).toBe(true)
+      const toAttr = link.attributes('data-to')
+      expect(toAttr).toBeTruthy()
+      expect(JSON.parse(toAttr!)).toEqual({
+        path: USERS_CATALOG_PATH,
+        query: { q: '10000001' },
+      })
+    })
+
+    it('BDD-N18-L1-005 — plain text when identity administration denied', async () => {
+      patchSession(
+        ['GROUP_ADMIN'],
+        { ...adminCapabilities, manageLegalHold: false },
+        [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.legalHoldAdministration],
+      )
+      vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(
+        pageView([sampleHold({ createdByUsername: '10000001' })]),
+      )
+
+      const { wrapper } = await mountListView()
+      const cell = wrapper.find('[data-testid="legal-hold-created-by"]')
+
+      expect(cell.text()).toContain('10000001')
+      expect(cell.find('.entity-link-cell__link').exists()).toBe(false)
+      expect(cell.find('.router-link-stub').exists()).toBe(false)
+      expect(cell.find('.entity-link-cell__text').exists()).toBe(true)
+    })
+
+    it('BDD-N18-L1-006 — empty actor is em dash and not a link', async () => {
+      patchSession(
+        ['GLOBAL_ADMIN'],
+        adminCapabilities,
+        [
+          ROUTE_KEYS.dashboardHome,
+          ROUTE_KEYS.legalHoldAdministration,
+          ROUTE_KEYS.identityAdministration,
+        ],
+      )
+      vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(
+        pageView([
+          sampleHold({
+            createdByUsername: '   ',
+            createdByDisplayName: null,
+          }),
+        ]),
+      )
+
+      const { wrapper } = await mountListView()
+      const cell = wrapper.find('[data-testid="legal-hold-created-by"]')
+
+      expect(cell.text()).toBe('—')
+      expect(cell.find('.entity-link-cell__link').exists()).toBe(false)
+      expect(cell.find('.router-link-stub').exists()).toBe(false)
+    })
+
+    it('BDD-N18-L1-007 — activating link navigates to users catalog with q prefill', async () => {
+      patchSession(
+        ['GLOBAL_ADMIN'],
+        adminCapabilities,
+        [
+          ROUTE_KEYS.dashboardHome,
+          ROUTE_KEYS.legalHoldAdministration,
+          ROUTE_KEYS.identityAdministration,
+        ],
+      )
+      vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(
+        pageView([sampleHold({ createdByUsername: '10000001' })]),
+      )
+
+      const { wrapper, router } = await mountListView({ withRouter: true })
+      const link = wrapper.find('[data-testid="legal-hold-created-by"] .entity-link-cell__link')
+
+      expect(link.exists()).toBe(true)
+      await link.trigger('click')
+      await flushPromises()
+
+      expect(router?.currentRoute.value.path).toBe(USERS_CATALOG_PATH)
+      expect(router?.currentRoute.value.query.q).toBe('10000001')
+    })
   })
 })

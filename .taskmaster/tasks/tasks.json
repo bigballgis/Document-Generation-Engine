@@ -730,14 +730,15 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: NON-CE #153 reminder-timing-settings-ia In Progress (post-SYS-NORM §4a); prior NON-CE #152 SYS-NORM Wave 8 Done 8aca145b / 7df6c563; SYS-NORM program Waves 0–8 Done; do not treat #53 as delivery leaf. Prior NON-CE #151 Wave 7 Done 11356c63 / f795b04a; prior #150 Wave 6 Done 64b0a650; prior #149 Wave 5 Done febb95b3; prior #148 Wave 4 Done dac9dcd9 / 5c71acc0; prior #147 Wave 3 Done 18a9e3b2 / f21dda5e; prior #146 Wave 2 Done 5d77db80 / 992f6822; prior #145 Wave 1 Done 7a62be44 / f1594f2a / ce2cb9f0; prior #144 PTA Done ac36ecbc / 6bc74ff1; prior #143 Wave 0 Done. Post-program parked queue (SYS-NORM §4a): Reminder timing In Progress (#153); siblings Parked — Asset library group isolation; Binding editor re-layout; Auto referenceKey. N18 deferred. Do NOT mark #53 Done.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: NON-CE #153 reminder-timing-settings-ia In Progress (post-SYS-NORM §4a; worktree D:/working/DGE-reminder-timing-settings-ia · feat/reminder-timing-settings-ia; BDD ready docs/behavior/reminder-timing-settings-ia.md RT-IA-001…016). Prior NON-CE #152 SYS-NORM Wave 8 Done (MAIN 8aca145b / feature 7df6c563; SYS-NORM Waves 0–8 Done). Prior NON-CE #151 Wave 7 Done 11356c63 / f795b04a; prior #150 Wave 6 Done 64b0a650; prior #149 Wave 5 Done febb95b3; prior #148 Wave 4 Done dac9dcd9 / 5c71acc0. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT claim parked UX Done.",
+        "description": "IN PROGRESS 2026-07-19. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: NON-CE #157+#158 sys-norm-n18-role-l1 In Progress (post-SYS-NORM residual N18 + DOCUMENT_AUTHOR L1); prior NON-CE #155+#156 binding-editor-ia Done 9f2378ad / 9e318d9c; prior #154 Asset library Done c12a0687 / 5b48117f; prior #153 Reminder timing Done d213834f / 807d8213; prior #152 SYS-NORM Wave 8 Done 8aca145b / 7df6c563; SYS-NORM program Waves 0–8 Done; do not treat #53 as delivery leaf. Do NOT mark #53 Done. Do NOT activate CE-O02 / #119.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: NON-CE #157+#158 sys-norm-n18-role-l1 In Progress (post-SYS-NORM residual; worktree D:/working/DGE-sys-norm-n18-role-l1 · feat/sys-norm-n18-role-l1; BDD ready docs/behavior/sys-norm-n18-role-l1.md BDD-N18-L1-001…012). Prior NON-CE #155+#156 binding-editor-ia Done 9f2378ad / 9e318d9c; §4a parked UX queue empty before this residual leaf. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT activate #119.",
+
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-22T01:20:00.000Z"
+        "updatedAt": "2026-07-22T08:41:00.000Z"
       },
       {
         "id": "54",
@@ -2156,17 +2157,46 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-22T05:45:00.000Z"
+      },
+      {
+        "id": "157",
+        "title": "N18 Legal-hold Created-by EntityLink (sys-norm-n18-role-l1 merge leaf)",
+        "description": "IN PROGRESS 2026-07-22. NON-CE post-SYS-NORM residual N18 Legal-hold actor EntityLink. Slice sys-norm-n18-role-l1; placement ISOLATED; worktree D:/working/DGE-sys-norm-n18-role-l1 · feat/sys-norm-n18-role-l1; base c4af526d. Batch merge (member_task_ids: [\"157\",\"158\"]; proposed_slice_id: sys-norm-n18-role-l1; shared_acceptance_surface: LegalHoldListView EntityLink + DOCUMENT_AUTHOR L1 i18n/docs; evidence_amortization: one FE gates + E2E + deploy; vetoes_applied: checklist-#3b/#5a / CE-O02 / #53 / #119-Word-host / #106-umbrella; on_red_split_hint: If N18 fails, peel L1 docs-only to solo). BDD ready docs/behavior/sys-norm-n18-role-l1.md BDD-N18-L1-001…012. Scope: LegalHoldListView Created-by column uses EntityLinkCell (display name when present / username fallback / em dash; link to /entitlement/users?q=… when identity-administration permitted; fail-closed plain text otherwise); optional additive createdByDisplayName. frontend_ui_in_scope=true; backend_api_contract_change=optional-additive. Host sole-active delivery leaf. Formal phase None. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02 / #119 / #106; do NOT expand N19–N20.",
+        "details": "ACTIVATED 2026-07-22 (stage 2 plan-orchestrator). Slice id: sys-norm-n18-role-l1. Merge leaf lead with #158 DOCUMENT_AUTHOR L1. Plan: docs/plan/system-normalization-program-2026-07.md §4a residual N18 → In Progress; detail docs/plan/detail/sys-norm-n18-role-l1.md. BDD SoT: docs/behavior/sys-norm-n18-role-l1.md (ready; BDD-N18-L1-001…012). Depends on §4a Binding editor #155+#156 Done + Wave 1 EntityLink primitives + CE-G04 Legal hold list. Formal phase remains None. Umbrella #53 CE remains in-progress registry-only — do NOT mark #53 Done. #106/#119 leave as-is. Checklist #3b/#5a stay CONDITIONAL.",
+        "testStrategy": "1. BDD ready N18-L1-001…007 (EntityLink paths). 2. Doc-keeper stage 3 if OpenAPI additive createdByDisplayName / terminology. 3. FE TDD: LegalHoldListView EntityLinkCell + formatUserDisplayLabel + identity route gate. 4. Optional BE additive displayName. 5. Shared leaf FE lint/type-check/test/build + E2E/UIUX with #158. 6. Queued docker-deploy-queue DEPLOY_OK. 7. Merge + MAIN doc-sync. 8. Do NOT flip #3b/#5a; do NOT mark #53 Done; do NOT activate CE-O02/#119.",
+        "priority": "high",
+        "dependencies": [
+          "156"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-22T08:41:00.000Z"
+      },
+      {
+        "id": "158",
+        "title": "DOCUMENT_AUTHOR L1 Confirmed EN Document author / ZH 文档作者 (sys-norm-n18-role-l1 merge leaf)",
+        "description": "IN PROGRESS 2026-07-22 (merged under sys-norm-n18-role-l1). NON-CE post-SYS-NORM residual ADR-0070 P-Q1 DOCUMENT_AUTHOR L1 label lock. Same slice/worktree/batch as #157. BDD ready docs/behavior/sys-norm-n18-role-l1.md BDD-N18-L1-008…012. Scope: lock L1 display strings EN Document author / ZH 文档作者 (no interim suffix); role ID DOCUMENT_AUTHOR unchanged; i18n + product/security/ADR narrative Confirmed via doc-keeper. Gates shared with #157 leaf. Formal phase None. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02 / #119.",
+        "details": "ACTIVATED 2026-07-22 — merged into slice sys-norm-n18-role-l1 with #157. Plan: docs/plan/detail/sys-norm-n18-role-l1.md In Progress. Lock Confirmed L1 copy; remove Pending/interim framing for DOCUMENT_AUTHOR display name. Persist via existing i18n keys (roles.DOCUMENT_AUTHOR and L1 mirrors); no role ID rename.",
+        "testStrategy": "1. BDD ready N18-L1-008…012. 2. Doc-keeper: terminology / permission-matrix / ADR-0070 L1 Confirmed prose. 3. FE i18n asserts EN/ZH exact strings without interim. 4. Shared leaf FE gates + E2E/UIUX with #157. 5. Do NOT rename role ID; do NOT flip #3b/#5a; do NOT mark #53 Done.",
+        "priority": "high",
+        "dependencies": [
+          "156",
+          "157"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-22T08:41:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-22T05:45:00.000Z",
-      "taskCount": 156,
+      "lastModified": "2026-07-22T08:41:00.000Z",
+      "taskCount": 158,
       "completedCount": 153,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-22T05:45:00.000Z"
+      "updated": "2026-07-22T08:41:00.000Z"
     }
   }
 }

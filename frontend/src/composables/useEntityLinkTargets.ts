@@ -9,6 +9,7 @@ import {
 import { useSessionStore } from '@/stores/session'
 
 export const GROUPS_CATALOG_PATH = '/entitlement/groups'
+export const USERS_CATALOG_PATH = '/entitlement/users'
 
 export function useEntityLinkTargets() {
   const sessionStore = useSessionStore()
@@ -51,6 +52,21 @@ export function useEntityLinkTargets() {
     return { path: GROUPS_CATALOG_PATH, query: { q: code } }
   }
 
+  /**
+   * Users catalog link (fail-closed). Prefills search with username when non-empty.
+   * Blank / whitespace usernames never link (N18 empty-actor → em dash, no navigation).
+   */
+  function userCatalogLink(username?: string | null): RouteLocationRaw | undefined {
+    if (!canLinkGroups.value) {
+      return undefined
+    }
+    const name = username?.trim()
+    if (!name) {
+      return undefined
+    }
+    return { path: USERS_CATALOG_PATH, query: { q: name } }
+  }
+
   /** Task hub Item cell — gate by entity domain before linking to task.path (N1). */
   function taskEntityLink(task: {
     path: string
@@ -83,6 +99,7 @@ export function useEntityLinkTargets() {
     masterDetailLink,
     contentModuleDetailLink,
     groupCatalogLink,
+    userCatalogLink,
     taskEntityLink,
   }
 }

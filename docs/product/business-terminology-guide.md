@@ -22,7 +22,7 @@
 | L1 Chinese primary object label | **母版** (not 主文档 as primary object noun) | — | Intent Wave 0; sweep **Wave 8 Done** |
 | API / L3 identifiers | May keep `masterId`, `MasterDocument`, routes, audit codes | — | Unchanged (N16–N17) |
 | L2 technical field labels | “Master ID” allowed where the field intentionally exposes the technical id | — | Unchanged |
-| Role `DOCUMENT_AUTHOR` | Role **ID** locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md); BDD [sys-norm-roles.md](../behavior/sys-norm-roles.md) ROLE-013) | EN/ZH **display label** finalizable — interim FE copy OK (P-Q1) | Labels: Wave 5 interim / Wave 8 capacity residual |
+| Role `DOCUMENT_AUTHOR` | Role **ID** locked ([ADR-0070](../adr/authorization-security/0070-role-compression-six-roles.md)); L1 EN **Document author** / ZH **文档作者** **Confirmed** ([sys-norm-n18-role-l1.md](../behavior/sys-norm-n18-role-l1.md) **BDD-N18-L1-008…010**; P-Q1 closed) | — | Labels: residual leaf `sys-norm-n18-role-l1` (TM **#158**; governance Confirmed; runtime i18n on same leaf) |
 | Role merge (catalog) | Six-role compression locked (ADR-0070); runtime catalog **Done** (`febb95b3`) | — | **Wave 5 Done** |
 | Document brands / Legal entities (L1) | **Not required product surfaces** ([ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)); do **not** use as nav/module titles | — (Wave 6 durable retire **Done** `64b0a650`) | **Wave 6 Done** `sys-norm-d1-brands` |
 | Logo / seal / letterhead legal name | Governed via **Letterhead** / **母版** (master flows) — not “Document brand” MDM | — | Wave 6+ |
@@ -94,7 +94,7 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | Master (object) | Letterhead | 母版 | `masters.*`, dashboard stats | short form for the DOCX asset; bare “Master” forbidden on L1 primary |
 | Master package | Letterhead package | 母版包 | `packageCatalog.master`, `masters.hub` | catalog row / package hub |
 | Master name | Letterhead name | 母版名称 | `masters.list.columns.name` | form/table L2 |
-| Document author (role) | Document author (interim) | 文档作者（interim） | `roles.DOCUMENT_AUTHOR` | Role ID locked; L1 final Pending (P-Q1). Retired: `roles.MASTER_DESIGNER` / `TEMPLATE_AUTHOR` |
+| Document author (role) | Document author | 文档作者 | `roles.DOCUMENT_AUTHOR` | Role ID locked; L1 **Confirmed** (BDD-N18-L1-008…009; no interim suffix). Retired: `roles.MASTER_DESIGNER` / `TEMPLATE_AUTHOR` |
 | Master review / approval | Letterhead review | 母版审核 | `masters.workflow.*`, `nav.behaviorItems.masterReview` | not 主文档审批 |
 | Master ID (technical) | Master ID | 母版 ID | `templates.detail.masterId` | L2 field label only |
 | Layout placeholder (was anchor) | Layout placeholder | 版式占位符 | `templates.authoring.*` | never expose "anchor" on L1 |
@@ -174,7 +174,7 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | Package container | **Letterhead package** | **母版包** | Catalog rows, hub pages (`packageCatalog.master.*`, `masters.hub.*`) |
 | Revision snapshot | **Revision line** | **修订线** | Immutable upload/replace history (`MasterRevisionLine`) |
 | Layout slot in DOCX | **Layout placeholder** | **版式占位符** | Bindings, integrity checks — not **锚点** on L1 |
-| Role | **Document author** (interim) | **文档作者**（interim） | `DOCUMENT_AUTHOR` — L1 final Pending (P-Q1); historical letterhead-designer label retired from assignable catalog |
+| Role | **Document author** | **文档作者** | `DOCUMENT_AUTHOR` — L1 **Confirmed** (BDD-N18-L1-008…009; P-Q1 closed); historical letterhead-designer label retired from assignable catalog |
 | Behavior queue | **Letterheads to review** | **待审核母版** | Dashboard / nav behavior entry |
 
 **Forbidden on L1 (zh-CN):** **主文档** — do not use in any user-facing bundle value.
@@ -200,7 +200,7 @@ ops seed / N23 → [demo-acceptance-asset-seed.md](../operations/demo-acceptance
 | `dashboard.stats.masterPendingReview.title` | Letterheads awaiting review | 待审核母版 |
 | `nav.behaviorItems.masterReview` | Letterheads to review | 待审核母版 |
 | `api.error.master.*` (L1 message) | …this letterhead… | …此母版… |
-| `roles.DOCUMENT_AUTHOR` | Document author (interim) | 文档作者（interim） |
+| `roles.DOCUMENT_AUTHOR` | Document author | 文档作者 |
 
 **Code / docs (L3 — unchanged):** `MasterDocument`, `master_document`, `GET /masters`, Flyway table
 names, audit event codes, OpenAPI schema `MasterDocumentResponse`.
