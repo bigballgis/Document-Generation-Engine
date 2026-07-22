@@ -4387,7 +4387,10 @@ export interface components {
             invocationCount: number;
             /** Format: date-time */
             createdAt: string;
+            /** @description Required actor username for Created-by column (CE-G04). */
             createdByUsername: string;
+            /** @description Optional additive friendly display name for Created-by EntityLink label (SYS-NORM residual N18 / BDD-N18-L1-002; ManagementUserDisplayService pattern). Absent or blank → clients fall back to createdByUsername. Required field set unchanged. */
+            createdByDisplayName?: string | null;
             /** Format: date-time */
             releasedAt?: string | null;
             releasedByUsername?: string | null;

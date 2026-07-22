@@ -10,7 +10,9 @@
 > **ready**/delivered [sys-norm-roles.md](../behavior/sys-norm-roles.md) (**BDD-SYS-NORM-ROLE-001…018**).
 > This file’s §3 / §13 tables are the **Confirmed permission SoT**. Production `ManagementRole` /
 > Flyway / FE enums landed with TM **#149** → **Done**. `DOCUMENT_AUTHOR` L1 EN/ZH
-> display labels remain **Pending** finalize (non-blocking; interim FE copy OK per ROLE-013).
+> display labels are **Confirmed** — EN **Document author** / ZH **文档作者**
+> ([sys-norm-n18-role-l1.md](../behavior/sys-norm-n18-role-l1.md) **BDD-N18-L1-008…010**;
+> ADR-0070 P-Q1 closed). Role ID `DOCUMENT_AUTHOR` unchanged.
 >
 > **Migration remap (locked):** `TEMPLATE_APPROVER` → `GROUP_ADMIN` (privilege accept);
 > `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` → `DOCUMENT_AUTHOR` (capability union). Retired codes are
@@ -34,7 +36,8 @@
 - [文档治理规则](../governance.md)
 - [ADR-0070 Role compression (six roles)](../adr/authorization-security/0070-role-compression-six-roles.md)（Accepted — Wave 5 impl **Done** `febb95b3`）
 - [SYS-NORM Wave 5 roles BDD](../behavior/sys-norm-roles.md)（**ready**/delivered — **BDD-SYS-NORM-ROLE-001…018**）
-- [System Normalization program](../plan/system-normalization-program-2026-07.md)（Waves **0–6 Done** `#150` `64b0a650`; Waves **7–8 Not Started**）
+- [System Normalization program](../plan/system-normalization-program-2026-07.md)（Waves **0–8 Done**; residual N18+L1 leaf `sys-norm-n18-role-l1` **In Progress**）
+- [N18 + DOCUMENT_AUTHOR L1 BDD](../behavior/sys-norm-n18-role-l1.md)（**ready** — **BDD-N18-L1-001…012**）
 - [ADR-0071 Retire document brand / legal entity surfaces](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md)（Accepted — Wave 1 nav hide Done `#145`; Wave 6 runtime SoT [sys-norm-d1-brands.md](../behavior/sys-norm-d1-brands.md)）
 - [SYS-NORM Wave 6 D1 brands BDD](../behavior/sys-norm-d1-brands.md)（**ready/Done** — **BDD-SYS-NORM-D1-001…020**；TM **#150** `64b0a650`）
 - [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
@@ -82,7 +85,7 @@
 | --- | --- | --- |
 | 全局管理员 | `GLOBAL_ADMIN` | 拥有系统最大权限；可分配全部六个管理角色；可改写种子。 |
 | 分组管理员 | `GROUP_ADMIN` | 管理范围由显式授权组决定；在被授权组内拥有管理员权限；**吸收**原 `TEMPLATE_APPROVER` 的合规/单级审批与 SEAL 上传等特权（特权扩展已接受）；可分配运营类角色 `DOCUMENT_AUTHOR` / `TEMPLATE_TESTER` / `LEGAL_REVIEWER`。 |
-| 文档作者 | `DOCUMENT_AUTHOR` | 原 `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` 能力并集：letterhead/母版作者 + 模板编排（+ 条款/内容模块作者，按本矩阵）。**不**因合并获得 `decideTests`、正常 `decideApprovals`、`reviewMasters`、例外干预或 `publishTemplates`（纯作者仍只提交待发布，管理员发布 — Batch B / BDD §5.2）。L1 EN/ZH **显示名 Pending**（interim i18n OK）。 |
+| 文档作者 | `DOCUMENT_AUTHOR` | 原 `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` 能力并集：letterhead/母版作者 + 模板编排（+ 条款/内容模块作者，按本矩阵）。**不**因合并获得 `decideTests`、正常 `decideApprovals`、`reviewMasters`、例外干预或 `publishTemplates`（纯作者仍只提交待发布，管理员发布 — Batch B / BDD §5.2）。L1 显示名 **Confirmed**：EN **Document author** / ZH **文档作者**（BDD-N18-L1-008…010；无 interim 后缀）。 |
 | 测试人员 | `TEMPLATE_TESTER` | 按分组配置；只执行测试通过/不通过判定（正常 `decideTests`）；不获得额外母版/模板编辑权限。SoD：不得并入文档作者。 |
 | 法务审阅人 | `LEGAL_REVIEWER` | 按分组配置；只执行多级模式下 **LEGAL** 阶段判定（`decideLegalApprovals`）；不获得额外母版/模板编辑权限；不得代批 COMPLIANCE / `SINGLE_TRACK`（403）。压缩不改动本角色（ADR-0064）。 |
 | 审计管理员 | `AUDIT_ADMIN` | 可查看全部审计记录；压缩不改动本角色。 |
@@ -342,7 +345,7 @@ API 管理配置按配置域独立保存；每个配置域操作动线为编辑�
 
 ### 9.1 用户管理权限矩阵
 
-用户管理覆盖用户全生命周期。本地账户库长期作为授权权威源，SSO 仅负责认证（见 [ADR 0036](../adr/authorization-security/0036-local-account-store-authorization-authority.md)）。角色标识与本矩阵角色名映射为：`GLOBAL_ADMIN`=全局管理员、`GROUP_ADMIN`=分组管理员、`DOCUMENT_AUTHOR`=文档作者（L1 显示名 Pending）、`TEMPLATE_TESTER`=测试人员、`LEGAL_REVIEWER`=法务审阅人、`AUDIT_ADMIN`=审计管理员。退役不可分配：`TEMPLATE_APPROVER`、`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`（**422** `ROLE_NOT_ASSIGNABLE`）。
+用户管理覆盖用户全生命周期。本地账户库长期作为授权权威源，SSO 仅负责认证（见 [ADR 0036](../adr/authorization-security/0036-local-account-store-authorization-authority.md)）。角色标识与本矩阵角色名映射为：`GLOBAL_ADMIN`=全局管理员、`GROUP_ADMIN`=分组管理员、`DOCUMENT_AUTHOR`=文档作者（L1 Confirmed：EN Document author / ZH 文档作者）、`TEMPLATE_TESTER`=测试人员、`LEGAL_REVIEWER`=法务审阅人、`AUDIT_ADMIN`=审计管理员。退役不可分配：`TEMPLATE_APPROVER`、`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`（**422** `ROLE_NOT_ASSIGNABLE`）。
 
 用户口令只允许以 Argon2id 哈希持久化；重置密码采用管理员传入新口令模式，平台只存哈希，不返回一次性临时口令，不在响应、日志或审计中回显口令明文或哈希。
 

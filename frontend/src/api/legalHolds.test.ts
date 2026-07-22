@@ -57,6 +57,24 @@ describe('legalHolds API', () => {
     expect(pageView.content[0]?.holdExternalId).toBe('LH-001')
   })
 
+  it('accepts optional additive createdByDisplayName on list payload (N18)', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [{ ...sampleHold, createdByDisplayName: 'Alice Author' }],
+          page: 0,
+          size: 20,
+          totalElements: 1,
+          totalPages: 1,
+        },
+      },
+    })
+
+    const pageView = await legalHoldsApi.listLegalHolds()
+    expect(pageView.content[0]?.createdByDisplayName).toBe('Alice Author')
+  })
+
   it('creates a legal hold', async () => {
     vi.mocked(http.post).mockResolvedValue({
       data: { metadata: {}, result: sampleHold },

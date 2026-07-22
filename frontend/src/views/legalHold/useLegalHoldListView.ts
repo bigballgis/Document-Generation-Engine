@@ -3,11 +3,13 @@ import { useI18n } from 'vue-i18n'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useLegalHoldsStore } from '@/stores/legalHolds'
 import { useSessionStore } from '@/stores/session'
 import type { LegalHoldStatus, LegalHoldView } from '@/types/legalHold'
+import { formatUserDisplayLabel } from '@/utils/userDisplay'
 
 export function useLegalHoldListView() {
   const { t } = useI18n()
@@ -16,6 +18,7 @@ export function useLegalHoldListView() {
   const sessionStore = useSessionStore()
   const { manageLegalHold } = useCapabilities()
   const { confirmAction } = useConfirmAction()
+  const { userCatalogLink } = useEntityLinkTargets()
 
   const createDialogOpen = ref(false)
   const statusFilter = ref<LegalHoldStatus | ''>('')
@@ -87,6 +90,14 @@ export function useLegalHoldListView() {
     return `/templates/${row.templateId}`
   }
 
+  function createdByLabel(row: LegalHoldView): string {
+    return formatUserDisplayLabel(row.createdByUsername, row.createdByDisplayName)
+  }
+
+  function createdByLinkTo(row: LegalHoldView) {
+    return userCatalogLink(row.createdByUsername)
+  }
+
   async function applyStatusFilter() {
     await legalHoldsStore.fetchHolds(0, legalHoldsStore.listSize, {
       status: statusFilter.value,
@@ -141,6 +152,8 @@ export function useLegalHoldListView() {
     scopeLabel,
     scopeSummary,
     templateLinkTo,
+    createdByLabel,
+    createdByLinkTo,
     confirmRelease,
     handleCreated,
   }

@@ -24,6 +24,8 @@ export interface LegalHoldView {
   invocationCount: number
   createdAt: string
   createdByUsername: string
+  /** Optional additive (N18); absent → FE label falls back to username. */
+  createdByDisplayName?: string | null
   releasedAt: string | null
   releasedByUsername: string | null
 }

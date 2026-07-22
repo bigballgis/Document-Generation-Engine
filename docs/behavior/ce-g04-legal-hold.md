@@ -60,7 +60,7 @@
 | ID | Confirmed product/UX note | Status |
 | --- | --- | --- |
 | **N13** | Zero holds in scope → **honest empty** (title + description). Create CTA only when the session may manage/create holds; without manage capability → honest empty **without** create CTA (not a silent blank table). | Wave 8 In Progress |
-| **N18** | Legal hold actor / username → EntityLink | **Explicitly deferred** — Wave 8 Done **must not** claim N18 closed |
+| **N18** | Legal hold actor / username → EntityLink | Wave 8 **deferred at exit**; residual **in delivery** on `sys-norm-n18-role-l1` (TM **#157**; BDD [sys-norm-n18-role-l1.md](./sys-norm-n18-role-l1.md) **BDD-N18-L1-001…007**; code Done **not** claimed here). Optional additive `createdByDisplayName` |
 
 ---
 

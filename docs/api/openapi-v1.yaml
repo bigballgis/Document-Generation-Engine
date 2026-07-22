@@ -10959,6 +10959,15 @@ components:
           format: date-time
         createdByUsername:
           type: string
+          description: Required actor username for Created-by column (CE-G04).
+        createdByDisplayName:
+          type: string
+          nullable: true
+          description: >-
+            Optional additive friendly display name for Created-by EntityLink label
+            (SYS-NORM residual N18 / BDD-N18-L1-002; ManagementUserDisplayService pattern).
+            Absent or blank → clients fall back to createdByUsername. Required field set
+            unchanged.
         releasedAt:
           type: string
           format: date-time

@@ -17,6 +17,7 @@ related:
   - docs/security/permission-matrix.md
   - docs/adr/template-lifecycle/0064-legal-compliance-approval-matrix.md
   - docs/product/business-terminology-guide.md
+  - docs/behavior/sys-norm-n18-role-l1.md
 ---
 
 # ADR 0070: Role Compression to Six Management Roles
@@ -38,8 +39,13 @@ related:
 
 **Implementation note (2026-07-21):** Wave 5 delivery **Done** (`febb95b3`) — matrix rewrite,
 Flyway remap, JWT/capabilities, and FE role surfaces landed. **Accepted status and Decision
-text below are unchanged** (do not reopen merges). `DOCUMENT_AUTHOR` L1 EN/ZH labels remain
-Pending finalize (non-blocking).
+merge/SoD text below are unchanged** (do not reopen merges).
+
+**P-Q1 L1 labels — Confirmed (2026-07-22):** `DOCUMENT_AUTHOR` L1 display strings locked as
+EN **Document author** / ZH **文档作者** (role ID unchanged). Behavior SoT
+[sys-norm-n18-role-l1.md](../../behavior/sys-norm-n18-role-l1.md)
+**BDD-N18-L1-008…010**; delivery leaf `sys-norm-n18-role-l1` TM **#157**+**#158** (**In Progress** —
+governance Confirmed here; runtime i18n/code Done is not claimed by this ADR note).
 
 ## Context
 
@@ -56,7 +62,7 @@ retaining separation of duties for testing, legal review, and audit.
 1. **Target assignable management roles (exactly six)**  
    - `GLOBAL_ADMIN` — keep  
    - `GROUP_ADMIN` — keep; **absorbs** `TEMPLATE_APPROVER`  
-   - `DOCUMENT_AUTHOR` — **merge** of `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` (stable role ID preferred; **L1 EN/ZH display labels finalizable** — Pending P-Q1)  
+   - `DOCUMENT_AUTHOR` — **merge** of `MASTER_DESIGNER` ∪ `TEMPLATE_AUTHOR` (stable role ID preferred; **L1 EN/ZH display labels Confirmed** — EN **Document author** / ZH **文档作者**; P-Q1 closed via BDD-N18-L1-008…010)  
    - `TEMPLATE_TESTER` — keep (do **not** merge into author)  
    - `LEGAL_REVIEWER` — keep (ADR-0064 legal track unchanged by this merge)  
    - `AUDIT_ADMIN` — keep  
@@ -116,14 +122,17 @@ the architectural decision only.
 
 - Wave 5 owned matrix rewrite, Flyway/user-role migration, OpenAPI/FE role enums, and E2E —
   **delivered** 2026-07-21 (`febb95b3`). Decision text above unchanged.
-- Onboarding / journey docs that listed eight roles were updated in Wave 5 (display-label
-  polish may continue in Wave 8).
+- Onboarding / journey docs that listed eight roles were updated in Wave 5; L1
+  `DOCUMENT_AUTHOR` display labels Confirmed 2026-07-22 (residual leaf
+  `sys-norm-n18-role-l1`).
 - ADR-0064 legal track remains; `LEGAL_REVIEWER` is not compressed away.
-- `DOCUMENT_AUTHOR` L1 label finalization remains Pending until product locks EN/ZH strings.
+- `DOCUMENT_AUTHOR` L1 labels are **Confirmed** (EN **Document author** / ZH **文档作者**);
+  P-Q1 is closed. Role ID / merge decisions above are unchanged.
 
 ## Related Documents
 
 - Wave 5 runtime BDD: [sys-norm-roles.md](../../behavior/sys-norm-roles.md) (`ready`)
+- P-Q1 / N18 L1 lock BDD: [sys-norm-n18-role-l1.md](../../behavior/sys-norm-n18-role-l1.md) (`ready`)
 - Behavior charter: [system-normalization-program.md](../../behavior/system-normalization-program.md)
 - Program: [system-normalization-program-2026-07.md](../../plan/system-normalization-program-2026-07.md)
 - Permissions: [permission-matrix.md](../../security/permission-matrix.md) (Wave 5 rewrite + runtime Done)
