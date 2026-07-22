@@ -97,6 +97,7 @@ defineExpose({ markPristine, validateStructure, scrollToBlock })
       :loading-catalog="loadingCatalog"
       :style-label="styleLabel"
       :node-label="nodeLabel"
+      :compact="Boolean(props.compactToolbar)"
       @undo="doUndo"
       @redo="doRedo"
       @insert-block="insertBlock"

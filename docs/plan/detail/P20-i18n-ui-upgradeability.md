@@ -166,3 +166,11 @@ background, classic-OA desktop-first layout, dual-brand theming):
 - Suggested order: T01 → T02 → T03 → T06 → T04 → T05 → T07.
 - Visual baseline (white bg, classic-OA desktop-first, dual-brand) and information
   architecture must remain unchanged across locale/brand switches (PRD §6.1).
+
+### Related post-P20 leaf (index only — no phase reopen)
+
+- **Binding editor IA + auto `referenceKey`** (`binding-editor-ia`, TM **#155**+**#156**,
+  **In Progress**): new binding-editor / Add-clause-reference chrome strings MUST use i18n
+  keys with English primary (`en.ts`); zh-CN may lag. Behavior SoT
+  [binding-editor-ia.md](../../behavior/binding-editor-ia.md) **BEI-C13** /
+  **BDD-BEI-009** / **BDD-BEI-019**. Does **not** reopen P20.

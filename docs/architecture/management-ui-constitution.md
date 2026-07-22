@@ -115,6 +115,24 @@ workspace, content-module lifecycle detail, and future role-aware detail pages.
 
 Reference implementation: `WorkspaceTabShell.vue`, `TemplateDetailDevWorkspace.vue`.
 
+### Binding editor page chrome (post-SYS-NORM §4a — BEI)
+
+When the author opens Design → Bindings → Configure/Edit an anchor, the **binding editor**
+is a child authoring surface (not a new top-level workspace tab). Confirmed chrome
+([binding-editor-ia.md](../behavior/binding-editor-ia.md) **BEI-C2…C6** / **BDD-BEI-001…011**):
+
+- **Sticky page action rail** on the binding editor itself: Back (secondary) · anchor title ·
+  Save (primary). This rail is **in addition to** the WorkspaceTabShell top-level Design rail;
+  it does **not** move Back/Save/Refresh onto Design nested sub-tab rows (Variables / Bindings /
+  Content modules remain content navigation only).
+- Left column: Content type → Visibility (advanced collapsed by default) → compact structured
+  editor toolbar; prefer flat OA sections over nested card/border stacks; fluid width.
+- Right column: sticky final-chain preview; Refresh visually secondary to Save.
+- New/changed chrome strings: English-first i18n keys (`en` primary).
+
+Clause-reference **Add** dialog auto-`referenceKey` (client-side only) is the same leaf
+(**BEI-C7…C13** / **BDD-BEI-012…019**); no OpenAPI / permission-matrix change.
+
 ## Entity Display and Catalog UX
 
 Human-readable entity columns, navigable links, filter control selection, and fluid vs

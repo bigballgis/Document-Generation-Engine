@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
 import type { ContentModuleSummary, ContentModuleVersion } from '@/types/contentModule'
@@ -13,7 +14,7 @@ const form = defineModel<{
   semanticVersion: string
 }>('form', { required: true })
 
-defineProps<{
+const props = defineProps<{
   referenceDialogTitle: string
   editingReferenceKey: string | null
   moduleOptions: ContentModuleSummary[]
@@ -23,31 +24,59 @@ defineProps<{
   previewContentJson: string
   clauseEditReadonly: boolean
   savingClause: boolean
+  referenceKeyUserOverridden?: boolean
 }>()
 
 const emit = defineEmits<{
   moduleChange: [moduleId: string]
   submitReference: []
   saveClause: []
+  referenceKeyOverride: []
+  clearKeyOverride: []
 }>()
 
 const { t } = useI18n()
+const advancedActiveNames = ref<string[]>([])
+
+const isEditPath = computed(() => Boolean(props.editingReferenceKey))
+
+watch(referenceDialogOpen, (open) => {
+  if (!open) {
+    advancedActiveNames.value = []
+  }
+})
+
+watch(
+  () => props.editingReferenceKey,
+  () => {
+    advancedActiveNames.value = []
+  },
+)
+
+function onOverrideInput() {
+  emit('referenceKeyOverride')
+}
+
+function onClearOverride() {
+  emit('clearKeyOverride')
+  advancedActiveNames.value = []
+}
 </script>
 
 <template>
-  <el-dialog v-model="referenceDialogOpen" :title="referenceDialogTitle" width="560px" destroy-on-close>
-    <el-form label-position="top">
-      <el-form-item :label="t('templates.clauseAuthoring.form.referenceKey')">
-        <el-input
-          v-model="form.referenceKey"
-          :disabled="Boolean(editingReferenceKey)"
-          :placeholder="t('templates.clauseAuthoring.form.referenceKeyPlaceholder')"
-        />
-      </el-form-item>
+  <el-dialog
+    v-model="referenceDialogOpen"
+    :title="referenceDialogTitle"
+    width="560px"
+    destroy-on-close
+    data-testid="clause-reference-dialog"
+  >
+    <el-form label-position="top" data-testid="clause-reference-form">
       <el-form-item :label="t('templates.clauseAuthoring.form.moduleId')">
         <el-select
           :model-value="form.moduleId"
           filterable
+          data-testid="clause-reference-module-select"
           :placeholder="t('templates.clauseAuthoring.form.moduleIdPlaceholder')"
           @change="emit('moduleChange', $event)"
         >
@@ -63,6 +92,7 @@ const { t } = useI18n()
         <el-select
           v-model="form.semanticVersion"
           :disabled="!form.moduleId"
+          data-testid="clause-reference-version-select"
           :placeholder="t('templates.clauseAuthoring.form.semanticVersionPlaceholder')"
         >
           <el-option
@@ -73,10 +103,68 @@ const { t } = useI18n()
           />
         </el-select>
       </el-form-item>
+      <el-form-item :label="t('templates.clauseAuthoring.form.referenceKey')">
+        <el-input
+          v-model="form.referenceKey"
+          disabled
+          data-testid="clause-reference-key-input"
+          :placeholder="t('templates.clauseAuthoring.form.referenceKeyPlaceholder')"
+        />
+        <p
+          v-if="!isEditPath && form.referenceKey && !referenceKeyUserOverridden"
+          class="reference-key-hint"
+          data-testid="clause-reference-key-auto-hint"
+        >
+          {{ t('templates.clauseAuthoring.form.referenceKeyAutoHint') }}
+        </p>
+        <p
+          v-else-if="isEditPath"
+          class="reference-key-hint"
+          data-testid="clause-reference-key-locked-hint"
+        >
+          {{ t('templates.clauseAuthoring.form.referenceKeyLockedHint') }}
+        </p>
+      </el-form-item>
+      <el-collapse
+        v-if="!isEditPath"
+        v-model="advancedActiveNames"
+        class="reference-advanced"
+        data-testid="clause-reference-advanced"
+      >
+        <el-collapse-item
+          :title="t('templates.clauseAuthoring.form.advancedTitle')"
+          name="advanced"
+        >
+          <p class="reference-advanced__hint">
+            {{ t('templates.clauseAuthoring.form.advancedHint') }}
+          </p>
+          <el-form-item :label="t('templates.clauseAuthoring.form.customReferenceKey')">
+            <el-input
+              v-model="form.referenceKey"
+              data-testid="clause-reference-key-override"
+              :placeholder="t('templates.clauseAuthoring.form.referenceKeyPlaceholder')"
+              @input="onOverrideInput"
+            />
+          </el-form-item>
+          <el-button
+            data-testid="clause-reference-key-reset"
+            @click="onClearOverride"
+          >
+            {{ t('templates.clauseAuthoring.form.resetAutoKey') }}
+          </el-button>
+        </el-collapse-item>
+      </el-collapse>
     </el-form>
     <template #footer>
-      <el-button @click="referenceDialogOpen = false">{{ t('common.cancel') }}</el-button>
-      <el-button type="primary" :loading="saving" @click="emit('submitReference')">
+      <el-button data-testid="clause-reference-cancel" @click="referenceDialogOpen = false">
+        {{ t('common.cancel') }}
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="saving"
+        data-testid="clause-reference-save"
+        @click="emit('submitReference')"
+      >
         {{ t('templates.clauseAuthoring.saveReference') }}
       </el-button>
     </template>
@@ -129,5 +217,21 @@ const { t } = useI18n()
 <style scoped lang="scss">
 .readonly-alert {
   margin-bottom: 1rem;
+}
+
+.reference-key-hint {
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.reference-advanced {
+  margin-top: 0.25rem;
+
+  &__hint {
+    margin: 0 0 0.75rem;
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+  }
 }
 </style>

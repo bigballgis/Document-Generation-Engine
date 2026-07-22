@@ -244,7 +244,7 @@ test.describe('LRP-C2 structured editor local draft recovery', () => {
         response.url().includes(`/templates/${templateId}/bindings/HEADER`),
       { timeout: 60_000 },
     )
-    await page.locator('.binding-editor__toolbar').getByRole('button', { name: /^save$/i }).click()
+    await page.getByTestId('binding-editor-save').click()
     const saveResponse = await saveResponsePromise
     expect(saveResponse.ok()).toBeTruthy()
     await expect(page.getByTestId('controlled-structured-content-editor')).toHaveCount(0, {
