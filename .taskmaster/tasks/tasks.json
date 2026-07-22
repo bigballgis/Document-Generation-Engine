@@ -2131,42 +2131,42 @@
       {
         "id": "155",
         "title": "Binding editor re-layout (binding-editor-ia merge leaf)",
-        "description": "IN PROGRESS 2026-07-22. NON-CE post-SYS-NORM section 4a Binding editor re-layout. Slice binding-editor-ia (sole-active); placement ISOLATED; worktree D:/working/DGE-binding-editor-ia · feat/binding-editor-ia; base_sha c8967e3c898db4aaf70e5daf6557c50a05a485dd. Batch merge member_task_ids:[\"155\",\"156\"]; shared_acceptance_surface: Template Dev binding/clause-reference authoring UX; evidence_amortization: one FE verify + E2E + UIUX + queued deploy; vetoes: checklist-#3b/#5a, CE-O02, #53, N18-unless-trivial. BDD ready docs/behavior/binding-editor-ia.md BDD-BEI-001…020. Scope: sticky action rail (Back/title/Save), compact editor toolbar, sticky final-chain preview, collapsed Visibility advanced, reduce nested cards/borders, fluid width, English-first i18n, WorkspaceTabShell nested-tab CTA rules. frontend_ui_in_scope=true; backend_api_contract_change=false. Formal phase None. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02.",
-        "details": "ACTIVE 2026-07-22 (stage 2 plan registration). Slice id: binding-editor-ia. Merged with #156 Auto referenceKey. Plan: docs/plan/detail/binding-editor-ia.md In Progress; program docs/plan/system-normalization-program-2026-07.md section 4a Binding editor + Auto referenceKey → In Progress under this sole-active leaf. BDD SoT: docs/behavior/binding-editor-ia.md (ready; BDD-BEI-001…011 layout + 012…020 refKey). on_red_split_hint: If auto-refKey breaks independently, peel #156 to solo leaf; keep #155 layout. Umbrella #53 CE remains in-progress registry-only.",
+        "description": "DONE 2026-07-22. NON-CE post-SYS-NORM section 4a Binding editor re-layout. Slice binding-editor-ia; MAIN merge 9f2378ad; feature tip 9e318d9c; worktree REMOVED. Batch merge member_task_ids:[\"155\",\"156\"] closed. BDD ready/shipped docs/behavior/binding-editor-ia.md BDD-BEI-001…020. Scope delivered: sticky action rail (Back/title/Save), compact editor toolbar, sticky final-chain preview, collapsed Visibility advanced, fluid width, English-first i18n, WorkspaceTabShell nested-tab CTA rules. frontend_ui_in_scope=true; backend_api_contract_change=false. Gates: FE lint/type-check/test(1697)/build GREEN; BE mvn verify N/A; E2E binding-editor-ia.spec.ts 9/9; UIUX PASS_WITH_NOTES Critical=0 Major=0 Minor=2; Arch PASS_WITH_NOTES Critical=0 merge_go=yes; CQ Critical toolbar selector drift FIXED; Stage 5 DEPLOY_OK 2026-07-22T12:34:41+08:00; Stage 10 SkipBuild DEPLOY_OK 2026-07-22T13:03:32+08:00. Formal phase None. Sole-active cleared. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02; N18 stays deferred.",
+        "details": "Completed 2026-07-22 (stage 12 MAIN doc-sync). Slice id: binding-editor-ia. Merged with #156 Auto referenceKey. Plan: docs/plan/detail/binding-editor-ia.md Done; program docs/plan/system-normalization-program-2026-07.md section 4a Binding editor + Auto referenceKey → Done; sole-active cleared. Umbrella #53 CE remains in-progress registry-only.",
         "testStrategy": "1. BDD ready BEI-001…020. 2. Doc-keeper: catalog-nav / management-ui constitution / i18n index sync if needed (no API contract). 3. FE TDD: TemplateAuthoringBindingEditor sticky rail + compact toolbar + sticky preview + Visibility collapsed + fluid width. 4. FE lint/type-check/test/build GREEN (BE mvn verify N/A unless touch). 5. E2E + UIUX for layout hierarchy + refKey dialog (shared leaf). 6. Queued docker-deploy-queue DEPLOY_OK. 7. Merge + MAIN doc-sync. 8. Do NOT flip #3b/#5a; do NOT mark #53 Done; do NOT activate CE-O02.",
         "priority": "high",
         "dependencies": [
           "154"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-22T01:27:00.000Z"
+        "updatedAt": "2026-07-22T05:45:00.000Z"
       },
       {
         "id": "156",
         "title": "Auto referenceKey generation (binding-editor-ia merge leaf)",
-        "description": "IN PROGRESS 2026-07-22 (merged under binding-editor-ia). NON-CE post-SYS-NORM section 4a Auto referenceKey generation. Same sole-active leaf as #155; Batch merge member_task_ids:[\"155\",\"156\"]. BDD ready docs/behavior/binding-editor-ia.md BDD-BEI-012…020. Scope: Add clause reference dialog auto-generates referenceKey from selected module moduleCode → UPPER_SNAKE (BEI-C8) with _2/_3 conflict suffixes (BEI-C9); Advanced custom override; edit path key locked; client-side only — no backend API contract change. frontend_ui_in_scope=true; backend_api_contract_change=false. Formal phase None. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02. on_red_split_hint: peel this task to solo if auto-refKey breaks independently.",
-        "details": "ACTIVE 2026-07-22 (stage 2 plan registration) — merged into slice binding-editor-ia with #155. Plan: docs/plan/detail/binding-editor-ia.md. Vitest for normalize + conflict suffix; Playwright for Add-dialog auto-key. Persist via existing content-module-reference upsert APIs.",
+        "description": "DONE 2026-07-22 (merged under binding-editor-ia). NON-CE post-SYS-NORM section 4a Auto referenceKey generation. MAIN merge 9f2378ad; feature tip 9e318d9c; worktree REMOVED. Batch merge closed with #155. BDD ready/shipped docs/behavior/binding-editor-ia.md BDD-BEI-012…020. Scope delivered: Add clause reference dialog auto-generates referenceKey from moduleCode → UPPER_SNAKE with _2/_3 conflict suffixes; Advanced custom override; edit path key locked; client-side only. Gates shared with #155 leaf. Formal phase None. Sole-active cleared. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02.",
+        "details": "Completed 2026-07-22 — merged into slice binding-editor-ia with #155. Plan: docs/plan/detail/binding-editor-ia.md Done. Vitest normalize + conflict suffix; Playwright Add-dialog auto-key. Persist via existing content-module-reference upsert APIs.",
         "testStrategy": "1. BDD ready BEI-012…020. 2. FE TDD: UPPER_SNAKE normalize + conflict suffix + Advanced override + edit lock. 3. Shared leaf FE gates + E2E/UIUX with #155. 4. Queued deploy evidence. 5. Do NOT invent rename UX; do NOT change backend API contract.",
         "priority": "high",
         "dependencies": [
           "154",
           "155"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-22T01:27:00.000Z"
+        "updatedAt": "2026-07-22T05:45:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-22T01:27:00.000Z",
+      "lastModified": "2026-07-22T05:45:00.000Z",
       "taskCount": 156,
-      "completedCount": 149,
+      "completedCount": 153,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-22T01:27:00.000Z"
+      "updated": "2026-07-22T05:45:00.000Z"
     }
   }
 }

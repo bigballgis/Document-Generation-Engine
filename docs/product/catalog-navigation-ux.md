@@ -26,7 +26,7 @@
 > (`d213834f` / `807d8213`; BDD [reminder-timing-settings-ia.md](../behavior/reminder-timing-settings-ia.md)
 > **BDD-RT-IA-001…016**; FE **Done**).
 > Post-program §4a Binding editor IA + auto `referenceKey` — TM **#155**+**#156** merge leaf
-> `binding-editor-ia` → **In Progress** (BDD [binding-editor-ia.md](../behavior/binding-editor-ia.md)
+> `binding-editor-ia` → **Done** (`9f2378ad` / `9e318d9c`; BDD [binding-editor-ia.md](../behavior/binding-editor-ia.md)
 > **BDD-BEI-001…020**; detail [binding-editor-ia.md](../plan/detail/binding-editor-ia.md)).
 > Does **not** add catalog/hub nav entries — authoring chrome only on the existing
 > Design → Bindings / clause-reference surfaces.
@@ -225,7 +225,7 @@ Authoring surface for one **in-flight** dev line (`DRAFT`, `TESTING`, `APPROVAL`
 2. **Authoring** — variables, anchor bindings, composition rules, structured content (existing P3/P18 authoring scope)
 3. **Workflow actions** — submit test, lifecycle decisions, publish gate (capability-gated; unchanged lifecycle semantics)
 
-**Binding editor chrome (BEI, In Progress):** Design nested sub-tabs (Variables / Bindings /
+**Binding editor chrome (BEI, Done):** Design nested sub-tabs (Variables / Bindings /
 Content modules) remain content navigation only. Configure/Edit binding opens a child
 surface with its own sticky Back · title · Save rail and sticky final-chain preview;
 clause-reference Add dialog auto-suggests `referenceKey` from `moduleCode`. Behavior SoT:
