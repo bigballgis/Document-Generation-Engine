@@ -7,6 +7,7 @@
 **Date:** 2026-07-23  
 **Viewport:** 1440×900 (standard)  
 **Stack:** Docker frontend `http://127.0.0.1:4173` + backend `http://127.0.0.1:8080` — **UP** (Stage 5 `dc9229ca`; no redeploy)  
+**Tip at Stage 7 close:** `c0cc57a0` (+ validation refresh)
 **Verdict:** **PASS** (Critical = 0; dual-brand evidence complete)
 
 ## Surfaces checked
@@ -23,16 +24,19 @@
 | Command | Result |
 | --- | --- |
 | Stage 6 functional (prior): `PQH-N22-catalog-row-actions.spec.ts` | **7/7 passed** (`f1c47287`) |
+| Stage 7 full UIUX suite (re-run 2026-07-23): a11y + PQH-N22 + CE-E02 + CE-G04 + SYS-NORM-W3 | **21/21 passed** (~3.8m) |
 | Stage 7 evidence: `PQH-N22-uiux-evidence.spec.ts` | **4/4 passed** |
 | `a11y-smoke.spec.ts` | **9/9 passed** |
 
 ```powershell
-$env:E2E_TARGET='docker'; $env:E2E_BASE_URL='http://127.0.0.1:4173'; $env:FRONTEND_PORT='4173'
 pnpm -C frontend exec playwright test `
   e2e/a11y-smoke.spec.ts `
   e2e/PQH-N22-uiux-evidence.spec.ts `
+  e2e/CE-E02-asset-library-uiux-evidence.spec.ts `
+  e2e/CE-G04-legal-hold-uiux-evidence.spec.ts `
+  e2e/SYS-NORM-W3-uiux-evidence.spec.ts `
   --config playwright.docker.config.ts --workers=1
-# 13 passed (1.5m)
+# 21 passed (3.8m)
 ```
 
 ## Screenshot inventory
@@ -96,7 +100,7 @@ Path prefix: `frontend/e2e/evidence/PQH-N22/screenshots/` (**27** files on disk)
 
 ### Notes (non-blocking)
 
-1. Unrelated WIP on CE-E02 / CE-G04 / SYS-NORM-W3 evidence specs was discarded; N22 evidence lives under `PQH-N22/` only.
+1. Dedicated N22 evidence under `frontend/e2e/evidence/PQH-N22/`; related catalog UIUX specs (CE-E02 / CE-G04 / SYS-NORM-W3) updated to open More before asserting teleported menu items (`3c594eb9`).
 2. Helpers: `PQH_N22_VIEWPORT` 1440×900 + `capturePqhN22Screenshot` / `capturePqhN22LocatorScreenshot` in `frontend/e2e/helpers/uiux-evidence.ts`.
 3. Spec: `frontend/e2e/PQH-N22-uiux-evidence.spec.ts`.
 4. Product Vue unchanged in this Stage 7 pass (evidence + harness only).
