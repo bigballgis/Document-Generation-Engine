@@ -57,7 +57,7 @@
     "vite": "^6.4.3",
     "vitest": "^3.2.7",
     "vue-eslint-parser": "^9.4.3",
-    "vue-tsc": "^2.2.12"
+    "vue-tsc": "^3.3.8"
   },
   "pnpm": {
     "overrides": {
