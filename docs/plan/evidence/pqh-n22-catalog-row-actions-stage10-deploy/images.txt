@@ -1,29 +1,3 @@
-
-REPOSITORY                                                                     TAG                                                                           IMAGE ID       CREATED          SIZE
-documentgenerationengine-docgen-backend                                        latest                                                                        c9aa310196e3   43 minutes ago   1.46GB
-documentgenerationengine-docgen-frontend                                       latest                                                                        c28f788431f2   44 minutes ago   86.2MB
-dge-ce-g04-legal-hold-docgen-backend                                           latest                                                                        c07b3e92039b   6 days ago       1.46GB
-dge-ce-g04-legal-hold-docgen-frontend                                          latest                                                                        90e70f723270   7 days ago       85.6MB
-dge-ce-o01-pdfa-output-docgen-backend                                          latest                                                                        4b7d62ce8624   7 days ago       1.46GB
-dge-ce-e02-asset-library-docgen-backend                                        latest                                                                        d45de5a637d6   7 days ago       1.46GB
-dge-ce-o01-pdfa-output-docgen-frontend                                         latest                                                                        dd87017704d7   7 days ago       85.5MB
-dge-ce-e02-asset-library-docgen-frontend                                       latest                                                                        e701efba8923   7 days ago       85.5MB
-dge-ce-u11-invocation-troubleshoot-docgen-backend                              latest                                                                        1d3c0f15d98f   8 days ago       1.46GB
-dge-ce-u11-invocation-troubleshoot-docgen-frontend                             latest                                                                        2b4f95009902   8 days ago       85.3MB
-dge-ce-k05-master-impact-real-docgen-backend                                   latest                                                                        fdf71959e125   8 days ago       1.46GB
-dge-ce-k05-master-impact-real-docgen-frontend                                  latest                                                                        26b93a70f1ca   8 days ago       85.3MB
-dge-ce-u10-shared-group-codes-ui-docgen-backend                                latest                                                                        20c639395ea1   8 days ago       1.46GB
-dge-ce-u10-shared-group-codes-ui-docgen-frontend                               latest                                                                        7f966f9bf4dc   8 days ago       85.3MB
-dge-ce-k04-semantic-change-diff-docgen-backend                                 latest                                                                        5aaccfd55dd2   8 days ago       1.46GB
-dge-ce-k04-semantic-change-diff-docgen-frontend                                latest                                                                        fb992f225a7c   8 days ago       85.2MB
-dge-ce-u09-master-review-reachability-docgen-backend                           latest                                                                        c7ca3ae6c409   8 days ago       1.46GB
-dge-ce-u09-master-review-reachability-docgen-frontend                          latest                                                                        da39ad5bb8d4   8 days ago       85.2MB
-dge-ce-k03-variable-compute-engine-docgen-backend                              latest                                                                        416a99cabee7   8 days ago       1.46GB
-dge-ce-k03-variable-compute-engine-docgen-frontend                             latest                                                                        d2e782c98898   8 days ago       85.2MB
-dge-ce-u08-content-module-review-loop-docgen-backend                           latest                                                                        87f9c8674aa3   8 days ago       1.46GB
-dge-ce-u08-content-module-review-loop-docgen-frontend                          latest                                                                        dc8867e78ae3   8 days ago       85.2MB
-dge-ce-k02-master-style-authority-docgen-backend                               latest                                                                        3b3b373d464e   8 days ago       1.46GB
-dge-ce-k02-master-style-authority-docgen-frontend                              latest                                                                        06536eb3a6b1   8 days ago       85.2MB
-dge-ce-u04-inline-pdf-preview-docgen-frontend                                  latest                                                                        8dc784ab4c0b   8 days ago       85.2MB
-dge-ce-u04-inline-pdf-preview-docgen-backend                                   latest                                                                        504b96f3a731   8 days ago       1.46GB
-
+IMAGE                                             ID             DISK USAGE   CONTENT SIZE   EXTRA
+documentgenerationengine-docgen-backend:latest    7a76976af1ea       1.46GB          468MB   U    
+documentgenerationengine-docgen-frontend:latest   3a09d46600ae       86.2MB         23.6MB   U    

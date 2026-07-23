@@ -1,11 +1,11 @@
 [
     {
-        "Id": "sha256:c9aa310196e36938978c9107cd91751713a2eabdd2bdfd13bcd43ff7a5dcef2a",
+        "Id": "sha256:7a76976af1eae43ec924d908de68507ebeb3ead75e47da209fc2bb253254ca7f",
         "RepoTags": [
             "documentgenerationengine-docgen-backend:latest"
         ],
         "RepoDigests": [
-            "documentgenerationengine-docgen-backend@sha256:c9aa310196e36938978c9107cd91751713a2eabdd2bdfd13bcd43ff7a5dcef2a"
+            "documentgenerationengine-docgen-backend@sha256:7a76976af1eae43ec924d908de68507ebeb3ead75e47da209fc2bb253254ca7f"
         ],
         "Comment": "buildkit.dockerfile.v0",
         "Created": "2026-07-23T10:52:28.893661043Z",
@@ -54,18 +54,18 @@
             ]
         },
         "Metadata": {
-            "LastTagTime": "2026-07-23T11:34:05.630137271Z"
+            "LastTagTime": "2026-07-23T11:37:34.778092412Z"
         },
         "Descriptor": {
             "mediaType": "application/vnd.oci.image.index.v1+json",
-            "digest": "sha256:c9aa310196e36938978c9107cd91751713a2eabdd2bdfd13bcd43ff7a5dcef2a",
+            "digest": "sha256:7a76976af1eae43ec924d908de68507ebeb3ead75e47da209fc2bb253254ca7f",
             "size": 856
         },
         "Identity": {
             "Build": [
                 {
-                    "Ref": "x489tutlm0fxq52uls4toel3k",
-                    "CreatedAt": "2026-07-23T11:34:05.684799458Z"
+                    "Ref": "ljkf5xmuc36g931a7f22ke5oh",
+                    "CreatedAt": "2026-07-23T11:37:34.839341319Z"
                 }
             ]
         }
