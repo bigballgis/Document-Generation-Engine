@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19 (registry only). Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: CLEARED — prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe (PQH Leaf 1; program docs/plan/post-queue-hardening-program-2026-07.md stays In Progress; next queue #161 pending). Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Prior #155+#156 binding-editor-ia Done 9f2378ad / 9e318d9c; #154 Asset library Done c12a0687; #153 Reminder timing Done d213834f; #152 SYS-NORM Wave 8 Done 8aca145b; SYS-NORM Waves 0–8 Done. Do NOT treat #53 as delivery leaf. Do NOT mark #53 Done. Do NOT activate CE-O02 / #119.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active CLEARED — prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe; next PQH queue #161 N19–N20 pending (not activated). Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT activate #119.",
+        "description": "IN PROGRESS 2026-07-19 (registry only). Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: NON-CE #161 pqh-n19-n20-entitylink (PQH Leaf 2 In Progress; program docs/plan/post-queue-hardening-program-2026-07.md). Prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe (PQH Leaf 1). Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Prior #155+#156 binding-editor-ia Done 9f2378ad / 9e318d9c; #154 Asset library Done c12a0687; #153 Reminder timing Done d213834f; #152 SYS-NORM Wave 8 Done 8aca145b; SYS-NORM Waves 0–8 Done. Do NOT mark #53 Done. Do NOT treat #53 as delivery leaf. Do NOT activate CE-O02 / #119. Do NOT flip #3b/#5a. Formal phase None.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active = NON-CE #161 pqh-n19-n20-entitylink (PQH Leaf 2; Batch solo; BDD ready). Prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe; #162 N22 stays pending; #163 F7 parked. Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT activate #119.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-23T02:55:00.000Z"
+        "updatedAt": "2026-07-23T03:10:00.000Z"
       },
       {
         "id": "54",
@@ -2216,22 +2216,22 @@
       },
       {
         "id": "161",
-        "title": "PQH N19-N20: EntityLink where-used + MasterImpact (queued Leaf 2)",
-        "description": "PENDING 2026-07-23 — queued under Post-Queue Hardening priority 3 / serial Leaf 2. SYS-NORM residuals N19-N20 (EntityLink where-used; MasterImpact). NEXT QUEUE HEAD after Leaf 1 #159+#160 Done. NOT sole-active — do NOT auto-activate. Do NOT reopen SYS-NORM Waves 0–8. Do NOT fold into #53. Formal phase None. Program: docs/plan/post-queue-hardening-program-2026-07.md.",
-        "details": "Queue stub only — next queue head after pqh-f8-format-date-tz Done (ab382c02). Activate via future deliver + Batch Recommendation. Origin: docs/plan/system-normalization-program-2026-07.md N19–N20 row (waves remain Done).",
-        "testStrategy": "Activate only after Leaf 1 Done; then BDD + FE pipeline per deliver.",
+        "title": "PQH N19-N20: EntityLink where-used + MasterImpact (Leaf 2 sole-active)",
+        "description": "IN PROGRESS 2026-07-23 — sole-active NON-CE delivery leaf under Post-Queue Hardening priority 3 / serial Leaf 2. Slice pqh-n19-n20-entitylink. Placement ISOLATED · worktree D:/working/DGE-pqh-n19-n20-entitylink · branch feat/pqh-n19-n20-entitylink. Batch Recommendation solo (member_task_ids:[\"161\"]; proposed_slice_id:pqh-n19-n20-entitylink). BDD ready docs/behavior/pqh-n19-n20-entitylink.md (BDD-PQH-N19N20-001…014); frontend_ui_in_scope=true; backend_api_contract_change=false. Scope: N19 where-used groupCode EntityLink + template name EntityLink regression lock; N20 MasterImpact EntityLinkCell fail-closed. Do NOT reopen SYS-NORM Waves 0–8. Do NOT fold N22 (#162). Do NOT fold into #53. Formal phase None. Program: docs/plan/post-queue-hardening-program-2026-07.md · detail docs/plan/detail/pqh-n19-n20-entitylink.md.",
+        "details": "Activated 2026-07-23 via deliver + Batch Recommendation solo. Host sole-active = this leaf only. Origin residual: docs/plan/system-normalization-program-2026-07.md N19–N20 (waves remain Done). Next after Done: #162 N22 pending. Prefer frontend-engineer; skip doc-keeper if entity-display skill/matrix already covers. Vetoes: n19n20-vs-n22, checklist-#3b/#5a-GO, CE-O02, mark-#53-CE-Done, activate-#119, do-not-reopen-SYS-NORM-Waves-0-8.",
+        "testStrategy": "FE TDD + gates; E2E/UIUX for BDD-PQH-N19N20-001…014; queued docker deploy evidence; merge + MAIN doc-sync before Done.",
         "priority": "medium",
         "dependencies": [
           "160"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-23T02:55:00.000Z"
+        "updatedAt": "2026-07-23T03:10:00.000Z"
       },
       {
         "id": "162",
         "title": "PQH N22: Catalog row action pattern (queued Leaf 3)",
-        "description": "PENDING 2026-07-23 — queued under Post-Queue Hardening priority 3 / serial Leaf 3. SYS-NORM residual N22 (catalog row action pattern). NOT sole-active. Do NOT activate until Leaf 2 #161 Done (or explicit reorder). Do NOT reopen SYS-NORM Waves 0–8. Do NOT fold into #53. Formal phase None. Program: docs/plan/post-queue-hardening-program-2026-07.md.",
+        "description": "PENDING 2026-07-23 — queued under Post-Queue Hardening priority 3 / serial Leaf 3. SYS-NORM residual N22 (catalog row action pattern). NOT sole-active. Do NOT activate until Leaf 2 #161 Done (or explicit reorder). Do NOT reopen SYS-NORM Waves 0–8. Do NOT fold into #53. Formal phase None. Program: docs/plan/post-queue-hardening-program-2026-07.md. Host sole-active is #161 pqh-n19-n20-entitylink (Leaf 2).",
         "details": "Queue stub only. Activate via future deliver after N19–N20 leaf. Origin: docs/plan/system-normalization-program-2026-07.md N22 row (waves remain Done).",
         "testStrategy": "Activate only after Leaf 2 Done; then BDD + FE pipeline per deliver.",
         "priority": "medium",
@@ -2240,7 +2240,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-23T02:55:00.000Z"
+        "updatedAt": "2026-07-23T03:10:00.000Z"
       },
       {
         "id": "163",
@@ -2257,13 +2257,13 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-23T02:55:00.000Z",
+      "lastModified": "2026-07-23T03:10:00.000Z",
       "taskCount": 163,
       "completedCount": 157,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-23T02:55:00.000Z"
+      "updated": "2026-07-23T03:10:00.000Z"
     }
   }
 }

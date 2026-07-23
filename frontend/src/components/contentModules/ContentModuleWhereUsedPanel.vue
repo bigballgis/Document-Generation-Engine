@@ -16,13 +16,18 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const { templateDetailLink } = useEntityLinkTargets()
+const { templateDetailLink, groupCatalogLink } = useEntityLinkTargets()
 
 const rows = ref<ContentModuleWhereUsedTemplate[]>([])
 const loading = ref(false)
 const loadError = ref(false)
 const currentPage = ref(1)
 const totalElements = ref(0)
+
+function entityLabel(value?: string | null): string {
+  const trimmed = value?.trim()
+  return trimmed || '—'
+}
 
 async function loadWhereUsed() {
   if (!props.moduleId) {
@@ -90,17 +95,25 @@ watch(currentPage, () => {
         >
           <template #default="{ row }">
             <EntityLinkCell
-              :label="row.name"
+              data-testid="where-used-template-name"
+              :label="entityLabel(row.name)"
               :subtitle="row.externalId"
               :to="templateDetailLink(row.id)"
             />
           </template>
         </el-table-column>
         <el-table-column
-          prop="groupCode"
           :label="t('contentModules.detail.whereUsed.columns.group')"
           width="140"
-        />
+        >
+          <template #default="{ row }">
+            <EntityLinkCell
+              data-testid="where-used-group-code"
+              :label="entityLabel(row.groupCode)"
+              :to="groupCatalogLink(row.groupCode)"
+            />
+          </template>
+        </el-table-column>
         <el-table-column
           prop="lifecycleStatus"
           :label="t('contentModules.detail.whereUsed.columns.status')"

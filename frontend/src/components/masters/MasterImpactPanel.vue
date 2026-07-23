@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { templateDetailPath } from '@/routing/routeKeys'
+import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import type { MasterImpactAnalysis, MasterReferencedTemplate } from '@/types/master'
 
 const props = defineProps<{
@@ -10,6 +11,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const { templateDetailLink } = useEntityLinkTargets()
 
 const referencedTemplates = computed((): MasterReferencedTemplate[] => {
   const impact = props.impact
@@ -26,6 +28,15 @@ const referencedTemplates = computed((): MasterReferencedTemplate[] => {
 })
 
 const hasReferences = computed(() => referencedTemplates.value.length > 0)
+
+function referencedTemplateLabel(template: MasterReferencedTemplate): string {
+  const name = template.name?.trim()
+  if (name) {
+    return name
+  }
+  const id = template.templateId?.trim()
+  return id || '—'
+}
 </script>
 
 <template>
@@ -49,12 +60,12 @@ const hasReferences = computed(() => referencedTemplates.value.length > 0)
         <p class="list-label">{{ t('masters.impact.referencedTemplates') }}</p>
         <ul>
           <li v-for="template in referencedTemplates" :key="template.templateId">
-            <router-link
-              :to="templateDetailPath(template.templateId)"
-              data-testid="master-impact-template-link"
-            >
-              {{ template.name }}
-            </router-link>
+            <EntityLinkCell
+              data-testid="master-impact-template-cell"
+              :label="referencedTemplateLabel(template)"
+              :subtitle="template.externalId"
+              :to="templateDetailLink(template.templateId)"
+            />
           </li>
         </ul>
       </div>

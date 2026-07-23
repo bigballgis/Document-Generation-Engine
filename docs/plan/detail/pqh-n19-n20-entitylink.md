@@ -1,0 +1,91 @@
+# PQH Leaf 2 — N19–N20 EntityLink where-used + MasterImpact
+
+**Program / slice:** `pqh-n19-n20-entitylink` (Post-Queue Hardening; **NON-CE**; **not** a formal P-phase)  
+**Formal plan phase:** **None**  
+**Task Master:** **#161** (PQH N19–N20) → **In Progress** (sole-active)  
+**Active delivery slice:** `pqh-n19-n20-entitylink` (**host sole-active**)  
+**Placement:** **ISOLATED** · worktree `D:/working/DGE-pqh-n19-n20-entitylink` · branch `feat/pqh-n19-n20-entitylink`  
+**BDD:** [pqh-n19-n20-entitylink.md](../../behavior/pqh-n19-n20-entitylink.md) — **ready** (`BDD-PQH-N19N20-001…014`); `frontend_ui_in_scope=true`; `backend_api_contract_change=false`  
+**Program:** [post-queue-hardening-program-2026-07.md](../post-queue-hardening-program-2026-07.md)  
+**Upstream residual:** [system-normalization-program-2026-07.md](../system-normalization-program-2026-07.md) N19–N20 (Waves **0–8** remain **Done** — do **not** reopen)  
+**Batch recommendation:** **solo** (`member_task_ids: ["161"]`; `proposed_slice_id: pqh-n19-n20-entitylink`;
+`shared_acceptance_surface: ContentModuleWhereUsedPanel groupCode EntityLink + MasterImpactPanel EntityLinkCell / fail-closed template links`;
+`evidence_amortization: one FE gates + E2E + UIUX + queued deploy`;
+vetoes_applied: n19n20-vs-n22, checklist-#3b/#5a-GO, CE-O02, mark-#53-CE-Done, activate-#119, do-not-reopen-SYS-NORM-Waves-0-8;
+`on_red_split_hint: Peel N20 MasterImpact if where-used groupCode alone is green`) — **active**
+
+---
+
+## Purpose
+
+Deliver SYS-NORM residuals **N19–N20** under PQH Leaf 2:
+
+1. **N19** — `ContentModuleWhereUsedPanel` **groupCode** column uses `EntityLinkCell` + `groupCatalogLink` (identity-administration fail-closed); **lock** existing template-name `EntityLinkCell` regression.
+2. **N20** — `MasterImpactPanel` referenced templates use `EntityLinkCell` + `templateDetailLink` (fail-closed plain text when template-management denied).
+
+**Out of scope:** N22 catalog row actions (TM **#162**); IBL-E6 nesting columns; API contract changes; reopening SYS-NORM Waves 0–8.
+
+---
+
+## Status
+
+| Item | Value |
+| --- | --- |
+| Leaf status | **In Progress** |
+| Formal phase | **None** |
+| Host sole-active | **#161** `pqh-n19-n20-entitylink` (this leaf) |
+| Program | PQH **In Progress** — Leaf 1 **Done**; Leaf 2 **In Progress**; Leaf 3 **#162** pending; F7 **#163** parked |
+| Gate evidence | *(pending implementation)* |
+| Prefer next specialist | **frontend-engineer** — skip **doc-keeper** unless skill/matrix needs touch (`frontend-entity-display` + UX constitution already cover EntityLink) |
+| Do **not** | Flip **#3b/#5a**; mark **#53** Done; activate CE-O02 / **#119** / F7 / **#162**; reopen SYS-NORM Waves 0–8; claim IBL/CE/go-live Done |
+
+---
+
+## Task rows
+
+| ID | Task | Status |
+| --- | --- | --- |
+| PQH-N19N20-T01 | Plan/TM sole-active activation + detail/ledger/program cross-links | **Done** |
+| PQH-N19N20-T02 | Frontend TDD: where-used `groupCode` EntityLink + template name regression lock | **Not Started** |
+| PQH-N19N20-T03 | Frontend TDD: MasterImpact `EntityLinkCell` fail-closed | **Not Started** |
+| PQH-N19N20-T04 | FE lint / type-check / test / build | **Not Started** |
+| PQH-N19N20-T05 | E2E + UIUX (BDD-PQH-N19N20-001…014) | **Not Started** |
+| PQH-N19N20-T06 | Architecture (+ optional CQ) review | **Not Started** |
+| PQH-N19N20-T07 | Queued docker deploy evidence + merge + MAIN doc-sync | **Not Started** |
+
+### Task Master members
+
+| TM | Alias | Title | Status |
+| --- | --- | --- | --- |
+| **#161** | N19–N20 | EntityLink where-used + MasterImpact | **In Progress** (sole-active) |
+
+### Queued / parked (not this leaf)
+
+| TM | Alias | Status |
+| --- | --- | --- |
+| **#162** | N22 | **pending** (Leaf 3 — do **not** activate) |
+| **#163** | PQH-F7 (Bucket4j→Redis) | **pending** (parked) |
+| **#159** / **#160** | PQH-CHARTER / PQH-F8 | **Done** (Leaf 1 closed) |
+
+---
+
+## Exit criteria (from BDD-PQH-N19N20-001…014)
+
+| # | Criterion | Status |
+| --- | --- | --- |
+| 1–14 | See behavior SoT **BDD-PQH-N19N20-001…014** | **Not Started** |
+| Locks | Waves 0–8 stay Done; #162 not folded; #53 / #3b/#5a / CE-O02 / #119 held | **In Progress** (governance) |
+
+---
+
+## Related
+
+| Doc | Role |
+| --- | --- |
+| [post-queue-hardening-program-2026-07.md](../post-queue-hardening-program-2026-07.md) | Program SoT |
+| [pqh-n19-n20-entitylink.md](../../behavior/pqh-n19-n20-entitylink.md) | Behavior SoT |
+| [system-normalization-program-2026-07.md](../system-normalization-program-2026-07.md) | N19–N20 residual origin (waves stay Done) |
+| [sys-norm-n18-role-l1.md](../../behavior/sys-norm-n18-role-l1.md) | EntityLink fail-closed pattern reference |
+| [ux-entity-display-constitution.md](../../architecture/ux-entity-display-constitution.md) | Entity display constitution |
+| `.cursor/skills/frontend-entity-display/SKILL.md` | Implementer skill (prefer over doc-keeper) |
+| [execution-sync-ledger.md](../execution-sync-ledger.md) | Activation / evidence ledger |
