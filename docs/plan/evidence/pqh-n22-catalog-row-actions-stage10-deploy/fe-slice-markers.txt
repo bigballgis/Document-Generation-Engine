@@ -1,4 +1,4 @@
-TableEditMoreActions=yes (ApiInvocationsView-BbLet8Dv.js)
-AssetLibraryListView=yes (AssetLibraryListView-CSEbCDKq.js)
-LegalHoldListView=yes (index-CdDevzTw.js)
-ApiInvocationsView=yes (ApiInvocationsView-BbLet8Dv.js)
+ApiInvocationsView=yes
+AssetLibraryListView=yes
+LegalHoldListView=yes
+TableEditMoreActions=yes

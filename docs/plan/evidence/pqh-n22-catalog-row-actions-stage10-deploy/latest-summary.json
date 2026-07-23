@@ -8,50 +8,52 @@
   "batch_recommendation": "solo",
   "worktree_path": "D:/working/DGE-pqh-n22-catalog-row-actions",
   "branch": "feat/pqh-n22-catalog-row-actions",
-  "git_head": "c0cc57a07bbe0fcaf19a5b2d85ea3132a6e1aba3",
-  "tip_short": "c0cc57a0",
+  "git_head": "e60b488f63e1ff65400ec1cf03c29384bf5958f4",
+  "tip_short": "e60b488f",
   "stage5_runtime_tip": "c094d513",
   "stage5_evidence_tip": "f69c3f0c",
-  "local_time": "2026-07-23T19:36:33+08:00",
-  "utc_time": "2026-07-23T11:36:33Z",
-  "command": ".\\scripts\\docker-deploy-queue.ps1 -SkipBuild -Reason \"Stage10 PQH N22 #162 health recheck tip c0cc57a0 (images match Stage5)\"",
+  "prior_stage10_tip": "c0cc57a0",
+  "local_time": "2026-07-23T19:58:49+08:00",
+  "utc_time": "2026-07-23T11:58:49Z",
+  "command": "LOCKED: .\\scripts\\docker-deploy.ps1 -SkipBuild (queue -SkipBuild splat does not forward switch; mutex held). Reason: Stage10 PQH N22 #162 health recheck tip e60b488f",
   "compose_project": "documentgenerationengine",
   "queue_after": "idle",
+  "skip_build": true,
   "ports": {
-    "frontend": 4173,
-    "backend": 8080
+    "backend": 8080,
+    "frontend": 4173
   },
   "e2e_base_url": "http://localhost:4173",
   "health": {
-    "docgen_frontend": "healthy",
+    "docgen_backend": "healthy",
+    "healthz_8080": {
+      "body": "{\"status\":\"UP\"}",
+      "status_code": 200
+    },
     "frontend_4173": {
       "status_code": 200,
       "content_length": 1202
     },
-    "docgen_backend": "healthy",
-    "healthz_8080": {
-      "status_code": 200,
-      "body": "{\"status\":\"UP\"}"
-    }
+    "docgen_frontend": "healthy"
   },
   "images": {
-    "frontend": {
-      "digest": "sha256:c28f788431f236047715acbe939aef7a96298a56743d4eb20a30ad7dacbf034b",
-      "created": "2026-07-23T10:51:02.428392551Z"
-    },
     "backend": {
-      "digest": "sha256:c9aa310196e36938978c9107cd91751713a2eabdd2bdfd13bcd43ff7a5dcef2a",
+      "digest": "sha256:7a76976af1eae43ec924d908de68507ebeb3ead75e47da209fc2bb253254ca7f",
       "created": "2026-07-23T10:52:28.893661043Z"
+    },
+    "frontend": {
+      "digest": "sha256:3a09d46600ae0abbd1171515767a9153db18997c12e541c420827e67fa437cd3",
+      "created": "2026-07-23T10:51:02.428392551Z"
     }
   },
   "previous_known_good_stage5": {
-    "frontend": "sha256:fec2e9a139da5b7dc816899d4c575a533be83e5402ce95fca533b0e1ceaf3668",
-    "backend": "sha256:ac50ebecdf42191b7f975d61b307ddeed7281785a2c72ed017ba918971c2b454"
+    "backend": "sha256:ac50ebecdf42191b7f975d61b307ddeed7281785a2c72ed017ba918971c2b454",
+    "frontend": "sha256:fec2e9a139da5b7dc816899d4c575a533be83e5402ce95fca533b0e1ceaf3668"
   },
   "fe_slice_markers": {
-    "LegalHoldListView": "yes",
-    "AssetLibraryListView": "yes",
     "ApiInvocationsView": "yes",
+    "AssetLibraryListView": "yes",
+    "LegalHoldListView": "yes",
     "TableEditMoreActions": "yes"
   },
   "fe_asset_markers": [
@@ -60,15 +62,14 @@
     "assets/vendor-Xw4Mn6wR.js",
     "assets/element-icons-CgFD3HYL.js",
     "assets/element-plus-BbelUoim.js",
-    "assets/app-vendor-BKMZwS8Q.js",
-    "assets/element-plus-DmnagY-B.css",
-    "assets/index-o849ckbw.css"
+    "assets/app-vendor-BKMZwS8Q.js"
   ],
   "notes": [
-    "Stage 10 SkipBuild queued health evidence; stack was already healthy with Stage 5 N22 FE digests before recheck.",
-    "Docker COPY layers CACHED (jar/dist unchanged); SkipBuild refreshed manifest-list Ids after host package/build.",
-    "N22 FE markers identical to Stage 5 (same chunk filenames).",
-    "Queue acquired then released; idle after; no bypass; single compose project.",
+    "Stage 10 health recheck for tip e60b488f (evidence-only after Stage 5 app runtime).",
+    "No frontend/src or backend/src changes since 8757f5ec / Stage 5 image era.",
+    "docker-deploy-queue.ps1 -SkipBuild currently fails to forward -SkipBuild to docker-deploy.ps1 (string splat); used locked direct docker-deploy.ps1 -SkipBuild.",
+    "Single compose project documentgenerationengine; no second stack.",
+    "Queue idle after release; no bypass.",
     "No merge. Task #162 not marked Done."
   ]
 }

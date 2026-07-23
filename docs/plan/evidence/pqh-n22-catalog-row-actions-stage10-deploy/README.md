@@ -5,15 +5,16 @@
 | **Result** | **DEPLOY_OK** |
 | **task_ids** | `["162"]` |
 | **worktree** | `D:/working/DGE-pqh-n22-catalog-row-actions` |
-| **branch** | `feat/pqh-n22-catalog-row-actions` @ `c0cc57a0` |
-| **evidence_tip** | `c0cc57a0` (E2E/UIUX evidence commits after Stage 5; app runtime still N22 from Stage 5) |
+| **branch** | `feat/pqh-n22-catalog-row-actions` @ `e60b488f` |
+| **evidence_tip** | `e60b488f` (E2E/UIUX evidence commits after Stage 5; app runtime still N22 from Stage 5) |
 | **stage5_runtime_tip** | `c094d513` (product FE) |
-| **local_time** | 2026-07-23T19:36:33+08:00 |
-| **command** | `.\scripts\docker-deploy-queue.ps1 -SkipBuild -Reason "Stage10 PQH N22 #162 health recheck tip c0cc57a0 (images match Stage5)"` |
+| **prior_stage10_tip** | `c0cc57a0` (refreshed for current tip) |
+| **local_time** | 2026-07-23T19:58:49+08:00 |
+| **command** | Locked `.\scripts\docker-deploy.ps1 -SkipBuild` (queue `-SkipBuild` splat does not forward switch; mutex held) |
 | **compose_project** | `documentgenerationengine` (canonical; single host :8080/:4173) |
 | **queue** | acquired → released; idle after; no bypass |
 | **mvn verify** | **not run** |
-| **mode** | SkipBuild health re-check / evidence |
+| **mode** | SkipBuild health re-check / evidence refresh |
 
 ## Previous known-good (Stage 5)
 
@@ -22,14 +23,14 @@
 | `documentgenerationengine-docgen-backend:latest` | `sha256:ac50ebecdf42191b7f975d61b307ddeed7281785a2c72ed017ba918971c2b454` |
 | `documentgenerationengine-docgen-frontend:latest` | `sha256:fec2e9a139da5b7dc816899d4c575a533be83e5402ce95fca533b0e1ceaf3668` |
 
-## Post-SkipBuild digests (local Id / manifest list)
+## Post-SkipBuild digests (local Id)
 
 | Image | Id |
 | --- | --- |
-| `documentgenerationengine-docgen-backend:latest` | `sha256:c9aa310196e36938978c9107cd91751713a2eabdd2bdfd13bcd43ff7a5dcef2a` |
-| `documentgenerationengine-docgen-frontend:latest` | `sha256:c28f788431f236047715acbe939aef7a96298a56743d4eb20a30ad7dacbf034b` |
+| `documentgenerationengine-docgen-backend:latest` | `sha256:7a76976af1eae43ec924d908de68507ebeb3ead75e47da209fc2bb253254ca7f` |
+| `documentgenerationengine-docgen-frontend:latest` | `sha256:3a09d46600ae0abbd1171515767a9153db18997c12e541c420827e67fa437cd3` |
 
-Docker `COPY` layers were **CACHED** (jar/dist content unchanged from Stage 5). Manifest-list Ids refreshed on SkipBuild image re-export (same pattern as prior Stage 10 leaves).
+SkipBuild restarted existing images only (no host compile / image rebuild).
 
 ## Health
 
@@ -49,8 +50,6 @@ Docker `COPY` layers were **CACHED** (jar/dist content unchanged from Stage 5). 
 | `LegalHoldListView` | yes |
 | `ApiInvocationsView` | yes |
 
-Chunk filenames match Stage 5 evidence (`ApiInvocationsView-BbLet8Dv.js`, `AssetLibraryListView-CSEbCDKq.js`, `index-CdDevzTw.js`).
-
 ## Artifact files
 
 - `latest-summary.json`
@@ -65,10 +64,11 @@ Chunk filenames match Stage 5 evidence (`ApiInvocationsView-BbLet8Dv.js`, `Asset
 
 ## Notes
 
-1. Pre-check: queue idle; :8080/:4173 healthy; running images matched Stage 5 digests → chose `-SkipBuild`.
-2. Queued SkipBuild only — no second compose project / port offsets.
-3. KAFKA_IMAGE bitnamilegacy warning unchanged (local/dev only).
-4. **No merge.** Task **#162** not marked Done.
+1. Pre-check: tip `e60b488f` is evidence-only after Stage 5 app runtime; :8080/:4173 healthy → SkipBuild.
+2. `docker-deploy-queue.ps1 -SkipBuild` currently does **not** forward `-SkipBuild` to `docker-deploy.ps1` (string array splat); Stage 10 used **locked** direct `docker-deploy.ps1 -SkipBuild`.
+3. Single compose project; no port offsets / second stack.
+4. KAFKA_IMAGE bitnamilegacy warning unchanged (local/dev only).
+5. **No merge.** Task **#162** not marked Done.
 
 ### Next
 

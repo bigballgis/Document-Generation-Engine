@@ -1,11 +1,11 @@
 [
     {
-        "Id": "sha256:c28f788431f236047715acbe939aef7a96298a56743d4eb20a30ad7dacbf034b",
+        "Id": "sha256:3a09d46600ae0abbd1171515767a9153db18997c12e541c420827e67fa437cd3",
         "RepoTags": [
             "documentgenerationengine-docgen-frontend:latest"
         ],
         "RepoDigests": [
-            "documentgenerationengine-docgen-frontend@sha256:c28f788431f236047715acbe939aef7a96298a56743d4eb20a30ad7dacbf034b"
+            "documentgenerationengine-docgen-frontend@sha256:3a09d46600ae0abbd1171515767a9153db18997c12e541c420827e67fa437cd3"
         ],
         "Comment": "buildkit.dockerfile.v0",
         "Created": "2026-07-23T10:51:02.428392551Z",
@@ -57,18 +57,18 @@
             ]
         },
         "Metadata": {
-            "LastTagTime": "2026-07-23T11:34:09.32448628Z"
+            "LastTagTime": "2026-07-23T11:37:38.137203359Z"
         },
         "Descriptor": {
             "mediaType": "application/vnd.oci.image.index.v1+json",
-            "digest": "sha256:c28f788431f236047715acbe939aef7a96298a56743d4eb20a30ad7dacbf034b",
+            "digest": "sha256:3a09d46600ae0abbd1171515767a9153db18997c12e541c420827e67fa437cd3",
             "size": 856
         },
         "Identity": {
             "Build": [
                 {
-                    "Ref": "uurfjbthrcghj27635wovob6y",
-                    "CreatedAt": "2026-07-23T11:34:09.36864462Z"
+                    "Ref": "kumbmqximogcp2j0wenfie7fx",
+                    "CreatedAt": "2026-07-23T11:37:38.201236366Z"
                 }
             ]
         }

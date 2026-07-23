@@ -4,5 +4,3 @@ assets/vendor-Xw4Mn6wR.js
 assets/element-icons-CgFD3HYL.js
 assets/element-plus-BbelUoim.js
 assets/app-vendor-BKMZwS8Q.js
-assets/element-plus-DmnagY-B.css
-assets/index-o849ckbw.css
