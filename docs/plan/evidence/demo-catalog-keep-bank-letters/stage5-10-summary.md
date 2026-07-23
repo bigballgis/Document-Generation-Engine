@@ -36,6 +36,12 @@
 - `docgen-frontend` healthy `:4173`
 - postgres / redis / minio / kafka healthy
 
+## Re-verify (2026-07-24 build-deploy-agent, post-merge)
+
+- Queue idle; stack healthy; running backend jar **SEEDERS_ABSENT**.
+- Live API inventory still **8 KEEP / PURGE absent** — see `stage5-10-reverify-2026-07-24.md`.
+- No new deploy queued (SkipBuild not required). Cleanup/import not re-run (pwsh ENOENT mid-session).
+
 ## Next
 
-`e2e-test-engineer` — keep-set smoke (do not merge / do not flip #3b/#5a).
+Stage 6 E2E **14/14** PASS → merge `0e6d0bad` → Stage 12/13. Follow-ups remain: orphan SQL schema mismatch (BDD-004/005 not fully automated); cleanup pagination workaround.

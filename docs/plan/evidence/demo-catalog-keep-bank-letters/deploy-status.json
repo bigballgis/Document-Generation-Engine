@@ -1,14 +1,19 @@
 {
   "capturedAt": "2026-07-23T20:07:52.1518813Z",
+  "reverifiedAt": "2026-07-23T20:20:28Z",
   "slice": "demo-catalog-keep-bank-letters",
   "taskId": 164,
   "deploy_status": "DEPLOY_OK",
+  "deploy_action_this_session": "none_SkipBuild_not_required",
   "compose_project": "documentgenerationengine",
+  "queue_status_this_session": "DEPLOY_QUEUE: idle (no lock); Pending ticket files: 0",
   "healthz": {
     "status": "UP"
   },
   "frontend_4173_status": 200,
   "backend_8080": "healthy",
+  "backend_image": "documentgenerationengine-docgen-backend:latest sha256:a885fee7ba0474d4c759d73228c271ed708592e6750cb3dcca014a899c7e4d5f created=2026-07-23T19:50:27Z",
+  "seeder_check": "SEEDERS_ABSENT_FROM_JAR (DemoCatalogSeeder / DemoFullFlowCatalogSeeder not in /app/app.jar)",
   "containers": [
     "docgen-frontend|Up 4 minutes (healthy)|0.0.0.0:4173->8080/tcp, [::]:4173->8080/tcp",
     "docgen-backend|Up 6 minutes (healthy)|0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp",
@@ -19,6 +24,8 @@
   ],
   "notes": [
     "Full queued deploy from feature worktree after JWT_SECRET + COMPOSE_PROJECT_NAME + FRONTEND_PORT aligned to MAIN acceptance values.",
-    "SkipBuild recreate fixed FRONTEND_PORT 5173→4173."
+    "SkipBuild recreate fixed FRONTEND_PORT 5173→4173.",
+    "2026-07-24 re-verify: queue idle; health OK; seeders absent in running jar; catalog KEEP-8 / PURGE absent via API. No new deploy queued (SkipBuild not required).",
+    "Cleanup WhatIf/real re-run blocked mid-session by pwsh.exe ENOENT — see stage5-10-reverify-2026-07-24.md."
   ]
 }

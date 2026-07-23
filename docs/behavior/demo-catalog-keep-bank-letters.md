@@ -6,10 +6,11 @@
 | **BDD ID 前缀** | `BDD-DEMO-KEEP` |
 | **编写日期** | 2026-07-24 |
 | **Slice** | `demo-catalog-keep-bank-letters` |
-| **Branch** | `feat/demo-catalog-keep-bank-letters` |
-| **Worktree** | `D:/working/DGE-demo-catalog-keep-bank-letters` |
-| **Placement** | ISOLATED |
-| **Integration base** | `origin/main` |
+| **Delivery status** | TM **#164** → **Done** (MAIN merge `0e6d0bad`; sole-active cleared; BDD-004/005 orphan automation not fully claimed) |
+| **Branch** | `feat/demo-catalog-keep-bank-letters` (merged) |
+| **Worktree** | **REMOVED** |
+| **Placement** | ISOLATED (historical) |
+| **Integration base** | `origin/main` @ `0e6d0bad` |
 | **task_ids** | `["164"]`（alias slice id `demo-catalog-keep-bank-letters`） |
 | **Batch recommendation** | **solo** — single leaf; amortize one cleanup + registry shrink + seeder retirement evidence run |
 | **Owning docs** | **本文件（本叶行为 SoT）**；对照 [bank-letter-demo-refresh.md](./bank-letter-demo-refresh.md)（Wave A Done）；[bank-letter-demo-expand.md](./bank-letter-demo-expand.md)（Wave B Done）；[sys-norm-demo-seed-terms.md](./sys-norm-demo-seed-terms.md)（Wave 8 seed defaults）；[deploy/demo-shared/README.md](../../deploy/demo-shared/README.md)；ops note §9（本文件）+ operator runbook [demo-catalog-keep-bank-letters.md](../operations/demo-catalog-keep-bank-letters.md)；evidence stub [demo-catalog-keep-bank-letters/](../plan/evidence/demo-catalog-keep-bank-letters/README.md) |

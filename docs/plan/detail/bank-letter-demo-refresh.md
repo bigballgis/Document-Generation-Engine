@@ -3,7 +3,7 @@
 **Program / slice family:** `bank-letter-demo-refresh` / `bank-letter-demo-expand` (ad-hoc **NON-CE** ops-demo content program; **not** a formal P-phase; **not** IBL Wave B; **not** CE-O02)  
 **Formal plan phase:** **None** — single-active-phase discipline OK (does not occupy a P* slot)  
 **Task Master:** **#141** Wave A (`demo-refresh-wave-a`) → **Done** · **#142** Wave B expand (`bank-letter-demo-expand`) → **Done**  
-**Active delivery slice (this family):** **none** — Wave A/B sole-active **cleared** (2026-07-20). **Successor host sole-active (2026-07-24):** TM **#164** / `demo-catalog-keep-bank-letters` → **In Progress** — see [demo-catalog-keep-bank-letters.md](./demo-catalog-keep-bank-letters.md)  
+**Active delivery slice (this family):** **none** — Wave A/B sole-active **cleared** (2026-07-20). **Successor (2026-07-24):** TM **#164** / `demo-catalog-keep-bank-letters` → **Done** (`0e6d0bad`; sole-active **cleared**) — see [demo-catalog-keep-bank-letters.md](./demo-catalog-keep-bank-letters.md)  
 **Placement (Wave B historical):** worktree `D:/working/DGE-bank-letter-demo-expand` · `feat/bank-letter-demo-expand` → MAIN merge `288ce98f`; worktree **REMOVED**  
 **Placement (Wave A historical):** worktree `D:/working/DGE-bank-letter-demo-refresh` · `feat/bank-letter-demo-refresh` → MAIN merge `aa88170f` (feature `5ae9575a`); worktree **REMOVED**  
 **BDD Wave A:** [bank-letter-demo-refresh.md](../../behavior/bank-letter-demo-refresh.md) — **ready** (`BDD-DEMO-REFRESH-001…014`); `frontend_ui_in_scope=false`  

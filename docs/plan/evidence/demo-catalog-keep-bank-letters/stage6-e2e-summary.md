@@ -66,4 +66,4 @@ Ops/registry/disk scenarios (003–009, 011–014) remain Stage 4–5 / contract
 
 ## Next
 
-`architecture-reviewer` (Stage 8). Do **not** claim Done; do **not** merge.
+Architecture/CQ **PASS_WITH_NOTES** → merge `0e6d0bad` → Stage 12 doc-sync → Stage 13 commit-review. Residual: broader suite helpers may still reference purged IDs (not in this focused 14/14 run).

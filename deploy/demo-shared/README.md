@@ -4,7 +4,7 @@ Canonical Word style catalog / layout baseline for keep-set `deploy/demo-*` mast
 
 ## Acceptance catalog SoT (KEEP-8 — current)
 
-**Status:** **Authoritative for screenshot / acceptance demos** (Task Master **#164** / slice `demo-catalog-keep-bank-letters` → **In Progress**; keep-set registries + package purge + Java seeder retirement landed in feature worktree — acceptance cleanup via `deploy/cleanup-demo-catalog-keep-list.ps1` scheduled for Stage 5/10).
+**Status:** **Authoritative for screenshot / acceptance demos** (Task Master **#164** / slice `demo-catalog-keep-bank-letters` → **Done** `0e6d0bad`; keep-set registries + package purge + Java seeder retirement landed; acceptance cleanup evidence under [docs/plan/evidence/demo-catalog-keep-bank-letters/](../../docs/plan/evidence/demo-catalog-keep-bank-letters/README.md); sole-active **cleared**).
 
 User confirmation **2026-07-24** contracted the Live demo catalog to **8** bank-letter templates. This supersedes the Wave B **20**-ID registry as the **default acceptance catalog size**. Wave A/B remain **Done** historical quality work; non-KEEP packages are **removed from repo**.
 
@@ -14,7 +14,7 @@ User confirmation **2026-07-24** contracted the Live demo catalog to **8** bank-
 | Behavior SoT | [demo-catalog-keep-bank-letters.md](../../docs/behavior/demo-catalog-keep-bank-letters.md) (`BDD-DEMO-KEEP-001`…`014`) |
 | Ops runbook | [demo-catalog-keep-bank-letters.md](../../docs/operations/demo-catalog-keep-bank-letters.md) |
 | Plan | [demo-catalog-keep-bank-letters.md](../../docs/plan/detail/demo-catalog-keep-bank-letters.md) |
-| Evidence stub | [docs/plan/evidence/demo-catalog-keep-bank-letters/](../../docs/plan/evidence/demo-catalog-keep-bank-letters/README.md) |
+| Evidence | [docs/plan/evidence/demo-catalog-keep-bank-letters/](../../docs/plan/evidence/demo-catalog-keep-bank-letters/README.md) |
 | Authoritative load path | **Deploy package + PowerShell** `import-all-demos.ps1` → `publish-all-demos.ps1` (optional `generate-all-demos.ps1`) — **not** Java `ApplicationRunner` auto-seed |
 | Hard vetoes | Do **not** flip checklist **#3b/#5a GO**; do **not** mark **#53** / **#106** Done; do **not** touch CE-O02; do **not** claim go-live / IBL / CE Done |
 
@@ -52,14 +52,14 @@ User confirmation **2026-07-24** contracted the Live demo catalog to **8** bank-
 
 Full ops note: behavior §9 + [operations runbook §3](../../docs/operations/demo-catalog-keep-bank-letters.md#3-ops-note--historical-java-seeders-confirmed).
 
-### Confirmed vs pending
+### Confirmed vs follow-ups
 
 | Kind | Content |
 | --- | --- |
-| **Confirmed** | KEEP-8 / PURGE inventories; PowerShell import as SoT load path; seeder retirement rationale; vetoes |
-| **Pending (implementers)** | Delete purge packages from disk; shrink import/publish/generate registries; retire Java seeder classes; land `cleanup-demo-catalog-keep-list.ps1`; archive Docker/verify evidence |
+| **Confirmed / delivered (#164 Done)** | KEEP-8 / PURGE inventories; PowerShell import as SoT load path; seeder retirement; purge packages removed; registries narrowed; `cleanup-demo-catalog-keep-list.ps1`; acceptance evidence archived |
+| **Follow-ups (honest)** | Orphan CM/asset SQL schema mismatch (BDD-004/005 not fully automated); cleanup pagination (~100); residual broader E2E purged-ID fixtures |
 
-Until registry shrink lands, scripts on disk may still reference Wave B packages — treat that as **implementation lag**, not a reversion of KEEP SoT.
+Do **not** treat Wave B’s historical **20**-ID table as the current acceptance default.
 
 ---
 
@@ -77,7 +77,7 @@ Until registry shrink lands, scripts on disk may still reference Wave B packages
 
 ### Catalogue expand (Wave B — Done)
 
-**Status:** **Done** (Task Master **#142** / slice `bank-letter-demo-expand`) — MAIN merge `288ce98f`; generate **20/20**. Sole-active **cleared** (successor **#164** KEEP leaf).
+**Status:** **Done** (Task Master **#142** / slice `bank-letter-demo-expand`) — MAIN merge `288ce98f`; generate **20/20**. Sole-active **cleared** (successor **#164** KEEP leaf also **Done** `0e6d0bad`).
 
 | Item | Value |
 | --- | --- |
@@ -132,7 +132,7 @@ Bindings must reference style keys from this manifest via `styleRef` or `section
 
 ## Related
 
-- [demo-catalog-keep-bank-letters.md](../../docs/behavior/demo-catalog-keep-bank-letters.md) — **current** acceptance KEEP SoT (**#164** In Progress)
+- [demo-catalog-keep-bank-letters.md](../../docs/behavior/demo-catalog-keep-bank-letters.md) — **current** acceptance KEEP SoT (**#164** Done `0e6d0bad`)
 - [docs/operations/demo-catalog-keep-bank-letters.md](../../docs/operations/demo-catalog-keep-bank-letters.md) — ops runbook + Java seeder retirement note
 - [bank-letter-demo-refresh.md](../../docs/behavior/bank-letter-demo-refresh.md) — Wave A content refresh BDD (**Done**)
 - [bank-letter-demo-expand.md](../../docs/behavior/bank-letter-demo-expand.md) — Wave B catalogue expand BDD (**Done**)
@@ -149,17 +149,16 @@ Prefer **keep-set cleanup** + **idempotent re-import overwrite** over destructiv
 # From repo root — acceptance stack healthy on :8080 / :4173
 # Deploy only via: .\scripts\docker-deploy-queue.ps1
 
-# 1) Keep-set catalog cleanup (planned — implementers land script)
-#    Do NOT use FOL-only cleanup-catalog-except-fol.ps1 for this leaf
-#    (it would delete the other seven KEEP templates).
-# .\deploy\cleanup-demo-catalog-keep-list.ps1 -WhatIf
-# .\deploy\cleanup-demo-catalog-keep-list.ps1
+# 1) Keep-set catalog cleanup (landed; paginate DELETE if catalog ≫ ~100)
+#    FOL-only script redirects here (do not use it as FOL-only strip).
+.\deploy\cleanup-demo-catalog-keep-list.ps1 -WhatIf
+.\deploy\cleanup-demo-catalog-keep-list.ps1
 
 # 2) Optional FOL test-data cleanup (supports -WhatIf) — FOL package only
 .\deploy\demo-fol\cleanup-fol-test-data-sets.ps1 -WhatIf
 .\deploy\demo-fol\cleanup-fol-test-data-sets.ps1
 
-# 3) Import-all overwrite (KEEP packages only — after registry shrink)
+# 3) Import-all overwrite (KEEP packages only)
 .\deploy\import-all-demos.ps1
 
 # 4) Publish + generate evidence (expectedCount=8 after shrink)
@@ -173,14 +172,14 @@ Prefer **keep-set cleanup** + **idempotent re-import overwrite** over destructiv
 | `deploy/demo-fol/cleanup-catalog-except-fol.ps1` | Historical FOL-only strip | **Unsafe** for KEEP-8 (deletes other seven keep IDs) |
 | `deploy/demo-fol/cleanup-fol-test-data-sets.ps1` | Remove duplicate FOL executive test data sets | Prefer with `-WhatIf` first |
 | `deploy/demo-import-shared.ps1` DRAFT reset | Local-demo lifecycle reset so bindings/variables can refresh | Invoked by package import; not a DB DROP |
-| `deploy/import-all-demos.ps1` | Primary overwrite of demo packages | Target: **KEEP packages only** (after implementer shrink) |
+| `deploy/import-all-demos.ps1` | Primary overwrite of demo packages | **KEEP packages only** (narrowed under #164) |
 | `deploy/publish-all-demos.ps1` / `generate-all-demos.ps1` | Lifecycle + DOCX evidence | Target: **8** keep externalIds |
 
 BDD: `BDD-DEMO-KEEP-001`…`014` (current); Wave A/B scenarios remain historical evidence.
 
-## Publish orchestration (target after #164)
+## Publish orchestration (KEEP-8 — current)
 
-After KEEP packages are ready:
+After KEEP packages are present:
 
 ```powershell
 # From repo root — backend must be healthy on :8080
@@ -250,6 +249,6 @@ After publish, generate executive DOCX artifacts for KEEP templates only:
 | Manifest | (same script) | `.tmp/evidence/generated-docx-manifest.json` |
 | Audit | (same script) | `.tmp/evidence/audit-records/<externalId>.json` |
 
-Manifest source: `deploy/demo-shared/demo-runtime-generate-manifest.json` (must mirror KEEP-8 after implementer shrink).
+Manifest source: `deploy/demo-shared/demo-runtime-generate-manifest.json` (mirrors KEEP-8).
 
-Contract tests: `DemoPublishOrchestrationContractTest` / `DemoGenerateOrchestrationContractTest` — assert keep-set of **8** under `mvn verify` after #164 implementation.
+Contract tests: `DemoPublishOrchestrationContractTest` / `DemoGenerateOrchestrationContractTest` — assert keep-set of **8** under `mvn verify` (#164).

@@ -1,13 +1,13 @@
 # Ops runbook — Slim demo catalog (keep bank-letter Live set)
 
-**Status:** Ops contract + repo implementer artifacts **landed** in feature worktree — acceptance DB cleanup / Stage 5–10 evidence still pending  
+**Status:** **Done** (2026-07-24) — MAIN merge `0e6d0bad`; acceptance cleanup + evidence archived; sole-active **cleared**  
 **Last updated:** 2026-07-24  
-**Slice / Task Master:** `demo-catalog-keep-bank-letters` · **#164** → **In Progress** (sole-active; do **not** mark Done from this doc alone)  
+**Slice / Task Master:** `demo-catalog-keep-bank-letters` · **#164** → **Done**  
 **Behavior SoT (authoritative keep/purge):** [demo-catalog-keep-bank-letters.md](../behavior/demo-catalog-keep-bank-letters.md) (`BDD-DEMO-KEEP-001`…`014`; `bdd_readiness: ready`)  
 **Plan detail:** [demo-catalog-keep-bank-letters.md](../plan/detail/demo-catalog-keep-bank-letters.md)  
 **Shared helpers / acceptance SoT pointer:** [deploy/demo-shared/README.md](../../deploy/demo-shared/README.md)  
-**Evidence home (planned):** [docs/plan/evidence/demo-catalog-keep-bank-letters/](../plan/evidence/demo-catalog-keep-bank-letters/README.md)  
-**Related:** [demo-acceptance-asset-seed.md](./demo-acceptance-asset-seed.md) (Wave 8 asset seed — retain opt-in; ≠ template catalog seed) · FOL-only precedent `deploy/demo-fol/cleanup-catalog-except-fol.ps1` (unsafe for KEEP-8)
+**Evidence home:** [docs/plan/evidence/demo-catalog-keep-bank-letters/](../plan/evidence/demo-catalog-keep-bank-letters/README.md)  
+**Related:** [demo-acceptance-asset-seed.md](./demo-acceptance-asset-seed.md) (Wave 8 asset seed — retain opt-in; ≠ template catalog seed) · FOL-only precedent `deploy/demo-fol/cleanup-catalog-except-fol.ps1` (unsafe for KEEP-8; redirects to keep-8 cleanup)
 
 ---
 
@@ -25,11 +25,11 @@ Authoritative load path for the keep-set: **deploy package + PowerShell import/p
 | --- | --- |
 | **Confirmed (BDD / user 2026-07-24)** | Keep-list of 8 externalIds; purge-list of non-keep DEMO templates + 8 disk packages; fail-closed dependency checks; Java seeders for purged IDs must not reintroduce them on default boot; import/publish/generate registries must narrow to keep-set; vetoes below. |
 | **Confirmed (ops note / historical)** | Why demo historically used Java ApplicationRunner + in-JVM DOCX builders (§3). Goal state: keep-set via deploy packages + import scripts; Java seeders disabled / not required by default. |
-| **Landed in feature worktree (implementer)** | `deploy/cleanup-demo-catalog-keep-list.ps1`; purge packages deleted from disk; `import-all` / `publish-all` / `Get-DemoPublishExternalIds` / `demo-runtime-generate-manifest.json` / `DemoPublishRegistry` narrowed to keep-8; purge Java seeders removed. |
-| **Pending (Stage 5/10)** | Run cleanup against acceptance DB; import/publish evidence; archive under `docs/plan/evidence/demo-catalog-keep-bank-letters/`. |
+| **Delivered (#164 Done)** | `deploy/cleanup-demo-catalog-keep-list.ps1`; purge packages deleted from disk; registries narrowed to keep-8; purge Java seeders removed; acceptance cleanup keep-8 PUBLISHED + `purge_absent`; evidence under [demo-catalog-keep-bank-letters/](../plan/evidence/demo-catalog-keep-bank-letters/). |
+| **Follow-ups (honest — not leaf reopen)** | (1) Orphan CM/asset SQL schema mismatch — **do not** claim BDD-DEMO-KEEP-004/005 fully automated; (2) cleanup script pagination (~100) — use paginated DELETE when catalog ≫ page size; (3) broader E2E helpers may still reference purged IDs. |
 | **Out of scope (confirmed)** | Frontend empty-state UI (`frontend_ui_in_scope=false`); `CatalogLoadSeeder` / `LOAD-TPL-*`; flipping launch checklist **#3b/#5a**; marking **#53** / **#106** Done; touching **CE-O02**; claiming go-live / IBL / CE Done. |
 
-Do **not** treat this runbook as proof that acceptance DB cleanup already ran — execute `cleanup-demo-catalog-keep-list.ps1` in Stage 5/10 and archive evidence.
+Acceptance DB cleanup for this leaf **did run** (Stage 5/10); re-run the keep-list script after future noisy seeds if the catalog drifts.
 
 ---
 
@@ -52,7 +52,7 @@ Do **not** treat this runbook as proof that acceptance DB cleanup already ran �
 **Goal state for this leaf**
 
 - Keep-set of **8** templates is **deploy package + import/publish scripts** driven.
-- Java **template-family** seeders are **not required** for those eight (remain **disabled by default**; unused seeder classes deleted or quarantined by implementers — **code pending**).
+- Java **template-family** seeders are **not required** for those eight (classes removed; default `seed-enabled=false`).
 - Reboot must **not** reintroduce purged template IDs.
 - `DemoAssetLibrarySeeder` stays opt-in (`DOCGEN_SEED_DEMO_ASSET_LIBRARY`, default `false`) for managed-asset bootstrap — must **not** re-seed purged template families. Distinct from template catalog seed; see [demo-acceptance-asset-seed.md](./demo-acceptance-asset-seed.md).
 - `CatalogLoadSeeder` (`LOAD-TPL-*`) remains a separate opt-in load tool — **not** part of this keep/purge set.
@@ -98,7 +98,7 @@ Default today: `docgen.demo-catalog.seed-enabled=${DOCGEN_SEED_DEMO_CATALOG:fals
 | `DEMO-FULL-FLOW-LETTER` | *(Java seeder only — no deploy package)* |
 | `DEMO-RETAIL-LETTER` | *(legacy Java seeder only)* |
 
-### 5.2 Deploy packages to remove from repo (planned disk purge)
+### 5.2 Deploy packages removed from repo (Done)
 
 `demo-retail-account`, `demo-mortgage`, `demo-trade-lc`, `demo-collection`, `demo-wealth`, `demo-kyc-cdd`, `demo-account-closure`, `demo-insurance-endorsement`.
 
@@ -106,14 +106,14 @@ Default today: `docgen.demo-catalog.seed-enabled=${DOCGEN_SEED_DEMO_CATALOG:fals
 
 After purge templates are removed, soft-delete / remove masters, content modules, and asset-library rows **only if** they are not in the keep-set transitive dependency graph. Fail-closed if a candidate delete is still referenced by a keep template (§7).
 
-### 5.4 Java seeders — class retirement policy (confirmed intent; code pending)
+### 5.4 Java seeders — class retirement (Done for template-family)
 
 | Class | Policy |
 | --- | --- |
-| `DemoFullFlowCatalogSeeder` | **REMOVE** (seeds `DEMO-FULL-FLOW-LETTER`) |
-| `DemoFullFlowPublishSupport` | **REMOVE** with seeder |
-| `DemoCatalogSeeder` | **REMOVE** (seeds `DEMO-RETAIL-LETTER`) |
-| `DemoRetailLetterheadDocxBuilder` | **REMOVE if unused** after seeder deletion |
+| `DemoFullFlowCatalogSeeder` | **REMOVED** (seeds `DEMO-FULL-FLOW-LETTER`) |
+| `DemoFullFlowPublishSupport` | **REMOVED** with seeder |
+| `DemoCatalogSeeder` | **REMOVED** (seeds `DEMO-RETAIL-LETTER`) |
+| `DemoRetailLetterheadDocxBuilder` | **RETAINED** (CatalogLoadSeeder / E2E fixtures) |
 | `DemoAssetLibrarySeeder` | **RETAIN** (opt-in `false` default) |
 | `CatalogLoadSeeder` | **RETAIN** (opt-in `false` default; out of screenshot catalog scope) |
 
@@ -137,7 +137,7 @@ Config: leave `DOCGEN_SEED_DEMO_CATALOG` / `docgen.demo-catalog.seed-enabled` **
 | **Pattern** | Extends FOL cleanup (admin login, healthz wait, DELETE via management API, Postgres orphan soft-delete) for **all eight** externalIds |
 | **Params** | `-BackendUrl` (default `:8080`), `-PostgresContainer` / DB creds, `-WhatIf` |
 | **Admin session** | Local demo admin (e.g. `10000001`) |
-| **Status** | **Landed** in feature worktree — run against acceptance in Stage 5/10 |
+| **Status** | **Landed** + acceptance evidence archived (Stage 5/10); note pagination follow-up (~100 page size) |
 
 ---
 
@@ -151,9 +151,9 @@ Config: leave `DOCGEN_SEED_DEMO_CATALOG` / `docgen.demo-catalog.seed-enabled` **
 
 ---
 
-## 8. Import / publish / generate (keep packages only — planned registry shrink)
+## 8. Import / publish / generate (keep packages only — Done)
 
-After implementers narrow registries:
+Registries narrowed to KEEP-8:
 
 ```powershell
 # Repo root; healthy Docker acceptance stack required
@@ -178,18 +178,18 @@ After implementers narrow registries:
 1. Confirm Docker acceptance stack healthy (`:8080` healthz). Prefer queued deploy: `.\scripts\docker-deploy-queue.ps1` (single host — never a second compose project).
 2. Confirm keep packages are importable from the repo (or already Live in DB).
 3. Confirm `DOCGEN_SEED_DEMO_CATALOG` unset/`false`.
-4. After implementers land artifacts: run `cleanup-demo-catalog-keep-list.ps1` (prefer `-WhatIf` first).
+4. Run `cleanup-demo-catalog-keep-list.ps1` (prefer `-WhatIf` first; paginate DELETE if catalog ≫ ~100).
 5. Run import-all → publish-all (optional generate-all).
 6. Reboot / redeploy and confirm purged IDs (`DEMO-FULL-FLOW-LETTER`, `DEMO-RETAIL-LETTER`, other purge externalIds) are **not** recreated.
 7. Archive evidence under `docs/plan/evidence/demo-catalog-keep-bank-letters/` (catalog list, publish summary `expectedCount=8`, seeder silence notes).
 
 ---
 
-## 10. Acceptance evidence (planned location)
+## 10. Acceptance evidence (archived)
 
 | Path | Purpose |
 | --- | --- |
-| [docs/plan/evidence/demo-catalog-keep-bank-letters/](../plan/evidence/demo-catalog-keep-bank-letters/README.md) | Leaf evidence home (stub until Stage 5/10) |
+| [docs/plan/evidence/demo-catalog-keep-bank-letters/](../plan/evidence/demo-catalog-keep-bank-letters/README.md) | Leaf evidence home (Stage 5/6/10 artifacts) |
 | Management API | `GET /api/management/v1/templates` — demo catalog externalId set = keep-set |
 | Binding integrity | `POST .../bindings/validate` for each keep template |
 | Boot silence | Default config does not recreate purge IDs |
