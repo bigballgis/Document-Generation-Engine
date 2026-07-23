@@ -20,8 +20,7 @@ Archive post-cleanup acceptance evidence for the slim screenshot catalog (**8** 
 | [templates-after-cleanup.json](./templates-after-cleanup.json) | After: **8** keep only; `purge_absent=true`; all `PUBLISHED` |
 | [templates-after-paginated-delete.txt](./templates-after-paginated-delete.txt) | Paginated DELETE workaround note |
 | [stage5-10-summary.md](./stage5-10-summary.md) | Human summary + cleanup pagination + orphan SQL notes |
-| [stage5-10-reverify-2026-07-24.md](./stage5-10-reverify-2026-07-24.md) | Post-merge re-verify: queue idle; KEEP-8 API; seeders absent from running JAR |
-| [stage5-10-reverify-2026-07-24.md](./stage5-10-reverify-2026-07-24.md) | Post-merge re-verify: queue idle, seeders absent, live KEEP-8 / PURGE absent; cleanup re-run blocked by pwsh ENOENT |
+| [stage5-10-reverify-2026-07-24.md](./stage5-10-reverify-2026-07-24.md) | Post-merge re-verify: queue idle; seeders absent from running JAR; live KEEP-8 / PURGE absent; cleanup re-run blocked by pwsh ENOENT |
 | [cleanup-whatif.log](./cleanup-whatif.log) / [cleanup-real.log](./cleanup-real.log) / [cleanup-masters.log](./cleanup-masters.log) | Cleanup runs |
 | [cleanup-paginated-delete.log](./cleanup-paginated-delete.log) | Paginated DELETE (API page size ~100 workaround) |
 | [all-demos-publish-summary.json](./all-demos-publish-summary.json) | `expectedCount=8` / 8 published |
@@ -36,7 +35,12 @@ Archive post-cleanup acceptance evidence for the slim screenshot catalog (**8** 
 
 ## Keep-set confirmed
 
-`DEMO-COVENANT-WAIVER`, `DEMO-FORMAL-DEMAND`, `DEMO-COMMITMENT-LETTER`, `DEMO-FACILITY-AMENDMENT`, `DEMO-FACILITY-RENEWAL`, `DEMO-ANNUAL-REVIEW`, `DEMO-CREDIT-LIMIT-CONFIRM`, `CORP-FOL-OFFER`
+`DEMO-COVENANT-WAIVER`, `DEMO-FORMAL-DEMAND`, `DEMO-COMMITMENT-LETTER`, `DEMO-FACILITY-AMENDMENT`, `DEMO-FACILITY-RENEWAL`, `DEMO-ANNUAL-REVIEW`, `DEMO-CREDIT-LIMIT-CONFIRM`, `CORP-FOL-OFFER` + `deploy/demo-shared`
+
+**PURGE packages removed:** `demo-retail-account`, `demo-mortgage`, `demo-trade-lc`, `demo-collection`, `demo-wealth`, `demo-kyc-cdd`, `demo-account-closure`, `demo-insurance-endorsement`
+
+**Java removed:** `DemoCatalogSeeder`, `DemoFullFlowCatalogSeeder`, `DemoFullFlowPublishSupport`, `DemoCatalogSeedProperties`  
+**Java retained:** `DemoAssetLibrarySeeder`, `CatalogLoadSeeder`, `DemoCatalogSessions`, `DemoRetailLetterheadDocxBuilder`, `DemoDocxFactory`
 
 ## Gates cited
 
@@ -46,8 +50,8 @@ Archive post-cleanup acceptance evidence for the slim screenshot catalog (**8** 
 | FE lint / type-check / test / build | GREEN |
 | `docker-deploy-queue` | DEPLOY_OK |
 | Cleanup | keep-8 PUBLISHED; `purge_absent=true` |
-| Stage 6 E2E | 14/14 PASS |
-| Architecture | PASS_WITH_NOTES |
+| Stage 6 E2E | **Focused** demos **14/14** PASS — not full suite |
+| Architecture | PASS_WITH_NOTES (`merge_go`) |
 | Code quality | PASS_WITH_NOTES |
 
 ## Honest follow-ups (architecture / CQ notes — not Done blockers)

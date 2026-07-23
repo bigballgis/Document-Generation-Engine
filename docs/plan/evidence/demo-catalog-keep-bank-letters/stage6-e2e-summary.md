@@ -8,7 +8,7 @@
 | **Config** | `frontend/playwright.docker.config.ts` |
 | **Worktree** | `D:/working/DGE-demo-catalog-keep-bank-letters` |
 | **Branch** | `feat/demo-catalog-keep-bank-letters` |
-| **Result** | **PASS** (14/14) |
+| **Result** | **PASS** (focused demos **14/14** — not full `test:e2e:docker` suite) |
 
 ## Specs run
 

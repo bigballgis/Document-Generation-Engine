@@ -155,16 +155,19 @@ Verified 2026-07-24 against `*-template-config.json` under `deploy/demo-*` (work
 
 ### 5.3 Java seeders — retain / remove recommendation (observation for implementers)
 
-| Class | Seeds | Recommendation | Rationale |
+| Class | Seeds | Delivered (#164) | Rationale |
 | --- | --- | --- | --- |
-| `DemoFullFlowCatalogSeeder` | `DEMO-FULL-FLOW-LETTER` | **REMOVE** (or delete + drop registry insert) | Purge-set; not in KEEP; historically boot-seeded without deploy package |
-| `DemoFullFlowPublishSupport` | publish helper for full-flow | **REMOVE** with seeder | Only serves purged full-flow path |
-| `DemoCatalogSeeder` | `DEMO-RETAIL-LETTER` | **REMOVE** | Legacy retail draft; not in KEEP; obsolete vs package import |
-| `DemoRetailLetterheadDocxBuilder` | in-JVM letterhead for retail/full-flow seed | **REMOVE if unused** after seeder deletion; retain only if keep-set tests still need builder APIs | Historical DOCX factory for ApplicationRunner path |
-| `DemoAssetLibrarySeeder` | shared asset-library bootstrap | **RETAIN** (opt-in `false` default) | Not a template-family seeder; must not reintroduce purged templates |
-| `CatalogLoadSeeder` | `LOAD-TPL-*` pagination load | **RETAIN** (opt-in `false` default) | Out of screenshot catalog scope (LR-C5); not purge-set |
+| `DemoFullFlowCatalogSeeder` | `DEMO-FULL-FLOW-LETTER` | **REMOVED** | Purge-set; not in KEEP; historically boot-seeded without deploy package |
+| `DemoFullFlowPublishSupport` | publish helper for full-flow | **REMOVED** with seeder | Only serves purged full-flow path |
+| `DemoCatalogSeeder` | `DEMO-RETAIL-LETTER` | **REMOVED** | Legacy retail draft; not in KEEP; obsolete vs package import |
+| `DemoCatalogSeedProperties` | config for `DemoCatalogSeeder` | **REMOVED** | Paired with retired template-family seeder |
+| `DemoCatalogSessions` | session helpers | **RETAINED** | Used by retained seeders / fixtures |
+| `DemoDocxFactory` | in-JVM DOCX factory | **RETAINED** | CatalogLoadSeeder / E2E fixtures |
+| `DemoRetailLetterheadDocxBuilder` | in-JVM letterhead builder | **RETAINED** | CatalogLoadSeeder / E2E fixtures |
+| `DemoAssetLibrarySeeder` | shared asset-library bootstrap | **RETAINED** (opt-in `false` default) | Not a template-family seeder; must not reintroduce purged templates |
+| `CatalogLoadSeeder` | `LOAD-TPL-*` pagination load | **RETAINED** (opt-in `false` default) | Out of screenshot catalog scope (LR-C5); not purge-set |
 
-Default config today: `docgen.demo-catalog.seed-enabled=${DOCGEN_SEED_DEMO_CATALOG:false}`. Goal: remove unused seeder classes so even `seed-enabled=true` cannot recreate purge IDs; keep-set loaded only via deploy import.
+Default config: `docgen.demo-catalog.seed-enabled=${DOCGEN_SEED_DEMO_CATALOG:false}`. Keep-set loaded only via deploy import; template-family seeders removed so reboot cannot recreate purge IDs.
 
 ### 5.4 Inventory sources examined
 
@@ -496,10 +499,13 @@ purge_inventory:
       - DemoFullFlowCatalogSeeder
       - DemoFullFlowPublishSupport
       - DemoCatalogSeeder
-      - DemoRetailLetterheadDocxBuilder (if unused after seeder removal)
+      - DemoCatalogSeedProperties
     retain:
       - DemoAssetLibrarySeeder (opt-in false default)
       - CatalogLoadSeeder (opt-in false default; LOAD-TPL-* out of scope)
+      - DemoCatalogSessions
+      - DemoRetailLetterheadDocxBuilder
+      - DemoDocxFactory
 acceptance_scenarios:
   - BDD-DEMO-KEEP-001
   - BDD-DEMO-KEEP-002

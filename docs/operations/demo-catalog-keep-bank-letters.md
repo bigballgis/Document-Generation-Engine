@@ -113,6 +113,9 @@ After purge templates are removed, soft-delete / remove masters, content modules
 | `DemoFullFlowCatalogSeeder` | **REMOVED** (seeds `DEMO-FULL-FLOW-LETTER`) |
 | `DemoFullFlowPublishSupport` | **REMOVED** with seeder |
 | `DemoCatalogSeeder` | **REMOVED** (seeds `DEMO-RETAIL-LETTER`) |
+| `DemoCatalogSeedProperties` | **REMOVED** with `DemoCatalogSeeder` |
+| `DemoCatalogSessions` | **RETAINED** (session helpers for retained seeders / fixtures) |
+| `DemoDocxFactory` | **RETAINED** (CatalogLoadSeeder / E2E fixtures) |
 | `DemoRetailLetterheadDocxBuilder` | **RETAINED** (CatalogLoadSeeder / E2E fixtures) |
 | `DemoAssetLibrarySeeder` | **RETAIN** (opt-in `false` default) |
 | `CatalogLoadSeeder` | **RETAIN** (opt-in `false` default; out of screenshot catalog scope) |

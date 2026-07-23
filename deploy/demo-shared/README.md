@@ -40,7 +40,7 @@ User confirmation **2026-07-24** contracted the Live demo catalog to **8** bank-
 | **Deploy packages removed** | `demo-retail-account`, `demo-mortgage`, `demo-trade-lc`, `demo-collection`, `demo-wealth`, `demo-kyc-cdd`, `demo-account-closure`, `demo-insurance-endorsement` |
 | **Java-only template IDs retired** | `DEMO-FULL-FLOW-LETTER`, `DEMO-RETAIL-LETTER` (seeders deleted) |
 | **Java classes removed** | `DemoFullFlowCatalogSeeder`, `DemoFullFlowPublishSupport`, `DemoCatalogSeeder`, `DemoCatalogSeedProperties` |
-| **Java retained** | `DemoRetailLetterheadDocxBuilder` + `DemoDocxFactory` (CatalogLoadSeeder / E2E fixtures); `DemoAssetLibrarySeeder`, `CatalogLoadSeeder` (`LOAD-TPL-*`) — default `false` |
+| **Java retained** | `DemoAssetLibrarySeeder`, `CatalogLoadSeeder` (`LOAD-TPL-*`, default `false`), `DemoCatalogSessions`, `DemoRetailLetterheadDocxBuilder`, `DemoDocxFactory` |
 | **Cleanup script** | `deploy/cleanup-demo-catalog-keep-list.ps1` (FOL-only script redirects here) |
 
 ### Why Java template seeders existed / why retired
