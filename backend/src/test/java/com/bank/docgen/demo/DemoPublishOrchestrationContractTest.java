@@ -12,39 +12,27 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 /**
- * BDD-DEMO-TYP-011 — publish orchestration covers all demo templates with AD group alignment (P23-T12).
+ * BDD-DEMO-KEEP-008 / 014 — publish orchestration covers keep-set bank-letter templates only.
  */
 class DemoPublishOrchestrationContractTest {
 
     @Test
-    void bddDemoTyp011_publishRegistryCoversAllPackageTemplates() throws Exception {
+    void bddDemoKeep014_publishRegistryCoversKeepSetOnly() throws Exception {
         assertThat(DemoPublishRegistry.allPublishExternalIds())
-                .hasSize(20)
+                .hasSize(8)
                 .containsExactly(
                         "CORP-FOL-OFFER",
-                        DemoFullFlowCatalogSeeder.DEMO_FULL_FLOW_EXTERNAL_ID,
-                        "DEMO-RETAIL-ACCOUNT-OPEN",
-                        "DEMO-RETAIL-ACCOUNT-BALANCE",
-                        "DEMO-MORTGAGE-APPROVAL",
                         "DEMO-CREDIT-LIMIT-CONFIRM",
-                        "DEMO-TRADE-LC-NOTICE",
-                        "DEMO-TRADE-GUARANTEE-NOTICE",
-                        "DEMO-RATE-CHANGE-NOTICE",
-                        "DEMO-OVERDUE-COLLECTION",
                         "DEMO-ANNUAL-REVIEW",
                         "DEMO-FACILITY-RENEWAL",
-                        "DEMO-WEALTH-STATEMENT",
                         "DEMO-FACILITY-AMENDMENT",
-                        "DEMO-KYC-CDD-NOTICE",
-                        "DEMO-ACCOUNT-CLOSURE",
                         "DEMO-COMMITMENT-LETTER",
                         "DEMO-FORMAL-DEMAND",
-                        "DEMO-COVENANT-WAIVER",
-                        "DEMO-INSURANCE-ENDORSEMENT"
+                        "DEMO-COVENANT-WAIVER"
                 );
         assertThat(DemoPublishRegistry.externalIdsFromPackages())
-                .hasSize(19)
-                .doesNotContain(DemoFullFlowCatalogSeeder.DEMO_FULL_FLOW_EXTERNAL_ID);
+                .hasSize(8)
+                .doesNotContain("DEMO-FULL-FLOW-LETTER", "DEMO-RETAIL-LETTER");
     }
 
     @Test
@@ -54,15 +42,24 @@ class DemoPublishOrchestrationContractTest {
         assertThat(content).contains("Get-DemoPublishExternalIds");
         assertThat(content).contains("Get-DemoAllowedApiAdGroups");
         assertThat(content).contains("Ensure-DemoRuntimeCredential");
+        assertThat(content).doesNotContain("DEMO-FULL-FLOW-LETTER");
     }
 
     @Test
-    void bddDemoTyp011_importChainListsAllDemoPackages() throws Exception {
+    void bddDemoKeep008_importChainListsKeepPackagesOnly() throws Exception {
         Path script = DemoPackageContractSupport.deployRoot().resolve("import-all-demos.ps1");
         String content = Files.readString(script);
         for (String packageCode : DemoPackageContractSupport.packageCodes()) {
             assertThat(content).contains(packageCode);
         }
+        assertThat(content).doesNotContain("demo-retail-account");
+        assertThat(content).doesNotContain("demo-mortgage");
+        assertThat(content).doesNotContain("demo-trade-lc");
+        assertThat(content).doesNotContain("demo-collection");
+        assertThat(content).doesNotContain("demo-wealth");
+        assertThat(content).doesNotContain("demo-kyc-cdd");
+        assertThat(content).doesNotContain("demo-account-closure");
+        assertThat(content).doesNotContain("demo-insurance-endorsement");
     }
 
     @ParameterizedTest
@@ -85,6 +82,28 @@ class DemoPublishOrchestrationContractTest {
             assertThat(DemoPublishRegistry.allowedApiAdGroups(groupCode))
                     .containsAnyOf("RETAIL_API", "CORP_API")
                     .hasSize(1);
+        }
+    }
+
+    @Test
+    void bddDemoKeep007_purgeSeedersAbsentFromClasspath() {
+        assertThat(classPresent("com.bank.docgen.demo.DemoFullFlowCatalogSeeder")).isFalse();
+        assertThat(classPresent("com.bank.docgen.demo.DemoFullFlowPublishSupport")).isFalse();
+        assertThat(classPresent("com.bank.docgen.demo.DemoCatalogSeeder")).isFalse();
+        assertThat(classPresent("com.bank.docgen.demo.DemoCatalogSeedProperties")).isFalse();
+        assertThat(classPresent("com.bank.docgen.demo.CatalogLoadSeeder")).isTrue();
+        assertThat(classPresent("com.bank.docgen.demo.DemoAssetLibrarySeeder")).isTrue();
+        // Retained: CatalogLoadSeeder + DemoAssetLibrarySeeder still use letterhead/session helpers.
+        assertThat(classPresent("com.bank.docgen.demo.DemoRetailLetterheadDocxBuilder")).isTrue();
+        assertThat(classPresent("com.bank.docgen.demo.DemoCatalogSessions")).isTrue();
+    }
+
+    private static boolean classPresent(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException ex) {
+            return false;
         }
     }
 }

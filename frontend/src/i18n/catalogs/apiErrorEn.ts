@@ -246,6 +246,8 @@ export const apiErrorEn = {
     asyncTaskCancellationNotAllowed: "The async task cannot be cancelled in its current state.",
     idempotencyKeyRequired: "The idempotency key is required.",
     rateLimitExceeded: "Too many requests. Please retry later.",
+    rateLimitBackendUnavailable:
+      "Rate-limit service is temporarily unavailable. Please retry later.",
     invocationNotFound: "The invocation record was not found.",
     invocationRecordExpired: "The invocation record has expired.",
     invocationViewInvalid: "The invocation view parameter is invalid.",

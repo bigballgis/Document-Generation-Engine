@@ -227,6 +227,7 @@ export const apiErrorZhCn = {
     asyncTaskCancellationNotAllowed: "异步任务当前状态不允许取消。",
     idempotencyKeyRequired: "需要幂等键。",
     rateLimitExceeded: "请求过多，请稍后重试。",
+    rateLimitBackendUnavailable: "限流服务暂时不可用，请稍后重试。",
     invocationNotFound: "未找到调用记录。",
     invocationRecordExpired: "调用记录已过期。",
     invocationViewInvalid: "调用记录视图参数无效。",

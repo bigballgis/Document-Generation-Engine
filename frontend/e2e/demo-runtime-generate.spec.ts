@@ -32,9 +32,9 @@ test.describe('Demo bank-grade runtime generate (BDD-DEMO-TYP-011/012)', () => {
     })
   })
 
-  test('publish registry has 20 runtime cases', () => {
-    expect(DEMO_PUBLISH_EXTERNAL_IDS).toHaveLength(20)
-    expect(DEMO_RUNTIME_CASES).toHaveLength(20)
+  test('publish registry has keep-set of 8 runtime cases', () => {
+    expect(DEMO_PUBLISH_EXTERNAL_IDS).toHaveLength(8)
+    expect(DEMO_RUNTIME_CASES).toHaveLength(8)
     expect(DEMO_RUNTIME_CASES.map((demoCase) => demoCase.externalId)).toEqual([...DEMO_PUBLISH_EXTERNAL_IDS])
   })
 

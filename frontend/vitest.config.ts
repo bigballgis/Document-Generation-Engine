@@ -22,11 +22,15 @@ export default defineConfig({
     include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
     // Element Plus + jsdom mounts regularly exceed 20s under coverage on this host.
     testTimeout: 40_000,
+    // Windows: forks + capped workers reduce coverage/.tmp shard ENOENT races.
+    pool: 'forks',
+    maxWorkers: 2,
     coverage: {
       provider: 'v8',
       reporter: ['text-summary', 'json-summary'],
       // Avoid rimraf of coverage/.tmp while workers still flush shards (Windows ENOENT).
       clean: false,
+      processingConcurrency: 1,
       include: ['src/**/*.{ts,vue}'],
       exclude: [
         'src/**/*.test.ts',

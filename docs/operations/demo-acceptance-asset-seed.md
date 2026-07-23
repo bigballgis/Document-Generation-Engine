@@ -95,3 +95,13 @@ Not Wave 8 substitutes — see plan §4a:
 (Reminder timing → **Done** #153; Asset library group isolation → TM **#154** **In Progress** / ALGI BDD **ready**.)
 
 **N18** Legal hold actor EntityLink remains **deferred** (not claimed Done by Wave 8).
+
+---
+
+## 6. Distinct from template-catalog Java seeders (#164)
+
+**Confirmed:** This Wave 8 contract covers **managed Asset Library** seed (`DemoAssetLibrarySeeder` / `DOCGEN_SEED_DEMO_ASSET_LIBRARY`) only.
+
+It does **not** authorize or require template-family ApplicationRunners (`DemoCatalogSeeder`, `DemoFullFlowCatalogSeeder`) for acceptance demos. Those template seeders historically dual-sourced the demo catalog and are **retired** under KEEP-8 — see [demo-catalog-keep-bank-letters.md](./demo-catalog-keep-bank-letters.md) and [deploy/demo-shared/README.md](../../deploy/demo-shared/README.md) (acceptance SoT = KEEP-8 via PowerShell import).
+
+**Retain** `DemoAssetLibrarySeeder` as opt-in (`false` default); it must **not** re-seed purged template families.

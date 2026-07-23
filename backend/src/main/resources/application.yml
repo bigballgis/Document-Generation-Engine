@@ -107,6 +107,8 @@ docgen:
       secret-key: ${MINIO_ROOT_PASSWORD:docgen_local_pwd}
   master:
     max-docx-upload-bytes: ${DOCGEN_MASTER_MAX_DOCX_UPLOAD_BYTES:52428800}
+  # TM #164: DemoCatalogSeeder / DemoFullFlowCatalogSeeder retired. Keep-set loads via
+  # deploy/import-all-demos.ps1. Flag retained as no-op for env compatibility (default false).
   demo-catalog:
     seed-enabled: ${DOCGEN_SEED_DEMO_CATALOG:false}
   # SYS-NORM Wave 8 / W8-C2: optional managed Asset Library seed for demo/验收 only.

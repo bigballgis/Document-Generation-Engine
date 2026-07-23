@@ -1,0 +1,24 @@
+{
+  "capturedAt": "2026-07-23T20:07:52.1518813Z",
+  "slice": "demo-catalog-keep-bank-letters",
+  "taskId": 164,
+  "deploy_status": "DEPLOY_OK",
+  "compose_project": "documentgenerationengine",
+  "healthz": {
+    "status": "UP"
+  },
+  "frontend_4173_status": 200,
+  "backend_8080": "healthy",
+  "containers": [
+    "docgen-frontend|Up 4 minutes (healthy)|0.0.0.0:4173->8080/tcp, [::]:4173->8080/tcp",
+    "docgen-backend|Up 6 minutes (healthy)|0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp",
+    "docgen-kafka|Up 2 days (healthy)|0.0.0.0:9092->9092/tcp, [::]:9092->9092/tcp",
+    "docgen-postgres|Up 2 days (healthy)|0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp",
+    "docgen-redis|Up 2 days (healthy)|0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp",
+    "docgen-minio|Up 2 days (healthy)|0.0.0.0:9000-9001->9000-9001/tcp, [::]:9000-9001->9000-9001/tcp"
+  ],
+  "notes": [
+    "Full queued deploy from feature worktree after JWT_SECRET + COMPOSE_PROJECT_NAME + FRONTEND_PORT aligned to MAIN acceptance values.",
+    "SkipBuild recreate fixed FRONTEND_PORT 5173→4173."
+  ]
+}
