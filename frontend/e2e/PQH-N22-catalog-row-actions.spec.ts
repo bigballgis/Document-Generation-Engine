@@ -2,15 +2,15 @@
  * PQH N22 / TM #162 — Catalog row Edit/More via TableEditMoreActions.
  *
  * BDD SoT: docs/behavior/pqh-n22-catalog-row-actions.md
- *   BDD-PQH-N22-001…004 — Asset Library More-only + Disable confirm
- *   BDD-PQH-N22-006…007 — Legal Holds More-only + Release confirm
+ *   BDD-PQH-N22-001…005 — Asset Library More-only + Disable confirm + fail-closed
+ *   BDD-PQH-N22-006…008 — Legal Holds More-only + Release confirm + fail-closed
  *   BDD-PQH-N22-009…010 — API Invocations Open summary primary + settings under More
  *   BDD-PQH-N22-011 — Users/Groups Edit/More regression lock
  *   BDD-PQH-N22-012 — shared data-testid="table-edit-more-actions"
+ *   BDD-PQH-N22-013 — Templates / Masters / Content modules invent no Actions column
  *
- * Unit/component cover 001–012 mount contracts; this file locks user journeys.
- * BDD-005/008 (fail-closed entitlements) + 013/014 (deferred / no invent) are
- * unit + docs gates — not re-asserted as full journeys here.
+ * Unit/component cover mount contracts; this file locks user journeys.
+ * BDD-PQH-N22-014 (hub nested / SYS-NORM Waves stay deferred/Done) is a docs gate.
  *
  * Acceptance stack (Stage 5/6): FRONTEND_PORT=4173 + backend :8080
  *
@@ -334,5 +334,31 @@ test.describe('PQH N22 catalog row Edit/More (BDD-PQH-N22)', () => {
     await page.keyboard.press('Escape')
 
     await captureEvidence(page, 'BDD-PQH-N22-011-users-groups-edit-more.png')
+  })
+
+  test('BDD-PQH-N22-013: EntityLink catalogs invent no Actions column', async ({ page }) => {
+    await loginAs(page, E2E_ADMIN)
+    await dismissOnboardingTourIfPresent(page)
+
+    // Product copy may say Letterhead templates / Standard clauses; routes stay EntityLink catalogs.
+    const catalogs: Array<{ path: string; heading: RegExp }> = [
+      { path: '/templates', heading: /^templates$/i },
+      { path: '/masters', heading: /^(masters|letterhead templates)$/i },
+      { path: '/content-modules', heading: /^(content modules|standard clauses)$/i },
+    ]
+
+    for (const catalog of catalogs) {
+      await page.goto(catalog.path)
+      const main = page.locator('main')
+      await expect(main.getByRole('heading', { level: 1, name: catalog.heading })).toBeVisible({
+        timeout: 20_000,
+      })
+      await expect(main.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
+      // N22 must not invent Edit/More Actions on EntityLink-driven list catalogs.
+      await expect(main.getByTestId('table-edit-more-actions')).toHaveCount(0)
+      await expect(main.getByRole('columnheader', { name: /^actions$/i })).toHaveCount(0)
+    }
+
+    await captureEvidence(page, 'BDD-PQH-N22-013-entitylink-no-actions.png')
   })
 })
