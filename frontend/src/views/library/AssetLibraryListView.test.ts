@@ -1,8 +1,9 @@
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import TableEditMoreActions from '@/components/common/TableEditMoreActions.vue'
 import AssetLibraryListView from '@/views/library/AssetLibraryListView.vue'
 import en from '@/i18n/locales/en'
 import * as libraryAssetsApi from '@/api/libraryAssets'
@@ -118,6 +119,7 @@ function patchSession(
 
 describe('AssetLibraryListView', () => {
   let pinia: ReturnType<typeof createPinia>
+  let activeWrapper: VueWrapper | null = null
 
   beforeEach(() => {
     pinia = createPinia()
@@ -128,16 +130,27 @@ describe('AssetLibraryListView', () => {
     vi.mocked(libraryAssetsApi.disableLibraryAsset).mockReset()
   })
 
+  afterEach(() => {
+    activeWrapper?.unmount()
+    activeWrapper = null
+    document.body.querySelectorAll('.el-popper, .el-overlay').forEach((node) => node.remove())
+  })
+
   function mountView() {
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
-    return mount(AssetLibraryListView, {
+    activeWrapper = mount(AssetLibraryListView, {
       global: {
         plugins: [pinia, i18n, ElementPlus],
         stubs: {
           ScopedGroupSelect: scopedGroupStub,
+          RouterLink: {
+            props: ['to'],
+            template: '<a class="router-link-stub"><slot /></a>',
+          },
         },
       },
     })
+    return activeWrapper
   }
 
   it('renders catalog rows and upload action for authors', async () => {
@@ -238,6 +251,24 @@ describe('AssetLibraryListView', () => {
     )
   })
 
+  async function emitDisableCommand(wrapper: VueWrapper) {
+    const actions = wrapper.findComponent(TableEditMoreActions)
+    expect(actions.exists()).toBe(true)
+    const dropdown = actions.findComponent({ name: 'ElDropdown' })
+    expect(dropdown.exists()).toBe(true)
+    await dropdown.vm.$emit('command', 'disable')
+    await flushPromises()
+  }
+
+  async function openMoreMenu(wrapper: VueWrapper) {
+    const actions = wrapper.find('[data-testid="table-edit-more-actions"]')
+    expect(actions.exists()).toBe(true)
+    const moreButton = actions.findAll('button').find((button) => button.text().includes('More'))
+    expect(moreButton).toBeDefined()
+    await moreButton!.trigger('click')
+    await flushPromises()
+  }
+
   it('disables with groupCode for admins on ACTIVE rows', async () => {
     patchSession(['GLOBAL_ADMIN'], {
       ...authorCapabilities,
@@ -260,14 +291,10 @@ describe('AssetLibraryListView', () => {
     await flushPromises()
     await flushPromises()
 
-    const disable = wrapper.find('[data-testid="asset-library-disable"]')
-    expect(disable.exists()).toBe(true)
-    await disable.trigger('click')
-    await flushPromises()
+    await emitDisableCommand(wrapper)
 
     expect(libraryAssetsApi.disableLibraryAsset).toHaveBeenCalledWith('IMG-ADMIN', 'RETAIL')
   })
-
   it('hides upload for testers and shows ACTIVE assets only', async () => {
     patchSession(['TEMPLATE_TESTER'], {
       ...authorCapabilities,
@@ -362,6 +389,79 @@ describe('AssetLibraryListView', () => {
     await flushPromises()
     await flushPromises()
 
-    expect(wrapper.find('[data-testid="asset-library-disable"]').exists()).toBe(true)
+    await openMoreMenu(wrapper)
+    expect(document.body.querySelector('[data-testid="asset-library-disable"]')).toBeTruthy()
+  })
+
+  describe('PQH N22 catalog row actions (BDD-PQH-N22-002…005)', () => {
+    function patchAdmin() {
+      patchSession(['GLOBAL_ADMIN'], {
+        ...authorCapabilities,
+        manageMasters: true,
+        decideApprovals: true,
+        decideLegalApprovals: false,
+        publishTemplates: true,
+        manageContentModuleLifecycle: true,
+        manageApiPolicy: true,
+        readAudit: true,
+      })
+    }
+
+    it('BDD-PQH-N22-002/012 — Actions uses TableEditMoreActions with shared testid', async () => {
+      patchAdmin()
+      vi.mocked(libraryAssetsApi.listLibraryAssets).mockResolvedValue(pageView([sampleAsset()]))
+
+      const wrapper = mountView()
+      await flushPromises()
+      await flushPromises()
+
+      expect(wrapper.find('[data-testid="table-edit-more-actions"]').exists()).toBe(true)
+      expect(wrapper.findComponent(TableEditMoreActions).exists()).toBe(true)
+    })
+
+    it('BDD-PQH-N22-003 — hides Edit; More remains', async () => {
+      patchAdmin()
+      vi.mocked(libraryAssetsApi.listLibraryAssets).mockResolvedValue(pageView([sampleAsset()]))
+
+      const wrapper = mountView()
+      await flushPromises()
+      await flushPromises()
+
+      const actions = wrapper.find('[data-testid="table-edit-more-actions"]')
+      expect(actions.find('.table-edit-more-actions__edit').exists()).toBe(false)
+      expect(actions.text()).toContain('More')
+      expect(actions.text()).not.toContain('Edit')
+    })
+
+    it('BDD-PQH-N22-004 — Disable under More runs confirmDisable', async () => {
+      patchAdmin()
+      vi.mocked(libraryAssetsApi.listLibraryAssets).mockResolvedValue(
+        pageView([sampleAsset({ assetKey: 'IMG-N22' })]),
+      )
+      vi.mocked(libraryAssetsApi.disableLibraryAsset).mockResolvedValue(
+        sampleAsset({ assetKey: 'IMG-N22', status: 'DISABLED' }),
+      )
+
+      const wrapper = mountView()
+      await flushPromises()
+      await flushPromises()
+
+      await openMoreMenu(wrapper)
+      expect(document.body.querySelector('[data-testid="asset-library-disable"]')).toBeTruthy()
+      await emitDisableCommand(wrapper)
+      expect(libraryAssetsApi.disableLibraryAsset).toHaveBeenCalledWith('IMG-N22', 'RETAIL')
+    })
+
+    it('BDD-PQH-N22-005 — Actions column hidden without disable entitlement', async () => {
+      patchSession(['DOCUMENT_AUTHOR'], authorCapabilities)
+      vi.mocked(libraryAssetsApi.listLibraryAssets).mockResolvedValue(pageView([sampleAsset()]))
+
+      const wrapper = mountView()
+      await flushPromises()
+      await flushPromises()
+
+      expect(wrapper.find('[data-testid="table-edit-more-actions"]').exists()).toBe(false)
+      expect(wrapper.find('[data-testid="asset-library-disable"]').exists()).toBe(false)
+    })
   })
 })

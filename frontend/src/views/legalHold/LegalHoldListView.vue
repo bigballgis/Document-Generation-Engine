@@ -4,6 +4,7 @@ import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import TableEditMoreActions from '@/components/common/TableEditMoreActions.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import LegalHoldCreateDialog from '@/components/legalHold/LegalHoldCreateDialog.vue'
@@ -154,15 +155,23 @@ const {
             fixed="right"
           >
             <template #default="{ row }">
-              <el-button
+              <TableEditMoreActions
                 v-if="row.status === 'ACTIVE'"
-                link
-                type="danger"
-                data-testid="legal-hold-release"
-                @click.stop="confirmRelease(row)"
+                :show-edit="false"
+                @command="(command) => command === 'release' && confirmRelease(row)"
               >
-                {{ t('legalHold.release.action') }}
-              </el-button>
+                <template #more>
+                  <el-dropdown-menu>
+                    <el-dropdown-item
+                      command="release"
+                      class="legal-hold-release-action"
+                      data-testid="legal-hold-release"
+                    >
+                      {{ t('legalHold.release.action') }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </TableEditMoreActions>
             </template>
           </el-table-column>
         </AppDataTable>

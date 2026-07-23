@@ -208,7 +208,7 @@ starting Wave 0 `sys-norm-charter`.
 | N16–N17 | Terminology | EN Master mix; EN/ZH L1 split |
 | N18–N20 | EntityLink | **N18 Legal hold actor** — Wave 1/8 deferred; residual `sys-norm-n18-role-l1` → **Done** (`a4f59c4d` / `b54281b1`; **behavior ready**/shipped [sys-norm-n18-role-l1.md](./sys-norm-n18-role-l1.md) **BDD-N18-L1-001…012**); N19–N20 where-used groupCode / MasterImpact — residual / capacity defer OK |
 | N21 | Journey | Role journey timeline silent empty |
-| N22 | Actions | Catalog row action pattern inconsistency |
+| N22 | Actions | Catalog row action pattern inconsistency — Wave 1 partial (Users/Groups `TableEditMoreActions`); catalog-wide residual owned under PQH Leaf 3 TM **#162** — behavior SoT [pqh-n22-catalog-row-actions.md](./pqh-n22-catalog-row-actions.md) **ready** **BDD-PQH-N22-001…014** (do **not** reopen Waves 0–8) |
 | N23 | Docs/seed | `demo-images` bypass vs managed asset story |
 
 Wave assignment of N* items is a **plan** concern (doc-keeper / plan-orchestrator); this

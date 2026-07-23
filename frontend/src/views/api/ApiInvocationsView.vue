@@ -9,6 +9,7 @@ import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import TableEditMoreActions from '@/components/common/TableEditMoreActions.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import InvocationSummaryDrawer from '@/components/templates/InvocationSummaryDrawer.vue'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
@@ -239,16 +240,29 @@ watch(
           </el-table-column>
           <el-table-column
             :label="t('apiPolicy.invocationsPage.columns.actions')"
-            width="200"
+            width="160"
             fixed="right"
           >
             <template #default="{ row }">
-              <el-button type="primary" link @click.stop="openDetail(row)">
-                {{ t('apiPolicy.invocationsPage.openDetail') }}
-              </el-button>
-              <el-button link @click.stop="openPackageSettings(row.templateId)">
-                {{ t('apiPolicy.invocationsPage.openSettings') }}
-              </el-button>
+              <TableEditMoreActions
+                :edit-label="t('apiPolicy.invocationsPage.openDetail')"
+                @edit="openDetail(row)"
+                @command="
+                  (command) =>
+                    command === 'openSettings' && openPackageSettings(row.templateId)
+                "
+              >
+                <template #more>
+                  <el-dropdown-menu>
+                    <el-dropdown-item
+                      command="openSettings"
+                      data-testid="api-invocations-open-settings"
+                    >
+                      {{ t('apiPolicy.invocationsPage.openSettings') }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </TableEditMoreActions>
             </template>
           </el-table-column>
         </AppDataTable>

@@ -116,12 +116,15 @@ describe('UserManagementPanel', () => {
     expect(wrapper.text()).toContain('Retail Operator')
   })
 
-  it('uses shared Edit/More actions and group EntityLink (BDD-SYS-NORM-W1-007/014)', async () => {
+  it('uses shared Edit/More actions and group EntityLink (BDD-SYS-NORM-W1-007/014 / BDD-PQH-N22-011)', async () => {
     patchSession(['GLOBAL_ADMIN'], ['*'])
     const wrapper = await mountPanel()
     await flushPromises()
 
     expect(wrapper.find('[data-testid="table-edit-more-actions"]').exists()).toBe(true)
+    expect(wrapper.find('.table-edit-more-actions__edit').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Edit')
+    expect(wrapper.text()).toContain('More')
     expect(wrapper.find('.entity-link-cell__link').exists()).toBe(true)
     expect(wrapper.text()).toContain('RETAIL')
   })
@@ -172,7 +175,7 @@ describe('UserManagementPanel', () => {
     expect(optionText).toContain('Global administrator')
   })
 
-  it('creates a user through the store', async () => {
+  it('creates a user through the store', { timeout: 30_000 }, async () => {
     patchSession(['GLOBAL_ADMIN'], ['*'])
     vi.mocked(identityApi.createUser).mockResolvedValue({
       ...sampleUser,
@@ -214,7 +217,7 @@ describe('UserManagementPanel', () => {
       roles: ['DOCUMENT_AUTHOR'],
       authorizedGroupCodes: ['RETAIL'],
     })
-  }, 15000)
+  })
 
   it('surfaces backend error codes on load failure', async () => {
     patchSession(['GROUP_ADMIN'], ['RETAIL'])

@@ -117,12 +117,13 @@ describe('GroupManagementPanel', () => {
     expect(wrapper.text()).not.toContain('Retail banking')
   })
 
-  it('uses shared Edit/More actions primitive (BDD-SYS-NORM-W1-007)', async () => {
+  it('uses shared Edit/More actions primitive (BDD-SYS-NORM-W1-007 / BDD-PQH-N22-011)', async () => {
     patchSession(['GLOBAL_ADMIN'])
     const wrapper = await mountPanel()
     await flushPromises()
 
     expect(wrapper.find('[data-testid="table-edit-more-actions"]').exists()).toBe(true)
+    expect(wrapper.find('.table-edit-more-actions__edit').exists()).toBe(true)
     expect(wrapper.text()).toContain('Edit')
     expect(wrapper.text()).toContain('More')
   })

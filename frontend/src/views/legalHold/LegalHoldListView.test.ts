@@ -1,9 +1,10 @@
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import TableEditMoreActions from '@/components/common/TableEditMoreActions.vue'
 import LegalHoldListView from '@/views/legalHold/LegalHoldListView.vue'
 import en from '@/i18n/locales/en'
 import * as legalHoldsApi from '@/api/legalHolds'
@@ -89,6 +90,7 @@ function sampleHold(overrides: Partial<LegalHoldView> = {}): LegalHoldView {
 
 describe('LegalHoldListView', () => {
   let pinia: ReturnType<typeof createPinia>
+  let activeWrapper: VueWrapper | null = null
 
   function patchSession(roles: string[], capabilities: ManagementCapabilities, routes?: string[]) {
     const sessionStore = useSessionStore()
@@ -107,7 +109,8 @@ describe('LegalHoldListView', () => {
           ROUTE_KEYS.legalHoldAdministration,
           ROUTE_KEYS.templateManagement,
         ],
-        capabilities,
+        // Clone so Pinia reactive merge cannot mutate the shared fixture object.
+        capabilities: { ...capabilities },
         expiresAt: '2099-01-01T00:00:00Z',
       },
     })
@@ -130,7 +133,7 @@ describe('LegalHoldListView', () => {
       await router.push('/')
       await router.isReady()
     }
-    const wrapper = mount(LegalHoldListView, {
+    activeWrapper = mount(LegalHoldListView, {
       global: {
         plugins: router ? [pinia, i18n, ElementPlus, router] : [pinia, i18n, ElementPlus],
         stubs: options?.withRouter
@@ -147,7 +150,7 @@ describe('LegalHoldListView', () => {
     })
     await flushPromises()
     await flushPromises()
-    return { wrapper, router }
+    return { wrapper: activeWrapper, router }
   }
 
   beforeEach(() => {
@@ -157,6 +160,72 @@ describe('LegalHoldListView', () => {
     vi.mocked(legalHoldsApi.listLegalHolds).mockReset()
     vi.mocked(legalHoldsApi.createLegalHold).mockReset()
     vi.mocked(legalHoldsApi.releaseLegalHold).mockReset()
+  })
+
+  afterEach(() => {
+    activeWrapper?.unmount()
+    activeWrapper = null
+    document.body.querySelectorAll('.el-popper, .el-overlay').forEach((node) => node.remove())
+  })
+
+  async function emitReleaseCommand(wrapper: VueWrapper) {
+    const actions = wrapper.findComponent(TableEditMoreActions)
+    expect(actions.exists()).toBe(true)
+    const dropdown = actions.findComponent({ name: 'ElDropdown' })
+    expect(dropdown.exists()).toBe(true)
+    await dropdown.vm.$emit('command', 'release')
+    await flushPromises()
+  }
+
+  async function openMoreMenu(wrapper: VueWrapper) {
+    const actions = wrapper.find('[data-testid="table-edit-more-actions"]')
+    expect(actions.exists()).toBe(true)
+    const moreButton = actions.findAll('button').find((button) => button.text().includes('More'))
+    expect(moreButton).toBeDefined()
+    await moreButton!.trigger('click')
+    await flushPromises()
+  }
+
+  describe('PQH N22 catalog row actions (BDD-PQH-N22-006…008)', () => {
+    it('BDD-PQH-N22-006/012 — Actions uses TableEditMoreActions with shared testid', async () => {
+      patchSession(['GLOBAL_ADMIN'], adminCapabilities)
+      vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(pageView([sampleHold()]))
+
+      const { wrapper } = await mountListView()
+
+      expect(wrapper.text()).toContain('LH-001')
+      expect(wrapper.find('[data-testid="table-edit-more-actions"]').exists()).toBe(true)
+      expect(wrapper.findComponent(TableEditMoreActions).exists()).toBe(true)
+    })
+
+    it('BDD-PQH-N22-007 — hides Edit; Release under More', async () => {
+      patchSession(['GLOBAL_ADMIN'], adminCapabilities)
+      vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(pageView([sampleHold()]))
+      vi.mocked(legalHoldsApi.releaseLegalHold).mockResolvedValue(
+        sampleHold({ status: 'RELEASED', releasedAt: '2026-07-16T12:00:00Z' }),
+      )
+
+      const { wrapper } = await mountListView()
+      const actions = wrapper.find('[data-testid="table-edit-more-actions"]')
+
+      expect(actions.find('.table-edit-more-actions__edit').exists()).toBe(false)
+      expect(actions.text()).toContain('More')
+      expect(actions.text()).not.toContain('Edit')
+
+      await openMoreMenu(wrapper)
+      expect(document.body.querySelector('[data-testid="legal-hold-release"]')).toBeTruthy()
+      await emitReleaseCommand(wrapper)
+      expect(legalHoldsApi.releaseLegalHold).toHaveBeenCalledWith('hold-1')
+    })
+
+    it('BDD-PQH-N22-008 — Actions column hidden without manage entitlement', async () => {
+      patchSession(['GROUP_ADMIN'], { ...adminCapabilities, manageLegalHold: false })
+      vi.mocked(legalHoldsApi.listLegalHolds).mockResolvedValue(pageView([sampleHold()]))
+
+      const { wrapper } = await mountListView()
+
+      expect(wrapper.find('[data-testid="table-edit-more-actions"]').exists()).toBe(false)
+    })
   })
 
   it('renders holds, create action, and releases after confirm for GLOBAL_ADMIN', async () => {
@@ -175,10 +244,11 @@ describe('LegalHoldListView', () => {
     expect(wrapper.text()).toContain('LH-001')
     expect(wrapper.text()).toContain('TPL-001')
     expect(wrapper.find('[data-testid="legal-hold-create-open"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="legal-hold-release"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="table-edit-more-actions"]').exists()).toBe(true)
 
-    await wrapper.find('[data-testid="legal-hold-release"]').trigger('click')
-    await flushPromises()
+    await openMoreMenu(wrapper)
+    expect(document.body.querySelector('[data-testid="legal-hold-release"]')).toBeTruthy()
+    await emitReleaseCommand(wrapper)
 
     expect(legalHoldsApi.releaseLegalHold).toHaveBeenCalledWith('hold-1')
     expect(vi.mocked(legalHoldsApi.listLegalHolds).mock.calls.length).toBeGreaterThanOrEqual(2)
@@ -232,6 +302,7 @@ describe('LegalHoldListView', () => {
     const { wrapper } = await mountListView()
 
     expect(wrapper.find('[data-testid="legal-hold-create-open"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="table-edit-more-actions"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="legal-hold-release"]').exists()).toBe(false)
   })
 

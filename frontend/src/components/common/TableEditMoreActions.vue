@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
-defineProps<{
-  editLabel?: string
-  moreLabel?: string
-}>()
+withDefaults(
+  defineProps<{
+    editLabel?: string
+    moreLabel?: string
+    /** When false, omit the primary Edit control (destructive-only catalogs). */
+    showEdit?: boolean
+  }>(),
+  {
+    showEdit: true,
+  },
+)
 
 const emit = defineEmits<{
   edit: []
@@ -17,11 +24,12 @@ const { t } = useI18n()
 <template>
   <div class="table-edit-more-actions" data-testid="table-edit-more-actions">
     <el-button
+      v-if="showEdit"
       class="table-edit-more-actions__edit"
       link
       size="small"
       type="primary"
-      @click="emit('edit')"
+      @click.stop="emit('edit')"
     >
       <slot name="edit">{{ editLabel ?? t('common.edit') }}</slot>
     </el-button>
@@ -30,7 +38,7 @@ const { t } = useI18n()
       class="table-edit-more-actions__more"
       @command="(command: string) => emit('command', command)"
     >
-      <el-button link size="small">
+      <el-button link size="small" @click.stop>
         {{ moreLabel ?? t('common.more') }}
       </el-button>
       <template #dropdown>

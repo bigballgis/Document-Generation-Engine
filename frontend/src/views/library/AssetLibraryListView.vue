@@ -6,6 +6,7 @@ import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
+import TableEditMoreActions from '@/components/common/TableEditMoreActions.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import AssetLibraryUploadDialog from '@/components/library/AssetLibraryUploadDialog.vue'
@@ -181,15 +182,23 @@ const {
               fixed="right"
             >
               <template #default="{ row }">
-                <el-button
+                <TableEditMoreActions
                   v-if="row.status === 'ACTIVE'"
-                  link
-                  type="danger"
-                  data-testid="asset-library-disable"
-                  @click.stop="confirmDisable(row)"
+                  :show-edit="false"
+                  @command="(command) => command === 'disable' && confirmDisable(row)"
                 >
-                  {{ t('assetLibrary.disable.action') }}
-                </el-button>
+                  <template #more>
+                    <el-dropdown-menu>
+                      <el-dropdown-item
+                        command="disable"
+                        class="asset-library-disable-action"
+                        data-testid="asset-library-disable"
+                      >
+                        {{ t('assetLibrary.disable.action') }}
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </TableEditMoreActions>
               </template>
             </el-table-column>
           </AppDataTable>
