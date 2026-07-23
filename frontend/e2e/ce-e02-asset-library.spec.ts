@@ -244,7 +244,11 @@ test.describe('CE-E02 asset library management', () => {
       hasText: assetKey,
     })
     await expect(row).toBeVisible({ timeout: 20_000 })
-    await row.getByTestId('asset-library-disable').click()
+    // N22: Disable lives under TableEditMoreActions → More (not a bare Actions button).
+    const actions = row.getByTestId('table-edit-more-actions')
+    await expect(actions).toBeVisible()
+    await actions.getByRole('button', { name: /^more$/i }).click()
+    await page.locator('.el-dropdown-menu:visible').getByTestId('asset-library-disable').click()
     await confirmDisableMessageBox(page)
 
     await expect(page.getByText(/asset disabled/i)).toBeVisible({ timeout: 20_000 })

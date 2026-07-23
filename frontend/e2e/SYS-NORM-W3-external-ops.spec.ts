@@ -236,7 +236,10 @@ test.describe('SYS-NORM Wave 3 — External services ops functional journeys', (
     const rowCount = await rows.count()
     test.skip(rowCount === 0, 'No in-scope invocation rows to open detail (honest empty covered in W3-004)')
 
-    await rows.first().getByRole('button', { name: /open summary|打开摘要/i }).click()
+    // N22: primary Open summary is TableEditMoreActions Edit slot (label may stay Open summary).
+    const actions = rows.first().getByTestId('table-edit-more-actions')
+    await expect(actions).toBeVisible()
+    await actions.getByRole('button', { name: /open summary|打开摘要/i }).click()
     const drawer = page.getByTestId('invocation-summary-drawer')
     await expect(drawer).toBeVisible({ timeout: 20_000 })
     await expect(drawer.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })

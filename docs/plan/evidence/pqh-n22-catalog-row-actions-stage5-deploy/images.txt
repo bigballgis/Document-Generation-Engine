@@ -1,0 +1,2 @@
+documentgenerationengine-docgen-backend:latest 68a8b087d52d 1.46GB 6 minutes ago
+documentgenerationengine-docgen-frontend:latest 365b77edf223 86.2MB 7 minutes ago

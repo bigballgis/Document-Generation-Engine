@@ -1,0 +1,45 @@
+{
+  "result": "DEPLOY_OK",
+  "stage": 5,
+  "task_ids": [
+    "162"
+  ],
+  "slice_id": "pqh-n22-catalog-row-actions",
+  "worktree_path": "D:/working/DGE-pqh-n22-catalog-row-actions",
+  "branch": "feat/pqh-n22-catalog-row-actions",
+  "git_head": "c094d5136f243407c5f221983bdce10527daa8b6",
+  "git_subject": "feat(ui): PQH N22 catalog Edit/More row actions (#162)",
+  "local_time": "2026-07-23T18:59+08:00",
+  "command": ".\\scripts\\docker-deploy-queue.ps1 -Reason \"Stage5 PQH N22 #162 E2E stack prep (retry after FE build OK)\"",
+  "compose_project": "documentgenerationengine",
+  "queue": "idle",
+  "health": {
+    "docgen_frontend": "healthy",
+    "backend_8080": {
+      "body": "{\"status\":\"UP\"}",
+      "status_code": 200
+    },
+    "docgen_backend": "healthy",
+    "frontend_4173": {
+      "content_length": 1202,
+      "status_code": 200
+    }
+  },
+  "images": {
+    "backend": "sha256:68a8b087d52d889ddb9351c5162fa4aa2bf05ad95eff3e041f66d67377c75876",
+    "frontend": "sha256:365b77edf223c62d1c74d0db920b68baf7c75e2697852f034649d7cf3c174bd1"
+  },
+  "fe_slice_markers": [
+    "TableEditMoreActions hits=7",
+    "AssetLibraryListView hits=2",
+    "LegalHoldListView hits=2",
+    "ApiInvocationsView hits=2"
+  ],
+  "notes": [
+    "Attempt 1 FAIL: .env from .env.example insecure JWT (BDD-OPS-JWT-SECRET-001)",
+    "JWT/FRONTEND_PORT/COMPOSE_PROJECT_NAME synced from MAIN .env (JWT len=64; value not recorded)",
+    "Attempt 2 FAIL: pnpm build exited under deploy script after vue-tsc start (no stderr captured); standalone pnpm build then PASS",
+    "Attempt 3 DEPLOY_OK: full queue deploy from feature worktree; images rebuilt; stack healthy",
+    "E2E not run in Stage 5; no merge; #162 not Done"
+  ]
+}

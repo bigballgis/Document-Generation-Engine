@@ -196,8 +196,11 @@ test.describe('Asset library group isolation (BDD-ALGI-015/016)', () => {
     await expect(row.getByText(DEMO_GROUP_CODE, { exact: true })).toBeVisible()
     await expect(row.getByText(/^active$/i)).toBeVisible()
 
-    // Disable still works for (groupCode, assetKey) identity.
-    await row.getByTestId('asset-library-disable').click()
+    // Disable still works for (groupCode, assetKey) identity (N22: under More).
+    const actions = row.getByTestId('table-edit-more-actions')
+    await expect(actions).toBeVisible()
+    await actions.getByRole('button', { name: /^more$/i }).click()
+    await page.locator('.el-dropdown-menu:visible').getByTestId('asset-library-disable').click()
     await confirmDisableMessageBox(page)
     await expect(page.getByText(/asset disabled/i)).toBeVisible({ timeout: 20_000 })
     await expect(

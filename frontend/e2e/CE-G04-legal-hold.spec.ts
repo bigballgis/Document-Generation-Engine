@@ -307,7 +307,11 @@ test.describe('CE-G04 Legal Hold UI (BDD-CE-G04-015…017)', () => {
     expect(created!.status).toBe('ACTIVE')
     expect(created!.scopeType).toBe('TEMPLATE_WINDOW')
 
-    await row.getByTestId('legal-hold-release').click()
+    // N22: Release lives under TableEditMoreActions → More (dropdown teleports to body).
+    const actions = row.getByTestId('table-edit-more-actions')
+    await expect(actions).toBeVisible()
+    await actions.getByRole('button', { name: /^more$/i }).click()
+    await page.locator('.el-dropdown-menu:visible').getByTestId('legal-hold-release').click()
     const confirmBox = page.locator('.el-message-box')
     await expect(confirmBox).toBeVisible()
     await expect(confirmBox.getByText(/release legal hold/i)).toBeVisible()
@@ -323,7 +327,7 @@ test.describe('CE-G04 Legal Hold UI (BDD-CE-G04-015…017)', () => {
     expect(releaseResponse.status(), await releaseResponse.text()).toBe(200)
 
     await expect(row.getByTestId('legal-hold-status-RELEASED')).toBeVisible({ timeout: 20_000 })
-    await expect(row.getByTestId('legal-hold-release')).toHaveCount(0)
+    await expect(row.getByTestId('table-edit-more-actions')).toHaveCount(0)
 
     const released = await findLegalHoldByReason(request, reason)
     expect(released).toBeTruthy()
@@ -373,8 +377,11 @@ test.describe('CE-G04 Legal Hold UI (BDD-CE-G04-015…017)', () => {
     expect(created?.scopeType).toBe('INVOCATION_SET')
     expect(created?.invocationCount).toBe(1)
 
-    // Cleanup: release so list stays tidy for subsequent runs
-    await row.getByTestId('legal-hold-release').click()
+    // Cleanup: release so list stays tidy for subsequent runs (N22: under More).
+    const cleanupActions = row.getByTestId('table-edit-more-actions')
+    await expect(cleanupActions).toBeVisible()
+    await cleanupActions.getByRole('button', { name: /^more$/i }).click()
+    await page.locator('.el-dropdown-menu:visible').getByTestId('legal-hold-release').click()
     const box = page.locator('.el-message-box')
     await expect(box).toBeVisible()
     await box.getByRole('button', { name: /^release hold$/i }).click()

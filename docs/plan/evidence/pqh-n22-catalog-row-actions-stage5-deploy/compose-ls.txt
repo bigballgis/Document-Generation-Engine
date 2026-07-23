@@ -1,0 +1,2 @@
+NAME                       STATUS              CONFIG FILES
+documentgenerationengine   running(6)          D:\working\DGE-pqh-n22-catalog-row-actions\docker-compose.yml,D:\working\DGE-pqh-n22-catalog-row-actions\docker-compose.prod.yml,D:\working\DGE-pqh-n22-catalog-row-actions\docker-compose.lab.yml,D:\working\DGE-sys-norm-demo-seed-terms\docker-compose.yml,D:\working\DGE-sys-norm-demo-seed-terms\docker-compose.prod.yml,D:\working\DGE-sys-norm-demo-seed-terms\docker-compose.lab.yml
