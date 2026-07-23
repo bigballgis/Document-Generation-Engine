@@ -38,7 +38,7 @@ Deliver SYS-NORM residual **N22** under PQH Leaf 3 — catalog-wide **Edit / Mor
 | Formal phase | **None** |
 | Host sole-active | **cleared for this leaf** — Leaf 1–3 closed; F7 **#163** parked (not auto-activated) |
 | Program | PQH **In Progress** — Leaf 1 **Done**; Leaf 2 **Done**; Leaf 3 **Done**; F7 **#163** parked |
-| Gate evidence | FE lint/type-check/test/build **GREEN** (feature tip); E2E functional **7/7** PASS (`f1c47287`); UIUX **PASS** Critical=0 (`PQH-N22-uiux-manifest.md`; Stage 7 suite **21/21**); architecture **PASS_WITH_NOTES** Critical=0 `merge_go=true` (Stage 8); Stage 5+10 **DEPLOY_OK** SkipBuild `:8080` UP / `:4173` **200** — [pqh-n22-catalog-row-actions-stage5-deploy/](../evidence/pqh-n22-catalog-row-actions-stage5-deploy/) · [pqh-n22-catalog-row-actions-stage10-deploy/](../evidence/pqh-n22-catalog-row-actions-stage10-deploy/); MAIN merge `e60b488f` |
+| Gate evidence | FE product tip `c094d513` + lint/type-check/test/build **GREEN**; E2E functional **7/7** PASS (`f1c47287`); UIUX **PASS** Critical=0 (`PQH-N22-uiux-manifest.md`; Stage 7 suite **21/21**; tip `c0cc57a0`); architecture **PASS_WITH_NOTES** Critical=0 `merge_go=true` (Stage 8; CQ skipped); Stage 5+10 **DEPLOY_OK** (`:8080` UP / `:4173` **200**; Stage 10 SkipBuild tip `c0cc57a0`, runtime FE from Stage 5) — [pqh-n22-catalog-row-actions-stage5-deploy/](../evidence/pqh-n22-catalog-row-actions-stage5-deploy/) · [pqh-n22-catalog-row-actions-stage10-deploy/](../evidence/pqh-n22-catalog-row-actions-stage10-deploy/); MAIN merge `e60b488f` |
 | Do **not** | Flip **#3b/#5a**; mark **#53** Done; activate CE-O02 / **#119** / F7; reopen SYS-NORM Waves 0–8; claim IBL/CE/go-live Done |
 
 ---
@@ -52,7 +52,7 @@ Deliver SYS-NORM residual **N22** under PQH Leaf 3 — catalog-wide **Edit / Mor
 | PQH-N22-T03 | Frontend TDD: Legal Holds More-only lifecycle | **Done** (stage 4 FE) |
 | PQH-N22-T04 | Frontend TDD: API Invocations primary Open detail + settings under More | **Done** (stage 4 FE) |
 | PQH-N22-T05 | Frontend TDD: Users/Groups Edit/More regression lock | **Done** (stage 4 FE) |
-| PQH-N22-T06 | FE lint / type-check / test / build | **Done** (stage 4 FE; evidence on feature branch) |
+| PQH-N22-T06 | FE lint / type-check / test / build | **Done** (stage 4 FE; product tip `c094d513`) |
 | PQH-N22-T07 | E2E + UIUX (BDD-PQH-N22-001…014) | **Done** — E2E **7/7** (`f1c47287`); UIUX **PASS** Critical=0 ([PQH-N22-uiux-manifest.md](../../../frontend/e2e/evidence/PQH-N22-uiux-manifest.md); Stage 7 **21/21**) |
 | PQH-N22-T08 | Architecture (+ optional CQ) review | **Done** — Stage 8 **PASS_WITH_NOTES** Critical=0 `merge_go=true` |
 | PQH-N22-T09 | Queued docker deploy evidence + merge + MAIN doc-sync | **Done** — Stage 5+10 **DEPLOY_OK**; FF merge `e60b488f`; Stage 12 this sync |
