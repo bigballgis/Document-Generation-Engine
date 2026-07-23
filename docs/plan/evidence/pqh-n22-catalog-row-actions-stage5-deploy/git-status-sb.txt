@@ -1,9 +1,2 @@
 ## feat/pqh-n22-catalog-row-actions...origin/feat/pqh-n22-catalog-row-actions
- M docs/plan/detail/pqh-n22-catalog-row-actions.md
- M frontend/vitest.config.ts
-?? docs/plan/evidence/pqh-n22-catalog-row-actions-stage5-deploy/
-?? frontend-gate-test6.err
-?? frontend-gate-test6.out
-?? frontend/stage5-build-diag.txt
-?? gate-test-exit.txt
-?? gate-watch.pid
+ M docs/plan/evidence/pqh-n22-catalog-row-actions-stage5-deploy/git-head.txt

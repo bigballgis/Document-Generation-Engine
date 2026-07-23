@@ -1,2 +1,4 @@
-documentgenerationengine-docgen-backend:latest 68a8b087d52d 1.46GB 6 minutes ago
-documentgenerationengine-docgen-frontend:latest 365b77edf223 86.2MB 7 minutes ago
+REPOSITORY                                 TAG       IMAGE ID       CREATED          SIZE
+documentgenerationengine-docgen-backend    latest    ac50ebecdf42   17 minutes ago   1.46GB
+documentgenerationengine-docgen-frontend   latest    fec2e9a139da   18 minutes ago   86.2MB
+
