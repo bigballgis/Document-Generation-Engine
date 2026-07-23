@@ -7,11 +7,11 @@
 | **Authored** | 2026-07-23 |
 | **Program / queue** | Post-queue hardening · **PQH-F7** (IBL **F7** / **Q1** follow-on; ADR-0044 prerequisite **#3**) |
 | **Slice** | `pqh-f7-redis-rate-limit` |
-| **Branch** | `feat/pqh-f7-redis-rate-limit` |
-| **Worktree** | `D:/working/DGE-pqh-f7-redis-rate-limit` |
-| **Base** | `850b51c9` (handoff) |
-| **Placement** | ISOLATED |
-| **Task Master** | **#163** PQH-F7 (unparked by parent deliver; Batch Recommendation **solo**; `member_task_ids: ["163"]`) |
+| **Branch** | `feat/pqh-f7-redis-rate-limit` (merged; branch removed with worktree) |
+| **Worktree** | `D:/working/DGE-pqh-f7-redis-rate-limit` (**REMOVED**) |
+| **Base** | `850b51c9` (handoff) · **MAIN merge** `b739a38f` |
+| **Placement** | ISOLATED (closed) |
+| **Task Master** | **#163** PQH-F7 → **Done** (Batch **solo** closed; `member_task_ids: ["163"]`) |
 | **Formal phase** | **None** (do not invent a sole-active formal P-phase) |
 | **Batch recommendation** | **solo** (`proposed_slice_id: pqh-f7-redis-rate-limit`; vetoes below) |
 | **Owning docs** | **This file (leaf behavior SoT)**; finding SoT [intl-bank-letter-readiness-program.md](../plan/intl-bank-letter-readiness-program.md) **F7 / Q1**; program [post-queue-hardening-program-2026-07.md](../plan/post-queue-hardening-program-2026-07.md); topology [ADR-0044 deployment topology](../adr/operations/0044-deployment-topology-v1.md); scale-out baseline [ADR-0044 multi-instance correctness](../adr/operations/0044-multi-instance-correctness-baseline.md); locks deferral [ADR-0039](../adr/technology-stack/0039-redisson-lock-evaluation.md); API hardening [ADR-0031](../adr/api/0031-api-platform-hardening-baseline.md); honesty sibling [prod-ops-security-hardening.md](./prod-ops-security-hardening.md) **D01B-C9** |

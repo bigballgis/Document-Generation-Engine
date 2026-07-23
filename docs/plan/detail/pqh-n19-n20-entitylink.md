@@ -35,7 +35,7 @@ Deliver SYS-NORM residuals **N19–N20** under PQH Leaf 2:
 | Leaf status | **Done** |
 | Formal phase | **None** |
 | Host sole-active | **cleared for this leaf** — Leaf 3 TM **#162** N22 also **Done** (`ef1b505d`) |
-| Program | PQH **In Progress** — Leaf 1 **Done**; Leaf 2 **Done**; Leaf 3 **#162** **Done**; F7 **#163** parked |
+| Program | PQH **Done** — Leaf 1–4 **Done** (this leaf closed first among Leaf 2–4; Leaf 4 **#163** → **Done** `b739a38f`) |
 | Gate evidence | FE lint/type-check/test(**1721**)/build **GREEN**; E2E **7/7** PASS; UIUX **PASS_WITH_NOTES** Critical=0; architecture **PASS_WITH_NOTES** Critical=0 `merge_go=true`; Stage 5+10 **DEPLOY_OK** [pqh-n19-n20-entitylink/](../evidence/pqh-n19-n20-entitylink/) |
 | Do **not** | Flip **#3b/#5a**; mark **#53** Done; activate CE-O02 / **#119** / F7; reopen SYS-NORM Waves 0–8; claim IBL/CE/go-live Done |
 

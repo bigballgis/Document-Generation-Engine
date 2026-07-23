@@ -36,8 +36,8 @@ Deliver SYS-NORM residual **N22** under PQH Leaf 3 — catalog-wide **Edit / Mor
 | --- | --- |
 | Leaf status | **Done** |
 | Formal phase | **None** |
-| Host sole-active | **cleared for this leaf** — Leaf 1–3 closed; F7 **#163** parked (not auto-activated) |
-| Program | PQH **In Progress** — Leaf 1 **Done**; Leaf 2 **Done**; Leaf 3 **Done**; F7 **#163** parked |
+| Host sole-active | **cleared for this leaf** — Leaf 1–4 closed (Leaf 4 **#163** → **Done** `b739a38f`) |
+| Program | PQH **Done** — Leaf 1–4 **Done** (Leaf 4 **#163** closed after this leaf) |
 | Gate evidence | FE product tip `c094d513` + FE gates era `8757f5ec` lint/type-check/test/build **GREEN**; E2E functional **7/7** PASS (`f1c47287`); UIUX **PASS** Critical=0 (`PQH-N22-uiux-manifest.md`; Stage 7 suite **21/21** docker; UIUX tip `e60b488f`); architecture **PASS_WITH_NOTES** Critical=0 `merge_go=true` (Stage 8; CQ skipped); Stage 5+10 **DEPLOY_OK** (`:8080` UP / `:4173` **200**; Stage 10 SkipBuild tip `c5121164`, runtime FE from Stage 5) — [pqh-n22-catalog-row-actions-stage5-deploy/](../evidence/pqh-n22-catalog-row-actions-stage5-deploy/) · [pqh-n22-catalog-row-actions-stage10-deploy/](../evidence/pqh-n22-catalog-row-actions-stage10-deploy/); MAIN integrate `ef1b505d`; **push blocked** (GitHub 443; `main` ahead of `origin/main`) |
 | Do **not** | Flip **#3b/#5a**; mark **#53** Done; activate CE-O02 / **#119** / F7; reopen SYS-NORM Waves 0–8; claim IBL/CE/go-live Done |
 
@@ -69,7 +69,7 @@ Deliver SYS-NORM residual **N22** under PQH Leaf 3 — catalog-wide **Edit / Mor
 | --- | --- | --- |
 | **#161** | N19–N20 | **Done** (Leaf 2 closed) |
 | **#159** / **#160** | PQH-CHARTER / PQH-F8 | **Done** (Leaf 1 closed) |
-| **#163** | PQH-F7 (Bucket4j→Redis) | **pending** (parked — not auto-activated) |
+| **#163** | PQH-F7 (Bucket4j→Redis) | **Done** (Leaf 4 closed — [pqh-f7-redis-rate-limit.md](./pqh-f7-redis-rate-limit.md); MAIN `b739a38f`) |
 
 ---
 
