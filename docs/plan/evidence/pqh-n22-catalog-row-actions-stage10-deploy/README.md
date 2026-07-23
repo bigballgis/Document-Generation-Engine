@@ -7,6 +7,8 @@
 | **worktree** | `D:/working/DGE-pqh-n22-catalog-row-actions` |
 | **branch** | `feat/pqh-n22-catalog-row-actions` @ `e60b488f` |
 | **evidence_tip** | `e60b488f` (E2E/UIUX evidence commits after Stage 5; app runtime still N22 from Stage 5) |
+| **MAIN integrate** | `ef1b505d` (Stage 11; preserves this Stage 10 tip commit `c5121164`) |
+| **push** | **BLOCKED** (GitHub 443) — `main` ahead of `origin/main` |
 | **stage5_runtime_tip** | `c094d513` (product FE) |
 | **prior_stage10_tip** | `c0cc57a0` (refreshed for current tip) |
 | **local_time** | 2026-07-23T19:58:49+08:00 |
