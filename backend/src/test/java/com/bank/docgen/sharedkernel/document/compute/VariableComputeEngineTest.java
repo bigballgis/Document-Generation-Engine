@@ -4,7 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Nested;
@@ -268,6 +277,216 @@ class VariableComputeEngineTest {
         void formatAmountNullFails() {
             assertThatThrownBy(() -> engine.evaluateSingle("x", "FORMAT_AMOUNT(null)", Map.of(), null))
                     .isInstanceOf(VariableComputeException.class);
+        }
+    }
+
+    /**
+     * PQH-F8 — FORMAT_DATE timezone / as-of (BDD-PQH-F8-001…011).
+     */
+    @Nested
+    class FormatDateTimezone {
+
+        @Test
+        void dateOnlyIsoIsZoneIndependent() {
+            // BDD-PQH-F8-001
+            String result = String.valueOf(engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${signDate})",
+                    Map.of("signDate", "2024-01-15"),
+                    "en-US"
+            ));
+            assertThat(result).isEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+        }
+
+        @Test
+        void localeChangesDisplayNotCalendarDay() {
+            // BDD-PQH-F8-002
+            Map<String, Object> bindings = Map.of("signDate", "2024-01-15");
+            String zh = String.valueOf(engine.evaluateSingle(
+                    "x", "FORMAT_DATE(${signDate})", bindings, "zh-CN"));
+            String en = String.valueOf(engine.evaluateSingle(
+                    "x", "FORMAT_DATE(${signDate})", bindings, "en-US"));
+            assertThat(zh).isEqualTo(medium(LocalDate.of(2024, 1, 15), "zh-CN"));
+            assertThat(en).isEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+            assertThat(zh).isNotEqualTo(en);
+        }
+
+        @Test
+        void unaryInstantAndDateUseUtcCalendarDay() {
+            // BDD-PQH-F8-003
+            Instant instant = Instant.parse("2024-01-15T23:30:00Z");
+            String fromInstant = String.valueOf(engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt})",
+                    Map.of("eventAt", instant),
+                    "en-US"
+            ));
+            String fromDate = String.valueOf(engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt})",
+                    Map.of("eventAt", Date.from(instant)),
+                    "en-US"
+            ));
+            assertThat(fromInstant).isEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+            assertThat(fromDate).isEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+        }
+
+        @Test
+        void binaryZoneShiftsInstantCalendarDay() {
+            // BDD-PQH-F8-004
+            Instant instant = Instant.parse("2024-01-15T23:30:00Z");
+            String result = String.valueOf(engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt}, 'Asia/Shanghai')",
+                    Map.of("eventAt", instant),
+                    "en-US"
+            ));
+            assertThat(result).isEqualTo(medium(LocalDate.of(2024, 1, 16), "en-US"));
+            assertThat(result).isNotEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+        }
+
+        @Test
+        void isoDatetimeStringDoesNotPrefixTruncate() {
+            // BDD-PQH-F8-005
+            String result = String.valueOf(engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt}, 'Asia/Shanghai')",
+                    Map.of("eventAt", "2024-01-15T23:30:00Z"),
+                    "en-US"
+            ));
+            assertThat(result).isEqualTo(medium(LocalDate.of(2024, 1, 16), "en-US"));
+            assertThat(result).isNotEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+        }
+
+        @Test
+        void unaryOffsetDateTimeUsesEmbeddedLocalDate() {
+            // BDD-PQH-F8-006
+            OffsetDateTime eventAt = OffsetDateTime.parse("2024-01-15T23:30:00+08:00");
+            String result = String.valueOf(engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt})",
+                    Map.of("eventAt", eventAt),
+                    "en-US"
+            ));
+            assertThat(result).isEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+        }
+
+        @Test
+        void binaryOffsetDateTimeConvertsViaInstantAndZone() {
+            // BDD-PQH-F8-007
+            OffsetDateTime eventAt = OffsetDateTime.parse("2024-01-15T23:30:00+08:00");
+            String result = String.valueOf(engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt}, 'UTC')",
+                    Map.of("eventAt", eventAt),
+                    "en-US"
+            ));
+            assertThat(result).isEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+        }
+
+        @Test
+        void binaryBlankOrInvalidZoneFailsClosed() {
+            // BDD-PQH-F8-008
+            Instant instant = Instant.parse("2024-01-15T23:30:00Z");
+            Map<String, Object> nullTz = new java.util.LinkedHashMap<>();
+            nullTz.put("eventAt", instant);
+            nullTz.put("tz", null);
+            assertThatThrownBy(() -> engine.evaluateSingle(
+                    "x", "FORMAT_DATE(${eventAt}, ${tz})", nullTz, "en-US"))
+                    .isInstanceOf(VariableComputeException.class);
+
+            assertThatThrownBy(() -> engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt}, ${tz})",
+                    Map.of("eventAt", instant, "tz", ""),
+                    "en-US"
+            )).isInstanceOf(VariableComputeException.class);
+
+            assertThatThrownBy(() -> engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt}, 'Not/AZone')",
+                    Map.of("eventAt", instant),
+                    "en-US"
+            )).isInstanceOf(VariableComputeException.class);
+        }
+
+        @Test
+        void illegalArityFailsClosed() {
+            // BDD-PQH-F8-009
+            assertThatThrownBy(() -> engine.evaluateSingle("x", "FORMAT_DATE()", Map.of(), "en-US"))
+                    .isInstanceOf(VariableComputeException.class);
+
+            assertThatThrownBy(() -> engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${d}, 'UTC', 'extra')",
+                    Map.of("d", "2024-01-15"),
+                    "en-US"
+            )).isInstanceOf(VariableComputeException.class);
+        }
+
+        @Test
+        void zoneArgIsNotALocaleTag() {
+            // BDD-PQH-F8-010
+            Instant instant = Instant.parse("2024-01-15T23:30:00Z");
+            assertThatThrownBy(() -> engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt}, 'en-US')",
+                    Map.of("eventAt", instant),
+                    "en-US"
+            )).isInstanceOf(VariableComputeException.class);
+
+            String ok = String.valueOf(engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${signDate})",
+                    Map.of("signDate", "2024-01-15"),
+                    "en-US"
+            ));
+            assertThat(ok).isEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+        }
+
+        @Test
+        void dateOnlyWithUnusedZoneStillSucceeds() {
+            // BDD-PQH-F8-011
+            String result = String.valueOf(engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${signDate}, 'Asia/Shanghai')",
+                    Map.of("signDate", "2024-01-15"),
+                    "en-US"
+            ));
+            assertThat(result).isEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+        }
+
+        @Test
+        void unaryZonedDateTimeUsesEmbeddedLocalDate() {
+            ZonedDateTime eventAt = ZonedDateTime.parse("2024-01-15T23:30:00+08:00[Asia/Shanghai]");
+            String result = String.valueOf(engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt})",
+                    Map.of("eventAt", eventAt),
+                    "en-US"
+            ));
+            assertThat(result).isEqualTo(medium(LocalDate.of(2024, 1, 15), "en-US"));
+        }
+
+        @Test
+        void nullValueFailsClosed() {
+            assertThatThrownBy(() -> engine.evaluateSingle("x", "FORMAT_DATE(null)", Map.of(), "en-US"))
+                    .isInstanceOf(VariableComputeException.class);
+        }
+
+        @Test
+        void ambiguousLocalDateTimeStringFailsClosed() {
+            assertThatThrownBy(() -> engine.evaluateSingle(
+                    "x",
+                    "FORMAT_DATE(${eventAt})",
+                    Map.of("eventAt", "2024-01-15T23:30:00"),
+                    "en-US"
+            )).isInstanceOf(VariableComputeException.class);
+        }
+
+        private static String medium(LocalDate date, String localeTag) {
+            Locale locale = Locale.forLanguageTag(localeTag);
+            return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale).format(date);
         }
     }
 

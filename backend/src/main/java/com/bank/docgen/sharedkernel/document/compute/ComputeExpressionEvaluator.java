@@ -3,14 +3,21 @@ package com.bank.docgen.sharedkernel.document.compute;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Currency;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -88,7 +95,7 @@ final class ComputeExpressionEvaluator {
             case "AVG" -> evalAvg(requireOne(call));
             case "FILTER" -> evalFilter(call.args());
             case "FORMAT_AMOUNT" -> evalFormatAmount(call.args());
-            case "FORMAT_DATE" -> evalFormatDate(requireOne(call));
+            case "FORMAT_DATE" -> evalFormatDate(call.args());
             case "SPELL_AMOUNT" -> evalSpellAmount(call.args());
             default -> fail("Unknown function '" + call.name() + "'");
         };
@@ -228,14 +235,38 @@ final class ComputeExpressionEvaluator {
         }
     }
 
-    private String evalFormatDate(ComputeAst.Expr valueExpr) {
-        Object value = evaluate(valueExpr);
+    private String evalFormatDate(List<ComputeAst.Expr> args) {
+        if (args.size() != 1 && args.size() != 2) {
+            fail("FORMAT_DATE requires 1 or 2 arguments");
+        }
+        Object value = evaluate(args.getFirst());
         if (value == null) {
             fail("FORMAT_DATE value is null");
         }
-        LocalDate date = toLocalDate(value);
+        ZoneId zone = null;
+        if (args.size() == 2) {
+            // Resolve zone fail-closed even when unused for calendar-only inputs (F8-C6/C13).
+            zone = resolveZoneId(evaluate(args.get(1)));
+        }
+        LocalDate date = toLocalDate(value, zone);
         DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale);
         return formatter.format(date);
+    }
+
+    private ZoneId resolveZoneId(Object zoneValue) {
+        if (zoneValue == null) {
+            fail("FORMAT_DATE zoneId is null");
+        }
+        String zoneId = String.valueOf(zoneValue).trim();
+        if (zoneId.isEmpty()) {
+            fail("FORMAT_DATE zoneId is blank");
+        }
+        try {
+            return ZoneId.of(zoneId);
+        } catch (DateTimeException ex) {
+            fail("FORMAT_DATE zoneId '" + zoneId + "' is not a valid IANA ZoneId");
+            return null;
+        }
     }
 
     private String evalSpellAmount(List<ComputeAst.Expr> args) {
@@ -264,7 +295,7 @@ final class ComputeExpressionEvaluator {
         }
     }
 
-    private LocalDate toLocalDate(Object value) {
+    private LocalDate toLocalDate(Object value, ZoneId zone) {
         if (value instanceof LocalDate localDate) {
             return localDate;
         }
@@ -272,17 +303,66 @@ final class ComputeExpressionEvaluator {
             return localDateTime.toLocalDate();
         }
         if (value instanceof OffsetDateTime offsetDateTime) {
-            return offsetDateTime.toLocalDate();
+            if (zone == null) {
+                return offsetDateTime.toLocalDate();
+            }
+            return offsetDateTime.toInstant().atZone(zone).toLocalDate();
         }
-        if (value instanceof java.util.Date date) {
-            return date.toInstant().atZone(java.time.ZoneOffset.UTC).toLocalDate();
+        if (value instanceof ZonedDateTime zonedDateTime) {
+            if (zone == null) {
+                return zonedDateTime.toLocalDate();
+            }
+            return zonedDateTime.toInstant().atZone(zone).toLocalDate();
+        }
+        if (value instanceof Instant instant) {
+            return instant.atZone(zoneOrUtc(zone)).toLocalDate();
+        }
+        if (value instanceof Date date) {
+            return date.toInstant().atZone(zoneOrUtc(zone)).toLocalDate();
         }
         String text = String.valueOf(value).trim();
-        if (text.length() >= 10 && text.charAt(4) == '-') {
-            return LocalDate.parse(text.substring(0, 10));
+        if (isDateOnlyIso(text)) {
+            try {
+                return LocalDate.parse(text);
+            } catch (DateTimeParseException ex) {
+                fail("FORMAT_DATE expected ISO date");
+                return null;
+            }
         }
-        fail("FORMAT_DATE expected ISO date");
+        Instant instant = parseInstantLike(text);
+        if (instant != null) {
+            return instant.atZone(zoneOrUtc(zone)).toLocalDate();
+        }
+        fail("FORMAT_DATE expected ISO date or datetime");
         return null;
+    }
+
+    private static ZoneId zoneOrUtc(ZoneId zone) {
+        return zone != null ? zone : ZoneOffset.UTC;
+    }
+
+    private static boolean isDateOnlyIso(String text) {
+        return text.length() == 10
+                && text.charAt(4) == '-'
+                && text.charAt(7) == '-';
+    }
+
+    private Instant parseInstantLike(String text) {
+        try {
+            return Instant.parse(text);
+        } catch (DateTimeParseException ignored) {
+            // try offset / zoned forms below
+        }
+        try {
+            return OffsetDateTime.parse(text).toInstant();
+        } catch (DateTimeParseException ignored) {
+            // try zoned form below
+        }
+        try {
+            return ZonedDateTime.parse(text).toInstant();
+        } catch (DateTimeParseException ignored) {
+            return null;
+        }
     }
 
     private Object resolvePath(String path) {

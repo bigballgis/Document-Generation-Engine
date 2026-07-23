@@ -2415,7 +2415,16 @@ paths:
         arity ∉ {1,2} → `VARIABLE_COMPUTE_FAILED` (no silent wrong-language
         fallback). Behavior SoT:
         docs/behavior/ibl-a3-amount-in-words.md (BDD-IBL-A3-001…012).
-        Traceability: BDD-CE-K03-024…025; ADR-0056; IBL-A2; IBL-A3.
+
+        Whitelist `FORMAT_DATE` forms (PQH-F8 / IBL F8 residual): unary
+        `FORMAT_DATE(value)` or optional `FORMAT_DATE(value, zoneId)` where
+        `zoneId` is an IANA ZoneId (e.g. `Asia/Shanghai`, `UTC`) — not a locale
+        tag. Instant-like unary conversion uses documented **UTC**; binary uses
+        the explicit zone. Date-only `yyyy-MM-dd` / `LocalDate` are
+        zone-independent (binary zone unused). Locale MEDIUM display still
+        follows `context.locale` only. Do not infer zone from locale. Behavior
+        SoT: docs/behavior/pqh-f8-format-date-tz.md (BDD-PQH-F8-001…012).
+        Traceability: BDD-CE-K03-024…025; ADR-0056; IBL-A2; IBL-A3; PQH-F8.
       parameters:
         - name: templateId
           in: path
@@ -2476,7 +2485,17 @@ paths:
         blank currency, or bad arity → `VARIABLE_COMPUTE_FAILED` (no silent
         wrong-language fallback). Behavior SoT:
         docs/behavior/ibl-a3-amount-in-words.md (BDD-IBL-A3-001…012).
-        Traceability: BDD-CE-K03-026…027; ADR-0056; IBL-A2; IBL-A3.
+
+        Whitelist `FORMAT_DATE` forms (PQH-F8 / IBL F8 residual): unary
+        `FORMAT_DATE(value)` resolves calendar day then MEDIUM-formats with
+        `locale` / `context.locale`. Instant / `Date` / ISO datetime-with-offset
+        or `Z` → **UTC** calendar day when zone omitted; binary
+        `FORMAT_DATE(value, zoneId)` converts via IANA ZoneId. Date-only inputs
+        ignore zone. Blank/invalid zone, bad arity, or unparseable datetime →
+        `VARIABLE_COMPUTE_FAILED` (no silent bank TZ; no ISO prefix-truncate).
+        Second arg is never a locale tag. Behavior SoT:
+        docs/behavior/pqh-f8-format-date-tz.md (BDD-PQH-F8-001…012).
+        Traceability: BDD-CE-K03-026…027; ADR-0056; IBL-A2; IBL-A3; PQH-F8.
       parameters:
         - name: templateId
           in: path
@@ -8793,6 +8812,8 @@ components:
         IBL-A3: `SPELL_AMOUNT(value)` (CNY Chinese always) or
         `SPELL_AMOUNT(value, currencyCode)` (ISO + locale language); see
         docs/behavior/ibl-a3-amount-in-words.md.
+        PQH-F8: `FORMAT_DATE(value)` or `FORMAT_DATE(value, zoneId)` (IANA);
+        unary Instant-like → UTC; see docs/behavior/pqh-f8-format-date-tz.md.
       properties:
         variableKey:
           type: string
@@ -8808,6 +8829,9 @@ components:
             `SPELL_AMOUNT(value)` (CNY Chinese, locale-independent) or
             `SPELL_AMOUNT(value, currencyCode)` (ISO 4217 + locale language;
             IBL-A3); supported pairs at least `(en,USD)` and `(zh,CNY)`.
+            `FORMAT_DATE(value)` or `FORMAT_DATE(value, zoneId)` with IANA
+            ZoneId (PQH-F8); second arg is not a locale tag; unary Instant-like
+            conversion defaults to UTC.
           minLength: 1
           maxLength: 2048
         knownVariableKeys:
@@ -8852,6 +8876,10 @@ components:
         `SPELL_AMOUNT` = ISO + locale language; unsupported pair / illegal
         currency / bad arity → `VARIABLE_COMPUTE_FAILED`. Behavior:
         docs/behavior/ibl-a3-amount-in-words.md.
+        PQH-F8: unary `FORMAT_DATE` Instant-like → UTC; binary optional IANA
+        `zoneId`; blank/invalid zone / bad arity / unparseable datetime →
+        `VARIABLE_COMPUTE_FAILED`. Behavior:
+        docs/behavior/pqh-f8-format-date-tz.md.
       properties:
         variableKey:
           type: string
@@ -8865,8 +8893,11 @@ components:
             `FORMAT_AMOUNT(${principal}, 'EUR')` (ISO 4217 + locale formatting);
             `SPELL_AMOUNT(${principal})` (CNY Chinese always);
             `SPELL_AMOUNT(${principal}, 'USD')` with locale `en-US` (en+USD
-            amount-in-words). Invalid/blank currency, unsupported SPELL pair,
-            or bad arity on binary forms → `VARIABLE_COMPUTE_FAILED`.
+            amount-in-words);
+            `FORMAT_DATE(${signDate})` (date-only preferred for letter as-of);
+            `FORMAT_DATE(${eventAt}, 'Asia/Shanghai')` (IANA zone for Instant).
+            Invalid/blank currency, unsupported SPELL pair, blank/invalid
+            ZoneId, or bad arity on binary forms → `VARIABLE_COMPUTE_FAILED`.
           minLength: 1
           maxLength: 2048
         sampleVariables:
@@ -8879,13 +8910,16 @@ components:
           type: string
           description: >-
             Optional BCP-47 locale tag (default zh-CN for FORMAT_* / SPELL_AMOUNT).
-            Controls number/grouping localization for `FORMAT_AMOUNT`; currency
-            identity on binary `FORMAT_AMOUNT` comes from the ISO 4217 argument,
-            not from this field (IBL-A2). For binary `SPELL_AMOUNT`, primary
-            language of this locale selects the speller with the ISO currency
-            (IBL-A3); unary `SPELL_AMOUNT` ignores locale language (always CNY
-            Chinese). Default `zh-CN` means binary USD requires an explicit
-            `en` / `en-US` locale.
+            Controls number/grouping localization for `FORMAT_AMOUNT` and MEDIUM
+            date display for `FORMAT_DATE`; currency identity on binary
+            `FORMAT_AMOUNT` comes from the ISO 4217 argument, not from this field
+            (IBL-A2). For binary `SPELL_AMOUNT`, primary language of this locale
+            selects the speller with the ISO currency (IBL-A3); unary
+            `SPELL_AMOUNT` ignores locale language (always CNY Chinese). Does
+            **not** select Instant→calendar-day conversion zone (PQH-F8 —
+            use optional `zoneId` arg; unary Instant-like defaults to UTC).
+            Default `zh-CN` means binary USD requires an explicit `en` /
+            `en-US` locale.
           maxLength: 32
     ComputeExpressionEvaluateView:
       type: object

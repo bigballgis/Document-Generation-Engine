@@ -76,7 +76,7 @@
 | | `AVG(collection)` — 算术平均；空集合 → 失败（不可定义）。非数值 → 失败。 | |
 | | `FILTER(collection, fieldPath, op, literal)` — 从对象列表过滤；`op` ∈ {`EQ`,`NE`,`GT`,`GE`,`LT`,`LE`,`IS_NULL`,`IS_NOT_NULL`}；`fieldPath` 为相对字段路径（点分，无 `${}`）；`IS_NULL`/`IS_NOT_NULL` 忽略 literal。结果为列表，可供 SUM/COUNT/AVG。 | |
 | | `FORMAT_AMOUNT(value)` — 按 locale 格式化为金额展示字符串（默认币种展示规则由 locale 决定；本片不引入多币种参数）。**超集：** 国际函件 ISO 币种二元形态见 [IBL-A2](./ibl-a2-format-amount-currency.md) `FORMAT_AMOUNT(value, currencyCode)`。 | |
-| | `FORMAT_DATE(value)` — 按 locale 格式化为日期展示字符串；输入为 ISO 日期/日期时间或平台 DATE 类型。 | |
+| | `FORMAT_DATE(value)` — 按 locale 格式化为日期展示字符串；输入为 ISO 日期/日期时间或平台 DATE 类型。**超集：** 时区/as-of 诚实语义见 [PQH-F8](./pqh-f8-format-date-tz.md) — `FORMAT_DATE(value, zoneId)`（IANA）；一元 Instant-like → 文档化 **UTC**；date-only 优先；locale 仅展示、不推断 zone（ADR-0056 Amendment 2026-07-23）。 | |
 | | `SPELL_AMOUNT(value)` — 人民币中文大写字符串（见 K03-C12）。**超集：** 国际函件二元形态见 [IBL-A3](./ibl-a3-amount-in-words.md) `SPELL_AMOUNT(value, currencyCode)`（ISO + `context.locale` language；至少 `(en,USD)` / `(zh,CNY)`）。 | |
 | **K03-C11** | **Locale：** `FORMAT_AMOUNT` / `FORMAT_DATE` 读取生成请求 `context.locale`（CE-C01 白名单）。缺失、null、空白 → 默认 **`zh-CN`**。非法 locale 标签（CE-C01 已拦类型；若通过但无法解析）→ 回退 `zh-CN` **或** fail-closed 为 `VARIABLE_COMPUTE_FAILED`——本片选定：**无法解析则回退 zh-CN**（与「默认 zh-CN」一致，避免仅为 locale 标签失败整单；审计摘要仍保留原始 locale 字符串）。**一元** `SPELL_AMOUNT(value)` **固定人民币中文大写**，不随 locale 切换语言（K03 基线；金标回归）。**二元**国际化 amount-in-words 见 [IBL-A3](./ibl-a3-amount-in-words.md)（未支持 (language,currency) fail-closed，禁止静默错语言）。 | 计划卡；CE-C01 S-3；IBL-A3 |
 | **K03-C12** | **SPELL_AMOUNT（CNY 大写）边界表（必须覆盖）：** | 计划卡 |
