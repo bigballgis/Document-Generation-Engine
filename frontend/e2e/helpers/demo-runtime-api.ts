@@ -2,23 +2,14 @@ import type { APIRequestContext } from '@playwright/test'
 
 import { DEMO_RUNTIME_MIN_DOCX_BYTES } from '@/utils/demoRuntimeRegistry'
 
-import accountClosureDemoVariables from '../fixtures/demo/account-closure-demo-test-variables.json' with { type: 'json' }
 import annualReviewDemoVariables from '../fixtures/demo/annual-review-demo-test-variables.json' with { type: 'json' }
-import collectionDemoVariables from '../fixtures/demo/collection-demo-test-variables.json' with { type: 'json' }
 import commitmentDemoVariables from '../fixtures/demo/commitment-demo-test-variables.json' with { type: 'json' }
 import covenantWaiverDemoVariables from '../fixtures/demo/covenant-waiver-demo-test-variables.json' with { type: 'json' }
 import creditLimitDemoVariables from '../fixtures/demo/credit-limit-demo-test-variables.json' with { type: 'json' }
 import facilityAmendmentDemoVariables from '../fixtures/demo/facility-amendment-demo-test-variables.json' with { type: 'json' }
 import formalDemandDemoVariables from '../fixtures/demo/formal-demand-demo-test-variables.json' with { type: 'json' }
-import fullFlowDemoVariables from '../fixtures/demo/full-flow-demo-test-variables.json' with { type: 'json' }
-import insuranceEndorsementDemoVariables from '../fixtures/demo/insurance-endorsement-demo-test-variables.json' with { type: 'json' }
-import kycCddDemoVariables from '../fixtures/demo/kyc-cdd-demo-test-variables.json' with { type: 'json' }
-import mortgageDemoVariables from '../fixtures/demo/mortgage-demo-test-variables.json' with { type: 'json' }
-import retailAccountDemoVariables from '../fixtures/demo/retail-account-demo-test-variables.json' with { type: 'json' }
-import tradeLcDemoVariables from '../fixtures/demo/trade-lc-demo-test-variables.json' with { type: 'json' }
-import wealthDemoVariables from '../fixtures/demo/wealth-demo-test-variables.json' with { type: 'json' }
 import folDemoTestVariables from '../fixtures/fol-demo-test-variables.json' with { type: 'json' }
-import { DEMO_FULL_FLOW_EXTERNAL_ID, E2E_GROUP_ADMIN, E2E_TEMPLATE_AUTHOR, FOL_TEMPLATE_EXTERNAL_ID } from './auth'
+import { E2E_GROUP_ADMIN, E2E_TEMPLATE_AUTHOR, FOL_TEMPLATE_EXTERNAL_ID } from './auth'
 import {
   E2E_CATALOG_PAGE_SIZE,
   buildCatalogQuery,
@@ -93,6 +84,7 @@ function variablesFromTestDataSet(fixture: DemoVariablesFixture, dataSetId: stri
   return dataSet.variables
 }
 
+/** Keep-set of 8 bank-letter Live templates (TM #164 / BDD-DEMO-KEEP-010). */
 export const DEMO_RUNTIME_CASES: DemoRuntimeCase[] = [
   {
     externalId: FOL_TEMPLATE_EXTERNAL_ID,
@@ -101,58 +93,10 @@ export const DEMO_RUNTIME_CASES: DemoRuntimeCase[] = [
     loadVariables: () => folDemoTestVariables.variables as Record<string, unknown>,
   },
   {
-    externalId: DEMO_FULL_FLOW_EXTERNAL_ID,
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES[DEMO_FULL_FLOW_EXTERNAL_ID],
-    contentMarkers: ['Margaret Sinclair'],
-    loadVariables: () => variablesFromFixture(fullFlowDemoVariables),
-  },
-  {
-    externalId: 'DEMO-RETAIL-ACCOUNT-OPEN',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-RETAIL-ACCOUNT-OPEN'],
-    contentMarkers: ['Eleanor Whitfield', 'Manchester Deansgate', 'Meridian Everyday Current Account'],
-    loadVariables: () => variablesFromTestDataSet(retailAccountDemoVariables, 'retail-open-executive'),
-  },
-  {
-    externalId: 'DEMO-RETAIL-ACCOUNT-BALANCE',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-RETAIL-ACCOUNT-BALANCE'],
-    contentMarkers: ['James Porter', '24,567.89', 'Meridian Reward Saver Account'],
-    loadVariables: () => variablesFromTestDataSet(retailAccountDemoVariables, 'retail-balance-executive'),
-  },
-  {
-    externalId: 'DEMO-MORTGAGE-APPROVAL',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-MORTGAGE-APPROVAL'],
-    contentMarkers: ['Oliver Hartley', 'Willow Close', 'Meridian Home Finance'],
-    loadVariables: () => variablesFromFixture(mortgageDemoVariables),
-  },
-  {
     externalId: 'DEMO-CREDIT-LIMIT-CONFIRM',
     minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-CREDIT-LIMIT-CONFIRM'],
     contentMarkers: ['Northgate Manufacturing', 'CORP-CL-2026', 'Revolving Credit Facility'],
     loadVariables: () => variablesFromFixture(creditLimitDemoVariables),
-  },
-  {
-    externalId: 'DEMO-TRADE-LC-NOTICE',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-TRADE-LC-NOTICE'],
-    contentMarkers: ['Shanghai Apex', 'LC-2026-MERI-44821', 'UCP 600'],
-    loadVariables: () => variablesFromTestDataSet(tradeLcDemoVariables, 'trade-lc-executive'),
-  },
-  {
-    externalId: 'DEMO-TRADE-GUARANTEE-NOTICE',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-TRADE-GUARANTEE-NOTICE'],
-    contentMarkers: ['Gulf Infrastructure', 'BG-2026-MERI-99201', 'URDG 758'],
-    loadVariables: () => variablesFromTestDataSet(tradeLcDemoVariables, 'trade-guarantee-executive'),
-  },
-  {
-    externalId: 'DEMO-RATE-CHANGE-NOTICE',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-RATE-CHANGE-NOTICE'],
-    contentMarkers: ['Priya Sharma', '3.95% AER', 'Meridian Retail Banking'],
-    loadVariables: () => variablesFromTestDataSet(collectionDemoVariables, 'rate-change-executive'),
-  },
-  {
-    externalId: 'DEMO-OVERDUE-COLLECTION',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-OVERDUE-COLLECTION'],
-    contentMarkers: ['Daniel Reeves', '1,247.50', 'overdue balance'],
-    loadVariables: () => variablesFromTestDataSet(collectionDemoVariables, 'overdue-collection-executive'),
   },
   {
     externalId: 'DEMO-ANNUAL-REVIEW',
@@ -167,28 +111,10 @@ export const DEMO_RUNTIME_CASES: DemoRuntimeCase[] = [
     loadVariables: () => variablesFromTestDataSet(annualReviewDemoVariables, 'facility-renewal-executive'),
   },
   {
-    externalId: 'DEMO-WEALTH-STATEMENT',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-WEALTH-STATEMENT'],
-    contentMarkers: ['Ashford Family Trust', 'PWM-UK-2026', 'Meridian Private Wealth'],
-    loadVariables: () => variablesFromFixture(wealthDemoVariables),
-  },
-  {
     externalId: 'DEMO-FACILITY-AMENDMENT',
     minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-FACILITY-AMENDMENT'],
     contentMarkers: ['Pacific Rim Holdings', 'AMD-2026-FAC-77102', 'Variation'],
     loadVariables: () => variablesFromFixture(facilityAmendmentDemoVariables),
-  },
-  {
-    externalId: 'DEMO-KYC-CDD-NOTICE',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-KYC-CDD-NOTICE'],
-    contentMarkers: ['Helen Cartwright', 'CDD-2026-77841', 'Customer Due Diligence'],
-    loadVariables: () => variablesFromFixture(kycCddDemoVariables),
-  },
-  {
-    externalId: 'DEMO-ACCOUNT-CLOSURE',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-ACCOUNT-CLOSURE'],
-    contentMarkers: ['Thomas Nguyen', 'Closure Effective Date', 'Meridian Everyday Current Account'],
-    loadVariables: () => variablesFromFixture(accountClosureDemoVariables),
   },
   {
     externalId: 'DEMO-COMMITMENT-LETTER',
@@ -207,12 +133,6 @@ export const DEMO_RUNTIME_CASES: DemoRuntimeCase[] = [
     minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-COVENANT-WAIVER'],
     contentMarkers: ['Northgate Manufacturing', 'Specified Covenant Breach', 'Waiver Period'],
     loadVariables: () => variablesFromFixture(covenantWaiverDemoVariables),
-  },
-  {
-    externalId: 'DEMO-INSURANCE-ENDORSEMENT',
-    minDocxBytes: DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-INSURANCE-ENDORSEMENT'],
-    contentMarkers: ['Oliver Hartley', 'loss payee', 'MORT-2026-UHF-55201'],
-    loadVariables: () => variablesFromFixture(insuranceEndorsementDemoVariables),
   },
 ]
 

@@ -1,53 +1,28 @@
-/** Mirrors `DemoPublishRegistry.allPublishExternalIds()` / `Get-DemoPublishExternalIds`. */
+/** Mirrors `DemoPublishRegistry.allPublishExternalIds()` / `Get-DemoPublishExternalIds` (keep-set). */
 export const DEMO_PUBLISH_EXTERNAL_IDS = [
   'CORP-FOL-OFFER',
-  'DEMO-FULL-FLOW-LETTER',
-  'DEMO-RETAIL-ACCOUNT-OPEN',
-  'DEMO-RETAIL-ACCOUNT-BALANCE',
-  'DEMO-MORTGAGE-APPROVAL',
   'DEMO-CREDIT-LIMIT-CONFIRM',
-  'DEMO-TRADE-LC-NOTICE',
-  'DEMO-TRADE-GUARANTEE-NOTICE',
-  'DEMO-RATE-CHANGE-NOTICE',
-  'DEMO-OVERDUE-COLLECTION',
   'DEMO-ANNUAL-REVIEW',
   'DEMO-FACILITY-RENEWAL',
-  'DEMO-WEALTH-STATEMENT',
   'DEMO-FACILITY-AMENDMENT',
-  'DEMO-KYC-CDD-NOTICE',
-  'DEMO-ACCOUNT-CLOSURE',
   'DEMO-COMMITMENT-LETTER',
   'DEMO-FORMAL-DEMAND',
   'DEMO-COVENANT-WAIVER',
-  'DEMO-INSURANCE-ENDORSEMENT',
 ] as const
 
 export type DemoPublishExternalId = (typeof DEMO_PUBLISH_EXTERNAL_IDS)[number]
 
 /**
  * Per-template DOCX size floors (BDD-DEMO-TYP-012 anti-scaffold guard).
- * Wave A floors calibrated from Docker runtime probe 2026-07-08; Wave B floors
- * aligned to similar letter complexity pending generate-all evidence.
+ * Keep-set floors aligned to `deploy/demo-shared/demo-runtime-generate-manifest.json`.
  */
 export const DEMO_RUNTIME_MIN_DOCX_BYTES: Record<DemoPublishExternalId, number> = {
   'CORP-FOL-OFFER': 20_480,
-  'DEMO-FULL-FLOW-LETTER': 2_560,
-  'DEMO-RETAIL-ACCOUNT-OPEN': 4_096,
-  'DEMO-RETAIL-ACCOUNT-BALANCE': 4_096,
-  'DEMO-MORTGAGE-APPROVAL': 5_120,
   'DEMO-CREDIT-LIMIT-CONFIRM': 7_680,
-  'DEMO-TRADE-LC-NOTICE': 5_120,
-  'DEMO-TRADE-GUARANTEE-NOTICE': 5_120,
-  'DEMO-RATE-CHANGE-NOTICE': 4_096,
-  'DEMO-OVERDUE-COLLECTION': 4_096,
   'DEMO-ANNUAL-REVIEW': 5_120,
   'DEMO-FACILITY-RENEWAL': 4_608,
-  'DEMO-WEALTH-STATEMENT': 5_120,
   'DEMO-FACILITY-AMENDMENT': 6_144,
-  'DEMO-KYC-CDD-NOTICE': 4_096,
-  'DEMO-ACCOUNT-CLOSURE': 4_096,
   'DEMO-COMMITMENT-LETTER': 6_144,
   'DEMO-FORMAL-DEMAND': 5_120,
   'DEMO-COVENANT-WAIVER': 5_120,
-  'DEMO-INSURANCE-ENDORSEMENT': 4_096,
 }

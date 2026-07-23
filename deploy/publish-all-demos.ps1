@@ -1,28 +1,18 @@
-# Publish all imported demo templates through lifecycle + API policy + credential.
-# P23-T12 / Wave B #142 — publish orchestration for Wave A + Wave B demo families + full-flow.
+# Publish keep-set demo templates through lifecycle + API policy + credential.
+# TM #164 / demo-catalog-keep-bank-letters — eight bank-letter Live templates only.
 #
 # Prerequisites:
 #   1. Backend healthy on :8080 (Docker deploy or local spring-boot:run)
-#   2. deploy/import-all-demos.ps1 completed (15 deploy/demo-* packages)
-#   3. DEMO-FULL-FLOW-LETTER present (docgen.demo-catalog.seed-enabled=true on first boot, or E2E seed)
+#   2. deploy/import-all-demos.ps1 completed (7 keep packages)
 #
-# Templates covered (20 external IDs — registry: Get-DemoPublishExternalIds):
+# Templates covered (8 external IDs — registry: Get-DemoPublishExternalIds):
 #   CORP-FOL-OFFER                          | CORP   | CORP_API
-#   DEMO-FULL-FLOW-LETTER                   | RETAIL | RETAIL_API
-#   DEMO-RETAIL-ACCOUNT-OPEN/BALANCE        | RETAIL | RETAIL_API
-#   DEMO-MORTGAGE-APPROVAL                  | RETAIL | RETAIL_API
 #   DEMO-CREDIT-LIMIT-CONFIRM               | CORP   | CORP_API
-#   DEMO-TRADE-LC-NOTICE / GUARANTEE-NOTICE | TRADE  | RETAIL_API
-#   DEMO-RATE-CHANGE / OVERDUE-COLLECTION   | RETAIL | RETAIL_API
 #   DEMO-ANNUAL-REVIEW / FACILITY-RENEWAL   | CORP   | CORP_API
-#   DEMO-WEALTH-STATEMENT                   | WEALTH | RETAIL_API
 #   DEMO-FACILITY-AMENDMENT                 | CORP   | CORP_API
-#   DEMO-KYC-CDD-NOTICE                     | RETAIL | RETAIL_API
-#   DEMO-ACCOUNT-CLOSURE                    | RETAIL | RETAIL_API
 #   DEMO-COMMITMENT-LETTER                  | CORP   | CORP_API
 #   DEMO-FORMAL-DEMAND                      | CORP   | CORP_API
 #   DEMO-COVENANT-WAIVER                    | CORP   | CORP_API
-#   DEMO-INSURANCE-ENDORSEMENT              | RETAIL | RETAIL_API
 #
 # AD group alignment: template groupCode CORP → policy CORP_API; all others → RETAIL_API.
 # Runtime callers svc-caller / e2e-runtime-caller hold both groups (application.yml).
@@ -85,70 +75,6 @@ function Get-TemplateDetail {
     return $content | Where-Object { $_.externalId -eq $ExternalId } | Select-Object -First 1
 }
 
-function Get-DemoFullFlowWaveABindingJson {
-    # Keep in sync with DemoFullFlowCatalogSeeder.STRUCTURED_BINDING_JSON (Wave A Meridian letter).
-    return (@'
-{"schemaVersion":"1.0","nodes":[{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Meridian Retail Banking"}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"42 High Street, Manchester M1 1AA"}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Date: 6 July 2026"}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Our ref: MRB-FF-2026-001042"}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Dear "},{"type":"emphasis","variant":"bold","children":[{"type":"variable","key":"customerName"}]},{"type":"textRun","value":","}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Re: Confirmation of recent account correspondence — Meridian Everyday Current Account"}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"We write to confirm that we have received and processed your recent instructions relating to your retail banking relationship with Meridian Retail Banking. This letter is issued for your records and does not amend the Account terms and conditions unless expressly stated below."}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Account details: sort code 60-16-13; account number ending 6819. Please quote our reference above in any further correspondence."}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"If any detail in this letter is incorrect, please contact Customer Service on 0800 123 4567 within 14 days of the date of this letter."}]},{"type":"paragraph","styleRef":"ClauseBody","children":[{"type":"textRun","value":"Governing law: This letter and your Account are governed by the laws of England and Wales. Eligible deposits are protected by the Financial Services Compensation Scheme up to the applicable limit."}]},{"type":"paragraph","styleRef":"SignatureBlock","children":[{"type":"textRun","value":"Yours sincerely,"}]},{"type":"paragraph","styleRef":"SignatureBlock","children":[{"type":"textRun","value":"Customer Service — Meridian Retail Banking"}]}]}
-'@).Trim()
-}
-
-function Ensure-DemoFullFlowCatalogContent {
-    param(
-        [string]$TemplateId,
-        [string]$AccessToken,
-        [string]$PostgresContainer = 'docgen-postgres'
-    )
-    $sql = @"
-DELETE FROM anchor_binding
-WHERE template_version_id IN (
-    SELECT id FROM template_version WHERE template_id = '$TemplateId'::uuid AND deleted_at IS NULL
-)
-AND anchor_id = 'BODY';
-"@
-    $sql | docker exec -i $PostgresContainer psql -U docgen -d docgen -v ON_ERROR_STOP=1 | Out-Null
-    Invoke-MgmtApi PUT "/templates/$TemplateId/variables/customerName" $AccessToken @{
-        variableKey = 'customerName'
-        variableType = 'TEXT'
-        required = $true
-        description = 'Customer Name'
-    } | Out-Null
-    $detail = Invoke-MgmtApi GET "/templates/$TemplateId" $AccessToken
-    $existing = @($detail.result.bindings) | Where-Object { $_.anchorId -eq 'HEADER' } | Select-Object -First 1
-    $body = @{
-        anchorId = 'HEADER'
-        declaredContentType = 'TEXT'
-        structuredContentJson = (Get-DemoFullFlowWaveABindingJson)
-    }
-    if ($existing -and $existing.updatedAt) {
-        $utc = [datetime]$existing.updatedAt
-        if ($utc.Kind -ne [DateTimeKind]::Utc) { $utc = $utc.ToUniversalTime() }
-        $body.expectedUpdatedAt = $utc.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'")
-    }
-    Invoke-MgmtApi PUT "/templates/$TemplateId/bindings/HEADER" $AccessToken $body | Out-Null
-}
-
-function Ensure-DemoFullFlowTestDataSet {
-    param(
-        [string]$TemplateId,
-        [string]$AccessToken,
-        [string]$WorkspaceRoot
-    )
-    $sets = @(Invoke-MgmtApi GET "/templates/$TemplateId/test-data-sets" $AccessToken).result
-    if ($sets.Count -gt 0) { return }
-
-    $fixturePath = Join-Path $WorkspaceRoot 'frontend/e2e/fixtures/demo/full-flow-demo-test-variables.json'
-    if (-not (Test-Path $fixturePath)) {
-        throw "Missing full-flow test data fixture: $fixturePath"
-    }
-    $fixture = Get-Content $fixturePath -Raw | ConvertFrom-Json
-    Write-PublishStep "Creating full-flow executive test data set for $TemplateId ..."
-    Invoke-MgmtApi POST "/templates/$TemplateId/test-data-sets" $AccessToken @{
-        name = [string]$fixture.name
-        required = $true
-        variables = $fixture.variables
-    } | Out-Null
-}
-
 function Ensure-TestingReady {
     param(
         [string]$ExternalId,
@@ -160,11 +86,6 @@ function Ensure-TestingReady {
     $detail = Invoke-MgmtApi GET "/templates/$TemplateId" $AccessToken
     $status = [string]$detail.result.lifecycleStatus
     if (@('APPROVAL', 'PENDING_RELEASE', 'PUBLISHED') -contains $status) { return }
-
-    if ($ExternalId -eq 'DEMO-FULL-FLOW-LETTER') {
-        Ensure-DemoFullFlowCatalogContent -TemplateId $TemplateId -AccessToken $AccessToken
-        Ensure-DemoFullFlowTestDataSet -TemplateId $TemplateId -AccessToken $AccessToken -WorkspaceRoot $WorkspaceRoot
-    }
 
     Write-PublishStep "Validating bindings for $TemplateId ..."
     Invoke-MgmtApi POST "/templates/$TemplateId/bindings/validate" $AccessToken @{} | Out-Null
@@ -338,7 +259,7 @@ function Publish-DemoTemplate {
         $template = Get-TemplateDetail -ExternalId $ExternalId -AccessToken $script:AuthorToken
     }
     if (-not $template) {
-        Write-Warning "SKIP $ExternalId — template not found (run import-all-demos.ps1 first; full-flow needs demo-catalog seed)"
+        Write-Warning "SKIP $ExternalId — template not found (run import-all-demos.ps1 first)"
         return $null
     }
 
@@ -347,11 +268,6 @@ function Publish-DemoTemplate {
     $accessToken = Resolve-DemoPublishAccessToken -GroupCode $groupCode
     $testerToken = Resolve-DemoPublishTesterToken -GroupCode $groupCode
     Write-PublishStep "Processing $ExternalId ($groupCode, status=$($template.lifecycleStatus)) ..."
-
-    if ($ExternalId -eq 'DEMO-FULL-FLOW-LETTER' -and [string]$template.lifecycleStatus -eq 'DRAFT') {
-        Ensure-DemoFullFlowCatalogContent -TemplateId $templateId -AccessToken $accessToken
-        Ensure-DemoFullFlowTestDataSet -TemplateId $templateId -AccessToken $accessToken -WorkspaceRoot $WorkspaceRoot
-    }
 
     if ([string]$template.lifecycleStatus -ne 'PUBLISHED') {
         $approverToken = Resolve-DemoPublishApproverToken -GroupCode $groupCode -DefaultApproverToken $ApproverToken

@@ -1,34 +1,94 @@
-# Demo shared bank style manifest (P23-T03)
+# Demo shared bank style + acceptance catalog helpers
 
-Canonical Word style catalog and layout baseline for all `deploy/demo-*` master DOCX assets.
+Canonical Word style catalog / layout baseline for keep-set `deploy/demo-*` master DOCX assets, plus shared import/publish/generate helpers.
 
-## Post-remediation content refresh (Wave A — Done)
+## Acceptance catalog SoT (KEEP-8 — current)
+
+**Status:** **Authoritative for screenshot / acceptance demos** (Task Master **#164** / slice `demo-catalog-keep-bank-letters` → **In Progress**; keep-set registries + package purge + Java seeder retirement landed in feature worktree — acceptance cleanup via `deploy/cleanup-demo-catalog-keep-list.ps1` scheduled for Stage 5/10).
+
+User confirmation **2026-07-24** contracted the Live demo catalog to **8** bank-letter templates. This supersedes the Wave B **20**-ID registry as the **default acceptance catalog size**. Wave A/B remain **Done** historical quality work; non-KEEP packages are **removed from repo**.
+
+| Item | Value |
+| --- | --- |
+| Intent | Keep only the eight Live bank-letter templates + transitive letterhead / clauses / assets; purge other DEMO noise; retire Java template seeders that dual-source the catalog |
+| Behavior SoT | [demo-catalog-keep-bank-letters.md](../../docs/behavior/demo-catalog-keep-bank-letters.md) (`BDD-DEMO-KEEP-001`…`014`) |
+| Ops runbook | [demo-catalog-keep-bank-letters.md](../../docs/operations/demo-catalog-keep-bank-letters.md) |
+| Plan | [demo-catalog-keep-bank-letters.md](../../docs/plan/detail/demo-catalog-keep-bank-letters.md) |
+| Evidence stub | [docs/plan/evidence/demo-catalog-keep-bank-letters/](../../docs/plan/evidence/demo-catalog-keep-bank-letters/README.md) |
+| Authoritative load path | **Deploy package + PowerShell** `import-all-demos.ps1` → `publish-all-demos.ps1` (optional `generate-all-demos.ps1`) — **not** Java `ApplicationRunner` auto-seed |
+| Hard vetoes | Do **not** flip checklist **#3b/#5a GO**; do **not** mark **#53** / **#106** Done; do **not** touch CE-O02; do **not** claim go-live / IBL / CE Done |
+
+### KEEP-8 Live templates (confirmed)
+
+| # | externalId | Deploy package |
+| --- | --- | --- |
+| 1 | `DEMO-COVENANT-WAIVER` | `deploy/demo-covenant-waiver` |
+| 2 | `DEMO-FORMAL-DEMAND` | `deploy/demo-formal-demand` |
+| 3 | `DEMO-COMMITMENT-LETTER` | `deploy/demo-commitment` |
+| 4 | `DEMO-FACILITY-AMENDMENT` | `deploy/demo-facility-amendment` |
+| 5 | `DEMO-ANNUAL-REVIEW` | `deploy/demo-annual-review` |
+| 6 | `DEMO-FACILITY-RENEWAL` | `deploy/demo-annual-review` |
+| 7 | `DEMO-CREDIT-LIMIT-CONFIRM` | `deploy/demo-credit-limit` |
+| 8 | `CORP-FOL-OFFER` | `deploy/demo-fol` |
+
+**Retain:** `deploy/demo-shared/` (this directory) for bank style + runtime generate helpers scoped to KEEP. `demo-runtime-generate-manifest.json` and `Get-DemoPublishExternalIds` list **only** these eight externalIds (`expectedCount=8`).
+
+### PURGE (completed in repo; run cleanup script against acceptance DB)
+
+| Category | Items |
+| --- | --- |
+| **Deploy packages removed** | `demo-retail-account`, `demo-mortgage`, `demo-trade-lc`, `demo-collection`, `demo-wealth`, `demo-kyc-cdd`, `demo-account-closure`, `demo-insurance-endorsement` |
+| **Java-only template IDs retired** | `DEMO-FULL-FLOW-LETTER`, `DEMO-RETAIL-LETTER` (seeders deleted) |
+| **Java classes removed** | `DemoFullFlowCatalogSeeder`, `DemoFullFlowPublishSupport`, `DemoCatalogSeeder`, `DemoCatalogSeedProperties` |
+| **Java retained** | `DemoRetailLetterheadDocxBuilder` + `DemoDocxFactory` (CatalogLoadSeeder / E2E fixtures); `DemoAssetLibrarySeeder`, `CatalogLoadSeeder` (`LOAD-TPL-*`) — default `false` |
+| **Cleanup script** | `deploy/cleanup-demo-catalog-keep-list.ps1` (FOL-only script redirects here) |
+
+### Why Java template seeders existed / why retired
+
+| | Confirmed |
+| --- | --- |
+| **Historical why** | Boot-time `ApplicationRunner` auto-seed + in-JVM DOCX builders gave acceptance/E2E a minimal catalog **without** PowerShell import |
+| **Why retire now** | Dual catalog sources (deploy import vs Java seed) let purged IDs return on reboot; KEEP-8 SoT requires a **single** load path |
+
+Full ops note: behavior §9 + [operations runbook §3](../../docs/operations/demo-catalog-keep-bank-letters.md#3-ops-note--historical-java-seeders-confirmed).
+
+### Confirmed vs pending
+
+| Kind | Content |
+| --- | --- |
+| **Confirmed** | KEEP-8 / PURGE inventories; PowerShell import as SoT load path; seeder retirement rationale; vetoes |
+| **Pending (implementers)** | Delete purge packages from disk; shrink import/publish/generate registries; retire Java seeder classes; land `cleanup-demo-catalog-keep-list.ps1`; archive Docker/verify evidence |
+
+Until registry shrink lands, scripts on disk may still reference Wave B packages — treat that as **implementation lag**, not a reversion of KEEP SoT.
+
+---
+
+## Historical context (Wave A / Wave B — Done)
+
+### Post-remediation content refresh (Wave A — Done)
 
 **Status:** **Done** (Task Master **#141** / slice `bank-letter-demo-refresh`) — MAIN merge `aa88170f`; evidence **13/13**.
 
 | Item | Value |
 | --- | --- |
-| Intent | Clean shallow/padding/test-flavored demo content; uplift **existing** eight `deploy/demo-*` packages + `DEMO-FULL-FLOW-LETTER` to 100% realistic bank-letter quality (mock parties/amounts only) |
+| Intent | Clean shallow/padding/test-flavored demo content; uplift **then-existing** eight `deploy/demo-*` packages + `DEMO-FULL-FLOW-LETTER` to bank-letter quality |
 | Behavior SoT | [bank-letter-demo-refresh.md](../../docs/behavior/bank-letter-demo-refresh.md) (`BDD-DEMO-REFRESH-001`…`014`) |
-| Plan | [bank-letter-demo-refresh.md](../../docs/plan/detail/bank-letter-demo-refresh.md) |
 | Evidence | [docs/plan/evidence/bank-letter-demo-refresh/](../../docs/plan/evidence/bank-letter-demo-refresh/README.md) |
-| Hard vetoes | Do **not** flip checklist **#3b/#5a GO**; do **not** reopen RTL / CE-O02; do **not** invent Word-host evidence |
 
-Wave A rewrote content **inside** the historical eight families (+ full-flow); it did **not** replace PRD §6.7 product rows.
+### Catalogue expand (Wave B — Done)
 
-## Catalogue expand (Wave B — In Progress)
-
-**Status:** **In Progress** (Task Master **#142** / slice `bank-letter-demo-expand`) — **do not** treat as Done until import → publish → generate evidence for the expanded registry is archived. **Do not** flip **#3b/#5a GO**.
+**Status:** **Done** (Task Master **#142** / slice `bank-letter-demo-expand`) — MAIN merge `288ce98f`; generate **20/20**. Sole-active **cleared** (successor **#164** KEEP leaf).
 
 | Item | Value |
 | --- | --- |
-| Intent | Add **seven** real bank-practice letter families (new `deploy/demo-*` packages) and expand the publish/runtime registry **13 → 20** (`+7`); **does not** rename or replace PRD §6.7 eight families |
+| Intent | Added seven bank-practice letter families; expanded publish/runtime registry **13 → 20** |
 | Behavior SoT | [bank-letter-demo-expand.md](../../docs/behavior/bank-letter-demo-expand.md) (`BDD-DEMO-EXPAND-001`…`016`) |
-| Evidence stub | [docs/plan/evidence/bank-letter-demo-expand/](../../docs/plan/evidence/bank-letter-demo-expand/README.md) |
-| Registry target | Wave A **13** + Wave B **7** = **20** runtime `externalId`s |
-| Hard vetoes | Do **not** pretend Commitment is FOL / `CORP-FOL-OFFER`; do **not** flip **#3b/#5a GO**; do **not** reopen RTL / CE-O02; do **not** invent Word-host evidence |
+| Evidence | [docs/plan/evidence/bank-letter-demo-expand/](../../docs/plan/evidence/bank-letter-demo-expand/README.md) |
+| Relation to KEEP | Wave B quality bar retained for KEEP families; **non-KEEP** Wave A/B packages are purge targets under **#164** |
 
-Template coverage table below is the **publish/runtime registry** target (**20** `externalId`s).
+**Do not** treat the historical **20**-ID table below as the current acceptance default — see **KEEP-8** above.
+
+---
 
 ## Style keys
 
@@ -68,57 +128,59 @@ Bindings must reference style keys from this manifest via `styleRef` or `section
 - `BDD-DEMO-TYP-001`…`004` — named styles in master catalog
 - `BDD-DEMO-TYP-016` — full catalog at build time
 - `BDD-DEMO-TYP-018` — margin baseline ≥ 2.54 cm
+- `BDD-DEMO-KEEP-001`…`014` — slim catalog keep-set / seeder retirement
 
 ## Related
 
+- [demo-catalog-keep-bank-letters.md](../../docs/behavior/demo-catalog-keep-bank-letters.md) — **current** acceptance KEEP SoT (**#164** In Progress)
+- [docs/operations/demo-catalog-keep-bank-letters.md](../../docs/operations/demo-catalog-keep-bank-letters.md) — ops runbook + Java seeder retirement note
 - [bank-letter-demo-refresh.md](../../docs/behavior/bank-letter-demo-refresh.md) — Wave A content refresh BDD (**Done**)
-- [bank-letter-demo-expand.md](../../docs/behavior/bank-letter-demo-expand.md) — Wave B catalogue expand BDD (**In Progress**; not Done)
-- [docs/plan/evidence/bank-letter-demo-expand/](../../docs/plan/evidence/bank-letter-demo-expand/README.md) — Wave B evidence stub
+- [bank-letter-demo-expand.md](../../docs/behavior/bank-letter-demo-expand.md) — Wave B catalogue expand BDD (**Done**)
 - [demo-typography-layout-behavior-spec.md](../../docs/requirements/demo-typography-layout-behavior-spec.md) — P23 typography (**Done**; do not reopen)
 - [demo-expansion-behavior-spec.md](../../docs/requirements/demo-expansion-behavior-spec.md) — P22 engine + scaffolds (**Done**; do not reopen)
 - [P23 detail plan](../../docs/plan/detail/P23-demo-typography-layout-excellence.md) — task **P23-T03**
 - [Wave A plan](../../docs/plan/detail/bank-letter-demo-refresh.md)
 
-## Ops-safe cleanup → reimport (Wave A preferred path)
+## Ops-safe cleanup → reimport (KEEP preferred path)
 
-Prefer **idempotent re-import overwrite** over destructive database surgery. **Forbidden:** reckless whole-DB `DROP`, second Compose project, or parallel Docker stacks.
+Prefer **keep-set cleanup** + **idempotent re-import overwrite** over destructive database surgery. **Forbidden:** reckless whole-DB `DROP`, second Compose project, or parallel Docker stacks.
 
 ```powershell
 # From repo root — acceptance stack healthy on :8080 / :4173
 # Deploy only via: .\scripts\docker-deploy-queue.ps1
 
-# 1) Optional FOL test-data cleanup (supports -WhatIf)
+# 1) Keep-set catalog cleanup (planned — implementers land script)
+#    Do NOT use FOL-only cleanup-catalog-except-fol.ps1 for this leaf
+#    (it would delete the other seven KEEP templates).
+# .\deploy\cleanup-demo-catalog-keep-list.ps1 -WhatIf
+# .\deploy\cleanup-demo-catalog-keep-list.ps1
+
+# 2) Optional FOL test-data cleanup (supports -WhatIf) — FOL package only
 .\deploy\demo-fol\cleanup-fol-test-data-sets.ps1 -WhatIf
 .\deploy\demo-fol\cleanup-fol-test-data-sets.ps1
 
-# 2) Optional — only when intentionally stripping non-FOL catalog leftovers
-#    (narrow; do NOT use as default full refresh)
-# .\deploy\demo-fol\cleanup-catalog-except-fol.ps1 -WhatIf
-
-# 3) Import-all overwrite (preferred primary refresh mechanism)
-#    Per-package import uses demo-import-shared DRAFT reset when needed
-#    (local demo only — not a DROP). Bump catalogMarker / masterLayoutVersion
-#    in package configs when content materially changes.
+# 3) Import-all overwrite (KEEP packages only — after registry shrink)
 .\deploy\import-all-demos.ps1
 
-# 4) Publish + generate evidence
+# 4) Publish + generate evidence (expectedCount=8 after shrink)
 .\deploy\publish-all-demos.ps1
 .\deploy\generate-all-demos.ps1
 ```
 
 | Tool | Role | Notes |
 | --- | --- | --- |
-| `deploy/demo-fol/cleanup-fol-test-data-sets.ps1` | Remove duplicate FOL executive test data sets; keep one canonical row | Prefer with `-WhatIf` first |
-| `deploy/demo-fol/cleanup-catalog-except-fol.ps1` | Narrow catalog strip (non-FOL leftovers) | **Not** the default full Wave A path |
+| `deploy/cleanup-demo-catalog-keep-list.ps1` | Keep-8 catalog cleanup | **Planned** — supersedes FOL-only cleanup for this leaf |
+| `deploy/demo-fol/cleanup-catalog-except-fol.ps1` | Historical FOL-only strip | **Unsafe** for KEEP-8 (deletes other seven keep IDs) |
+| `deploy/demo-fol/cleanup-fol-test-data-sets.ps1` | Remove duplicate FOL executive test data sets | Prefer with `-WhatIf` first |
 | `deploy/demo-import-shared.ps1` DRAFT reset | Local-demo lifecycle reset so bindings/variables can refresh | Invoked by package import; not a DB DROP |
-| `deploy/import-all-demos.ps1` | **Primary** overwrite of demo packages | Wave A eight packages + Wave B seven new packages; full-flow via existing seeder |
-| `deploy/publish-all-demos.ps1` / `generate-all-demos.ps1` | Lifecycle + DOCX evidence | Same **20**-ID registry as coverage table (13 Wave A + 7 Wave B) |
+| `deploy/import-all-demos.ps1` | Primary overwrite of demo packages | Target: **KEEP packages only** (after implementer shrink) |
+| `deploy/publish-all-demos.ps1` / `generate-all-demos.ps1` | Lifecycle + DOCX evidence | Target: **8** keep externalIds |
 
-BDD: `BDD-DEMO-REFRESH-001`…`004` (Wave A); `BDD-DEMO-EXPAND-001`…`004` (Wave B registry).
+BDD: `BDD-DEMO-KEEP-001`…`014` (current); Wave A/B scenarios remain historical evidence.
 
-## Publish orchestration (P23-T12)
+## Publish orchestration (target after #164)
 
-After bank-grade package content is ready (P23 historical rewrite, Wave A refresh, **or** Wave B catalogue expand), import then publish all runtime-callable demo templates:
+After KEEP packages are ready:
 
 ```powershell
 # From repo root — backend must be healthy on :8080
@@ -126,15 +188,20 @@ After bank-grade package content is ready (P23 historical rewrite, Wave A refres
 .\deploy\publish-all-demos.ps1
 ```
 
-| Step | Script | Templates |
+| Step | Script | Templates (target) |
 | --- | --- | --- |
-| Import | `deploy/import-all-demos.ps1` | Wave A 8 packages + Wave B 7 packages → template IDs from `*-template-config.json` |
-| Full-flow seed | `DemoFullFlowCatalogSeeder` (when `docgen.demo-catalog.seed-enabled=true`) | `DEMO-FULL-FLOW-LETTER` |
-| Publish | `deploy/publish-all-demos.ps1` | All **20** external IDs via `Get-DemoPublishExternalIds` |
+| Import | `deploy/import-all-demos.ps1` | Seven KEEP packages → eight template IDs |
+| Full-flow seed | ~~`DemoFullFlowCatalogSeeder`~~ | **Retired** — do not enable for slim catalog |
+| Publish | `deploy/publish-all-demos.ps1` | Exactly **8** keep externalIds via `Get-DemoPublishExternalIds` |
 
-### Template coverage (publish registry)
+### Historical Wave A+B coverage (20 IDs — superseded for acceptance default)
 
-**Wave A (13 — retained; PRD §6.7 eight families + full-flow):**
+Retained for audit of Wave A/B Done evidence only. **Current SoT = KEEP-8 table above.**
+
+<details>
+<summary>Historical 20-ID publish registry (Wave A 13 + Wave B 7)</summary>
+
+**Wave A (13 — historical):**
 
 | externalId | groupCode | API policy AD group |
 | --- | --- | --- |
@@ -148,7 +215,7 @@ After bank-grade package content is ready (P23 historical rewrite, Wave A refres
 | `DEMO-ANNUAL-REVIEW` / `FACILITY-RENEWAL` | CORP | `CORP_API` |
 | `DEMO-WEALTH-STATEMENT` | WEALTH | `RETAIL_API` |
 
-**Wave B (+7 — catalogue expand; does not replace eight families):**
+**Wave B (+7 — historical):**
 
 | externalId | groupCode | API policy AD group |
 | --- | --- | --- |
@@ -160,18 +227,18 @@ After bank-grade package content is ready (P23 historical rewrite, Wave A refres
 | `DEMO-COVENANT-WAIVER` | CORP | `CORP_API` |
 | `DEMO-INSURANCE-ENDORSEMENT` | RETAIL | `RETAIL_API` |
 
-**Total registry:** **20** runtime `externalId`s (13 + 7). Commitment (`DEMO-COMMITMENT-LETTER`) is **independent** of FOL (`CORP-FOL-OFFER`).
+</details>
 
 Runtime callers `svc-caller` and `e2e-runtime-caller` are granted **both** `RETAIL_API` and `CORP_API` in `application.yml`.
 
 ### Outputs
 
 - `.tmp/credentials/<externalId>.json` — API credential bundles for runtime generate (P23-T14)
-- `.tmp/evidence/all-demos-publish-summary.json` — publish evidence table
+- `.tmp/evidence/all-demos-publish-summary.json` — publish evidence table (**target `expectedCount=8`**)
 
-### Runtime generate (P23-T14)
+### Runtime generate
 
-After publish, generate executive DOCX artifacts for all **20** templates:
+After publish, generate executive DOCX artifacts for KEEP templates only:
 
 ```powershell
 .\deploy\generate-all-demos.ps1
@@ -183,6 +250,6 @@ After publish, generate executive DOCX artifacts for all **20** templates:
 | Manifest | (same script) | `.tmp/evidence/generated-docx-manifest.json` |
 | Audit | (same script) | `.tmp/evidence/audit-records/<externalId>.json` |
 
-Manifest source: `deploy/demo-shared/demo-runtime-generate-manifest.json` (mirrors `DEMO_RUNTIME_CASES` / `demoRuntimeRegistry.ts`).
+Manifest source: `deploy/demo-shared/demo-runtime-generate-manifest.json` (must mirror KEEP-8 after implementer shrink).
 
-Contract tests: `DemoPublishOrchestrationContractTest` (BDD-DEMO-TYP-011), `DemoGenerateOrchestrationContractTest` (BDD-DEMO-TYP-012/013) — extend for Wave B IDs per `BDD-DEMO-EXPAND-003`/`004`.
+Contract tests: `DemoPublishOrchestrationContractTest` / `DemoGenerateOrchestrationContractTest` — assert keep-set of **8** under `mvn verify` after #164 implementation.

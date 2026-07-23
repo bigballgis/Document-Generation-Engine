@@ -1,0 +1,105 @@
+{
+  "generatedAt": "2026-07-23T20:09:11.1977161Z",
+  "backendUrl": "http://localhost:8080",
+  "releaseVersion": "1.0.0",
+  "templateCount": 8,
+  "expectedCount": 8,
+  "templates": [
+    {
+      "externalId": "CORP-FOL-OFFER",
+      "templateId": "e13956f5-c003-446b-bef5-68a1c4ed6dac",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-A73DDA3F",
+      "catalogMarker": null
+    },
+    {
+      "externalId": "DEMO-CREDIT-LIMIT-CONFIRM",
+      "templateId": "1d21ee00-85a3-48f9-b839-6cc2e2ec7100",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-EA9F1C86",
+      "catalogMarker": "credit-limit-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-ANNUAL-REVIEW",
+      "templateId": "89fd9a75-c437-4320-9588-9c72ae577e80",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-A63C35F0",
+      "catalogMarker": "annual-review-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-FACILITY-RENEWAL",
+      "templateId": "6a176474-0dc4-426e-b38f-d1cf3a127332",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-F0C4B086",
+      "catalogMarker": "annual-review-demo-v4-wave-a"
+    },
+    {
+      "externalId": "DEMO-FACILITY-AMENDMENT",
+      "templateId": "fac05548-6d9f-4cae-8238-45cc3b2b7dbd",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-03C47A98",
+      "catalogMarker": "facility-amendment-demo-v1-wave-b"
+    },
+    {
+      "externalId": "DEMO-COMMITMENT-LETTER",
+      "templateId": "00154c94-d5c5-442c-ab42-2f727efcae04",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-1121D16E",
+      "catalogMarker": "commitment-demo-v1-wave-b"
+    },
+    {
+      "externalId": "DEMO-FORMAL-DEMAND",
+      "templateId": "7d8cdba3-df8b-4a0a-830f-a69927b36b95",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-F4FCBBB4",
+      "catalogMarker": "formal-demand-demo-v1-wave-b"
+    },
+    {
+      "externalId": "DEMO-COVENANT-WAIVER",
+      "templateId": "63bb46a2-61e3-4eb3-bb9f-23cff6e8bdab",
+      "groupCode": "CORP",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "allowedAdGroups": [
+        "CORP_API"
+      ],
+      "credentialExternalId": "CRED-DAF3CF5D",
+      "catalogMarker": "covenant-waiver-demo-v1-wave-b"
+    }
+  ]
+}

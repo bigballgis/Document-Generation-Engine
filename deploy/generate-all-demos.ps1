@@ -1,5 +1,6 @@
-# Runtime generate all published demo templates + SHA-256 evidence manifest.
-# P23-T14 — BDD-DEMO-TYP-011/012/013 runtime proof driver.
+# Runtime generate keep-set published demos + SHA-256 evidence manifest.
+# TM #164 / BDD-DEMO-KEEP-010 — eight bank-letter Live templates only.
+# Also covers BDD-DEMO-TYP-011/012/013 runtime proof driver.
 #
 # Prerequisites:
 #   1. Backend healthy on :8080 (Docker deploy or local spring-boot:run)

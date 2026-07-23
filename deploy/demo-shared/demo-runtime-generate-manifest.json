@@ -1,13 +1,10 @@
 {
-  "manifestVersion": "wave-b-demo-expand-v1",
+  "manifestVersion": "keep-bank-letters-v1",
   "bddIds": [
+    "BDD-DEMO-KEEP-010",
     "BDD-DEMO-TYP-011",
     "BDD-DEMO-TYP-012",
-    "BDD-DEMO-TYP-013",
-    "BDD-DEMO-REFRESH-004",
-    "BDD-DEMO-REFRESH-011",
-    "BDD-DEMO-EXPAND-003",
-    "BDD-DEMO-EXPAND-004"
+    "BDD-DEMO-TYP-013"
   ],
   "forbiddenPatterns": [
     "LOREM",
@@ -27,64 +24,10 @@
       "variablesFixture": "deploy/demo-fol/config/fol-demo-test-variables.json"
     },
     {
-      "externalId": "DEMO-FULL-FLOW-LETTER",
-      "minDocxBytes": 2560,
-      "contentMarkers": ["Margaret Sinclair", "Meridian Retail Banking"],
-      "variablesFixture": "frontend/e2e/fixtures/demo/full-flow-demo-test-variables.json"
-    },
-    {
-      "externalId": "DEMO-RETAIL-ACCOUNT-OPEN",
-      "minDocxBytes": 4096,
-      "contentMarkers": ["Eleanor Whitfield", "Manchester Deansgate", "Meridian Everyday Current Account"],
-      "variablesFixture": "deploy/demo-retail-account/config/retail-account-demo-test-variables.json",
-      "testDataSetId": "retail-open-executive"
-    },
-    {
-      "externalId": "DEMO-RETAIL-ACCOUNT-BALANCE",
-      "minDocxBytes": 4096,
-      "contentMarkers": ["James Porter", "24,567.89", "Meridian Reward Saver Account"],
-      "variablesFixture": "deploy/demo-retail-account/config/retail-account-demo-test-variables.json",
-      "testDataSetId": "retail-balance-executive"
-    },
-    {
-      "externalId": "DEMO-MORTGAGE-APPROVAL",
-      "minDocxBytes": 5120,
-      "contentMarkers": ["Oliver Hartley", "Willow Close", "Meridian Home Finance"],
-      "variablesFixture": "deploy/demo-mortgage/config/mortgage-demo-test-variables.json"
-    },
-    {
       "externalId": "DEMO-CREDIT-LIMIT-CONFIRM",
       "minDocxBytes": 7680,
       "contentMarkers": ["Northgate Manufacturing", "CORP-CL-2026", "Revolving Credit Facility"],
       "variablesFixture": "deploy/demo-credit-limit/config/credit-limit-demo-test-variables.json"
-    },
-    {
-      "externalId": "DEMO-TRADE-LC-NOTICE",
-      "minDocxBytes": 5120,
-      "contentMarkers": ["Shanghai Apex", "LC-2026-MERI-44821", "UCP 600"],
-      "variablesFixture": "deploy/demo-trade-lc/config/trade-lc-demo-test-variables.json",
-      "testDataSetId": "trade-lc-executive"
-    },
-    {
-      "externalId": "DEMO-TRADE-GUARANTEE-NOTICE",
-      "minDocxBytes": 5120,
-      "contentMarkers": ["Gulf Infrastructure", "BG-2026-MERI-99201", "URDG 758"],
-      "variablesFixture": "deploy/demo-trade-lc/config/trade-lc-demo-test-variables.json",
-      "testDataSetId": "trade-guarantee-executive"
-    },
-    {
-      "externalId": "DEMO-RATE-CHANGE-NOTICE",
-      "minDocxBytes": 4096,
-      "contentMarkers": ["Priya Sharma", "3.95% AER", "Meridian Retail Banking"],
-      "variablesFixture": "deploy/demo-collection/config/collection-demo-test-variables.json",
-      "testDataSetId": "rate-change-executive"
-    },
-    {
-      "externalId": "DEMO-OVERDUE-COLLECTION",
-      "minDocxBytes": 4096,
-      "contentMarkers": ["Daniel Reeves", "1,247.50", "overdue balance"],
-      "variablesFixture": "deploy/demo-collection/config/collection-demo-test-variables.json",
-      "testDataSetId": "overdue-collection-executive"
     },
     {
       "externalId": "DEMO-ANNUAL-REVIEW",
@@ -101,28 +44,10 @@
       "testDataSetId": "facility-renewal-executive"
     },
     {
-      "externalId": "DEMO-WEALTH-STATEMENT",
-      "minDocxBytes": 5120,
-      "contentMarkers": ["Ashford Family Trust", "PWM-UK-2026", "Meridian Private Wealth"],
-      "variablesFixture": "deploy/demo-wealth/config/wealth-demo-test-variables.json"
-    },
-    {
       "externalId": "DEMO-FACILITY-AMENDMENT",
       "minDocxBytes": 6144,
       "contentMarkers": ["Pacific Rim Holdings", "AMD-2026-FAC-77102", "Variation"],
       "variablesFixture": "deploy/demo-facility-amendment/config/facility-amendment-demo-test-variables.json"
-    },
-    {
-      "externalId": "DEMO-KYC-CDD-NOTICE",
-      "minDocxBytes": 4096,
-      "contentMarkers": ["Helen Cartwright", "CDD-2026-77841", "Customer Due Diligence"],
-      "variablesFixture": "deploy/demo-kyc-cdd/config/kyc-cdd-demo-test-variables.json"
-    },
-    {
-      "externalId": "DEMO-ACCOUNT-CLOSURE",
-      "minDocxBytes": 4096,
-      "contentMarkers": ["Thomas Nguyen", "Closure Effective Date", "Meridian Everyday Current Account"],
-      "variablesFixture": "deploy/demo-account-closure/config/account-closure-demo-test-variables.json"
     },
     {
       "externalId": "DEMO-COMMITMENT-LETTER",
@@ -141,12 +66,6 @@
       "minDocxBytes": 5120,
       "contentMarkers": ["Northgate Manufacturing", "Specified Covenant Breach", "Waiver Period"],
       "variablesFixture": "deploy/demo-covenant-waiver/config/covenant-waiver-demo-test-variables.json"
-    },
-    {
-      "externalId": "DEMO-INSURANCE-ENDORSEMENT",
-      "minDocxBytes": 4096,
-      "contentMarkers": ["Oliver Hartley", "loss payee", "MORT-2026-UHF-55201"],
-      "variablesFixture": "deploy/demo-insurance-endorsement/config/insurance-endorsement-demo-test-variables.json"
     }
   ]
 }

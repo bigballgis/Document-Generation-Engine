@@ -4,8 +4,17 @@ import { assertDocxArtifact, buildMinimalDocxArchive } from '@/utils/demoRuntime
 import { DEMO_PUBLISH_EXTERNAL_IDS, DEMO_RUNTIME_MIN_DOCX_BYTES } from '@/utils/demoRuntimeRegistry'
 
 describe('demoRuntimeRegistry', () => {
-  it('defines 20 published demo external IDs', () => {
-    expect(DEMO_PUBLISH_EXTERNAL_IDS).toHaveLength(20)
+  it('defines 8 keep-set published demo external IDs', () => {
+    expect(DEMO_PUBLISH_EXTERNAL_IDS).toEqual([
+      'CORP-FOL-OFFER',
+      'DEMO-CREDIT-LIMIT-CONFIRM',
+      'DEMO-ANNUAL-REVIEW',
+      'DEMO-FACILITY-RENEWAL',
+      'DEMO-FACILITY-AMENDMENT',
+      'DEMO-COMMITMENT-LETTER',
+      'DEMO-FORMAL-DEMAND',
+      'DEMO-COVENANT-WAIVER',
+    ])
   })
 
   it('assigns a positive minBytes floor for every published demo', () => {
@@ -14,11 +23,11 @@ describe('demoRuntimeRegistry', () => {
     }
   })
 
-  it('uses calibrated size floors with FOL highest and full-flow lowest', () => {
+  it('uses calibrated size floors with FOL highest among keep-set', () => {
     expect(DEMO_RUNTIME_MIN_DOCX_BYTES['CORP-FOL-OFFER']).toBe(20_480)
     expect(DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-CREDIT-LIMIT-CONFIRM']).toBe(7_680)
-    expect(DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-FULL-FLOW-LETTER']).toBe(2_560)
-    expect(DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-RATE-CHANGE-NOTICE']).toBe(4_096)
+    expect(DEMO_RUNTIME_MIN_DOCX_BYTES['DEMO-FACILITY-RENEWAL']).toBe(4_608)
+    expect(DEMO_PUBLISH_EXTERNAL_IDS).not.toContain('DEMO-FULL-FLOW-LETTER')
   })
 })
 

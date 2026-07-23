@@ -1,6 +1,5 @@
 package com.bank.docgen.demo.support;
 
-import com.bank.docgen.demo.DemoFullFlowCatalogSeeder;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Canonical demo publish registry for P23-T12 — external IDs and API AD group mapping
+ * Canonical demo publish registry for keep-set bank letters (TM #164) — external IDs
  * mirrored by {@code deploy/publish-all-demos.ps1} and {@code deploy/demo-import-shared.ps1}.
  */
 public final class DemoPublishRegistry {
@@ -36,9 +35,7 @@ public final class DemoPublishRegistry {
     }
 
     public static List<String> allPublishExternalIds() throws IOException {
-        Set<String> ids = new LinkedHashSet<>(externalIdsFromPackages());
-        ids.add(DemoFullFlowCatalogSeeder.DEMO_FULL_FLOW_EXTERNAL_ID);
-        return orderedPublishExternalIds(ids);
+        return orderedPublishExternalIds(new LinkedHashSet<>(externalIdsFromPackages()));
     }
 
     private static void collectExternalIds(JsonNode config, Set<String> ids) {
@@ -55,25 +52,13 @@ public final class DemoPublishRegistry {
         List<String> ordered = new ArrayList<>();
         String[] preferred = {
                 "CORP-FOL-OFFER",
-                DemoFullFlowCatalogSeeder.DEMO_FULL_FLOW_EXTERNAL_ID,
-                "DEMO-RETAIL-ACCOUNT-OPEN",
-                "DEMO-RETAIL-ACCOUNT-BALANCE",
-                "DEMO-MORTGAGE-APPROVAL",
                 "DEMO-CREDIT-LIMIT-CONFIRM",
-                "DEMO-TRADE-LC-NOTICE",
-                "DEMO-TRADE-GUARANTEE-NOTICE",
-                "DEMO-RATE-CHANGE-NOTICE",
-                "DEMO-OVERDUE-COLLECTION",
                 "DEMO-ANNUAL-REVIEW",
                 "DEMO-FACILITY-RENEWAL",
-                "DEMO-WEALTH-STATEMENT",
                 "DEMO-FACILITY-AMENDMENT",
-                "DEMO-KYC-CDD-NOTICE",
-                "DEMO-ACCOUNT-CLOSURE",
                 "DEMO-COMMITMENT-LETTER",
                 "DEMO-FORMAL-DEMAND",
-                "DEMO-COVENANT-WAIVER",
-                "DEMO-INSURANCE-ENDORSEMENT"
+                "DEMO-COVENANT-WAIVER"
         };
         for (String externalId : preferred) {
             if (ids.contains(externalId)) {

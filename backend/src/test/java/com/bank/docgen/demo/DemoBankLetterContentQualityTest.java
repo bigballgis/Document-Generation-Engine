@@ -51,11 +51,6 @@ class DemoBankLetterContentQualityTest {
         Path manifest = DemoPackageContractSupport.deployRoot()
                 .resolve("demo-shared/demo-runtime-generate-manifest.json");
         scanFile(manifest, hits);
-        Path fullFlowFixture = Path.of("..", "frontend", "e2e", "fixtures", "demo", "full-flow-demo-test-variables.json")
-                .normalize();
-        if (Files.isRegularFile(fullFlowFixture)) {
-            scanFile(fullFlowFixture, hits);
-        }
 
         assertThat(hits)
                 .as("Wave A demo sources must not contain meta-padding / placeholder prose")

@@ -48,16 +48,16 @@ describe('catalog-query E2E helpers', () => {
         totalPages: 3,
       })
       .mockResolvedValueOnce({
-        content: [{ externalId: 'DEMO-RETAIL-LETTER' }],
+        content: [{ externalId: 'CORP-FOL-OFFER' }],
         totalPages: 3,
       })
 
     const match = await findInCatalogPages(
       fetchPage,
-      (row: Row) => row.externalId === 'DEMO-RETAIL-LETTER',
+      (row: Row) => row.externalId === 'CORP-FOL-OFFER',
       { pageSize: 1 },
     )
-    expect(match?.externalId).toBe('DEMO-RETAIL-LETTER')
+    expect(match?.externalId).toBe('CORP-FOL-OFFER')
     expect(fetchPage).toHaveBeenCalledTimes(2)
   })
 

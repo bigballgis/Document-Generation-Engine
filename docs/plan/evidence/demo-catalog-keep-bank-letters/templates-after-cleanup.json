@@ -1,0 +1,100 @@
+{
+  "capturedAt": "2026-07-23T20:09:46.0881935Z",
+  "total": 8,
+  "keepPresent": [
+    "DEMO-COVENANT-WAIVER",
+    "DEMO-FORMAL-DEMAND",
+    "DEMO-COMMITMENT-LETTER",
+    "DEMO-FACILITY-AMENDMENT",
+    "DEMO-FACILITY-RENEWAL",
+    "DEMO-ANNUAL-REVIEW",
+    "DEMO-CREDIT-LIMIT-CONFIRM",
+    "CORP-FOL-OFFER"
+  ],
+  "keepMissing": [],
+  "purgeSampleChecked": [
+    "DEMO-FULL-FLOW-LETTER",
+    "DEMO-RETAIL-LETTER",
+    "DEMO-INSURANCE-ENDORSEMENT",
+    "DEMO-ACCOUNT-CLOSURE",
+    "DEMO-KYC-CDD-NOTICE",
+    "DEMO-OVERDUE-COLLECTION",
+    "DEMO-RATE-CHANGE-NOTICE",
+    "DEMO-MORTGAGE-APPROVAL",
+    "DEMO-RETAIL-ACCOUNT-BALANCE",
+    "DEMO-RETAIL-ACCOUNT-OPEN",
+    "LOAD-TPL-0500",
+    "LOAD-TPL-0001"
+  ],
+  "purgeSampleStillPresent": [],
+  "purge_absent": true,
+  "allPublished": true,
+  "externalIds": [
+    "CORP-FOL-OFFER",
+    "DEMO-ANNUAL-REVIEW",
+    "DEMO-COMMITMENT-LETTER",
+    "DEMO-COVENANT-WAIVER",
+    "DEMO-CREDIT-LIMIT-CONFIRM",
+    "DEMO-FACILITY-AMENDMENT",
+    "DEMO-FACILITY-RENEWAL",
+    "DEMO-FORMAL-DEMAND"
+  ],
+  "keepSetDetails": [
+    {
+      "externalId": "DEMO-COVENANT-WAIVER",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "groupCode": "CORP",
+      "name": "Covenant Waiver / Consent Letter"
+    },
+    {
+      "externalId": "DEMO-FORMAL-DEMAND",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "groupCode": "CORP",
+      "name": "Formal Demand Letter under Facility"
+    },
+    {
+      "externalId": "DEMO-COMMITMENT-LETTER",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "groupCode": "CORP",
+      "name": "Commitment Letter / Offer to Commit"
+    },
+    {
+      "externalId": "DEMO-FACILITY-AMENDMENT",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "groupCode": "CORP",
+      "name": "Facility Amendment / Variation Letter"
+    },
+    {
+      "externalId": "DEMO-FACILITY-RENEWAL",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "groupCode": "CORP",
+      "name": "Facility Renewal Letter"
+    },
+    {
+      "externalId": "DEMO-ANNUAL-REVIEW",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "groupCode": "CORP",
+      "name": "Annual Credit Review"
+    },
+    {
+      "externalId": "DEMO-CREDIT-LIMIT-CONFIRM",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "groupCode": "CORP",
+      "name": "Credit Facility Confirmation"
+    },
+    {
+      "externalId": "CORP-FOL-OFFER",
+      "lifecycleStatus": "PUBLISHED",
+      "releaseVersion": "1.0.0",
+      "groupCode": "CORP",
+      "name": "Facility Offer Letter (Wholesale Term Facility)"
+    }
+  ]
+}

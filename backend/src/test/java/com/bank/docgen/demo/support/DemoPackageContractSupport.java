@@ -5,34 +5,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * Keep-set demo package contract support — screenshot bank-letter Live set (TM #164).
+ */
 public final class DemoPackageContractSupport {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    /** Seven deploy packages covering eight keep external IDs. */
     private static final List<String> PACKAGE_CODES = List.of(
             "demo-fol",
-            "demo-retail-account",
-            "demo-mortgage",
             "demo-credit-limit",
-            "demo-trade-lc",
-            "demo-collection",
             "demo-annual-review",
-            "demo-wealth",
             "demo-facility-amendment",
-            "demo-kyc-cdd",
-            "demo-account-closure",
             "demo-commitment",
             "demo-formal-demand",
-            "demo-covenant-waiver",
-            "demo-insurance-endorsement"
+            "demo-covenant-waiver"
     );
 
     private DemoPackageContractSupport() {

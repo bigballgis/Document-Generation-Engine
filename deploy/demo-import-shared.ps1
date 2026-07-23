@@ -833,22 +833,15 @@ function Get-DemoPublishExternalIds {
         $DeployRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
     }
     $ids = [System.Collections.Generic.List[string]]::new()
+    # Keep-set only (TM #164) — eight bank-letter Live templates; no DEMO-FULL-FLOW-LETTER insert.
     $packageOrder = @(
         'demo-fol',
-        'demo-retail-account',
-        'demo-mortgage',
         'demo-credit-limit',
-        'demo-trade-lc',
-        'demo-collection',
         'demo-annual-review',
-        'demo-wealth',
         'demo-facility-amendment',
-        'demo-kyc-cdd',
-        'demo-account-closure',
         'demo-commitment',
         'demo-formal-demand',
-        'demo-covenant-waiver',
-        'demo-insurance-endorsement'
+        'demo-covenant-waiver'
     )
     foreach ($packageDir in $packageOrder) {
         $configDir = Join-Path $DeployRoot $packageDir 'config'
@@ -859,9 +852,6 @@ function Get-DemoPublishExternalIds {
                 if ($def.externalId) { $ids.Add([string]$def.externalId) }
             }
         }
-    }
-    if ($ids -notcontains 'DEMO-FULL-FLOW-LETTER') {
-        $ids.Insert(1, 'DEMO-FULL-FLOW-LETTER')
     }
     return @($ids | Select-Object -Unique)
 }

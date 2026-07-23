@@ -11,9 +11,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * P23-T15 — centralized POI typography/layout regression suite for all demo master DOCX families.
- *
- * <p>BDD: TYP-001, 002, 003, 004, 013, 014, 016, 018 (master build-time surface).
+ * Keep-set POI typography/layout regression for bank-letter Live masters (TM #164).
  */
 class DemoTypographyLayoutRegressionTest {
 
@@ -31,40 +29,29 @@ class DemoTypographyLayoutRegressionTest {
   }
 
   @Test
-  void bddDemoTyp016_regressionSuiteCoversEightFamiliesPlusFol() throws Exception {
-    long familyCount = demoFamilyMasters().count();
-    assertThat(familyCount).isGreaterThanOrEqualTo(9);
+  void bddDemoKeep_regressionSuiteCoversKeepSetFamilies() throws Exception {
     assertThat(demoFamilyMasters().map(args -> args.get()[0].toString()))
-        .contains("credit-limit", "mortgage", "trade-lc", "collection-rate", "annual-review", "wealth",
-            "retail-account-open", "fol");
+        .containsExactlyInAnyOrder(
+            "fol",
+            "credit-limit",
+            "annual-review",
+            "facility-renewal",
+            "facility-amendment",
+            "commitment",
+            "formal-demand",
+            "covenant-waiver");
   }
 
   static Stream<Arguments> demoFamilyMasters() throws Exception {
     return Stream.of(
         Arguments.of(
+            "fol",
+            FolMasterDocxAssetGeneratorTest.buildWholesaleFolMasterDocx(),
+            PageNumberingProfile.SECTION_AND_GLOBAL),
+        Arguments.of(
             "credit-limit",
             CreditLimitMasterDocxAssetGeneratorTest.buildMaster(),
             PageNumberingProfile.SECTION_AND_GLOBAL),
-        Arguments.of(
-            "mortgage",
-            MortgageMasterDocxAssetGeneratorTest.buildMaster(),
-            PageNumberingProfile.SECTION_AND_GLOBAL),
-        Arguments.of(
-            "trade-lc",
-            TradeLcMasterDocxAssetGeneratorTest.buildLcMaster(),
-            PageNumberingProfile.GLOBAL_ONLY),
-        Arguments.of(
-            "trade-guarantee",
-            TradeLcMasterDocxAssetGeneratorTest.buildGuaranteeMaster(),
-            PageNumberingProfile.GLOBAL_ONLY),
-        Arguments.of(
-            "collection-rate",
-            CollectionMasterDocxAssetGeneratorTest.buildRateChangeMaster(),
-            PageNumberingProfile.GLOBAL_ONLY),
-        Arguments.of(
-            "collection-overdue",
-            CollectionMasterDocxAssetGeneratorTest.buildOverdueMaster(),
-            PageNumberingProfile.GLOBAL_ONLY),
         Arguments.of(
             "annual-review",
             AnnualReviewMasterDocxAssetGeneratorTest.buildAnnualReviewMaster(),
@@ -74,25 +61,21 @@ class DemoTypographyLayoutRegressionTest {
             AnnualReviewMasterDocxAssetGeneratorTest.buildFacilityRenewalMaster(),
             PageNumberingProfile.SECTION_AND_GLOBAL),
         Arguments.of(
-            "wealth",
-            WealthMasterDocxAssetGeneratorTest.buildMaster(),
-            PageNumberingProfile.GLOBAL_ONLY),
-        Arguments.of(
-            "retail-account-open",
-            RetailAccountMasterDocxAssetGeneratorTest.buildAccountOpeningMaster(),
-            PageNumberingProfile.GLOBAL_ONLY),
-        Arguments.of(
-            "retail-account-balance",
-            RetailAccountMasterDocxAssetGeneratorTest.buildBalanceConfirmationMaster(),
-            PageNumberingProfile.GLOBAL_ONLY),
-        Arguments.of(
-            "fol",
-            FolMasterDocxAssetGeneratorTest.buildWholesaleFolMasterDocx(),
+            "facility-amendment",
+            FacilityAmendmentMasterDocxAssetGeneratorTest.buildMaster(),
             PageNumberingProfile.SECTION_AND_GLOBAL),
         Arguments.of(
-            "full-flow",
-            DemoRetailLetterheadDocxBuilder.buildFullFlowMaster(DemoCatalogSeeder.DEMO_ANCHOR_ID),
-            PageNumberingProfile.GLOBAL_ONLY)
+            "commitment",
+            CommitmentMasterDocxAssetGeneratorTest.buildMaster(),
+            PageNumberingProfile.SECTION_AND_GLOBAL),
+        Arguments.of(
+            "formal-demand",
+            FormalDemandMasterDocxAssetGeneratorTest.buildMaster(),
+            PageNumberingProfile.SECTION_AND_GLOBAL),
+        Arguments.of(
+            "covenant-waiver",
+            CovenantWaiverMasterDocxAssetGeneratorTest.buildMaster(),
+            PageNumberingProfile.SECTION_AND_GLOBAL)
     );
   }
 }
