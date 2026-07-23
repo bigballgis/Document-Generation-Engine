@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19 (registry only). Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: NON-CE #159+#160 pqh-f8-format-date-tz In Progress (PQH charter + FORMAT_DATE TZ; program docs/plan/post-queue-hardening-program-2026-07.md). Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1 (sole-active cleared). Prior #155+#156 binding-editor-ia Done 9f2378ad / 9e318d9c; #154 Asset library Done c12a0687; #153 Reminder timing Done d213834f; #152 SYS-NORM Wave 8 Done 8aca145b; SYS-NORM Waves 0–8 Done. Do NOT treat #53 as delivery leaf. Do NOT mark #53 Done. Do NOT activate CE-O02 / #119.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active delivery leaf: NON-CE #159+#160 pqh-f8-format-date-tz In Progress (worktree D:/working/DGE-pqh-f8-format-date-tz · feat/pqh-f8-format-date-tz; BDD ready docs/behavior/pqh-f8-format-date-tz.md BDD-PQH-F8-001…012). Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1 — stale sole-active claim cleared. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT activate #119.",
+        "description": "IN PROGRESS 2026-07-19 (registry only). Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: CLEARED — prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe (PQH Leaf 1; program docs/plan/post-queue-hardening-program-2026-07.md stays In Progress; next queue #161 pending). Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Prior #155+#156 binding-editor-ia Done 9f2378ad / 9e318d9c; #154 Asset library Done c12a0687; #153 Reminder timing Done d213834f; #152 SYS-NORM Wave 8 Done 8aca145b; SYS-NORM Waves 0–8 Done. Do NOT treat #53 as delivery leaf. Do NOT mark #53 Done. Do NOT activate CE-O02 / #119.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active CLEARED — prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe; next PQH queue #161 N19–N20 pending (not activated). Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT activate #119.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-23T01:40:00.000Z"
+        "updatedAt": "2026-07-23T02:55:00.000Z"
       },
       {
         "id": "54",
@@ -1468,14 +1468,14 @@
       {
         "id": "106",
         "title": "IBL: International Bank Letter Readiness Program (umbrella)",
-        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A Done (A1–A6; #107–#112 Done); Wave IBL-B In Progress (#113–#118 IBL-B1–B6 Done; B7 #119 Blocked Word host); Wave IBL-C Done (#120–#122); Wave IBL-D Done (#123–#127); Wave IBL-E Done (#128–#134; F15 descope; ADR-0068 Accepted; PD-4…PD-9 confirmed 2026-07-19). Residual F8/Q2 FORMAT_DATE TZ scheduled under NON-CE PQH #160 (sole-active leaf pqh-f8-format-date-tz with #159 charter) — does NOT make #106 sole-active. F7/Q1 Bucket4j→Redis parked as PQH #163 pending (not activated). #119 IBL-B7 still Blocked. Formal phase None. Do NOT treat #106 as sole-active. Do NOT activate #119. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done / go-live.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active: NON-CE PQH #159+#160 pqh-f8-format-date-tz (FORMAT_DATE F8 + charter) — outside this umbrella. Prior IBL-E #134 Done 37239d68 / 68abc7c3. Wave IBL-B In Progress B1–B6 Done / B7 #119 Blocked residual; Wave IBL-A remains Done. F8 residual → PQH-F8 #160; F7 parked #163. Do NOT activate #119. Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT mark Wave B / IBL program Done.",
+        "description": "REGISTRY ONLY — not a delivery leaf. Program waves: Wave IBL-A Done (A1–A6; #107–#112 Done); Wave IBL-B In Progress (#113–#118 IBL-B1–B6 Done; B7 #119 Blocked Word host); Wave IBL-C Done (#120–#122); Wave IBL-D Done (#123–#127); Wave IBL-E Done (#128–#134; F15 descope; ADR-0068 Accepted; PD-4…PD-9 confirmed 2026-07-19). Residual F8/Q2 FORMAT_DATE TZ → Done under NON-CE PQH #160 (pqh-f8-format-date-tz with #159 charter; MAIN ab382c02 / feature ee0893fe; sole-active cleared) — does NOT make #106 sole-active; does NOT claim IBL program Done. F7/Q1 Bucket4j→Redis parked as PQH #163 pending (not activated). #119 IBL-B7 still Blocked. Formal phase None. Do NOT treat #106 as sole-active. Do NOT activate #119. Do NOT flip #3b/#5a GO. Do NOT claim IBL program Done / go-live.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #107–134 map to IBL-* IDs. REGISTRY ONLY — not a delivery leaf. Do NOT treat #106 as sole-active. Host sole-active cleared — prior NON-CE PQH #159+#160 pqh-f8-format-date-tz Done (FORMAT_DATE F8 + charter) outside this umbrella. Prior IBL-E #134 Done 37239d68 / 68abc7c3. Wave IBL-B In Progress B1–B6 Done / B7 #119 Blocked residual; Wave IBL-A remains Done. F8 residual closed under PQH-F8 #160; F7 parked #163. Do NOT activate #119. Formal phase remains None. Do NOT claim go-live. Do NOT flip checklist #3b/#5a GO. Do NOT mark Wave B / IBL program Done.",
         "testStrategy": "N/A — umbrella. Close when all IBL leaf tasks Done or cancelled/deferred.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-23T01:40:00.000Z"
+        "updatedAt": "2026-07-23T02:55:00.000Z"
       },
       {
         "id": "107",
@@ -2189,36 +2189,36 @@
       {
         "id": "159",
         "title": "PQH-CHARTER: Post-queue hardening program charter (pqh-f8-format-date-tz merge leaf)",
-        "description": "IN PROGRESS 2026-07-23. NON-CE Post-Queue Hardening program charter (post-queue-hardening-2026-07). Slice pqh-f8-format-date-tz; placement ISOLATED; worktree D:/working/DGE-pqh-f8-format-date-tz · feat/pqh-f8-format-date-tz. Batch merge member_task_ids:[\"159\",\"160\"] open. BDD not-applicable (docs-only governance). Scope: program plan docs/plan/post-queue-hardening-program-2026-07.md; priority lock (charter→F8→N19–N20→N22→Word/fonts blocked→seal writer backlog); serial queue; F7 parked; vetoes; formal phase None; sole-active set for #159+#160. frontend_ui_in_scope=false. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02/#119/F7; do NOT claim IBL/CE/go-live Done; do NOT reopen SYS-NORM Waves 0–8.",
-        "details": "SOLE-ACTIVE leaf member with #160. Program SoT: docs/plan/post-queue-hardening-program-2026-07.md. Detail: docs/plan/detail/pqh-f8-format-date-tz.md. Ledger activation 2026-07-23. Docs-only for charter half; code lands under #160. Umbrella #53 CE remains in-progress registry-only.",
-        "testStrategy": "1. Program plan + detail + index/ledger links exist. 2. TM #159+#160 in-progress sole-active; #161/#162 pending queue; #163 parked. 3. #53/#106 notes clear stale N18 sole-active. 4. Formal phase None. 5. Do NOT flip #3b/#5a; do NOT mark #53 Done.",
+        "description": "DONE 2026-07-23. NON-CE Post-Queue Hardening program charter (post-queue-hardening-2026-07). Slice pqh-f8-format-date-tz; Batch merge member_task_ids:[\"159\",\"160\"] closed. MAIN tip ab382c02; feature ee0893fe; worktree REMOVED. BDD not-applicable (docs-only governance). Scope delivered: program plan docs/plan/post-queue-hardening-program-2026-07.md; priority lock; serial queue; F7 parked; vetoes; formal phase None. Sole-active cleared with #160. frontend_ui_in_scope=false. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02/#119/F7; do NOT claim IBL/CE/go-live Done; do NOT reopen SYS-NORM Waves 0–8.",
+        "details": "COMPLETED with #160. Program SoT: docs/plan/post-queue-hardening-program-2026-07.md Leaf 1 Done. Detail: docs/plan/detail/pqh-f8-format-date-tz.md. Ledger completion 2026-07-23. Next queue head #161 pending (not activated). Umbrella #53 CE remains in-progress registry-only.",
+        "testStrategy": "1. Program plan + detail + index/ledger links exist. 2. TM #159+#160 done; sole-active cleared; #161 next queue head pending; #162/#163 pending/parked. 3. Formal phase None. 4. Do NOT flip #3b/#5a; do NOT mark #53 Done.",
         "priority": "high",
         "dependencies": [
           "158"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-23T01:40:00.000Z"
+        "updatedAt": "2026-07-23T02:55:00.000Z"
       },
       {
         "id": "160",
         "title": "PQH-F8: FORMAT_DATE timezone / as-of semantics (pqh-f8-format-date-tz merge leaf)",
-        "description": "IN PROGRESS 2026-07-23. NON-CE Post-Queue Hardening Leaf 1 — IBL F8/Q2 FORMAT_DATE timezone/as-of honesty. Slice pqh-f8-format-date-tz; placement ISOLATED; worktree D:/working/DGE-pqh-f8-format-date-tz · feat/pqh-f8-format-date-tz. Batch merge with #159 open. BDD ready docs/behavior/pqh-f8-format-date-tz.md BDD-PQH-F8-001…012. Scope: optional IANA zoneId binary FORMAT_DATE; documented UTC unary default for instant-like values; date-only as-of; Instant/OffsetDateTime/ZonedDateTime/Date path clarity; OpenAPI/ADR-0056 note via doc-keeper. frontend_ui_in_scope=false; E2E/UIUX N/A. Evidence: mvn verify + Stage 10 deploy. Formal phase None. Sole-active with #159. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02/#119/F7; do NOT merge N19–N22; do NOT claim IBL/CE/go-live Done.",
-        "details": "SOLE-ACTIVE leaf lead with #159 charter. Program: docs/plan/post-queue-hardening-program-2026-07.md priority 2. Detail: docs/plan/detail/pqh-f8-format-date-tz.md. Upstream IBL F8/Q2. Next implementer after doc-keeper (ADR-0056/OpenAPI if needed): backend-engineer. Umbrella #53 registry-only.",
-        "testStrategy": "1. BDD ready F8-001…012. 2. Doc-keeper ADR-0056/OpenAPI/contract-outline zone note. 3. BE TDD ComputeExpressionEvaluator FORMAT_DATE. 4. mvn verify GREEN. 5. Arch review. 6. Queued docker-deploy-queue DEPLOY_OK. 7. Merge + MAIN doc-sync. 8. Do NOT flip #3b/#5a; do NOT mark #53 Done; do NOT activate #119/F7.",
+        "description": "DONE 2026-07-23. NON-CE Post-Queue Hardening Leaf 1 — IBL F8/Q2 FORMAT_DATE timezone/as-of honesty. Slice pqh-f8-format-date-tz; Batch merge with #159 closed. MAIN tip ab382c02; feature ee0893fe; worktree REMOVED. BDD ready/shipped docs/behavior/pqh-f8-format-date-tz.md BDD-PQH-F8-001…012. Scope delivered: optional IANA zoneId binary FORMAT_DATE; documented UTC unary default; date-only as-of; Instant/OffsetDateTime/ZonedDateTime/Date path clarity; ADR-0056/OpenAPI notes. Gates: mvn verify GREEN 2414/0/0/15; architecture PASS_WITH_NOTES Critical=0 merge_go=true; Stage 10 DEPLOY_OK docs/plan/evidence/pqh-f8-format-date-tz/. frontend_ui_in_scope=false; E2E/UIUX N/A. Sole-active cleared. Formal phase None. Do NOT mark #53 Done; do NOT flip #3b/#5a; do NOT activate CE-O02/#119/F7; do NOT mark N19–N22 Done; do NOT claim IBL/CE/go-live Done.",
+        "details": "COMPLETED with #159 charter. Program: docs/plan/post-queue-hardening-program-2026-07.md Leaf 1 Done; program stays In Progress. Detail: docs/plan/detail/pqh-f8-format-date-tz.md. Upstream IBL F8/Q2 closed under PQH. Next queue head #161 N19–N20 pending (not activated). Umbrella #53 registry-only.",
+        "testStrategy": "1. BDD ready F8-001…012 shipped. 2. ADR-0056/OpenAPI/contract-outline zone note. 3. BE TDD ComputeExpressionEvaluator FORMAT_DATE. 4. mvn verify GREEN 2414. 5. Arch review PASS_WITH_NOTES. 6. Queued docker-deploy-queue DEPLOY_OK. 7. Merge + MAIN doc-sync. 8. Do NOT flip #3b/#5a; do NOT mark #53 Done; do NOT activate #119/F7.",
         "priority": "high",
         "dependencies": [
           "159"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-23T01:40:00.000Z"
+        "updatedAt": "2026-07-23T02:55:00.000Z"
       },
       {
         "id": "161",
         "title": "PQH N19-N20: EntityLink where-used + MasterImpact (queued Leaf 2)",
-        "description": "PENDING 2026-07-23 — queued under Post-Queue Hardening priority 3 / serial Leaf 2. SYS-NORM residuals N19-N20 (EntityLink where-used; MasterImpact). NOT sole-active. Do NOT activate until Leaf 1 #159+#160 Done. Do NOT reopen SYS-NORM Waves 0–8. Do NOT fold into #53. Formal phase None. Program: docs/plan/post-queue-hardening-program-2026-07.md.",
-        "details": "Queue stub only. Activate via future deliver + Batch Recommendation after pqh-f8-format-date-tz merge. Origin: docs/plan/system-normalization-program-2026-07.md N19–N20 row (waves remain Done).",
+        "description": "PENDING 2026-07-23 — queued under Post-Queue Hardening priority 3 / serial Leaf 2. SYS-NORM residuals N19-N20 (EntityLink where-used; MasterImpact). NEXT QUEUE HEAD after Leaf 1 #159+#160 Done. NOT sole-active — do NOT auto-activate. Do NOT reopen SYS-NORM Waves 0–8. Do NOT fold into #53. Formal phase None. Program: docs/plan/post-queue-hardening-program-2026-07.md.",
+        "details": "Queue stub only — next queue head after pqh-f8-format-date-tz Done (ab382c02). Activate via future deliver + Batch Recommendation. Origin: docs/plan/system-normalization-program-2026-07.md N19–N20 row (waves remain Done).",
         "testStrategy": "Activate only after Leaf 1 Done; then BDD + FE pipeline per deliver.",
         "priority": "medium",
         "dependencies": [
@@ -2226,7 +2226,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-23T01:40:00.000Z"
+        "updatedAt": "2026-07-23T02:55:00.000Z"
       },
       {
         "id": "162",
@@ -2240,30 +2240,30 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-23T01:40:00.000Z"
+        "updatedAt": "2026-07-23T02:55:00.000Z"
       },
       {
         "id": "163",
         "title": "PQH-F7 PARKED: Bucket4j to Redis / coordinated rate-limit (IBL Q1)",
-        "description": "PENDING 2026-07-23 — PARKED backlog under Post-Queue Hardening (not in Leaf 1–3 serial activate queue). IBL F7/Q1: Bucket4j in-process → Redis/coordinated rate-limit (ADR-0039 residual). Do NOT activate in pqh-f8-format-date-tz. Do NOT mark Done. Do NOT fold into #53 without explicit deliver. Formal phase None. Program: docs/plan/post-queue-hardening-program-2026-07.md.",
+        "description": "PENDING 2026-07-23 — PARKED backlog under Post-Queue Hardening (not in Leaf 1–3 serial activate queue). IBL F7/Q1: Bucket4j in-process → Redis/coordinated rate-limit (ADR-0039 residual). Do NOT activate with F8 leaf (closed). Do NOT mark Done. Do NOT fold into #53 without explicit deliver. Formal phase None. Program: docs/plan/post-queue-hardening-program-2026-07.md.",
         "details": "Parked only. Finding SoT: docs/plan/intl-bank-letter-readiness-program.md F7/Q1. Requires explicit future scheduling — veto F7-parked-not-in-leaf.",
         "testStrategy": "N/A until activated; then distributed limiter BDD + verify + multi-instance evidence.",
         "priority": "low",
         "dependencies": [],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-23T01:40:00.000Z"
+        "updatedAt": "2026-07-23T02:55:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-23T01:40:00.000Z",
+      "lastModified": "2026-07-23T02:55:00.000Z",
       "taskCount": 163,
-      "completedCount": 155,
+      "completedCount": 157,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-23T01:40:00.000Z"
+      "updated": "2026-07-23T02:55:00.000Z"
     }
   }
 }

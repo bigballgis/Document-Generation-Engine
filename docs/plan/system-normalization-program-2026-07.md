@@ -15,7 +15,7 @@
 | **Wave 6 leaf** | TM **#150** · `sys-norm-d1-brands` → **Done** (MAIN merge `64b0a650`; worktree **REMOVED**) |
 | **Wave 7 leaf** | TM **#151** · `sys-norm-promotion-pack` → **Done** (MAIN merge `11356c63` / feature `f795b04a`; worktree **REMOVED**) |
 | **Wave 8 leaf** | TM **#152** · `sys-norm-demo-seed-terms` → **Done** (MAIN merge `8aca145b` / feature `7df6c563`; worktree **REMOVED**) |
-| **Sole-active** | **cleared for SYS-NORM** — host sole-active moved to PQH Leaf 1 TM **#159**+**#160** ([post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md)). Residual N18+L1 TM **#157**+**#158** → **Done** (`a4f59c4d` / `b54281b1`). Waves **0–8** remain **Done** (do **not** reopen) |
+| **Sole-active** | **cleared for SYS-NORM** — host sole-active also **cleared** for PQH Leaf 1 (**#159**+**#160** Done `ab382c02` / `ee0893fe`); next PQH queue **#161** pending ([post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md)). Residual N18+L1 TM **#157**+**#158** → **Done** (`a4f59c4d` / `b54281b1`). Waves **0–8** remain **Done** (do **not** reopen) |
 | **Batch (Wave 8)** | **solo** · `member_task_ids: ["152"]` · `proposed_slice_id: sys-norm-demo-seed-terms` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / parked-UX-not-in-W8 — **closed** |
 | **Batch (Wave 7)** | **solo** · `member_task_ids: ["151"]` · `proposed_slice_id: sys-norm-promotion-pack` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-8 / parked UX — **closed** |
 | **Batch (Wave 6)** | **solo** · `member_task_ids: ["150"]` · `proposed_slice_id: sys-norm-d1-brands` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-7 / Wave-8 / parked UX — **closed** |
@@ -199,8 +199,10 @@ detail [detail/sys-norm-n18-role-l1.md](./detail/sys-norm-n18-role-l1.md); Gates
 E2E SYS-NORM-N18 **5/5**/UIUX **PASS_WITH_NOTES**/Arch **merge_with_notes**/Stage 5+10
 **DEPLOY_OK**).
 
-**Sole-active (host delivery leaf):** moved to NON-CE **PQH** Leaf 1 TM **#159**+**#160**
-`pqh-f8-format-date-tz` — see [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md).
+**Sole-active (host delivery leaf):** **cleared** — prior NON-CE **PQH** Leaf 1 TM
+**#159**+**#160** `pqh-f8-format-date-tz` → **Done** (`ab382c02` / `ee0893fe`); next PQH
+queue head **#161** N19–N20 **pending** (not activated) — see
+[post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md).
 SYS-NORM Waves **0–8** remain **Done** (do **not** reopen as In Progress). Residual N18+L1
 TM **#157**+**#158** → **Done** (`a4f59c4d` / `b54281b1`). N19–N20 / N22 queue under PQH
 (**#161** / **#162** `pending`). Prior §4a Binding editor + Auto `referenceKey` TM
