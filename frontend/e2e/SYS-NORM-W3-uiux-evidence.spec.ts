@@ -163,7 +163,7 @@ test.describe('SYS-NORM-W3-UIUX evidence @1440 dual-brand', () => {
     }
   })
 
-  test('05 Invocation detail drawer (when rows exist)', async ({ page }) => {
+  test('05 Invocation detail drawer + More→settings (when rows exist)', async ({ page }) => {
     await page.setViewportSize(SYS_NORM_W3_VIEWPORT)
     await loginAs(page, E2E_GROUP_ADMIN)
     await dismissOnboardingTourIfPresent(page)
@@ -174,7 +174,11 @@ test.describe('SYS-NORM-W3-UIUX evidence @1440 dual-brand', () => {
     const rowCount = await rows.count()
     test.skip(rowCount === 0, 'No invocation rows — drawer evidence skipped (honest empty)')
 
-    await rows.first().getByRole('button', { name: /open summary|打开摘要/i }).click()
+    const row = rows.first()
+    // N22: primary Open summary is TableEditMoreActions Edit slot.
+    const actions = row.getByTestId('table-edit-more-actions')
+    await expect(actions).toBeVisible()
+    await actions.getByRole('button', { name: /open summary|打开摘要/i }).click()
     const drawer = page.getByTestId('invocation-summary-drawer')
     await expect(drawer).toBeVisible({ timeout: 20_000 })
     await expect(drawer.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
@@ -183,6 +187,22 @@ test.describe('SYS-NORM-W3-UIUX evidence @1440 dual-brand', () => {
 
     await captureSysNormW3Screenshot(page, '03-invocation-drawer-redbc-1440x900.png')
     await captureSysNormW3LocatorScreenshot(drawer, '03b-invocation-drawer-redbc-crop.png')
+
+    await drawer.getByRole('button', { name: /close|关闭/i }).click().catch(async () => {
+      await page.keyboard.press('Escape')
+    })
+    await expect(drawer).toBeHidden({ timeout: 10_000 })
+
+    // N22: API settings under More — menu items teleport to body; scope :visible.
+    await actions.getByRole('button', { name: /^more$/i }).click()
+    const moreMenu = page.locator('.el-dropdown-menu:visible')
+    const settingsItem = moreMenu.getByTestId('api-invocations-open-settings')
+    await expect(settingsItem).toBeVisible()
+    await captureSysNormW3LocatorScreenshot(moreMenu, '03c-more-menu-settings-redbc-crop.png')
+    await settingsItem.click()
+    await expect(page).toHaveURL(/\/api\/packages\/[^/]+\/settings/, { timeout: 20_000 })
+    await expect(page.getByTestId('api-package-settings-panel')).toBeVisible({ timeout: 30_000 })
+    await captureSysNormW3Screenshot(page, '03d-settings-via-more-redbc-1440x900.png')
   })
 
   test('06–07 Package settings complete dual-brand', async ({ page }) => {

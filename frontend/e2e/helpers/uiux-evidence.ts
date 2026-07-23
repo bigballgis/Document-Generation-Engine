@@ -2104,3 +2104,34 @@ export async function captureBindingEditorIaLocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** PQH N22 / #162 — Catalog Edit/More row actions — 1440×900 dual-brand. */
+export const PQH_N22_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'PQH-N22')
+export const PQH_N22_SCREENSHOT_DIR = path.join(PQH_N22_EVIDENCE_ROOT, 'screenshots')
+export const PQH_N22_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensurePqhN22EvidenceDirs(): void {
+  fs.mkdirSync(PQH_N22_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function pqhN22ScreenshotPath(filename: string): string {
+  return path.join(PQH_N22_SCREENSHOT_DIR, filename)
+}
+
+export async function capturePqhN22Screenshot(page: Page, filename: string): Promise<string> {
+  ensurePqhN22EvidenceDirs()
+  const target = pqhN22ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function capturePqhN22LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensurePqhN22EvidenceDirs()
+  const target = pqhN22ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+

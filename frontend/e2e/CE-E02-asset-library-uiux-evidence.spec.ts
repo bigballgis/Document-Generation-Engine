@@ -115,7 +115,11 @@ test.describe('CE-E02 Asset Library UIUX evidence @1440 dual-brand', () => {
       hasText: fixtureAssetKey,
     })
     await expect(row).toBeVisible({ timeout: 20_000 })
-    await expect(row.getByTestId('asset-library-disable')).toBeVisible()
+    // N22: Disable lives under TableEditMoreActions → More (teleports to body).
+    const actions = row.getByTestId('table-edit-more-actions')
+    await expect(actions).toBeVisible()
+    await expect(actions.locator('.table-edit-more-actions__edit')).toHaveCount(0)
+    await expect(actions.getByRole('button', { name: /^more$/i })).toBeVisible()
     await expect(row.getByText(/^active$/i)).toBeVisible()
 
     // Entity display: asset key as human label, no raw UUID as primary cell text
@@ -132,6 +136,7 @@ test.describe('CE-E02 Asset Library UIUX evidence @1440 dual-brand', () => {
       page.locator('.catalog-filter-toolbar'),
       '01c-catalog-filters-redbc-crop.png',
     )
+    await captureCeE02LocatorScreenshot(actions, '01d-more-only-actions-redbc-crop.png')
 
     // Upload dialog
     await page.getByTestId('asset-library-upload-open').click()
@@ -147,8 +152,12 @@ test.describe('CE-E02 Asset Library UIUX evidence @1440 dual-brand', () => {
     await uploadDialog.getByRole('button', { name: /^cancel$/i }).click()
     await expect(uploadDialog).toHaveCount(0)
 
-    // Disable confirm (full-page + crop — EP message-box layout is platform-known)
-    await row.getByTestId('asset-library-disable').click()
+    // Disable via More → teleported menu (full-page + crop — EP message-box layout is platform-known)
+    await actions.getByRole('button', { name: /^more$/i }).click()
+    const moreMenu = page.locator('.el-dropdown-menu:visible')
+    await expect(moreMenu.getByTestId('asset-library-disable')).toBeVisible()
+    await captureCeE02LocatorScreenshot(moreMenu, '02b-more-menu-disable-redbc-crop.png')
+    await moreMenu.getByTestId('asset-library-disable').click()
     const confirmBox = page.locator('.el-message-box')
     await expect(confirmBox).toBeVisible()
     await expect(confirmBox.getByRole('button', { name: /^disable$/i })).toBeVisible()
@@ -172,6 +181,8 @@ test.describe('CE-E02 Asset Library UIUX evidence @1440 dual-brand', () => {
       hasText: fixtureAssetKey,
     })
     await expect(greenRow).toBeVisible({ timeout: 20_000 })
+    const greenActions = greenRow.getByTestId('table-edit-more-actions')
+    await expect(greenActions).toBeVisible()
     await expect(page.getByTestId('asset-library-upload-open')).toBeVisible()
     await assertNoViewportOverflow(page)
 
@@ -190,7 +201,10 @@ test.describe('CE-E02 Asset Library UIUX evidence @1440 dual-brand', () => {
     )
     await greenDialog.getByRole('button', { name: /^cancel$/i }).click()
 
-    await greenRow.getByTestId('asset-library-disable').click()
+    await greenActions.getByRole('button', { name: /^more$/i }).click()
+    const greenMenu = page.locator('.el-dropdown-menu:visible')
+    await expect(greenMenu.getByTestId('asset-library-disable')).toBeVisible()
+    await greenMenu.getByTestId('asset-library-disable').click()
     const greenConfirm = page.locator('.el-message-box')
     await expect(greenConfirm).toBeVisible()
     await captureCeE02LocatorScreenshot(

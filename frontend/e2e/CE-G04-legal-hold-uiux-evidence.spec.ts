@@ -158,7 +158,11 @@ test.describe('CE-G04 Legal Hold UIUX evidence @1440 dual-brand', () => {
       .filter({ hasText: fixtureReason })
     await expect(row).toBeVisible({ timeout: 20_000 })
     await expect(row.getByTestId('legal-hold-status-ACTIVE')).toBeVisible()
-    await expect(row.getByTestId('legal-hold-release')).toBeVisible()
+    // N22: Release lives under TableEditMoreActions → More (teleports to body).
+    const actions = row.getByTestId('table-edit-more-actions')
+    await expect(actions).toBeVisible()
+    await expect(actions.locator('.table-edit-more-actions__edit')).toHaveCount(0)
+    await expect(actions.getByRole('button', { name: /^more$/i })).toBeVisible()
     await expect(row.getByText(fixtureHold.holdExternalId)).toBeVisible()
 
     const tableText = await page.getByTestId('legal-hold-table').innerText()
@@ -177,6 +181,7 @@ test.describe('CE-G04 Legal Hold UIUX evidence @1440 dual-brand', () => {
       '01c-status-filter-redbc-crop.png',
     )
     await captureCeG04LocatorScreenshot(row, '01d-active-row-redbc-crop.png')
+    await captureCeG04LocatorScreenshot(actions, '01e-more-only-actions-redbc-crop.png')
 
     // Create dialog — TEMPLATE_WINDOW default
     const dialog = await openCreateDialog(page)
@@ -203,8 +208,12 @@ test.describe('CE-G04 Legal Hold UIUX evidence @1440 dual-brand', () => {
     await page.getByTestId('legal-hold-create-cancel').click()
     await expect(dialog).toBeHidden({ timeout: 10_000 })
 
-    // Release MessageBox (cancel — do not mutate fixture yet)
-    await row.getByTestId('legal-hold-release').click()
+    // Release via More → teleported menu (cancel — do not mutate fixture yet)
+    await actions.getByRole('button', { name: /^more$/i }).click()
+    const moreMenu = page.locator('.el-dropdown-menu:visible')
+    await expect(moreMenu.getByTestId('legal-hold-release')).toBeVisible()
+    await captureCeG04LocatorScreenshot(moreMenu, '03b-more-menu-release-redbc-crop.png')
+    await moreMenu.getByTestId('legal-hold-release').click()
     const confirmBox = page.locator('.el-message-box')
     await expect(confirmBox).toBeVisible()
     await expect(confirmBox.getByText(/release legal hold/i)).toBeVisible()
@@ -288,7 +297,12 @@ test.describe('CE-G04 Legal Hold UIUX evidence @1440 dual-brand', () => {
     )
     await page.getByTestId('legal-hold-create-cancel').click()
 
-    await greenRow.getByTestId('legal-hold-release').click()
+    const greenActions = greenRow.getByTestId('table-edit-more-actions')
+    await expect(greenActions).toBeVisible()
+    await greenActions.getByRole('button', { name: /^more$/i }).click()
+    const greenMenu = page.locator('.el-dropdown-menu:visible')
+    await expect(greenMenu.getByTestId('legal-hold-release')).toBeVisible()
+    await greenMenu.getByTestId('legal-hold-release').click()
     const greenConfirm = page.locator('.el-message-box')
     await expect(greenConfirm).toBeVisible()
     await captureCeG04LocatorScreenshot(
