@@ -1,0 +1,39 @@
+{
+  "result": "DEPLOY_OK",
+  "when": "2026-07-23T23:45:27+08:00",
+  "utc": "2026-07-23T15:45:27Z",
+  "slice": "pqh-f7-redis-rate-limit",
+  "stage": 10,
+  "reason": "PQH-F7 Redis rate-limit stage10 deploy evidence COMPOSE_PROJECT_NAME=documentgenerationengine",
+  "task_ids": ["163"],
+  "worktree": "D:/working/DGE-pqh-f7-redis-rate-limit",
+  "branch": "feat/pqh-f7-redis-rate-limit",
+  "head": "850b51c9f091e83c4bbcb96b6bb462603da004ab",
+  "head_note": "feature tip SHA equals MAIN tip; PQH-F7 code present as uncommitted worktree changes packaged into backend image",
+  "main_tip_at_leaf_start": "850b51c9",
+  "compose_project": "documentgenerationengine",
+  "frontend_port": 4173,
+  "backend_port": 8080,
+  "healthz_status": 200,
+  "healthz_body": "{\"status\":\"UP\"}",
+  "frontend_status": 200,
+  "frontend_body_len": 1202,
+  "backend_image_digest": "sha256:2dfa77960ba95aa47d1eaaf9f89616c4fd2a1ee726378abc3e1b1f2337196934",
+  "frontend_image_digest": "sha256:b6fe5e5b1c43d215f06be9e64850b8a2077fa9b17f356f3af6ce7da52d7c750f",
+  "previous_known_good_backend": "sha256:7a76976af1eae43ec924d908de68507ebeb3ead75e47da209fc2bb253254ca7f",
+  "previous_known_good_frontend": "sha256:3a09d46600ae0abbd1171515767a9153db18997c12e541c420827e67fa437cd3",
+  "command": "$env:COMPOSE_PROJECT_NAME='documentgenerationengine'; $env:FRONTEND_PORT='4173'; .\\scripts\\docker-deploy-queue.ps1 -Reason \"PQH-F7 Redis rate-limit stage10 deploy evidence COMPOSE_PROJECT_NAME=documentgenerationengine\"",
+  "queue_status": "DEPLOY_QUEUE: idle (no lock); Pending ticket files: 0",
+  "rebuild": "full host mvn package + pnpm build + image package; backend image rebuilt with PQH-F7 jar; frontend image layers reused (digest unchanged from prior)",
+  "rate_limit_default_off": {
+    "RUNTIME_RATE_LIMIT_DISTRIBUTED": "<unset>",
+    "packaged_default": "distributed: ${RUNTIME_RATE_LIMIT_DISTRIBUTED:false}",
+    "distributed_true_enabled_in_stack": false,
+    "runtime_path_smoke": "GET /api/v1/system/health -> HTTP 401 (filter chain alive; no Redis rate-limit fail-closed)"
+  },
+  "remediation_attempts": [
+    "FAIL: JWT_SECRET insecure default from .env.example (BDD-OPS-JWT-SECRET-001) — synced unique secret from MAIN .env (len=64; value not recorded)",
+    "FAIL: missing COMPOSE_PROJECT_NAME caused dge-pqh-f7-redis-rate-limit project + /docgen-minio name conflict — orphan network/volumes removed; set COMPOSE_PROJECT_NAME=documentgenerationengine + FRONTEND_PORT=4173"
+  ],
+  "next": "11 integration-merger"
+}

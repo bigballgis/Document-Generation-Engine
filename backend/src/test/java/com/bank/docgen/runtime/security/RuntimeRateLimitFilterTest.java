@@ -7,15 +7,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bank.docgen.infrastructure.config.RuntimeRateLimitProperties;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.runtime.metrics.RateLimitBackendUnavailableMetrics;
 import com.bank.docgen.runtime.metrics.RateLimitDeniedMetrics;
 import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.bucket4j.ConsumptionProbe;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +29,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 class RuntimeRateLimitFilterTest {
 
     @Mock
-    private RuntimeRateLimitService rateLimitService;
+    private RuntimeRateLimiter rateLimitService;
     @Mock
     private MessageResolver messageResolver;
     @Mock
@@ -40,6 +39,7 @@ class RuntimeRateLimitFilterTest {
     private final TraceIdProvider traceIdProvider = new TraceIdProvider();
     private SimpleMeterRegistry meterRegistry;
     private RateLimitDeniedMetrics rateLimitDeniedMetrics;
+    private RateLimitBackendUnavailableMetrics rateLimitBackendUnavailableMetrics;
 
     private RuntimeRateLimitFilter filter;
 
@@ -47,13 +47,15 @@ class RuntimeRateLimitFilterTest {
     void setUp() {
         meterRegistry = new SimpleMeterRegistry();
         rateLimitDeniedMetrics = new RateLimitDeniedMetrics(meterRegistry);
+        rateLimitBackendUnavailableMetrics = new RateLimitBackendUnavailableMetrics(meterRegistry);
         filter = new RuntimeRateLimitFilter(
                 rateLimitService,
                 traceIdProvider,
                 messageResolver,
                 objectMapper,
                 runtimeGenerationAuditRecorder,
-                rateLimitDeniedMetrics
+                rateLimitDeniedMetrics,
+                rateLimitBackendUnavailableMetrics
         );
     }
 
@@ -62,10 +64,8 @@ class RuntimeRateLimitFilterTest {
         when(rateLimitService.enabled()).thenReturn(true);
         when(messageResolver.resolve("api.error.runtime.rateLimitExceeded"))
                 .thenReturn("Too many requests. Please retry later.");
-        ConsumptionProbe rejected = mock(ConsumptionProbe.class);
-        when(rejected.isConsumed()).thenReturn(false);
-        when(rejected.getNanosToWaitForRefill()).thenReturn(2_000_000_000L);
-        when(rateLimitService.tryConsumeKey("CRED-1:svc-caller")).thenReturn(rejected);
+        when(rateLimitService.tryConsumeKey("CRED-1:svc-caller"))
+                .thenReturn(RateLimitDecision.denied(2_000_000_000L));
 
         MockHttpServletRequest request = new MockHttpServletRequest(
                 "POST", "/api/dev/v1/templates/TPL-001/generate");
@@ -89,6 +89,41 @@ class RuntimeRateLimitFilterTest {
                 body.path("metadata").path("traceId").asText(),
                 body.path("metadata").path("auditId").asText()
         );
+    }
+
+    @Test
+    void backendUnavailableWrites503Not429() throws Exception {
+        when(rateLimitService.enabled()).thenReturn(true);
+        when(messageResolver.resolve("api.error.runtime.rateLimitBackendUnavailable"))
+                .thenReturn("Rate-limit service is temporarily unavailable. Please retry later.");
+        when(rateLimitService.tryConsumeKey("CRED-1:svc-caller"))
+                .thenReturn(RateLimitDecision.backendUnavailable());
+
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "POST", "/api/dev/v1/templates/TPL-001/generate");
+        request.addHeader(ApiCredentialAuthenticationFilter.HEADER_CREDENTIAL_ID, "CRED-1");
+        request.addHeader(ApiCredentialAuthenticationFilter.HEADER_ACCESS_ACCOUNT, "svc-caller");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = mock(FilterChain.class);
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(response.getStatus()).isEqualTo(503);
+        assertThat(response.getHeader("Retry-After")).isEqualTo("1");
+        JsonNode body = objectMapper.readTree(response.getContentAsString());
+        assertThat(body.path("error").path("code").asText())
+                .isEqualTo(ApiErrorCodes.RATE_LIMIT_BACKEND_UNAVAILABLE);
+        assertThat(body.path("error").path("category").asText()).isEqualTo("RUNTIME");
+        assertThat(body.path("error").path("retryable").asBoolean()).isTrue();
+        assertThat(body.path("error").path("messageKey").asText())
+                .isEqualTo("api.error.runtime.rateLimitBackendUnavailable");
+        assertThat(meterRegistry.find("docgen.http.rate_limit.backend_unavailable").counter().count())
+                .isEqualTo(1.0);
+        assertThat(meterRegistry.find("docgen.http.rate_limit.denied").counter().count()).isZero();
+        verify(runtimeGenerationAuditRecorder, never()).recordRateLimitDenied(
+                any(), any(), any(), any(), any()
+        );
+        verify(chain, never()).doFilter(any(), any());
     }
 
     /**
@@ -140,9 +175,7 @@ class RuntimeRateLimitFilterTest {
     @Test
     void withinLimitContinuesFilterChain() throws Exception {
         when(rateLimitService.enabled()).thenReturn(true);
-        ConsumptionProbe accepted = mock(ConsumptionProbe.class);
-        when(accepted.isConsumed()).thenReturn(true);
-        when(rateLimitService.tryConsumeKey("CRED-1:svc-caller")).thenReturn(accepted);
+        when(rateLimitService.tryConsumeKey("CRED-1:svc-caller")).thenReturn(RateLimitDecision.allowed());
 
         MockHttpServletRequest request = new MockHttpServletRequest(
                 "POST", "/api/dev/v1/templates/TPL-001/generate");
@@ -154,5 +187,20 @@ class RuntimeRateLimitFilterTest {
         filter.doFilter(request, response, chain);
 
         verify(chain).doFilter(request, response);
+    }
+
+    @Test
+    void managementPathsAreNotFiltered() throws Exception {
+        when(rateLimitService.enabled()).thenReturn(true);
+
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "GET", "/api/management/templates");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = mock(FilterChain.class);
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain).doFilter(request, response);
+        verify(rateLimitService, never()).tryConsumeKey(any());
     }
 }

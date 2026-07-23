@@ -169,10 +169,11 @@ Expect `# HELP` lines for JVM and HTTP metrics. After LR-D3 instrumentation, als
 | Residual | Ops implication |
 | --- | --- |
 | Sticky SSE | Progress SSE is process-local; multi-pod needs sticky sessions at ingress **or** Redis pub/sub relay (not in v1) |
-| Process-local rate-limit | Bucket4j in-process; `RUNTIME_RATE_LIMIT_DISTRIBUTED` defaults **false** — distributed switch/config is residual, not delivered |
-| Scale-out gate | Prerequisites table in topology ADR (schedulers mutex, SSE, shared limiter, Kafka async, Redisson) before replicas > 1 / HPA |
+| Runtime rate-limit (default) | Process-local Bucket4j; `docgen.runtime.rate-limit.distributed` / `RUNTIME_RATE_LIMIT_DISTRIBUTED` defaults **`false`** — correct for single-replica v1 |
+| Runtime rate-limit (opt-in scale-out) | Set `RUNTIME_RATE_LIMIT_DISTRIBUTED=true` **only** when Redis is healthy and multi-replica (or intentional shared-quota) is intended. Shared quota key = `credentialId:accessAccount`. If Redis coordination fails while distributed=true → fail-closed HTTP **503** `RATE_LIMIT_BACKEND_UNAVAILABLE` (`retryable=true`; messageKey `api.error.runtime.rateLimitBackendUnavailable`) — **not** silent process-local fallback, **not** **429**. True quota exhaustion remains **429** `RATE_LIMIT_EXCEEDED` + `Retry-After`. Leaf: [PQH-F7](../behavior/pqh-f7-redis-rate-limit.md) / TM **#163** (enable after leaf verify; do not claim code Done from runbook alone) |
+| Scale-out gate | Prerequisites table in topology ADR (schedulers mutex, SSE, shared limiter, Kafka async, Redisson locks) before replicas > 1 / HPA — closing rate-limit ≠ closing SSE/locks/Kafka |
 
-Companion honesty note: [0044-multi-instance-correctness-baseline.md](../adr/operations/0044-multi-instance-correctness-baseline.md). Behavior: [prod-ops-security-hardening.md](../behavior/prod-ops-security-hardening.md) (D01B-C9).
+Companion honesty note: [0044-multi-instance-correctness-baseline.md](../adr/operations/0044-multi-instance-correctness-baseline.md). Behavior: [pqh-f7-redis-rate-limit.md](../behavior/pqh-f7-redis-rate-limit.md); PRR sibling [prod-ops-security-hardening.md](../behavior/prod-ops-security-hardening.md) (D01B-C9 rate-limit clause narrowed by PQH-F7).
 
 <a id="draft-alert-thresholds-lrd3--not-confirmed-slos"></a>
 

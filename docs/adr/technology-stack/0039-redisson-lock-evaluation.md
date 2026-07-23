@@ -12,6 +12,9 @@ related:
   - docs/adr/technology-stack/0037-backend-dependency-realization-sequencing.md
   - docs/adr/technology-stack/0034-data-and-storage-operations-baseline.md
   - docs/adr/operations/0044-deployment-topology-v1.md
+  - docs/adr/operations/0044-multi-instance-correctness-baseline.md
+  - docs/behavior/pqh-f7-redis-rate-limit.md
+  - docs/adr/api/0031-api-platform-hardening-baseline.md
 ---
 
 # ADR 0039: Redisson Distributed Lock Evaluation
@@ -60,3 +63,17 @@ without distributed locks. Production deployment today is a single backend insta
 - [ADR 0028: Backend Platform Stack Baseline](./0028-backend-platform-stack-baseline.md)
 - [ADR 0037: Backend Dependency Realization Sequencing](./0037-backend-dependency-realization-sequencing.md)
 - Refined by [ADR 0044: Deployment Topology for v1 Launch](../operations/0044-deployment-topology-v1.md) (deployment topology v1)
+- [0044 multi-instance correctness baseline](../operations/0044-multi-instance-correctness-baseline.md) — rate-limit vs locks scope split
+- [ADR 0031: API Platform Hardening Baseline](../api/0031-api-platform-hardening-baseline.md) — Redis rate-limit counters (orthogonal to locks)
+
+## Appendix — Relationship to PQH-F7 shared rate-limit (2026-07-23)
+
+**Does not amend the Accepted Decision body above.**
+
+[PQH-F7](../../behavior/pqh-f7-redis-rate-limit.md) / TM **#163** delivers ADR-0044 scale-out prerequisite **#3** — **shared Redis-coordinated runtime rate-limit** (Bucket4j-redis / Lettuce-backed proxy when `docgen.runtime.rate-limit.distributed=true`). That leaf:
+
+- **Is** a prerequisite for multi-instance *quota* correctness.
+- **Is not** the Redisson **distributed lock** slice for idempotency `begin` / async-task ownership.
+- **Does not** lift Decision §2–§3: Redisson locks remain **mandatory before** claiming multi-instance ownership safety and remain **deferred** until a dedicated locks slice.
+
+Readers must not treat PQH-F7 Done (when claimed after gates) as ADR-0039 lock adoption or as overall multi-instance correctness complete.

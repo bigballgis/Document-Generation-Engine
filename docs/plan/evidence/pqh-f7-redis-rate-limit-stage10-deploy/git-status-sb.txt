@@ -1,0 +1,43 @@
+## feat/pqh-f7-redis-rate-limit...origin/main
+ M .taskmaster/tasks/tasks.json
+ M backend/src/main/java/com/bank/docgen/infrastructure/config/ProductionMultiInstanceGuard.java
+ M backend/src/main/java/com/bank/docgen/infrastructure/config/RuntimeRateLimitProperties.java
+ M backend/src/main/java/com/bank/docgen/runtime/security/RuntimeRateLimitFilter.java
+ M backend/src/main/java/com/bank/docgen/runtime/security/RuntimeRateLimitService.java
+ M backend/src/main/java/com/bank/docgen/sharedkernel/api/ApiErrorCodes.java
+ M backend/src/main/resources/application-prod.yml
+ M backend/src/main/resources/application.yml
+ M backend/src/main/resources/i18n/messages_en.properties
+ M backend/src/test/java/com/bank/docgen/runtime/security/RuntimeRateLimitFilterTest.java
+ M backend/src/test/java/com/bank/docgen/runtime/security/RuntimeRateLimitServiceTest.java
+ M docs/README.md
+ M docs/adr/README.md
+ M docs/adr/api/0006-api-error-model.md
+ M docs/adr/api/0031-api-platform-hardening-baseline.md
+ M docs/adr/operations/0044-deployment-topology-v1.md
+ M docs/adr/operations/0044-multi-instance-correctness-baseline.md
+ M docs/adr/technology-stack/0039-redisson-lock-evaluation.md
+ M docs/api/README.md
+ M docs/api/contract-outline.md
+ M docs/api/openapi-v1.yaml
+ M docs/behavior/prod-ops-security-hardening.md
+ M docs/operations/runbook.md
+ M docs/plan/README.md
+ M docs/plan/core-excellence-program-2026-07.md
+ M docs/plan/execution-sync-ledger.md
+ M docs/plan/intl-bank-letter-readiness-program.md
+ M docs/plan/master-plan.md
+ M docs/plan/post-queue-hardening-program-2026-07.md
+ M docs/plan/system-normalization-program-2026-07.md
+ M frontend/src/auto-imports.d.ts
+?? backend/src/main/java/com/bank/docgen/infrastructure/config/RuntimeRateLimitConfig.java
+?? backend/src/main/java/com/bank/docgen/runtime/metrics/RateLimitBackendUnavailableMetrics.java
+?? backend/src/main/java/com/bank/docgen/runtime/security/RateLimitDecision.java
+?? backend/src/main/java/com/bank/docgen/runtime/security/RedisRuntimeRateLimitService.java
+?? backend/src/main/java/com/bank/docgen/runtime/security/RuntimeRateLimiter.java
+?? backend/src/test/java/com/bank/docgen/infrastructure/config/RuntimeRateLimitPropertiesTest.java
+?? backend/src/test/java/com/bank/docgen/runtime/metrics/RateLimitBackendUnavailableMetricsTest.java
+?? backend/src/test/java/com/bank/docgen/runtime/security/RedisRuntimeRateLimitServiceTest.java
+?? docs/behavior/pqh-f7-redis-rate-limit.md
+?? docs/plan/detail/pqh-f7-redis-rate-limit.md
+?? docs/plan/evidence/pqh-f7-redis-rate-limit-stage10-deploy/

@@ -1459,6 +1459,7 @@ Async task query response structure
 | 生成类 | `GENERATION` | 文档生成、PDF 转换、生成任务或生成结果资源异常。 |
 | 加密类 | `ENCRYPTION` | 动态加密参数或加密处理失败。 |
 | 批量类 | `BATCH` | 批量输入、单笔标识、部分失败或整批处理失败。 |
+| 运行时平台控制类 | `RUNTIME` | 运行时 API 限流等平台控制（PQH-F7；不含业务校验/生成失败）。 |
 
 ## v1 基线错误码清单
 
@@ -1540,6 +1541,10 @@ Async task query response structure
 | `BATCH` | `ORIGINAL_BATCH_NOT_FOUND` | `api.error.batch.originalBatchNotFound` | `false` | Original batch was not found. |
 | `BATCH` | `BATCH_PARTIAL_FAILED` | `api.error.batch.batchPartialFailed` | `false` | One or more batch items failed. |
 | `BATCH` | `BATCH_PROCESSING_FAILED` | `api.error.batch.batchProcessingFailed` | `true` | Batch processing failed. |
+| `RUNTIME` | `RATE_LIMIT_EXCEEDED` | `api.error.runtime.rateLimitExceeded` | `true` | Too many requests. Please retry later. |
+| `RUNTIME` | `RATE_LIMIT_BACKEND_UNAVAILABLE` | `api.error.runtime.rateLimitBackendUnavailable` | `true` | Rate-limit coordination backend is temporarily unavailable. |
+
+**PQH-F7（2026-07-23；Task Master #163）：** 运行时限流作用于 `/api/{env}/v1/*`（`RuntimeRateLimitFilter`）；**不**作用于 `/api/management/**`。桶键 = `credentialId:accessAccount`；缺凭证头 **pass-through**（下游认证 401）。`docgen.runtime.rate-limit.distributed` / `RUNTIME_RATE_LIMIT_DISTRIBUTED` **默认 false**（进程内 Bucket4j）。`distributed=true` 时共享 Redis 配额；Redis 协调失败 → **503** `RATE_LIMIT_BACKEND_UNAVAILABLE`（fail-closed；**禁止**静默回退进程内；**禁止**用 429 冒充配额耗尽）。配额耗尽路径保持 **429** `RATE_LIMIT_EXCEEDED` + `Retry-After` + 审计/拒绝指标。English-first messageKeys：`api.error.runtime.rateLimitExceeded`（既有）、`api.error.runtime.rateLimitBackendUnavailable`（本叶新增；实现写入 `messages_en.properties` + 前端 `api.error` 目录若适用）。行为 SoT：[pqh-f7-redis-rate-limit.md](../behavior/pqh-f7-redis-rate-limit.md)（BDD-PQH-F7-001…012）。Formal phase **None**；**not** go-live；do **not** flip **#3b/#5a GO**；do **not** claim IBL/CE Done；**docs-first — 勿将本文标为实现 Done**。
 
 ## HTTP 状态码确认映射
 
@@ -1556,8 +1561,9 @@ Async task query response structure
 | 409 Conflict | `RELEASE_VERSION_DISABLED`、`DEFAULT_ROUTE_NOT_CONFIGURED`、`DEFAULT_ROUTE_TARGET_UNAVAILABLE`、`TEMPLATE_DISABLED`、`TEMPLATE_DEPRECATED`、`IDEMPOTENCY_KEY_CONFLICT`、`IDEMPOTENCY_RETRY_NOT_ALLOWED`、`ASYNC_TASK_CANCELLATION_NOT_ALLOWED`、`BINDING_VERSION_CONFLICT`（CE-U21 锚点绑定乐观锁）。 | 请求与当前版本、模板、default 配置、幂等状态、异步任务或绑定并发令牌冲突。 |
 | 410 Gone | `DOWNLOAD_URL_EXPIRED`、`RESULT_RETENTION_EXPIRED`、`ASYNC_TASK_EXPIRED`。 | 资源曾可用，但下载地址、任务或结果已过期。 |
 | 422 Unprocessable Entity | `VARIABLE_VALIDATION_FAILED`（IBL-A1 runtime/preview VariableSchema 聚合校验）、`VARIABLE_COMPUTE_FAILED`（CE-K03 / IBL-A2 / IBL-A3 / PQH-F8 compute 求值失败，含非法 `FORMAT_AMOUNT` 币种、未支持/非法 `SPELL_AMOUNT` pair、非法 `FORMAT_DATE` zoneId/datetime）、`VARIABLE_REQUIRED`、`VARIABLE_TYPE_INVALID`、`VARIABLE_FORMAT_INVALID`、`VARIABLE_RULE_FAILED`、`OOXML_VALIDATION_FAILED`、`EXCEPTION_REASON_REQUIRED`、`EXCEPTION_SECONDARY_CONFIRM_REQUIRED`。 | 请求结构可解析，但模板变量、业务规则或 compute 表达式校验/求值未通过，装配后 DOCX 未通过 OOXML 输出校验（fail-closed，不落库/不预览），或 CE-G01 例外干预字段缺失。 |
+| 429 Too Many Requests | `RATE_LIMIT_EXCEEDED`（运行时身份配额耗尽；须带 `Retry-After`）。 | 调用方配额耗尽；**不是**限流后端宕机。 |
 | 500 Internal Server Error | `TEMPLATE_CONTRACT_INVALID`、`TEMPLATE_ANCHOR_MISSING`、`DOCX_GENERATION_FAILED`、`PDF_CONVERSION_FAILED`、`ENCRYPTION_FAILED`、`BATCH_PROCESSING_FAILED`。 | 平台处理、模板资产、生成、转换、加密或整批处理失败。 |
-| 503 Service Unavailable | `AD_GROUP_RESOLUTION_FAILED`、`IDEMPOTENCY_STORE_UNAVAILABLE`、`GENERATION_SERVICE_UNAVAILABLE`、`PDF_CONVERSION_CAPACITY_EXCEEDED`。 | 权限依赖、幂等存储、生成服务临时不可用，或 PDF 转换池饱和。 |
+| 503 Service Unavailable | `AD_GROUP_RESOLUTION_FAILED`、`IDEMPOTENCY_STORE_UNAVAILABLE`、`GENERATION_SERVICE_UNAVAILABLE`、`PDF_CONVERSION_CAPACITY_EXCEEDED`、`RATE_LIMIT_BACKEND_UNAVAILABLE`（PQH-F7：`distributed=true` 且 Redis 协调不可用）。 | 权限依赖、幂等存储、生成服务临时不可用、PDF 转换池饱和，或分布式限流后端不可用。 |
 | 504 Gateway Timeout | `GENERATION_TIMEOUT`。 | 文档生成超时。 |
 
 ## 统一错误响应确认

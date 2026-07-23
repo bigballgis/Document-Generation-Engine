@@ -19,6 +19,8 @@
 
 **完成声明约束：** 本叶关闭 Wave D 残差中的 **actuator 匿名暴露**、**nginx CSP/标准安全头**、**ADR-0044 文档诚实**、以及 **FailedSyncInvocationErrorMapper** 对 D01A 三码族的 IRC 对齐。**禁止**据此宣称 go-live；**禁止**翻转 checklist **#3b**（保持 **CONDITIONAL**）；**禁止**将 **#5a** 标为 **GO**；**禁止**交付本文件 §OUT 所列 dashboard FE 与其它后续叶范围。
 
+**Supersession note (rate-limit residual only — 2026-07-23):** D01B-C9 / BDD-PRR-D01B-011 对 runtime rate-limit「进程内权威 / distributed 不得读成已交付」的诚实陈述，在 **PQH-F7 / TM #163** 文档契约下被**收窄**（非整叶作废）：默认仍 `distributed=false`（单副本诚实不变）；共享 Redis 限流为该叶 **accepted opt-in contract**（启用且验证后关闭「aspirational dead config」残差**仅限 rate-limit 行**）。权威行为 SoT：[pqh-f7-redis-rate-limit.md](./pqh-f7-redis-rate-limit.md)。**仍禁止**宣称 multi-instance / SSE / Redisson locks / Kafka 完整。本文件历史 D01B **Done** 声明不因本注记回写。
+
 ---
 
 ## 0. Batch / queue context
@@ -108,7 +110,7 @@ batch_recommendation:
 | **D01B-C6** | **nginx CSP + 标准安全头：** docker acceptance / prod compose 使用的 frontend edge 配置（至少 `frontend/nginx.conf`；若 `nginx-main.conf` 影响该路径则一并）对 HTML/SPA 成功响应发出至少：`Content-Security-Policy`、`X-Content-Type-Options`、`X-Frame-Options`、`Referrer-Policy`。CSP 须为**明确策略字符串**（可 `default-src 'self'` 为基线，并允许本应用已知的 pdf.js / 同域 API 所需指令；**禁止**空头或仅注释「TODO CSP」冒充完成）。 | ADR-0031 + handoff |
 | **D01B-C7** | **HSTS：** 在 **纯 HTTP** acceptance（如 `:4173`）上 **不强制** `Strict-Transport-Security`（避免误伤本地 HTTP）。若 edge 终止 TLS 的 prod 路径适用，可另加 HSTS；本叶验收不因缺 HSTS on HTTP 失败。 | ADR-0031 意图 + 本地验收现实 |
 | **D01B-C8** | **安全头不破坏功能：** SSE progress proxy、`/api/` 反代、`/healthz` 静态 ok、pdf.js `.mjs` 类型行为保持可用；CSP 不得无故阻断同域 SPA 引导与既有管理 UI 资源加载（本叶无 FE 功能改动，仅 edge 头）。 | 既有 `nginx.conf` 行为 |
-| **D01B-C9** | **ADR-0044 诚实陈述（文档事实）：** 更新/对齐 ADR-0044 家族（topology + multi-instance baseline，及必要的 ops 交叉引用）使读者明确：**(a)** v1 **单 serving backend 副本**；**(b)** SSE **sticky sessions required**（无 Redis pub/sub relay 则不算多实例完整）；**(c)** runtime rate-limit **进程内**为现行权威（`distributed` 开关默认 false / 或未启用 Redis limiter 时不得声称「分布式限流已交付」）；**(d)** 任何「dead / aspirational / deferred」配置必须标为残差，**禁止**声称 multi-instance correctness complete。 | handoff + ADR-0044 + `application-prod.yml` |
+| **D01B-C9** | **ADR-0044 诚实陈述（文档事实）：** 更新/对齐 ADR-0044 家族（topology + multi-instance baseline，及必要的 ops 交叉引用）使读者明确：**(a)** v1 **单 serving backend 副本**；**(b)** SSE **sticky sessions required**（无 Redis pub/sub relay 则不算多实例完整）；**(c)** runtime rate-limit：**默认**进程内权威（`distributed` 开关默认 false）；启用 Redis shared limiter 前不得声称「分布式限流已交付」——**PQH-F7（2026-07-23）收窄本条 (c)**：见文件头 supersession note 与 [pqh-f7-redis-rate-limit.md](./pqh-f7-redis-rate-limit.md)（默认仍 false；opt-in 为 accepted leaf contract）；**(d)** 任何「dead / aspirational / deferred」配置必须标为残差，**禁止**声称 multi-instance correctness complete。 | handoff + ADR-0044 + `application-prod.yml` |
 | **D01B-C10** | **不翻转 Accepted ADR 决策核：** 诚实补丁是澄清后果/现状/残差，不是把「v1 单副本」改写成「已水平扩展」。 | document-as-code |
 | **D01B-C11** | **IRC mapper — 三异常对齐 D01A：** `FailedSyncInvocationErrorMapper.from` 在 throwable（及 **cause chain**）上识别： | D01A §4.1 + handoff |
 | | → `GenerationServiceUnavailableException` ⇒ `code=GENERATION_SERVICE_UNAVAILABLE`，`category=GENERATION`，`retryable=true`，`messageKey=api.error.generation.generationServiceUnavailable` | |
@@ -278,8 +280,9 @@ batch_recommendation:
 **Given** 同 **D01B-010** 文档集  
 **When** 读者查找 SSE 与 rate-limit 多实例前提  
 **Then** 文档明确：**SSE sticky sessions required**（无 Redis pub/sub relay 则 multi-pod SSE 不完整）  
-**And** runtime rate-limit **process-local** 为现行权威；`distributed` 开关/配置若存在，须标为 deferred / 非默认完成态，**不得**读成「Redis 分布式限流已交付」  
-**And** 明确 **not** multi-instance correctness complete
+**And** runtime rate-limit：**默认** process-local 为权威；`distributed` 默认 false  
+**And**（**PQH-F7 收窄，非本叶原验收改写**）读者可在 [pqh-f7-redis-rate-limit.md](./pqh-f7-redis-rate-limit.md) / ADR-0044 家族看到：opt-in Redis shared limiter 为 **accepted leaf contract**（启用+验证后关闭 rate-limit 行「aspirational dead config」残差）；**不得**把默认 off 读成「多实例已完整」  
+**And** 明确 **not** multi-instance correctness complete（SSE / locks / Kafka 仍开）
 
 ### BDD-PRR-D01B-012 — IRC：GenerationServiceUnavailableException
 

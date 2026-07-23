@@ -117,7 +117,7 @@ Verified **2026-07-17** (read-only). Implementers must re-verify paths before co
 | **F4** | `/contract` API publishes hardcoded schema names, not per-field variable schemas; no consumer contract tests; placeholder renames lack API compatibility gate | `ContractAssemblyService` | **High** — consumer break risk | **IBL-A4** |
 | **F5** | Retained invocation parameters store full variables (ADR-0057); `VariablePiiCategory` not applied as retention redaction | Invocation retention path; `VariablePiiCategory` | **High** — PII at rest | **IBL-A5** |
 | **F6** | Regenerate is SPECIMEN-watermarked and (pre-A6) replayed with `locale=null` — locale loss closed by **IBL-A6**; true non-SPECIMEN re-issue → dedicated **#138** | `InvocationRegenerationService` / `InvocationRegenerationAssemblySupport` | **Medium** — watermark policy | **IBL-A6** locale **Done**; PD-6 **#138** → **Done** (`73ab03cb`; OUT of E1/Wave E; opt-in production re-issue; default SPECIMEN retained on non-opt-in paths) |
-| **F7** | Bucket4j rate limit in-process only — multiplies under scale-out | `RuntimeRateLimitService`; ADR-0039 residual | **Medium** | **Parked** under PQH TM **#163** (not activated; see [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md)) |
+| **F7** | Bucket4j rate limit in-process only — multiplies under scale-out | `RuntimeRateLimitService`; ADR-0039 residual | **Medium** | **Activated under PQH Leaf 4** TM **#163** `pqh-f7-redis-rate-limit` (**In Progress** / sole-active; BDD [pqh-f7-redis-rate-limit.md](../behavior/pqh-f7-redis-rate-limit.md) **BDD-PQH-F7-001…012**; detail [detail/pqh-f7-redis-rate-limit.md](./detail/pqh-f7-redis-rate-limit.md); program [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md)) — **not** an IBL wave reopen; does **not** claim IBL Done |
 | **F8** | No timezone/as-of date semantics; `FORMAT_DATE` forces UTC via `java.util.Date` | `FORMAT_DATE` / date formatting path | **Medium** | **Done** as PQH-F8 TM **#160** under [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md) (Leaf 1 `pqh-f8-format-date-tz` with charter **#159**; MAIN `ab382c02` / feature `ee0893fe`; BDD [pqh-f8-format-date-tz.md](../behavior/pqh-f8-format-date-tz.md) **BDD-PQH-F8-001…012**; sole-active **cleared**) — residual closed under PQH, **not** an IBL wave reopen; does **not** claim IBL Done |
 | **F9** | Direct-format whitelist permits lineSpacing/spacingBefore/After/indents, but writer only applies fontFamily/fontSize/textColor | `DirectFormatRules` vs `StructuredContentDocxStyleSupport.applyDirectFormatIfPresent` | **Critical** — authors trust false controls | **IBL-B1** (**Done** `a33da272` / `44237c99` — Apply path + child inline fix) |
 | **F10** | Word↔LibreOffice pagination trust still unproven (Path X); ADR-0042 **Accepted** with Word n/a residual + metadata-gated enforcement; checklist **#3b CONDITIONAL** (≠ GO) | ADR-0042; Path X exemption; Path E / Word host; launch checklist #3b | **Critical** (Path E residual) | **IBL-B7** (**Blocked** on Word host for Path E / #3b GO) |
@@ -353,7 +353,7 @@ Kept separate from confirmed findings and from §Pending product-boundary decisi
 
 | # | Question | Notes |
 | --- | --- | --- |
-| **Q1** | Schedule **F7** distributed/ coördinated rate-limit (Bucket4j / Redis) as a future IBL-A/D task or leave under ADR-0039 / CE-PRR? | **Resolved (parked):** PQH TM **#163** pending — not activated; do not fold into F8 leaf |
+| **Q1** | Schedule **F7** distributed/ coördinated rate-limit (Bucket4j / Redis) as a future IBL-A/D task or leave under ADR-0039 / CE-PRR? | **Resolved (activated under PQH):** PQH TM **#163** Leaf 4 **in-progress** / sole-active (`pqh-f7-redis-rate-limit`); BDD **ready** — **not** an IBL Wave A/D reopen; do **not** claim IBL Done |
 | **Q2** | Schedule **F8** timezone / as-of date semantics for `FORMAT_DATE` into IBL-A follow-on? | **Resolved (Done under PQH):** PQH-F8 TM **#160** + charter **#159** → **Done** (`ab382c02` / `ee0893fe`); optional IANA `zoneId` + UTC unary documented; sole-active **cleared** — IBL program remains not Done; **not** an IBL Wave A reopen |
 | **Q3** | Expand Docker Playwright smoke subset (9→N of 162) under IBL or CDP/CE? | Coordinate ownership; avoid double-own |
 | **Q4** | Company-approved artifacts for veraPDF, Testcontainers, k6 — intranet availability? | Dependency policy before IBL-B3/D1/D3 |
@@ -421,7 +421,7 @@ Task Master registration for IBL waves is **complete** (#106–#134; MAIN merge 
 | 2026-07-17 four-track (+ template) read-only audit | §1 F1–F28 |
 | [launch-readiness-program.md](./launch-readiness-program.md) LR-D6 / DEF-LRP-D6-001 | **IBL-B2** |
 | ADR-0042 Accepted (Path X) / checklist #3b CONDITIONAL → Path E for GO | **IBL-B7** (Blocked on Word host) |
-| ADR-0039 / Bucket4j in-process | F7 deferred (Q1) |
+| ADR-0039 / Bucket4j in-process | F7 activated under PQH Leaf 4 (#163); Redisson locks remain deferred |
 | ADR-0057 invocation retention | **IBL-A5** |
 | Golden corpus anti-pixel stance | **IBL-C1** + PD-2 |
 | [non-functional-requirements.md](../requirements/non-functional-requirements.md) §待确认 | **IBL-D3** feeds confirmation only |

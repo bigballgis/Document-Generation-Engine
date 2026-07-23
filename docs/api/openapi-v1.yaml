@@ -6,6 +6,14 @@ info:
   description: >-
     Formal v1 OpenAPI contract for template-based document generation. Template
     variables are constrained by each released template version contract.
+    Runtime rate-limit (PQH-F7 / TM #163): filter on `/api/{environment}/v1/*`
+    only. Quota exceeded → HTTP 429 `RATE_LIMIT_EXCEEDED` (`category=RUNTIME`,
+    `messageKey=api.error.runtime.rateLimitExceeded`, `Retry-After`). When
+    `docgen.runtime.rate-limit.distributed=true` and Redis coordination is
+    unavailable → HTTP 503 `RATE_LIMIT_BACKEND_UNAVAILABLE`
+    (`messageKey=api.error.runtime.rateLimitBackendUnavailable`, retryable);
+    must not use 429 for backend outage. Default `distributed=false`.
+    See `docs/behavior/pqh-f7-redis-rate-limit.md`.
 servers:
   - url: /
     description: Deployment root. Paths include /api/{environment}/v1.
@@ -5500,7 +5508,18 @@ components:
           schema:
             $ref: '#/components/schemas/AsyncAcceptedResponse'
     ErrorResponse:
-      description: Error response.
+      description: >-
+        Unified error envelope. Runtime rate-limit may also return HTTP 429
+        (`RATE_LIMIT_EXCEEDED`) or, when distributed coordination fails, HTTP 503
+        (`RATE_LIMIT_BACKEND_UNAVAILABLE`); both use `category=RUNTIME`.
+      headers:
+        Retry-After:
+          description: >-
+            Seconds until retry is advised. Present on `RATE_LIMIT_EXCEEDED` (429);
+            optional on `RATE_LIMIT_BACKEND_UNAVAILABLE` (503).
+          schema:
+            type: integer
+            minimum: 1
       content:
         application/json:
           schema:
@@ -12793,7 +12812,7 @@ components:
           type: string
     ErrorCategory:
       type: string
-      enum: [AUTHENTICATION, AUTHORIZATION, VERSION_ROUTING, API_POLICY, IDEMPOTENCY, VALIDATION, TEMPLATE_CONTRACT, RENDERING, GENERATION, ENCRYPTION, BATCH]
+      enum: [AUTHENTICATION, AUTHORIZATION, VERSION_ROUTING, API_POLICY, IDEMPOTENCY, VALIDATION, TEMPLATE_CONTRACT, RENDERING, GENERATION, ENCRYPTION, BATCH, RUNTIME]
     ErrorCode:
       type: string
       enum:
@@ -12897,3 +12916,5 @@ components:
         - CONTENT_MODULE_NESTING_DEPTH_EXCEEDED
         - CONTENT_MODULE_NESTING_TARGET_UNRESOLVED
         - CONTENT_MODULE_NESTING_STRUCTURE_INVALID
+        - RATE_LIMIT_EXCEEDED
+        - RATE_LIMIT_BACKEND_UNAVAILABLE

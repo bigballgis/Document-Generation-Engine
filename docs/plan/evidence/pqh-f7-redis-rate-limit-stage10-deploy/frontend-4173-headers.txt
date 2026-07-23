@@ -1,0 +1,17 @@
+
+Key                     Value
+---                     -----
+Server                  {nginx/1.27.5}
+Date                    {Thu, 23 Jul 2026 15:44:31 GMT}
+Connection              {keep-alive}
+ETag                    {"6a61f1ec-4b2"}
+Content-Security-Policy {default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; worker-src 'self' b…
+X-Content-Type-Options  {nosniff}
+X-Frame-Options         {SAMEORIGIN}
+Referrer-Policy         {strict-origin-when-cross-origin}
+Accept-Ranges           {bytes}
+Content-Type            {text/html}
+Content-Length          {1202}
+Last-Modified           {Thu, 23 Jul 2026 10:50:20 GMT}
+
+

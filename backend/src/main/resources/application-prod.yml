@@ -19,8 +19,9 @@ docgen:
     scrape-password: ${DOCGEN_ACTUATOR_SCRAPE_PASSWORD:}
   runtime:
     rate-limit:
-      # Process-local Bucket4j remains authoritative for v1 (ADR-0044 honesty).
-      # Redis distributed limiter is deferred — default false; not multi-instance complete.
+      # Default process-local Bucket4j (ADR-0044 honesty). Opt-in Redis shared limiter
+      # via RUNTIME_RATE_LIMIT_DISTRIBUTED=true when Redis is healthy (PQH-F7 delivered).
+      # Enabling does not imply multi-instance complete (SSE / locks / Kafka still residual).
       distributed: ${RUNTIME_RATE_LIMIT_DISTRIBUTED:false}
   multi-instance:
     sse-sticky-sessions-required: true

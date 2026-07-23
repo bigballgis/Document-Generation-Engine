@@ -1,6 +1,7 @@
 package com.bank.docgen.runtime.security;
 
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.runtime.metrics.RateLimitBackendUnavailableMetrics;
 import com.bank.docgen.runtime.metrics.RateLimitDeniedMetrics;
 import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
@@ -10,7 +11,6 @@ import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.bucket4j.ConsumptionProbe;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,20 +26,25 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class RuntimeRateLimitFilter extends OncePerRequestFilter {
 
-    private final RuntimeRateLimitService rateLimitService;
+    /** Fixed Retry-After hint (seconds) when the distributed rate-limit backend is unavailable. */
+    static final long BACKEND_UNAVAILABLE_RETRY_AFTER_SECONDS = 1L;
+
+    private final RuntimeRateLimiter rateLimitService;
     private final TraceIdProvider traceIdProvider;
     private final MessageResolver messageResolver;
     private final ObjectMapper objectMapper;
     private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
     private final RateLimitDeniedMetrics rateLimitDeniedMetrics;
+    private final RateLimitBackendUnavailableMetrics rateLimitBackendUnavailableMetrics;
 
     public RuntimeRateLimitFilter(
-            RuntimeRateLimitService rateLimitService,
+            RuntimeRateLimiter rateLimitService,
             TraceIdProvider traceIdProvider,
             MessageResolver messageResolver,
             ObjectMapper objectMapper,
             RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder,
-            RateLimitDeniedMetrics rateLimitDeniedMetrics
+            RateLimitDeniedMetrics rateLimitDeniedMetrics,
+            RateLimitBackendUnavailableMetrics rateLimitBackendUnavailableMetrics
     ) {
         this.rateLimitService = rateLimitService;
         this.traceIdProvider = traceIdProvider;
@@ -47,6 +52,7 @@ public class RuntimeRateLimitFilter extends OncePerRequestFilter {
         this.objectMapper = objectMapper;
         this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
         this.rateLimitDeniedMetrics = rateLimitDeniedMetrics;
+        this.rateLimitBackendUnavailableMetrics = rateLimitBackendUnavailableMetrics;
     }
 
     @Override
@@ -66,25 +72,23 @@ public class RuntimeRateLimitFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String credentialId = request.getHeader(ApiCredentialAuthenticationFilter.HEADER_CREDENTIAL_ID);
         String accessAccount = request.getHeader(ApiCredentialAuthenticationFilter.HEADER_ACCESS_ACCOUNT);
-        String rateLimitKey;
         if (credentialId == null || credentialId.isBlank() || accessAccount == null || accessAccount.isBlank()) {
-            // LR-B7 recorded decision (ADR-0031 alignment; ledger seam «Runtime rate limit»):
-            // requests without credential headers PASS THROUGH the limiter deliberately —
-            // there is no stable caller identity to bucket, and ApiCredentialAuthenticationFilter
-            // rejects them immediately downstream (401, fail-closed at the auth layer). Buckets
-            // stay reserved for authenticated caller identities. In-process Bucket4j remains
-            // correct under the ADR-0044 v1 single-replica topology; a shared/distributed
-            // limiter is an ADR-0031 follow-up gated on scale-out (ADR-0044 prerequisite #3).
+            // LR-B7 / F7-C2: missing credential headers pass through (no IP bucket). Auth fails closed
+            // downstream with 401. Shared Redis coordination is opt-in via distributed=true (PQH-F7).
             filterChain.doFilter(request, response);
             return;
         }
-        rateLimitKey = credentialId.trim() + ":" + accessAccount.trim();
-        ConsumptionProbe probe = rateLimitService.tryConsumeKey(rateLimitKey);
-        if (probe.isConsumed()) {
+        String rateLimitKey = credentialId.trim() + ":" + accessAccount.trim();
+        RateLimitDecision decision = rateLimitService.tryConsumeKey(rateLimitKey);
+        if (decision.isAllowed()) {
             filterChain.doFilter(request, response);
             return;
         }
-        long retryAfterSeconds = Math.max(1L, TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill()));
+        if (decision.isBackendUnavailable()) {
+            writeBackendUnavailableResponse(request, response);
+            return;
+        }
+        long retryAfterSeconds = Math.max(1L, TimeUnit.NANOSECONDS.toSeconds(decision.nanosToWaitForRefill()));
         writeRateLimitResponse(request, response, retryAfterSeconds, credentialId.trim(), accessAccount.trim());
     }
 
@@ -116,6 +120,31 @@ public class RuntimeRateLimitFilter extends OncePerRequestFilter {
         );
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         response.setHeader(HttpHeaders.RETRY_AFTER, Long.toString(retryAfterSeconds));
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        objectMapper.writeValue(
+                response.getOutputStream(),
+                new ErrorEnvelope(Metadata.minimal(auditId, traceId), error)
+        );
+    }
+
+    private void writeBackendUnavailableResponse(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        rateLimitBackendUnavailableMetrics.record();
+        String messageKey = "api.error.runtime.rateLimitBackendUnavailable";
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.RATE_LIMIT_BACKEND_UNAVAILABLE,
+                ApiErrorCategories.RUNTIME,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                true,
+                null
+        );
+        response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
+        response.setHeader(HttpHeaders.RETRY_AFTER, Long.toString(BACKEND_UNAVAILABLE_RETRY_AFTER_SECONDS));
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         objectMapper.writeValue(
                 response.getOutputStream(),

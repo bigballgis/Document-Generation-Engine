@@ -98,7 +98,7 @@ before replicas > 1.
 | --- | --- | --- | --- | --- |
 | 1 | `@Scheduled` jobs (3) | Correct under compose (one container); **double-runs under K8s blue-green** (both colors resident) | Distributed mutex (ShedLock JDBC or DB lock; see Appendix) | **LR-B2** — recommended under compose; **MANDATORY before first K8s blue-green prod deployment** |
 | 2 | SSE progress streams | Correct — subscriber and publisher share the traffic-serving process | Sticky routing at the ingress **or** Redis pub/sub relay | **LR-B3** records the constraint (no relay in v1) |
-| 3 | Runtime rate limiting | Correct — single quota holder on the traffic path (ADR-0031 Redis counters deferred, see below) | Shared limiter (bucket4j-redis per ADR-0031) or gateway-level enforcement | ADR-0031 follow-up (LR-B7 stays in-process scope) |
+| 3 | Runtime rate limiting | Correct — single quota holder on the traffic path; process-local Bucket4j remains **default** (`distributed=false`) | Shared Redis-backed limiter when `docgen.runtime.rate-limit.distributed=true` (bucket4j-redis / `RedisRuntimeRateLimitService` per ADR-0031); gateway enforcement optional complement only | **PQH-F7** / TM **#163** (accepted contract + leaf delivery; default remains off for v1 single replica) |
 | 4 | Async batch transport | Correct — the traffic-accepting instance owns the task | `ASYNC_TRANSPORT=kafka` in the scaled environment | **LR-B4** — Kafka stays an optional switch for v1 |
 | 5 | Idempotency `begin` / async-task ownership | Correct — no concurrent owner | Redisson distributed locks | ADR-0039 (mandatory before multi-instance) |
 
@@ -142,23 +142,29 @@ the target posture for the **scaled future state**; this ADR gates backend HPA
 activation behind the prerequisites table. The HPA templates and tuning values stay in
 the chart, disabled.
 
-### Deferred for v1: ADR-0031 Redis centralized rate-limit counters
+### ADR-0031 Redis centralized rate-limit counters — v1 default vs scale-out switch
 
 ADR-0031 accepted **«Rate limit counter storage strategy: Redis (centralized
-counters)»**. The current implementation is process-local Bucket4j
-(`RuntimeRateLimitService`, in-memory `ConcurrentHashMap`). This ADR records an
-explicit **v1 deferral** of that storage decision, not a reversal:
+counters)»**. v1 **default** remains process-local Bucket4j
+(`RuntimeRateLimitService`, in-memory `ConcurrentHashMap`) with
+`docgen.runtime.rate-limit.distributed` / `RUNTIME_RATE_LIMIT_DISTRIBUTED`
+defaulting to **`false`** — not a reversal of ADR-0031, and not automatic
+enablement when Redis is healthy:
 
 - Under a single serving replica the process-local limiter is **semantically
   equivalent** to centralized counters — there is exactly one quota holder on the
   traffic path.
-- Known limitation accepted for v1: counters **do not survive a restart** (a restart
-  resets buckets, allowing brief over-admission up to one bucket refill).
-- The deferral **must be closed before scale-out** (bucket4j-redis per ADR-0031, or
-  gateway-level enforcement) — prerequisites table row 3.
-- Tracked in the execution-sync-ledger transitional seam **«Runtime rate limit»**
-  (shared Redis limiter / ADR-0031 alignment; LR-B7 covers the filter fail-closed
-  alignment only, not the storage move).
+- Known limitation of process-local mode: counters **do not survive a restart**
+  (a restart resets buckets, allowing brief over-admission up to one bucket refill).
+- **Scale-out / multi-replica prerequisite (row 3):** shared Redis-backed limiter
+  (bucket4j-redis / `RedisRuntimeRateLimitService`) selected when operators set
+  `distributed=true`. **Accepted leaf contract:** [PQH-F7](../../behavior/pqh-f7-redis-rate-limit.md)
+  / TM **#163** — deliver and verify coordinated quota; Redis unavailable while
+  distributed → fail-closed **503** `RATE_LIMIT_BACKEND_UNAVAILABLE` (not silent
+  process-local fallback; not **429**). Docs-first stage records the contract;
+  **do not** claim code Done from this ADR alone.
+- LR-B7 covers missing-credential-header **pass-through** and filter scope only;
+  storage backend selection is the PQH-F7 / ADR-0031 alignment above.
 
 ## Consequences
 
@@ -192,10 +198,10 @@ delivered multi-instance correctness:
 | Residual | Current authority | Not complete until |
 | --- | --- | --- |
 | SSE progress | Process-local `SseEmitterRegistry`; sticky sessions required across pods | Redis pub/sub relay **or** sticky routing proven at every ingress hop |
-| Runtime rate-limit | Process-local Bucket4j; `RUNTIME_RATE_LIMIT_DISTRIBUTED` defaults **`false`** in `application-prod.yml` | Shared Redis limiter (ADR-0031) enabled and verified on the traffic path |
-| Multi-instance overall | **Incomplete** — single-replica topology is the v1 gate | Prerequisites table rows 1–5 closed |
+| Runtime rate-limit | **Default:** process-local Bucket4j (`RUNTIME_RATE_LIMIT_DISTRIBUTED` / `docgen.runtime.rate-limit.distributed` = **`false`**). **Accepted PQH-F7 contract:** shared Redis limiter when flag true (fail-closed 503 on Redis outage) — **narrows** the former “aspirational dead config” residual for **this row only** after leaf verify; still **not** auto-on | Leaf **#163** gates + queued deploy evidence with flag enabled; ops enable only with healthy Redis |
+| Multi-instance overall | **Incomplete** — single-replica topology is the v1 gate | Prerequisites table rows 1–5 closed (rate-limit row ≠ SSE / Redisson locks / Kafka Done) |
 
-Companion SOR-S07 note [0044-multi-instance-correctness-baseline.md](./0044-multi-instance-correctness-baseline.md): Decision §1 «distributed default in prod» wording is **aspirational / residual** — do **not** read Accepted there as Redis rate-limit delivered. Ops: [runbook § Multi-instance residuals](../../operations/runbook.md#multi-instance-residuals-adr-0044). Behavior SoT: [prod-ops-security-hardening.md](../../behavior/prod-ops-security-hardening.md) (D01B-C9).
+Companion SOR-S07 note [0044-multi-instance-correctness-baseline.md](./0044-multi-instance-correctness-baseline.md): Decision §1 is the **accepted scale-out contract** for rate-limit; default remains process-local — do **not** read Accepted as “multi-instance complete” or as default Redis rate-limit on. Ops: [runbook § Multi-instance residuals](../../operations/runbook.md#multi-instance-residuals-adr-0044). Behavior: [pqh-f7-redis-rate-limit.md](../../behavior/pqh-f7-redis-rate-limit.md); honesty sibling [prod-ops-security-hardening.md](../../behavior/prod-ops-security-hardening.md) (D01B-C9 rate-limit clause narrowed by PQH-F7).
 
 Branch directives for Wave LR-B tasks:
 
@@ -247,10 +253,11 @@ The table above is the **original LR-B2 verification record** and is **not** rew
 
 - [ADR 0039: Redisson Distributed Lock Evaluation](../technology-stack/0039-redisson-lock-evaluation.md) — single-instance assumption refined by this ADR
 - [ADR 0030: Operational Platform Baseline](./0030-operational-platform-baseline.md) — blue-green + autoscaling baseline
-- [ADR 0031: API Platform Hardening Baseline](../api/0031-api-platform-hardening-baseline.md) — Redis centralized rate-limit counters (deferred for v1 by this ADR; required on scale-out)
+- [ADR 0031: API Platform Hardening Baseline](../api/0031-api-platform-hardening-baseline.md) — Redis centralized rate-limit counters (v1 default process-local; scale-out via PQH-F7 distributed switch)
 - [ADR 0033: Async Messaging and Task Retry Baseline](../async-processing/0033-async-messaging-and-task-retry-baseline.md) — Kafka transport baseline
-- [0044 multi-instance correctness baseline (honesty residual)](./0044-multi-instance-correctness-baseline.md) — SOR-S07 companion; Accepted ≠ complete
-- [PRR-D01b behavior — ADR-0044 honesty](../../behavior/prod-ops-security-hardening.md) — D01B-C9 / BDD-PRR-D01B-010…011
+- [0044 multi-instance correctness baseline (honesty residual)](./0044-multi-instance-correctness-baseline.md) — SOR-S07 companion; Accepted ≠ multi-instance complete
+- [PQH-F7 Redis / coordinated runtime rate-limit](../../behavior/pqh-f7-redis-rate-limit.md) — leaf behavior SoT (BDD-PQH-F7-001…012); prerequisite row **#3**
+- [PRR-D01b behavior — ADR-0044 honesty](../../behavior/prod-ops-security-hardening.md) — D01B-C9 / BDD-PRR-D01B-010…011 (rate-limit clause narrowed by PQH-F7)
 - [Operations runbook — multi-instance residuals](../../operations/runbook.md#multi-instance-residuals-adr-0044)
 - [Launch Readiness Program](../../plan/launch-readiness-program.md) — §1 findings 3/4/5
 - [LRP Wave LR-B detail](../../plan/detail/LRP-B-runtime-scaleout-session.md) — LR-B1/B2/B3/B4/B5 task sheets

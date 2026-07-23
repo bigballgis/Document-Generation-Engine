@@ -2244,15 +2244,15 @@
       },
       {
         "id": "163",
-        "title": "PQH-F7 PARKED: Bucket4j to Redis / coordinated rate-limit (IBL Q1)",
-        "description": "PENDING 2026-07-23 — PARKED backlog under Post-Queue Hardening (not in Leaf 1–3 serial activate queue). IBL F7/Q1: Bucket4j in-process → Redis/coordinated rate-limit (ADR-0039 residual). Do NOT activate with F8 leaf (closed). Do NOT mark Done. Do NOT fold into #53 without explicit deliver. Formal phase None. Program: docs/plan/post-queue-hardening-program-2026-07.md.",
-        "details": "Parked only. Finding SoT: docs/plan/intl-bank-letter-readiness-program.md F7/Q1. Requires explicit future scheduling — veto F7-parked-not-in-leaf.",
-        "testStrategy": "N/A until activated; then distributed limiter BDD + verify + multi-instance evidence.",
-        "priority": "low",
+        "title": "PQH-F7 ACTIVE Leaf 4: Bucket4j to Redis / coordinated runtime rate-limit (IBL Q1)",
+        "description": "IN PROGRESS 2026-07-23 — ACTIVE PQH Leaf 4 sole-active NON-CE delivery leaf (slice pqh-f7-redis-rate-limit). Unparked from backlog. IBL F7/Q1: Redis/coordinated runtime rate-limit (ADR-0039 residual / ADR-0044 #3). BDD ready: docs/behavior/pqh-f7-redis-rate-limit.md (BDD-PQH-F7-001…012). Placement ISOLATED D:/working/DGE-pqh-f7-redis-rate-limit · feat/pqh-f7-redis-rate-limit · base 850b51c9. Batch solo member_task_ids:[\"163\"]. frontend_ui_in_scope=false; backend_api_contract_change=true (503 RATE_LIMIT_BACKEND_UNAVAILABLE when distributed Redis down). Formal phase None. Do NOT mark Done yet. Do NOT flip #3b/#5a GO; do NOT activate CE-O02/#119; do NOT mark #53 Done; do NOT claim IBL/CE/go-live Done. Program: docs/plan/post-queue-hardening-program-2026-07.md.",
+        "details": "ACTIVE Leaf 4 sole-active. Slice id: pqh-f7-redis-rate-limit. Behavior: docs/behavior/pqh-f7-redis-rate-limit.md. Detail: docs/plan/detail/pqh-f7-redis-rate-limit.md. Confirmed: bucket_key credentialId:accessAccount; missing headers pass-through; redis_down fail-closed 503 RATE_LIMIT_BACKEND_UNAVAILABLE (retryable); distributed_default false (RUNTIME_RATE_LIMIT_DISTRIBUTED opt-in); scope runtime filter only. Leaf 1–3 remain Done. Vetoes: checklist-#3b/#5a-GO, CE-O02, mark-#53-CE-Done, activate-#119-Word-host, do-not-claim-IBL-CE-go-live-Done.",
+        "testStrategy": "BDD-PQH-F7-001…012; mvn verify; Stage 10 queued deploy; FE E2E/UIUX N/A; multi-instance shared quota evidence when distributed=true.",
+        "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-23T02:55:00Z"
+        "updatedAt": "2026-07-23T14:35:00Z"
       }
     ],
     "metadata": {

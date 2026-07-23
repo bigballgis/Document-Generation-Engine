@@ -311,3 +311,17 @@ Additive opt-in profile on CE-E01 / CE-E03 export + existing import dry-run/comm
 - Management UI: Templates **Import** dialog dry-run (**Check dependencies** → gated **Import** when `readyToCommit=true`)
 
 Permission reuse: matrix §5 export/import — **no new capability codes**. Reuses [ADR-0071](../adr/template-lifecycle/0071-retire-document-brand-legal-entity-surfaces.md) Decision 5 (no brand/entity sidecar; two-phase master P2). Do **not** flip checklist **#3b/#5a**; do **not** mark **#53** Done; Wave 8 OOS.
+
+### Runtime rate-limit errors (PQH-F7)
+
+Runtime filter on `/api/{environment}/v1/*` only (`frontend_ui_in_scope=false`). Companion: [contract-outline.md](contract-outline.md) PQH-F7 block; [openapi-v1.yaml](openapi-v1.yaml) `ErrorCategory=RUNTIME`, `ErrorCode` `RATE_LIMIT_*`. Behavior SoT: [pqh-f7-redis-rate-limit.md](../behavior/pqh-f7-redis-rate-limit.md) (**BDD-PQH-F7-001…012**).
+
+| Condition | HTTP | `error.code` | `error.category` | `error.messageKey` | `retryable` |
+| --- | --- | --- | --- | --- | --- |
+| Identity quota exhausted | **429** | `RATE_LIMIT_EXCEEDED` | `RUNTIME` | `api.error.runtime.rateLimitExceeded` | `true` |
+| Redis coordination unavailable while `distributed=true` | **503** | `RATE_LIMIT_BACKEND_UNAVAILABLE` | `RUNTIME` | `api.error.runtime.rateLimitBackendUnavailable` | `true` |
+
+- Bucket key: `credentialId:accessAccount`; missing credential headers → pass-through (not 429/503 from rate-limit).
+- `RUNTIME_RATE_LIMIT_DISTRIBUTED` / `docgen.runtime.rate-limit.distributed` defaults **`false`**.
+- English defaults: implement `api.error.runtime.rateLimitBackendUnavailable` in `messages_en.properties` (+ frontend `api.error` catalog parity when applicable). Existing `api.error.runtime.rateLimitExceeded` unchanged.
+- Permission matrix: **N/A** (no new capability). Formal phase **None**; do **not** flip **#3b/#5a**; docs-first — do **not** claim implementation Done from this note alone.

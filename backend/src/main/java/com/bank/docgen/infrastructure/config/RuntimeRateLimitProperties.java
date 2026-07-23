@@ -6,7 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record RuntimeRateLimitProperties(
         boolean enabled,
         int requestsPerMinute,
-        int burstCapacity
+        int burstCapacity,
+        boolean distributed
 ) {
     public RuntimeRateLimitProperties {
         if (requestsPerMinute <= 0) {

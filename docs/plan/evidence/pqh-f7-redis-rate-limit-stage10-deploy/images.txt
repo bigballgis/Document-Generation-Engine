@@ -1,0 +1,2 @@
+documentgenerationengine-docgen-backend:latest  sha256:2dfa77960ba95aa47d1eaaf9f89616c4fd2a1ee726378abc3e1b1f2337196934
+documentgenerationengine-docgen-frontend:latest sha256:b6fe5e5b1c43d215f06be9e64850b8a2077fa9b17f356f3af6ce7da52d7c750f

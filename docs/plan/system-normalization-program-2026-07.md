@@ -15,7 +15,7 @@
 | **Wave 6 leaf** | TM **#150** · `sys-norm-d1-brands` → **Done** (MAIN merge `64b0a650`; worktree **REMOVED**) |
 | **Wave 7 leaf** | TM **#151** · `sys-norm-promotion-pack` → **Done** (MAIN merge `11356c63` / feature `f795b04a`; worktree **REMOVED**) |
 | **Wave 8 leaf** | TM **#152** · `sys-norm-demo-seed-terms` → **Done** (MAIN merge `8aca145b` / feature `7df6c563`; worktree **REMOVED**) |
-| **Sole-active** | **cleared for SYS-NORM** — host sole-active **cleared** (PQH Leaf 3 TM **#162** `pqh-n22-catalog-row-actions` → **Done** `ef1b505d`; [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md) Leaf 1–3 **Done**) — do **not** reopen Waves **0–8**. Prior PQH Leaf 2 (**#161**) **Done** `20c67ac9` / `1e023a35`; Leaf 1 (**#159**+**#160**) **Done** `ab382c02` / `ee0893fe`. Residual N18+L1 TM **#157**+**#158** → **Done** (`a4f59c4d` / `b54281b1`) |
+| **Sole-active** | **cleared for SYS-NORM** — host sole-active is NON-CE PQH Leaf 4 TM **#163** `pqh-f7-redis-rate-limit` (**In Progress**; [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md)) — do **not** reopen Waves **0–8**. Prior PQH Leaf 3 (**#162**) **Done** `ef1b505d`; Leaf 2 (**#161**) **Done** `20c67ac9` / `1e023a35`; Leaf 1 (**#159**+**#160**) **Done** `ab382c02` / `ee0893fe`. Residual N18+L1 TM **#157**+**#158** → **Done** (`a4f59c4d` / `b54281b1`) |
 | **Batch (Wave 8)** | **solo** · `member_task_ids: ["152"]` · `proposed_slice_id: sys-norm-demo-seed-terms` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / parked-UX-not-in-W8 — **closed** |
 | **Batch (Wave 7)** | **solo** · `member_task_ids: ["151"]` · `proposed_slice_id: sys-norm-promotion-pack` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-8 / parked UX — **closed** |
 | **Batch (Wave 6)** | **solo** · `member_task_ids: ["150"]` · `proposed_slice_id: sys-norm-d1-brands` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-7 / Wave-8 / parked UX — **closed** |
@@ -199,13 +199,14 @@ detail [detail/sys-norm-n18-role-l1.md](./detail/sys-norm-n18-role-l1.md); Gates
 E2E SYS-NORM-N18 **5/5**/UIUX **PASS_WITH_NOTES**/Arch **merge_with_notes**/Stage 5+10
 **DEPLOY_OK**).
 
-**Sole-active (host delivery leaf):** **cleared** — NON-CE **PQH** Leaf 3 TM **#162**
-`pqh-n22-catalog-row-actions` → **Done** (MAIN tip/merge `ef1b505d`; worktree **REMOVED**;
-Batch **solo** closed; BDD **ready**/shipped
-[pqh-n22-catalog-row-actions.md](../behavior/pqh-n22-catalog-row-actions.md)
-**BDD-PQH-N22-001…014**; detail [detail/pqh-n22-catalog-row-actions.md](./detail/pqh-n22-catalog-row-actions.md))
+**Sole-active (host delivery leaf):** NON-CE **PQH** Leaf 4 TM **#163**
+`pqh-f7-redis-rate-limit` → **In Progress** (**sole-active**; worktree
+`D:/working/DGE-pqh-f7-redis-rate-limit` · `feat/pqh-f7-redis-rate-limit`; Batch **solo**
+active; BDD **ready** [pqh-f7-redis-rate-limit.md](../behavior/pqh-f7-redis-rate-limit.md)
+**BDD-PQH-F7-001…012**; detail [detail/pqh-f7-redis-rate-limit.md](./detail/pqh-f7-redis-rate-limit.md))
 — see [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md)
-(Leaf 1–3 **Done**; F7 **#163** parked). Prior PQH Leaf 2 TM **#161** → **Done**
+(Leaf 4 **In Progress**; Leaf 1–3 **Done**; next queue **empty**). Prior PQH Leaf 3 TM **#162** → **Done**
+(`ef1b505d`). Prior PQH Leaf 2 TM **#161** → **Done**
 (`20c67ac9` / `1e023a35`). Prior PQH Leaf 1 TM **#159**+**#160** → **Done**
 (`ab382c02` / `ee0893fe`). SYS-NORM Waves **0–8** remain **Done** (do **not** reopen as
 In Progress). Residual N18+L1 TM **#157**+**#158** → **Done** (`a4f59c4d` / `b54281b1`).
@@ -214,7 +215,7 @@ Prior §4a Binding editor + Auto `referenceKey` TM **#155**+**#156** → **Done*
 `5b48117f`). SYS-NORM Wave 8 TM **#152** → **Done** `8aca145b` / `7df6c563`. §4a Reminder
 timing TM **#153** → **Done** (`d213834f` / `807d8213`). Parked UX queue **empty**. Do
 **not** fold into **#53**; do **not** flip **#3b** / **#5a**; do **not** activate CE-O02 /
-**#119** / F7 **#163**.
+**#119**. Host sole-active is PQH Leaf 4 **#163** (outside SYS-NORM — do **not** reopen Waves 0–8).
 
 ---
 

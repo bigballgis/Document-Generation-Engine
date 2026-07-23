@@ -49,6 +49,8 @@ public final class ApiErrorCodes {
     /** CE-O01 / ADR-0058: PDF/A-2b archival profile cannot combine with encryption. */
     public static final String PDF_ARCHIVAL_ENCRYPTION_MUTEX = "PDF_ARCHIVAL_ENCRYPTION_MUTEX";
     public static final String RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED";
+    /** PQH-F7: Redis coordination unavailable while distributed rate-limit is enabled (HTTP 503). */
+    public static final String RATE_LIMIT_BACKEND_UNAVAILABLE = "RATE_LIMIT_BACKEND_UNAVAILABLE";
     public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
     public static final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
     public static final String USERNAME_ALREADY_EXISTS = "USERNAME_ALREADY_EXISTS";

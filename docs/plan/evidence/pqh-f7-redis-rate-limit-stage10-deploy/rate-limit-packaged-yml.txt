@@ -1,0 +1,20 @@
+jar=D:\working\DGE-pqh-f7-redis-rate-limit\backend\target\docgen-backend-0.1.0-SNAPSHOT.jar
+
+===== BOOT-INF/classes/application.yml (rate-limit excerpts) =====
+>     rate-limit:
+        enabled: ${RUNTIME_RATE_LIMIT_ENABLED:true}
+>       requests-per-minute: ${RUNTIME_RATE_LIMIT_RPM:120}
+>       burst-capacity: ${RUNTIME_RATE_LIMIT_BURST:120}
+        # Process-local by default; set true only for Redis-coordinated shared quota (PQH-F7).
+>       distributed: ${RUNTIME_RATE_LIMIT_DISTRIBUTED:false}
+    invocation:
+      cleanup-interval-ms: ${DOCGEN_INVOCATION_CLEANUP_INTERVAL_MS:3600000}
+
+===== BOOT-INF/classes/application-prod.yml (rate-limit excerpts) =====
+>     rate-limit:
+        # Default process-local Bucket4j (ADR-0044 honesty). Opt-in Redis shared limiter
+>       # via RUNTIME_RATE_LIMIT_DISTRIBUTED=true when Redis is healthy (PQH-F7 delivered).
+        # Enabling does not imply multi-instance complete (SSE / locks / Kafka still residual).
+>       distributed: ${RUNTIME_RATE_LIMIT_DISTRIBUTED:false}
+    multi-instance:
+      sse-sticky-sessions-required: true

@@ -7,10 +7,11 @@ import io.github.bucket4j.ConsumptionProbe;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.springframework.stereotype.Service;
 
-@Service
-public class RuntimeRateLimitService {
+/**
+ * Process-local Bucket4j rate limiter (default when {@code docgen.runtime.rate-limit.distributed=false}).
+ */
+public class RuntimeRateLimitService implements RuntimeRateLimiter {
 
     private final RuntimeRateLimitProperties properties;
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
@@ -19,17 +20,19 @@ public class RuntimeRateLimitService {
         this.properties = properties;
     }
 
+    @Override
     public boolean enabled() {
         return properties.enabled();
     }
 
-    public ConsumptionProbe tryConsume(String credentialExternalId, String accessAccount) {
-        return tryConsumeKey(credentialExternalId + ":" + accessAccount);
-    }
-
-    public ConsumptionProbe tryConsumeKey(String key) {
+    @Override
+    public RateLimitDecision tryConsumeKey(String key) {
         Bucket bucket = buckets.computeIfAbsent(key, ignored -> newBucket());
-        return bucket.tryConsumeAndReturnRemaining(1);
+        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+        if (probe.isConsumed()) {
+            return RateLimitDecision.allowed();
+        }
+        return RateLimitDecision.denied(probe.getNanosToWaitForRefill());
     }
 
     private Bucket newBucket() {

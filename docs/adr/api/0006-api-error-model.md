@@ -18,6 +18,8 @@ related:
 
 Accepted (amended 2026-07-16 — `error.category` set includes `RENDERING`; aligns contract-outline 11-category baseline and OpenAPI `ErrorCategory`)
 
+**Amendment 2026-07-23 (PQH-F7 / TM #163):** additive `error.category` value **`RUNTIME`** for runtime platform controls (rate-limit filter). Adds codes **`RATE_LIMIT_EXCEEDED`** (HTTP **429**) and **`RATE_LIMIT_BACKEND_UNAVAILABLE`** (HTTP **503**). Does **not** remove or redefine the existing eleven categories. See Appendix below — Decision body list above remains the historical RENDERING baseline; RUNTIME is an additive amendment.
+
 ## Context
 
 The dynamic API needs stable error semantics for callers, administrators, support teams, audit review, retry behavior, and batch failure handling. Earlier drafts left open whether errors should use a top-level code with a separate reason or detailed stable error codes.
@@ -91,6 +93,17 @@ Asynchronous task acceptance returns 202. Asynchronous batch partial success ret
 - Return business errors with HTTP 200 only: rejected because callers and gateways need broad transport-level error semantics.
 - Use HTTP 207 Multi-Status for asynchronous batch partial success: rejected because 200 with explicit item statuses and item errors is more compatible for common enterprise API clients.
 
+## Appendix — RUNTIME category + rate-limit codes (PQH-F7 / 2026-07-23)
+
+**Additive amendment** — does not remove the historical eleven-category Decision list above.
+
+| Item | Confirmed |
+| --- | --- |
+| Category | `RUNTIME` — runtime platform controls on `/api/{env}/v1/*` (rate-limit filter). OpenAPI `ErrorCategory` and contract-outline category table include `RUNTIME`. |
+| Quota exceeded | HTTP **429**, `error.code=RATE_LIMIT_EXCEEDED`, `category=RUNTIME`, `retryable=true`, `messageKey=api.error.runtime.rateLimitExceeded`, `Retry-After` ≥ 1s (unchanged caller contract). |
+| Rate-limit backend unavailable | HTTP **503**, `error.code=RATE_LIMIT_BACKEND_UNAVAILABLE`, `category=RUNTIME`, `retryable=true`, `messageKey=api.error.runtime.rateLimitBackendUnavailable` when `distributed=true` and Redis coordination fails — **fail-closed**; **must not** use 429 / `RATE_LIMIT_EXCEEDED` for outage. |
+| Scope | Runtime filter only; management API paths out of scope. Behavior SoT: [pqh-f7-redis-rate-limit.md](../../behavior/pqh-f7-redis-rate-limit.md). |
+
 ## Related Documents
 
 ## OQ Closure Trace
@@ -104,3 +117,5 @@ Asynchronous task acceptance returns 202. Asynchronous batch partial success ret
 - [Domain Model](../../domain/domain-model.md)
 - [Permission Matrix](../../security/permission-matrix.md)
 - [API Contract Outline](../../api/contract-outline.md)
+- [OpenAPI v1](../../api/openapi-v1.yaml)
+- [PQH-F7 Redis / coordinated runtime rate-limit](../../behavior/pqh-f7-redis-rate-limit.md)

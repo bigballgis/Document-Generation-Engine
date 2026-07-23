@@ -50,6 +50,8 @@ docgen:
       enabled: ${RUNTIME_RATE_LIMIT_ENABLED:true}
       requests-per-minute: ${RUNTIME_RATE_LIMIT_RPM:120}
       burst-capacity: ${RUNTIME_RATE_LIMIT_BURST:120}
+      # Process-local by default; set true only for Redis-coordinated shared quota (PQH-F7).
+      distributed: ${RUNTIME_RATE_LIMIT_DISTRIBUTED:false}
   invocation:
     cleanup-interval-ms: ${DOCGEN_INVOCATION_CLEANUP_INTERVAL_MS:3600000}
     cleanup-batch-size: ${DOCGEN_INVOCATION_CLEANUP_BATCH_SIZE:1000}

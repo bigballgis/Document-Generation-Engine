@@ -21,6 +21,8 @@ related:
   - docs/adr/api/0013-api-contract-visibility-audit-and-context.md
   - docs/adr/api/0014-api-openapi-v1-contract-scope.md
   - docs/adr/authorization-security/0020-unified-authorization-and-sensitive-data-handling.md
+  - docs/adr/operations/0044-deployment-topology-v1.md
+  - docs/behavior/pqh-f7-redis-rate-limit.md
 ---
 
 # ADR 0031: API Platform Hardening Baseline
@@ -90,3 +92,19 @@ These decisions are accepted as the API platform hardening foundation. They comp
 - [Runtime View](../../architecture/runtime-view.md)
 - [Security View](../../architecture/security-view.md)
 - [Basic Technology Stack Baseline ADR](../technology-stack/0022-basic-technology-stack-baseline.md)
+- [ADR 0044 Deployment Topology](../operations/0044-deployment-topology-v1.md) — v1 single-replica default; scale-out prerequisite row **#3**
+- [PQH-F7 Redis / coordinated runtime rate-limit](../../behavior/pqh-f7-redis-rate-limit.md) — leaf closing Redis counters for distributed mode
+
+## Follow-up notes — rate-limit counters (PQH-F7 / 2026-07-23)
+
+**Does not rewrite the Accepted Decision table.**
+
+| Topic | Confirmed note |
+| --- | --- |
+| Storage baseline | Redis centralized counters remain the **accepted** storage decision (Decision row above). |
+| v1 default runtime | Process-local Bucket4j remains the **default** authority while `docgen.runtime.rate-limit.distributed=false` (ADR-0044 single serving replica honesty). |
+| Scale-out realization | [PQH-F7](../../behavior/pqh-f7-redis-rate-limit.md) / TM **#163** is the leaf that wires and verifies Redis-backed coordination when operators set `RUNTIME_RATE_LIMIT_DISTRIBUTED=true`. |
+| Exceed path | **429** `RATE_LIMIT_EXCEEDED` + `Retry-After` + audit/metrics unchanged (Decision «rate limit exceed response»). |
+| Backend outage (distributed only) | **503** `RATE_LIMIT_BACKEND_UNAVAILABLE` (`category=RUNTIME`, `retryable=true`, messageKey `api.error.runtime.rateLimitBackendUnavailable`) — fail-closed; **not** a silent process-local fallback; **not** 429. |
+| Dual dimensions | Runtime identity key is `credentialId:accessAccount` (tenant+user intent on the runtime path); missing credential headers pass through (LR-B7). |
+| Pending until leaf Done | Implementation + gates — docs-first stage records contract only; do **not** claim Redis rate-limit code Done from this note alone. |
