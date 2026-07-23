@@ -29,8 +29,8 @@ vetoes_applied: f8-vs-n19n22-unrelated-domains, checklist-#3b/#5a-GO, CE-O02, ma
 | --- | --- |
 | Leaf status | **Done** |
 | Formal phase | **None** |
-| Host sole-active | **superseded** — Leaf 2 TM **#161** `pqh-n19-n20-entitylink` (**In Progress**) |
-| Program | PQH **In Progress** — Leaf 1 **Done**; Leaf 2 N19–N20 **In Progress**; Leaf 3 N22 queued; F7 parked |
+| Host sole-active | **cleared** — Leaf 2 TM **#161** also **Done** (`20c67ac9`); next **#162** pending |
+| Program | PQH **In Progress** — Leaf 1 **Done**; Leaf 2 N19–N20 **Done**; Leaf 3 N22 queued; F7 parked |
 | Gate evidence | `mvn verify` **GREEN 2414/0/0/15**; architecture **PASS_WITH_NOTES** Critical=0 `merge_go=true`; Stage 10 **DEPLOY_OK** [pqh-f8-format-date-tz/](../evidence/pqh-f8-format-date-tz/); E2E/UIUX **N/A** |
 | Do **not** | Flip **#3b/#5a**; mark **#53** Done; activate CE-O02 / **#119** / F7; mark N19–N22 Done; claim IBL/CE/go-live Done; reopen SYS-NORM Waves 0–8 |
 
@@ -57,7 +57,7 @@ vetoes_applied: f8-vs-n19n22-unrelated-domains, checklist-#3b/#5a-GO, CE-O02, ma
 
 | TM | Alias | Status |
 | --- | --- | --- |
-| **#161** | N19–N20 | **In Progress** (Leaf 2 sole-active — [pqh-n19-n20-entitylink.md](./pqh-n19-n20-entitylink.md)) |
+| **#161** | N19–N20 | **Done** (Leaf 2 closed — [pqh-n19-n20-entitylink.md](./pqh-n19-n20-entitylink.md); MAIN `20c67ac9`) |
 | **#162** | N22 | **pending** (Leaf 3) |
 | **#163** | PQH-F7 (Bucket4j→Redis) | **pending** (parked) |
 
