@@ -19,7 +19,7 @@ related:
 
 > **Slice:** `pqh-n22-catalog-row-actions` · Batch Recommendation **`solo`**
 > **Member task:** TM **#162** (SYS-NORM residual N22 under PQH Leaf 3) → **Done**
-> **Placement:** MAIN after Stage 11 FF merge `e60b488f` · worktree **REMOVED**
+> **Placement:** MAIN after Stage 11 integrate `ef1b505d` (Stage 10 tip `c5121164`; UIUX tip `e60b488f`) · worktree **REMOVED** · **push blocked** (`main` ahead of `origin/main`)
 > (was ISOLATED `D:/working/DGE-pqh-n22-catalog-row-actions` · `feat/pqh-n22-catalog-row-actions`).
 > **Trace:** SYS-NORM §2.10 **N22** — Catalog row action pattern; Wave 1 delivered
 > Users/Groups Edit/More via `TableEditMoreActions` (**BDD-SYS-NORM-W1-007/008**);

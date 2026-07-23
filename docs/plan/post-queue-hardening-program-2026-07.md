@@ -9,7 +9,7 @@
 | **Sole-active leaf** | **cleared** — Leaf 1–3 closed; F7 **#163** remains parked (not auto-activated) |
 | **Leaf 1 closed** | TM **#159**+**#160** · `pqh-f8-format-date-tz` → **Done** (MAIN tip `ab382c02`; feature `ee0893fe`; worktree **REMOVED**) |
 | **Leaf 2 closed** | TM **#161** · `pqh-n19-n20-entitylink` → **Done** (MAIN tip `20c67ac9`; feature `1e023a35`; worktree **REMOVED**) |
-| **Leaf 3 closed** | TM **#162** · `pqh-n22-catalog-row-actions` → **Done** (MAIN tip / merge `e60b488f`; Stage 10 tip `c0cc57a0`; worktree **REMOVED**) |
+| **Leaf 3 closed** | TM **#162** · `pqh-n22-catalog-row-actions` → **Done** (MAIN tip/merge `ef1b505d`; Stage 10 tip `c5121164`; worktree **REMOVED**) |
 | **Batch (Leaf 1)** | **merge** · `member_task_ids: ["159","160"]` · `proposed_slice_id: pqh-f8-format-date-tz` — **closed** |
 | **Batch (Leaf 2)** | **solo** · `member_task_ids: ["161"]` · `proposed_slice_id: pqh-n19-n20-entitylink` — **closed** |
 | **Batch (Leaf 3)** | **solo** · `member_task_ids: ["162"]` · `proposed_slice_id: pqh-n22-catalog-row-actions` — **closed** |
@@ -38,7 +38,7 @@ semantics (IBL **F8** / **Q2**) → **Done**.
 
 **Leaf 3 (closed):** Catalog row action pattern Edit/More via `TableEditMoreActions`
 (SYS-NORM **N22**) — Asset Library + Legal Holds + API Invocations (+ Users/Groups
-regression) → **Done** (`e60b488f`).
+regression) → **Done** (`ef1b505d`).
 
 ---
 
@@ -51,7 +51,7 @@ regression) → **Done** (`e60b488f`).
 | --- | --- | --- | --- |
 | **1** | Charter / program | **PQH-CHARTER** — this program plan + plan/ledger/TM registration | **Done** (TM **#159**) |
 | **2** | Platform quality | **PQH-F8** — `FORMAT_DATE` optional IANA `zoneId` + documented UTC unary default; date-only as-of | **Done** (TM **#160**) |
-| **3** | UX polish | **N19–N20** then **N22** (SYS-NORM residuals; NON-CE) | **Done** — Leaf 2 TM **#161** **Done**; Leaf 3 TM **#162** **Done** (`e60b488f`) |
+| **3** | UX polish | **N19–N20** then **N22** (SYS-NORM residuals; NON-CE) | **Done** — Leaf 2 TM **#161** **Done**; Leaf 3 TM **#162** **Done** (`ef1b505d`) |
 | **4** | Go-live Word / fonts | **#119** / checklist **#3b** / **#5a** | **Blocked** backlog — do **not** activate without Word host |
 | **5** | Rendering fidelity | Seal writer / ADR-0043 slice B | **Backlog** after F8 unless user reorders |
 
@@ -95,7 +95,7 @@ regression) → **Done** (`e60b488f`).
 | **PQH-CHARTER** | **#159** | **done** | Docs/governance — this program |
 | **PQH-F8** | **#160** | **done** | FORMAT_DATE semantics — BDD shipped |
 | **N19–N20** | **#161** | **done** | Leaf 2 closed (`pqh-n19-n20-entitylink`; MAIN `20c67ac9`) |
-| **N22** | **#162** | **done** | Leaf 3 closed (`pqh-n22-catalog-row-actions`; MAIN `e60b488f`) |
+| **N22** | **#162** | **done** | Leaf 3 closed (`pqh-n22-catalog-row-actions`; MAIN `ef1b505d`) |
 | **PQH-F7** (parked) | **#163** | **pending** | Parked backlog; not activated |
 
 **Sole-active statement:** Host delivery sole-active is **cleared**. Leaf 1 **#159**+**#160**,
