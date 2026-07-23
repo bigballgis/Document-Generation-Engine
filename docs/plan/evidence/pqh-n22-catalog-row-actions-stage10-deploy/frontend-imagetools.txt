@@ -1,0 +1,2 @@
+REPOSITORY                                 TAG       DIGEST                                                                    IMAGE ID                                                                  CREATED          SIZE
+documentgenerationengine-docgen-frontend   latest    sha256:c28f788431f236047715acbe939aef7a96298a56743d4eb20a30ad7dacbf034b   sha256:c28f788431f236047715acbe939aef7a96298a56743d4eb20a30ad7dacbf034b   44 minutes ago   86.2MB
