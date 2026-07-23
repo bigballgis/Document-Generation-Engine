@@ -2105,7 +2105,7 @@ export async function captureBindingEditorIaLocatorScreenshot(
   return filename
 }
 
-/** PQH N22 / #162 — Catalog Edit/More row actions — 1440×900 dual-brand. */
+/** PQH N22 / #162 - Catalog Edit/More row actions - 1440x900 dual-brand. */
 export const PQH_N22_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'PQH-N22')
 export const PQH_N22_SCREENSHOT_DIR = path.join(PQH_N22_EVIDENCE_ROOT, 'screenshots')
 export const PQH_N22_VIEWPORT = { width: 1440, height: 900 } as const
