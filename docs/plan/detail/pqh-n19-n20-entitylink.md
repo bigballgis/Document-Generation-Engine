@@ -34,10 +34,10 @@ Deliver SYS-NORM residuals **N19–N20** under PQH Leaf 2:
 | --- | --- |
 | Leaf status | **Done** |
 | Formal phase | **None** |
-| Host sole-active | **cleared for this leaf** — succeeded by TM **#162** N22 Leaf 3 (**In Progress**) |
-| Program | PQH **In Progress** — Leaf 1 **Done**; Leaf 2 **Done**; Leaf 3 **#162** **In Progress**; F7 **#163** parked |
+| Host sole-active | **cleared for this leaf** — Leaf 3 TM **#162** N22 also **Done** (`e60b488f`) |
+| Program | PQH **In Progress** — Leaf 1 **Done**; Leaf 2 **Done**; Leaf 3 **#162** **Done**; F7 **#163** parked |
 | Gate evidence | FE lint/type-check/test(**1721**)/build **GREEN**; E2E **7/7** PASS; UIUX **PASS_WITH_NOTES** Critical=0; architecture **PASS_WITH_NOTES** Critical=0 `merge_go=true`; Stage 5+10 **DEPLOY_OK** [pqh-n19-n20-entitylink/](../evidence/pqh-n19-n20-entitylink/) |
-| Do **not** | Flip **#3b/#5a**; mark **#53** Done; activate CE-O02 / **#119** / F7 / **#162**; reopen SYS-NORM Waves 0–8; claim IBL/CE/go-live Done |
+| Do **not** | Flip **#3b/#5a**; mark **#53** Done; activate CE-O02 / **#119** / F7; reopen SYS-NORM Waves 0–8; claim IBL/CE/go-live Done |
 
 ---
 
@@ -63,7 +63,7 @@ Deliver SYS-NORM residuals **N19–N20** under PQH Leaf 2:
 
 | TM | Alias | Status |
 | --- | --- | --- |
-| **#162** | N22 | **In Progress** (Leaf 3 sole-active — [pqh-n22-catalog-row-actions.md](./pqh-n22-catalog-row-actions.md)) |
+| **#162** | N22 | **Done** (Leaf 3 closed — [pqh-n22-catalog-row-actions.md](./pqh-n22-catalog-row-actions.md); MAIN `e60b488f`) |
 | **#163** | PQH-F7 (Bucket4j→Redis) | **pending** (parked) |
 | **#159** / **#160** | PQH-CHARTER / PQH-F8 | **Done** (Leaf 1 closed) |
 

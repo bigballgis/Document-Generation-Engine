@@ -4,23 +4,23 @@
 | --- | --- |
 | **Program ID** | `post-queue-hardening-2026-07` (short: **PQH**) |
 | **Created** | 2026-07-23 |
-| **Status** | **In Progress** (Leaf 1 **Done**; Leaf 2 **#161** N19–N20 **Done**; Leaf 3 **#162** N22 **In Progress**) |
+| **Status** | **In Progress** (Leaf 1 **Done**; Leaf 2 **#161** N19–N20 **Done**; Leaf 3 **#162** N22 **Done**; F7 **#163** parked) |
 | **Formal phase** | **None** (NON-CE program; not a P-phase — same pattern as SYS-NORM residuals) |
-| **Sole-active leaf** | TM **#162** N22 · `pqh-n22-catalog-row-actions` (**In Progress**) |
+| **Sole-active leaf** | **cleared** — Leaf 1–3 closed; F7 **#163** remains parked (not auto-activated) |
 | **Leaf 1 closed** | TM **#159**+**#160** · `pqh-f8-format-date-tz` → **Done** (MAIN tip `ab382c02`; feature `ee0893fe`; worktree **REMOVED**) |
 | **Leaf 2 closed** | TM **#161** · `pqh-n19-n20-entitylink` → **Done** (MAIN tip `20c67ac9`; feature `1e023a35`; worktree **REMOVED**) |
-| **Leaf 3 active** | TM **#162** · `pqh-n22-catalog-row-actions` → **In Progress** (worktree `D:/working/DGE-pqh-n22-catalog-row-actions` · `feat/pqh-n22-catalog-row-actions`) |
+| **Leaf 3 closed** | TM **#162** · `pqh-n22-catalog-row-actions` → **Done** (MAIN tip / merge `e60b488f`; Stage 10 tip `c0cc57a0`; worktree **REMOVED**) |
 | **Batch (Leaf 1)** | **merge** · `member_task_ids: ["159","160"]` · `proposed_slice_id: pqh-f8-format-date-tz` — **closed** |
 | **Batch (Leaf 2)** | **solo** · `member_task_ids: ["161"]` · `proposed_slice_id: pqh-n19-n20-entitylink` — **closed** |
-| **Batch (Leaf 3)** | **solo** · `member_task_ids: ["162"]` · `proposed_slice_id: pqh-n22-catalog-row-actions` — **active** |
+| **Batch (Leaf 3)** | **solo** · `member_task_ids: ["162"]` · `proposed_slice_id: pqh-n22-catalog-row-actions` — **closed** |
 | **Behavior SoT (F8)** | [pqh-f8-format-date-tz.md](../behavior/pqh-f8-format-date-tz.md) (**ready**/shipped; **BDD-PQH-F8-001…012**) |
 | **Behavior SoT (N19–N20)** | [pqh-n19-n20-entitylink.md](../behavior/pqh-n19-n20-entitylink.md) (**ready**/shipped; **BDD-PQH-N19N20-001…014**) |
-| **Behavior SoT (N22)** | [pqh-n22-catalog-row-actions.md](../behavior/pqh-n22-catalog-row-actions.md) (**ready**; **BDD-PQH-N22-001…014**) |
+| **Behavior SoT (N22)** | [pqh-n22-catalog-row-actions.md](../behavior/pqh-n22-catalog-row-actions.md) (**ready**/shipped; **BDD-PQH-N22-001…014**) |
 | **Detail plan (Leaf 1)** | [detail/pqh-f8-format-date-tz.md](./detail/pqh-f8-format-date-tz.md) |
 | **Detail plan (Leaf 2)** | [detail/pqh-n19-n20-entitylink.md](./detail/pqh-n19-n20-entitylink.md) |
 | **Detail plan (Leaf 3)** | [detail/pqh-n22-catalog-row-actions.md](./detail/pqh-n22-catalog-row-actions.md) |
-| **Next queue head** | Leaf 3 **#162** **In Progress** (sole-active); after close → F7 **#163** remains parked (not auto-activate) |
-| **Upstream** | SYS-NORM Waves **0–8 Done** (do **not** reopen); IBL F8/Q2 residual **Done under PQH**; N19–N20 residual **Done under PQH**; N22 residual **In Progress under PQH**; CE umbrella **#53** registry-only |
+| **Next queue head** | **empty** — Leaf 1–3 **Done**; F7 **#163** remains parked (not auto-activate) |
+| **Upstream** | SYS-NORM Waves **0–8 Done** (do **not** reopen); IBL F8/Q2 residual **Done under PQH**; N19–N20 residual **Done under PQH**; N22 residual **Done under PQH**; CE umbrella **#53** registry-only |
 
 ---
 
@@ -36,9 +36,9 @@ semantics (IBL **F8** / **Q2**) → **Done**.
 **Leaf 2 (closed):** EntityLink where-used `groupCode` + MasterImpact fail-closed
 (SYS-NORM **N19–N20**) → **Done**.
 
-**Leaf 3 (active):** Catalog row action pattern Edit/More via `TableEditMoreActions`
+**Leaf 3 (closed):** Catalog row action pattern Edit/More via `TableEditMoreActions`
 (SYS-NORM **N22**) — Asset Library + Legal Holds + API Invocations (+ Users/Groups
-regression) → **In Progress**.
+regression) → **Done** (`e60b488f`).
 
 ---
 
@@ -51,7 +51,7 @@ regression) → **In Progress**.
 | --- | --- | --- | --- |
 | **1** | Charter / program | **PQH-CHARTER** — this program plan + plan/ledger/TM registration | **Done** (TM **#159**) |
 | **2** | Platform quality | **PQH-F8** — `FORMAT_DATE` optional IANA `zoneId` + documented UTC unary default; date-only as-of | **Done** (TM **#160**) |
-| **3** | UX polish | **N19–N20** then **N22** (SYS-NORM residuals; NON-CE) | **In Progress** — Leaf 2 TM **#161** **Done**; Leaf 3 TM **#162** **In Progress** (sole-active) |
+| **3** | UX polish | **N19–N20** then **N22** (SYS-NORM residuals; NON-CE) | **Done** — Leaf 2 TM **#161** **Done**; Leaf 3 TM **#162** **Done** (`e60b488f`) |
 | **4** | Go-live Word / fonts | **#119** / checklist **#3b** / **#5a** | **Blocked** backlog — do **not** activate without Word host |
 | **5** | Rendering fidelity | Seal writer / ADR-0043 slice B | **Backlog** after F8 unless user reorders |
 
@@ -63,13 +63,13 @@ regression) → **In Progress**.
 | --- | --- | --- | --- | --- |
 | **Leaf 1** | `pqh-f8-format-date-tz` | **#159** PQH-CHARTER + **#160** PQH-F8 | **Done** | Charter docs + FORMAT_DATE TZ/as-of |
 | **Leaf 2** | `pqh-n19-n20-entitylink` | **#161** N19–N20 | **Done** | EntityLink where-used + MasterImpact |
-| **Leaf 3** | `pqh-n22-catalog-row-actions` | **#162** N22 | **In Progress** (sole-active) | Catalog row action pattern |
+| **Leaf 3** | `pqh-n22-catalog-row-actions` | **#162** N22 | **Done** | Catalog row action pattern |
 
 **Parked (not in serial activate queue):**
 
 | Item | TM | Status |
 | --- | --- | --- |
-| **F7** Bucket4j → Redis / coordinated rate-limit (IBL Q1 / ADR-0039 residual) | **#163** | **pending** — **parked** backlog only; do **not** activate in Leaf 1–3 |
+| **F7** Bucket4j → Redis / coordinated rate-limit (IBL Q1 / ADR-0039 residual) | **#163** | **pending** — **parked** backlog only; do **not** auto-activate |
 
 ---
 
@@ -95,11 +95,11 @@ regression) → **In Progress**.
 | **PQH-CHARTER** | **#159** | **done** | Docs/governance — this program |
 | **PQH-F8** | **#160** | **done** | FORMAT_DATE semantics — BDD shipped |
 | **N19–N20** | **#161** | **done** | Leaf 2 closed (`pqh-n19-n20-entitylink`; MAIN `20c67ac9`) |
-| **N22** | **#162** | **in-progress** | Leaf 3 sole-active (`pqh-n22-catalog-row-actions`) |
+| **N22** | **#162** | **done** | Leaf 3 closed (`pqh-n22-catalog-row-actions`; MAIN `e60b488f`) |
 | **PQH-F7** (parked) | **#163** | **pending** | Parked backlog; not activated |
 
-**Sole-active statement:** Host delivery sole-active is TM **#162** (`pqh-n22-catalog-row-actions`).
-Leaf 1 **#159**+**#160** and Leaf 2 **#161** remain **Done**. **#163** is **not** sole-active.
+**Sole-active statement:** Host delivery sole-active is **cleared**. Leaf 1 **#159**+**#160**,
+Leaf 2 **#161**, and Leaf 3 **#162** remain **Done**. **#163** is **not** sole-active.
 Umbrella **#53** stays **in-progress** registry-only (not a delivery leaf).
 
 ---
@@ -115,7 +115,7 @@ not a sole-active P-phase. Do not invent `In Progress` rows on P0–P23 for this
 
 | Program | Relation |
 | --- | --- |
-| [SYS-NORM](./system-normalization-program-2026-07.md) | Waves 0–8 **Done**; N19–N20 residual **Done under PQH**; N22 residual **In Progress under PQH** — do not reopen waves |
+| [SYS-NORM](./system-normalization-program-2026-07.md) | Waves 0–8 **Done**; N19–N20 residual **Done under PQH**; N22 residual **Done under PQH** — do not reopen waves |
 | [IBL](./intl-bank-letter-readiness-program.md) | F8/Q2 **Done under PQH-F8** (#160); F7/Q1 parked as **#163**; do not claim IBL Done |
 | [CE](./core-excellence-program-2026-07.md) | Umbrella **#53** registry-only; do not fold PQH into CE |
 | LRP / ADR-0043 | Seal writer / Path X residuals stay backlog priority 5 |
@@ -127,3 +127,6 @@ not a sole-active P-phase. Do not invent `In Progress` rows on P0–P23 for this
 Program may move to Done only when Leaf 1–3 are Done (or explicitly cancelled) **and**
 user confirms parked items remain parked or are separately scheduled — still without
 claiming IBL/CE/go-live Done or flipping checklist GO.
+
+**Leaf 1–3 are Done** (2026-07-23). Program stays **In Progress** until user confirms
+parked F7 (**#163**) disposition — do **not** auto-activate F7.

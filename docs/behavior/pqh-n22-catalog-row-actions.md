@@ -17,13 +17,13 @@ related:
 
 # PQH N22 — Catalog row action pattern (Edit/More)
 
-> **Slice:** `pqh-n22-catalog-row-actions` · Batch Recommendation **`solo`**  
-> **Member task:** TM **#162** (SYS-NORM residual N22 under PQH Leaf 3).  
-> **Placement:** ISOLATED · worktree `D:/working/DGE-pqh-n22-catalog-row-actions` ·
-> branch `feat/pqh-n22-catalog-row-actions`.  
+> **Slice:** `pqh-n22-catalog-row-actions` · Batch Recommendation **`solo`**
+> **Member task:** TM **#162** (SYS-NORM residual N22 under PQH Leaf 3) → **Done**
+> **Placement:** MAIN after Stage 11 FF merge `e60b488f` · worktree **REMOVED**
+> (was ISOLATED `D:/working/DGE-pqh-n22-catalog-row-actions` · `feat/pqh-n22-catalog-row-actions`).
 > **Trace:** SYS-NORM §2.10 **N22** — Catalog row action pattern; Wave 1 delivered
-> `TableEditMoreActions` for Users/Groups (**BDD-SYS-NORM-W1-007/008**); catalog-wide
-> remainder owned here.  
+> Users/Groups Edit/More via `TableEditMoreActions` (**BDD-SYS-NORM-W1-007/008**);
+> catalog-wide remainder closed under PQH Leaf 3.
 > **Locks / vetoes:** do **not** reopen SYS-NORM Waves **0–8**; do **not** flip
 > checklist **#3b** / **#5a**; do **not** mark **#53** Done; do **not** activate
 > CE-O02 / **#119**; do **not** activate F7 (**#163**). Formal phase **None**.

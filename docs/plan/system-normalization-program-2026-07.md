@@ -15,7 +15,7 @@
 | **Wave 6 leaf** | TM **#150** · `sys-norm-d1-brands` → **Done** (MAIN merge `64b0a650`; worktree **REMOVED**) |
 | **Wave 7 leaf** | TM **#151** · `sys-norm-promotion-pack` → **Done** (MAIN merge `11356c63` / feature `f795b04a`; worktree **REMOVED**) |
 | **Wave 8 leaf** | TM **#152** · `sys-norm-demo-seed-terms` → **Done** (MAIN merge `8aca145b` / feature `7df6c563`; worktree **REMOVED**) |
-| **Sole-active** | **cleared for SYS-NORM** — host sole-active is PQH Leaf 3 TM **#162** `pqh-n22-catalog-row-actions` (**In Progress**; [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md)) — do **not** reopen Waves **0–8**. Prior PQH Leaf 2 (**#161**) **Done** `20c67ac9` / `1e023a35`; Leaf 1 (**#159**+**#160**) **Done** `ab382c02` / `ee0893fe`. Residual N18+L1 TM **#157**+**#158** → **Done** (`a4f59c4d` / `b54281b1`) |
+| **Sole-active** | **cleared for SYS-NORM** — host sole-active **cleared** (PQH Leaf 3 TM **#162** `pqh-n22-catalog-row-actions` → **Done** `e60b488f`; [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md) Leaf 1–3 **Done**) — do **not** reopen Waves **0–8**. Prior PQH Leaf 2 (**#161**) **Done** `20c67ac9` / `1e023a35`; Leaf 1 (**#159**+**#160**) **Done** `ab382c02` / `ee0893fe`. Residual N18+L1 TM **#157**+**#158** → **Done** (`a4f59c4d` / `b54281b1`) |
 | **Batch (Wave 8)** | **solo** · `member_task_ids: ["152"]` · `proposed_slice_id: sys-norm-demo-seed-terms` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / parked-UX-not-in-W8 — **closed** |
 | **Batch (Wave 7)** | **solo** · `member_task_ids: ["151"]` · `proposed_slice_id: sys-norm-promotion-pack` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-8 / parked UX — **closed** |
 | **Batch (Wave 6)** | **solo** · `member_task_ids: ["150"]` · `proposed_slice_id: sys-norm-d1-brands` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / Wave-7 / Wave-8 / parked UX — **closed** |
@@ -24,7 +24,7 @@
 | **Batch (Wave 3)** | **solo** · `member_task_ids: ["147"]` · `proposed_slice_id: sys-norm-external-ops` — **closed** |
 | **Batch (Wave 2)** | **solo** · `member_task_ids: ["146"]` · `proposed_slice_id: sys-norm-hub-ia` — **closed** |
 | **Batch (Wave 1)** | **solo** · `member_task_ids: ["145"]` · `proposed_slice_id: sys-norm-shell-fluid-nav` — **closed** |
-| **Next queue head** | **empty under SYS-NORM** — N19–N20 residual **Done under PQH** TM **#161** Leaf 2 (`20c67ac9`); N22 residual **In Progress under PQH** TM **#162** Leaf 3 (`pqh-n22-catalog-row-actions`; do **not** reopen Waves 0–8; do **not** activate under SYS-NORM). Residual N18+L1 **closed** (**#157**+**#158** Done `a4f59c4d`); §4a parked UX queue **empty** |
+| **Next queue head** | **empty under SYS-NORM** — N19–N20 residual **Done under PQH** TM **#161** Leaf 2 (`20c67ac9`); N22 residual **Done under PQH** TM **#162** Leaf 3 (`e60b488f`; do **not** reopen Waves 0–8; do **not** activate under SYS-NORM). Residual N18+L1 **closed** (**#157**+**#158** Done `a4f59c4d`); §4a parked UX queue **empty** |
 | **Batch (§4a N18+L1)** | **merge** · `member_task_ids: ["157","158"]` · `proposed_slice_id: sys-norm-n18-role-l1` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / #119-Word-host / #106-umbrella — **closed** |
 | **Batch (§4a BEI)** | **merge** · `member_task_ids: ["155","156"]` · `proposed_slice_id: binding-editor-ia` · vetoes: checklist-#3b/#5a / CE-O02 / #53 / N18-unless-trivial — **closed** |
 | **Batch (§4a ALGI)** | **solo** · `member_task_ids: ["154"]` · `proposed_slice_id: asset-library-group-isolation` · vetoes: Binding editor / Auto `referenceKey` / checklist-#3b/#5a / CE-O02 / #53 — **closed** |
@@ -171,7 +171,7 @@ Wave 5 ([sys-norm-roles.md](../behavior/sys-norm-roles.md) **ROLE-001…018**), 
 | N18 | EntityLink — Legal hold actor | **Done** — TM **#157**+**#158** merge leaf `sys-norm-n18-role-l1` (`a4f59c4d` / `b54281b1`; BDD **ready**/shipped [sys-norm-n18-role-l1.md](../behavior/sys-norm-n18-role-l1.md) **BDD-N18-L1-001…012**; does **not** reopen Waves 0–8 Done) |
 | N19–N20 | EntityLink — where-used; MasterImpact | **Done under PQH** TM **#161** Leaf 2 (`pqh-n19-n20-entitylink`; MAIN tip `20c67ac9` / feature `1e023a35`; BDD **ready**/shipped [pqh-n19-n20-entitylink.md](../behavior/pqh-n19-n20-entitylink.md) **BDD-PQH-N19N20-001…014**; detail [detail/pqh-n19-n20-entitylink.md](./detail/pqh-n19-n20-entitylink.md) — do **not** reopen Waves 0–8) — [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md) |
 | N21 | Journey — Role journey timeline silent empty | **8 Done** |
-| N22 | Actions — Catalog row action pattern | **1** partial (Edit/More); catalog-wide remainder **In Progress under PQH** TM **#162** Leaf 3 (`pqh-n22-catalog-row-actions`; BDD **ready** [pqh-n22-catalog-row-actions.md](../behavior/pqh-n22-catalog-row-actions.md) **BDD-PQH-N22-001…014**; detail [detail/pqh-n22-catalog-row-actions.md](./detail/pqh-n22-catalog-row-actions.md) — do **not** reopen Waves 0–8) — [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md) |
+| N22 | Actions — Catalog row action pattern | **Done under PQH** TM **#162** Leaf 3 (`pqh-n22-catalog-row-actions`; MAIN tip/merge `e60b488f`; BDD **ready**/shipped [pqh-n22-catalog-row-actions.md](../behavior/pqh-n22-catalog-row-actions.md) **BDD-PQH-N22-001…014**; detail [detail/pqh-n22-catalog-row-actions.md](./detail/pqh-n22-catalog-row-actions.md) — do **not** reopen Waves 0–8) — [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md) |
 | N23 | Docs/seed — `demo-images` bypass vs managed asset | **8 Done** ([demo-acceptance-asset-seed.md](../operations/demo-acceptance-asset-seed.md) + seeder) |
 
 ---
@@ -199,22 +199,22 @@ detail [detail/sys-norm-n18-role-l1.md](./detail/sys-norm-n18-role-l1.md); Gates
 E2E SYS-NORM-N18 **5/5**/UIUX **PASS_WITH_NOTES**/Arch **merge_with_notes**/Stage 5+10
 **DEPLOY_OK**).
 
-**Sole-active (host delivery leaf):** NON-CE **PQH** Leaf 3 TM **#162**
-`pqh-n22-catalog-row-actions` → **In Progress** (worktree
-`D:/working/DGE-pqh-n22-catalog-row-actions` · `feat/pqh-n22-catalog-row-actions`; Batch
-**solo** active; BDD **ready**
+**Sole-active (host delivery leaf):** **cleared** — NON-CE **PQH** Leaf 3 TM **#162**
+`pqh-n22-catalog-row-actions` → **Done** (MAIN tip/merge `e60b488f`; worktree **REMOVED**;
+Batch **solo** closed; BDD **ready**/shipped
 [pqh-n22-catalog-row-actions.md](../behavior/pqh-n22-catalog-row-actions.md)
 **BDD-PQH-N22-001…014**; detail [detail/pqh-n22-catalog-row-actions.md](./detail/pqh-n22-catalog-row-actions.md))
-— see [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md).
-Prior PQH Leaf 2 TM **#161** → **Done** (`20c67ac9` / `1e023a35`). Prior PQH Leaf 1 TM
-**#159**+**#160** → **Done** (`ab382c02` / `ee0893fe`). SYS-NORM Waves **0–8** remain
-**Done** (do **not** reopen as In Progress). Residual N18+L1 TM **#157**+**#158** →
-**Done** (`a4f59c4d` / `b54281b1`). Prior §4a Binding editor + Auto `referenceKey` TM
-**#155**+**#156** → **Done** (`9f2378ad` / `9e318d9c`). §4a Asset library TM **#154** →
-**Done** (`c12a0687` / `5b48117f`). SYS-NORM Wave 8 TM **#152** → **Done** `8aca145b` /
-`7df6c563`. §4a Reminder timing TM **#153** → **Done** (`d213834f` / `807d8213`). Parked UX
-queue **empty**. Do **not** fold into **#53**; do **not** flip **#3b** / **#5a**; do **not**
-activate CE-O02 / **#119** / F7 **#163**.
+— see [post-queue-hardening-program-2026-07.md](./post-queue-hardening-program-2026-07.md)
+(Leaf 1–3 **Done**; F7 **#163** parked). Prior PQH Leaf 2 TM **#161** → **Done**
+(`20c67ac9` / `1e023a35`). Prior PQH Leaf 1 TM **#159**+**#160** → **Done**
+(`ab382c02` / `ee0893fe`). SYS-NORM Waves **0–8** remain **Done** (do **not** reopen as
+In Progress). Residual N18+L1 TM **#157**+**#158** → **Done** (`a4f59c4d` / `b54281b1`).
+Prior §4a Binding editor + Auto `referenceKey` TM **#155**+**#156** → **Done**
+(`9f2378ad` / `9e318d9c`). §4a Asset library TM **#154** → **Done** (`c12a0687` /
+`5b48117f`). SYS-NORM Wave 8 TM **#152** → **Done** `8aca145b` / `7df6c563`. §4a Reminder
+timing TM **#153** → **Done** (`d213834f` / `807d8213`). Parked UX queue **empty**. Do
+**not** fold into **#53**; do **not** flip **#3b** / **#5a**; do **not** activate CE-O02 /
+**#119** / F7 **#163**.
 
 ---
 
