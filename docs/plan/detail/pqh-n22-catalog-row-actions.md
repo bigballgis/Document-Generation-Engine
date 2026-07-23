@@ -37,7 +37,7 @@ Deliver SYS-NORM residual **N22** under PQH Leaf 3 — catalog-wide **Edit / Mor
 | Formal phase | **None** |
 | Host sole-active | **#162** `pqh-n22-catalog-row-actions` |
 | Program | PQH **In Progress** — Leaf 1 **Done**; Leaf 2 **Done**; Leaf 3 **In Progress**; F7 **#163** parked |
-| Gate evidence | Pending frontend-engineer → FE gates / E2E / UIUX / Arch / Stage 5+10 |
+| Gate evidence | FE gates green on tip (lint/type-check/test/build); E2E / UIUX / Arch / Stage 5+10 pending |
 | Do **not** | Flip **#3b/#5a**; mark **#53** Done; activate CE-O02 / **#119** / F7; reopen SYS-NORM Waves 0–8; claim IBL/CE/go-live Done |
 
 ---
