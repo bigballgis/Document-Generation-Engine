@@ -14,7 +14,8 @@
 | **Formal phase** | **None** |
 | **Owning docs (leaf SoT)** | **This file** |
 | **Traceability** | [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) **BDD-TEMPLATE-PACKAGE-NAV-001** (S4 clone / S7 in-flight block); [requirements-plan.md](../requirements/requirements-plan.md) §模板包导航 UX; [domain-model.md](../domain/domain-model.md) §2.10–2.11 (dev / release lines; same-release republish clears `release_version` → `STOPPED`) |
-| **Frontend UI** | **`frontend_ui_in_scope=true`** (version-lines honesty + Clone affordance; hub / release detail) |
+| **Frontend UI** | Activation **`frontend_ui_in_scope=true`**; delivery **FE untouched** → E2E/UIUX **N/A** (acceptance via version-lines API on live stack) |
+| **Delivery** | **Done** — MAIN merge `c1bb6c77` / feature `cfefbb55`; `mvn verify` **GREEN 2406**; evidence [fix-abandoned-dev-blocks-clone/](../plan/evidence/fix-abandoned-dev-blocks-clone/) |
 
 **Completion claim constraints:** Closes the proven bug that blank/`null` `releaseVersion` alone marks a version as in-flight, so abandoned `STOPPED`/`DEPRECATED` rows fake an in-flight line and block Clone on a published sibling. **Do not** invent a third `lineKind`. **Do not** change publish / abandon lifecycle transitions beyond in-flight classification and version-lines projection honesty. **Do not** flip checklist **#3b** / **#5a**. **Do not** claim go-live / CE / IBL Done.
 
