@@ -151,6 +151,30 @@ class TemplateVersionLineServiceTest {
     }
 
     @Test
+    void list_showsAbandonedStoppedLifecycleHonestlyAndAllowsClone() {
+        TemplateVersionEntity abandoned = abandonedStoppedVersion(UUID.randomUUID(), 1);
+        TemplateVersionEntity published = publishedVersion(UUID.randomUUID(), 2, "1.0.0");
+        when(templateService.requireReadableTemplate(templateId, author)).thenReturn(template);
+        when(templateCurrentVersionResolver.listVersionLinesOrdered(templateId))
+                .thenReturn(List.of(published, abandoned));
+        when(templateCurrentVersionResolver.isInFlight(abandoned)).thenReturn(false);
+        when(templateCurrentVersionResolver.isInFlight(published)).thenReturn(false);
+        when(templateCurrentVersionResolver.hasInFlightDevVersion(templateId)).thenReturn(false);
+        when(groupAccessService.canAuthorTemplates(author)).thenReturn(true);
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.empty());
+
+        var page = service.list(templateId, 0, 20, author);
+
+        assertThat(page.content()).hasSize(2);
+        assertThat(page.content().get(0).lifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
+        assertThat(page.content().get(0).cloneable()).isTrue();
+        assertThat(page.content().get(1).lifecycleStatus()).isEqualTo(TemplateLifecycleStatus.STOPPED);
+        assertThat(page.content().get(1).lifecycleStatus()).isNotEqualTo(template.getLifecycleStatus());
+        assertThat(page.content().get(1).lineKind()).isEqualTo(TemplateVersionLineKind.PUBLISHED);
+        assertThat(page.content().get(1).cloneable()).isTrue();
+    }
+
+    @Test
     void get_includesMasterPinWhenPublishedLineIsPinned() {
         UUID versionId = UUID.randomUUID();
         UUID revisionId = UUID.randomUUID();
@@ -362,6 +386,14 @@ class TemplateVersionLineServiceTest {
         TemplateVersionEntity entity = new TemplateVersionEntity(id, templateId, "10000003");
         entity.setDevVersionNumber(devVersionNumber);
         entity.setLifecycleStatus(TemplateLifecycleStatus.DRAFT);
+        return entity;
+    }
+
+    private TemplateVersionEntity abandonedStoppedVersion(UUID id, int devVersionNumber) {
+        TemplateVersionEntity entity = new TemplateVersionEntity(id, templateId, "10000003");
+        entity.setDevVersionNumber(devVersionNumber);
+        entity.setReleaseVersion(null);
+        entity.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
         return entity;
     }
 }
