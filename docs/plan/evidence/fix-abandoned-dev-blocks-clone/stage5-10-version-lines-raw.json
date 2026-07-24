@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "auditId": "AUD-229786d9-6126-490f-a753-838db03bf38d",
+    "traceId": "d9610386-a31a-4609-8ecf-66020cd6eee7"
+  },
+  "result": {
+    "content": [
+      {
+        "devVersionId": "3087989d-0a55-42bb-b070-2d46529c9ac7",
+        "devVersionNumber": 2,
+        "releaseVersion": "1.0.0",
+        "lifecycleStatus": "PUBLISHED",
+        "approvalSubState": null,
+        "lineKind": "PUBLISHED",
+        "updatedAt": "2026-07-23T20:09:10.914589Z",
+        "updatedBy": "10000002",
+        "defaultRouteTarget": true,
+        "cloneable": true,
+        "updatedByDisplayName": "Group Admin (10000002)"
+      },
+      {
+        "devVersionId": "97044d55-3cb2-410c-8d1a-6b43cffa4989",
+        "devVersionNumber": 1,
+        "releaseVersion": null,
+        "lifecycleStatus": "STOPPED",
+        "approvalSubState": null,
+        "lineKind": "PUBLISHED",
+        "updatedAt": "2026-07-23T20:09:10.869847Z",
+        "updatedBy": "10000002",
+        "defaultRouteTarget": null,
+        "cloneable": true,
+        "updatedByDisplayName": "Group Admin (10000002)"
+      }
+    ],
+    "page": 0,
+    "size": 50,
+    "totalElements": 2,
+    "totalPages": 1
+  }
+}

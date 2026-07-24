@@ -1,17 +1,27 @@
 package com.bank.docgen.template.service;
 
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
+import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TemplateCurrentVersionResolver {
+
+    private static final Set<TemplateLifecycleStatus> IN_FLIGHT_LIFECYCLE_STATUSES = EnumSet.of(
+            TemplateLifecycleStatus.DRAFT,
+            TemplateLifecycleStatus.TESTING,
+            TemplateLifecycleStatus.APPROVAL,
+            TemplateLifecycleStatus.PENDING_RELEASE
+    );
 
     private final TemplateVersionRepository templateVersionRepository;
 
@@ -60,7 +70,9 @@ public class TemplateCurrentVersionResolver {
 
     public Optional<TemplateVersionEntity> findLatestPublishedVersion(UUID templateId) {
         return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId).stream()
-                .filter(version -> !isDeleted(version) && !isInFlight(version))
+                .filter(version -> !isDeleted(version)
+                        && !isInFlight(version)
+                        && hasNonBlankReleaseVersion(version))
                 .max(Comparator.comparingInt(TemplateVersionEntity::getDevVersionNumber));
     }
 
@@ -77,12 +89,22 @@ public class TemplateCurrentVersionResolver {
     }
 
     public boolean isInFlight(TemplateVersionEntity version) {
-        return !isDeleted(version)
-                && (version.getReleaseVersion() == null || version.getReleaseVersion().isBlank());
+        if (isDeleted(version)) {
+            return false;
+        }
+        if (hasNonBlankReleaseVersion(version)) {
+            return false;
+        }
+        return IN_FLIGHT_LIFECYCLE_STATUSES.contains(version.getLifecycleStatus());
     }
 
     private boolean isDeleted(TemplateVersionEntity version) {
         return version.isDeleted();
+    }
+
+    private static boolean hasNonBlankReleaseVersion(TemplateVersionEntity version) {
+        String releaseVersion = version.getReleaseVersion();
+        return releaseVersion != null && !releaseVersion.isBlank();
     }
 }
 
