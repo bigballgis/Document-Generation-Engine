@@ -27,6 +27,12 @@ public class ApiCredentialEntity {
     @Column(name = "secret_hash", nullable = false, length = 256)
     private String secretHash;
 
+    @Column(name = "previous_secret_hash", length = 256)
+    private String previousSecretHash;
+
+    @Column(name = "rotation_grace_period_ends_at")
+    private Instant rotationGracePeriodEndsAt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
     private ApiCredentialStatus status;
@@ -82,6 +88,14 @@ public class ApiCredentialEntity {
         return secretHash;
     }
 
+    public String getPreviousSecretHash() {
+        return previousSecretHash;
+    }
+
+    public Instant getRotationGracePeriodEndsAt() {
+        return rotationGracePeriodEndsAt;
+    }
+
     public ApiCredentialStatus getStatus() {
         return status;
     }
@@ -110,15 +124,28 @@ public class ApiCredentialEntity {
         return expiresAt;
     }
 
+    public void setExpiresAt(Instant expiresAt) {
+        this.expiresAt = expiresAt;
+        this.updatedAt = Instant.now();
+    }
+
     public void revoke() {
         this.status = ApiCredentialStatus.REVOKED;
         this.revokedAt = Instant.now();
         this.updatedAt = Instant.now();
+        this.previousSecretHash = null;
+        this.rotationGracePeriodEndsAt = null;
     }
 
-    public void rotateSecret(String newSecretHash) {
+    /**
+     * FOS-W10-1/W10-2: keep prior hash for 28-day grace; rebase {@code expiresAt} from {@code now}.
+     */
+    public void rotateSecret(String newSecretHash, Instant now) {
+        this.previousSecretHash = this.secretHash;
         this.secretHash = newSecretHash;
+        this.rotationGracePeriodEndsAt = ApiCredentialLifecycleSupport.rotationGracePeriodEndsAt(now);
         this.rotationGeneration++;
-        this.updatedAt = Instant.now();
+        this.expiresAt = ApiCredentialLifecycleSupport.defaultExpiresAt(now);
+        this.updatedAt = now;
     }
 }

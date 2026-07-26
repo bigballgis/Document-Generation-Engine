@@ -1,7 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import CredentialsPanel from '@/components/api/CredentialsPanel.vue'
 import en from '@/i18n/locales/en'
 import type { ApiCredentialSummary } from '@/types/template'
@@ -12,6 +12,7 @@ const sampleCredential: ApiCredentialSummary = {
   status: 'ACTIVE',
   createdAt: '2026-06-23T10:00:00Z',
   revokedAt: null,
+  expiresAt: '2026-12-20T10:00:00Z',
 }
 
 function mountPanel() {
@@ -68,3 +69,24 @@ describe('CredentialsPanel', () => {
     expect(document.body.textContent).toContain('Copy the secret now')
   })
 })
+
+  it('copies secret from dialog', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    const wrapper = mountPanel()
+    await flushPromises()
+    const panel = wrapper.vm as unknown as {
+      revealSecret: (id: string, secret: string) => void
+    }
+    panel.revealSecret('EXT-CRED-001', 'super-secret-value')
+    await flushPromises()
+    const buttons = Array.from(document.body.querySelectorAll('button'))
+    const copyBtn = buttons.find((b) => b.textContent?.includes('Copy secret'))
+    expect(copyBtn).toBeTruthy()
+    await copyBtn!.click()
+    await flushPromises()
+    expect(writeText).toHaveBeenCalledWith('super-secret-value')
+  })

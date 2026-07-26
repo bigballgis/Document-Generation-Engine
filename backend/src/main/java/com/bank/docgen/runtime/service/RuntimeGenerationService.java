@@ -80,12 +80,16 @@ public class RuntimeGenerationService {
         ApiCredentialEntity credential = apiCredentialRepository
                 .findByExternalId(session.credentialExternalId())
                 .orElse(null);
+        Instant now = Instant.now();
         RuntimeCredentialSummaryView credentialSummary = credential == null ? null
                 : new RuntimeCredentialSummaryView(
                         credential.getExternalId(),
-                        ApiCredentialLifecycleSupport.resolveEffectiveStatus(credential, Instant.now()).name(),
+                        ApiCredentialLifecycleSupport.resolveEffectiveStatus(credential, now).name(),
                         "fp-" + credential.getExternalId(),
-                        credential.getExpiresAt()
+                        credential.getExpiresAt(),
+                        ApiCredentialLifecycleSupport.isPreviousSecretWithinGrace(credential, now)
+                                ? credential.getRotationGracePeriodEndsAt()
+                                : null
                 );
         return contractAssemblyService.assemble(
                 template,

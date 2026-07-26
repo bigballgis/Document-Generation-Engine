@@ -140,6 +140,10 @@ export interface ApiCredentialSummary {
   status: string
   createdAt: string
   revokedAt: string | null
+  /** Persisted credential expiry (ISO 8601). FOS-W10-3. */
+  expiresAt?: string | null
+  /** Present while previous secret remains accepted (28-day grace). */
+  rotationGracePeriodEndsAt?: string | null
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management API credential create). */
@@ -149,4 +153,14 @@ export interface ApiCredentialCreated {
   secret: string
   status: string
   createdAt: string
+  expiresAt?: string | null
+}
+
+export interface ApiCredentialRotated {
+  credentialId: string
+  externalId: string
+  secret: string
+  rotatedAt: string
+  expiresAt?: string | null
+  rotationGracePeriodEndsAt?: string | null
 }

@@ -71,7 +71,7 @@ class ApiManagementServiceCredentialRotationTest {
         ApiCredentialEntity credential = new ApiCredentialEntity(
                 CREDENTIAL_ID, "CRED-ROTATE", TEMPLATE_ID, "hash", "admin"
         );
-        credential.rotateSecret("hash-1");
+        credential.rotateSecret("hash-1", Instant.now());
 
         when(templateService.requireReadableTemplate(TEMPLATE_ID, admin)).thenReturn(template);
         when(apiCredentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(credential));

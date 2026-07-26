@@ -2462,9 +2462,9 @@
         "testStrategy": "See docs/plan/detail/FOS-W10-credential-lifecycle.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:30:00.000Z"
+        "updatedAt": "2026-07-26T19:21:55.000Z"
       },
       {
         "id": "181",

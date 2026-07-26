@@ -156,7 +156,8 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
                         ApiErrorCodes.INVALID_CREDENTIALS,
                         "api.error.runtime.invalidCredentials"
                 ));
-        if (!passwordHashService.matches(secret, credential.getSecretHash())) {
+        Instant now = Instant.now();
+        if (!matchesCurrentOrGraceSecret(secret, credential, now)) {
             throw new RuntimeAuthenticationException(
                     ApiErrorCodes.INVALID_CREDENTIALS,
                     "api.error.runtime.invalidCredentials"
@@ -164,7 +165,7 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
         }
         ApiCredentialStatus effectiveStatus = ApiCredentialLifecycleSupport.resolveEffectiveStatus(
                 credential,
-                Instant.now()
+                now
         );
         if (effectiveStatus == ApiCredentialStatus.REVOKED) {
             throw new RuntimeAuthenticationException(
@@ -178,7 +179,7 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
                     "api.error.runtime.apiCredentialExpired"
             );
         }
-        if (!ApiCredentialLifecycleSupport.isActiveCredential(credential, Instant.now())) {
+        if (!ApiCredentialLifecycleSupport.isActiveCredential(credential, now)) {
             throw new RuntimeAuthenticationException(
                     ApiErrorCodes.INVALID_CREDENTIALS,
                     "api.error.runtime.invalidCredentials"
@@ -222,6 +223,23 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
                 accessAccount,
                 callerGroups
         );
+    }
+
+    /**
+     * FOS-W10-1: accept current secret always; accept previous secret only within 28-day grace.
+     */
+    private boolean matchesCurrentOrGraceSecret(
+            String secret,
+            ApiCredentialEntity credential,
+            Instant now
+    ) {
+        if (passwordHashService.matches(secret, credential.getSecretHash())) {
+            return true;
+        }
+        if (!ApiCredentialLifecycleSupport.isPreviousSecretWithinGrace(credential, now)) {
+            return false;
+        }
+        return passwordHashService.matches(secret, credential.getPreviousSecretHash());
     }
 
     private String extractTemplateIdFromPath(String path) {

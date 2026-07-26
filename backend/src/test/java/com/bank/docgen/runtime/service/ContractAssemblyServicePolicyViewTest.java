@@ -76,7 +76,8 @@ class ContractAssemblyServicePolicyViewTest {
                 "cred-ext-001",
                 "ACTIVE",
                 "fp-cred-ext-001",
-                Instant.parse("2026-12-01T00:00:00Z")
+                Instant.parse("2026-12-01T00:00:00Z"),
+                null
         );
 
         lenient().when(messageResolver.resolve(any())).thenAnswer(invocation -> invocation.getArgument(0).toString());

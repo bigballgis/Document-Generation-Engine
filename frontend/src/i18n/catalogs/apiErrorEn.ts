@@ -217,6 +217,8 @@ export const apiErrorEn = {
     accessDenied: "You do not have permission to manage API settings for this template.",
     templateNotPublished: "API policy can only be configured for published templates.",
     credentialNotActive: "The API credential is not active.",
+    credentialExpiryDaysInvalid: "Credential expiry days must be between 1 and 365.",
+    credentialAlreadyRevoked: "The API credential is already revoked.",
     defaultRouteTargetNotCallable: "The default route target release version is not callable.",
     policyVersionNotFound: "The requested API policy version was not found.",
     policyImpactBlocked: "The candidate API policy has blocking impacts and cannot be applied.",

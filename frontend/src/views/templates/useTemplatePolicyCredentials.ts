@@ -16,7 +16,11 @@ export interface UseTemplatePolicyCredentialsOptions {
   template: ComputedRef<TemplateDetail | null>
   errorMessage: ComputedRef<string>
   /** When set, secrets are revealed via this callback instead of the local secret dialog. */
-  revealSecret?: (externalId: string, secret: string) => void
+  revealSecret?: (
+    externalId: string,
+    secret: string,
+    meta?: { expiresAt?: string | null; rotationGracePeriodEndsAt?: string | null },
+  ) => void
 }
 
 export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentialsOptions) {
@@ -99,9 +103,13 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
     credentialSecretDialogVisible.value = true
   }
 
-  function revealCredentialSecret(externalId: string, secret: string) {
+  function revealCredentialSecret(
+    externalId: string,
+    secret: string,
+    meta?: { expiresAt?: string | null; rotationGracePeriodEndsAt?: string | null },
+  ) {
     if (revealSecret) {
-      revealSecret(externalId, secret)
+      revealSecret(externalId, secret, meta)
       return
     }
     openCredentialSecretDialog(externalId, secret)
@@ -110,7 +118,7 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
   async function handleCreateCredential() {
     try {
       const created = await apiPolicyStore.createCredential(templateId.value)
-      revealCredentialSecret(created.externalId, created.secret)
+      revealCredentialSecret(created.externalId, created.secret, { expiresAt: created.expiresAt })
       ElMessage.success(t('templates.policy.createCredentialSuccess'))
     } catch {
       ElMessage.error(resolvePolicyErrorMessage('templates.error.createCredential'))
@@ -128,7 +136,10 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
     }
     try {
       const rotated = await apiPolicyStore.rotateCredential(templateId.value, credentialId)
-      revealCredentialSecret(externalId, rotated.secret)
+      revealCredentialSecret(externalId, rotated.secret, {
+        expiresAt: rotated.expiresAt,
+        rotationGracePeriodEndsAt: rotated.rotationGracePeriodEndsAt,
+      })
       ElMessage.success(t('templates.policy.rotateCredentialSuccess'))
     } catch {
       ElMessage.error(resolvePolicyErrorMessage('templates.error.rotateCredential'))
