@@ -1,7 +1,7 @@
 # FOS-W14 — Demo literacy path
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
-**Wave:** W14 · **Status:** **Not Started**
+**Wave:** W14 · **Status:** **Done**
 **Slice id:** `fos-demo-literacy-path` · worktree `../DGE-fos-demo-literacy-path` · branch `feat/fos-demo-literacy-path`
 **Task Master:** **#184** · **delivery_lane:** **full** if scripts/UI touched; **light** only if pure docs (BDD must prove E1–E5)
 **Origin:** E13, E19, E20  
