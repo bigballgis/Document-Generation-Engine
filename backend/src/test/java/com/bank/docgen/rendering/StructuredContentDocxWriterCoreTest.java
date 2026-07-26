@@ -170,6 +170,22 @@ class StructuredContentDocxWriterCoreTest extends StructuredContentDocxWriterTes
         }
     }
     @Test
+    void skipsLoopBodyWhenCollectionEmpty() throws Exception {
+        String structured = """
+                {"nodes":[{"type":"loopBlock","loopVariable":"items","children":[
+                  {"type":"textRun","value":"Row item"}
+                ]}]}
+                """;
+
+        byte[] result = render(structured, Map.of("items", List.of()));
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            assertThat(document.getParagraphs().stream().map(XWPFParagraph::getText).toList())
+                    .noneMatch(text -> text.contains("Row item"));
+        }
+    }
+
+    @Test
     void rendersLoopBlockSinglePassWhenListMissing() throws Exception {
         String structured = """
                 {"nodes":[{"type":"loopBlock","loopVariable":"items","children":[

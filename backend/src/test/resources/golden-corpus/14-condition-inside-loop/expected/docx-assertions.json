@@ -1,0 +1,30 @@
+{
+  "deferred": false,
+  "assertions": [
+    {
+      "type": "XML_CONTAINS",
+      "part": "word/document.xml",
+      "substring": "Condition inside loop letter"
+    },
+    {
+      "type": "XML_CONTAINS",
+      "part": "word/document.xml",
+      "substring": "ROW-"
+    },
+    {
+      "type": "XML_CONTAINS",
+      "part": "word/document.xml",
+      "substring": "Alpha"
+    },
+    {
+      "type": "XML_CONTAINS",
+      "part": "word/document.xml",
+      "substring": "Gamma"
+    },
+    {
+      "type": "XML_NOT_CONTAINS",
+      "part": "word/document.xml",
+      "substring": "BetaHidden"
+    }
+  ]
+}

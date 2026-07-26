@@ -1,7 +1,7 @@
 # FOS-W13 — Default verify honesty
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
-**Wave:** W13 · **Status:** **Not Started**
+**Wave:** W13 · **Status:** **Done**
 **Slice id:** `fos-default-verify-honesty` · worktree `../DGE-fos-default-verify-honesty` · branch `feat/fos-default-verify-honesty`
 **Task Master:** **#183** · **delivery_lane:** **full**
 **Origin:** E2, E4, E6, E7, E8, E9, E10, E11

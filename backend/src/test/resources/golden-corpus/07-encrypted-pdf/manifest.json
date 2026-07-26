@@ -2,9 +2,10 @@
   "id": "encrypted-pdf",
   "theme": "PDF encryption with fixture password (open+owner, ALLOW_PRINT)",
   "maturity": "ACTIVE",
-  "title": "Encrypted PDF — minimal ACTIVE sample",
+  "title": "Encrypted PDF \u2014 minimal ACTIVE sample",
   "renderMode": "STRUCTURED_ASSEMBLE",
   "pdfSource": "SYNTHETIC",
   "description": "Minimal encrypted-PDF sample. DOCX half asserts the assembled document carries the sample body. PDF half synthesizes a PDF from the assembled DOCX text (no soffice required), encrypts it with a test-fixture open/owner password, asserts the PDF cannot be opened without the password, then asserts the body is extractable after decryption. Fixture password is test-only and never logged.",
-  "owningFutureSlice": "CE-K07 skeleton — minimal ACTIVE sample; encryption contract owned by PdfEncryptionService"
+  "owningFutureSlice": "CE-K07 skeleton \u2014 minimal ACTIVE sample; encryption contract owned by PdfEncryptionService",
+  "harnessSelfTest": true
 }

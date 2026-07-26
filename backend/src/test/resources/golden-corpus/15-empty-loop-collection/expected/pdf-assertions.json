@@ -1,0 +1,13 @@
+{
+  "deferred": false,
+  "assertions": [
+    {
+      "type": "TEXT_CONTAINS",
+      "substring": "Empty collection notice"
+    },
+    {
+      "type": "TEXT_NOT_CONTAINS",
+      "substring": "Loop body must not appear when empty"
+    }
+  ]
+}

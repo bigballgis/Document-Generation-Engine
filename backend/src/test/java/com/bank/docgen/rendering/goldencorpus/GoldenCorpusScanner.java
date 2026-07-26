@@ -94,13 +94,19 @@ public final class GoldenCorpusScanner {
             String title = textOr(root, "title", id);
             String renderMode = textOr(root, "renderMode", "STRUCTURED_ASSEMBLE");
             String pdfSource = textOr(root, "pdfSource", "LIBREOFFICE");
+            boolean harnessSelfTest = root.path("harnessSelfTest").asBoolean(
+                    "SYNTHETIC".equalsIgnoreCase(pdfSource)
+            );
+            String productPdf = textOr(root, "productPdf", null);
             GoldenCorpusManifest manifest = new GoldenCorpusManifest(
                     id,
                     theme,
                     maturity,
                     title,
                     renderMode,
-                    pdfSource
+                    pdfSource,
+                    harnessSelfTest,
+                    productPdf
             );
             return new GoldenCorpusPackage(packageDir, manifest);
         } catch (IOException ex) {
@@ -171,3 +177,4 @@ public final class GoldenCorpusScanner {
         return node.asText().trim();
     }
 }
+

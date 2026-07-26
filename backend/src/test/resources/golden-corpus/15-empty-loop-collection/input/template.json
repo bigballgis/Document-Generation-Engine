@@ -1,0 +1,5 @@
+{
+  "bindings": {
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"Empty loop collection letter\"}]},{\"type\":\"loopBlock\",\"loopVariable\":\"items\",\"children\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"Loop body must not appear when empty\"}]}]},{\"type\":\"conditionBlock\",\"conditionExpression\":\"${showEmptyNotice} == true\",\"children\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"Empty collection notice\"}]}]}]}"
+  }
+}

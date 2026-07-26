@@ -2,9 +2,10 @@
   "id": "cross-page-table",
   "theme": "Cross-page table header repetition (tblHeader)",
   "maturity": "ACTIVE",
-  "title": "Cross-page table — repeatHeaderAcrossPages → w:tblHeader (CE-K06a)",
+  "title": "Cross-page table \u2014 repeatHeaderAcrossPages \u2192 w:tblHeader (CE-K06a)",
   "renderMode": "STRUCTURED_ASSEMBLE",
   "pdfSource": "LIBREOFFICE",
   "description": "ACTIVE CE-K06a sample: tableComponent with repeatHeaderAcrossPages=true emits OOXML <w:tblHeader/> on the header row. DOCX assertions require tblHeader presence and header cell text. PDF half deferred (no page-break pixel/text requirement).",
-  "owningFutureSlice": "CE-K06a"
+  "owningFutureSlice": "CE-K06a",
+  "productPdf": "pending-CRCH-W5"
 }

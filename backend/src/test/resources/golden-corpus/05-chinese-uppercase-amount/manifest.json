@@ -2,9 +2,10 @@
   "id": "chinese-uppercase-amount",
   "theme": "Chinese uppercase amount (SPELL_AMOUNT) rendering",
   "maturity": "ACTIVE",
-  "title": "Chinese uppercase amount — ACTIVE (CE-K03)",
+  "title": "Chinese uppercase amount \u2014 ACTIVE (CE-K03)",
   "renderMode": "STRUCTURED_ASSEMBLE",
   "pdfSource": "SYNTHETIC",
   "description": "ACTIVE CE-K03 package: SPELL_AMOUNT evaluated before assemble; DOCX asserts RMB uppercase text.",
-  "owningFutureSlice": "CE-K03"
+  "owningFutureSlice": "CE-K03",
+  "harnessSelfTest": true
 }

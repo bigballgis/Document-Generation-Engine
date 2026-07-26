@@ -2,9 +2,10 @@
   "id": "qr-barcode",
   "theme": "QR barcode embedded image (qrBarcodeRef)",
   "maturity": "ACTIVE",
-  "title": "QR barcode — qrBarcodeRef ZXing PNG embed (CE-K06b)",
+  "title": "QR barcode \u2014 qrBarcodeRef ZXing PNG embed (CE-K06b)",
   "renderMode": "STRUCTURED_ASSEMBLE",
   "pdfSource": "LIBREOFFICE",
   "description": "ACTIVE CE-K06b sample: qrBarcodeRef with variables payload embeds a PNG via ZXing. DOCX assertions require drawing/blip presence. PDF half deferred (no soffice required). No pixel comparison.",
-  "owningFutureSlice": "CE-K06b"
+  "owningFutureSlice": "CE-K06b",
+  "productPdf": "pending-CRCH-W5"
 }
