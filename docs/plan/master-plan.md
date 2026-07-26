@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase / program:** **None** (2026-07-09+). **Delivery focus note (2026-07-26):** **FOS In Progress** — [frontline-operability-solidity-program-2026-07.md](frontline-operability-solidity-program-2026-07.md). **#171** → **Done** (`8dfdb0ba`); **#172** `fos-author-can-start` → **Done** (`f5622e3f` / `f6d2903c`). **#173** `fos-authoring-blocks-work` → **Done** (`7418f2e4` / `f932a2a3`). **#174** `fos-gates-explain-themselves` → **Done** (`1960da96` / `17c4e396`). Next **#175** `fos-time-locale-honesty`. Prior **CRCH W0+W1** → **Done** (`ad7f6d49`). OD-FOS-1…4 / CRCH OD-1/OD-2 **resolved**. Formal phase **None**; vetoes: checklist-#3b/#5a / CE-O02 / #53 / #106 / #119 / no-new-features.
+**Active formal phase / program:** **None** (2026-07-09+). **Delivery focus note (2026-07-26):** **FOS In Progress** — [frontline-operability-solidity-program-2026-07.md](frontline-operability-solidity-program-2026-07.md). **#171** → **Done** (`8dfdb0ba`); **#172** `fos-author-can-start` → **Done** (`f5622e3f` / `f6d2903c`). **#173** `fos-authoring-blocks-work` → **Done** (`7418f2e4` / `f932a2a3`). **#174** `fos-gates-explain-themselves` → **Done** (`1960da96` / `17c4e396`). **#175** `fos-time-locale-honesty` → **Done** (`19f4f917` / `78a0bf8d`). Next **#176** `fos-lifecycle-cannot-corrupt`. Prior **CRCH W0+W1** → **Done** (`ad7f6d49`). OD-FOS-1…4 / CRCH OD-1/OD-2 **resolved**. Formal phase **None**; vetoes: checklist-#3b/#5a / CE-O02 / #53 / #106 / #119 / no-new-features.
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).

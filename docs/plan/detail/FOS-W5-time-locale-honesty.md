@@ -1,7 +1,7 @@
 # FOS-W5 — Time & locale honesty
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
-**Wave:** W5 · **Status:** **In Progress**
+**Wave:** W5 · **Status:** **Done**
 **Slice id:** `fos-time-locale-honesty` · worktree `../DGE-fos-time-locale-honesty` · branch `feat/fos-time-locale-honesty`
 **Task Master:** **#175** · **delivery_lane:** **full**
 **Origin:** D2, D3, D9, D15, D17

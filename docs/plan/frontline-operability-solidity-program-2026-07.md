@@ -10,7 +10,7 @@
 | **Origin** | User-commissioned deep review (2026-07-26): make **existing** core maximally **易用** and **扎实** for a bank frontline employee who must orchestrate the most complex bank template and hand it off for other systems to call — **no new product features** |
 | **Audit baseline commit** | `f29211c5` (MAIN tip when program authored; locate code by quoted snippets, not line numbers) |
 | **Model note** | Program authored with Opus 5–class deep audits; detail sheets are written so a **lower-tier implementer** can execute TDD without improvisation |
-| **Next queue head** | FOS **Leaf 4** `fos-gates-explain-themselves` / TM **#174** → **Done** (`1960da96` / `17c4e396`); next **Leaf 5** `fos-time-locale-honesty` (TM **#175**) |
+| **Next queue head** | FOS **Leaf 5** `fos-time-locale-honesty` / TM **#175** → **Done** (`19f4f917` / `78a0bf8d`); next **Leaf 6** `fos-lifecycle-cannot-corrupt` (TM **#176**) |
 | **Upstream** | [CRCH](./core-render-compute-hardening-program.md) owns rendering P0 + preview dedupe (W0+W1) and compute/DOCX/harness designs (W2/W3/W5). FOS **supersedes CRCH W4** (authoring IA) — see §6 |
 
 ---
@@ -129,7 +129,7 @@ If a future decision appears, add it here — do not invent product behaviour.
 | **W2** | `fos-author-can-start` | Author can start & navigate | A1,A2,A16,A17,A18,A21,A25,A26 | [FOS-W2](detail/FOS-W2-author-can-start.md) | **Done** |
 | **W3** | `fos-authoring-blocks-work` | Authoring blocks work | A5,A6,A7,A9,A10,A11,A12 | [FOS-W3](detail/FOS-W3-authoring-blocks-work.md) | **Done** |
 | **W4** | `fos-gates-explain-themselves` | Gates & actions explain themselves | A3,A8,A13,A14,A15,A19,A20,A27,D10,D12,D13,D14 | [FOS-W4](detail/FOS-W4-gates-explain-themselves.md) | **Done** |
-| **W5** | `fos-time-locale-honesty` | Time & locale honesty | D2,D3,D9,D15,D17 | [FOS-W5](detail/FOS-W5-time-locale-honesty.md) | **Not Started** |
+| **W5** | `fos-time-locale-honesty` | Time & locale honesty | D2,D3,D9,D15,D17 | [FOS-W5](detail/FOS-W5-time-locale-honesty.md) | **Done** |
 | **W6** | `fos-lifecycle-cannot-corrupt` | Lifecycle cannot corrupt | B1,B3,B4,B5,B6,B13,B19,B23 (B16 → **non-goal** per D10) | [FOS-W6](detail/FOS-W6-lifecycle-cannot-corrupt.md) | **Not Started** |
 | **W7** | `fos-generation-fails-closed` | Generation fails closed | B2,B7,B8,B9,B10,B15 | [FOS-W7](detail/FOS-W7-generation-fails-closed.md) | **Not Started** |
 | **W8** | `fos-concurrency-integrity` | Concurrency & integrity | B11,B12,B17,B18,B20 | [FOS-W8](detail/FOS-W8-concurrency-integrity.md) | **Not Started** |
@@ -155,7 +155,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Leaf 2 | **#172** | `fos-author-can-start` | **done** | Merged `f5622e3f` / feat `f6d2903c` | |
 | Leaf 3 | **#173** | `fos-authoring-blocks-work` | **done** | Merged `7418f2e4` / feat `f932a2a3` |
 | Leaf 4 | **#174** | `fos-gates-explain-themselves` | **done** | `1960da96` / `17c4e396` |
-| Leaf 5 | **#175** | `fos-time-locale-honesty` | **pending** | |
+| Leaf 5 | **#175** | `fos-time-locale-honesty` | **done** | `19f4f917` / `78a0bf8d` |
 | Leaf 6 | **#176** | `fos-lifecycle-cannot-corrupt` | **pending** | W6-8 non-goal (D10) — do not invent PENDING_RELEASE→DRAFT |
 | Leaf 7 | **#177** | `fos-generation-fails-closed` | **pending** | |
 | Leaf 8 | **#178** | `fos-concurrency-integrity` | **pending** | |

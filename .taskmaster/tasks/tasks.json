@@ -2402,7 +2402,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W5-time-locale-honesty.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
