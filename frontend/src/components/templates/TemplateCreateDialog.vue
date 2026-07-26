@@ -46,6 +46,7 @@ defineExpose({
     :title="t('templates.create.title')"
     width="560px"
     destroy-on-close
+    :close-on-click-modal="false"
   >
     <el-alert
       v-if="apiErrorMessage"

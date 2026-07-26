@@ -60,6 +60,7 @@ defineExpose({ submitForm })
     :title="mode === 'create' ? t('identity.users.createTitle') : t('identity.users.editTitle')"
     width="560px"
     destroy-on-close
+    :close-on-click-modal="false"
   >
     <el-form ref="formRef" :model="form" :rules="formRules" label-position="top">
       <el-form-item

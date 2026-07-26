@@ -1120,6 +1120,7 @@ export default {
       restore: '恢复版本',
       deactivateDisabledTooltip: '默认路由发布版本不能停用。',
       createFromLatestRelease: '基于最新发布创建修改',
+      inFlightDraftExistsTooltip: '已存在草稿版本',
       empty: '暂无版本线。',
       loadError: '无法加载版本线。',
     },
@@ -1280,6 +1281,10 @@ export default {
       refresh: '刷新',
       thresholdHint:
         '当前阈值（{scope}）：必填变量 {variablePct}%、必填样本 {samplePct}%、版式占位符绑定 {anchorPct}%。',
+      scopeType: {
+        GLOBAL: '全局默认',
+        GROUP: '组覆盖',
+      },
       status: {
         meetsThreshold: '综合覆盖率已达到阈值（{percentage}%）。',
         belowThreshold: '综合覆盖率低于阈值（{percentage}%）。',
@@ -1748,6 +1753,7 @@ export default {
       noVariables: '尚未配置变量。',
       noBindings: '尚未配置版式占位符绑定。',
       validateBindings: '校验绑定',
+      validateBindingsEmptyTooltip: '请先配置至少一个版式占位符绑定再校验。',
       bindingValidationSuccess: '绑定校验通过。',
       bindingValidationBlocking: '绑定校验发现阻塞项。',
       bindingValidationSummary: '{valid}/{total} 个绑定有效',
@@ -1791,7 +1797,8 @@ export default {
       bindingVersionConflictKeepEditing: '继续编辑',
       deleteVariableSuccess: '变量已删除。',
       confirmDeleteVariableTitle: '删除变量',
-      confirmDeleteVariableMessage: '是否从模板草稿中移除此变量？',
+      confirmDeleteVariableMessage:
+        '是否从模板草稿中移除变量 “{variableKey}”？\n\n绑定：{bindingCount}\n规则：{ruleCount}\n未锁定测试集：{unlockedCount}\n跳过的锁定测试集：{lockedCount}\n计算表达式引用：{computeCount}',
       rename: {
         confirmTitle: '重命名变量',
         confirmMessage:

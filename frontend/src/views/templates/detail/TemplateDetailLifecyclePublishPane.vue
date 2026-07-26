@@ -107,7 +107,7 @@ const showAdGroupsNotConfiguredWarning = computed(() =>
               <el-tag v-if="item.informational" type="info" size="small">
                 {{ t('templates.publishGate.informational') }}
               </el-tag>
-              <el-tag v-else :type="item.ready ? 'success' : 'warning'" size="small">
+              <el-tag :type="item.ready ? 'success' : 'warning'" size="small">
                 {{ item.ready ? t('templates.publishGate.ready') : t('templates.publishGate.pending') }}
               </el-tag>
             </li>

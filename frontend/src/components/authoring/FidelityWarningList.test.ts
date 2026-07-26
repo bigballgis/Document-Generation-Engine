@@ -106,3 +106,34 @@ describe('FidelityWarningList human labels (FOS-W1-1)', () => {
     expect(text.toLowerCase()).toContain('seal')
   })
 })
+
+describe('FidelityWarningList edit link (FOS-W4-6)', () => {
+  it('never puts artifact storage key into Edit binding href', async () => {
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(FidelityWarningList, {
+      props: {
+        warnings: [
+          {
+            code: 'UNRESOLVED_VARIABLE',
+            messageKey: 'authoring.fidelity.unresolvedVariable',
+            location: 'amountAnchor',
+            artifact: null,
+            viewed: false,
+          },
+        ],
+        artifactHint: 'artifacts/prev-1.docx',
+        templateId: 'tpl-1',
+        devVersionId: 'dev-1',
+      },
+      global: {
+        plugins: [i18n, ElementPlus],
+        stubs: { RouterLink: { props: ['to'], template: '<a :href="to"><slot /></a>' } },
+      },
+    })
+    await flushPromises()
+    const link = wrapper.get('[data-testid="fidelity-warning-edit-binding"]')
+    expect(link.attributes('href')).toContain('anchorId=amountAnchor')
+    expect(link.attributes('href')).not.toContain('artifacts')
+    expect(wrapper.text()).toContain('prev-1.docx')
+  })
+})

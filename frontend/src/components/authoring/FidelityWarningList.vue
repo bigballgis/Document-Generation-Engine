@@ -10,6 +10,10 @@ import {
   uniqueWarningCodes,
 } from '@/utils/fidelityWarningFilters'
 import { buildFidelityBindingEditLink } from '@/utils/fidelityBindingEditLink'
+import {
+  friendlyArtifactLabel,
+  resolveFidelityEditAnchorId,
+} from '@/utils/fidelityArtifactLabel'
 
 const props = defineProps<{
   warnings: FidelityWarning[]
@@ -36,7 +40,8 @@ watch(
       code: warning.code ?? 'UNKNOWN',
       messageKey: warning.messageKey,
       location: warning.location ?? null,
-      artifact: warning.artifact ?? props.artifactHint ?? null,
+      // Keep payload artifact only — never merge storage-key hints into edit targets.
+      artifact: warning.artifact ?? null,
       viewed: warning.viewed ?? false,
     }))
   },
@@ -110,8 +115,16 @@ function bindingEditLink(warning: FidelityWarning): string | null {
   return buildFidelityBindingEditLink({
     templateId: props.templateId,
     devVersionId: props.devVersionId,
-    anchorId: warning.artifact ?? warning.location,
+    anchorId: resolveFidelityEditAnchorId(warning),
   })
+}
+
+function artifactColumnLabel(warning: FidelityWarning): string {
+  return friendlyArtifactLabel(
+    warning.artifact,
+    props.artifactHint,
+    t('common.notAvailable'),
+  )
 }
 
 function toggleTechnicalDetails(index: number) {
@@ -201,7 +214,7 @@ function resetFilters() {
       </el-table-column>
       <el-table-column :label="t('templates.preview.warningFilters.artifact')" min-width="120">
         <template #default="{ row }">
-          {{ row.artifact ?? t('common.notAvailable') }}
+          {{ artifactColumnLabel(row) }}
         </template>
       </el-table-column>
       <el-table-column :label="t('templates.preview.warningFilters.viewed')" width="140">

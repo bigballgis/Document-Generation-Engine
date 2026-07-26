@@ -70,6 +70,20 @@ describe('TemplateDetailApprovalPublishPane Go fix (BDD-CE-U15-LSS)', () => {
     expect(wrapper.text()).toContain('Pending')
   })
 
+  it('FOS-W4-11: informational items still show ready/pending tags', () => {
+    const wrapper = mountPane([
+      {
+        key: 'FIDELITY_REVIEW',
+        label: 'Fidelity review',
+        ready: true,
+        informational: true,
+      },
+    ])
+    const text = wrapper.text()
+    expect(text).toContain('Informational')
+    expect(text).toContain('Ready')
+  })
+
   it('LSS-006: COVERAGE_THRESHOLDS Go fix lands on testing/coverage', async () => {
     const wrapper = mountPane([
       { key: 'COVERAGE_THRESHOLDS', label: 'Coverage', ready: false, blocker: true },

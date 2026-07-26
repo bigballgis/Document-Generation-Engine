@@ -48,7 +48,22 @@ export function useVersionLinesPanel(
   const totalElements = computed(() => versionLinesCache.value?.totalElements ?? 0)
   const totalPages = computed(() => versionLinesCache.value?.totalPages ?? 0)
 
-  const hasInFlightLine = computed(() => versionLines.value.some(isInFlightVersionLine))
+  /**
+   * Whole-collection in-flight signal: current page may omit IN_FLIGHT when paginated.
+   * Published rows already carry `cloneable=false` when any in-flight exists (API `hasInFlight`).
+   */
+  const hasInFlightLine = computed(() => {
+    if (versionLines.value.some(isInFlightVersionLine)) {
+      return true
+    }
+    if (!props.canClone) {
+      return false
+    }
+    return versionLines.value.some(
+      (row) =>
+        !isInFlightVersionLine(row) && Boolean(row.releaseVersion) && row.cloneable === false,
+    )
+  })
 
   const latestPublishedLine = computed(() =>
     versionLines.value.find((row) => !isInFlightVersionLine(row) && row.releaseVersion),
@@ -107,8 +122,10 @@ export function useVersionLinesPanel(
   const showPagination = computed(() => totalPages.value > 1)
 
   const showCreateFromLatestRelease = computed(
-    () => Boolean(props.canClone && !hasInFlightLine.value && latestPublishedLine.value?.cloneable !== false),
+    () => Boolean(props.canClone && latestPublishedLine.value),
   )
+
+  const createFromLatestReleaseDisabled = computed(() => hasInFlightLine.value)
 
   function canCloneRow(row: TemplateVersionLineSummary): boolean {
     return Boolean(
@@ -172,6 +189,8 @@ export function useVersionLinesPanel(
     onRowClick,
     showPagination,
     showCreateFromLatestRelease,
+    createFromLatestReleaseDisabled,
+    hasInFlightLine,
     canCloneRow,
     canAbandonRow,
     canDeactivateRow,

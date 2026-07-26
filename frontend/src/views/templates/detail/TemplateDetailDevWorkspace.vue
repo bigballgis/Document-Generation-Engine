@@ -64,6 +64,7 @@ const {
   batchDialogStreamUrl,
   batchRunning,
   isEligible,
+  submitEligibilityLoadError,
   submitTooltipContent,
   submitTooltipDisabled,
   handleSubmitForTestConfirm,
@@ -174,11 +175,15 @@ function onAuthoringPathDismiss() {
           :is-eligible="isEligible"
           :submit-tooltip-content="submitTooltipContent"
           :submit-tooltip-disabled="submitTooltipDisabled"
+          :submit-eligibility-load-error="submitEligibilityLoadError"
           :submit-gate-ready="submitGateReady"
           :loading-submit-gate="loadingSubmitGate"
           :submit-gate-load-error="submitGateLoadError"
+          :submit-gate-items="submitGateItems"
           :publish-gate-ready="publishGateReady"
           :loading-publish-gate="loadingPublishGate"
+          :publish-gate-load-error="publishGateLoadError"
+          :publish-gate-items="publishGateItems"
           @run-full-test="handleRunFullTest"
           @request-submit-for-test="requestSubmitForTestDialog"
           @test-decision="emit('test-decision', $event)"

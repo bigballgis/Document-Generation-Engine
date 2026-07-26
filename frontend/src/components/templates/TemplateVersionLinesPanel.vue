@@ -35,6 +35,7 @@ const {
   onRowClick,
   showPagination,
   showCreateFromLatestRelease,
+  createFromLatestReleaseDisabled,
   canCloneRow,
   canAbandonRow,
   canDeactivateRow,
@@ -56,15 +57,24 @@ defineExpose({
       <div class="card-header">
         <div class="card-header-row">
           <span>{{ t('templates.versionLines.title') }}</span>
-          <el-button
+          <el-tooltip
             v-if="showCreateFromLatestRelease"
-            type="primary"
-            data-version-line-create-from-latest
-            :loading="cloningReleaseVersion === latestPublishedLine?.releaseVersion"
-            @click="handleCreateFromLatestRelease"
+            :content="t('templates.versionLines.inFlightDraftExistsTooltip')"
+            :disabled="!createFromLatestReleaseDisabled"
+            placement="bottom"
           >
-            {{ t('templates.versionLines.createFromLatestRelease') }}
-          </el-button>
+            <span>
+              <el-button
+                type="primary"
+                data-version-line-create-from-latest
+                :disabled="createFromLatestReleaseDisabled"
+                :loading="cloningReleaseVersion === latestPublishedLine?.releaseVersion"
+                @click="handleCreateFromLatestRelease"
+              >
+                {{ t('templates.versionLines.createFromLatestRelease') }}
+              </el-button>
+            </span>
+          </el-tooltip>
         </div>
         <p class="card-hint">{{ t('templates.versionLines.hint') }}</p>
       </div>

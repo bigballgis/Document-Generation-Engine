@@ -415,4 +415,45 @@ describe('useTemplateVariableTreePanel rename cascade', () => {
     await panel.handleSaveVariable()
     expect(upsertVariableApi).not.toHaveBeenCalled()
   })
+
+  it('FOS-W4-1: delete confirm shows non-zero binding impact count', async () => {
+    listTestDataSets.mockResolvedValue([
+      {
+        testDataSetId: 'u1',
+        locked: false,
+        name: 'unlocked',
+        description: null,
+        variables: { customer: 'Acme' },
+        required: false,
+        scenarioName: null,
+        coverageTags: [],
+      },
+    ])
+    const variables = ref([
+      schema({ variableKey: 'customer' }),
+      schema({
+        variableKey: 'label',
+        variableType: 'COMPUTED',
+        computeExpression: '${customer}',
+      }),
+    ])
+    deleteVariable.mockResolvedValue(undefined)
+    const panel = useTemplateVariableTreePanel({ templateId, variables, onUpdated })
+    await panel.handleDeleteVariable('customer')
+
+    expect(confirmAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        titleKey: 'templates.authoring.confirmDeleteVariableTitle',
+        messageKey: 'templates.authoring.confirmDeleteVariableMessage',
+        messageParams: expect.objectContaining({
+          variableKey: 'customer',
+          bindingCount: 1,
+          ruleCount: 1,
+          unlockedCount: 1,
+          computeCount: 1,
+        }),
+      }),
+    )
+    expect(deleteVariable).toHaveBeenCalledWith('tpl-1', 'customer')
+  })
 })

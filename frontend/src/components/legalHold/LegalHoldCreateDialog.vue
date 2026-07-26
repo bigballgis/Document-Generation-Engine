@@ -154,6 +154,7 @@ defineExpose({
     :title="t('legalHold.create.title')"
     width="560px"
     destroy-on-close
+    :close-on-click-modal="false"
     data-testid="legal-hold-create-dialog"
     @closed="resetForm"
   >
