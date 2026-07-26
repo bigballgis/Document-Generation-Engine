@@ -128,6 +128,35 @@ export function createApiPolicyMutationActions(deps: {
     }
   }
 
+  async function previewPolicyRollback(templateId: string, policyVersion: number) {
+    const entry = entryFor(templateId)
+    entry.submitting = true
+    entry.lastErrorMessageKey = null
+    try {
+      return await apiPolicyApi.previewPolicyRollback(templateId, policyVersion)
+    } catch (error) {
+      entry.lastErrorMessageKey = resolveApiErrorMessageKey(error, 'templates.error.previewPolicyImpact')
+      throw error
+    } finally {
+      entry.submitting = false
+    }
+  }
+
+  async function rollbackPolicy(templateId: string, policyVersion: number, confirmed = true) {
+    const entry = entryFor(templateId)
+    entry.submitting = true
+    entry.lastErrorMessageKey = null
+    try {
+      entry.policy = await apiPolicyApi.rollbackPolicy(templateId, policyVersion, confirmed)
+      return entry.policy
+    } catch (error) {
+      entry.lastErrorMessageKey = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
+      throw error
+    } finally {
+      entry.submitting = false
+    }
+  }
+
   async function revokeCredential(templateId: string, credentialId: string) {
     const entry = entryFor(templateId)
     entry.submitting = true
@@ -146,6 +175,8 @@ export function createApiPolicyMutationActions(deps: {
   return {
     savePolicy,
     previewImpact,
+    previewPolicyRollback,
+    rollbackPolicy,
     savePolicyDomain,
     saveInvocationRetentionDomain,
     createCredential,

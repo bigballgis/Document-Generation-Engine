@@ -41,7 +41,7 @@ export function buildApiPolicyImpactFindings(
       reasonKey: 'apiPolicy.detail.impact.findings.generic.reason',
       impactKey: 'apiPolicy.detail.impact.findings.generic.impact',
       adviceKey: 'apiPolicy.detail.impact.findings.generic.advice',
-      expectedErrorCode: 'POLICY_IMPACT_BLOCKED',
+      expectedErrorCode: 'TEMPLATE_VALIDATION_FAILED',
     },
   ]
 }

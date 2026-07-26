@@ -32,7 +32,7 @@ All document generation APIs require `requestId` and `idempotencyKey`, including
 
 Batch generation uses a batch-level `idempotencyKey` to identify repeated submission of the whole batch. Each batch item must include `items[].itemId`, and `items[].itemId` must be unique within the same batch. `items[].itemId` is used for per-item response details, audit details, and failed-item location; it does not replace the batch-level `idempotencyKey`.
 
-If a batch request contains duplicate `items[].itemId` values, the whole request fails validation with `400 ITEM_ID_DUPLICATED`. The platform does not create a batch or asynchronous task for that request.
+If a batch request contains duplicate `items[].itemId` values, the whole request fails validation with `422 ITEM_ID_DUPLICATED` (FOS-W11-7; aligns with the runtime validation family). The platform does not create a batch or asynchronous task for that request.
 
 The idempotency uniqueness scope is caller, environment, template, resolved release version, and `idempotencyKey`. Within that scope, the same `idempotencyKey` with different request semantics returns an idempotency conflict.
 
@@ -110,3 +110,7 @@ Batch audit records include `batchId`, `items[].itemId` or its summary, and `ori
 - [Domain Model](../../domain/domain-model.md)
 - [Permission Matrix](../../security/permission-matrix.md)
 - [API Contract Outline](../../api/contract-outline.md)
+
+## Amendment (2026-07-26 / FOS-W11-7)
+
+`ITEM_ID_DUPLICATED` HTTP status is **422** (was documented as 400).

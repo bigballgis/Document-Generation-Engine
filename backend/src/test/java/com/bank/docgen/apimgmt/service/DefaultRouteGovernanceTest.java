@@ -206,7 +206,9 @@ class DefaultRouteGovernanceTest {
                 groupAdmin
         );
 
-        assertThat(preview.contractDiffSummary()).contains("currentTarget=1.0.0").contains("candidateTarget=2.0.0");
+        assertThat(preview.contractDiffSummary()).isNull();
+        assertThat(preview.currentDefaultRouteTarget()).isEqualTo("1.0.0");
+        assertThat(preview.candidateDefaultRouteTarget()).isEqualTo("2.0.0");
         assertThat(preview.idempotencyImpactSummary())
                 .isEqualTo("api.apimgmt.policyImpact.idempotencyDefaultRouteGuard");
         assertThat(preview.defaultRouteImpacted()).isTrue();

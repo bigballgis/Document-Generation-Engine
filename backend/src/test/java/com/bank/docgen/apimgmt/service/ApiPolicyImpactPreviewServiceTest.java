@@ -146,6 +146,51 @@ class ApiPolicyImpactPreviewServiceTest {
         assertThat(preview.blocking()).isFalse();
     }
 
+
+    @Test
+    void preview_warnsWhenOutputFormatsNarrow() {
+        when(groupAccessService.canManageApiPolicy(groupAdmin)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
+        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
+                .thenReturn(List.of(callableVersion));
+        ApiPolicyEntity policy = existingPolicy(templateId, 1);
+        policy.replaceConfiguration(
+                "[\"RETAIL_API\"]",
+                "1.0.0",
+                "[\"DOCX\", \"PDF\"]",
+                "[\"SYNC_STREAM\", \"ASYNC_TASK\"]",
+                true,
+                20,
+                false,
+                false,
+                "10000001"
+        );
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(policy));
+
+        ApiPolicyImpactPreviewView preview = service.preview(
+                templateId,
+                new UpsertApiPolicyRequest(
+                        List.of("RETAIL_API"),
+                        "1.0.0",
+                        List.of("DOCX"),
+                        List.of("SYNC_STREAM"),
+                        true,
+                        5,
+                        false,
+                        false
+                ),
+                groupAdmin
+        );
+
+        assertThat(preview.blocking()).isFalse();
+        assertThat(preview.warnings()).contains(
+                "api.apimgmt.policyImpact.outputFormatsNarrowed",
+                "api.apimgmt.policyImpact.outputModesNarrowed",
+                "api.apimgmt.policyImpact.batchLimitLowered"
+        );
+        assertThat(preview.summaryMessageKey()).isEqualTo("api.apimgmt.policyImpact.warning");
+    }
+
     private ManagementSessionClaims session(List<String> roles) {
         return new ManagementSessionClaims(
                 "10000002",

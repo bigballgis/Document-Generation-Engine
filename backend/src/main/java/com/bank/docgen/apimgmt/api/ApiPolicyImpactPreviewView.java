@@ -13,7 +13,9 @@ public record ApiPolicyImpactPreviewView(
         int nextPolicyVersion,
         String summaryMessageKey,
         String contractDiffSummary,
-        String idempotencyImpactSummary
+        String idempotencyImpactSummary,
+        String currentDefaultRouteTarget,
+        String candidateDefaultRouteTarget
 ) {
     public ApiPolicyImpactPreviewView {
         changedAreas = DefensiveCopies.copyList(changedAreas);

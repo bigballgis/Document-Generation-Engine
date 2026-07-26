@@ -92,6 +92,8 @@ export interface ApiPolicyImpactPreview {
   summaryMessageKey: string
   contractDiffSummary: string | null
   idempotencyImpactSummary: string | null
+  currentDefaultRouteTarget?: string | null
+  candidateDefaultRouteTarget?: string | null
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management routes summary). */

@@ -97,6 +97,10 @@ export const apiMessagesEn = {
         warning: 'These access settings have non-blocking warnings.',
         safe: 'These access settings are safe to apply.',
         defaultRouteChanged: 'Default route target will change.',
+                outputFormatsNarrowed: 'Allowed output formats will narrow; some callers may start failing.',
+        outputModesNarrowed: 'Allowed output modes will narrow; some callers may start failing.',
+        adGroupsNarrowed: 'Authorized AD groups will narrow; some callers may be denied.',
+        batchLimitLowered: 'Batch item limit will be lowered; larger batches may be rejected.',
         defaultRouteNotCallable: 'The candidate default route is not callable.',
         idempotencyDefaultRouteGuard:
           'Existing idempotency keys may conflict after default route changes.',

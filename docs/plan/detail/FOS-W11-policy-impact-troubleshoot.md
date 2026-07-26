@@ -1,7 +1,7 @@
 # FOS-W11 — Policy impact & troubleshooting
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
-**Wave:** W11 · **Status:** **Not Started**
+**Wave:** W11 · **Status:** **Done**
 **Slice id:** `fos-policy-impact-troubleshoot` · worktree `../DGE-fos-policy-impact-troubleshoot` · branch `feat/fos-policy-impact-troubleshoot`
 **Task Master:** **#181** · **delivery_lane:** **full**
 **Origin:** C7, C8, C9, C10, C13, C14, C15, C20, C21

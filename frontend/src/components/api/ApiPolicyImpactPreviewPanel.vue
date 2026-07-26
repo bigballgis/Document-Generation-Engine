@@ -88,6 +88,17 @@ const changedAreasText = computed(() => {
           <dt>{{ t('apiPolicy.detail.impact.changedAreas') }}</dt>
           <dd>{{ changedAreasText }}</dd>
         </div>
+        <div v-if="preview.defaultRouteImpacted">
+          <dt>{{ t('apiPolicy.detail.impact.routeTargets') }}</dt>
+          <dd>
+            {{
+              t('apiPolicy.detail.impact.routeTargetChange', {
+                current: preview.currentDefaultRouteTarget || t('apiPolicy.detail.impact.routeTargetNone'),
+                candidate: preview.candidateDefaultRouteTarget || t('apiPolicy.detail.impact.routeTargetNone'),
+              })
+            }}
+          </dd>
+        </div>
       </dl>
 
       <ul

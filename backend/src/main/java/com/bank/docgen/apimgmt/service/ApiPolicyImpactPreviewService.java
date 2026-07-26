@@ -13,11 +13,15 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,17 +77,11 @@ public class ApiPolicyImpactPreviewService {
 
         List<String> callableReleaseVersions = resolveCallableReleaseVersions(template);
         String candidateDefaultRoute = request.defaultRouteReleaseVersion();
+        String currentDefaultRoute = existing.map(ApiPolicyEntity::getDefaultRouteReleaseVersion).orElse(null);
         boolean hasCandidateDefaultRoute = candidateDefaultRoute != null && !candidateDefaultRoute.isBlank();
         boolean blocking = hasCandidateDefaultRoute && !callableReleaseVersions.contains(candidateDefaultRoute);
         boolean defaultRouteImpacted = changedAreas.contains("DEFAULT_ROUTE_TARGET");
-        List<String> warnings = buildWarnings(blocking, defaultRouteImpacted);
-        String contractDiffSummary = defaultRouteImpacted
-                ? buildDefaultRouteContractDiff(existing, candidateDefaultRoute)
-                : null;
-        String idempotencyImpactSummary = defaultRouteImpacted
-                ? "api.apimgmt.policyImpact.idempotencyDefaultRouteGuard"
-                : null;
-
+        List<String> warnings = buildWarnings(blocking, defaultRouteImpacted, existing, request);
         return new ApiPolicyImpactPreviewView(
                 changedAreas,
                 blocking,
@@ -92,8 +90,10 @@ public class ApiPolicyImpactPreviewService {
                 currentPolicyVersion,
                 nextPolicyVersion,
                 summaryMessageKey(blocking, warnings.isEmpty()),
-                contractDiffSummary,
-                idempotencyImpactSummary
+                null,
+                defaultRouteImpacted ? "api.apimgmt.policyImpact.idempotencyDefaultRouteGuard" : null,
+                currentDefaultRoute,
+                candidateDefaultRoute
         );
     }
 
@@ -114,7 +114,7 @@ public class ApiPolicyImpactPreviewService {
         boolean blocking = candidateDefaultRoute != null
                 && !candidateDefaultRoute.isBlank()
                 && !callableReleaseVersions.contains(candidateDefaultRoute);
-        List<String> warnings = buildWarnings(blocking, defaultRouteImpacted);
+        List<String> warnings = buildWarnings(blocking, defaultRouteImpacted, existing, null);
 
         return new ApiPolicyImpactPreviewView(
                 List.of("DEFAULT_ROUTE_TARGET"),
@@ -124,8 +124,10 @@ public class ApiPolicyImpactPreviewService {
                 currentPolicyVersion,
                 currentPolicyVersion + 1,
                 summaryMessageKey(blocking, warnings.isEmpty()),
-                buildDefaultRouteContractDiff(existing, candidateDefaultRoute),
-                defaultRouteImpacted ? "api.apimgmt.policyImpact.idempotencyDefaultRouteGuard" : null
+                null,
+                defaultRouteImpacted ? "api.apimgmt.policyImpact.idempotencyDefaultRouteGuard" : null,
+                currentDefaultRoute,
+                candidateDefaultRoute
         );
     }
 
@@ -146,13 +148,15 @@ public class ApiPolicyImpactPreviewService {
                 .toList();
     }
 
-    private String buildDefaultRouteContractDiff(Optional<ApiPolicyEntity> existing, String candidateDefaultRoute) {
-        String currentTarget = existing.map(ApiPolicyEntity::getDefaultRouteReleaseVersion).orElse(null);
-        return "currentTarget=" + (currentTarget == null ? "none" : currentTarget)
-                + ",candidateTarget=" + (candidateDefaultRoute == null ? "none" : candidateDefaultRoute);
-    }
-
-    private List<String> buildWarnings(boolean blocking, boolean defaultRouteImpacted) {
+    /**
+     * FOS-W11-1: warn when allowances narrow (formats/modes removed, batch lowered, AD groups removed).
+     */
+    private List<String> buildWarnings(
+            boolean blocking,
+            boolean defaultRouteImpacted,
+            Optional<ApiPolicyEntity> existing,
+            UpsertApiPolicyRequest request
+    ) {
         List<String> warnings = new ArrayList<>();
         if (defaultRouteImpacted) {
             warnings.add("api.apimgmt.policyImpact.defaultRouteChanged");
@@ -160,7 +164,51 @@ public class ApiPolicyImpactPreviewService {
         if (blocking) {
             warnings.add("api.apimgmt.policyImpact.defaultRouteNotCallable");
         }
+        if (existing.isPresent() && request != null) {
+            ApiPolicyEntity policy = existing.get();
+            if (isStrictSubset(readStringList(policy.getOutputFormatsJson()), request.outputFormats())) {
+                warnings.add("api.apimgmt.policyImpact.outputFormatsNarrowed");
+            }
+            if (isStrictSubset(readStringList(policy.getOutputModesJson()), request.outputModes())) {
+                warnings.add("api.apimgmt.policyImpact.outputModesNarrowed");
+            }
+            if (isStrictSubset(readStringList(policy.getAllowedAdGroupsJson()), request.allowedAdGroups())) {
+                warnings.add("api.apimgmt.policyImpact.adGroupsNarrowed");
+            }
+            int currentBatch = Math.max(policy.getMaxBatchSize(), policy.getBatchSyncMaxItems());
+            if (request.maxBatchSize() < currentBatch) {
+                warnings.add("api.apimgmt.policyImpact.batchLimitLowered");
+            }
+        }
         return warnings;
+    }
+
+    private static boolean isStrictSubset(List<String> current, List<String> candidate) {
+        Set<String> currentSet = toUpperSet(current);
+        Set<String> candidateSet = toUpperSet(candidate);
+        return !candidateSet.containsAll(currentSet) && !currentSet.equals(candidateSet);
+    }
+
+    private static Set<String> toUpperSet(List<String> values) {
+        Set<String> out = new HashSet<>();
+        if (values == null) {
+            return out;
+        }
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                out.add(value.trim().toUpperCase(Locale.ROOT));
+            }
+        }
+        return out;
+    }
+
+    private List<String> readStringList(String json) {
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<String>>() {
+            });
+        } catch (JsonProcessingException | IllegalArgumentException ex) {
+            return List.of();
+        }
     }
 
     private String summaryMessageKey(boolean blocking, boolean warningFree) {
