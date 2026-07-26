@@ -18,7 +18,7 @@ jobs:
     name: npm audit + SBOM
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.0
@@ -45,7 +45,7 @@ jobs:
     name: Trivy scan runtime images
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run Trivy on backend Dockerfile
         uses: aquasecurity/trivy-action@0.28.0
         with:
