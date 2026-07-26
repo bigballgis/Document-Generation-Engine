@@ -5,9 +5,12 @@ export const STRUCTURED_CONTENT_MAX_NEST_DEPTH = 3
 
 export type NodePath = number[]
 
-/** Whether a container at `parentPath` may receive another nested block child. */
+/**
+ * Whether a container at `parentPath` may receive another nested block child.
+ * FOS-W3-4 — allow true depth MAX (path length &lt; MAX), matching i18n `{ max: 3 }`.
+ */
 export function canAddNestedBlockChildren(parentPath: NodePath): boolean {
-  return parentPath.length + 1 < STRUCTURED_CONTENT_MAX_NEST_DEPTH
+  return parentPath.length < STRUCTURED_CONTENT_MAX_NEST_DEPTH
 }
 
 export function pathKey(path: NodePath): string {
@@ -128,7 +131,8 @@ export function appendChildBlockAtPath(
 }
 
 export function isNestedContainerType(type: string): boolean {
-  return type === 'conditionBlock' || type === 'loopBlock'
+  // FOS-W3-2 — lists reuse the nested children editor path.
+  return type === 'conditionBlock' || type === 'loopBlock' || type === 'list'
 }
 
 function parentPathOf(path: NodePath): NodePath | null {

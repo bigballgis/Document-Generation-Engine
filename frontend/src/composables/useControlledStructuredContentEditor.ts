@@ -204,7 +204,13 @@ export function useControlledStructuredContentEditor(
     insertNestedBlock: (parentPath: number[], type: ConfirmedNodeType) =>
       doc.insertNestedBlock(parentPath, type, selectedStyleKey.value),
     insertInline: (type: ConfirmedNodeType) => doc.insertInline(type, selectedStyleKey.value),
-    applySelectedStyle: () => doc.applySelectedStyle(selectedStyleKey.value),
+    applySelectedStyle: () => {
+      const entry = styleCatalog.value?.entries.find(
+        (item) => item.styleKey === selectedStyleKey.value,
+      )
+      doc.applySelectedStyle(selectedStyleKey.value, entry?.applicableNodeTypes)
+    },
+    setFocusedPath: doc.setFocusedPath,
     handlePasteFile: paste.handlePasteFile,
     removeBlock: doc.removeBlock,
     reorderBlock: doc.reorderBlock,

@@ -27,10 +27,12 @@ export interface StructuredContentDocumentModelApi {
   doRedo: () => void
   handleEditorKeydown: (event: KeyboardEvent) => void
   endFieldCoalesce: () => void
+  focusedPath: Ref<NodePath | null>
+  setFocusedPath: (path: NodePath | null) => void
   insertBlock: (type: ConfirmedNodeType, selectedStyleKey: string) => void
   insertNestedBlock: (parentPath: NodePath, type: ConfirmedNodeType, selectedStyleKey: string) => void
   insertInline: (type: ConfirmedNodeType, selectedStyleKey: string) => void
-  applySelectedStyle: (selectedStyleKey: string) => void
+  applySelectedStyle: (selectedStyleKey: string, applicableNodeTypes?: string[]) => void
   updateBlockField: (path: NodePath, field: keyof StructuredContentNode, value: string) => void
   updateInlineChild: (
     path: NodePath,
@@ -150,10 +152,13 @@ export function useStructuredContentDocumentModel(options: {
     history.endCoalesce()
   }
 
+  const focusedPath = ref<NodePath | null>(null)
+
   const mutations = createStructuredContentDocumentMutations({
     documentModel,
     isReadonly: options.isReadonly,
     setPendingCoalesceKey,
+    focusedPath,
   })
 
   function resetHistoryWithStructure(structureJson: string) {

@@ -40,4 +40,6 @@ export type TemplateAuthoringBindingsPanelProps = {
 
 export type StructuredBindingEditorExpose = {
   markPristine: () => void
+  /** FOS-W3-7 — client structure validation before binding save. */
+  validateStructure?: () => Array<{ messageKey: string; location: string; blockPath: number[] }>
 }
