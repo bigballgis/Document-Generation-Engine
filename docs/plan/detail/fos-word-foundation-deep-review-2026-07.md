@@ -68,14 +68,14 @@ by KEEP-8.
 
 | Id | Sev | Finding | Disposition |
 | --- | --- | --- | --- |
-| **WF-1** | **P0** | `tableComponentRef` / `list` inside `conditionBlock`/`loopBlock` → **silent empty render** (no dispatch branch) | [FOS-W15](FOS-W15-word-foundation-honesty.md) **W15-1** — Remediate (fail-closed or render) |
-| **WF-2** | **P0** | ≥3 block children in condition/loop can **reorder** (`writeInlineOrBlockChildren`) | FOS-W15 **W15-2** — Remediate |
-| **WF-3** | **P0** | Clause `numbering.level` is a **literal prefix** that **restarts per anchor** — Formal Demand can show seven "1." headings; ADR-0019 duplicate-number gate is blind to assembly | FOS-W15 **W15-3** — Honesty (+ optional continuity; full Word `numPr` may stay CRCH/ADR) |
-| **WF-4** | **P1** | FOL/demo `headerRows` PowerShell flatten → blank table headers in shipped JSON | FOS-W15 **W15-4** — Remediate demo |
-| **WF-5** | **P1** | Style manifest `spacingAfterTwips` / CJK never applied; demos never use `directFormat` spacing | FOS-W15 **W15-5** (+ CRCH W3 coordination) |
-| **WF-6** | **P1** | Typography regression asserts **POI-built master shell**, not generated letter | FOS-W15 **W15-6** — Gate honesty |
-| **WF-7** | **P1** | No KEEP-8 package uses `COMPUTED` / `FORMAT_AMOUNT` / `SPELL_AMOUNT` — money is preformatted strings | FOS-W15 **W15-7** — Demo honesty (engine remains CRCH W2) |
-| **WF-8** | **P1** | Author never *sees* Word after upload (no thumbnail / style specimen / page setup); KEEP-8 masters are JVM-POI skeletons | FOS-W15 **W15-8** — One live Word-crafted letterhead path |
+| **WF-1** | **P0** | `tableComponentRef` / `list` inside `conditionBlock`/`loopBlock` → **silent empty render** (no dispatch branch) | **Remediated** (FOS-W15 / #185) — all-block children → `writeBlockNodes`; fallthrough fail-closed |
+| **WF-2** | **P0** | ≥3 block children in condition/loop can **reorder** (`writeInlineOrBlockChildren`) | **Remediated** — order-preserving `writeBlockNodes` + mixed-path cursor advance |
+| **WF-3** | **P0** | Clause `numbering.level` is a **literal prefix** that **restarts per anchor** — Formal Demand can show seven "1." headings; ADR-0019 duplicate-number gate is blind to assembly | **Documented** — behavior + FE honesty note; full Word `numPr` remains CRCH/ADR |
+| **WF-4** | **P1** | FOL/demo `headerRows` PowerShell flatten → blank table headers in shipped JSON | **Remediated** — FOL overlays nested; writer accepts flat shape; PS `Repair-DemoTableHeaderRowsJson` |
+| **WF-5** | **P1** | Style manifest `spacingAfterTwips` / CJK never applied; demos never use `directFormat` spacing | **Remediated** — `DemoMasterDocxStyleSupport` wires spacing + eastAsia into `styles.xml` |
+| **WF-6** | **P1** | Typography regression asserts **POI-built master shell**, not generated letter | **Remediated** — `DemoGeneratedLetterTypographyTest` asserts generated DOCX |
+| **WF-7** | **P1** | No KEEP-8 package uses `COMPUTED` / `FORMAT_AMOUNT` / `SPELL_AMOUNT` — money is preformatted strings | **Documented** — caller-owned until CRCH W2 KEEP-8 path; engine proven in golden corpus |
+| **WF-8** | **P1** | Author never *sees* Word after upload (no thumbnail / style specimen / page setup); KEEP-8 masters are JVM-POI skeletons | **Remediated (partial)** — FOL master embeds `word/media` logo letterhead; catalog column `logo` vs `text-only` |
 
 Already owned elsewhere (do not duplicate): CRCH W3 table geometry / `rPr` / bookmarks;
 CRCH W0-7 seal validation honesty; FOS W3 UI for list/contentModule/style scope; CRCH W2

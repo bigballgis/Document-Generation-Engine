@@ -175,6 +175,8 @@ export const templatesAuthoringEn = {
         wordTable: 'Paste Word tables through the controlled paste cleaner as table component refs.',
         floatLayout: 'Float and absolute layout constructs are blocked in v1.',
       },
+      sectionHeadingNumberingHonesty:
+        'Clause numbers are literal prefixes (numbering.level / displayNumber). Continuity across anchors is not Word automatic multilevel numbering.',
       nodes: {
         sectionHeading: 'Heading',
         paragraph: 'Paragraph',

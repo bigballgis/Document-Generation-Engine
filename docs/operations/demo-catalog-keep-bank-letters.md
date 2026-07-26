@@ -63,16 +63,18 @@ Default today: `docgen.demo-catalog.seed-enabled=${DOCGEN_SEED_DEMO_CATALOG:fals
 
 ## 4. Keep-list (confirmed)
 
-| # | externalId | Deploy package |
-| --- | --- | --- |
-| 1 | `DEMO-COVENANT-WAIVER` | `deploy/demo-covenant-waiver` |
-| 2 | `DEMO-FORMAL-DEMAND` | `deploy/demo-formal-demand` |
-| 3 | `DEMO-COMMITMENT-LETTER` | `deploy/demo-commitment` |
-| 4 | `DEMO-FACILITY-AMENDMENT` | `deploy/demo-facility-amendment` |
-| 5 | `DEMO-ANNUAL-REVIEW` | `deploy/demo-annual-review` |
-| 6 | `DEMO-FACILITY-RENEWAL` | `deploy/demo-annual-review` |
-| 7 | `DEMO-CREDIT-LIMIT-CONFIRM` | `deploy/demo-credit-limit` |
-| 8 | `CORP-FOL-OFFER` | `deploy/demo-fol` |
+| # | externalId | Deploy package | Letterhead (FOS-W15-8) |
+| --- | --- | --- | --- |
+| 1 | `DEMO-COVENANT-WAIVER` | `deploy/demo-covenant-waiver` | text-only |
+| 2 | `DEMO-FORMAL-DEMAND` | `deploy/demo-formal-demand` | text-only |
+| 3 | `DEMO-COMMITMENT-LETTER` | `deploy/demo-commitment` | text-only |
+| 4 | `DEMO-FACILITY-AMENDMENT` | `deploy/demo-facility-amendment` | text-only |
+| 5 | `DEMO-ANNUAL-REVIEW` | `deploy/demo-annual-review` | text-only |
+| 6 | `DEMO-FACILITY-RENEWAL` | `deploy/demo-annual-review` | text-only |
+| 7 | `DEMO-CREDIT-LIMIT-CONFIRM` | `deploy/demo-credit-limit` | text-only |
+| 8 | `CORP-FOL-OFFER` | `deploy/demo-fol` | **logo** (`word/media` in `wholesale-fol-master.docx`) |
+
+FOL volume ≠ layout showcase — see [demo-learner-walkthrough.md](./demo-learner-walkthrough.md) §6.
 
 **Keep transitive deps:** referenced letterheads/masters, standard clauses / content modules, and asset-library assets bound by keep-set bindings. Retain `deploy/demo-shared/` helpers required by keep packages. After shrink, `demo-runtime-generate-manifest.json` must list **only** these eight externalIds.
 

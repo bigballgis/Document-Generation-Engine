@@ -33,8 +33,9 @@ final class StructuredContentDocxTableSupport {
         int rowIndex = 0;
         JsonNode headerRows = tableDefinition.path("headerRows");
         if (headerRows.isArray() && !headerRows.isEmpty()) {
-            // v1 writer emits the first header row only (unchanged semantics).
-            JsonNode headerRow = headerRows.get(0);
+            // FOS-W15-4: PowerShell ConvertTo-Json may flatten @(@(...)) to a single cell array.
+            // Accept both [[cells...]] and [cell, cell, ...] shapes.
+            JsonNode headerRow = normalizeHeaderRow(headerRows);
             writeTableRow(table, rowIndex, headerRow, columnKeys, variables, true, repeatHeaderAcrossPages);
             rowIndex++;
         }
@@ -111,6 +112,21 @@ final class StructuredContentDocxTableSupport {
         }
         Object value = scopedVariables.get(variableKey);
         return value == null ? "" : String.valueOf(value);
+    }
+
+    /**
+     * Returns the first header row cells array. Canonical shape is {@code [[cell...]]};
+     * legacy/flattened shape is {@code [cell...]} (FOS-W15-4 / PowerShell ConvertTo-Json).
+     */
+    static JsonNode normalizeHeaderRow(JsonNode headerRows) {
+        JsonNode first = headerRows.get(0);
+        if (first != null && first.isArray()) {
+            return first;
+        }
+        if (first != null && first.isObject() && first.has("columnKey")) {
+            return headerRows;
+        }
+        return first;
     }
 
     static Map<String, Object> scopedVariables(Map<String, Object> base, Object item) {

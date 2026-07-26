@@ -97,11 +97,13 @@ class StructuredContentDocxWriteSession {
                 if (!paragraphAvailable) {
                     currentParagraph = cursor.insertParagraphAfter(currentParagraph);
                 } else {
-                    paragraphAvailable = false;
                     StructuredContentDocxWriter.clearParagraph(currentParagraph);
                 }
                 XWPFTable table = cursor.insertTableAfter(currentParagraph);
                 tableSupport.populateTable(tableDefinition, table, variables);
+                // FOS-W15-2: advance past the table so the next block is not inserted before it.
+                currentParagraph = cursor.insertParagraphAfter(table);
+                paragraphAvailable = true;
                 continue;
             }
             if ("list".equals(type)) {

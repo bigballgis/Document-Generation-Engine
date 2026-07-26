@@ -48,6 +48,10 @@ class DemoMasterDocxStyleSupportTest {
                     .as("styles.xml must define style %s", styleKey)
                     .contains("w:styleId=\"" + styleKey + "\"");
         }
+        // FOS-W15-5: spacingAfterTwips + CJK eastAsia from demo-bank-style-manifest.json
+        assertThat(stylesXml)
+                .contains("w:after=\"120\"")
+                .contains("w:eastAsia=\"Noto Sans CJK SC\"");
     }
 
     @Test

@@ -63,7 +63,10 @@ public final class DemoMasterDocxStyleSupport {
                     definition.styleKey(),
                     definition.fontSizeHalfPoints(),
                     definition.fontFamily(),
-                    definition.bold()
+                    definition.bold(),
+                    definition.eastAsiaFontFamily(),
+                    definition.spacingBeforeTwips(),
+                    definition.spacingAfterTwips()
             );
         }
     }
@@ -82,6 +85,7 @@ public final class DemoMasterDocxStyleSupport {
             JsonNode root = OBJECT_MAPPER.readTree(Files.readString(SHARED_MANIFEST));
             Map<String, MasterStyleCatalogEntry> catalogEntries = new LinkedHashMap<>();
             List<BankStyleDefinition> definitions = new ArrayList<>();
+            String cjkFont = root.path("fonts").path("cjk").asText("");
             JsonNode stylesNode = root.get("styles");
             if (stylesNode != null && stylesNode.isArray()) {
                 for (JsonNode styleNode : stylesNode) {
@@ -108,7 +112,10 @@ public final class DemoMasterDocxStyleSupport {
                             styleNode.path("fontSizeHalfPoints").asInt(
                                     DocxMasterStyleRegistry.resolveDefaultFontSizeHalfPoints(styleKey)
                             ),
-                            styleNode.path("bold").asBoolean(false)
+                            styleNode.path("bold").asBoolean(false),
+                            cjkFont,
+                            styleNode.path("spacingBeforeTwips").asInt(0),
+                            styleNode.path("spacingAfterTwips").asInt(0)
                     ));
                 }
             }
@@ -129,7 +136,10 @@ public final class DemoMasterDocxStyleSupport {
             String styleKey,
             String fontFamily,
             int fontSizeHalfPoints,
-            boolean bold
+            boolean bold,
+            String eastAsiaFontFamily,
+            int spacingBeforeTwips,
+            int spacingAfterTwips
     ) {
     }
 }

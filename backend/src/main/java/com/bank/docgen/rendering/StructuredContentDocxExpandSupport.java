@@ -148,17 +148,38 @@ final class StructuredContentDocxExpandSupport {
         // children; paragraph spacing keys on the parent are applied once before children.
         JsonNode parentDirectFormat = node.get("directFormat");
         styles.applyParagraphDirectFormat(paragraph, parentDirectFormat);
+
+        // FOS-W15-1/W15-2: all-block children go through writeBlockNodes so table/list render
+        // (not silent-empty) and multi-child order is preserved via that path's cursor.
+        boolean allBlockLevel = true;
+        for (int index = 0; index < children.size(); index++) {
+            if (!StructuredContentDocxCursorSupport.isBlockLevelType(children.get(index).path("type").asText(""))) {
+                allBlockLevel = false;
+                break;
+            }
+        }
+        if (allBlockLevel) {
+            writeBlockNodesReuseFirst.accept(children, paragraph);
+            return;
+        }
+
+        // Mixed inline + block: advance current paragraph so later blocks are not re-anchored
+        // after the original first paragraph (order scramble / WF-2).
+        XWPFParagraph current = paragraph;
+        boolean firstBlockWritten = false;
         for (int index = 0; index < children.size(); index++) {
             JsonNode child = children.get(index);
             if (StructuredContentDocxCursorSupport.isBlockLevelType(child.path("type").asText(""))) {
-                if (index == 0) {
-                    writeBlockNode.accept(child, paragraph);
+                if (!firstBlockWritten) {
+                    writeBlockNode.accept(child, current);
+                    firstBlockWritten = true;
                 } else {
-                    writeBlockNode.accept(child, cursor.insertParagraphAfter(paragraph));
+                    current = cursor.insertParagraphAfter(current);
+                    writeBlockNode.accept(child, current);
                 }
             } else {
                 inlineSupport.writeInlineNode(
-                        child, paragraph, false, false, false, parentDirectFormat);
+                        child, current, false, false, false, parentDirectFormat);
             }
         }
     }

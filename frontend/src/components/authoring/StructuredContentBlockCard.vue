@@ -186,6 +186,14 @@ function onDragEnd() {
       </div>
     </header>
 
+    <p
+      v-if="node.type === 'sectionHeading'"
+      class="section-heading-numbering-honesty"
+      data-testid="section-heading-numbering-honesty"
+    >
+      {{ t('templates.structuredEditor.sectionHeadingNumberingHonesty') }}
+    </p>
+
     <template v-if="node.type === 'paragraph' || node.type === 'sectionHeading'">
       <div class="inline-row" @focusin="emit('focus-path', path)">
         <div
@@ -397,6 +405,13 @@ function onDragEnd() {
   justify-content: space-between;
   margin-bottom: 0.5rem;
   gap: 0.5rem;
+}
+
+.section-heading-numbering-honesty {
+  margin: 0 0 0.5rem;
+  font-size: var(--font-size-sm, 0.8125rem);
+  line-height: 1.4;
+  color: var(--text-secondary, #5c6570);
 }
 
 .block-card__title {

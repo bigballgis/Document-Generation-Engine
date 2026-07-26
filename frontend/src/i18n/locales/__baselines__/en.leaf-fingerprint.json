@@ -1,6 +1,6 @@
 {
-  "keyCount": 2962,
-  "sha256": "a33ab7cd1e148d735313b1929a9d10b830d99e7eae0c9e43ae997483afe7b5c3",
+  "keyCount": 2963,
+  "sha256": "b5878f975b7ff4207a8e9510a4ab5ea544ac29732c1293d553ea0e7d111ef3ed",
   "keys": [
     "api.apimgmt.policyImpact.adGroupsNarrowed",
     "api.apimgmt.policyImpact.batchLimitLowered",
@@ -2762,6 +2762,7 @@
     "templates.structuredEditor.readonlyHint",
     "templates.structuredEditor.redo",
     "templates.structuredEditor.redoTooltip",
+    "templates.structuredEditor.sectionHeadingNumberingHonesty",
     "templates.structuredEditor.styleCatalog.keys.BodyText",
     "templates.structuredEditor.styleCatalog.keys.Heading1",
     "templates.structuredEditor.stylePicker.apply",
