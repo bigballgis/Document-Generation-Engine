@@ -2,13 +2,17 @@ import { describe, expect, it } from 'vitest'
 import type { CallerContract } from '@/types/contract'
 import type { TestDataSet } from '@/types/templatePreview'
 import {
-  ACCESS_TOKEN_PLACEHOLDER,
+  ACCESS_ACCOUNT_PLACEHOLDER,
+  API_CREDENTIAL_ID_PLACEHOLDER,
+  API_CREDENTIAL_SECRET_PLACEHOLDER,
   IDEMPOTENCY_KEY_PLACEHOLDER,
   absolutizeGenerateUrl,
   buildContractCopyableExample,
   buildGeneratePayload,
+  pickDefaultMode,
   pickDefaultTestDataSet,
   resolveGenerateUrl,
+  toBatchGenerateUrl,
 } from '@/utils/contractCopyableExample'
 
 function sampleContract(overrides?: Partial<CallerContract>): CallerContract {
@@ -75,7 +79,7 @@ function sampleDataSet(
 }
 
 describe('contractCopyableExample', () => {
-  it('CCE-001: curl includes Auth, Idempotency-Key, POST, and generate URL', () => {
+  it('CCE-001 / FOS-W9-1: curl uses credential headers, body idempotencyKey, no Bearer', () => {
     const example = buildContractCopyableExample(
       sampleContract(),
       sampleDataSet('ds-1', { customerName: 'Acme' }),
@@ -83,12 +87,40 @@ describe('contractCopyableExample', () => {
     )
 
     expect(example.curl).toContain('curl -X POST')
-    expect(example.curl).toContain(`Authorization: Bearer ${ACCESS_TOKEN_PLACEHOLDER}`)
-    expect(example.curl).toContain(`Idempotency-Key: ${IDEMPOTENCY_KEY_PLACEHOLDER}`)
+    expect(example.curl).toContain(`X-Api-Credential-Id: ${API_CREDENTIAL_ID_PLACEHOLDER}`)
+    expect(example.curl).toContain(`X-Api-Credential-Secret: ${API_CREDENTIAL_SECRET_PLACEHOLDER}`)
+    expect(example.curl).toContain(`X-Access-Account: ${ACCESS_ACCOUNT_PLACEHOLDER}`)
     expect(example.curl).toContain('Content-Type: application/json')
     expect(example.curl).toContain('https://api.example.com/api/uat/v1/templates/TPL-1/default/generate')
+    expect(example.curl).not.toContain('Authorization: Bearer')
+    expect(example.curl).not.toContain('Idempotency-Key:')
+    expect(example.payloadJson).toContain(IDEMPOTENCY_KEY_PLACEHOLDER)
     expect(example.curl).not.toMatch(/^generate-sync-docx$/)
-    expect(example.curl.length).toBeGreaterThan('generate-sync-docx'.length)
+  })
+
+  it('FOS-W9-2: policy with only SYNC_DOWNLOAD_URL+ASYNC_TASK yields async batch curl', () => {
+    // Shape matches docs/api/examples/contract-response.json allowedOutputModes.
+    const contract = sampleContract({
+      apiPolicy: {
+        ...sampleContract().apiPolicy,
+        allowedOutputModes: ['SYNC_DOWNLOAD_URL', 'ASYNC_TASK'],
+      },
+    })
+    const picked = pickDefaultMode(contract.apiPolicy.allowedOutputModes)
+    expect(picked).toEqual({ mode: 'ASYNC_TASK', kind: 'async' })
+
+    const example = buildContractCopyableExample(contract, sampleDataSet('ds-1', { a: 1 }), {
+      origin: 'https://api.example.com',
+    })
+    expect(example.exampleKind).toBe('async')
+    expect(example.payload.output.mode).toBe('ASYNC_TASK')
+    expect(example.generateUrl).toContain('/batch-generate')
+    expect(toBatchGenerateUrl('/api/uat/v1/templates/TPL-1/default/generate')).toContain(
+      '/batch-generate',
+    )
+    expect(example.curl).toContain('/batch-generate')
+    expect(example.curl).not.toContain('Authorization: Bearer')
+    expect(example.curl).toContain('X-Api-Credential-Id:')
   })
 
   it('CCE-002: payload reflects selected dataset variables without path fields', () => {
@@ -130,7 +162,8 @@ describe('contractCopyableExample', () => {
     expect(example.payloadJson).toContain('"customerName": "Acme"')
     expect(example.payloadJson).toContain(IDEMPOTENCY_KEY_PLACEHOLDER)
     expect(example.payloadJson).not.toMatch(/eyJ[A-Za-z0-9_-]+\./)
-    expect(example.curl).toContain(ACCESS_TOKEN_PLACEHOLDER)
+    expect(example.curl).toContain(API_CREDENTIAL_ID_PLACEHOLDER)
+    expect(example.curl).not.toContain('Authorization: Bearer')
     expect(example.curl).not.toMatch(/Bearer\s+[A-Za-z0-9_-]{20,}/)
   })
 
@@ -141,8 +174,10 @@ describe('contractCopyableExample', () => {
 
     expect(example.hasTestDataSet).toBe(false)
     expect(example.payload.variables).toEqual({})
-    expect(example.curl).toContain(`Authorization: Bearer ${ACCESS_TOKEN_PLACEHOLDER}`)
-    expect(example.curl).toContain(`Idempotency-Key: ${IDEMPOTENCY_KEY_PLACEHOLDER}`)
+    expect(example.curl).toContain(`X-Api-Credential-Id: ${API_CREDENTIAL_ID_PLACEHOLDER}`)
+    expect(example.curl).not.toContain('Authorization: Bearer')
+    expect(example.curl).not.toContain('Idempotency-Key:')
+    expect(example.payloadJson).toContain(IDEMPOTENCY_KEY_PLACEHOLDER)
     expect(example.curl).toContain('-d ')
   })
 
@@ -169,8 +204,9 @@ describe('contractCopyableExample', () => {
     expect(uatExample.generateUrl).toContain('/api/uat/')
     expect(prodExample.generateUrl).toContain('/api/prod/')
     expect(prodExample.curl).toContain('/api/prod/v1/templates/TPL-1/default/generate')
-    expect(prodExample.curl).toContain(`Authorization: Bearer ${ACCESS_TOKEN_PLACEHOLDER}`)
-    expect(prodExample.curl).toContain(`Idempotency-Key: ${IDEMPOTENCY_KEY_PLACEHOLDER}`)
+    expect(prodExample.curl).toContain(`X-Api-Credential-Id: ${API_CREDENTIAL_ID_PLACEHOLDER}`)
+    expect(prodExample.curl).not.toContain('Authorization: Bearer')
+    expect(prodExample.payloadJson).toContain(IDEMPOTENCY_KEY_PLACEHOLDER)
   })
 
   it('resolves default route URL and absolutizes root-relative paths', () => {

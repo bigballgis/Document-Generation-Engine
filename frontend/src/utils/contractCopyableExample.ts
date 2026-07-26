@@ -1,8 +1,12 @@
 import type { CallerContract } from '@/types/contract'
 import type { TestDataSet } from '@/types/templatePreview'
 
-/** Fixed placeholders — never embed real secrets (U12-C3). */
-export const ACCESS_TOKEN_PLACEHOLDER = '<ACCESS_TOKEN>'
+/** Fixed placeholders — never embed real secrets (U12-C3 / FOS-W9-1). */
+export const API_CREDENTIAL_ID_PLACEHOLDER = '<API_CREDENTIAL_ID>'
+export const API_CREDENTIAL_SECRET_PLACEHOLDER = '<API_CREDENTIAL_SECRET>'
+export const ACCESS_ACCOUNT_PLACEHOLDER = '<ACCESS_ACCOUNT>'
+/** @deprecated FOS-W9-1 — Bearer is not accepted by runtime; kept for import stability in older tests. */
+export const ACCESS_TOKEN_PLACEHOLDER = API_CREDENTIAL_ID_PLACEHOLDER
 export const IDEMPOTENCY_KEY_PLACEHOLDER = '<IDEMPOTENCY_KEY>'
 const REQUEST_ID_PLACEHOLDER = '<REQUEST_ID>'
 
@@ -20,9 +24,9 @@ export type ContractCopyableExample = {
   payloadJson: string
   curl: string
   hasTestDataSet: boolean
+  /** FOS-W9-2: sync curl only when SYNC_STREAM is allowed; else async batch. */
+  exampleKind: 'sync' | 'async'
 }
-
-const SYNC_MODE_PREFERENCE = ['SYNC_STREAM', 'SYNC_DOWNLOAD_URL'] as const
 
 function pickDefaultFormat(allowed: string[]): string {
   if (allowed.includes('DOCX')) {
@@ -31,13 +35,19 @@ function pickDefaultFormat(allowed: string[]): string {
   return allowed[0] ?? 'DOCX'
 }
 
-function pickDefaultMode(allowed: string[]): string {
-  for (const preferred of SYNC_MODE_PREFERENCE) {
-    if (allowed.includes(preferred)) {
-      return preferred
-    }
+/**
+ * FOS-W9-2: sync generate only accepts SYNC_STREAM (ADR-0038). Prefer that when allowed;
+ * otherwise fall back to ASYNC_TASK for a batch-generate example.
+ */
+export function pickDefaultMode(allowed: string[]): { mode: string; kind: 'sync' | 'async' } {
+  const normalized = allowed.map((item) => item.toUpperCase())
+  if (normalized.includes('SYNC_STREAM')) {
+    return { mode: 'SYNC_STREAM', kind: 'sync' }
   }
-  return allowed[0] ?? 'SYNC_STREAM'
+  if (normalized.includes('ASYNC_TASK')) {
+    return { mode: 'ASYNC_TASK', kind: 'async' }
+  }
+  return { mode: allowed[0] ?? 'SYNC_STREAM', kind: 'sync' }
 }
 
 /** Prefer default route URL; else first callable explicit version URL. */
@@ -48,6 +58,17 @@ export function resolveGenerateUrl(contract: CallerContract): string {
   }
   const first = contract.callableVersions[0]?.explicitVersionUrl?.trim()
   return first ?? ''
+}
+
+/** Map a sync generate path to the corresponding batch-generate path. */
+export function toBatchGenerateUrl(generateUrl: string): string {
+  if (!generateUrl) {
+    return generateUrl
+  }
+  if (generateUrl.includes('/batch-generate')) {
+    return generateUrl
+  }
+  return generateUrl.replace(/\/generate(\b|$)/, '/batch-generate$1')
 }
 
 /**
@@ -77,10 +98,11 @@ export function buildGeneratePayload(
 ): GenerateExamplePayload {
   const allowedFormats = contract.apiPolicy?.allowedOutputFormats ?? []
   const allowedModes = contract.apiPolicy?.allowedOutputModes ?? []
+  const picked = pickDefaultMode(allowedModes)
   return {
     output: {
       format: pickDefaultFormat(allowedFormats),
-      mode: pickDefaultMode(allowedModes),
+      mode: picked.mode,
     },
     variables: { ...(variables ?? {}) },
     requestId: REQUEST_ID_PLACEHOLDER,
@@ -92,12 +114,41 @@ function formatPayloadJson(payload: GenerateExamplePayload): string {
   return `${JSON.stringify(payload, null, 2)}\n`
 }
 
+function credentialHeaders(): string[] {
+  return [
+    `  -H 'X-Api-Credential-Id: ${API_CREDENTIAL_ID_PLACEHOLDER}' \\`,
+    `  -H 'X-Api-Credential-Secret: ${API_CREDENTIAL_SECRET_PLACEHOLDER}' \\`,
+    `  -H 'X-Access-Account: ${ACCESS_ACCOUNT_PLACEHOLDER}' \\`,
+  ]
+}
+
 function buildSyncGenerateCurl(generateUrl: string, payloadJson: string): string {
   const body = payloadJson.trimEnd()
   return [
     `curl -X POST '${generateUrl}' \\`,
-    `  -H 'Authorization: Bearer ${ACCESS_TOKEN_PLACEHOLDER}' \\`,
-    `  -H 'Idempotency-Key: ${IDEMPOTENCY_KEY_PLACEHOLDER}' \\`,
+    ...credentialHeaders(),
+    `  -H 'Content-Type: application/json' \\`,
+    `  -d '${body.replace(/'/g, `'\\''`)}'`,
+  ].join('\n')
+}
+
+function buildAsyncBatchCurl(batchUrl: string, payloadJson: string): string {
+  const syncPayload = JSON.parse(payloadJson) as GenerateExamplePayload
+  const batchBody = {
+    output: syncPayload.output,
+    items: [
+      {
+        itemId: 'item-1',
+        variables: syncPayload.variables,
+      },
+    ],
+    requestId: syncPayload.requestId,
+    idempotencyKey: syncPayload.idempotencyKey,
+  }
+  const body = JSON.stringify(batchBody, null, 2)
+  return [
+    `curl -X POST '${batchUrl}' \\`,
+    ...credentialHeaders(),
     `  -H 'Content-Type: application/json' \\`,
     `  -d '${body.replace(/'/g, `'\\''`)}'`,
   ].join('\n')
@@ -118,12 +169,20 @@ export function buildContractCopyableExample(
   options?: { origin?: string },
 ): ContractCopyableExample {
   const relativeUrl = resolveGenerateUrl(contract)
-  const generateUrl = absolutizeGenerateUrl(relativeUrl, options?.origin)
+  const allowedModes = contract.apiPolicy?.allowedOutputModes ?? []
+  const picked = pickDefaultMode(allowedModes)
+  const pathForKind =
+    picked.kind === 'async' ? toBatchGenerateUrl(relativeUrl) : relativeUrl
+  const generateUrl = absolutizeGenerateUrl(pathForKind, options?.origin)
   const hasTestDataSet = selectedDataSet != null
   const payload = buildGeneratePayload(contract, selectedDataSet?.variables)
   const payloadJson = formatPayloadJson(payload)
-  const curl = buildSyncGenerateCurl(generateUrl, payloadJson)
-  const exampleToken = contract.examples[0] ?? 'generate-sync'
+  const curl =
+    picked.kind === 'async'
+      ? buildAsyncBatchCurl(generateUrl, payloadJson)
+      : buildSyncGenerateCurl(generateUrl, payloadJson)
+  // FOS-W9-5: never surface opaque backend example tokens as the primary label.
+  const exampleToken = picked.kind === 'async' ? 'batch-generate-async' : 'generate-sync'
   return {
     exampleToken,
     generateUrl,
@@ -131,5 +190,6 @@ export function buildContractCopyableExample(
     payloadJson,
     curl,
     hasTestDataSet,
+    exampleKind: picked.kind,
   }
 }

@@ -63,7 +63,8 @@ describe('AI-SCALE i18n locale domain split (I18N-01…04)', () => {
     const fp = fingerprint(entries)
     const baselinePath = join(baselineDir, 'en.leaf-fingerprint.json')
 
-    if (!existsSync(baselinePath)) {
+    const updateBaselines = process.env.UPDATE_I18N_BASELINES === '1'
+    if (!existsSync(baselinePath) || updateBaselines) {
       mkdirSync(baselineDir, { recursive: true })
       writeFileSync(
         baselinePath,
@@ -99,7 +100,8 @@ describe('AI-SCALE i18n locale domain split (I18N-01…04)', () => {
     const fp = fingerprint(entries)
     const baselinePath = join(baselineDir, 'zh-CN.leaf-fingerprint.json')
 
-    if (!existsSync(baselinePath)) {
+    const updateBaselines = process.env.UPDATE_I18N_BASELINES === '1'
+    if (!existsSync(baselinePath) || updateBaselines) {
       mkdirSync(baselineDir, { recursive: true })
       writeFileSync(
         baselinePath,
