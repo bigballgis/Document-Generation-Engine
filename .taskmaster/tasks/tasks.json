@@ -2342,7 +2342,7 @@
         "testStrategy": "N/A registry. Do not mark Done until FOS program exit criteria met.",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
@@ -2529,13 +2529,13 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-26T17:17:52.670Z",
+      "lastModified": "2026-07-26T17:18:55.224Z",
       "taskCount": 185,
-      "completedCount": 163,
+      "completedCount": 165,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-26T17:17:52.670Z"
+      "updated": "2026-07-26T17:18:55.224Z"
     }
   }
 }
