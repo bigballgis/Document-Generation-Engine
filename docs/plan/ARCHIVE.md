@@ -53,7 +53,8 @@ Status vocabulary: `Done` / archived. Rows stay reachable; bodies stay in place
 
 | Program | Entry | Note |
 | --- | --- | --- |
-| AI-Scale Remediation | [ai-scale-remediation-program-2026-07.md](./ai-scale-remediation-program-2026-07.md) | Leaf 1 **In Progress** — live |
+| Frontline Operability & Solidity (FOS) | [frontline-operability-solidity-program-2026-07.md](./frontline-operability-solidity-program-2026-07.md) | **Not Started** (plan registered) — live queue, not archived |
+| AI-Scale Remediation | [ai-scale-remediation-program-2026-07.md](./ai-scale-remediation-program-2026-07.md) | Leaf 1 **Done**; program **In Progress** (queued peels) — live |
 | CORE-EXCELLENCE | CE plan docs under `docs/plan/` | Active delivery program (not a formal P-phase) |
 | Intl bank letter readiness (IBL) | [intl-bank-letter-readiness-program.md](./intl-bank-letter-readiness-program.md) | Residual / blocked items may remain — open only when task concerns IBL |
 

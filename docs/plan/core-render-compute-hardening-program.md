@@ -164,7 +164,7 @@ change the default.
 | **W1** | Preview consolidation | 6 | [CRCH-W1-preview-consolidation.md](detail/CRCH-W1-preview-consolidation.md) | **Not Started** |
 | **W2** | Compute DSL capability | ~6 | not yet written — see §5 | **Not Started** |
 | **W3** | DOCX fidelity depth | ~6 | not yet written — see §6 | **Not Started** |
-| **W4** | Authoring information architecture | ~4 | not yet written — see §7 | **Not Started** |
+| **W4** | Authoring information architecture | ~4 | **Superseded by FOS W2–W4** — see §7 | **Superseded** |
 | **W5** | Fidelity verification harness | ~5 | not yet written — see §8 | **Not Started** |
 
 Severity legend used throughout: **P0** = produces a wrong document, a wrong recipient, or a
@@ -248,9 +248,21 @@ product position rather than an accident.
 
 ---
 
-## 7. W4 — Authoring information architecture (design)
+## 7. W4 — Authoring information architecture — **SUPERSEDED by FOS**
 
-| Id | Item | Current state |
+**Do not execute this section as a CRCH leaf.** On 2026-07-26 the user commissioned a
+broader frontline operability program that absorbs authoring IA:
+
+| CRCH item | Absorbed by |
+| --- | --- |
+| W4-1 Flatten navigation / escape traps | [FOS-W2](detail/FOS-W2-author-can-start.md) (A2, A21, A25, A26) |
+| W4-2 Reconcile guide order with tab order | [FOS-W2](detail/FOS-W2-author-can-start.md) W2-3 |
+| W4-3 Split the test-data dialog | Residual noted under [FOS-W3](detail/FOS-W3-authoring-blocks-work.md) optional W3-X |
+| W4-4 Variable-path autocomplete | Residual noted under FOS-W3 optional W3-Y |
+
+Program: [frontline-operability-solidity-program-2026-07.md](./frontline-operability-solidity-program-2026-07.md).
+
+| Id | Item | Current state (kept for history) |
 | --- | --- | --- |
 | W4-1 | Flatten navigation | An author simultaneously tracks a lifecycle stepper, an optional authoring-path guide, a workspace tab, and a sub-tab — four concurrent position indicators, up to five levels deep when editing a binding |
 | W4-2 | Reconcile guide order with tab order | The path guide sequences `master → bindings → variables → preview` while Design defaults to landing on `bindings` and lists `variables` first |
