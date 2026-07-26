@@ -4,12 +4,12 @@
 | --- | --- |
 | **Program ID** | `ai-scale-remediation-2026-07` (short: **AI-SCALE**) |
 | **Created** | 2026-07-26 |
-| **Status** | **In Progress** (Leaf 1–2 **Done**; Leaf 3 **In Progress**; Leaf 4 queued **pending**) |
+| **Status** | **In Progress** (Leaf 1–2 **Done**; Leaf 3 **Done**; Leaf 4 queued **pending**) |
 | **Formal phase** | **None** (NON-CE agent/docs operability program — not a P-phase) |
 | **Sole-active leaf** | TM **#168** · slice `ai-scale-peel-i18n` · worktree `D:/working/DGE-ai-scale-peel-i18n` · `feat/ai-scale-peel-i18n` |
 | **Leaf 1 (Done)** | TM **#166** · `ai-scale-remediation-g1` → **Done** (`c4f1b0d4`; worktree **REMOVED**) |
 | **Leaf 2 (Done)** | TM **#167** · `ai-scale-peel-template-import` → **Done** (`d02aa414` / feat `1f55a420`; worktree **REMOVED**) |
-| **Leaf 3 (sole-active)** | TM **#168** · slice `ai-scale-peel-i18n` · i18n `en.ts` / `zh-CN.ts` domain split → **In Progress** (BDD **ready**; do **not** fold #169) |
+| **Leaf 3 (Done)** | TM **#168** · slice `ai-scale-peel-i18n` → **Done** (`ce47186a` / `0a5e928e`) |
 | **Leaf 4 (queued)** | TM **#169** · mega-test fixture split → **pending** (do **not** activate) |
 | **Batch (Leaf 1)** | **solo** · `member_task_ids: ["166"]` · `proposed_slice_id: ai-scale-remediation-g1` · vetoes: `unrelated-code-peel`, `file-cap`, `risk-domain-split` — **closed** |
 | **Batch (Leaf 2)** | **solo** · `member_task_ids: ["167"]` · `proposed_slice_id: ai-scale-peel-template-import` · `delivery_lane: full` · vetoes: `unrelated-frontend-i18n`, `mega-test-split` — **closed** |
@@ -53,7 +53,7 @@ mega-fixture peels.
 | --- | --- | --- | --- | --- |
 | **Leaf 1** | `ai-scale-remediation-g1` | **#166** | **Done** (`c4f1b0d4`) | Module map SoT + light lane + soft budgets + progressive disclosure |
 | **Leaf 2** | `ai-scale-peel-template-import` | **#167** | **Done** (`d02aa414` / `1f55a420`) | TemplateImport* peel under soft budgets |
-| **Leaf 3** | `ai-scale-peel-i18n` | **#168** | **In Progress** (sole-active) | i18n facade + `locales/domains/*` split (`delivery_lane: light`) |
+| **Leaf 3** | `ai-scale-peel-i18n` | **#168** | **Done** (`ce47186a` / `0a5e928e`) | i18n facade + `locales/domains/*` split (`delivery_lane: light`) |
 | **Leaf 4** | TBD (`ai-scale-mega-test-fixture-split`) | **#169** | **pending** | Mega-test fixture split |
 
 **Rule:** At most **one** AI-SCALE delivery leaf sole-active at a time. Do **not** auto-activate

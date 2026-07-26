@@ -2309,14 +2309,14 @@
       {
         "id": "168",
         "title": "AI-SCALE Leaf 3: i18n en.ts / zh-CN.ts domain split",
-        "description": "IN PROGRESS 2026-07-27 sole-active. NON-CE AI-SCALE Leaf 3 (slice ai-scale-peel-i18n). Split mega locale files frontend/src/i18n/locales/en.ts and zh-CN.ts into domain modules under locales/domains/* per soft size budgets; keep public facades @/i18n/locales/en and zh-CN. Structure-only: identical keys/values; English-first preserved. delivery_lane:light (E1\u2013E5; stages 5\u20137/10 N/A). Batch solo; veto merge with #169. Formal phase None. Do NOT flip #3b/#5a GO; do NOT mark #53/#106 Done; do NOT activate #119; do NOT touch CE-O02; do NOT fold #169.",
+        "description": "DONE \u2014 AI-SCALE Leaf 3 i18n locale domain peel. Merged ce47186a / feat 0a5e928e. Closeout synced with FOS #176 on 2026-07-26.",
         "details": "Sole-active NON-CE delivery leaf (plan-orchestrator Stage 2, 2026-07-27; Stage 3 docs-first path guidance updated). Slice id: ai-scale-peel-i18n. Placement ISOLATED; worktree D:/working/DGE-ai-scale-peel-i18n \u00b7 feat/ai-scale-peel-i18n; base origin/main@757338d8. Batch recommendation solo (member_task_ids:[\"168\"]; proposed_slice_id:ai-scale-peel-i18n; delivery_lane:light; vetoes_applied: mega-test-split, backend-domain). BDD ready: docs/behavior/ai-scale-i18n-locale-split.md (I18N-01\u202609). Program: docs/plan/ai-scale-remediation-program-2026-07.md (Leaf 3 In Progress). Detail: docs/plan/detail/ai-scale-i18n-locale-split.md. Agent paths: module-map + i18n-english-first skill (facade stable; edit domains). FE gates required (lint/type-check/test/build); E2E/Docker N/A. #169 remains pending queued. Umbrella #53 CE remains in-progress registry-only (sole-active note \u2192 #168).",
         "testStrategy": "1. Key completeness/parity unit tests across en + zh-CN after domain split. 2. FE lint, type-check, test, build GREEN. 3. No dotted key path or copy-meaning change. 4. Stages 5\u20137/10 N/A evidence (light lane; frontend_ui_in_scope=false). 5. Do not implement #169 in this leaf.",
         "priority": "medium",
         "dependencies": [
           "167"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-27T01:23:00.000Z"
       },
