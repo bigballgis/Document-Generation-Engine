@@ -1,0 +1,10 @@
+{
+  "id": "condition-inside-loop",
+  "theme": "Condition block nested inside loopBlock (true/false/empty honesty)",
+  "maturity": "ACTIVE",
+  "title": "Condition inside loop \u2014 FOS-W13-4",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "SYNTHETIC",
+  "harnessSelfTest": true,
+  "description": "FOS-W13-4: real conditionBlock inside loopBlock. True branch emits Included labels; false branch text must be absent; empty-collection notice stays off when showEmptyNotice=false."
+}

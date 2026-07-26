@@ -2498,7 +2498,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W13-default-verify-honesty.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },

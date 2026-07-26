@@ -1,0 +1,10 @@
+{
+  "id": "empty-loop-collection",
+  "theme": "Empty loop collection + notice (FOS-W13-4 companion)",
+  "maturity": "ACTIVE",
+  "title": "Empty loop collection \u2014 FOS-W13-4",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "SYNTHETIC",
+  "harnessSelfTest": true,
+  "description": "Empty items[] must not emit loop body; empty-collection notice when showEmptyNotice=true."
+}

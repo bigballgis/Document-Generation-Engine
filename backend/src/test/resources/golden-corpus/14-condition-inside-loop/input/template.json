@@ -1,0 +1,5 @@
+{
+  "bindings": {
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"Condition inside loop letter\"}]},{\"type\":\"loopBlock\",\"loopVariable\":\"items\",\"children\":[{\"type\":\"conditionBlock\",\"conditionExpression\":\"${includeRow} == true\",\"children\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"ROW-\"},{\"type\":\"variable\",\"key\":\"label\"}]}]}]}]}"
+  }
+}

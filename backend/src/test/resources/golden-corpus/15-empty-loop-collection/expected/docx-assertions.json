@@ -1,0 +1,20 @@
+{
+  "deferred": false,
+  "assertions": [
+    {
+      "type": "XML_CONTAINS",
+      "part": "word/document.xml",
+      "substring": "Empty loop collection letter"
+    },
+    {
+      "type": "XML_CONTAINS",
+      "part": "word/document.xml",
+      "substring": "Empty collection notice"
+    },
+    {
+      "type": "XML_NOT_CONTAINS",
+      "part": "word/document.xml",
+      "substring": "Loop body must not appear when empty"
+    }
+  ]
+}

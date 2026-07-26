@@ -2,6 +2,7 @@
 
 **Status:** Active ratchet toward constitution targets (ADR-0035).  
 **Bundle floors (enforced in CI):** backend JaCoCo LINE ≥ 0.70 / BRANCH ≥ 0.45; frontend Vitest lines 22 / functions 32 / branches 55.  
+**Package floors (FOS-W13-8):** `authoring` LINE ≥ 0.40; `apimgmt` LINE ≥ 0.50; `template` LINE ≥ 0.55 (measured starting floors — ratchet upward; not 0.90 overnight).  
 **Constitution targets:** changed lines ≥ 85%; security-critical / core domain ≥ 90%.
 
 ## Per-package backend floors (next ratchet)

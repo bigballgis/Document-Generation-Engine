@@ -109,6 +109,11 @@ class GoldenCorpusCrossLocaleMatrixTest {
             assertThat(ALLOWED_PDF_SOURCES)
                     .as("package %s pdfSource=%s", corpusPackage.id(), pdfSource)
                     .contains(pdfSource);
+            if ("SYNTHETIC".equals(pdfSource)) {
+                assertThat(corpusPackage.manifest().harnessSelfTest())
+                        .as("SYNTHETIC PDF for %s must be labeled harnessSelfTest (FOS-W13-2)", corpusPackage.id())
+                        .isTrue();
+            }
 
             // No checked-in expected PDF binaries that could falsely claim LO provenance.
             try (var stream = Files.list(corpusPackage.directory().resolve("expected"))) {

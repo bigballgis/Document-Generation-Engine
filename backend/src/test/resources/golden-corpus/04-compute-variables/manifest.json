@@ -2,9 +2,10 @@
   "id": "compute-variables",
   "theme": "Computed variables (computeExpression evaluation)",
   "maturity": "ACTIVE",
-  "title": "Compute variables — ACTIVE (CE-K03)",
+  "title": "Compute variables \u2014 ACTIVE (CE-K03)",
   "renderMode": "STRUCTURED_ASSEMBLE",
   "pdfSource": "SYNTHETIC",
   "description": "ACTIVE CE-K03 package: COALESCE/SUM/FILTER/FORMAT_AMOUNT evaluated before structured assemble; DOCX asserts computed text.",
-  "owningFutureSlice": "CE-K03"
+  "owningFutureSlice": "CE-K03",
+  "harnessSelfTest": true
 }

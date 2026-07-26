@@ -159,8 +159,12 @@ class StructuredContentDocxWriteSession {
     private void writeLoopBlock(JsonNode node, XWPFParagraph paragraph) {
         String loopVariable = node.path("loopVariable").asText("");
         Object rawItems = variables.get(loopVariable);
-        if (!(rawItems instanceof List<?> items) || items.isEmpty()) {
+        // FOS-W13-4: missing/non-list keeps single-pass compat; empty list emits nothing.
+        if (!(rawItems instanceof List<?> items)) {
             expandSupport.writeInlineOrBlockChildren(node, paragraph);
+            return;
+        }
+        if (items.isEmpty()) {
             return;
         }
         XWPFParagraph current = paragraph;

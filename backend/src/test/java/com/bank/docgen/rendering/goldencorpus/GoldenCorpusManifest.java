@@ -9,6 +9,8 @@ public record GoldenCorpusManifest(
         GoldenCorpusMaturity maturity,
         String title,
         String renderMode,
-        String pdfSource
+        String pdfSource,
+        boolean harnessSelfTest,
+        String productPdf
 ) {
 }

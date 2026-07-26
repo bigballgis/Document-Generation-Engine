@@ -1,0 +1,21 @@
+{
+  "deferred": false,
+  "assertions": [
+    {
+      "type": "TEXT_CONTAINS",
+      "substring": "ROW-"
+    },
+    {
+      "type": "TEXT_CONTAINS",
+      "substring": "Alpha"
+    },
+    {
+      "type": "TEXT_CONTAINS",
+      "substring": "Gamma"
+    },
+    {
+      "type": "TEXT_NOT_CONTAINS",
+      "substring": "BetaHidden"
+    }
+  ]
+}
