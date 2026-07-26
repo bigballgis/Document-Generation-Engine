@@ -3,12 +3,12 @@
 **Program / slice:** `ai-scale-peel-i18n` (ad-hoc **NON-CE** AI-SCALE Leaf 3; **not** a formal P-phase)  
 **Program registry:** [ai-scale-remediation-program-2026-07.md](../ai-scale-remediation-program-2026-07.md)  
 **Formal plan phase:** **None**  
-**Task Master:** **#168** (`AI-SCALE-L3` / i18n locale split) → **In Progress** (sole-active)  
-**BDD:** [ai-scale-i18n-locale-split.md](../../behavior/ai-scale-i18n-locale-split.md) — **`ready`** (2026-07-27; **BDD-AI-SCALE-I18N** I18N-01…09)  
-**Placement:** **ISOLATED** · worktree `D:/working/DGE-ai-scale-peel-i18n` · branch `feat/ai-scale-peel-i18n` · base `origin/main@757338d8`  
+**Task Master:** **#168** (`AI-SCALE-L3` / i18n locale split) → **Done** (`ce47186a`; sole-active **cleared**)  
+**BDD:** [ai-scale-i18n-locale-split.md](../../behavior/ai-scale-i18n-locale-split.md) — **`ready`/shipped** (2026-07-27; **BDD-AI-SCALE-I18N** I18N-01…09)  
+**Placement:** **MAIN** (post stage 11) · worktree **REMOVED** · merge `ce47186a0b949495e4a74dda8711bb910e877dcc`  
 **Batch recommendation:** **solo** (`member_task_ids: ["168"]`; `proposed_slice_id: ai-scale-peel-i18n`;
 `delivery_lane: light`;
-vetoes_applied: `mega-test-split`, `backend-domain`) — **open**
+vetoes_applied: `mega-test-split`, `backend-domain`) — **closed**
 
 **Prior (Done, do not reopen):** Leaf 1 **#166** → **Done** (`c4f1b0d4`); Leaf 2 **#167** → **Done** (`d02aa414` / `1f55a420`)
 
@@ -24,10 +24,10 @@ Split oversized locale catalogs `frontend/src/i18n/locales/en.ts` and `zh-CN.ts`
 
 | Item | Value |
 | --- | --- |
-| Leaf status | **In Progress** (sole-active 2026-07-27 Stage 2) |
+| Leaf status | **Done** (2026-07-27; merge `ce47186a`) |
 | Formal phase | **None** |
-| Host sole-active | **#168** / `ai-scale-peel-i18n` |
-| `bdd_readiness` | **`ready`** |
+| Host sole-active | **cleared** (next queue head **#169** **pending** — do **not** activate) |
+| `bdd_readiness` | **`ready`/shipped** |
 | `delivery_lane` | **light** (E1–E5; FE gates still required) |
 | `frontend_ui_in_scope` | **false** |
 | `openapi_contract_change` | **false** |
@@ -43,9 +43,9 @@ Split oversized locale catalogs `frontend/src/i18n/locales/en.ts` and `zh-CN.ts`
 | --- | --- | --- |
 | AI-SCALE-L3-T01 | Sole-active activation + TM/plan/ledger wiring for #168 | **Done** (2026-07-27 Stage 2) |
 | AI-SCALE-L3-T02 | Doc-keeper: indexes / module-map / i18n convention cross-links as needed | **Done** (2026-07-27 Stage 3) |
-| AI-SCALE-L3-T03 | TDD Red: locale key completeness / en↔zh-CN parity characterization | **Not Started** |
-| AI-SCALE-L3-T04 | Peel `en.ts` / `zh-CN.ts` into domain modules under soft budgets (identical keys/values) | **Not Started** |
-| AI-SCALE-L3-T05 | FE lint / type-check / test / build + light-lane N/A evidence + merge + MAIN doc-sync | **Not Started** |
+| AI-SCALE-L3-T03 | TDD Red: locale key completeness / en↔zh-CN parity characterization | **Done** (2026-07-27; `localeDomainSplit.test.ts` 5/5) |
+| AI-SCALE-L3-T04 | Peel `en.ts` / `zh-CN.ts` into domain modules under soft budgets (identical keys/values) | **Done** (2026-07-27) |
+| AI-SCALE-L3-T05 | FE lint / type-check / test / build + light-lane N/A evidence + merge + MAIN doc-sync | **Done** (2026-07-27; merge `ce47186a`; stages 5–7/10 **N/A**) |
 
 ---
 
@@ -57,6 +57,18 @@ Split oversized locale catalogs `frontend/src/i18n/locales/en.ts` and `zh-CN.ts`
 | Soft budgets for locale modules | Mega-test fixture split (**#169**) |
 | FE unit gates + key parity tests | Backend / OpenAPI / runtime semantics |
 | English-first + zh-CN parity preserved | Playwright E2E / Docker deploy (N/A light) |
+
+---
+
+## Gate evidence
+
+| Gate | Result |
+| --- | --- |
+| `pnpm` lint / type-check / test / build | **PASS** (pre-merge worktree) |
+| `localeDomainSplit.test.ts` | **5/5 PASS** after rebase |
+| architecture-reviewer | **PASS** |
+| code-quality-reviewer | **PASS** |
+| Stages 5–7 / 10 | **N/A** (`delivery_lane: light`; `frontend_ui_in_scope=false`) |
 
 ---
 

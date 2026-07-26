@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19 (registry only). Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None \u2014 optimization-backlog program, NOT a P-phase. ADR D1\u2013D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1\u20134 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 \u2192 Done. Host sole-active = NON-CE #168 AI-SCALE-L3 ai-scale-peel-i18n (in-progress; not a CE leaf). Prior NON-CE #167 AI-SCALE-L2 Done d02aa414 / 1f55a420. Do NOT treat #53 as delivery leaf or mark Done.",
-        "details": "Program epic only \u2014 no implementation in this task. Traceability: Task Master #54\u2013#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54\u2013#97 Done (CE-O02 deferred). Tooling #50 Done \u2014 not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A\u2013D residuals Done outside this umbrella. Host sole-active: NON-CE #168 AI-SCALE-L3 ai-scale-peel-i18n (in-progress; delivery_lane:light; not a CE leaf). Prior NON-CE #167 AI-SCALE-L2 ai-scale-peel-template-import Done d02aa414 / 1f55a420. Prior NON-CE #166 AI-SCALE-G1 Done c4f1b0d4. Prior NON-CE #165 Done c1bb6c77 / cfefbb55. Prior NON-CE #164 Done 0e6d0bad. Prior NON-CE #163 pqh-f7-redis-rate-limit Done b739a38f; PQH program Done. Do NOT mark #53 Done while CE program registry remains open.",
-        "testStrategy": "N/A \u2014 umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55\u2013#97 open.",
+        "description": "IN PROGRESS 2026-07-19 (registry only). Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1-D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1-4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 -> Done. Host sole-active cleared (prior NON-CE #168 AI-SCALE-L3 ai-scale-peel-i18n Done ce47186a0b949495e4a74dda8711bb910e877dcc; not a CE leaf). Prior NON-CE #167 AI-SCALE-L2 Done d02aa414 / 1f55a420. Do NOT treat #53 as delivery leaf or mark Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54-#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54-#97 Done (CE-O02 deferred). Tooling #50 Done — do NOT treat #53 as delivery leaf. PRR Wave A-D residuals Done outside this umbrella. Host sole-active cleared: prior NON-CE #168 AI-SCALE-L3 ai-scale-peel-i18n Done ce47186a0b949495e4a74dda8711bb910e877dcc (delivery_lane:light; not a CE leaf). Prior NON-CE #167 AI-SCALE-L2 Done d02aa414 / 1f55a420. Prior NON-CE #166 AI-SCALE-G1 Done c4f1b0d4. Prior NON-CE #165 Done c1bb6c77 / cfefbb55. Prior NON-CE #164 Done 0e6d0bad. Prior NON-CE #163 pqh-f7-redis-rate-limit Done b739a38f; PQH program Done. Next AI-SCALE queue head #169 pending (not activated). Do NOT mark #53 Done while CE program registry remains open.",
+        "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-27T01:23:00.000Z"
+        "updatedAt": "2026-07-27T02:35:00.000Z"
       },
       {
         "id": "54",
@@ -2309,22 +2309,22 @@
       {
         "id": "168",
         "title": "AI-SCALE Leaf 3: i18n en.ts / zh-CN.ts domain split",
-        "description": "DONE \u2014 AI-SCALE Leaf 3 i18n locale domain peel. Merged ce47186a / feat 0a5e928e. Closeout synced with FOS #176 on 2026-07-26.",
-        "details": "Sole-active NON-CE delivery leaf (plan-orchestrator Stage 2, 2026-07-27; Stage 3 docs-first path guidance updated). Slice id: ai-scale-peel-i18n. Placement ISOLATED; worktree D:/working/DGE-ai-scale-peel-i18n \u00b7 feat/ai-scale-peel-i18n; base origin/main@757338d8. Batch recommendation solo (member_task_ids:[\"168\"]; proposed_slice_id:ai-scale-peel-i18n; delivery_lane:light; vetoes_applied: mega-test-split, backend-domain). BDD ready: docs/behavior/ai-scale-i18n-locale-split.md (I18N-01\u202609). Program: docs/plan/ai-scale-remediation-program-2026-07.md (Leaf 3 In Progress). Detail: docs/plan/detail/ai-scale-i18n-locale-split.md. Agent paths: module-map + i18n-english-first skill (facade stable; edit domains). FE gates required (lint/type-check/test/build); E2E/Docker N/A. #169 remains pending queued. Umbrella #53 CE remains in-progress registry-only (sole-active note \u2192 #168).",
-        "testStrategy": "1. Key completeness/parity unit tests across en + zh-CN after domain split. 2. FE lint, type-check, test, build GREEN. 3. No dotted key path or copy-meaning change. 4. Stages 5\u20137/10 N/A evidence (light lane; frontend_ui_in_scope=false). 5. Do not implement #169 in this leaf.",
+        "description": "DONE 2026-07-27. NON-CE AI-SCALE Leaf 3 (slice ai-scale-peel-i18n). Split mega locale files frontend/src/i18n/locales/en.ts and zh-CN.ts into domain modules under locales/domains/*; thin public facades @/i18n/locales/en and zh-CN. Structure-only: identical keys/values; English-first preserved. Merge ce47186a0b949495e4a74dda8711bb910e877dcc; worktree REMOVED. delivery_lane:light (E1-E5; stages 5-7/10 N/A). Batch solo closed. Formal phase None. Do NOT flip #3b/#5a GO; do NOT mark #53/#106 Done; do NOT activate #119; do NOT touch CE-O02; do NOT auto-activate #169.",
+        "details": "COMPLETED 2026-07-27 Stage 12. Slice id: ai-scale-peel-i18n. Merge: ce47186a0b949495e4a74dda8711bb910e877dcc (feat/ai-scale-peel-i18n -> main); worktree DGE-ai-scale-peel-i18n REMOVED (stage 11). Batch recommendation solo (member_task_ids:[\"168\"]; proposed_slice_id:ai-scale-peel-i18n; delivery_lane:light; vetoes_applied: mega-test-split, backend-domain) closed. BDD ready/shipped: docs/behavior/ai-scale-i18n-locale-split.md (I18N-01...09). Program: docs/plan/ai-scale-remediation-program-2026-07.md (Leaf 3 Done; program In Progress). Detail: docs/plan/detail/ai-scale-i18n-locale-split.md (T01-T05 Done). Gates: pnpm lint/type-check/test/build PASS (pre-merge worktree); localeDomainSplit.test.ts 5/5 PASS after rebase; architecture PASS; code-quality PASS; stages 5-7/10 N/A (light). Sole-active cleared. Next queue head #169 pending — do not auto-activate. Umbrella #53 CE remains in-progress registry-only (sole-active note cleared).",
+        "testStrategy": "1. Key completeness/parity unit tests across en + zh-CN after domain split. 2. FE lint, type-check, test, build GREEN. 3. No dotted key path or copy-meaning change. 4. Stages 5–7/10 N/A evidence (light lane; frontend_ui_in_scope=false). 5. Do not implement #169 in this leaf.",
         "priority": "medium",
         "dependencies": [
           "167"
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-27T01:23:00.000Z"
+        "updatedAt": "2026-07-27T02:35:00.000Z"
       },
       {
         "id": "169",
         "title": "AI-SCALE Leaf 4 (queued): mega-test fixture split",
-        "description": "QUEUED ONLY \u2014 do not activate while #168 is sole-active. Split mega test fixtures / oversized test helpers into focused modules per soft size budgets. Test-infra peel leaf. Formal phase None.",
-        "details": "Pending serial queue after Leaf 3 (#168 in-progress sole-active ai-scale-peel-i18n). Slice id TBD at activation (suggested ai-scale-mega-test-fixture-split). Program: docs/plan/ai-scale-remediation-program-2026-07.md. Do NOT fold into #168; do NOT auto-activate.",
+        "description": "QUEUED ONLY — next AI-SCALE queue head after #168 Done; do not activate until explicit Stage 0. Split mega test fixtures / oversized test helpers into focused modules per soft size budgets. Test-infra peel leaf. Formal phase None.",
+        "details": "Pending serial queue after Leaf 3 (#168 Done ce47186a0b949495e4a74dda8711bb910e877dcc; sole-active cleared). Slice id TBD at activation (suggested ai-scale-mega-test-fixture-split). Program: docs/plan/ai-scale-remediation-program-2026-07.md. Do NOT fold into #168; do NOT auto-activate.",
         "testStrategy": "Activate only after prior AI-SCALE leaf Done. Verify suites still green after fixture peel; no product behavior change claimed.",
         "priority": "medium",
         "dependencies": [
@@ -2332,7 +2332,7 @@
         ],
         "status": "pending",
         "subtasks": [],
-        "updatedAt": "2026-07-27T01:23:00.000Z"
+        "updatedAt": "2026-07-27T02:35:00.000Z"
       },
       {
         "id": "170",

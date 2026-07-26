@@ -1,15 +1,16 @@
 ---
 id: BDD-AI-SCALE-I18N
 title: AI-SCALE Leaf 3 — Frontend i18n locale domain split under soft size budgets
-status: ready
+status: ready/shipped
 date: 2026-07-27
 bdd_readiness: ready
 task_ids: [168]
-placement: ISOLATED
-worktree_path: D:/working/DGE-ai-scale-peel-i18n
-branch: feat/ai-scale-peel-i18n
+placement: MAIN
+worktree_path: n/a (REMOVED)
+branch: main
 slice: ai-scale-peel-i18n
-integration_base: origin/main@757338d8
+integration_base: main@ce47186a
+merge_sha: ce47186a0b949495e4a74dda8711bb910e877dcc
 user_confirmation: 2026-07-26 「按你的建议整改吧»; stage-1 handoff confirms structure-only split with stable keys
 delivery_lane: light
 frontend_ui_in_scope: false
@@ -24,9 +25,9 @@ kind: structural-peel  # preserve message keys + copy; soft-budget acceptance
 | Field | Value |
 | --- | --- |
 | **Slice** | `ai-scale-peel-i18n` (program alias `ai-scale-i18n-locale-split`) |
-| **bdd_readiness** | **`ready`** |
+| **bdd_readiness** | **`ready`/shipped** |
 | **Recorded** | 2026-07-27 |
-| **Task Master** | **#168** (AI-SCALE Leaf 3 / `AI-SCALE-L3`) |
+| **Task Master** | **#168** (AI-SCALE Leaf 3 / `AI-SCALE-L3`) → **Done** (`ce47186a`) |
 | **Program** | [ai-scale-remediation-program-2026-07.md](../plan/ai-scale-remediation-program-2026-07.md) |
 | **Formal phase** | **None** (NON-CE AI-SCALE peel; do not invent P24+) |
 | **Actor** | Platform engineer / `frontend-engineer` / `code-quality-reviewer` (structure); management-UI users (regression surface via unchanged resolved strings) |
@@ -291,7 +292,7 @@ Public loaders remain:
 | **E2** | No runtime / OpenAPI / Flyway / generation acceptance change (or pure docs) | **Hold** — FE catalog structure only; no OpenAPI/Flyway/generation; resolved runtime messages unchanged by invariant |
 | **E3** | Stage 1 readiness `ready` or `not-applicable` | **Hold** — `bdd_readiness: ready` |
 | **E4** | Handoff records `delivery_lane: light` + E1–E3 rationale | **Hold** — this document + orchestrator handoff |
-| **E5** | Worktree still obeyed for multi-file delivery | **Hold** — `D:/working/DGE-ai-scale-peel-i18n` / `feat/ai-scale-peel-i18n` |
+| **E5** | Worktree still obeyed for multi-file delivery | **Hold** (during delivery) — worktree `DGE-ai-scale-peel-i18n` / `feat/ai-scale-peel-i18n`; **REMOVED** after merge `ce47186a` |
 
 **Verdict:** `delivery_lane: light`. Stages **5–7** / **10** → **N/A**. FE unit/gates → **required**.
 
