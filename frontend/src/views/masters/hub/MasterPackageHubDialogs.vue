@@ -52,6 +52,7 @@ const emit = defineEmits<{
   <MasterReviewDialog
     v-model="reviewDialogOpen"
     :mode="reviewMode"
+    :submitting="submitting"
     @submit="emit('decideReview', $event)"
   />
 </template>

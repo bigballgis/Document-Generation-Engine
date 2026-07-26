@@ -108,7 +108,13 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <el-dialog v-model="visible" :title="dialogTitle" width="900px" destroy-on-close>
+  <el-dialog
+    v-model="visible"
+    :title="dialogTitle"
+    width="900px"
+    destroy-on-close
+    :close-on-click-modal="false"
+  >
     <el-alert
       v-if="apiErrorMessage"
       class="dialog-alert"

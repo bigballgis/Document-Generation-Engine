@@ -352,9 +352,36 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     if (!canWriteVariables.value) {
       return
     }
+    const selected = templatesStore.selectedTemplate
+    const bindings = selected?.bindings ?? []
+    const rules = selected?.rules ?? []
+    const variables = options.variables.value
+    let testDataSets
+    try {
+      testDataSets = await listTestDataSets(options.templateId.value)
+    } catch {
+      ElMessage.error(t('templates.error.deleteVariable'))
+      return
+    }
+
+    const impact = analyzeVariableRenameImpact(
+      variableKey,
+      bindings,
+      rules,
+      variables,
+      testDataSets,
+    )
     const confirmed = await confirmAction({
       titleKey: 'templates.authoring.confirmDeleteVariableTitle',
       messageKey: 'templates.authoring.confirmDeleteVariableMessage',
+      messageParams: {
+        variableKey,
+        bindingCount: impact.bindingAnchorCount,
+        ruleCount: impact.ruleCount,
+        unlockedCount: impact.unlockedTestSetCount,
+        lockedCount: impact.lockedTestSetSkippedCount,
+        computeCount: impact.computeReferenceCount,
+      },
       type: 'warning',
     })
     if (!confirmed) {

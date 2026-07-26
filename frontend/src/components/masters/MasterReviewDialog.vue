@@ -6,6 +6,7 @@ import type { MasterReviewDecision } from '@/types/master'
 const props = defineProps<{
   modelValue: boolean
   mode: MasterReviewDecision
+  submitting?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -38,10 +39,16 @@ const titleKey = computed(() =>
 )
 
 function closeDialog() {
+  if (props.submitting) {
+    return
+  }
   visible.value = false
 }
 
 function submitForm() {
+  if (props.submitting) {
+    return
+  }
   emit('submit', {
     decision: props.mode,
     commentSummary: form.commentSummary.trim(),
@@ -50,7 +57,14 @@ function submitForm() {
 </script>
 
 <template>
-  <el-dialog v-model="visible" :title="t(titleKey)" width="520px" destroy-on-close>
+  <el-dialog
+    v-model="visible"
+    :title="t(titleKey)"
+    width="520px"
+    destroy-on-close
+    :close-on-click-modal="false"
+    :close-on-press-escape="!submitting"
+  >
     <el-form label-position="top">
       <el-form-item :label="t('masters.review.commentSummary')">
         <el-input
@@ -58,14 +72,18 @@ function submitForm() {
           type="textarea"
           maxlength="2048"
           :rows="4"
+          :disabled="submitting"
           :placeholder="t('masters.review.commentSummaryPlaceholder')"
         />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="closeDialog">{{ t('masters.actions.cancel') }}</el-button>
+      <el-button :disabled="submitting" @click="closeDialog">{{ t('masters.actions.cancel') }}</el-button>
       <el-button
         :type="mode === 'APPROVED' ? 'success' : 'danger'"
+        :loading="submitting"
+        :disabled="submitting"
+        data-testid="master-review-decision-submit"
         @click="submitForm"
       >
         {{ t(mode === 'APPROVED' ? 'masters.review.approve' : 'masters.review.reject') }}

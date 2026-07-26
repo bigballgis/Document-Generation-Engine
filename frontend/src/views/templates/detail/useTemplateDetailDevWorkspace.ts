@@ -39,18 +39,27 @@ export function useTemplateDetailDevWorkspace(options: UseTemplateDetailDevWorks
   const batchDialogStreamUrl = ref('')
   const batchRunning = ref(false)
 
-  const { isEligible, tooltipContent, refresh: refreshEligibility } = useSubmitTestEligibility(
-    toValue(options.templateId),
-  )
+  const {
+    isEligible,
+    tooltipContent,
+    loadError: submitEligibilityLoadError,
+    refresh: refreshEligibility,
+  } = useSubmitTestEligibility(toValue(options.templateId))
 
   const submitTooltipContent = computed(() => {
+    if (submitEligibilityLoadError.value) {
+      return submitEligibilityLoadError.value
+    }
     if (testDataSetCount.value === 0) {
       return t('templates.testPreview.workflow.noDataSetsTooltip')
     }
     return tooltipContent.value
   })
 
-  const submitTooltipDisabled = computed(() => isEligible.value && testDataSetCount.value > 0)
+  const submitTooltipDisabled = computed(
+    () =>
+      !submitEligibilityLoadError.value && isEligible.value && testDataSetCount.value > 0,
+  )
 
   const workspaceTabs = computed(() =>
     TEMPLATE_DEV_WORKSPACE_TABS.map((name) => ({
@@ -160,7 +169,7 @@ export function useTemplateDetailDevWorkspace(options: UseTemplateDetailDevWorks
         void refreshEligibility()
       }
     },
-    { immediate: false },
+    { immediate: true },
   )
 
   return {
@@ -173,6 +182,7 @@ export function useTemplateDetailDevWorkspace(options: UseTemplateDetailDevWorks
     batchDialogStreamUrl,
     batchRunning,
     isEligible,
+    submitEligibilityLoadError,
     submitTooltipContent,
     submitTooltipDisabled,
     handleSubmitForTestConfirm,

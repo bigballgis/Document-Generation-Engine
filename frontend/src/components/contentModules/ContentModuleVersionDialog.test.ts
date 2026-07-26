@@ -66,4 +66,21 @@ describe('ContentModuleVersionDialog', () => {
 
     expect(wrapper.find('[data-testid="controlled-structured-content-editor"]').exists()).toBe(true)
   })
+
+  it('FOS-W4-8: does not close on overlay click', async () => {
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleVersionDialog, {
+      props: {
+        modelValue: true,
+        moduleId: 'MOD-LOAN-DISCLOSURE',
+        mode: 'create',
+        version: null,
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    const dialog = wrapper.findComponent({ name: 'ElDialog' })
+    expect(dialog.props('closeOnClickModal')).toBe(false)
+  })
 })

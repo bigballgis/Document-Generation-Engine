@@ -296,9 +296,9 @@ describe('TemplateVersionLinesPanel', () => {
     expect(wrapper.find('[data-version-line-create-from-latest]').exists()).toBe(true)
   })
 
-  it('hides create-from-latest-release button when an in-flight line exists', async () => {
+  it('FOS-W4-7: disables create-from-latest-release when an in-flight line exists', async () => {
     vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
-      content: [inFlightLine, publishedLine],
+      content: [inFlightLine, { ...publishedLine, cloneable: false }],
       page: 0,
       size: 20,
       totalElements: 2,
@@ -308,6 +308,7 @@ describe('TemplateVersionLinesPanel', () => {
     const wrapper = mountPanel({ canClone: true })
     await flushPromises()
 
-    expect(wrapper.find('[data-version-line-create-from-latest]').exists()).toBe(false)
+    const button = wrapper.get('[data-version-line-create-from-latest]')
+    expect(button.attributes('disabled')).toBeDefined()
   })
 })

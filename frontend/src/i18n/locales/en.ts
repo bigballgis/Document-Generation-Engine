@@ -1142,6 +1142,7 @@ export default {
       restore: 'Restore version',
       deactivateDisabledTooltip: 'The default route release version cannot be deactivated.',
       createFromLatestRelease: 'Create modification from latest release',
+      inFlightDraftExistsTooltip: 'A draft version already exists',
       empty: 'No version lines yet.',
       loadError: 'Unable to load version lines.',
     },
@@ -1667,6 +1668,7 @@ export default {
       noVariables: 'No variables configured yet.',
       noBindings: 'No layout placeholder bindings configured yet.',
       validateBindings: 'Validate bindings',
+      validateBindingsEmptyTooltip: 'Configure at least one layout placeholder binding before validating.',
       bindingValidationSuccess: 'Binding validation passed.',
       bindingValidationBlocking: 'Binding validation found blocking issues.',
       bindingValidationSummary: '{valid} of {total} bindings valid',
@@ -1711,7 +1713,8 @@ export default {
       bindingVersionConflictKeepEditing: 'Keep editing',
       deleteVariableSuccess: 'Variable deleted.',
       confirmDeleteVariableTitle: 'Delete variable',
-      confirmDeleteVariableMessage: 'Remove this variable from the template draft?',
+      confirmDeleteVariableMessage:
+        'Remove variable "{variableKey}" from the template draft?\n\nBindings: {bindingCount}\nRules: {ruleCount}\nUnlocked test sets: {unlockedCount}\nLocked test sets skipped: {lockedCount}\nCompute references: {computeCount}',
       rename: {
         confirmTitle: 'Rename variable',
         confirmMessage:
@@ -2123,6 +2126,10 @@ export default {
       refresh: 'Refresh',
       thresholdHint:
         'Applied threshold ({scope}): required variables {variablePct}%, required samples {samplePct}%, layout placeholder bindings {anchorPct}%.',
+      scopeType: {
+        GLOBAL: 'Global default',
+        GROUP: 'Group override',
+      },
       status: {
         meetsThreshold: 'Aggregate coverage meets thresholds ({percentage}%).',
         belowThreshold: 'Aggregate coverage is below threshold ({percentage}%).',
