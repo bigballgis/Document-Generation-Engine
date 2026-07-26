@@ -27,7 +27,8 @@ describe('AuthoringPathGuide', () => {
     expect(wrapper.text()).toContain('Bindings')
     expect(wrapper.text()).toContain('Variables')
     expect(wrapper.text()).toContain('Preview')
-    expect(wrapper.text()).toContain('Skip guide')
+    expect(wrapper.text()).toContain('Dismiss')
+    expect(wrapper.text()).not.toContain('Skip guide')
     expect(wrapper.text()).not.toMatch(/Submit for testing|Approve|Reject|Confirm go-live|Publish/i)
   })
 
@@ -54,22 +55,21 @@ describe('AuthoringPathGuide', () => {
     ])
   })
 
-  it('BDD-CE-U16-APC-005: Skip / Dismiss emit dismiss', async () => {
+  it('FOS-W2-7: single Dismiss control emits dismiss', async () => {
     const wrapper = mountGuide('bindings')
-    await wrapper.get('[data-testid="authoring-path-guide-skip"]').trigger('click')
     await wrapper.get('[data-testid="authoring-path-guide-dismiss"]').trigger('click')
-    expect(wrapper.emitted('dismiss')).toHaveLength(2)
+    expect(wrapper.emitted('dismiss')).toHaveLength(1)
   })
 
-  it('Next advances from Letterhead to Bindings', async () => {
+  it('FOS-W2-3: Next advances from Letterhead to Variables', async () => {
     const wrapper = mountGuide('master')
     await wrapper.get('[data-testid="authoring-path-guide-next"]').trigger('click')
     expect(wrapper.emitted('navigate')?.[0]).toEqual([
       {
         workspaceTab: 'design',
-        designTab: 'bindings',
+        designTab: 'variables',
         authoringGuide: '1',
-        authoringGuideStep: 'bindings',
+        authoringGuideStep: 'variables',
       },
     ])
   })

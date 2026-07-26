@@ -22,6 +22,7 @@ const MASTER_HUB_PATH = /^\/masters\/([^/]+)$/
 const TEMPLATE_DEV_PATH = /^\/templates\/([^/]+)\/dev\/[^/]+$/
 const TEMPLATE_RELEASE_PATH = /^\/templates\/([^/]+)\/releases\/[^/]+$/
 const TEMPLATE_HUB_PATH = /^\/templates\/([^/]+)$/
+const API_PACKAGE_SETTINGS_PATH = /^\/api\/packages\/([^/]+)\/settings$/
 
 const DETAIL_PREFIXES: Array<{ prefix: string; listPath: string; listLabelKey: string }> = [
   {
@@ -66,6 +67,16 @@ export function buildBreadcrumbTrail(path: string): BreadcrumbSegment[] {
     return [
       { labelKey: 'nav.items.templates', path: '/templates' },
       { labelKey: 'templates.packageHub.breadcrumbLabel' },
+    ]
+  }
+
+  const apiPackageSettingsMatch = API_PACKAGE_SETTINGS_PATH.exec(path)
+  if (apiPackageSettingsMatch) {
+    const templateId = apiPackageSettingsMatch[1]
+    return [
+      { labelKey: 'nav.items.templates', path: '/templates' },
+      { labelKey: 'templates.packageHub.breadcrumbLabel', path: `/templates/${templateId}` },
+      { labelKey: 'apiPolicy.packageSettings.breadcrumbLabel' },
     ]
   }
 

@@ -2,10 +2,11 @@ import type { LocationQuery } from 'vue-router'
 import { templateDevVersionPath } from '@/routing/routeKeys'
 import type { TemplateJourneyWorkspaceQuery } from '@/utils/templateJourneyWorkspaceLink'
 
+/** FOS-W2-3 — align guide with Design tab order (variables before bindings). */
 export const AUTHORING_PATH_GUIDE_STEPS = [
   'master',
-  'bindings',
   'variables',
+  'bindings',
   'preview',
 ] as const
 

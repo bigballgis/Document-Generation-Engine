@@ -329,7 +329,7 @@ test.describe('CE-U16 authoring path compress UIUX evidence @1920 dual-brand', (
     await switchBrand(page, 'REDBC')
     await openPostCreateAuthoringPath(page, fixture.templateId, devVersionId)
     await expect(authoringGuide(page)).toBeVisible()
-    await page.getByTestId('authoring-path-guide-skip').click()
+    await page.getByTestId('authoring-path-guide-dismiss').click()
     await expect(authoringGuide(page)).toHaveCount(0)
     await expect(page).not.toHaveURL(/authoringGuide=1/)
     await expect(page.getByRole('tab', { name: /^template design$/i })).toBeVisible()

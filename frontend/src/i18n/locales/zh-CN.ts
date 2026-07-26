@@ -890,6 +890,7 @@ export default {
       groupCodeManualPlaceholder: '输入目标分组代码',
       master: '已批准母版',
       masterPlaceholder: '选择已批准的母版文档',
+      noApprovedMasters: '尚无已批准母版 — 请先请审核人批准一份母版。',
       externalId: '外部 ID',
       externalIdPlaceholder: '例如 TPL-RETAIL-LETTER',
       name: '模板名称',
@@ -1728,6 +1729,8 @@ export default {
       configureBinding: '配置',
       noMasterAnchors: '关联母版中尚未提取到占位符。',
       masterAnchorsLoadFailed: '无法加载母版占位符目录。',
+      anchorDeepLinkNotFound:
+        '未找到版式占位符 “{anchorId}”。请检查链接，或从绑定表打开占位符。',
       validationStatus: '校验状态',
       validationUnknown: '未校验',
       pasteResidue: {
@@ -2730,6 +2733,7 @@ export default {
     packageSettings: {
       title: 'API 设置 — {name}',
       loadingTitle: '正在加载包级 API 设置…',
+      breadcrumbLabel: 'API 设置',
       description: '编辑包级对外接入：授权 AD 组、默认路由、留存、凭证与高级域配置。',
       backToHub: '返回模板包',
       backToExternalServices: '对外服务概览',

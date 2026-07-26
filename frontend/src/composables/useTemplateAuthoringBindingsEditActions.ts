@@ -1,6 +1,7 @@
-import { computed, ref, watch, type Ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDirtyGuard } from '@/composables/useDirtyGuard'
+import { registerWorkspaceTabDirtyLeave } from '@/composables/workspaceTabDirtyLeave'
 import { useTemplateAuthoringBindingsPasteResidue } from '@/composables/useTemplateAuthoringBindingsPasteResidue'
 import { createTemplateAuthoringBindingsSaveFlow } from '@/composables/createTemplateAuthoringBindingsSaveFlow'
 import {
@@ -127,6 +128,15 @@ export function useTemplateAuthoringBindingsEditActions(options: {
         return false
       }
     },
+  })
+
+  onMounted(() => {
+    registerWorkspaceTabDirtyLeave((leave) => {
+      void dirtyGuardRequestLeave(leave)
+    })
+  })
+  onUnmounted(() => {
+    registerWorkspaceTabDirtyLeave(null)
   })
 
   const paste = useTemplateAuthoringBindingsPasteResidue({

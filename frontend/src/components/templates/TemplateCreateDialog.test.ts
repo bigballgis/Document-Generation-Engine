@@ -9,10 +9,16 @@ import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 import { useMastersStore } from '@/stores/masters'
 import { useTemplatesStore } from '@/stores/templates'
 import * as templatesApi from '@/api/templates'
+import * as mastersApi from '@/api/masters'
 
 vi.mock('@/api/templates', () => ({
   createTemplate: vi.fn(),
   listTemplates: vi.fn(),
+}))
+
+vi.mock('@/api/masters', () => ({
+  listAllMasters: vi.fn(),
+  listMasters: vi.fn(),
 }))
 
 vi.mock('@/api/riskPromptConfig', () => ({
@@ -42,13 +48,30 @@ const selectStub = {
     '<input class="select-stub" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
 }
 
+const approvedMaster = {
+  id: 'master-1',
+  groupCode: 'RETAIL',
+  name: 'Retail letterhead',
+  status: 'APPROVED' as const,
+  originalFilename: 'letterhead.docx',
+  anchorCount: 1,
+  updatedAt: '2026-06-23T10:00:00Z',
+  updatedBy: 'tester',
+}
+
 describe('TemplateCreateDialog', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.mocked(templatesApi.createTemplate).mockReset()
+    vi.mocked(mastersApi.listAllMasters).mockReset()
+    vi.mocked(mastersApi.listAllMasters).mockResolvedValue({
+      content: [approvedMaster],
+      truncated: false,
+      totalElements: 1,
+    })
   })
 
-  function mountDialog() {
+  function mountDialog(options: { seedMasters?: typeof approvedMaster[] } = {}) {
     const pinia = createPinia()
     setActivePinia(pinia)
     const i18n = createI18n({
@@ -57,17 +80,7 @@ describe('TemplateCreateDialog', () => {
       messages: { en },
     })
     useMastersStore().$patch({
-      masters: [
-        {
-          id: 'master-1',
-          groupCode: 'RETAIL',
-          name: 'Retail letterhead',
-          status: 'APPROVED',
-          originalFilename: 'letterhead.docx',
-          anchorCount: 1,
-          updatedAt: '2026-06-23T10:00:00Z',
-        },
-      ],
+      masters: options.seedMasters ?? [approvedMaster],
     })
 
     return mount(TemplateCreateDialog, {
@@ -86,6 +99,21 @@ describe('TemplateCreateDialog', () => {
 
   afterEach(() => {
     document.body.innerHTML = ''
+  })
+
+  it('FOS-W2-1: fetches APPROVED letterheads when the dialog opens on an empty store', async () => {
+    vi.mocked(mastersApi.listAllMasters).mockResolvedValue({
+      content: [approvedMaster],
+      truncated: false,
+      totalElements: 1,
+    })
+    mountDialog({ seedMasters: [] })
+    await flushPromises()
+
+    expect(mastersApi.listAllMasters).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'APPROVED' }),
+    )
+    expect(useMastersStore().masters.map((m) => m.id)).toEqual(['master-1'])
   })
 
   it('wires el-form validation rules for required create fields', async () => {

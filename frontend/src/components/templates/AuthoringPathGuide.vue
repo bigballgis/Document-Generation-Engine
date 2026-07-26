@@ -22,14 +22,9 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const steps = computed(() =>
-  AUTHORING_PATH_GUIDE_STEPS.map((id, index) => {
-    const currentIndex = AUTHORING_PATH_GUIDE_STEPS.indexOf(props.currentStep)
-    let status: 'completed' | 'current' | 'upcoming' = 'upcoming'
-    if (index < currentIndex) {
-      status = 'completed'
-    } else if (index === currentIndex) {
-      status = 'current'
-    }
+  AUTHORING_PATH_GUIDE_STEPS.map((id) => {
+    // FOS-W2-7 — current vs upcoming only (no fake completed ticks by index).
+    const status: 'current' | 'upcoming' = id === props.currentStep ? 'current' : 'upcoming'
     return {
       id,
       labelKey: AUTHORING_PATH_GUIDE_LABEL_KEYS[id],
@@ -78,14 +73,6 @@ function onNext() {
         <button
           type="button"
           class="authoring-path-guide__action"
-          data-testid="authoring-path-guide-skip"
-          @click="emit('dismiss')"
-        >
-          {{ t('templates.authoringPathGuide.skip') }}
-        </button>
-        <button
-          type="button"
-          class="authoring-path-guide__action"
           data-testid="authoring-path-guide-dismiss"
           @click="emit('dismiss')"
         >
@@ -109,7 +96,6 @@ function onNext() {
             type="button"
             class="authoring-path-guide__step"
             :class="{
-              'is-completed': step.status === 'completed',
               'is-current': step.status === 'current',
               'is-upcoming': step.status === 'upcoming',
             }"
@@ -119,8 +105,7 @@ function onNext() {
             @click="onStepActivate(step.navigateQuery)"
           >
             <span class="authoring-path-guide__marker" aria-hidden="true">
-              <span v-if="step.status === 'completed'" class="authoring-path-guide__check">✓</span>
-              <span v-else class="authoring-path-guide__dot" />
+              <span class="authoring-path-guide__dot" />
             </span>
             <span class="authoring-path-guide__label">{{ t(step.labelKey) }}</span>
           </button>

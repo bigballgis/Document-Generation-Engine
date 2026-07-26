@@ -104,8 +104,10 @@ function resolveStepperSubTab(query: TemplateJourneyWorkspaceQuery): TemplateDev
 }
 
 function onLifecycleStepperNavigate(query: TemplateJourneyWorkspaceQuery) {
+  // FOS-W2-2 — escape post-create guide so lifecycle/workspace nav is not a no-op.
+  const base = stripAuthoringPathGuideQuery(route.query)
   void router.replace({
-    query: buildDevWorkspaceQuery(route.query, query.workspaceTab, resolveStepperSubTab(query)),
+    query: buildDevWorkspaceQuery(base, query.workspaceTab, resolveStepperSubTab(query)),
   })
 }
 
