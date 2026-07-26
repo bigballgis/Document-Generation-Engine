@@ -71,7 +71,7 @@ code peels stay queued as Leaves 2–4.
 
 | Leaf | TM | Suggested slice id | Status | Focus |
 | --- | --- | --- | --- | --- |
-| **2** | **#167** | `ai-scale-template-import-peel` | **pending** | TemplateImport* peel |
+| **2** | **#167** | `ai-scale-peel-template-import` | BDD **ready** (impl pending) — [behavior](../../behavior/ai-scale-template-import-peel.md) · [detail](./ai-scale-template-import-peel.md) | TemplateImport* peel |
 | **3** | **#168** | `ai-scale-i18n-locale-split` | **pending** | i18n locale split |
 | **4** | **#169** | `ai-scale-mega-test-fixture-split` | **pending** | Mega-test fixture split |
 

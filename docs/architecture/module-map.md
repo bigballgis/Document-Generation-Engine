@@ -85,6 +85,7 @@ Single Maven module; business boundaries are **package** boundaries.
 | DOCX/PDF/LibreOffice/preview worker | `rendering-engineer` → `rendering` |
 | Generation task / runtime API | `backend-engineer` → `runtime` (+ `apimgmt` if policy) |
 | Template lifecycle / composition | `backend-engineer` → `template` |
+| Template import dry-run / apply / dependency precheck | `backend-engineer` → `template.web.TemplateImportController` + `template.service.TemplateImportService` (package-private `TemplateImport*Support` collaborators; orchestration stays outside `rendering`) |
 | Authz / fail-closed | `backend-engineer` → `authorization` |
 
 ## Frontend — `frontend/src/*`
