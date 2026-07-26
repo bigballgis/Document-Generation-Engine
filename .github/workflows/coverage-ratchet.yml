@@ -21,7 +21,7 @@ jobs:
           cache: maven
       - name: Backend bundle floors (0.70 line / 0.45 branch)
         run: mvn -B -ntp -f backend/pom.xml verify
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 9.15.0
       - uses: actions/setup-node@v4
