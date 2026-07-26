@@ -19,6 +19,11 @@ related:
 
 Accepted
 
+**Amendment (2026-07-26):** Rotation grace period changed from **7 days** to **28 days**
+per explicit user confirmation (FOS OD-FOS-4 / D11). Expiry reminder tiers (30 / 7 / 1 day
+before credential expiry) are unchanged. Implementation owned by FOS W10
+(`fos-credential-lifecycle`).
+
 ## Context
 
 The dynamic API uses API credential plus AD Group as the confirmed dual authorization model. API credentials identify calling systems or applications, while the access account and its AD Groups provide the second authorization dimension.
@@ -39,7 +44,7 @@ The confirmed API credential status set is `ACTIVE`, `EXPIRING_SOON`, `EXPIRED`,
 
 `EXPIRING_SOON` is used for the expiry reminder window. Rotation state is represented by the current secret and the retiring old secret during the rotation grace period; v1 does not add a credential-level `ROTATING` status.
 
-During rotation, the new secret becomes usable immediately. The old secret remains usable for a 7-day grace period, then becomes invalid.
+During rotation, the new secret becomes usable immediately. The old secret remains usable for a **28-day** grace period, then becomes invalid.
 
 Credential revocation takes effect immediately. A revoked credential blocks all subsequent API operations, including new generation, async task query, async task cancellation, and generated document download.
 
@@ -56,7 +61,7 @@ API credential expiry reminders are a lifecycle-specific notification rule. They
 ## Consequences
 
 - Credentials cannot become unmanaged long-lived secrets because expiry is mandatory and capped.
-- Callers can rotate credentials without immediate downtime because old secrets remain valid for a 7-day grace period.
+- Callers can rotate credentials without immediate downtime because old secrets remain valid for a **28-day** grace period.
 - Revocation has a clear security boundary: no future API operation can use the revoked credential, including retrieval of already generated results.
 - Secret plaintext exposure is minimized because the platform only shows it once and stores only irreversible summaries.
 - Administrators receive expiry reminders before credentials stop working, while API callers rely on contract or management visibility instead of proactive reminders.
