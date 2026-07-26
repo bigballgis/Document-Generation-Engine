@@ -10,7 +10,7 @@
 | **Origin** | User-commissioned deep review (2026-07-26): make **existing** core maximally **易用** and **扎实** for a bank frontline employee who must orchestrate the most complex bank template and hand it off for other systems to call — **no new product features** |
 | **Audit baseline commit** | `f29211c5` (MAIN tip when program authored; locate code by quoted snippets, not line numbers) |
 | **Model note** | Program authored with Opus 5–class deep audits; detail sheets are written so a **lower-tier implementer** can execute TDD without improvisation |
-| **Next queue head** | FOS **Leaf 10** `fos-credential-lifecycle` / TM **#180** → **Done** (`89ff4d95` / feat `3c0bae0e`); next **Leaf 11** `fos-policy-impact-troubleshoot` (TM **#181**) |
+| **Next queue head** | FOS **Leaf 11** `fos-policy-impact-troubleshoot` / TM **#181** → **Done** (`821d0f4a` / feat `8e5b9a53`); next **Leaf 12** `fos-ci-gates-tell-truth` (TM **#182**) |
 | **Upstream** | [CRCH](./core-render-compute-hardening-program.md) owns rendering P0 + preview dedupe (W0+W1) and compute/DOCX/harness designs (W2/W3/W5). FOS **supersedes CRCH W4** (authoring IA) — see §6 |
 
 ---
@@ -135,7 +135,7 @@ If a future decision appears, add it here — do not invent product behaviour.
 | **W8** | `fos-concurrency-integrity` | Concurrency & integrity | B11,B12,B17,B18,B20 | [FOS-W8](detail/FOS-W8-concurrency-integrity.md) | **Done** |
 | **W9** | `fos-contract-works-first-time` | Contract works first time | C1,C3,C5,C6,C16,C17,C18 | [FOS-W9](detail/FOS-W9-contract-works-first-time.md) | **Done** |
 | **W10** | `fos-credential-lifecycle` | Credential lifecycle matches ADR | C2,C4,C11,C12,C22 + **28-day grace (D11)** | [FOS-W10](detail/FOS-W10-credential-lifecycle.md) | **Done** |
-| **W11** | `fos-policy-impact-troubleshoot` | Policy impact & troubleshooting | C7,C8,C9,C10,C13,C14,C15,C20,C21 | [FOS-W11](detail/FOS-W11-policy-impact-troubleshoot.md) | **Not Started** |
+| **W11** | `fos-policy-impact-troubleshoot` | Policy impact & troubleshooting | C7,C8,C9,C10,C13,C14,C15,C20,C21 | [FOS-W11](detail/FOS-W11-policy-impact-troubleshoot.md) | **Done** |
 | **W12** | `fos-ci-gates-tell-truth` | CI gates tell the truth | E1,E5,E14,E15 | [FOS-W12](detail/FOS-W12-ci-gates-tell-truth.md) | **Not Started** |
 | **W13** | `fos-default-verify-honesty` | Default verify honesty | E2,E4,E6,E7,E8,E9,E10,E11 — **complements** CRCH W5 (do not duplicate LO pin / perceptual / soak) | [FOS-W13](detail/FOS-W13-default-verify-honesty.md) | **Not Started** |
 | **W14** | `fos-demo-literacy-path` | Demo literacy path | E19,E20,E13 — docs + entry point only | [FOS-W14](detail/FOS-W14-demo-literacy-path.md) | **Not Started** |
@@ -161,7 +161,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Leaf 8 | **#178** | `fos-concurrency-integrity` | **done** | `b6307d02` / `954933cc`; deploy/E2E BLOCKED (0 images) |
 | Leaf 9 | **#179** | `fos-contract-works-first-time` | **done** | `d8fe2b03` / `0d4a6dd1`; deploy/E2E BLOCKED (0 images) |
 | Leaf 10 | **#180** | `fos-credential-lifecycle` | **done** | `89ff4d95` / `3c0bae0e`; deploy/E2E BLOCKED (0 images) |
-| Leaf 11 | **#181** | `fos-policy-impact-troubleshoot` | **pending** | |
+| Leaf 11 | **#181** | `fos-policy-impact-troubleshoot` | **done** | `821d0f4a` / `8e5b9a53`; deploy/E2E BLOCKED (0 images) |
 | Leaf 12 | **#182** | `fos-ci-gates-tell-truth` | **pending** | May run earlier if host CI is blocking all delivery — orchestrator may promote |
 | Leaf 13 | **#183** | `fos-default-verify-honesty` | **pending** | After / with CRCH W5 designs |
 | Leaf 14 | **#184** | `fos-demo-literacy-path` | **pending** | |

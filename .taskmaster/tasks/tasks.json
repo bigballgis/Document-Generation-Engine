@@ -2474,7 +2474,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W11-policy-impact-troubleshoot.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T19:32:10.000Z"
       },
