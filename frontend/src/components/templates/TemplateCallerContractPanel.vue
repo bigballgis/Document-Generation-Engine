@@ -125,6 +125,53 @@ const {
         :total="totalVersionComparisonRows"
       />
 
+      <template v-for="version in contract.callableVersions" :key="version.releaseVersion">
+        <h4 class="version-variables-heading">
+          {{ t('templates.contract.sections.variablesForVersion', { version: version.releaseVersion }) }}
+        </h4>
+        <AppDataTable
+          :data="version.variables ?? []"
+          data-testid="contract-version-variables"
+        >
+          <el-table-column
+            prop="variableKey"
+            :label="t('templates.contract.columns.variableKey')"
+            sortable
+            min-width="160"
+          />
+          <el-table-column
+            prop="variableType"
+            :label="t('templates.contract.columns.variableType')"
+            sortable
+            width="140"
+          />
+          <el-table-column width="110">
+            <template #header>{{ t('templates.contract.columns.required') }}</template>
+            <template #default="{ row }">
+              {{ row.required ? t('common.yes') : t('common.no') }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="enumValues"
+            :label="t('templates.contract.columns.enumValues')"
+            min-width="160"
+          >
+            <template #default="{ row }">
+              {{ (row.enumValues ?? []).join(', ') || '—' }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="description"
+            :label="t('templates.contract.columns.description')"
+            min-width="200"
+          >
+            <template #default="{ row }">
+              {{ row.description || '—' }}
+            </template>
+          </el-table-column>
+        </AppDataTable>
+      </template>
+
       <h3>{{ t('templates.contract.sections.policy') }}</h3>
       <dl class="summary-grid">
         <div>
@@ -202,7 +249,11 @@ const {
             {{ copyableExample.exampleToken }}
           </el-tag>
           <span class="copyable-example__title">
-            {{ t('templates.contract.examples.syncGenerateTitle') }}
+            {{
+              copyableExample.exampleKind === 'async'
+                ? t('templates.contract.examples.asyncBatchTitle')
+                : t('templates.contract.examples.syncGenerateTitle')
+            }}
           </span>
         </div>
 
@@ -259,11 +310,13 @@ const {
           copyableExample.payloadJson
         }}</pre>
       </section>
-      <ul v-else class="example-list">
-        <li v-for="example in contract.examples" :key="example">
-          <code>{{ example }}</code>
-        </li>
-      </ul>
+      <p
+        v-else
+        class="copyable-example__empty-hint"
+        data-testid="contract-example-unavailable"
+      >
+        {{ t('templates.contract.examples.noTestDataSetHint') }}
+      </p>
     </template>
   </div>
 </template>

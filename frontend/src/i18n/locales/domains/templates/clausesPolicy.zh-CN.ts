@@ -368,6 +368,7 @@ export const templatesClausesPolicyZhCn = {
       sections: {
         paths: '运行时路径',
         versions: '可调用版本',
+        variablesForVersion: '变量 — 版本 {version}',
         policy: '接入设置摘要',
         errorCodes: '错误代码',
         examples: '示例',
@@ -376,6 +377,11 @@ export const templatesClausesPolicyZhCn = {
         releaseVersion: '发布版本',
         generateUrl: '生成 URL',
         defaultRouteTarget: '默认路由',
+        variableKey: '变量',
+        variableType: '类型',
+        required: '必填',
+        enumValues: '枚举值',
+        description: '说明',
         errorCode: '代码',
         category: '类别',
         message: '消息',
@@ -391,6 +397,7 @@ export const templatesClausesPolicyZhCn = {
       defaultRouteTargetNo: '—',
       examples: {
         syncGenerateTitle: '同步单笔生成',
+        asyncBatchTitle: '异步批量生成',
         testDataSet: '测试数据集',
         testDataSetPlaceholder: '选择测试数据集',
         noTestDataSetHint: '未选择测试数据集。请求体使用空 variables 骨架；curl 仍可复制。',

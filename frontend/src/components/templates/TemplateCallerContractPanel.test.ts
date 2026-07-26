@@ -10,7 +10,7 @@ import * as templatesApi from '@/api/templates'
 import type { CallerContract } from '@/types/contract'
 import type { TestDataSet } from '@/types/templatePreview'
 import {
-  ACCESS_TOKEN_PLACEHOLDER,
+  API_CREDENTIAL_ID_PLACEHOLDER,
   IDEMPOTENCY_KEY_PLACEHOLDER,
 } from '@/utils/contractCopyableExample'
 
@@ -73,7 +73,7 @@ function sampleContract(environment: 'dev' | 'uat' | 'prod' = 'uat'): CallerCont
     ],
     schemas: ['GenerateRequest'],
     errorCodes: [],
-    examples: ['generate-sync-docx'],
+    examples: [],
   }
 }
 
@@ -125,16 +125,16 @@ describe('TemplateCallerContractPanel copyable examples (CE-U12)', () => {
     ])
   })
 
-  it('CCE-001: renders curl with Auth, Idempotency-Key, POST, and generate URL', async () => {
+  it('CCE-001 / FOS-W9-1: renders curl with credential headers, POST, and generate URL', async () => {
     const wrapper = await mountPanel('uat')
     const curl = wrapper.get('[data-testid="contract-example-curl"]').text()
 
     expect(curl).toContain('curl -X POST')
-    expect(curl).toContain(`Authorization: Bearer ${ACCESS_TOKEN_PLACEHOLDER}`)
-    expect(curl).toContain(`Idempotency-Key: ${IDEMPOTENCY_KEY_PLACEHOLDER}`)
+    expect(curl).toContain(`X-Api-Credential-Id: ${API_CREDENTIAL_ID_PLACEHOLDER}`)
+    expect(curl).not.toContain('Authorization: Bearer')
+    expect(curl).not.toContain('Idempotency-Key:')
     expect(curl).toContain('/api/uat/v1/templates/TPL-1/default/generate')
-    expect(curl).not.toBe('generate-sync-docx')
-    expect(wrapper.text()).toContain('generate-sync-docx')
+    expect(wrapper.text()).not.toContain('generate-sync-docx')
   })
 
   it('CCE-002: payload reflects selected test data set variables without path fields', async () => {
@@ -210,7 +210,7 @@ describe('TemplateCallerContractPanel copyable examples (CE-U12)', () => {
     await wrapper.get('[data-testid="contract-copy-curl"]').trigger('click')
     await flushPromises()
     expect(writeText).toHaveBeenCalled()
-    expect(writeText.mock.calls[0]?.[0]).toContain(`Authorization: Bearer ${ACCESS_TOKEN_PLACEHOLDER}`)
+    expect(writeText.mock.calls[0]?.[0]).toContain(`X-Api-Credential-Id: ${API_CREDENTIAL_ID_PLACEHOLDER}`)
   })
 
   it('CCE-007: environment switch regenerates curl URL', async () => {
@@ -223,7 +223,7 @@ describe('TemplateCallerContractPanel copyable examples (CE-U12)', () => {
     expect(vi.mocked(contractApi.getCallerContract)).toHaveBeenCalledWith('tpl-1', 'prod')
     const curl = wrapper.get('[data-testid="contract-example-curl"]').text()
     expect(curl).toContain('/api/prod/v1/templates/TPL-1/default/generate')
-    expect(curl).toContain(`Authorization: Bearer ${ACCESS_TOKEN_PLACEHOLDER}`)
-    expect(curl).toContain(`Idempotency-Key: ${IDEMPOTENCY_KEY_PLACEHOLDER}`)
+    expect(curl).toContain(`X-Api-Credential-Id: ${API_CREDENTIAL_ID_PLACEHOLDER}`)
+    expect(curl).not.toContain('Idempotency-Key:')
   })
 })

@@ -1,7 +1,7 @@
 # FOS-W9 — Contract works first time
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
-**Wave:** W9 · **Status:** **Not Started**
+**Wave:** W9 · **Status:** **Done**
 **Slice id:** `fos-contract-works-first-time` · worktree `../DGE-fos-contract-works-first-time` · branch `feat/fos-contract-works-first-time`
 **Task Master:** **#179** · **delivery_lane:** **full**
 **Origin:** C1, C3, C5, C6, C16, C17, C18

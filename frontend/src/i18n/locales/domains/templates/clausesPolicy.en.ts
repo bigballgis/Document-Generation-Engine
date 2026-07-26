@@ -372,6 +372,7 @@ export const templatesClausesPolicyEn = {
       sections: {
         paths: 'Runtime paths',
         versions: 'Callable versions',
+        variablesForVersion: 'Variables — release {version}',
         policy: 'Access settings summary',
         errorCodes: 'Error codes',
         examples: 'Examples',
@@ -380,6 +381,11 @@ export const templatesClausesPolicyEn = {
         releaseVersion: 'Release version',
         generateUrl: 'Generate URL',
         defaultRouteTarget: 'Default route',
+        variableKey: 'Variable',
+        variableType: 'Type',
+        required: 'Required',
+        enumValues: 'Enum values',
+        description: 'Description',
         errorCode: 'Code',
         category: 'Category',
         message: 'Message',
@@ -395,6 +401,7 @@ export const templatesClausesPolicyEn = {
       defaultRouteTargetNo: '—',
       examples: {
         syncGenerateTitle: 'Sync single generate',
+        asyncBatchTitle: 'Async batch generate',
         testDataSet: 'Test data set',
         testDataSetPlaceholder: 'Select a test data set',
         noTestDataSetHint:
