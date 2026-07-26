@@ -49,4 +49,16 @@ describe('buildBreadcrumbTrail', () => {
     ])
     expect(trail[1]?.path).toBe('/masters/master-1')
   })
+
+  it('FOS-W2-5: builds API package settings trail via templates hub', () => {
+    const trail = buildBreadcrumbTrail('/api/packages/tpl-1/settings')
+
+    expect(trail.map((segment) => segment.labelKey)).toEqual([
+      'nav.items.templates',
+      'templates.packageHub.breadcrumbLabel',
+      'apiPolicy.packageSettings.breadcrumbLabel',
+    ])
+    expect(trail[0]?.path).toBe('/templates')
+    expect(trail[1]?.path).toBe('/templates/tpl-1')
+  })
 })

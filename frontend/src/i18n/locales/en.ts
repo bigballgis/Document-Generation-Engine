@@ -906,6 +906,8 @@ export default {
       groupCodeManualPlaceholder: 'Enter target group code',
       master: 'Approved letterhead',
       masterPlaceholder: 'Select an approved letterhead',
+      noApprovedMasters:
+        'No approved letterheads yet — ask a reviewer to approve a letterhead first.',
       externalId: 'External ID',
       externalIdPlaceholder: 'e.g. TPL-RETAIL-LETTER',
       name: 'Template name',
@@ -1646,6 +1648,8 @@ export default {
       configureBinding: 'Configure',
       noMasterAnchors: 'No layout placeholders found on the linked letterhead.',
       masterAnchorsLoadFailed: 'Unable to load master placeholder catalog.',
+      anchorDeepLinkNotFound:
+        'Layout placeholder “{anchorId}” was not found on this letterhead. Check the link or open bindings from the table.',
       validationStatus: 'Validation',
       validationUnknown: 'Not validated',
       pasteResidue: {
@@ -2776,6 +2780,7 @@ export default {
     packageSettings: {
       title: 'API settings — {name}',
       loadingTitle: 'Loading package API settings…',
+      breadcrumbLabel: 'API settings',
       description:
         'Edit package-level external access: authorized AD groups, default route, retention, credentials, and advanced domains.',
       backToHub: 'Back to template package',

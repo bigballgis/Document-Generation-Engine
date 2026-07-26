@@ -197,9 +197,9 @@ describe('MasterRevisionLinesPanel', () => {
     expect(dialogText).toContain('FOOTER')
     expect(dialogText).toContain('SIG_OLD')
     expect(dialogText).toContain('SIG_NEW')
-    expect(dialogText).toMatch(/Added anchors/i)
-    expect(dialogText).toMatch(/Removed anchors/i)
-    expect(dialogText).toMatch(/Renamed anchors/i)
+    expect(dialogText).toMatch(/Added layout placeholders/i)
+    expect(dialogText).toMatch(/Removed layout placeholders/i)
+    expect(dialogText).toMatch(/Renamed layout placeholders/i)
 
     wrapper.unmount()
   })

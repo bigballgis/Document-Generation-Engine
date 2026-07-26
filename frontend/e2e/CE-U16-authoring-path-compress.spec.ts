@@ -226,7 +226,7 @@ test.describe('CE-U16 authoring path compress (BDD-CE-U16-APC)', () => {
     await openPostCreateAuthoringPath(page, fixture.templateId, devVersionId)
 
     await expect(authoringGuide(page)).toBeVisible()
-    await page.getByTestId('authoring-path-guide-skip').click()
+    await page.getByTestId('authoring-path-guide-dismiss').click()
     await expect(authoringGuide(page)).toHaveCount(0)
     await expect(page).not.toHaveURL(/authoringGuide=1/)
 
