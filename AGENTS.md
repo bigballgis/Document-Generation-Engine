@@ -95,3 +95,33 @@ pwsh ./scripts/docker-deploy-queue.ps1 -Status
 
 Never invent a second compose project or port offsets.
 
+## Cursor Cloud specific instructions
+
+Dev environment for this codebase runs **natively** (no Docker in the Cloud VM). System
+deps are baked into the VM snapshot: **Temurin JDK 25** (default `java`), **Maven 3.8.7**,
+**PostgreSQL 16**, **Redis 7**. Standard gate/run commands live in `README.md` and
+`frontend/package.json`; only the non-obvious cloud caveats are captured here.
+
+- **JDK 25 is required, not 21.** `README.md` prerequisites say JDK 21, but `backend/pom.xml`
+  pins `maven.compiler.release=25`. The backend will not compile on JDK 21. Use JDK 25.
+- **Start data services each session (they do not auto-start):**
+  `sudo service postgresql start` and `sudo service redis-server start`.
+  The `docgen` DB + `docgen`/`docgen_local_pwd` role already exist in the snapshot; Flyway
+  migrations + seed users (`10000001`…`/ChangeMe123!`) persist in the Postgres data dir.
+- **MinIO and Kafka are NOT installed.** Run the backend with `STORAGE_PROVIDER=filesystem`
+  so object storage does not require MinIO (default is `minio`). Kafka is optional
+  (`ASYNC_TRANSPORT` defaults to `in-process`), so no action needed.
+  **LibreOffice is not installed** → DOCX→PDF conversion is unavailable; login, catalog,
+  CRUD and DOCX assembly work without it.
+- **Run backend (dev):** from `backend/`,
+  `STORAGE_PROVIDER=filesystem JWT_SECRET=local-dev-only-change-me-please-32bytes-min mvn -B -ntp -DskipTests spring-boot:run`.
+  Serves on `:8080`; health `GET /healthz`, readiness `GET /readyz` (503 until Postgres UP).
+- **Run frontend (dev):** from `frontend/`, `pnpm dev` → `http://127.0.0.1:5173`. Vite proxies
+  `/api` → `http://localhost:8080` (override via `VITE_BACKEND_URL`). Use `:5173` for dev, not
+  the Docker `:4173` acceptance path.
+- **Quality gates** (see `README.md` § Quality gates): backend `mvn -B -ntp -f backend/pom.xml verify`
+  (heavy — full JaCoCo/veraPDF; the `verapdf`/`libreoffice` gates may need `-Ddocgen.verapdf.skip=true`
+  / soffice absent). Frontend `pnpm -C frontend {lint,type-check,test,build}` all pass out of the box.
+- The `docker-deploy*.ps1` / `pwsh` queue flows require Docker + PowerShell, which are **not**
+  present in the Cloud VM; they are for the single Docker acceptance host only.
+
