@@ -8,6 +8,7 @@ public record ApiCredentialSummaryView(
         String status,
         Instant createdAt,
         Instant revokedAt,
-        Instant expiresAt
+        Instant expiresAt,
+        Instant rotationGracePeriodEndsAt
 ) {
 }

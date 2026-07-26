@@ -207,7 +207,8 @@ final class ContractAssemblyViewSupport {
                 null,
                 credentialSummary.status(),
                 null,
-                credentialSummary.expiresAt()
+                credentialSummary.expiresAt(),
+                credentialSummary.rotationGracePeriodEndsAt()
         );
     }
 

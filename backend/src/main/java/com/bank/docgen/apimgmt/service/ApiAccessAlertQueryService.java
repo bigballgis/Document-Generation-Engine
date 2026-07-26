@@ -151,18 +151,21 @@ public class ApiAccessAlertQueryService {
 
             credentials.stream()
                     .filter(credential -> ApiCredentialLifecycleSupport.isExpiringCredential(credential, now))
-                    .forEach(credential -> alerts.add(new ApiAccessAlertView(
-                            ApiAccessAlertType.EXPIRING_CREDENTIAL,
-                            ApiAccessAlertSeverity.WARNING,
-                            templateId,
-                            template.getExternalId(),
-                            template.getName(),
-                            template.getGroupCode(),
-                            EXPIRING_CREDENTIAL_MESSAGE_KEY,
-                            hubDeepLinkPath(templateId, null),
-                            credential.getExternalId(),
-                            ApiCredentialLifecycleSupport.resolveExpiresAt(credential)
-                    )));
+                    .forEach(credential -> {
+                        Instant expiresAt = ApiCredentialLifecycleSupport.resolveExpiresAt(credential);
+                        alerts.add(new ApiAccessAlertView(
+                                ApiAccessAlertType.EXPIRING_CREDENTIAL,
+                                ApiCredentialLifecycleSupport.expiryAlertSeverity(expiresAt, now),
+                                templateId,
+                                template.getExternalId(),
+                                template.getName(),
+                                template.getGroupCode(),
+                                EXPIRING_CREDENTIAL_MESSAGE_KEY,
+                                hubDeepLinkPath(templateId, null),
+                                credential.getExternalId(),
+                                expiresAt
+                        ));
+                    });
         }
 
         alerts.sort(Comparator

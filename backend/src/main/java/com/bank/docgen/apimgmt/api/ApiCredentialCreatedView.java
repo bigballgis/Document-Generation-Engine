@@ -7,6 +7,7 @@ public record ApiCredentialCreatedView(
         String externalId,
         String secret,
         String status,
-        Instant createdAt
+        Instant createdAt,
+        Instant expiresAt
 ) {
 }

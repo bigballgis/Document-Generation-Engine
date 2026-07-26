@@ -3,7 +3,7 @@ package com.bank.docgen.apimgmt.service;
 import com.bank.docgen.apimgmt.api.ApiCredentialCreatedView;
 import com.bank.docgen.apimgmt.api.ApiCredentialSummaryView;
 import com.bank.docgen.apimgmt.api.RotateCredentialResponse;
-import com.bank.docgen.apimgmt.domain.ApiCredentialStatus;
+import com.bank.docgen.apimgmt.domain.ApiCredentialLifecycleSupport;
 import com.bank.docgen.apimgmt.mapping.ApiPolicyViewMapper;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
@@ -57,11 +57,16 @@ final class ApiCredentialCommandSupport {
                 .toList();
     }
 
-    ApiCredentialCreatedView createCredential(UUID templateId, ManagementSessionClaims session) {
+    ApiCredentialCreatedView createCredential(
+            UUID templateId,
+            ManagementSessionClaims session,
+            Integer expiryDays
+    ) {
         TemplateEntity template = access.requireApiAdmin(templateId, session);
         apiPolicyRepository.findByTemplateId(templateId).orElseThrow(ApiManagementNotFoundException::new);
         String externalId = "CRED-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         String secret = generateSecret();
+        Instant now = Instant.now();
         ApiCredentialEntity credential = new ApiCredentialEntity(
                 UUID.randomUUID(),
                 externalId,
@@ -69,6 +74,13 @@ final class ApiCredentialCommandSupport {
                 passwordHashService.hash(secret),
                 session.username()
         );
+        if (expiryDays != null) {
+            try {
+                credential.setExpiresAt(ApiCredentialLifecycleSupport.expiresAtForDays(now, expiryDays));
+            } catch (IllegalArgumentException ex) {
+                throw new TemplateValidationException("api.error.apimgmt.credentialExpiryDaysInvalid");
+            }
+        }
         apiCredentialRepository.save(credential);
         managementAuditRecorder.recordCredentialCreated(
                 templateId,
@@ -83,7 +95,8 @@ final class ApiCredentialCommandSupport {
                 credential.getExternalId(),
                 secret,
                 credential.getStatus().name(),
-                credential.getCreatedAt()
+                credential.getCreatedAt(),
+                credential.getExpiresAt()
         );
     }
 
@@ -98,12 +111,13 @@ final class ApiCredentialCommandSupport {
         if (!credential.getTemplateId().equals(templateId)) {
             throw new ApiManagementNotFoundException();
         }
-        if (credential.getStatus() != ApiCredentialStatus.ACTIVE) {
+        Instant now = Instant.now();
+        if (!ApiCredentialLifecycleSupport.isRotatable(credential, now)) {
             throw new TemplateValidationException("api.error.apimgmt.credentialNotActive");
         }
         String previousFingerprint = fingerprint(credential.getExternalId());
         String secret = generateSecret();
-        credential.rotateSecret(passwordHashService.hash(secret));
+        credential.rotateSecret(passwordHashService.hash(secret), now);
         apiCredentialRepository.save(credential);
         managementAuditRecorder.recordCredentialRotated(
                 templateId,
@@ -119,7 +133,9 @@ final class ApiCredentialCommandSupport {
                 credential.getId().toString(),
                 credential.getExternalId(),
                 secret,
-                Instant.now()
+                now,
+                credential.getExpiresAt(),
+                credential.getRotationGracePeriodEndsAt()
         );
     }
 
@@ -129,6 +145,9 @@ final class ApiCredentialCommandSupport {
                 .orElseThrow(ApiManagementNotFoundException::new);
         if (!credential.getTemplateId().equals(templateId)) {
             throw new ApiManagementNotFoundException();
+        }
+        if (credential.getStatus() == com.bank.docgen.apimgmt.domain.ApiCredentialStatus.REVOKED) {
+            throw new TemplateValidationException("api.error.apimgmt.credentialAlreadyRevoked");
         }
         credential.revoke();
         apiCredentialRepository.save(credential);

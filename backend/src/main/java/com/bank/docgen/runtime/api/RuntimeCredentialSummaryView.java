@@ -10,6 +10,7 @@ public record RuntimeCredentialSummaryView(
         @JsonProperty("credentialId") String credentialExternalId,
         String status,
         String fingerprintSummary,
-        Instant expiresAt
+        Instant expiresAt,
+        Instant rotationGracePeriodEndsAt
 ) {
 }

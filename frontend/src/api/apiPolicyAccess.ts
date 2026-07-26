@@ -14,6 +14,8 @@ export interface RotatedCredential {
   externalId: string
   secret: string
   rotatedAt: string
+  expiresAt?: string | null
+  rotationGracePeriodEndsAt?: string | null
 }
 
 interface RoutesSummaryApiView {

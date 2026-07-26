@@ -6,6 +6,8 @@ public record RotateCredentialResponse(
         String credentialId,
         String externalId,
         String secret,
-        Instant rotatedAt
+        Instant rotatedAt,
+        Instant expiresAt,
+        Instant rotationGracePeriodEndsAt
 ) {
 }

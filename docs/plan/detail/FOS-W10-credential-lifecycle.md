@@ -1,7 +1,7 @@
 # FOS-W10 — Credential lifecycle matches ADR
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
-**Wave:** W10 · **Status:** **Not Started**
+**Wave:** W10 · **Status:** **Done**
 **Slice id:** `fos-credential-lifecycle` · worktree `../DGE-fos-credential-lifecycle` · branch `feat/fos-credential-lifecycle`
 **Task Master:** **#180** · **delivery_lane:** **full** (security-sensitive — never light)
 **Origin:** C2, C4, C11, C12, C22

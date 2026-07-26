@@ -198,6 +198,8 @@ export const apiErrorZhCn = {
     accessDenied: "您无权管理此模板的 API 设置。",
     templateNotPublished: "仅可为已发布模板配置 API 策略。",
     credentialNotActive: "API 凭据未激活。",
+    credentialExpiryDaysInvalid: "凭证有效期天数必须在 1 到 365 之间。",
+    credentialAlreadyRevoked: "该 API 凭证已被吊销。",
     defaultRouteTargetNotCallable: "默认路由目标发布版本不可调用。",
     policyVersionNotFound: "未找到请求的 API 策略版本。",
     policyImpactBlocked: "候选 API 策略存在阻塞性影响，无法应用。",
