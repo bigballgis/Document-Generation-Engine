@@ -1,7 +1,7 @@
 # FOS-W12 — CI gates tell the truth
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
-**Wave:** W12 · **Status:** **Not Started**
+**Wave:** W12 · **Status:** **Done**
 **Slice id:** `fos-ci-gates-tell-truth` · worktree `../DGE-fos-ci-gates-tell-truth` · branch `feat/fos-ci-gates-tell-truth`
 **Task Master:** **#182** · **delivery_lane:** **full** (test/CI behaviour; may be promoted earlier if CI blocks all delivery)
 **Origin:** E1, E5, E14, E15

@@ -1,4 +1,6 @@
-# SOR-C03 — Playwright smoke tier in CI (tagged subset; full suite remains local/docker)
+# SOR-C03 / FOS-W12-3 — Playwright smoke tier in CI
+# Honesty: does NOT start a second compose stack. Requires pre-provisioned :8080/:4173
+# or fails (probe + globalSetup). Vacuous skip-all cannot be green.
 name: Playwright Smoke
 
 on:
@@ -20,6 +22,9 @@ jobs:
     name: E2E smoke tier
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      CI: true
+      E2E_REQUIRE_STACK: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -36,6 +41,19 @@ jobs:
       - name: Install Playwright Chromium
         working-directory: frontend
         run: pnpm exec playwright install --with-deps chromium
+      - name: Probe acceptance stack (honest fail if missing)
+        run: |
+          set +e
+          curl -fsS --max-time 5 http://127.0.0.1:8080/healthz >/dev/null
+          BE=$?
+          curl -fsS --max-time 5 http://127.0.0.1:4173/ >/dev/null
+          FE=$?
+          if [ "$BE" -ne 0 ] || [ "$FE" -ne 0 ]; then
+            echo "::error::FOS-W12-3 stack not provisioned on this runner (backend=$BE frontend=$FE)."
+            echo "GitHub-hosted runners do not share the lab Docker host. Smoke is BLOCKED here unless a self-hosted runner with the acceptance stack is used."
+            echo "Do not treat skip-all as green."
+            exit 1
+          fi
       - name: Run smoke specs
         working-directory: frontend
         run: pnpm test:e2e:docker
