@@ -11,6 +11,7 @@ import type {
   ManagementAuditEvent,
   ManagementAuditExportResult,
 } from '@/types/audit'
+import { localWallClockToUtcIso } from '@/utils/localWallClockToUtcIso'
 
 const DEFAULT_PAGE_SIZE = 20
 
@@ -56,10 +57,12 @@ export const useAuditStore = defineStore('audit', () => {
       query.eventType = filters.value.eventType.trim()
     }
     if (filters.value.eventAtFrom?.trim()) {
-      query.eventAtFrom = filters.value.eventAtFrom.trim()
+      query.eventAtFrom =
+        localWallClockToUtcIso(filters.value.eventAtFrom.trim()) ?? filters.value.eventAtFrom.trim()
     }
     if (filters.value.eventAtTo?.trim()) {
-      query.eventAtTo = filters.value.eventAtTo.trim()
+      query.eventAtTo =
+        localWallClockToUtcIso(filters.value.eventAtTo.trim()) ?? filters.value.eventAtTo.trim()
     }
     if (filters.value.requestId?.trim()) {
       query.requestId = filters.value.requestId.trim()

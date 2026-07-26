@@ -5,7 +5,12 @@ export function useLocaleFormatters() {
 
   function formatDateTime(value: string | Date): string {
     const date = value instanceof Date ? value : new Date(value)
-    return date.toLocaleString(locale.value)
+    // FOS-W5-2: management timestamps render in UTC with an explicit zone marker
+    // (matches form labels that already say UTC).
+    return date.toLocaleString(locale.value, {
+      timeZone: 'UTC',
+      timeZoneName: 'short',
+    })
   }
 
   function formatNumber(value: number): string {

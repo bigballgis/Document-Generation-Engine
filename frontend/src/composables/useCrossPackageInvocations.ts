@@ -15,6 +15,7 @@ import {
 } from '@/composables/externalServicesOpsCompose'
 import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import type { ManagementInvocationFilters, TemplateSummary } from '@/types/template'
+import { localWallClockToUtcIso } from '@/utils/localWallClockToUtcIso'
 
 export type CrossPackageInvocationFilters = {
   status: string
@@ -273,8 +274,10 @@ export function useCrossPackageInvocations(options: { autoLoad?: boolean } = {})
     appliedFilters.status = filterDraft.status
     appliedFilters.requestId = filterDraft.requestId
     appliedFilters.templateId = filterDraft.templateId
-    appliedFilters.createdAfter = filterDraft.createdAfter
-    appliedFilters.createdBefore = filterDraft.createdBefore
+    appliedFilters.createdAfter =
+      localWallClockToUtcIso(filterDraft.createdAfter) ?? filterDraft.createdAfter
+    appliedFilters.createdBefore =
+      localWallClockToUtcIso(filterDraft.createdBefore) ?? filterDraft.createdBefore
     currentPage.value = 1
     void loadInvocations()
   }

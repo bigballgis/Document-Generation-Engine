@@ -2,6 +2,7 @@ import axios, { type AxiosError } from 'axios'
 import type { RouteLocationRaw } from 'vue-router'
 import type { ApiEnvelope } from '@/types/session'
 import { resolveApiError } from './errorEnvelope'
+import { APP_LOCALE_STORAGE_KEY } from '@/i18n/localeRegistry'
 
 const TOKEN_STORAGE_KEY = 'docgen.accessToken'
 
@@ -16,6 +17,12 @@ http.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_STORAGE_KEY)
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
+  }
+  // FOS-W5-4: drive Spring LocaleContextHolder / MessageResolver via Accept-Language
+  // (existing AcceptHeaderLocaleResolver — not a new negotiation scheme).
+  const appLocale = localStorage.getItem(APP_LOCALE_STORAGE_KEY)
+  if (appLocale) {
+    config.headers['Accept-Language'] = appLocale
   }
   return config
 })
