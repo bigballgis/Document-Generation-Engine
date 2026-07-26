@@ -47,18 +47,30 @@ export function latestSubmittedVersion(versions: Array<{ reviewState: string }>)
   return versions.find((version) => version.reviewState === 'SUBMITTED')
 }
 
+export function latestApprovedActiveVersion(
+  versions: Array<{ reviewState: string; lifecycleState?: string }>,
+) {
+  return versions.find(
+    (version) => version.reviewState === 'APPROVED' && (version.lifecycleState ?? 'ACTIVE') === 'ACTIVE',
+  )
+}
+
+export function latestApprovedStoppedVersion(
+  versions: Array<{ reviewState: string; lifecycleState?: string }>,
+) {
+  return versions.find(
+    (version) => version.reviewState === 'APPROVED' && version.lifecycleState === 'STOPPED',
+  )
+}
+
 export function hasApprovedActiveVersion(
   versions: Array<{ reviewState: string; lifecycleState?: string }>,
 ): boolean {
-  return versions.some(
-    (version) => version.reviewState === 'APPROVED' && (version.lifecycleState ?? 'ACTIVE') === 'ACTIVE',
-  )
+  return Boolean(latestApprovedActiveVersion(versions))
 }
 
 export function hasApprovedStoppedVersion(
   versions: Array<{ reviewState: string; lifecycleState?: string }>,
 ): boolean {
-  return versions.some(
-    (version) => version.reviewState === 'APPROVED' && version.lifecycleState === 'STOPPED',
-  )
+  return Boolean(latestApprovedStoppedVersion(versions))
 }

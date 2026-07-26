@@ -1,12 +1,19 @@
 import type { ComputedRef, Ref } from 'vue'
 import type { ComposerTranslation } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { resolveContentModuleActorId } from '@/auth/contentModuleRoles'
+import {
+  latestApprovedActiveVersion,
+  latestApprovedStoppedVersion,
+  latestDraftVersion,
+  latestSubmittedVersion,
+  resolveContentModuleActorId,
+} from '@/auth/contentModuleRoles'
 import type { useContentModulesStore } from '@/stores/contentModules'
 import type { useSessionStore } from '@/stores/session'
 import type {
   ContentModuleGovernanceActorRole,
   ContentModuleLifecycleOperation,
+  ContentModuleVersion,
 } from '@/types/contentModule'
 
 type ContentModulesStore = ReturnType<typeof useContentModulesStore>
@@ -15,6 +22,7 @@ type SessionStore = ReturnType<typeof useSessionStore>
 export function createContentModuleReviewActions(deps: {
   t: ComposerTranslation
   moduleId: ComputedRef<string>
+  versions: ComputedRef<ContentModuleVersion[]>
   errorMessage: ComputedRef<string>
   authorActorRole: ComputedRef<ContentModuleGovernanceActorRole | null>
   approverActorRole: ComputedRef<ContentModuleGovernanceActorRole | null>
@@ -24,6 +32,7 @@ export function createContentModuleReviewActions(deps: {
   const {
     t,
     moduleId,
+    versions,
     errorMessage,
     authorActorRole,
     approverActorRole,
@@ -33,7 +42,8 @@ export function createContentModuleReviewActions(deps: {
 
   async function handleSubmitReview() {
     const actorRole = authorActorRole.value
-    if (!actorRole) {
+    const target = latestDraftVersion(versions.value) as ContentModuleVersion | undefined
+    if (!actorRole || !target?.versionId) {
       return
     }
     try {
@@ -52,6 +62,7 @@ export function createContentModuleReviewActions(deps: {
         actorRole,
         actorId: resolveContentModuleActorId(sessionStore.session),
         changeDescription: result.value.trim(),
+        versionId: target.versionId,
       })
       ElMessage.success(t('contentModules.review.submitSuccess'))
     } catch (error) {
@@ -64,7 +75,8 @@ export function createContentModuleReviewActions(deps: {
 
   async function handleApproveReview() {
     const actorRole = approverActorRole.value
-    if (!actorRole) {
+    const target = latestSubmittedVersion(versions.value) as ContentModuleVersion | undefined
+    if (!actorRole || !target?.versionId) {
       return
     }
     try {
@@ -81,6 +93,7 @@ export function createContentModuleReviewActions(deps: {
         operation: 'APPROVE_REVIEW',
         actorRole,
         actorId: resolveContentModuleActorId(sessionStore.session),
+        versionId: target.versionId,
       })
       ElMessage.success(t('contentModules.review.approveSuccess'))
     } catch (error) {
@@ -93,7 +106,8 @@ export function createContentModuleReviewActions(deps: {
 
   async function handleRejectReview() {
     const actorRole = approverActorRole.value
-    if (!actorRole) {
+    const target = latestSubmittedVersion(versions.value) as ContentModuleVersion | undefined
+    if (!actorRole || !target?.versionId) {
       return
     }
     try {
@@ -112,6 +126,7 @@ export function createContentModuleReviewActions(deps: {
         actorRole,
         actorId: resolveContentModuleActorId(sessionStore.session),
         rejectionReason: result.value.trim(),
+        versionId: target.versionId,
       })
       ElMessage.success(t('contentModules.review.rejectSuccess'))
     } catch (error) {
@@ -128,6 +143,7 @@ export function createContentModuleReviewActions(deps: {
 export function createContentModuleLifecycleActions(deps: {
   t: ComposerTranslation
   moduleId: ComputedRef<string>
+  versions: ComputedRef<ContentModuleVersion[]>
   errorMessage: ComputedRef<string>
   lifecycleActorRole: ComputedRef<ContentModuleGovernanceActorRole | null>
   impactDialogOpen: Ref<boolean>
@@ -138,6 +154,7 @@ export function createContentModuleLifecycleActions(deps: {
   const {
     t,
     moduleId,
+    versions,
     errorMessage,
     lifecycleActorRole,
     impactDialogOpen,
@@ -164,6 +181,14 @@ export function createContentModuleLifecycleActions(deps: {
     if (!operation || !actorRole || !impact) {
       return
     }
+    const target =
+      operation === 'STOP_USE'
+        ? (latestApprovedActiveVersion(versions.value) as ContentModuleVersion | undefined)
+        : (latestApprovedStoppedVersion(versions.value) as ContentModuleVersion | undefined)
+    if (!target?.versionId) {
+      ElMessage.error(errorMessage.value || t('contentModules.error.lifecycle'))
+      return
+    }
     try {
       await contentModulesStore.applyLifecycleOperation(moduleId.value, {
         operationType: operation,
@@ -172,6 +197,7 @@ export function createContentModuleLifecycleActions(deps: {
         impactSummaryViewed: true,
         secondConfirmation: true,
         impactSummary: operation === 'RECOVER' ? undefined : impact,
+        versionId: target.versionId,
       })
       impactDialogOpen.value = false
       pendingLifecycleOperation.value = null

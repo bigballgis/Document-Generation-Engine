@@ -68,7 +68,8 @@ final class MasterDocumentFileMutationSupport {
                     previousLine.markSuperseded();
                     masterRevisionLineRepository.save(previousLine);
                 });
-        MasterDocumentStatus statusSnapshot = master.getStatus();
+        // FOS-W6-7: new upload always lands as DRAFT — snapshot honesty, not prior status.
+        MasterDocumentStatus statusSnapshot = MasterDocumentStatus.DRAFT;
         UUID revisionLineId = UUID.randomUUID();
         String revisionStorageKey = docxUploadSupport.revisionStorageKey(
                 masterId, revisionLineId, docxFile.getOriginalFilename());

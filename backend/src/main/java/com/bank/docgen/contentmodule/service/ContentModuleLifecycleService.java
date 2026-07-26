@@ -15,7 +15,6 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -61,7 +60,7 @@ public class ContentModuleLifecycleService {
             throw lifecycleRoleDenied();
         }
 
-        ContentModuleVersionEntity version = resolveTargetVersion(module.getId(), request.operationType());
+        ContentModuleVersionEntity version = resolveTargetVersion(module.getId(), request);
         applyOperation(version, request.operationType(), session.username());
 
         versionRepository.save(version);
@@ -98,6 +97,13 @@ public class ContentModuleLifecycleService {
                     HttpStatus.UNPROCESSABLE_ENTITY
             );
         }
+        if (!hasVersionTarget(request.versionId(), request.semanticVersion())) {
+            throw new ContentModuleGovernanceException(
+                    "CONTENT_MODULE_REQUEST_INVALID",
+                    "api.error.contentModule.versionTargetRequired",
+                    HttpStatus.UNPROCESSABLE_ENTITY
+            );
+        }
         if (!Boolean.TRUE.equals(request.impactSummaryViewed())
                 || !Boolean.TRUE.equals(request.secondConfirmation())) {
             throw new ContentModuleGovernanceException(
@@ -117,32 +123,56 @@ public class ContentModuleLifecycleService {
         }
     }
 
+    private static boolean hasVersionTarget(UUID versionId, String semanticVersion) {
+        return versionId != null || (semanticVersion != null && !semanticVersion.isBlank());
+    }
+
+    /**
+     * FOS-W6-3: stop-use / recover / deprecate must name an explicit version.
+     */
     private ContentModuleVersionEntity resolveTargetVersion(
             UUID moduleId,
-            ContentModuleLifecycleOperation operation
+            ContentModuleLifecycleOperationApplyRequest request
     ) {
-        List<ContentModuleVersionEntity> candidates = switch (operation) {
-            case STOP_USE -> versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
-                    moduleId,
-                    ContentModuleReviewState.APPROVED,
-                    ContentModuleLifecycleState.ACTIVE);
-            case RECOVER -> versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
-                    moduleId,
-                    ContentModuleReviewState.APPROVED,
-                    ContentModuleLifecycleState.STOPPED);
-            case DEPRECATE -> versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
-                    moduleId,
-                    ContentModuleReviewState.APPROVED,
-                    ContentModuleLifecycleState.STOPPED);
+        ContentModuleVersionEntity version = resolveExplicitVersion(
+                moduleId,
+                request.versionId(),
+                request.semanticVersion()
+        );
+        ContentModuleLifecycleState expectedLifecycle = switch (request.operationType()) {
+            case STOP_USE -> ContentModuleLifecycleState.ACTIVE;
+            case RECOVER, DEPRECATE -> ContentModuleLifecycleState.STOPPED;
         };
-        if (candidates.isEmpty()) {
-            throw new ContentModuleGovernanceException(
-                    "CONTENT_MODULE_STATE_TRANSITION_DENIED",
-                    "api.error.contentModule.lifecycleStateTransitionDenied",
-                    HttpStatus.CONFLICT
-            );
+        if (version.getReviewState() != ContentModuleReviewState.APPROVED
+                || version.getLifecycleState() != expectedLifecycle) {
+            throw stateDenied();
         }
-        return candidates.getFirst();
+        return version;
+    }
+
+    private ContentModuleVersionEntity resolveExplicitVersion(
+            UUID moduleId,
+            UUID versionId,
+            String semanticVersion
+    ) {
+        if (versionId != null) {
+            ContentModuleVersionEntity version = versionRepository.findById(versionId)
+                    .orElseThrow(this::versionTargetNotFound);
+            if (!moduleId.equals(version.getModuleId())) {
+                throw versionTargetNotFound();
+            }
+            return version;
+        }
+        return versionRepository.findByModuleIdAndSemanticVersion(moduleId, semanticVersion.trim())
+                .orElseThrow(this::versionTargetNotFound);
+    }
+
+    private ContentModuleGovernanceException versionTargetNotFound() {
+        return new ContentModuleGovernanceException(
+                "CONTENT_MODULE_VERSION_NOT_FOUND",
+                "api.error.contentModule.versionTargetNotFound",
+                HttpStatus.UNPROCESSABLE_ENTITY
+        );
     }
 
     private void applyOperation(

@@ -40,7 +40,9 @@ public interface TemplateVersionRepository extends JpaRepository<TemplateVersion
     @Query("""
             UPDATE TemplateVersionEntity v
             SET v.lifecycleStatus = :toStatus, v.updatedAt = :updatedAt
-            WHERE v.templateId = :templateId AND v.lifecycleStatus = :fromStatus
+            WHERE v.templateId = :templateId
+              AND v.lifecycleStatus = :fromStatus
+              AND v.deletedAt IS NULL
             """)
     int bulkUpdateLifecycleStatus(
             @Param("templateId") UUID templateId,
@@ -54,6 +56,7 @@ public interface TemplateVersionRepository extends JpaRepository<TemplateVersion
             UPDATE TemplateVersionEntity v
             SET v.lifecycleStatus = :toStatus, v.updatedAt = :updatedAt
             WHERE v.templateId = :templateId
+              AND v.deletedAt IS NULL
             """)
     int bulkUpdateAllLifecycleStatus(
             @Param("templateId") UUID templateId,

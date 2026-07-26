@@ -8,6 +8,7 @@ import com.bank.docgen.master.domain.MasterReviewAction;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterReviewRecordEntity;
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
+import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.UUID;
 final class MasterDocumentReviewSupport {
 
     private final MasterReviewRecordRepository masterReviewRecordRepository;
+    private final MasterRevisionLineRepository masterRevisionLineRepository;
     private final MasterDocxUploadSupport docxUploadSupport;
     private final MasterDocumentAccessSupport access;
     private final MasterDocumentViewSupport views;
@@ -25,12 +27,14 @@ final class MasterDocumentReviewSupport {
 
     MasterDocumentReviewSupport(
             MasterReviewRecordRepository masterReviewRecordRepository,
+            MasterRevisionLineRepository masterRevisionLineRepository,
             MasterDocxUploadSupport docxUploadSupport,
             MasterDocumentAccessSupport access,
             MasterDocumentViewSupport views,
             SelfApprovalGuard selfApprovalGuard
     ) {
         this.masterReviewRecordRepository = masterReviewRecordRepository;
+        this.masterRevisionLineRepository = masterRevisionLineRepository;
         this.docxUploadSupport = docxUploadSupport;
         this.access = access;
         this.views = views;
@@ -50,6 +54,7 @@ final class MasterDocumentReviewSupport {
         master.setChangeSummary(request.changeSummary());
         master.setStatus(MasterDocumentStatus.PENDING_REVIEW);
         master.setUpdatedBy(session.username());
+        syncCurrentLineStatusSnapshot(master, MasterDocumentStatus.PENDING_REVIEW);
         masterReviewRecordRepository.save(new MasterReviewRecordEntity(
                 UUID.randomUUID(),
                 masterId,
@@ -87,15 +92,17 @@ final class MasterDocumentReviewSupport {
                 "api.error.lifecycle.exceptionReasonRequired",
                 "api.error.lifecycle.exceptionSecondaryConfirmRequired"
         ));
-        MasterDocumentStatus nextStatus = "APPROVED".equals(request.decision())
-                ? MasterDocumentStatus.APPROVED
-                : MasterDocumentStatus.DRAFT;
+        // FOS-W6-7: parse decision against the enum (REJECTED is a real terminal review state).
+        MasterDocumentStatus nextStatus = MasterDocumentStatus.valueOf(request.decision());
         master.setStatus(nextStatus);
         master.setUpdatedBy(session.username());
+        syncCurrentLineStatusSnapshot(master, nextStatus);
         masterReviewRecordRepository.save(new MasterReviewRecordEntity(
                 UUID.randomUUID(),
                 masterId,
-                "APPROVED".equals(request.decision()) ? MasterReviewAction.APPROVED : MasterReviewAction.REJECTED,
+                nextStatus == MasterDocumentStatus.APPROVED
+                        ? MasterReviewAction.APPROVED
+                        : MasterReviewAction.REJECTED,
                 request.decision(),
                 master.getChangeSummary(),
                 request.commentSummary(),
@@ -104,6 +111,18 @@ final class MasterDocumentReviewSupport {
                 outcome.exceptionReason()
         ));
         return views.toDetail(master);
+    }
+
+    private void syncCurrentLineStatusSnapshot(MasterDocumentEntity master, MasterDocumentStatus status) {
+        UUID lineId = master.getCurrentRevisionLineId();
+        if (lineId == null) {
+            return;
+        }
+        masterRevisionLineRepository.findByIdAndMasterIdAndDeletedAtIsNull(lineId, master.getId())
+                .ifPresent(line -> {
+                    line.setStatusSnapshot(status);
+                    masterRevisionLineRepository.save(line);
+                });
     }
 
     /**

@@ -116,6 +116,7 @@ class MasterRevisionLineDeleteProtectionTest {
     @Test
     void deleteRevision_notReferenced_succeeds_bddK01_012() {
         MasterDocumentEntity master = readableMaster();
+        master.setCurrentRevisionLineId(REVISION_R1);
         MasterRevisionLineEntity r3 = revision(REVISION_R3);
         when(masterDocumentRepository.findByIdAndDeletedAtIsNull(MASTER_ID)).thenReturn(Optional.of(master));
         when(masterRevisionLineRepository.findByIdAndMasterIdAndDeletedAtIsNull(REVISION_R3, MASTER_ID))
@@ -129,6 +130,20 @@ class MasterRevisionLineDeleteProtectionTest {
         assertThat(r3.getDeletedAt()).isNotNull();
         verify(masterRevisionLineRepository).save(r3);
         verify(objectStoragePort).delete(r3.getStorageKey());
+    }
+
+    @Test
+    void deleteRevision_currentLine_failClosed_fosW6_2() {
+        MasterDocumentEntity master = readableMaster();
+        master.setCurrentRevisionLineId(REVISION_R1);
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(MASTER_ID)).thenReturn(Optional.of(master));
+
+        assertThatThrownBy(() -> service.deleteRevisionLine(MASTER_ID, REVISION_R1, masterAdmin))
+                .isInstanceOf(MasterValidationException.class)
+                .extracting(ex -> ((MasterValidationException) ex).messageKey())
+                .isEqualTo("api.error.master.cannotDeleteCurrentRevision");
+        verify(masterRevisionLineRepository, never()).save(any(MasterRevisionLineEntity.class));
+        verify(objectStoragePort, never()).delete(any());
     }
 
     private MasterDocumentEntity readableMaster() {

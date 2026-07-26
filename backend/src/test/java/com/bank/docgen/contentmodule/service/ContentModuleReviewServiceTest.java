@@ -95,9 +95,7 @@ class ContentModuleReviewServiceTest {
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(author, "RETAIL")).thenReturn(true);
-        when(versionRepository.findByModuleIdAndReviewStateOrderBySemanticVersionDesc(
-                MODULE_ID, ContentModuleReviewState.DRAFT))
-                .thenReturn(List.of(draftVersion));
+        when(versionRepository.findById(VERSION_ID)).thenReturn(java.util.Optional.of(draftVersion));
         when(groupAccessService.canAuthorContentModules(author)).thenReturn(true);
         when(versionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -110,6 +108,8 @@ class ContentModuleReviewServiceTest {
                         ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR,
                         "author-a",
                         "updated clause wording",
+                        null,
+                        VERSION_ID,
                         null
                 ),
                 author
@@ -132,6 +132,8 @@ class ContentModuleReviewServiceTest {
                         ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR,
                         "author-a",
                         " ",
+                        null,
+                        VERSION_ID,
                         null
                 ),
                 author
@@ -150,9 +152,7 @@ class ContentModuleReviewServiceTest {
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(approver, "RETAIL")).thenReturn(true);
-        when(versionRepository.findByModuleIdAndReviewStateOrderBySemanticVersionDesc(
-                MODULE_ID, ContentModuleReviewState.SUBMITTED))
-                .thenReturn(List.of(draftVersion));
+        when(versionRepository.findById(VERSION_ID)).thenReturn(java.util.Optional.of(draftVersion));
         when(groupAccessService.canDecideContentModuleReviews(approver)).thenReturn(true);
         when(versionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -165,6 +165,8 @@ class ContentModuleReviewServiceTest {
                         ContentModuleGovernanceActorRole.APPROVER,
                         "approver-a",
                         null,
+                        null,
+                        VERSION_ID,
                         null
                 ),
                 approver
@@ -180,9 +182,7 @@ class ContentModuleReviewServiceTest {
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(approver, "RETAIL")).thenReturn(true);
-        when(versionRepository.findByModuleIdAndReviewStateOrderBySemanticVersionDesc(
-                MODULE_ID, ContentModuleReviewState.SUBMITTED))
-                .thenReturn(List.of(draftVersion));
+        when(versionRepository.findById(VERSION_ID)).thenReturn(java.util.Optional.of(draftVersion));
         when(groupAccessService.canDecideContentModuleReviews(approver)).thenReturn(true);
         when(versionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -195,7 +195,9 @@ class ContentModuleReviewServiceTest {
                         ContentModuleGovernanceActorRole.APPROVER,
                         "approver-a",
                         null,
-                        "wording not acceptable"
+                        "wording not acceptable",
+                        VERSION_ID,
+                        null
                 ),
                 approver
         );
@@ -218,6 +220,8 @@ class ContentModuleReviewServiceTest {
                         ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR,
                         "author-a",
                         null,
+                        null,
+                        VERSION_ID,
                         null
                 ),
                 author
@@ -228,13 +232,11 @@ class ContentModuleReviewServiceTest {
     }
 
     @Test
-    void submitDeniedWhenNoDraftVersion() {
+    void submitDeniedWhenVersionTargetMissing() {
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(author, "RETAIL")).thenReturn(true);
-        when(versionRepository.findByModuleIdAndReviewStateOrderBySemanticVersionDesc(
-                MODULE_ID, ContentModuleReviewState.DRAFT))
-                .thenReturn(List.of());
+        when(versionRepository.findById(VERSION_ID)).thenReturn(java.util.Optional.empty());
         when(groupAccessService.canAuthorContentModules(author)).thenReturn(true);
 
         assertThatThrownBy(() -> reviewService.transition(
@@ -244,13 +246,52 @@ class ContentModuleReviewServiceTest {
                         ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR,
                         "author-a",
                         "change",
+                        null,
+                        VERSION_ID,
                         null
                 ),
                 author
         ))
                 .isInstanceOf(ContentModuleGovernanceException.class)
                 .extracting(ex -> ((ContentModuleGovernanceException) ex).errorCode())
-                .isEqualTo("MODULE_REVIEW_STATE_TRANSITION_DENIED");
+                .isEqualTo("MODULE_VERSION_NOT_FOUND");
+    }
+
+    @Test
+    void approveReview_targetsExplicitVersionOnly_fosW6_3() {
+        UUID versionBId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        ContentModuleVersionEntity versionA = new ContentModuleVersionEntity(
+                VERSION_ID, MODULE_ID, "1.9", "{}", "A", "10000003");
+        versionA.setReviewState(ContentModuleReviewState.SUBMITTED);
+        ContentModuleVersionEntity versionB = new ContentModuleVersionEntity(
+                versionBId, MODULE_ID, "1.10", "{}", "B", "10000003");
+        versionB.setReviewState(ContentModuleReviewState.SUBMITTED);
+        when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
+                .thenReturn(java.util.Optional.of(module));
+        when(groupAccessService.canAccessGroup(approver, "RETAIL")).thenReturn(true);
+        when(versionRepository.findById(versionBId)).thenReturn(java.util.Optional.of(versionB));
+        when(groupAccessService.canDecideContentModuleReviews(approver)).thenReturn(true);
+        when(versionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reviewRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = reviewService.transition(
+                "MOD-LOAN-DISCLOSURE",
+                new ContentModuleReviewTransitionRequest(
+                        ContentModuleReviewOperation.APPROVE_REVIEW,
+                        ContentModuleGovernanceActorRole.APPROVER,
+                        "approver-a",
+                        null,
+                        null,
+                        versionBId,
+                        null
+                ),
+                approver
+        );
+
+        assertThat(result.snapshot().state()).isEqualTo("APPROVED");
+        assertThat(versionB.getReviewState()).isEqualTo(ContentModuleReviewState.APPROVED);
+        assertThat(versionA.getReviewState()).isEqualTo(ContentModuleReviewState.SUBMITTED);
     }
 
     @Test
@@ -262,7 +303,9 @@ class ContentModuleReviewServiceTest {
                         ContentModuleGovernanceActorRole.APPROVER,
                         "approver-a",
                         null,
-                        " "
+                        " ",
+                        VERSION_ID,
+                        null
                 ),
                 approver
         ))

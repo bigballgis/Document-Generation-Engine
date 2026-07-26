@@ -74,7 +74,12 @@ public class MasterDocumentService {
         this.catalog = new MasterDocumentCatalogSupport(
                 masterDocumentRepository, groupAccessService, access, views);
         this.reviews = new MasterDocumentReviewSupport(
-                masterReviewRecordRepository, docxUploadSupport, access, views, selfApprovalGuard);
+                masterReviewRecordRepository,
+                masterRevisionLineRepository,
+                docxUploadSupport,
+                access,
+                views,
+                selfApprovalGuard);
         this.fileMutations = new MasterDocumentFileMutationSupport(
                 masterDocumentRepository,
                 masterRevisionLineRepository,
