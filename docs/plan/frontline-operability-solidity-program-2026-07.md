@@ -10,7 +10,7 @@
 | **Origin** | User-commissioned deep review (2026-07-26): make **existing** core maximally **易用** and **扎实** for a bank frontline employee who must orchestrate the most complex bank template and hand it off for other systems to call — **no new product features** |
 | **Audit baseline commit** | `f29211c5` (MAIN tip when program authored; locate code by quoted snippets, not line numbers) |
 | **Model note** | Program authored with Opus 5–class deep audits; detail sheets are written so a **lower-tier implementer** can execute TDD without improvisation |
-| **Next queue head** | FOS **Leaf 6** `fos-lifecycle-cannot-corrupt` / TM **#176** → **Done** (`23bd31d1` / feat `2b9a389d`); next **Leaf 7** `fos-generation-fails-closed` (TM **#177**) |
+| **Next queue head** | FOS **Leaf 7** `fos-generation-fails-closed` / TM **#177** → **Done** (`d251381f` / feat `c5244720`); next **Leaf 8** `fos-concurrency-integrity` (TM **#178**) |
 | **Upstream** | [CRCH](./core-render-compute-hardening-program.md) owns rendering P0 + preview dedupe (W0+W1) and compute/DOCX/harness designs (W2/W3/W5). FOS **supersedes CRCH W4** (authoring IA) — see §6 |
 
 ---
@@ -131,7 +131,7 @@ If a future decision appears, add it here — do not invent product behaviour.
 | **W4** | `fos-gates-explain-themselves` | Gates & actions explain themselves | A3,A8,A13,A14,A15,A19,A20,A27,D10,D12,D13,D14 | [FOS-W4](detail/FOS-W4-gates-explain-themselves.md) | **Done** |
 | **W5** | `fos-time-locale-honesty` | Time & locale honesty | D2,D3,D9,D15,D17 | [FOS-W5](detail/FOS-W5-time-locale-honesty.md) | **Done** |
 | **W6** | `fos-lifecycle-cannot-corrupt` | Lifecycle cannot corrupt | B1,B3,B4,B5,B6,B13,B19,B23 (B16 → **non-goal** per D10) | [FOS-W6](detail/FOS-W6-lifecycle-cannot-corrupt.md) | **Done** |
-| **W7** | `fos-generation-fails-closed` | Generation fails closed | B2,B7,B8,B9,B10,B15 | [FOS-W7](detail/FOS-W7-generation-fails-closed.md) | **Not Started** |
+| **W7** | `fos-generation-fails-closed` | Generation fails closed | B2,B7,B8,B9,B10,B15 | [FOS-W7](detail/FOS-W7-generation-fails-closed.md) | **Done** |
 | **W8** | `fos-concurrency-integrity` | Concurrency & integrity | B11,B12,B17,B18,B20 | [FOS-W8](detail/FOS-W8-concurrency-integrity.md) | **Not Started** |
 | **W9** | `fos-contract-works-first-time` | Contract works first time | C1,C3,C5,C6,C16,C17,C18 | [FOS-W9](detail/FOS-W9-contract-works-first-time.md) | **Not Started** |
 | **W10** | `fos-credential-lifecycle` | Credential lifecycle matches ADR | C2,C4,C11,C12,C22 + **28-day grace (D11)** | [FOS-W10](detail/FOS-W10-credential-lifecycle.md) | **Not Started** |
@@ -157,7 +157,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Leaf 4 | **#174** | `fos-gates-explain-themselves` | **done** | `1960da96` / `17c4e396` |
 | Leaf 5 | **#175** | `fos-time-locale-honesty` | **done** | `19f4f917` / `78a0bf8d` |
 | Leaf 6 | **#176** | `fos-lifecycle-cannot-corrupt` | **done** | `23bd31d1` / `2b9a389d`; W6-8 non-goal (D10) |
-| Leaf 7 | **#177** | `fos-generation-fails-closed` | **pending** | |
+| Leaf 7 | **#177** | `fos-generation-fails-closed` | **done** | `d251381f` / `c5244720`; deploy/E2E BLOCKED (0 images) |
 | Leaf 8 | **#178** | `fos-concurrency-integrity` | **pending** | |
 | Leaf 9 | **#179** | `fos-contract-works-first-time` | **pending** | |
 | Leaf 10 | **#180** | `fos-credential-lifecycle` | **pending** | W10-1 unblocked — **28-day** grace (D11 / ADR-0009 amended) |

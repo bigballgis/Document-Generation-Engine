@@ -2421,14 +2421,14 @@
       {
         "id": "177",
         "title": "FOS: FOS-W7 generation fails closed (fos-generation-fails-closed)",
-        "description": "PENDING \u2014 FOS wave leaf (plan only). Slice `fos-generation-fails-closed`. Detail docs/plan/detail/FOS-W7-generation-fails-closed.md. Program docs/plan/frontline-operability-solidity-program-2026-07.md. Do not auto-activate. No new features. Formal phase None. Vetoes: checklist-#3b/#5a; CE-O02; #53/#106; #119.",
-        "details": "Execute only when sole-active and Batch Recommendation selects this leaf. Follow detail sheet TDD/worktree/gates. Prefer CRCH W0+W1 before #171. OD-FOS items may block parts of #176/#180.",
+        "description": "DONE \u2014 FOS-W7 generation fails closed. Slice `fos-generation-fails-closed`. Merge `d251381f` / feat `c5244720`. Detail docs/plan/detail/FOS-W7-generation-fails-closed.md. Behavior docs/behavior/fos-generation-fails-closed.md. Evidence docs/plan/evidence/fos-generation-fails-closed/gates.md. Deploy/E2E BLOCKED (0 images). Formal phase None. Vetoes held.",
+        "details": "W7-1\u2026W7-6 shipped. Next FOS #178 fos-concurrency-integrity.",
         "testStrategy": "See docs/plan/detail/FOS-W7-generation-fails-closed.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:30:00.000Z"
+        "updatedAt": "2026-07-26T19:00:00.000Z"
       },
       {
         "id": "178",
