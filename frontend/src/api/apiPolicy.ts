@@ -7,6 +7,8 @@ export {
   listCredentials,
   createCredential,
   rotateCredential,
+  previewPolicyRollback,
+  rollbackPolicy,
   revokeCredential,
 } from '@/api/apiPolicyAccess'
 

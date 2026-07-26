@@ -13,6 +13,7 @@ import com.bank.docgen.runtime.service.RuntimeBatchValidationException;
 import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
 import com.bank.docgen.runtime.service.RuntimeDownloadExpiredException;
 import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
+import com.bank.docgen.runtime.service.GenerateRequestShapeException;
 import com.bank.docgen.runtime.service.SyncBatchFailureException;
 import com.bank.docgen.documentbrand.service.DocumentBrandResolveException;
 import com.bank.docgen.runtime.service.TemplateLocaleMismatchException;
@@ -267,6 +268,19 @@ public class RuntimeExceptionAdvice {
                 ApiErrorCodes.ENCRYPTION_FAILED,
                 ApiErrorCategories.ENCRYPTION,
                 ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(GenerateRequestShapeException.class)
+    public ResponseEntity<ErrorEnvelope> handleGenerateRequestShape(
+            HttpServletRequest request,
+            GenerateRequestShapeException ex
+    ) {
+        return errorEnvelopeFactory.validationError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.messageKey(),
+                ex.fieldErrors()
         );
     }
 
