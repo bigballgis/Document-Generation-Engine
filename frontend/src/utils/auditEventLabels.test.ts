@@ -32,6 +32,8 @@ describe('formatAuditEventType', () => {
       translate: i18n.global.t,
       hasKey: i18n.global.te,
     }
-    expect(formatAuditEventType('API_POLICY_UPDATED', translator)).toBe('API_POLICY_UPDATED')
+    expect(formatAuditEventType('TOTALLY_UNKNOWN_EVENT_XYZ', translator)).toBe(
+      'TOTALLY_UNKNOWN_EVENT_XYZ',
+    )
   })
 })

@@ -42,12 +42,18 @@ export function useTemplateInvocationsPanel(options: UseTemplateInvocationsPanel
 
   const statusFilterOptions = computed(() =>
     ['SUCCEEDED', 'FAILED', 'PARTIAL_SUCCEEDED', 'PROCESSING', 'ACCEPTED', 'EXPIRED', 'CANCELLED'].map(
-      (value) => ({ label: value, value }),
+      (value) => ({
+        label: t(`templates.policy.invocations.statusLabels.${value}`),
+        value,
+      }),
     ),
   )
 
   const kindFilterOptions = computed(() =>
-    ['SINGLE', 'BATCH_ROOT', 'ASYNC_TASK'].map((value) => ({ label: value, value })),
+    ['SINGLE', 'BATCH_ROOT', 'ASYNC_TASK'].map((value) => ({
+      label: t(`templates.policy.invocations.kindLabels.${value}`),
+      value,
+    })),
   )
 
   const uiPage = computed({

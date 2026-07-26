@@ -2,9 +2,9 @@
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
 **Wave:** W1
-**Status:** **Not Started**
+**Status:** **Done**
 **Slice id:** `fos-screens-tell-truth` · worktree `../DGE-fos-screens-tell-truth` · branch `feat/fos-screens-tell-truth`
-**Task Master:** **#171** (pending — activate only when this leaf becomes sole-active)
+**Task Master:** **#171** (**done**)
 **Audit baseline commit:** `f29211c5` — locate code by quoted snippet, not line number
 **delivery_lane:** **full** (user-facing string + filter/label behaviour)
 
@@ -292,3 +292,10 @@ extend it rather than inventing a new harness.
 5. `post-task-commit-review` on MAIN
 
 Do **not** mark FOS program Done. Do **not** activate Leaf 2 automatically.
+
+
+## Closeout evidence
+
+- Gates: [evidence/fos-screens-tell-truth/gates.md](../evidence/fos-screens-tell-truth/gates.md)
+- Behavior: [docs/behavior/fos-screens-tell-truth.md](../../behavior/fos-screens-tell-truth.md)
+- Docker/E2E/UIUX: **BLOCKED** on this host (no docker/pwsh) — recorded honestly; Vitest covers label honesty.

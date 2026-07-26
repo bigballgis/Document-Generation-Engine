@@ -76,6 +76,7 @@ export const apiErrorZhCn = {
     changeDiffReleaseVersionsRequired: "发布版本对比需要同时提供 releaseVersionA 与 releaseVersionB。",
     confirmationRequired: "此操作需要二次确认。",
     invalidState: "模板当前状态不允许执行此操作。",
+    invalidRulesJson: "组合或绑定规则 JSON 无效，无法解析。",
     devLineInFlight: "已有进行中的开发版本线。请先完成或放弃后，再克隆已发布版本。",
     versionImmutable: "已发布的模板版本内容不可修改。",
     defaultRouteTargetCannotDeactivate: "默认路由发布版本不能停用。",

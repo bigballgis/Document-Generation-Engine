@@ -2354,7 +2354,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W1-screens-tell-truth.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
@@ -2529,7 +2529,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-26T17:18:55.224Z",
+      "lastModified": "2026-07-26T17:19:09.208Z",
       "taskCount": 185,
       "completedCount": 165,
       "tags": [

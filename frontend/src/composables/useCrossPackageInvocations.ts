@@ -90,6 +90,17 @@ function assertCompositionFetchHonesty(batches: PackageInvocationBatch[]): void 
   }
 }
 
+/** Raw status enum values — views translate via `apiPolicy.invocationsPage.statusLabels.*`. */
+export const CROSS_PACKAGE_INVOCATION_STATUS_VALUES = [
+  'SUCCEEDED',
+  'FAILED',
+  'PARTIAL_SUCCEEDED',
+  'PROCESSING',
+  'ACCEPTED',
+  'EXPIRED',
+  'CANCELLED',
+] as const
+
 export function useCrossPackageInvocations(options: { autoLoad?: boolean } = {}) {
   const autoLoad = options.autoLoad !== false
   const pageSize = SERVER_TABLE_PAGE_SIZE
@@ -123,9 +134,10 @@ export function useCrossPackageInvocations(options: { autoLoad?: boolean } = {})
   const selectedRow = ref<CrossPackageInvocationRow | null>(null)
 
   const statusFilterOptions = computed(() =>
-    ['SUCCEEDED', 'FAILED', 'PARTIAL_SUCCEEDED', 'PROCESSING', 'ACCEPTED', 'EXPIRED', 'CANCELLED'].map(
-      (value) => ({ label: value, value }),
-    ),
+    CROSS_PACKAGE_INVOCATION_STATUS_VALUES.map((value) => ({
+      label: value,
+      value,
+    })),
   )
 
   const uiPage = computed({
