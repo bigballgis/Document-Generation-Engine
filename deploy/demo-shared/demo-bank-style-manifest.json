@@ -1,7 +1,7 @@
 {
-  "manifestVersion": "1.0.0",
+  "manifestVersion": "1.1.0",
   "catalogVersion": "demo-bank-v1",
-  "description": "Shared bank-grade Word style catalog for P23 demo master DOCX assets (P23-T03).",
+  "description": "Shared bank-grade Word style catalog for P23 demo master DOCX assets (P23-T03). FOS-W15-5: spacingBefore/AfterTwips and fonts.cjk (eastAsia) are applied into styles.xml by DemoMasterDocxStyleSupport.",
   "layout": {
     "pageSize": "A4",
     "marginsTwips": {

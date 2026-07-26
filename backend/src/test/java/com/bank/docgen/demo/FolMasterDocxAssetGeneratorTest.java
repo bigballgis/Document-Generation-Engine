@@ -36,7 +36,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 class FolMasterDocxAssetGeneratorTest {
 
     /** Bump when page layout / header / footer / style catalog changes; import script uses this to refresh uploaded masters. */
-    static final String MASTER_LAYOUT_VERSION = "fol-layout-v6-bank-style-manifest";
+    static final String MASTER_LAYOUT_VERSION = "fol-layout-v7-logo-letterhead";
 
     private static final Path ASSET_PATH = Path.of("..", "deploy", "demo-fol", "assets", "wholesale-fol-master.docx");
 
@@ -63,12 +63,17 @@ class FolMasterDocxAssetGeneratorTest {
                 .contains("w:styleId=\"DefinedTerm\"")
                 .contains("w:styleId=\"SignatureBlock\"")
                 .contains("w:styleId=\"TableHeader\"")
-                .contains("w:styleId=\"Heading1\"");
+                .contains("w:styleId=\"Heading1\"")
+                .contains("w:after=\"120\"")
+                .contains("w:eastAsia=\"Noto Sans CJK SC\"");
 
         String footerXml = DemoMasterDocxAssertions.readFooterXml(docx);
         assertThat(footerXml).contains("SECTIONPAGES").contains("NUMPAGES");
 
         DemoMasterDocxTestAssertions.assertNoPlaceholderMarkers(docx);
+        // FOS-W15-8: logo letterhead embeds word/media
+        assertThat(DemoMasterDocxAssertions.zipEntryNames(docx))
+                .anyMatch(name -> name.startsWith("word/media/"));
 
         try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docx))) {
             assertThat(document.getHeaderList()).isNotEmpty();
@@ -154,6 +159,23 @@ class FolMasterDocxAssetGeneratorTest {
     private static void configureDefaultHeader(XWPFDocument document) {
         XWPFHeader header = document.createHeader(HeaderFooterType.DEFAULT);
 
+        // FOS-W15-8: real word/media logo (not text-only letterhead).
+        XWPFParagraph logoLine = header.createParagraph();
+        logoLine.setAlignment(ParagraphAlignment.LEFT);
+        XWPFRun logoRun = logoLine.createRun();
+        try {
+            byte[] logoPng = buildMeridianLogoPng();
+            logoRun.addPicture(
+                    new ByteArrayInputStream(logoPng),
+                    org.apache.poi.xwpf.usermodel.Document.PICTURE_TYPE_PNG,
+                    "meridian-logo.png",
+                    org.apache.poi.util.Units.toEMU(36),
+                    org.apache.poi.util.Units.toEMU(36)
+            );
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to embed FOL letterhead logo", ex);
+        }
+
         XWPFParagraph brandLine = header.createParagraph();
         brandLine.setAlignment(ParagraphAlignment.LEFT);
         XWPFRun brandRun = brandLine.createRun();
@@ -177,6 +199,21 @@ class FolMasterDocxAssetGeneratorTest {
         XWPFRun ruleRun = ruleLine.createRun();
         ruleRun.setFontSize(4);
         ruleRun.setText(" ");
+    }
+
+    /** Minimal navy square PNG used as KEEP-8 logo letterhead evidence (FOS-W15-8). */
+    private static byte[] buildMeridianLogoPng() throws Exception {
+        java.awt.image.BufferedImage image =
+                new java.awt.image.BufferedImage(64, 64, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        java.awt.Graphics2D graphics = image.createGraphics();
+        graphics.setColor(new java.awt.Color(0x00, 0x33, 0x66));
+        graphics.fillRect(0, 0, 64, 64);
+        graphics.setColor(java.awt.Color.WHITE);
+        graphics.fillRect(18, 18, 28, 28);
+        graphics.dispose();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(image, "png", output);
+        return output.toByteArray();
     }
 
     private static void configureDefaultFooter(XWPFDocument document) {

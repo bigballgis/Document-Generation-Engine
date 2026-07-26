@@ -2759,6 +2759,7 @@
   "templates.structuredEditor.readonlyHint": "Read-only preview of structured content.",
   "templates.structuredEditor.redo": "Redo",
   "templates.structuredEditor.redoTooltip": "Redo structure change (Ctrl+Y / ⌘⇧Z)",
+  "templates.structuredEditor.sectionHeadingNumberingHonesty": "Clause numbers are literal prefixes (numbering.level / displayNumber). Continuity across anchors is not Word automatic multilevel numbering.",
   "templates.structuredEditor.styleCatalog.keys.BodyText": "Body text",
   "templates.structuredEditor.styleCatalog.keys.Heading1": "Heading 1",
   "templates.structuredEditor.stylePicker.apply": "Apply style",

@@ -1,6 +1,8 @@
 # FOS-W15 — Word foundation honesty (typography / layout / letterhead)
 
-**Status:** Not Started  
+**Status:** In Progress  
+**Behavior:** [fos-word-foundation-honesty.md](../../behavior/fos-word-foundation-honesty.md)  
+ 
 **Program:** [frontline-operability-solidity-program-2026-07.md](../frontline-operability-solidity-program-2026-07.md)  
 **Evidence audit:** [fos-word-foundation-deep-review-2026-07.md](fos-word-foundation-deep-review-2026-07.md)  
 **Task Master:** `#185`  
@@ -157,10 +159,10 @@ May split into 2–3 serial commits under one TM parent `#185`.
 
 ## Exit criteria
 
-- [ ] W15-1…W15-8 Done or explicitly Deferred with owner
-- [ ] Deep-review disposition table updated
-- [ ] Nested table/list no longer silent no-op; child order preserved
-- [ ] Clause numbering honesty documented (and/or continuity fixed)
-- [ ] Demo headerRows + at least one logo letterhead truthful
-- [ ] Style-manifest wired or trimmed; typography gate asserts generated DOCX
+- [x] W15-1…W15-8 Done or explicitly Deferred with owner (W15-3/W15-7 Documented; others Remediated)
+- [x] Deep-review disposition table updated
+- [x] Nested table/list no longer silent no-op; child order preserved
+- [x] Clause numbering honesty documented (and/or continuity fixed)
+- [x] Demo headerRows + at least one logo letterhead truthful
+- [x] Style-manifest wired or trimmed; typography gate asserts generated DOCX
 - [ ] post-task-doc-sync + commit-review

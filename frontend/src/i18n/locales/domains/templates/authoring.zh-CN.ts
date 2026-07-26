@@ -172,6 +172,8 @@ export const templatesAuthoringZhCn = {
         wordTable: '请通过受控粘贴清理器粘贴 Word 表格，作为表格组件引用。',
         floatLayout: 'v1 中禁止浮动与绝对定位布局。',
       },
+      sectionHeadingNumberingHonesty:
+        '条款编号是字面前缀（numbering.level / displayNumber），不会跨占位符自动连续，也不是 Word 多级列表编号。',
       nodes: {
         sectionHeading: '标题',
         paragraph: '段落',

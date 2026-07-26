@@ -51,8 +51,18 @@ FOS-W14-1: missing / non-PUBLISHED KEEP-8 templates **fail** the suite (not skip
 ./deploy/generate-all-demos.sh
 ```
 
+## 6. Word foundation literacy (FOS-W15)
+
+| Topic | Honest position |
+| --- | --- |
+| **Money formatting** | KEEP-8 demo variables ship **preformatted** amount strings. `FORMAT_AMOUNT` / `SPELL_AMOUNT` exist in the engine (golden corpus) but are **not** wired into KEEP-8 until CRCH W2 demo path lands — money formatting is **caller-owned** today. |
+| **Clause numbers** | `numbering.level` / `displayNumber` are **literal prefixes**, not Word automatic multilevel lists; continuity across anchors is not guaranteed. |
+| **Letterhead craft** | Volume of KEEP-8 ≠ layout showcase. Only **CORP-FOL-OFFER** ships a logo (`word/media`) letterhead in this wave; others remain text-only POI masters unless upgraded. |
+| **Typography gates** | Master-shell style presence is necessary but not sufficient — generated-letter spacing/styles are also asserted (W15-6). |
+
 ## Related
 
 - Ops SoT: [demo-catalog-keep-bank-letters.md](./demo-catalog-keep-bank-letters.md)
 - Deploy index: [deploy/README.md](../../deploy/README.md)
 - Behavior: [fos-demo-literacy-path.md](../behavior/fos-demo-literacy-path.md)
+- Word foundation: [fos-word-foundation-honesty.md](../behavior/fos-word-foundation-honesty.md)

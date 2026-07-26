@@ -2760,6 +2760,7 @@
   "templates.structuredEditor.readonlyHint": "结构化内容只读预览。",
   "templates.structuredEditor.redo": "重做",
   "templates.structuredEditor.redoTooltip": "重做结构变更（Ctrl+Y / ⌘⇧Z）",
+  "templates.structuredEditor.sectionHeadingNumberingHonesty": "条款编号是字面前缀（numbering.level / displayNumber），不会跨占位符自动连续，也不是 Word 多级列表编号。",
   "templates.structuredEditor.styleCatalog.keys.BodyText": "正文",
   "templates.structuredEditor.styleCatalog.keys.Heading1": "标题 1",
   "templates.structuredEditor.stylePicker.apply": "应用样式",
