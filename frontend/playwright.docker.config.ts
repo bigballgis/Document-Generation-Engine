@@ -8,8 +8,13 @@ export default defineConfig({
   timeout: 60_000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
+  globalSetup: './e2e/global-setup.docker.ts',
   globalTeardown: './e2e/global-teardown.ts',
-  reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report/docker' }]],
+  reporter: [
+    ['list'],
+    ['html', { open: 'never', outputFolder: 'playwright-report/docker' }],
+    ['./e2e/reporters/min-executed-reporter.ts', { minExecuted: 1 }],
+  ],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173',
     trace: 'on-first-retry',

@@ -25,6 +25,10 @@ export const DEMO_SEED_DOCX_PATH = path.join(FIXTURES_DIR, 'demo-retail-letterhe
 export const REPLACEMENT_DOCX_PATH = path.join(FIXTURES_DIR, 'retail-letterhead-replacement.docx')
 export const REPLACEMENT_DOCX_FILENAME = 'retail-letterhead-replacement.docx'
 export const DEMO_SEED_DOCX_FILENAME = 'demo-retail-letterhead.docx'
+export const FOL_SEED_DOCX_PATH = path.join(FIXTURES_DIR, 'fol-corporate-letterhead-seed.docx')
+export const FOL_SEED_DOCX_FILENAME = 'fol-corporate-letterhead-seed.docx'
+export const FOL_REPLACEMENT_DOCX_PATH = path.join(FIXTURES_DIR, 'retail-letterhead-replacement.docx')
+export const FOL_REPLACEMENT_DOCX_FILENAME = 'retail-letterhead-replacement.docx'
 
 interface MasterSummary {
   id: string
@@ -386,6 +390,61 @@ export async function restoreDemoMasterToApproved(
       adminToken,
       `/masters/${master.id}/review`,
       { decision: 'APPROVED', commentSummary: 'E2E restore approval' },
+    )
+  }
+}
+
+/** FOS-W12-4 — restore KEEP-8 FOL master to APPROVED after replace smoke. */
+export async function restoreFolMasterToApproved(
+  request: APIRequestContext,
+  options?: { force?: boolean },
+): Promise<void> {
+  if (!fs.existsSync(FOL_SEED_DOCX_PATH)) {
+    throw new Error(
+      `Missing seed fixture ${FOL_SEED_DOCX_PATH}. Commit the KEEP-8 FOL seed under frontend/e2e/fixtures/.`,
+    )
+  }
+
+  const operatorToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  const master = await findMasterByName(request, operatorToken, FOL_MASTER_NAME)
+  if (!master) {
+    throw new Error(
+      `FOL master "${FOL_MASTER_NAME}" was not found. Deploy KEEP-8 demos (DOCGEN_IMPORT_FOL_DEMO / import-all-demos).`,
+    )
+  }
+
+  if (
+    !options?.force
+    && master.status === 'APPROVED'
+    && master.originalFilename === FOL_SEED_DOCX_FILENAME
+  ) {
+    return
+  }
+
+  let detail = await replaceMasterFile(
+    request,
+    operatorToken,
+    master.id,
+    FOL_SEED_DOCX_PATH,
+    FOL_SEED_DOCX_FILENAME,
+  )
+
+  if (detail.status === 'DRAFT' || detail.status === 'REJECTED') {
+    detail = await authorizedPost<MasterDetail>(
+      request,
+      operatorToken,
+      `/masters/${master.id}/submit-review`,
+      { changeSummary: 'E2E restore FOL master after replace test' },
+    )
+  }
+
+  if (detail.status === 'PENDING_REVIEW') {
+    const adminToken = await apiLogin(request, E2E_ADMIN)
+    await authorizedPost<MasterDetail>(
+      request,
+      adminToken,
+      `/masters/${master.id}/review`,
+      { decision: 'APPROVED', commentSummary: 'E2E FOL restore approval' },
     )
   }
 }

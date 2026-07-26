@@ -11,6 +11,14 @@ export type StackReadinessOptions = {
   skipMessage?: string
 }
 
+/** FOS-W12-3: in CI (or E2E_REQUIRE_STACK=1), missing stack must fail — never vacuous skip-green. */
+export function mustFailWhenStackMissing(): boolean {
+  if (process.env.E2E_ALLOW_STACK_SKIP === '1') {
+    return false
+  }
+  return process.env.CI === 'true' || process.env.E2E_REQUIRE_STACK === '1'
+}
+
 export async function isBackendReady(
   request: APIRequestContext,
   backendHealthUrl: string = DEFAULT_BACKEND_HEALTH_URL,
@@ -33,7 +41,15 @@ export async function requireBackendReady(
     options.backendHealthUrl ?? DEFAULT_BACKEND_HEALTH_URL,
     options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
   )
-  test.skip(!ready, options.skipMessage ?? 'Backend :8080 required. Start the Docker stack before running E2E.')
+  if (ready) {
+    return
+  }
+  const message =
+    options.skipMessage ?? 'Backend :8080 required. Start the Docker stack before running E2E.'
+  if (mustFailWhenStackMissing()) {
+    throw new Error(message)
+  }
+  test.skip(true, message)
 }
 
 export async function isFrontendReady(
@@ -68,11 +84,16 @@ export function skipUnlessDockerStackReady(
   frontendBaseUrl: string = DEFAULT_FRONTEND_BASE_URL,
   skipMessage?: string,
 ): void {
-  test.skip(
-    !ready,
+  if (ready) {
+    return
+  }
+  const message =
     skipMessage
-      ?? `Stack required (${frontendBaseUrl} + backend :8080). Start backend and frontend before running E2E.`,
-  )
+    ?? `Stack required (${frontendBaseUrl} + backend :8080). Start backend and frontend before running E2E.`
+  if (mustFailWhenStackMissing()) {
+    throw new Error(message)
+  }
+  test.skip(true, message)
 }
 
 export async function requireDockerStack(
