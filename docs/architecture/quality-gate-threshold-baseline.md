@@ -17,8 +17,10 @@ related:
   - .github/skills/long-term-maintainability-fences/SKILL.md
   - .github/skills/code-review-static-scan/SKILL.md
   - .github/skills/task-auto-workflow/SKILL.md
+  - .cursor/skills/code-quality-review/SKILL.md
   - docs/adr/technology-stack/0035-implementation-realization-and-quality-gate-baseline.md
   - docs/behavior/deps-security-refresh.md
+  - docs/behavior/ai-scale-docs-conventions.md
   - docs/architecture/m9-task-sheet.md
   - docs/architecture/m9-t02-closure-plan.md
   - docs/evidence/security/README.md
@@ -73,6 +75,17 @@ The following are blocking for commit and push:
 3. File length:
    - Default target: <= 500 lines.
    - Hard block threshold: > 800 lines unless split plan is approved.
+4. Soft review artifact budgets (agent / `code-quality-reviewer` signals — **not** a second
+   hard CI SoT; must not invent stricter hard gates without ADR / user confirmation):
+   - Java `@Service` / orchestrator and Vue SFC: review warn when > **400** LOC (skill soft).
+   - `*Support` helpers: prefer <= **200** LOC and keep stateless; otherwise peel/extract.
+   - Review warn/critical bands live in
+     [code-quality-review SKILL](../../.cursor/skills/code-quality-review/SKILL.md);
+     baseline **file/function hard thresholds above remain authoritative** on conflict.
+   - When soft targets are exceeded on manually maintained sources, agents **prefer a
+     separate peel leaf** over silent growth (see
+     [ai-scale-docs-conventions.md](../behavior/ai-scale-docs-conventions.md)).
+   - Generated artifacts (e.g. OpenAPI client): size flags apply only to **manual** edits.
 
 ## Duplication and Dead Code
 

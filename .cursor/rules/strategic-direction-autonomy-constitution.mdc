@@ -58,6 +58,8 @@ appears.
 ## Relation to other constitutions
 
 - Does **not** skip BDD, TDD, E2E, doc-sync, or commit-review gates — it removes **human
-  permission polling** between those gates.
+  permission polling** between those gates — **except** eligible `delivery_lane: light`
+  leaves where BDD proves N/A acceptance surfaces (stages **5–7** and **10** recorded N/A
+  per `.cursor/skills/lightweight-delivery-lane/SKILL.md`).
 - Complements `delivery-orchestration-constitution.mdc` and `subagent-routing-mandate.mdc`.
 - User same-session explicit opt-out overrides autonomous push/commit defaults.

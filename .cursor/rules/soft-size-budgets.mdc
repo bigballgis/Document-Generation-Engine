@@ -1,0 +1,28 @@
+---
+description: Soft size budgets for agents/review — align with quality-gate-threshold-baseline; prefer peel tasks when exceeded; do not invent conflicting hard CI numbers.
+alwaysApply: false
+---
+
+# Soft Size Budgets (cite)
+
+Size SoT: `docs/architecture/quality-gate-threshold-baseline.md` § Complexity and Size.
+Behavior: `docs/behavior/ai-scale-docs-conventions.md`.
+Review bands: `.cursor/skills/code-quality-review/SKILL.md`.
+
+## Confirmed numbers (do not invent conflicts)
+
+| Artifact | Soft / review | Hard / exception SoT |
+| --- | --- | --- |
+| Function length | ≤ **80** lines (baseline default) | > **120** unless decomposition plan approved |
+| File length | ≤ **500** lines (baseline default) | > **800** unless split plan approved |
+| Java `@Service` / Vue SFC | Review warn > **400** LOC (skill soft) | Skill critical bands; baseline file hard still applies |
+| Java controller / Vue composable | Soft review bands in skill table | See `.cursor/skills/code-quality-review/STANDARDS.md` + SKILL bands |
+| `*Support` helpers | Prefer ≤ **200** LOC; else peel/extract (skill soft) | Must stay stateless helpers |
+
+## Agent behavior
+
+- Soft budgets are **guidance** for agents and `code-quality-reviewer`, not a license to
+  ignore baseline hard thresholds.
+- When soft targets are exceeded on manually maintained files, **prefer a separate peel
+  leaf** over silent continued growth.
+- Generated artifacts (e.g. `openapi-v1.ts`): size flags only on **manual** edits.

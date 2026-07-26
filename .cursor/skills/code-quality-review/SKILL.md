@@ -35,15 +35,29 @@ Parent summarizes findings in a severity table; does **not** fix unless user ask
 
 ## Size budgets (soft limits)
 
+**SoT alignment:** hard file/function thresholds and default targets come from
+[quality-gate-threshold-baseline.md](../../../docs/architecture/quality-gate-threshold-baseline.md)
+§ Complexity and Size (function ≤80 soft / >120 hard; file ≤500 soft / >800 hard).
+Agent conventions: [ai-scale-docs-conventions.md](../../../docs/behavior/ai-scale-docs-conventions.md).
+Rule cite: `.cursor/rules/soft-size-budgets.mdc`.
+
 | Artifact | Warning | Critical |
 | --- | --- | --- |
 | Java `@Service` / orchestrator | >400 LOC | >600 LOC |
 | Java controller | >300 LOC | >450 LOC |
 | Vue SFC | >400 LOC | >550 LOC |
 | Composable `.ts` | >300 LOC | >450 LOC |
+| Any source file (baseline) | >500 LOC | >800 LOC (baseline hard / split plan) |
 | Generated `openapi-v1.ts` | N/A (regen only) | manual edits |
 
+These warn/critical bands are **review signals**. On conflict with baseline hard thresholds,
+**baseline wins**. When soft targets are exceeded, prefer queuing a **separate peel leaf**
+(do not silently grow mega-files).
+
 Hotspots to always inspect: `useTemplateDetailController.ts`, `TemplateLifecycleService.java`, `StructuredContentDocxWriter.java`, `ManagementAuditRecorder.java`, `DashboardView.vue`.
+
+Also prefer [module-map.md](../../../docs/architecture/module-map.md) before unscoped
+repo-wide coupling greps when asking which package owns a smell.
 
 ## Backend signals (Java)
 

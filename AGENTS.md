@@ -25,6 +25,19 @@ Optional shortcuts: `/deliver` (preferred), `/multitask-slices` (legacy opt-in),
 Native Cursor parallel primitives are **opt-in only** — see
 `.cursor/skills/cursor-native-parallel/SKILL.md`.
 
+## First read (progressive disclosure)
+
+Keep the live index **thin**. Do **not** dump closed program bodies into context by default.
+
+1. [docs/README.md](docs/README.md) delivery focus + sole-active
+2. Active Task Master queue head (`.taskmaster/tasks/tasks.json`)
+3. [module-map.md](docs/architecture/module-map.md) for package/dir placement (prefer over whole-repo grep)
+4. Owning behavior + detail for the **current** leaf only
+5. Closed programs → [docs/plan/ARCHIVE.md](docs/plan/ARCHIVE.md) (open detail only when named)
+
+Soft size budgets: [quality-gate-threshold-baseline](docs/architecture/quality-gate-threshold-baseline.md)
++ [ai-scale-docs-conventions](docs/behavior/ai-scale-docs-conventions.md) — prefer peel leaves when exceeded.
+
 ## Pipeline (−1, then 0–14)
 
 See `.cursor/skills/delivery-pipeline/SKILL.md` and `delivery-orchestrator`.
@@ -34,6 +47,11 @@ See `.cursor/skills/delivery-pipeline/SKILL.md` and `delivery-orchestrator`.
   behavior [delivery-batch-recommend.md](docs/behavior/delivery-batch-recommend.md).
   Decide `merge` | `solo` | `split` from repo facts so related work shares **one**
   worktree / one evidence run. **Not** multi-writer parallel.
+- **Delivery lane (`full` | `light`):** skill
+  [lightweight-delivery-lane](.cursor/skills/lightweight-delivery-lane/SKILL.md);
+  behavior [lightweight-delivery-lane.md](docs/behavior/lightweight-delivery-lane.md).
+  `light` may skip E2E+Docker (stages 5–7, 10) **only** when BDD proves no UI/runtime
+  acceptance surface. **Does not** weaken full product leaves; worktree still mandatory.
 - **Specialist runtime (retry then GP):** Task flake / missing enum —
   [specialist-runtime-fallback](.cursor/skills/specialist-runtime-fallback/SKILL.md);
   behavior [specialist-runtime-fallback.md](docs/behavior/specialist-runtime-fallback.md).

@@ -14,6 +14,9 @@ related:
   - .github/copilot-instructions.md
   - .github/skills/documentation-governance/SKILL.md
   - docs/architecture/tdd-delivery-workflow.md
+  - docs/architecture/module-map.md
+  - docs/plan/ARCHIVE.md
+  - docs/behavior/ai-scale-docs-conventions.md
   - scripts/validate-doc-structure.ps1
 ---
 
@@ -23,6 +26,20 @@ related:
 
 This guide tells AI agents how to work in this project so documentation stays authoritative and implementation remains rebuildable from documentation.
 
+## Progressive disclosure (live index first)
+
+For delivery / plan reading, keep context thin (see
+[ai-scale-docs-conventions.md](../behavior/ai-scale-docs-conventions.md)):
+
+1. [docs/README.md](../README.md) delivery focus + sole-active note.
+2. Active Task Master queue head (`.taskmaster/tasks/tasks.json`).
+3. [Module map](./module-map.md) for package/directory placement (prefer over whole-repo grep).
+4. Owning behavior + detail for the **current** leaf only.
+5. Closed programs are historical — use [plan ARCHIVE](../plan/ARCHIVE.md); do **not**
+   load entire closed-program bodies by default.
+6. [execution-sync-ledger.md](../plan/execution-sync-ledger.md) — read header / sole-active
+   first; deep-dive mid-file history only when auditing a named slice.
+
 ## Default Reading Order
 
 For any non-trivial change, read in this order:
@@ -30,10 +47,13 @@ For any non-trivial change, read in this order:
 1. [Document as Software Charter](../document-as-software.md).
 2. [Documentation Architecture](../documentation-architecture.md).
 3. [Documentation Governance](../governance.md).
-4. For execution-oriented development work, [Orchestration High-Level Plan](./orchestration-high-level-plan.md) to identify active epic, planned direction, and whether a plan refresh is required.
+4. For execution-oriented development work, start from the **live** delivery focus
+   (README / Task Master sole-active). Use [Orchestration High-Level Plan](./orchestration-high-level-plan.md)
+   when epic ordering is in scope — not as a dump of closed programs.
 5. The source-of-truth document for the requested behavior.
-6. Relevant ADRs and architecture views.
-7. Relevant tests or validation scripts once implementation exists.
+6. [Module map](./module-map.md) then [Module boundaries](./module-boundaries.md) for placement.
+7. Relevant ADRs and architecture views.
+8. Relevant tests or validation scripts once implementation exists.
 
 ## Documentation-First Workflow
 
@@ -55,7 +75,7 @@ Before coding, AI must identify:
 - Which behavior specification authorizes the task: actor/role, user goal, trigger, preconditions, user journey, system responses, acceptance scenarios, boundary and exception behavior, observable evidence, and traceability.
 - Which requirement or ADR authorizes the behavior.
 - Which product, domain, permission, API, or architecture document owns the rule.
-- Which module boundary should own the implementation.
+- Which module boundary should own the implementation ([module-map.md](./module-map.md) for path; [module-boundaries.md](./module-boundaries.md) for capability).
 - Which tests or validation checks should verify it.
 - Which pending questions still block implementation.
 

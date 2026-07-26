@@ -53,6 +53,8 @@ bdd_readiness: ready | blocked | not-applicable
 placement: ISOLATED   # mandatory for delivery; MAIN only for read-only / main-only opt-out
 worktree_path:
 branch:
+delivery_lane: full | light
+delivery_lane_rationale: <cite BDD surface flags + light-lane E1–E5 when light>
 behavior_summary:
 acceptance_scenarios:
 gate_evidence:
@@ -78,10 +80,33 @@ runtime_routing:
   user_visible_note:
 ```
 
+## Delivery lane (`full` | `light`)
+
+Default **`full`**. Skill: `.cursor/skills/lightweight-delivery-lane/SKILL.md`.
+Behavior: [lightweight-delivery-lane.md](../../../docs/behavior/lightweight-delivery-lane.md).
+
+| Lane | Stages 5–7 (E2E) + 10 (Docker evidence) | Worktree (stage 0) | Unit/verify gates |
+| --- | --- | --- | --- |
+| **`full`** | Required when UI/runtime acceptance surfaces change (as today) | Mandatory for delivery (unless user `main-only`) | Required when code touched |
+| **`light`** | **May skip** — record **N/A** + rationale | **Still mandatory** for multi-file delivery; light ≠ main-only | **Still required** when code touched |
+
+**Light eligibility (all must hold):** BDD proves no management-UI acceptance surface;
+BDD proves no runtime/OpenAPI/Flyway/generation acceptance (or pure docs/governance);
+readiness `ready`/`not-applicable`; handoff records `delivery_lane: light` + rationale;
+worktree rule still obeyed.
+
+**Must not:** use light to weaken product behavior leaves; skip E2E for “flaky” without
+BDD N/A proof; treat Batch Recommendation `merge` as light eligibility; claim Playwright
+or deploy greens that were not run. Doubt → **`full`**. Mid-flight UI/runtime scope creep
+→ upgrade to **`full`** and run skipped stages before Done.
+
 ## Session worktree rule (mandatory)
 
 Every delivery session: stage −1 Batch Recommendation → stage 0 → code in
 `../DGE-<slice-id>` → merge via `integration-merger` → **doc-sync + commit on MAIN**.
+
+`delivery_lane: light` does **not** authorize implementing on MAIN. MAIN / `main-only`
+remains an explicit user opt-out (or read-only / single mechanical edit) independent of lane.
 
 ## Single-lane serial (default, 2026-07-16)
 
@@ -96,3 +121,5 @@ create a second concurrent writer.
 
 Always `.\scripts\docker-deploy-queue.ps1` (never parallel stacks).
 E2E docker needs stage 5 before stages 6–7.
+On `delivery_lane: light` with eligibility, stage 5 and stage 10 are **N/A** (do not
+queue a deploy “for completeness”).

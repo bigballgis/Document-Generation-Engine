@@ -11,8 +11,9 @@ product facts, or ADR decisions yourself — you delegate to the right specialis
 and enforce the gates between stages.
 
 Skills:
-- `.cursor/skills/delivery-pipeline/SKILL.md` (stage numbers + handoff payload)
+- `.cursor/skills/delivery-pipeline/SKILL.md` (stage numbers + handoff payload + `delivery_lane`)
 - `.cursor/skills/delivery-batch-recommend/SKILL.md` (**pre-0** Batch Recommendation)
+- `.cursor/skills/lightweight-delivery-lane/SKILL.md` (`delivery_lane` light\|full eligibility)
 - `.cursor/skills/specialist-runtime-fallback/SKILL.md` (Task enum / API unavailable)
 
 ## Supervisor mode
@@ -86,7 +87,8 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 | Rendering / DOCX / PDF / LibreOffice | −1→0→1→2→(3)→4 **rendering-engineer**→8→(9)→10→(11)→12→13→(14) |
 | Frontend-only | −1→0→1→2→(3)→4 frontend→5→6→7→8→(9)→10→(11)→12→13→(14) |
 | Full-stack | −1 then backend (or rendering) then frontend; E2E after stack prep |
-| Docs-only (plan-only, no code) | −1→0→2→3→12→13 (ISOLATED still for multi-file governance) |
+| Docs-only / light-eligible governance | −1→0→1→2→3→(8)→11→12→13 — `delivery_lane: light`; stages **5–7, 10 = N/A** (ISOLATED still; light ≠ main-only). **Prefer this path** for G1-style / governance leaves when BDD proves N/A surfaces. |
+| Docs-only (plan-only, no code) | −1→0→2→3→11→12→13 when stage **0** ran (ISOLATED — merge before MAIN doc-sync); prefer light-lane row above for G1-style leaves |
 | Deploy-only | build-deploy-agent (queue)→12→13 (Batch Recommendation N/A) |
 | Bug fix | −1→0 → failing regression first via owning engineer, then from stage 4 |
 | Multiple pending slices | **Batch Recommendation** may `merge` related into one leaf; otherwise **serial queue** — finish one leaf (0→13) then start the next; do **not** fan out writers |
@@ -101,11 +103,20 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 - Slash: prefer `/deliver`; `/multitask-slices` is legacy opt-in only.
 - **Batch Recommendation ≠ parallel:** `merge` means one leaf with multiple `member_task_ids`.
 
+### Delivery lane (`full` | `light`)
+
+- Default **`full`**. Emit `delivery_lane` + rationale in every handoff.
+- **`light`** only when BDD proves no UI/runtime acceptance surface (skill
+  `lightweight-delivery-lane`). May skip stages **5–7** and **10** with honest **N/A**.
+- **Must not** weaken product UI/runtime/authz leaves. Doubt → **`full`**.
+- Light does **not** waive worktree or unit/verify gates when code is touched.
+
 ### Deploy rules (resolve prior ambiguity)
 
-- **Behavior-changing** work that affects runtime/UI acceptance: stage **10** (or stage **5** prep) via queue is **mandatory** before Done (`docker-only-validation`).
+- **Behavior-changing** work that affects runtime/UI acceptance: stage **10** (or stage **5** prep) via queue is **mandatory** before Done (`docker-only-validation`) on `delivery_lane: full`.
 - E2E docker specs need a live stack: run stage **5** before stages **6–7**.
 - If stage 5 already deployed the new build, stage 10 may be `-SkipBuild` health re-check + evidence only.
+- Eligible `light` leaves: do **not** queue Docker “for completeness”.
 
 ### Session worktree doc-sync (single path)
 
@@ -120,7 +131,8 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 - No deliver without Batch Recommendation output (`batch_recommendation` block).
 - No code before BDD ready / not-applicable.
 - Exactly one plan phase `In Progress` (or Task Master active task when using taskmaster).
-- No frontend Done without E2E functional + UIUX.
+- No frontend Done without E2E functional + UIUX when UI acceptance surface changed (`full`).
+- No `delivery_lane: light` without BDD eligibility; never invent Playwright/Docker greens for skipped stages.
 - No Done before 12 then 13 (unless user `no-commit` — then report blocked on commit).
 - No second Docker stack; queue only.
 - **Mandatory session worktree** (stage 0); no delivery Done without stage 11 cleanup.
@@ -133,6 +145,8 @@ task_ids: [...]
 bdd_readiness: ready | blocked | not-applicable
 placement: MAIN | ISOLATED
 worktree_path / branch: ...
+delivery_lane: full | light
+delivery_lane_rationale: <cite BDD surfaces + light-lane E1–E5 when light>
 behavior_summary: ...
 acceptance_scenarios: [...]
 gate_evidence: [...]
