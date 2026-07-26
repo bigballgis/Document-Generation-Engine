@@ -4,8 +4,8 @@
 **Program registry:** [ai-scale-remediation-program-2026-07.md](../ai-scale-remediation-program-2026-07.md)  
 **Formal plan phase:** **None** — single-active-phase discipline OK (does not occupy a P* slot)  
 **Task Master:** **#166** (`AI-SCALE-G1` / `ai-scale-remediation-g1`) → **Done** (`c4f1b0d4`)  
-**Queued peels (do not activate):** **#167** Leaf 2 TemplateImport* · **#168** Leaf 3 i18n locale split · **#169** Leaf 4 mega-test fixture split — all **pending**  
-**Active delivery slice:** none (Leaf 1 closed; **sole-active cleared**)  
+**Queued peels (do not activate):** **#168** Leaf 3 i18n locale split · **#169** Leaf 4 mega-test fixture split — **pending** (Leaf 2 **#167** → **Done** `d02aa414`)  
+**Active delivery slice:** none (Leaf 1–2 closed; **sole-active cleared**)  
 **Placement:** **ISOLATED** · worktree `D:/working/DGE-ai-scale-remediation-g1` · branch `feat/ai-scale-remediation-g1` · **REMOVED** after merge `c4f1b0d4`  
 **BDD:** [module-map-agent-retrieval.md](../../behavior/module-map-agent-retrieval.md) · [lightweight-delivery-lane.md](../../behavior/lightweight-delivery-lane.md) · [ai-scale-docs-conventions.md](../../behavior/ai-scale-docs-conventions.md) — all **ready**/shipped  
 **Batch recommendation:** **solo** (`member_task_ids: ["166"]`; `proposed_slice_id: ai-scale-remediation-g1`;
@@ -34,11 +34,12 @@ code peels stay queued as Leaves 2–4.
 | --- | --- |
 | Leaf status | **Done** (`c4f1b0d4`) |
 | Formal phase | **None** |
-| Host sole-active | **cleared** (next queue head **#167** pending — not activated) |
+| Host sole-active | **cleared** (next queue head **#168** pending — not activated) |
 | delivery_lane | **light** (product E2E/Docker **N/A**) |
 | Umbrella #53 / #106 | Registry-only — **not** Done (veto held) |
 | #119 | **Blocked**/pending — **not** activated |
-| Queued Leaves 2–4 | **#167–#169** **pending** — do **not** auto-activate |
+| Leaf 2 | **#167** → **Done** (`d02aa414`) |
+| Queued Leaves 3–4 | **#168–#169** **pending** — do **not** auto-activate |
 | Do **not** | Flip **#3b/#5a GO**; mark **#53** / **#106** Done; activate **#119**; invent P24+; fold peels into closed Leaf 1 |
 
 ---

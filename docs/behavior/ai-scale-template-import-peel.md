@@ -1,21 +1,23 @@
 ---
 id: BDD-AI-SCALE-TIP
 title: AI-SCALE Leaf 2 — TemplateImport* structural peel under soft size budgets
-status: ready
+status: ready/shipped
 date: 2026-07-27
 bdd_readiness: ready
 task_ids: [167]
-placement: ISOLATED
-worktree_path: D:/working/DGE-ai-scale-peel-template-import
-branch: feat/ai-scale-peel-template-import
+placement: MAIN
+worktree_path: n/a (REMOVED)
+branch: main
 slice: ai-scale-peel-template-import
-integration_base: main@f29211c5
+integration_base: main@d02aa414
+merge_sha: d02aa414abf6cbda6e7bbd1e155b4e29aa5a5586
+feat_sha: 1f55a420274eb2b2e8b20be6465fc9e6c2255adf
 user_confirmation: 2026-07-26 「按你的建议整改吧」; continue autonomously after #166 Done
 delivery_lane: full
 frontend_ui_in_scope: false
 openapi_contract_change: false
 runtime_api_semantics_change: false
-stages_5_7_10: N/A-eligible
+stages_5_7_10: N/A
 kind: structural-peel  # preserve product import semantics; soft-budget acceptance
 ---
 
@@ -24,9 +26,9 @@ kind: structural-peel  # preserve product import semantics; soft-budget acceptan
 | Field | Value |
 | --- | --- |
 | **Slice** | `ai-scale-peel-template-import` |
-| **bdd_readiness** | **`ready`** |
+| **bdd_readiness** | **`ready`/shipped** |
 | **Recorded** | 2026-07-27 |
-| **Task Master** | **#167** (AI-SCALE Leaf 2 / `AI-SCALE-L2`) |
+| **Task Master** | **#167** (AI-SCALE Leaf 2 / `AI-SCALE-L2`) → **Done** (`d02aa414` / `1f55a420`) |
 | **Program** | [ai-scale-remediation-program-2026-07.md](../plan/ai-scale-remediation-program-2026-07.md) |
 | **Detail plan** | [detail/ai-scale-template-import-peel.md](../plan/detail/ai-scale-template-import-peel.md) |
 | **Formal phase** | **None** (NON-CE AI-SCALE peel; do not invent P24+) |
