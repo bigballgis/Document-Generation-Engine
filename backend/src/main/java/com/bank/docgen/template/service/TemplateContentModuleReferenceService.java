@@ -362,11 +362,13 @@ public class TemplateContentModuleReferenceService {
         Map<String, String> pinnedStructures = new LinkedHashMap<>();
         for (TemplateContentModuleReferenceEntity reference
                 : referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(templateVersionId)) {
-            contentModuleVersionRepository.findById(reference.getContentModuleVersionId())
-                    .ifPresent(version -> pinnedStructures.put(
-                            reference.getReferenceKey(),
-                            version.getContentStructureJson()
+            // FOS-W7-1: missing pinned clause versions fail closed (no silent omission).
+            ContentModuleVersionEntity version = contentModuleVersionRepository
+                    .findById(reference.getContentModuleVersionId())
+                    .orElseThrow(() -> new TemplateValidationException(
+                            "api.error.validation.contentModuleStructureMissing"
                     ));
+            pinnedStructures.put(reference.getReferenceKey(), version.getContentStructureJson());
         }
         return pinnedStructures;
     }

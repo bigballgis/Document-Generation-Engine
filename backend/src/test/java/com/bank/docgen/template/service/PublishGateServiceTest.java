@@ -144,8 +144,10 @@ class PublishGateServiceTest {
                         templateId.toString(), "1.0.0", versionId.toString(), null, false, 0, List.of(), List.of()));
         lenient().when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
                 .thenReturn(List.of(approvalRecord()));
+        ApiPolicyEntity callablePolicy = new ApiPolicyEntity(UUID.randomUUID(), templateId, "[]", "10000002");
+        callablePolicy.updateDefaultRouteDomain("1.0.0", "10000002");
         lenient().when(apiPolicyRepository.findByTemplateId(templateId))
-                .thenReturn(Optional.of(new ApiPolicyEntity(UUID.randomUUID(), templateId, "[]", "10000002")));
+                .thenReturn(Optional.of(callablePolicy));
         lenient().when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
                 .thenReturn(List.of(new VariableSchemaEntity(
                         UUID.randomUUID(), versionId, "field", VariableType.TEXT, true, null, null, "desc", null)));
@@ -177,7 +179,7 @@ class PublishGateServiceTest {
 
     @Test
     void publish_withUnresolvedBlocker_isRejected_withChecklist() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(blockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(blockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin);
@@ -192,7 +194,7 @@ class PublishGateServiceTest {
 
     @Test
     void publish_belowCoverageThreshold_isRejected() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(blockedCoverage());
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin);
@@ -207,7 +209,7 @@ class PublishGateServiceTest {
 
     @Test
     void publish_allGreen_succeeds_andRecordsChecklist() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin);
@@ -222,7 +224,7 @@ class PublishGateServiceTest {
         inFlightVersion.setAuthorWordPageCount(6);
         when(previewEvidencePort.latestSuccessfulPdfPageCount(templateId, versionId))
                 .thenReturn(Optional.of(9));
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin);
@@ -245,7 +247,7 @@ class PublishGateServiceTest {
         inFlightVersion.setAuthorWordPageCount(6);
         when(previewEvidencePort.latestSuccessfulPdfPageCount(templateId, versionId))
                 .thenReturn(Optional.of(8));
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin);
@@ -263,7 +265,7 @@ class PublishGateServiceTest {
         inFlightVersion.setAuthorWordPageCount(null);
         when(previewEvidencePort.latestSuccessfulPdfPageCount(templateId, versionId))
                 .thenReturn(Optional.of(6));
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin);
@@ -278,7 +280,7 @@ class PublishGateServiceTest {
 
     @Test
     void publishGate_isEvaluatedLive_notStaticText() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(previewEvidencePort.latestBatchTestRun(templateId)).thenReturn(Optional.empty());
 
@@ -293,7 +295,7 @@ class PublishGateServiceTest {
 
     @Test
     void submitForApproval_excludesApprovalSummaryAndApiPolicy() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
                 .thenReturn(List.of());
@@ -313,7 +315,7 @@ class PublishGateServiceTest {
 
     @Test
     void submitForApproval_withHardBlocker_rejectedWithSubmitGateMessageKey() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(blockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(blockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
 
         assertThatThrownBy(() -> service.assertReady(templateId, admin, PublishGatePhase.SUBMIT_FOR_APPROVAL))
@@ -323,7 +325,7 @@ class PublishGateServiceTest {
 
     @Test
     void submitForApproval_allGreen_succeeds() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin, PublishGatePhase.SUBMIT_FOR_APPROVAL);
@@ -334,7 +336,7 @@ class PublishGateServiceTest {
 
     @Test
     void publishGate_blocksContentModuleEffectiveExpired_lm008() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(contentModuleReferenceService.evaluateEffectiveExpiry(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveExpirySummaryView(
@@ -363,7 +365,7 @@ class PublishGateServiceTest {
 
     @Test
     void publishGate_blocksContentModuleEffectiveNotStarted_e5001() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(contentModuleReferenceService.evaluateEffectiveNotStarted(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleEffectiveNotStartedSummaryView(
@@ -396,7 +398,7 @@ class PublishGateServiceTest {
 
     @Test
     void publishGate_contentModuleReferencesPass_whenOnlyEffectiveExpired_lm013() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(contentModuleReferenceService.validateReferences(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 1, 0));
@@ -420,7 +422,7 @@ class PublishGateServiceTest {
 
     @Test
     void publishGate_blocksContentModuleReferencesWithEmptyPinnedStructure() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(contentModuleReferenceService.validateReferences(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(true, 1, 1));
@@ -443,7 +445,7 @@ class PublishGateServiceTest {
 
     @Test
     void publishGate_blocksInvalidContentModuleReferences() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(contentModuleReferenceService.validateReferences(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(true, 1, 1));
@@ -460,7 +462,7 @@ class PublishGateServiceTest {
     @Test
     void publishGate_allowsQrBarcodeRef_alone() {
         // BDD-CE-K06b-006 — qrBarcodeRef no longer hard-blocks publish gate
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         String qrJson = "{\"nodes\":[{\"type\":\"qrBarcodeRef\",\"referenceKey\":\"PAYMENT-QR\"}]}";
         AnchorBindingEntity binding = new AnchorBindingEntity(
@@ -490,7 +492,7 @@ class PublishGateServiceTest {
     @Test
     void publishGate_allowsAttachmentListRef_alone() {
         // BDD-CE-K06c-003 — attachmentListRef no longer hard-blocks publish gate
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         String attachmentJson = "{\"nodes\":[{\"type\":\"attachmentListRef\",\"referenceKey\":\"ATTACHMENTS\"}]}";
         AnchorBindingEntity binding = new AnchorBindingEntity(
@@ -520,7 +522,7 @@ class PublishGateServiceTest {
     @Test
     void publishGate_blocksUnresolvedPasteCleaningResidue() {
         // BDD-OPS-PASTE-BINDING-001 / S4
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         AnchorBindingEntity binding = new AnchorBindingEntity(
                 UUID.randomUUID(),
@@ -556,7 +558,7 @@ class PublishGateServiceTest {
     @Test
     void publishGate_pasteCleaningReadyWhenResidueCleared() {
         // BDD-OPS-PASTE-BINDING-001 / S5 (publish dimension)
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         AnchorBindingEntity binding = new AnchorBindingEntity(
                 UUID.randomUUID(),
@@ -588,7 +590,7 @@ class PublishGateServiceTest {
     @Test
     void publishGate_unsupportedStructuredNodes_readyWhenAbsent() {
         // A8 — happy path: no writer-unsupported nodes → dedicated check ready
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin);
@@ -605,8 +607,8 @@ class PublishGateServiceTest {
     }
 
     @Test
-    void publish_withSkeletonPolicyAndEmptyAdGroups_isNotBlocked() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+    void publish_withSkeletonPolicyAndEmptyAdGroups_isBlocked_fosW7_2() {
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         ApiPolicyEntity skeleton = ApiPolicyEntity.createSkeleton(templateId, "10000002");
         when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(skeleton));
@@ -618,15 +620,38 @@ class PublishGateServiceTest {
                 .findFirst()
                 .orElseThrow())
                 .satisfies(item -> {
+                    assertThat(item.blocker()).isTrue();
+                    assertThat(item.ready()).isFalse();
+                    assertThat(item.messageKey()).isEqualTo("api.publishGate.apiPolicy.blocked");
+                    assertThat(item.summary()).contains("adGroupsConfigured=false");
+                    assertThat(item.summary()).contains("defaultRouteConfigured=false");
+                });
+    }
+
+    @Test
+    void publish_withSkeletonPolicyAndDefaultRoute_isReady_fosW7_2() {
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        ApiPolicyEntity skeleton = ApiPolicyEntity.createSkeleton(templateId, "10000002");
+        skeleton.updateDefaultRouteDomain("1.0.0", "10000002");
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(skeleton));
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.API_POLICY)
+                .findFirst()
+                .orElseThrow())
+                .satisfies(item -> {
                     assertThat(item.blocker()).isFalse();
                     assertThat(item.ready()).isTrue();
-                    assertThat(item.summary()).contains("adGroupsConfigured=false");
+                    assertThat(item.summary()).contains("defaultRouteConfigured=true");
                 });
     }
 
     @Test
     void publish_withMalformedRuleExpression_isBlocked_ruleBounds() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(templateRuleValidationService.validateRules(
                 org.mockito.ArgumentMatchers.eq(templateId),
@@ -644,7 +669,7 @@ class PublishGateServiceTest {
 
     @Test
     void publish_withoutApiPolicySkeleton_isBlocked() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.empty());
 
@@ -787,7 +812,7 @@ class PublishGateServiceTest {
 
     @Test
     void publishGate_blocksWhenLatestPreviewHasUnviewedFidelityWarnings() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(previewEvidencePort.countUnviewedFidelityWarnings(templateId, versionId)).thenReturn(2);
 
@@ -802,7 +827,7 @@ class PublishGateServiceTest {
 
     @Test
     void publishGate_readyWhenAllFidelityWarningsViewed() {
-        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(templateService.evaluateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
         when(previewEvidencePort.countUnviewedFidelityWarnings(templateId, versionId)).thenReturn(0);
 

@@ -33,6 +33,7 @@ export const apiMessagesEn = {
       },
       apiPolicy: {
         ready: 'API access is configured.',
+        blocked: 'API access is not callable (default route and AD groups are missing).',
       },
       blockerStatus: {
         ready: 'No unresolved blockers detected.',

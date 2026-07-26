@@ -2,6 +2,8 @@ package com.bank.docgen.contentmodule.service;
 
 import com.bank.docgen.contentmodule.api.ContentModuleNestingAncestorHit;
 import com.bank.docgen.contentmodule.api.ContentModuleNestingPublishSummaryView;
+import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
+import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleNestingEdgeEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleNestingEdgeRepository;
@@ -378,8 +380,13 @@ public class ContentModuleNestingService {
         if (cached != null) {
             return cached;
         }
+        // FOS-W7-6: walk APPROVED+ACTIVE latest by numeric semver (W6-4 order), not any head.
         List<ContentModuleVersionEntity> versions =
-                versionRepository.findByModuleIdOrderBySemanticVersionDesc(moduleId);
+                versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
+                        moduleId,
+                        ContentModuleReviewState.APPROVED,
+                        ContentModuleLifecycleState.ACTIVE
+                );
         if (versions.isEmpty()) {
             neighborCache.put(moduleId, Set.of());
             return Set.of();

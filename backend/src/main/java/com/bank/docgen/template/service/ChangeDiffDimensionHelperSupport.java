@@ -75,7 +75,8 @@ final class ChangeDiffDimensionHelperSupport {
             return objectMapper.readValue(rulesJson, new TypeReference<List<CompositionRuleView>>() {
             });
         } catch (Exception ex) {
-            return List.of();
+            // FOS-W7-5: unparseable composition rules fail closed (never silent empty diff).
+            throw new TemplateValidationException("api.error.template.invalidRulesJson");
         }
     }
 

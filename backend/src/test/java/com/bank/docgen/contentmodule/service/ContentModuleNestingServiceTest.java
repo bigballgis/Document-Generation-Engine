@@ -10,6 +10,8 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.contentmodule.api.ContentModuleNestingPublishSummaryView;
+import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
+import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleNestingEdgeEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleNestingEdgeRepository;
@@ -69,7 +71,7 @@ class ContentModuleNestingServiceTest {
     void validateAndSyncEdges_depthOneNest_savesEdge() {
         when(accessSupport.resolveModule("MOD-CHILD")).thenReturn(Optional.of(child));
         when(accessSupport.canAccessModule(author, child)).thenReturn(true);
-        when(versionRepository.findByModuleIdOrderBySemanticVersionDesc(CHILD_ID))
+        when(versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(CHILD_ID, ContentModuleReviewState.APPROVED, ContentModuleLifecycleState.ACTIVE))
                 .thenReturn(List.of(new ContentModuleVersionEntity(
                         CHILD_VERSION_ID, CHILD_ID, "1.0.0", "{\"nodes\":[]}", "i", "10000003")));
         when(edgeRepository.findByParentVersionId(CHILD_VERSION_ID)).thenReturn(List.of());
@@ -121,7 +123,7 @@ class ContentModuleNestingServiceTest {
         when(accessSupport.resolveModule("MOD-CHILD-ALIAS")).thenReturn(Optional.of(aliasChild));
         when(accessSupport.canAccessModule(author, child)).thenReturn(true);
         when(accessSupport.canAccessModule(author, aliasChild)).thenReturn(true);
-        when(versionRepository.findByModuleIdOrderBySemanticVersionDesc(CHILD_ID))
+        when(versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(CHILD_ID, ContentModuleReviewState.APPROVED, ContentModuleLifecycleState.ACTIVE))
                 .thenReturn(List.of(new ContentModuleVersionEntity(
                         CHILD_VERSION_ID, CHILD_ID, "1.0.0", "{\"nodes\":[]}", "i", "10000003")));
         when(edgeRepository.findByParentVersionId(CHILD_VERSION_ID)).thenReturn(List.of());
@@ -157,7 +159,7 @@ class ContentModuleNestingServiceTest {
     void validateAndSyncEdges_mutualCycle_rejected() {
         when(accessSupport.resolveModule("MOD-CHILD")).thenReturn(Optional.of(child));
         when(accessSupport.canAccessModule(author, child)).thenReturn(true);
-        when(versionRepository.findByModuleIdOrderBySemanticVersionDesc(CHILD_ID))
+        when(versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(CHILD_ID, ContentModuleReviewState.APPROVED, ContentModuleLifecycleState.ACTIVE))
                 .thenReturn(List.of(new ContentModuleVersionEntity(
                         CHILD_VERSION_ID, CHILD_ID, "1.0.0", "{\"nodes\":[]}", "i", "10000003")));
         when(edgeRepository.findByParentVersionId(CHILD_VERSION_ID)).thenReturn(List.of(
@@ -187,7 +189,7 @@ class ContentModuleNestingServiceTest {
 
         for (int i = 1; i <= 8; i++) {
             UUID versionId = UUID.nameUUIDFromBytes(("ver-" + i).getBytes());
-            when(versionRepository.findByModuleIdOrderBySemanticVersionDesc(moduleIds[i]))
+            when(versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(moduleIds[i], ContentModuleReviewState.APPROVED, ContentModuleLifecycleState.ACTIVE))
                     .thenReturn(List.of(new ContentModuleVersionEntity(
                             versionId, moduleIds[i], "1.0.0", "{}", "i", "10000003")));
             when(edgeRepository.findByParentVersionId(versionId)).thenReturn(List.of(
@@ -221,7 +223,7 @@ class ContentModuleNestingServiceTest {
 
         for (int i = 1; i <= 7; i++) {
             UUID versionId = UUID.nameUUIDFromBytes(("d8-ver-" + i).getBytes());
-            when(versionRepository.findByModuleIdOrderBySemanticVersionDesc(moduleIds[i]))
+            when(versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(moduleIds[i], ContentModuleReviewState.APPROVED, ContentModuleLifecycleState.ACTIVE))
                     .thenReturn(List.of(new ContentModuleVersionEntity(
                             versionId, moduleIds[i], "1.0.0", "{}", "i", "10000003")));
             when(edgeRepository.findByParentVersionId(versionId)).thenReturn(List.of(
@@ -232,7 +234,7 @@ class ContentModuleNestingServiceTest {
                             "MOD-" + (i + 1))));
         }
         UUID leafVersion = UUID.nameUUIDFromBytes("d8-ver-8".getBytes());
-        when(versionRepository.findByModuleIdOrderBySemanticVersionDesc(moduleIds[8]))
+        when(versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(moduleIds[8], ContentModuleReviewState.APPROVED, ContentModuleLifecycleState.ACTIVE))
                 .thenReturn(List.of(new ContentModuleVersionEntity(
                         leafVersion, moduleIds[8], "1.0.0", "{}", "i", "10000003")));
         when(edgeRepository.findByParentVersionId(leafVersion)).thenReturn(List.of());

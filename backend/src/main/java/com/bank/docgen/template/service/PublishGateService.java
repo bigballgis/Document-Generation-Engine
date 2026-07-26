@@ -85,7 +85,8 @@ public class PublishGateService {
     ) {
         templateService.requireReadableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
-        BindingValidationView bindings = templateService.validateBindings(templateId, session);
+        // FOS-W7-4: gate is read-only — do not persist binding validation statuses.
+        BindingValidationView bindings = templateService.evaluateBindings(templateId, session);
         CoverageSummaryView coverage = coverageComputationService.compute(templateId, session);
         ChangeDiffView changeDiff = changeDiffService.compute(templateId, session);
         TemplateRuleValidationView ruleValidation = validateCurrentRules(templateId, version, session);

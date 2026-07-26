@@ -133,8 +133,13 @@ final class TemplateLifecycleEligibilitySupport {
         return templateService.requireReadableTemplate(templateId, session);
     }
 
+    /**
+     * FOS-W7-3: publish stamps the same in-flight DEV row the publish gate validated —
+     * never a soft-deleted highest {@code dev_version_number}.
+     */
     TemplateVersionEntity requireReleaseCandidateVersion(UUID templateId) {
         return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId).stream()
+                .filter(version -> !version.isDeleted())
                 .filter(version -> version.getReleaseVersion() == null || version.getReleaseVersion().isBlank())
                 .findFirst()
                 .orElseThrow(TemplateNotFoundException::new);

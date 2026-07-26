@@ -161,9 +161,15 @@ public class TemplateService {
         return contentMutations.saveRules(templateId, rules, session);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public BindingValidationView validateBindings(UUID templateId, ManagementSessionClaims session) {
         return readQueries.validateBindings(templateId, session);
+    }
+
+    /** FOS-W7-4: publish-gate evaluation without persisting binding validation statuses. */
+    @Transactional(readOnly = true)
+    public BindingValidationView evaluateBindings(UUID templateId, ManagementSessionClaims session) {
+        return readQueries.evaluateBindings(templateId, session);
     }
 
     @Transactional(readOnly = true)
