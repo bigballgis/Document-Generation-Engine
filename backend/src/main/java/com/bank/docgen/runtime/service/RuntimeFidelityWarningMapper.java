@@ -137,6 +137,12 @@ public class RuntimeFidelityWarningMapper {
                 "region=pdf-page-number",
                 "Post-conversion PDFBox stamp was skipped because pdfArchivalProfile is PDF_A_2B.",
                 "Rely on DOCX page-number fields before LibreOffice conversion when archival PDF is required.");
+        put(catalog, "PDF_SECTION_PAGE_NUMBERS_UNRESOLVED",
+                "pdfSectionPageNumbersUnresolved",
+                "Section page numbers could not be resolved; document-global page numbers were used.",
+                "region=pdf-page-number",
+                "Footer requested SECTIONPAGES but true section pagination was unavailable.",
+                "Use global page numbers, or wait for section-aware pagination derived from the converted PDF.");
         put(catalog, "DOCX_PERMISSIONS_NOT_APPLIED",
                 "docxPermissionsNotApplied",
                 "Requested encryption permissions were not applied because permissions map only to PDF output.",
@@ -246,10 +252,10 @@ public class RuntimeFidelityWarningMapper {
     private static void putSealCatalogEntries(Map<String, CatalogEntry> catalog) {
         put(catalog, "SEAL_OUTSIDE_AUTHORIZED_AREA",
                 "sealOutsideAuthorizedArea",
-                "Seal placement is outside the authorized area.",
+                "Seal coordinates fall outside the declared authorized area; seals render inline at the anchor.",
                 "region=seal",
-                "A seal reference was placed outside the authorized region.",
-                "Move the seal into the authorized area before republishing.");
+                "Declared sealBox coordinates are outside the authorized region; absolute page placement is not applied.",
+                "Treat authorized areas as guidance, or adjust sealBox documentation; seals stay inline.");
         put(catalog, "SEAL_AUTHORIZED_AREA_UNKNOWN",
                 "sealAuthorizedAreaUnknown",
                 "Seal placement references an unknown authorized area.",

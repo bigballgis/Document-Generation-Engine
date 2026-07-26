@@ -8,7 +8,8 @@ import java.util.List;
  */
 public record PdfPageNumberStampPlan(
         boolean dualPageNumbersEnabled,
-        List<Integer> sectionStartPages
+        List<Integer> sectionStartPages,
+        boolean sectionPaginationUnresolved
 ) {
 
     public PdfPageNumberStampPlan {
@@ -19,11 +20,16 @@ public record PdfPageNumberStampPlan(
     }
 
     public static PdfPageNumberStampPlan globalOnly() {
-        return new PdfPageNumberStampPlan(false, List.of(1));
+        return new PdfPageNumberStampPlan(false, List.of(1), false);
+    }
+
+    /** CRCH-W0-4: dual footer requested but section starts unknown — stamp global only. */
+    public static PdfPageNumberStampPlan globalOnlyWithUnresolvedSectionPagination() {
+        return new PdfPageNumberStampPlan(false, List.of(1), true);
     }
 
     public static PdfPageNumberStampPlan sectionAndGlobal(List<Integer> sectionStartPages) {
-        return new PdfPageNumberStampPlan(true, sectionStartPages);
+        return new PdfPageNumberStampPlan(true, sectionStartPages, false);
     }
 
     public int sectionIndexForPage(int pageNumber) {

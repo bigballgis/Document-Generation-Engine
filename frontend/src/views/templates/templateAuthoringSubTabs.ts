@@ -2,7 +2,6 @@ export const TEMPLATE_AUTHORING_SUB_TABS = [
   'variables',
   'contentModules',
   'bindings',
-  'testPreview',
 ] as const
 
 export type TemplateAuthoringSubTab = (typeof TEMPLATE_AUTHORING_SUB_TABS)[number]
@@ -14,7 +13,6 @@ const TEMPLATE_AUTHORING_SUB_TAB_LABEL_KEYS: Record<TemplateAuthoringSubTab, str
   variables: 'templates.authoring.subTabs.variables',
   contentModules: 'templates.authoring.subTabs.contentModules',
   bindings: 'templates.authoring.subTabs.bindings',
-  testPreview: 'templates.authoring.subTabs.testPreview',
 }
 
 export function resolveTemplateAuthoringSubTab(value: unknown): TemplateAuthoringSubTab {

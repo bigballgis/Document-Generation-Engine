@@ -75,7 +75,7 @@ public class ReferenceNodeService {
             StructuredContentNodeType nodeType =
                     StructuredContentNodeType.fromJsonType(node.path("type").asText("")).orElse(null);
             if (nodeType == StructuredContentNodeType.SEAL_REF) {
-                validateSealRef(node, nodeLocation, catalog, blockers);
+                validateSealRef(node, nodeLocation, catalog, blockers, warnings);
             } else if (nodeType == StructuredContentNodeType.IMAGE_REF) {
                 validateImageRef(node, nodeLocation, warnings);
             } else if (nodeType == StructuredContentNodeType.QR_BARCODE_REF) {
@@ -97,12 +97,14 @@ public class ReferenceNodeService {
             JsonNode node,
             String location,
             AuthorizedSealAreaCatalog catalog,
-            List<StructuredContentFidelityIssue> blockers
+            List<StructuredContentFidelityIssue> blockers,
+            List<StructuredContentFidelityIssue> warnings
     ) {
         validateReferenceKey(node, location, "referenceKey", blockers);
         JsonNode placement = node.get("placement");
         if (placement != null && placement.isObject()) {
-            validateSealPlacementGeometry(placement, location, catalog, blockers);
+            // CRCH-W0-7 / D4: seals render inline — authorized-area geometry is advisory only.
+            validateSealPlacementGeometry(placement, location, catalog, warnings);
         }
         if (node.path("applyScaling").asBoolean(false)) {
             blockers.add(issue(
@@ -120,56 +122,61 @@ public class ReferenceNodeService {
             JsonNode placement,
             String location,
             AuthorizedSealAreaCatalog catalog,
-            List<StructuredContentFidelityIssue> blockers
+            List<StructuredContentFidelityIssue> warnings
     ) {
         String authorizedAreaId = placement.path("authorizedAreaId").asText("").trim();
         JsonNode sealBoxNode = placement.get("sealBox");
         Optional<SealGeometryRules.SealAxisAlignedBox> sealBox =
                 AuthorizedSealAreaCatalog.parseSealBox(sealBoxNode);
         if (sealBox.isEmpty()) {
-            blockers.add(issue(
-                    StructuredContentFidelitySeverity.BLOCKER,
+            warnings.add(issue(
+                    StructuredContentFidelitySeverity.WARNING,
                     FidelityWarningCode.SEAL_PLACEMENT_GEOMETRY_INVALID,
                     MESSAGE_KEY_SEAL_PLACEMENT_GEOMETRY_INVALID,
                     location + ".placement",
-                    "Seal placement geometry is invalid at " + location + ".",
-                    "Provide placement.sealBox with xPt/yPt (width/height default 48pt) in page-local pt."
+                    "Seal placement geometry is invalid at " + location
+                            + "; seals are placed inline at the anchor (absolute page box is not applied).",
+                    "Provide placement.sealBox width/height for inline seal size, or remove placement if unused."
             ));
             return;
         }
 
         AuthorizedSealAreaCatalog.AreaLookup lookup = catalog.lookup(authorizedAreaId);
         if (lookup.status() == AuthorizedSealAreaCatalog.AreaStatus.UNKNOWN) {
-            blockers.add(issue(
-                    StructuredContentFidelitySeverity.BLOCKER,
+            warnings.add(issue(
+                    StructuredContentFidelitySeverity.WARNING,
                     FidelityWarningCode.SEAL_AUTHORIZED_AREA_UNKNOWN,
                     MESSAGE_KEY_SEAL_AUTHORIZED_AREA_UNKNOWN,
                     location + ".placement.authorizedAreaId",
-                    "Authorized seal area id is unknown at " + location + ".",
-                    "Reference an id declared in root authorizedSealAreas[]."
+                    "Authorized seal area id is unknown at " + location
+                            + "; seals remain inline at the anchor.",
+                    "Declare the area in authorizedSealAreas for documentation, or remove authorizedAreaId."
             ));
             return;
         }
         if (lookup.status() == AuthorizedSealAreaCatalog.AreaStatus.INVALID) {
-            blockers.add(issue(
-                    StructuredContentFidelitySeverity.BLOCKER,
+            warnings.add(issue(
+                    StructuredContentFidelitySeverity.WARNING,
                     FidelityWarningCode.SEAL_AUTHORIZED_AREA_INVALID,
                     MESSAGE_KEY_SEAL_AUTHORIZED_AREA_INVALID,
                     location + ".placement.authorizedAreaId",
-                    "Authorized seal area referenced at " + location + " is invalid.",
+                    "Authorized seal area referenced at " + location
+                            + " is invalid; seals remain inline at the anchor.",
                     "Correct the authorizedSealAreas entry geometry or remove duplicate ids."
             ));
             return;
         }
 
         if (!SealGeometryRules.fullyContains(lookup.area(), sealBox.get())) {
-            blockers.add(issue(
-                    StructuredContentFidelitySeverity.BLOCKER,
+            warnings.add(issue(
+                    StructuredContentFidelitySeverity.WARNING,
                     FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA,
                     MESSAGE_KEY_SEAL_OUTSIDE_AUTHORIZED_AREA,
                     location,
-                    "Seal placement at " + location + " is outside the authorized area.",
-                    "Reposition the seal within the authorized seal zone."
+                    "Seal placement coordinates at " + location
+                            + " fall outside the declared authorized area; "
+                            + "the product places seals inline at the anchor and does not honour absolute page boxes.",
+                    "Treat authorized areas as authoring guidance, or remove placement coordinates."
             ));
         }
     }

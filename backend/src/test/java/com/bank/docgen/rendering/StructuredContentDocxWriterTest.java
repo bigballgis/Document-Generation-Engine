@@ -5,6 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
+import org.apache.poi.xwpf.usermodel.XWPFPicture;
+import org.apache.poi.util.Units;
+import javax.imageio.ImageIO;
+import java.io.IOException;
+import java.io.ByteArrayOutputStream;
+import java.awt.image.BufferedImage;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -724,6 +730,125 @@ class StructuredContentDocxWriterTest {
                 .isInstanceOf(DocxAssemblyException.class)
                 .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
                 .isEqualTo("api.error.rendering.unsupportedNodeType");
+    }
+
+
+    @Test
+    void preservesImageAspectRatioInside48ptBox_crchW02() throws Exception {
+        StructuredContentImageResolver resolver = keyAgnosticResolver(pngBytes(200, 100));
+        writer = StructuredContentDocxWriterTestSupport.createWriter(objectMapper, resolver);
+        String structured = """
+                {"nodes":[{"type":"paragraph","children":[{"type":"imageRef","imageRef":"IMG-WIDE"}]}]}
+                """;
+
+        byte[] result = render(structured, Map.of());
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            XWPFPicture picture = document.getParagraphs().stream()
+                    .flatMap(paragraph -> paragraph.getRuns().stream())
+                    .flatMap(run -> run.getEmbeddedPictures().stream())
+                    .findFirst()
+                    .orElseThrow();
+            long cx = picture.getCTPicture().getSpPr().getXfrm().getExt().getCx();
+            long cy = picture.getCTPicture().getSpPr().getXfrm().getExt().getCy();
+            assertThat(cx).isEqualTo(Units.toEMU(48));
+            assertThat(cy).isEqualTo(Units.toEMU(24));
+        }
+    }
+
+    @Test
+    void rendersSealAtDeclaredSealBoxSize_crchW03() throws Exception {
+        StructuredContentImageResolver resolver = keyAgnosticResolver(pngBytes(64, 64));
+        writer = StructuredContentDocxWriterTestSupport.createWriter(objectMapper, resolver);
+        String structured = """
+                {"nodes":[{"type":"paragraph","children":[{
+                  "type":"sealRef",
+                  "referenceKey":"OFFICIAL_SEAL",
+                  "placement":{
+                    "authorizedAreaId":"AREA_1",
+                    "sealBox":{"pageIndex":0,"xPt":100,"yPt":100,"widthPt":120,"heightPt":90}
+                  }
+                }]}]}
+                """;
+
+        byte[] result = render(structured, Map.of());
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            XWPFPicture picture = document.getParagraphs().stream()
+                    .flatMap(paragraph -> paragraph.getRuns().stream())
+                    .flatMap(run -> run.getEmbeddedPictures().stream())
+                    .findFirst()
+                    .orElseThrow();
+            long cx = picture.getCTPicture().getSpPr().getXfrm().getExt().getCx();
+            long cy = picture.getCTPicture().getSpPr().getXfrm().getExt().getCy();
+            assertThat(cx).isEqualTo(Units.toEMU(120));
+            assertThat(cy).isEqualTo(Units.toEMU(90));
+        }
+    }
+
+    @Test
+    void rendersSealAtDefaultSizeWhenPlacementAbsent_crchW03() throws Exception {
+        StructuredContentImageResolver resolver = keyAgnosticResolver(pngBytes(64, 64));
+        writer = StructuredContentDocxWriterTestSupport.createWriter(objectMapper, resolver);
+        String structured = """
+                {"nodes":[{"type":"paragraph","children":[{"type":"sealRef","referenceKey":"OFFICIAL_SEAL"}]}]}
+                """;
+
+        byte[] result = render(structured, Map.of());
+
+        try (XWPFDocument document = StructuredContentDocxWriterTestSupport.openDocument(result)) {
+            XWPFPicture picture = document.getParagraphs().stream()
+                    .flatMap(paragraph -> paragraph.getRuns().stream())
+                    .flatMap(run -> run.getEmbeddedPictures().stream())
+                    .findFirst()
+                    .orElseThrow();
+            long cx = picture.getCTPicture().getSpPr().getXfrm().getExt().getCx();
+            long cy = picture.getCTPicture().getSpPr().getXfrm().getExt().getCy();
+            assertThat(cx).isEqualTo(Units.toEMU(48));
+            assertThat(cy).isEqualTo(Units.toEMU(48));
+        }
+    }
+
+    private static byte[] pngBytes(int width, int height) throws IOException {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", out);
+        return out.toByteArray();
+    }
+
+    private static StructuredContentImageResolver keyAgnosticResolver(byte[] bytes) {
+        return new StructuredContentImageResolver(
+                new com.bank.docgen.infrastructure.storage.ObjectStoragePort() {
+                    @Override
+                    public void put(String objectKey, java.io.InputStream content, long contentLength, String contentType) {
+                    }
+
+                    @Override
+                    public java.io.InputStream get(String objectKey) {
+                        throw new UnsupportedOperationException();
+                    }
+
+                    @Override
+                    public void delete(String objectKey) {
+                    }
+
+                    @Override
+                    public boolean exists(String objectKey) {
+                        return false;
+                    }
+                },
+                false
+        ) {
+            @Override
+            public ResolvedImage resolveImageRef(String imageRef) {
+                return new StructuredContentImageResolver.ResolvedImage(bytes, "custom.png");
+            }
+
+            @Override
+            public ResolvedImage resolveSealRef(String referenceKey) {
+                return new StructuredContentImageResolver.ResolvedImage(bytes, "seal.png");
+            }
+        };
     }
 
     private byte[] render(String structuredJson, Map<String, Object> variables) throws Exception {

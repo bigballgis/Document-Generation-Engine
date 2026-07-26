@@ -3,7 +3,7 @@
 **Program id:** `CRCH` (Core Rendering & Compute Hardening)
 **Type:** Ad-hoc NON-CE remediation program — **not** a formal P-phase, **not** an IBL/CE wave
 **Formal plan phase:** **None** (single-active-phase discipline unaffected)
-**Status:** **Not Started** (plan only — no code written)
+**Status:** **In Progress** (W0+W1 leaf `render-p0-preview-dedupe` Done; W2+ Not Started)
 **Created:** 2026-07-26
 **Origin:** User-commissioned deep audit of AI-authored core functionality (template orchestration, rendering fidelity, compute formulas, PDF conversion)
 **Audit baseline commit:** `df9a5b7d`
@@ -114,9 +114,16 @@ Extending capability must not widen the attack surface.
 
 ---
 
-## 3. Open decisions — BLOCKED pending user input
+## 3. Open decisions — RESOLVED (user 2026-07-26)
 
-Do not implement these. Surface them and wait.
+Previously blocked OD-1 / OD-2 were confirmed in the full-auto remediation session:
+
+| Former | Resolution | Consequence |
+| --- | --- | --- |
+| OD-1 | **Inline seals** (D4) | No `CTAnchor`. W0-7 demotes dishonest authorized-area geometry BLOCKERs. |
+| OD-2 | Stamping **default OFF** (D5) | Do not flip `pdf-page-number-stamping-enabled` default. |
+
+No remaining open decisions for W0+W1. W2+ still require detail sheets before execution.
 
 ### OD-1 — Seal placement is validated but never rendered (compliance gap)
 
@@ -160,8 +167,8 @@ change the default.
 
 | Wave | Name | Tasks | Detail sheet | Status |
 | --- | --- | --- | --- | --- |
-| **W0** | Rendering & conversion correctness | 6 | [CRCH-W0-rendering-correctness.md](detail/CRCH-W0-rendering-correctness.md) | **Not Started** |
-| **W1** | Preview consolidation | 6 | [CRCH-W1-preview-consolidation.md](detail/CRCH-W1-preview-consolidation.md) | **Not Started** |
+| **W0** | Rendering & conversion correctness | 7 | [CRCH-W0-rendering-correctness.md](detail/CRCH-W0-rendering-correctness.md) | **Done** |
+| **W1** | Preview consolidation | 6 | [CRCH-W1-preview-consolidation.md](detail/CRCH-W1-preview-consolidation.md) | **Done** |
 | **W2** | Compute DSL capability | ~6 | not yet written — see §5 | **Not Started** |
 | **W3** | DOCX fidelity depth | ~6 | not yet written — see §6 | **Not Started** |
 | **W4** | Authoring information architecture | ~4 | not yet written — see §7 | **Not Started** |

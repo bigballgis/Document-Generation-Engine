@@ -1007,6 +1007,7 @@ export default {
         title: 'Template testing',
         subTabs: {
           dataSets: 'Test data sets',
+          batchRuns: 'Batch tests',
           previewRuns: 'Preview runs',
           coverage: 'Coverage',
           changeDiff: 'Change diff',
@@ -1648,7 +1649,6 @@ export default {
         variables: 'Variables',
         bindings: 'Bindings',
         contentModules: 'Clause references',
-        testPreview: 'Test & preview',
       },
       previewPaneTitle: 'Final-chain preview',
       previewStale: 'Preview out of date',
@@ -1660,7 +1660,7 @@ export default {
         'Run a test generation or refresh to load the final-chain DOCX/PDF artifact beside the editor.',
       previewCollapse: 'Hide preview',
       previewExpand: 'Show preview',
-      inlinePdfTitle: 'PDF preview',
+
     },
     structuredEditor: {
       bindingHint:
@@ -1801,6 +1801,7 @@ export default {
       noComparison: 'No comparison summary yet.',
       noComparisonItems: 'No structured comparison differences recorded.',
       refresh: 'Refresh preview',
+      reloadDetails: 'Reload details',
       comparisonTitle: 'Structured preview comparison',
       locationType: 'Location type',
       locationRef: 'Location reference',

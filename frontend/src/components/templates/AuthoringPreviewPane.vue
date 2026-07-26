@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { computed, toRef } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import InlinePdfPreviewViewer from '@/components/templates/InlinePdfPreviewViewer.vue'
 import TemplatePreviewPanel from '@/components/templates/TemplatePreviewPanel.vue'
-import { useInlinePdfPreview } from '@/components/templates/useInlinePdfPreview'
 import type { AnchorBinding, PreviewRecord } from '@/types/template'
 
 const props = defineProps<{
@@ -22,16 +20,6 @@ const { t } = useI18n()
 
 const hasPreview = computed(() => props.preview !== null)
 const refreshDisabled = computed(() => props.refreshing === true)
-
-const {
-  loading: inlinePdfLoading,
-  errorMessage: inlinePdfError,
-  pdfBlob,
-  canShowInlinePdf,
-} = useInlinePdfPreview({
-  templateId: toRef(props, 'templateId'),
-  preview: toRef(props, 'preview'),
-})
 
 function handleRefresh() {
   if (refreshDisabled.value) {
@@ -70,24 +58,9 @@ function handleRefresh() {
       </el-button>
     </div>
 
-    <section
-      v-if="hasPreview && canShowInlinePdf"
-      class="authoring-preview-pane__inline-pdf"
-      data-testid="authoring-inline-pdf-section"
-    >
-      <h4 class="authoring-preview-pane__inline-pdf-title">
-        {{ t('templates.authoring.inlinePdfTitle') }}
-      </h4>
-      <InlinePdfPreviewViewer
-        :blob="pdfBlob"
-        :loading="inlinePdfLoading || refreshing"
-        :error-message="inlinePdfError"
-      />
-    </section>
-
     <TemplatePreviewPanel
       v-if="hasPreview"
-      compact
+      embedded
       :template-id="templateId"
       :bindings="bindings"
       :preview="preview"
@@ -138,19 +111,6 @@ function handleRefresh() {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
-  }
-
-  &__inline-pdf {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  &__inline-pdf-title {
-    margin: 0;
-    font-size: var(--font-size-sm);
-    font-weight: 650;
-    color: var(--text-secondary);
   }
 
   &__empty-hint {

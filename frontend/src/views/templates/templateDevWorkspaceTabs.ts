@@ -64,8 +64,8 @@ export function resolveTemplateDevWorkspaceTabFromQuery(
 
   const legacyTab = query.tab
   if (legacyTab === 'authoring') {
-    const authoringSubTab = resolveTemplateAuthoringSubTab(query.authoringTab)
-    if (authoringSubTab === 'testPreview') {
+    // CRCH-W1-5: testPreview removed from authoring union; preserve legacy deep-link remap.
+    if (query.authoringTab === 'testPreview') {
       return 'testing'
     }
     return 'design'
@@ -81,18 +81,16 @@ export function resolveTemplateDevWorkspaceTabFromQuery(
 export function resolveDesignSubTabFromQuery(query: TemplateDevWorkspaceRouteQuery): TemplateAuthoringSubTab {
   const designTab = query.designTab
   if (typeof designTab === 'string') {
-    const resolved = resolveTemplateAuthoringSubTab(designTab)
-    if (resolved !== 'testPreview') {
-      return resolved
+    if (designTab === 'testPreview') {
+      return DEFAULT_TEMPLATE_AUTHORING_SUB_TAB
     }
+    return resolveTemplateAuthoringSubTab(designTab)
   }
 
-  const legacyAuthoringTab = resolveTemplateAuthoringSubTab(query.authoringTab)
-  if (legacyAuthoringTab !== 'testPreview') {
-    return legacyAuthoringTab
+  if (query.authoringTab === 'testPreview') {
+    return DEFAULT_TEMPLATE_AUTHORING_SUB_TAB
   }
-
-  return DEFAULT_TEMPLATE_AUTHORING_SUB_TAB
+  return resolveTemplateAuthoringSubTab(query.authoringTab)
 }
 
 export function resolveTestingSubTabFromQuery(query: TemplateDevWorkspaceRouteQuery): TemplateTestingSubTab {

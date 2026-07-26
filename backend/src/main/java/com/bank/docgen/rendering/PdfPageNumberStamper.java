@@ -39,7 +39,8 @@ public final class PdfPageNumberStamper {
             List<Integer> sectionStarts = normalizeSectionStarts(resolvedPlan.sectionStartPages(), totalPages);
             PdfPageNumberStampPlan normalizedPlan = new PdfPageNumberStampPlan(
                     resolvedPlan.dualPageNumbersEnabled(),
-                    sectionStarts
+                    sectionStarts,
+                    resolvedPlan.sectionPaginationUnresolved()
             );
             for (int pageIndex = 0; pageIndex < totalPages; pageIndex++) {
                 int pageNumber = pageIndex + 1;
