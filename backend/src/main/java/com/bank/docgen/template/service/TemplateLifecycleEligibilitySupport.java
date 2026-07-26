@@ -45,7 +45,10 @@ final class TemplateLifecycleEligibilitySupport {
 
     void requireStatus(TemplateEntity template, TemplateLifecycleStatus expected) {
         if (template.getLifecycleStatus() != expected) {
-            throw new TemplateValidationException("api.error.template.invalidState");
+            throw new TemplateValidationException(
+                    "api.error.template.invalidState",
+                    template.getLifecycleStatus().name()
+            );
         }
     }
 
@@ -63,7 +66,10 @@ final class TemplateLifecycleEligibilitySupport {
                 && approvalSubStateResolver.resolve(template) == ApprovalSubState.PENDING_SUBMIT) {
             return;
         }
-        throw new TemplateValidationException("api.error.template.invalidState");
+        throw new TemplateValidationException(
+                "api.error.template.invalidState",
+                status == null ? "UNKNOWN" : status.name()
+        );
     }
 
     /**
@@ -72,7 +78,10 @@ final class TemplateLifecycleEligibilitySupport {
      */
     void requirePendingSubmitForApproval(TemplateEntity template) {
         if (approvalSubStateResolver.resolve(template) != ApprovalSubState.PENDING_SUBMIT) {
-            throw new TemplateValidationException("api.error.template.invalidState");
+            throw new TemplateValidationException(
+                    "api.error.template.invalidState",
+                    template.getLifecycleStatus().name()
+            );
         }
     }
 
@@ -81,7 +90,10 @@ final class TemplateLifecycleEligibilitySupport {
         if (subState != ApprovalSubState.PENDING_DECISION
                 && subState != ApprovalSubState.PENDING_LEGAL_DECISION
                 && subState != ApprovalSubState.PENDING_COMPLIANCE_DECISION) {
-            throw new TemplateValidationException("api.error.template.invalidState");
+            throw new TemplateValidationException(
+                    "api.error.template.invalidState",
+                    template.getLifecycleStatus().name()
+            );
         }
         return subState;
     }

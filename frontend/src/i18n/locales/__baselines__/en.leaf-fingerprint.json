@@ -1,6 +1,6 @@
 {
-  "keyCount": 2934,
-  "sha256": "8da2cb70e406017a9326aa70cfe90ae6827e1eeeab249be251c8286f32557696",
+  "keyCount": 2936,
+  "sha256": "74600114864a5afbcdf7a3793f222e481993942334d2dcbf0c427fdc346029cd",
   "keys": [
     "api.apimgmt.policyImpact.blocking",
     "api.apimgmt.policyImpact.defaultRouteChanged",
@@ -51,6 +51,7 @@
     "api.error.collaboration.accessDenied",
     "api.error.collaboration.queueDenied",
     "api.error.collaboration.workItemNotFound",
+    "api.error.conflict.dataIntegrity",
     "api.error.conflict.groupCodeAlreadyExists",
     "api.error.conflict.legalHoldAlreadyReleased",
     "api.error.conflict.usernameAlreadyExists",
@@ -261,6 +262,7 @@
     "api.error.template.masterNotApproved",
     "api.error.template.nextReviewDueInvalid",
     "api.error.template.notFound",
+    "api.error.template.optimisticLockConflict",
     "api.error.template.piiCategoryInvalid",
     "api.error.template.piiConfirmReasonRequired",
     "api.error.template.piiSecondaryConfirmRequired",

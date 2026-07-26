@@ -5,9 +5,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface TemplateRepository extends JpaRepository<TemplateEntity, UUID>, TemplateRepositoryCustom {
 
@@ -23,6 +27,11 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, UUID>,
     );
 
     Optional<TemplateEntity> findByIdAndDeletedAtIsNull(UUID id);
+
+    /** FOS-W8-2: serialize publish / release stamp against concurrent writers. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT t FROM TemplateEntity t WHERE t.id = :id AND t.deletedAt IS NULL")
+    Optional<TemplateEntity> findByIdAndDeletedAtIsNullForUpdate(@Param("id") UUID id);
 
     Optional<TemplateEntity> findByExternalIdAndDeletedAtIsNull(String externalId);
 

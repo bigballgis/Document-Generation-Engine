@@ -1,7 +1,9 @@
 # FOS-W8 — Concurrency & integrity
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
-**Wave:** W8 · **Status:** **Not Started**
+**Wave:** W8 · **Status:** **Done** (gates green; merge + MAIN closeout pending)
+**Evidence:** [fos-concurrency-integrity/gates.md](../evidence/fos-concurrency-integrity/gates.md)
+**Behavior:** [fos-concurrency-integrity.md](../../behavior/fos-concurrency-integrity.md)
 **Slice id:** `fos-concurrency-integrity` · worktree `../DGE-fos-concurrency-integrity` · branch `feat/fos-concurrency-integrity`
 **Task Master:** **#178** · **delivery_lane:** **full**
 **Origin:** B11, B12, B17, B18, B20

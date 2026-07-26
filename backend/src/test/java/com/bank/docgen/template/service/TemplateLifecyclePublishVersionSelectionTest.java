@@ -148,6 +148,7 @@ class TemplateLifecyclePublishVersionSelectionTest {
         TemplateVersionEntity candidateVersion = version(2, null, TemplateLifecycleStatus.DRAFT);
 
         when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateRepository.findByIdAndDeletedAtIsNullForUpdate(templateId)).thenReturn(Optional.of(template));
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
         org.mockito.Mockito.doNothing().when(publishGateService).assertReady(templateId, groupAdmin);
         when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
@@ -177,6 +178,7 @@ class TemplateLifecyclePublishVersionSelectionTest {
         TemplateVersionEntity publishedVersion = version(1, "1.0.0", TemplateLifecycleStatus.PUBLISHED);
 
         when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateRepository.findByIdAndDeletedAtIsNullForUpdate(templateId)).thenReturn(Optional.of(template));
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
         org.mockito.Mockito.doNothing().when(publishGateService).assertReady(templateId, groupAdmin);
         when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
@@ -201,6 +203,7 @@ class TemplateLifecyclePublishVersionSelectionTest {
         TemplateVersionEntity candidateVersion = version(2, null, TemplateLifecycleStatus.DRAFT);
 
         when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateRepository.findByIdAndDeletedAtIsNullForUpdate(templateId)).thenReturn(Optional.of(template));
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
         org.mockito.Mockito.doNothing().when(publishGateService).assertReady(templateId, groupAdmin);
         when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))

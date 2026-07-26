@@ -165,7 +165,7 @@ public class TemplateContentModuleReferenceService {
     ) {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        assertDraft(template);
+        templateService.assertDraft(template);
         String referenceKey = referenceSupport.normalizeReferenceKey(request.referenceKey());
         var existing = referenceRepository.findByTemplateVersionIdAndReferenceKey(version.getId(), referenceKey);
         if (existing.isPresent() && existing.get().isLockedFlag()) {
@@ -408,9 +408,4 @@ public class TemplateContentModuleReferenceService {
         return jurisdictions;
     }
 
-    private void assertDraft(TemplateEntity template) {
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.DRAFT) {
-            throw new TemplateValidationException("api.error.template.invalidState");
-        }
-    }
 }

@@ -44,12 +44,28 @@ public class ErrorEnvelopeFactory {
             String messageKey,
             boolean retryable
     ) {
+        return domainError(request, status, code, category, messageKey, retryable, new Object[0]);
+    }
+
+    public ResponseEntity<ErrorEnvelope> domainError(
+            HttpServletRequest request,
+            HttpStatus status,
+            String code,
+            String category,
+            String messageKey,
+            boolean retryable,
+            Object... messageArgs
+    ) {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();
+        Object[] args = messageArgs == null ? new Object[0] : messageArgs;
+        String resolved = args.length == 0
+                ? messageResolver.resolve(messageKey)
+                : messageResolver.resolve(messageKey, args);
         ErrorDetail error = new ErrorDetail(
                 code,
                 category,
-                messageResolver.resolve(messageKey),
+                resolved,
                 messageKey,
                 retryable,
                 null

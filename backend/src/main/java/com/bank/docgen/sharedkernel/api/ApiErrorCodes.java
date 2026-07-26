@@ -25,6 +25,10 @@ public final class ApiErrorCodes {
     public static final String TEMPLATE_DEFAULT_ROUTE_TARGET = "TEMPLATE_DEFAULT_ROUTE_TARGET";
     /** CE-U21: anchor binding update expectedUpdatedAt mismatch. */
     public static final String BINDING_VERSION_CONFLICT = "BINDING_VERSION_CONFLICT";
+    /** FOS-W8: JPA @Version / unique constraint collision on template authoring aggregates. */
+    public static final String TEMPLATE_OPTIMISTIC_LOCK_CONFLICT = "TEMPLATE_OPTIMISTIC_LOCK_CONFLICT";
+    /** FOS-W8-3: DB unique / integrity collision mapped to conflict envelope. */
+    public static final String DATA_INTEGRITY_CONFLICT = "DATA_INTEGRITY_CONFLICT";
     public static final String PREVIEW_NOT_FOUND = "PREVIEW_NOT_FOUND";
     public static final String RENDERING_FAILED = "RENDERING_FAILED";
     public static final String API_POLICY_NOT_FOUND = "API_POLICY_NOT_FOUND";

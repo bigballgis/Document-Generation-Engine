@@ -81,7 +81,8 @@ export const apiErrorEn = {
     changeDiffReleaseVersionsRequired:
       "Both releaseVersionA and releaseVersionB are required for release change-diff comparison.",
     confirmationRequired: "Secondary confirmation is required for this operation.",
-    invalidState: "The template is not in a valid state for this operation.",
+    invalidState: "The template is not in a valid state for this operation (current status: {0}).",
+    optimisticLockConflict: "This template version was updated elsewhere. Reload, then try again.",
     invalidRulesJson: "The composition or binding rules JSON is invalid and could not be parsed.",
     devLineInFlight: "A development version line is already in progress. Finish or abandon it before cloning a published release.",
     versionImmutable: "Published template version content cannot be modified.",
@@ -119,8 +120,8 @@ export const apiErrorEn = {
       "This binding was updated elsewhere. Reload the binding, then save again.",
     bindingExpectedUpdatedAtRequired:
       "expectedUpdatedAt is required when updating an existing anchor binding.",
-    publishGateBlocked: "Publish is blocked until binding validation passes.",
-    submitForApprovalGateBlocked: "Submit for approval is blocked until pre-release checks pass.",
+    publishGateBlocked: "Publish is blocked by gate check {0}.",
+    submitForApprovalGateBlocked: "Submit for approval is blocked by gate check {0}.",
     decisionReasonCategoryRequired: "A reason category is required for failed or rejected decisions.",
     decisionImpactSummaryRequired: "An impact summary is required for failed or rejected decisions.",
     decisionFidelityConfirmationRequired: "Fidelity evidence must be confirmed before recording a passing test decision.",
@@ -288,7 +289,8 @@ export const apiErrorEn = {
   conflict: {
     usernameAlreadyExists: "A user with this username already exists.",
     groupCodeAlreadyExists: "A business group with this code already exists.",
-    legalHoldAlreadyReleased: "The legal hold has already been released."
+    legalHoldAlreadyReleased: "The legal hold has already been released.",
+    dataIntegrity: "The change conflicts with an existing unique record. Reload and retry.",
   },
   contentModule: {
     notFound: "The content module was not found.",

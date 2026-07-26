@@ -76,7 +76,8 @@ export const apiErrorZhCn = {
     accessDenied: "您无权访问此模板。",
     changeDiffReleaseVersionsRequired: "发布版本对比需要同时提供 releaseVersionA 与 releaseVersionB。",
     confirmationRequired: "此操作需要二次确认。",
-    invalidState: "模板当前状态不允许执行此操作。",
+    invalidState: "模板当前状态不允许执行此操作（当前状态：{0}）。",
+    optimisticLockConflict: "此模板版本已在别处更新。请重新加载后再试。",
     invalidRulesJson: "组合或绑定规则 JSON 无效，无法解析。",
     devLineInFlight: "已有进行中的开发版本线。请先完成或放弃后，再克隆已发布版本。",
     versionImmutable: "已发布的模板版本内容不可修改。",
@@ -106,8 +107,8 @@ export const apiErrorZhCn = {
     invalidPasteCleaningEvidence: "粘贴清洗证据无法序列化。",
     bindingVersionConflict: "此绑定已在其他处更新。请重新加载绑定后再保存。",
     bindingExpectedUpdatedAtRequired: "更新已有锚点绑定时必须提供 expectedUpdatedAt。",
-    publishGateBlocked: "绑定校验通过前无法发布。",
-    submitForApprovalGateBlocked: "检查通过前无法提交审批。",
+    publishGateBlocked: "发布被门禁检查 {0} 阻止。",
+    submitForApprovalGateBlocked: "提交审批被门禁检查 {0} 阻止。",
     decisionReasonCategoryRequired: "测试不通过或审批驳回时必须选择原因类别。",
     decisionImpactSummaryRequired: "测试不通过或审批驳回时必须填写影响摘要。",
     decisionFidelityConfirmationRequired: "记录测试通过前，必须确认保真度证据。",
@@ -266,7 +267,8 @@ export const apiErrorZhCn = {
   conflict: {
     usernameAlreadyExists: "具有此用户名的用户已存在。",
     groupCodeAlreadyExists: "具有此代码的业务组已存在。",
-    legalHoldAlreadyReleased: "该法律冻结记录已释放。"
+    legalHoldAlreadyReleased: "该法律冻结记录已释放。",
+    dataIntegrity: "变更与已有唯一记录冲突。请重新加载后重试。",
   },
   contentModule: {
     notFound: "未找到标准条款。",
