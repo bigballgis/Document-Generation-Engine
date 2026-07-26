@@ -82,3 +82,27 @@ describe('FidelityWarningList', () => {
     expect(wrapper.find('.el-empty').text()).toContain('No warnings match the current filters')
   })
 })
+
+describe('FidelityWarningList human labels (FOS-W1-1)', () => {
+  it('renders SEAL_OUTSIDE_AUTHORIZED_AREA without raw generation.warning.fidelity key', async () => {
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(FidelityWarningList, {
+      props: {
+        warnings: [
+          {
+            code: 'SEAL_OUTSIDE_AUTHORIZED_AREA',
+            messageKey: 'generation.warning.fidelity.sealOutsideAuthorizedArea',
+            location: 'BODY:seal[0]',
+            artifact: 'BODY',
+            viewed: false,
+          },
+        ],
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+    await flushPromises()
+    const text = wrapper.text()
+    expect(text).not.toContain('generation.warning.fidelity.')
+    expect(text.toLowerCase()).toContain('seal')
+  })
+})

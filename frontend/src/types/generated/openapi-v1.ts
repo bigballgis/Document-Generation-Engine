@@ -2721,7 +2721,10 @@ export interface components {
             expiresAt?: string;
             fingerprintSummary?: string;
             authorizedTemplateSummary?: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Instant when the previous secret stops being accepted after rotation (ISO 8601 with timezone offset). Per ADR-0009 (amended 2026-07-26), the rotation grace period is 28 days from the rotation instant. Absent when the credential has never been rotated or grace has ended.
+             */
             rotationGracePeriodEndsAt?: string;
         };
         /**

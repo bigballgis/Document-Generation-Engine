@@ -155,7 +155,7 @@ const {
             style="width: 100%"
             :disabled="!canWriteVariables"
           >
-            <el-option v-for="type in variableTypes" :key="type" :label="type" :value="type" />
+            <el-option v-for="type in variableTypes" :key="type" :label="t(`templates.authoring.variableTypes.${type}`)" :value="type" />
           </AppSearchSelect>
         </el-form-item>
         <el-form-item :label="t('templates.authoring.required')">

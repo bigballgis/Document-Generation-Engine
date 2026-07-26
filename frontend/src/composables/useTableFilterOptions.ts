@@ -17,7 +17,7 @@ const LIFECYCLE_STATUSES: TemplateLifecycleStatus[] = [
   'DEPRECATED',
 ]
 
-const MASTER_STATUSES = ['DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED', 'ARCHIVED'] as const
+const MASTER_STATUSES = ['DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED'] as const
 
 export function useLifecycleStatusFilterOptions() {
   const { t, te } = useI18n()

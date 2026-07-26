@@ -178,7 +178,7 @@ describe('TemplateInvocationsPanel', () => {
     await statusSelect?.find('.el-select__wrapper').trigger('click')
     await flushPromises()
     const failedOption = Array.from(document.querySelectorAll('.el-select-dropdown__item')).find(
-      (item) => item.textContent?.includes('FAILED'),
+      (item) => item.textContent?.includes('Failed'),
     )
     await failedOption?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     expect(requestInput.exists()).toBe(true)

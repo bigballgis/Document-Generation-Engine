@@ -81,6 +81,7 @@ export const apiErrorEn = {
       "Both releaseVersionA and releaseVersionB are required for release change-diff comparison.",
     confirmationRequired: "Secondary confirmation is required for this operation.",
     invalidState: "The template is not in a valid state for this operation.",
+    invalidRulesJson: "The composition or binding rules JSON is invalid and could not be parsed.",
     devLineInFlight: "A development version line is already in progress. Finish or abandon it before cloning a published release.",
     versionImmutable: "Published template version content cannot be modified.",
     defaultRouteTargetCannotDeactivate: "The release version configured as the default API route cannot be deactivated.",

@@ -150,12 +150,33 @@ const {
           prop="invocationKind"
           :label="t('templates.policy.invocations.columns.kind')"
           min-width="120"
-        />
+        >
+          <template #default="{ row }">
+            {{ t(`templates.policy.invocations.kindLabels.${row.invocationKind}`, row.invocationKind) }}
+          </template>
+        </el-table-column>
         <el-table-column
           prop="status"
           :label="t('templates.policy.invocations.columns.status')"
           min-width="120"
-        />
+        >
+          <template #default="{ row }">
+            <el-tag
+              :type="
+                row.status === 'SUCCEEDED'
+                  ? 'success'
+                  : row.status === 'FAILED'
+                    ? 'danger'
+                    : row.status === 'PARTIAL_SUCCEEDED' || row.status === 'PROCESSING'
+                      ? 'warning'
+                      : 'info'
+              "
+              size="small"
+            >
+              {{ t(`templates.policy.invocations.statusLabels.${row.status}`, row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column
           prop="resolvedReleaseVersion"
           :label="t('templates.policy.invocations.columns.releaseVersion')"

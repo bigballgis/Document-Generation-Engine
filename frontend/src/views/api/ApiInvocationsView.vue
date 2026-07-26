@@ -52,6 +52,13 @@ const packageSelectOptions = computed(() =>
   })),
 )
 
+const translatedStatusFilterOptions = computed(() =>
+  statusFilterOptions.value.map((option) => ({
+    value: option.value,
+    label: t(`apiPolicy.invocationsPage.statusLabels.${option.value}`),
+  })),
+)
+
 const { onRowClick: activateRow } = useActivatableTableRow<CrossPackageInvocationRow>((row) =>
   openDetail(row),
 )
@@ -116,7 +123,7 @@ watch(
           :placeholder="t('apiPolicy.invocationsPage.filters.statusPlaceholder')"
         >
           <el-option
-            v-for="option in statusFilterOptions"
+            v-for="option in translatedStatusFilterOptions"
             :key="option.value"
             :label="option.label"
             :value="option.value"
@@ -219,7 +226,20 @@ watch(
             min-width="120"
           >
             <template #default="{ row }">
-              {{ row.status }}
+              <el-tag
+                :type="
+                  row.status === 'SUCCEEDED'
+                    ? 'success'
+                    : row.status === 'FAILED'
+                      ? 'danger'
+                      : row.status === 'PARTIAL_SUCCEEDED' || row.status === 'PROCESSING'
+                        ? 'warning'
+                        : 'info'
+                "
+                size="small"
+              >
+                {{ t(`apiPolicy.invocationsPage.statusLabels.${row.status}`, row.status) }}
+              </el-tag>
             </template>
           </el-table-column>
           <el-table-column
