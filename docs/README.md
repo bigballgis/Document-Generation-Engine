@@ -9,7 +9,7 @@
 
 **P22 Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md).
 
-**Host sole-active (2026-07-27):** **none** (cleared after #169 merge + worktree remove; #169 plan Done sync pending stages 12–13). Next FOS **#182**. Formal phase **None**.
+**Host sole-active (2026-07-27):** **none** (cleared after #169 merge + worktree remove; #169 plan Done sync pending stages 12–13). Next FOS **#183**. Formal phase **None**.
 
 **P2-T06 Done** (Phase B master revision history, 2026-07-01). **P21 Done**. Latest gates: backend
 `mvn verify` BUILD SUCCESS; frontend **643** Vitest (2026-07-03). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)

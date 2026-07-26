@@ -162,7 +162,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Leaf 9 | **#179** | `fos-contract-works-first-time` | **done** | `d8fe2b03` / `0d4a6dd1`; deploy/E2E BLOCKED (0 images) |
 | Leaf 10 | **#180** | `fos-credential-lifecycle` | **done** | `89ff4d95` / `3c0bae0e`; deploy/E2E BLOCKED (0 images) |
 | Leaf 11 | **#181** | `fos-policy-impact-troubleshoot` | **done** | `821d0f4a` / `8e5b9a53`; deploy/E2E BLOCKED (0 images) |
-| Leaf 12 | **#182** | `fos-ci-gates-tell-truth` | **pending** | May run earlier if host CI is blocking all delivery — orchestrator may promote |
+| Leaf 12 | **#182** | `fos-ci-gates-tell-truth` | **done** | `5bc228f8` / `df8ed393`; Playwright Smoke fail-closed/BLOCKED on GHA |
 | Leaf 13 | **#183** | `fos-default-verify-honesty` | **pending** | After / with CRCH W5 designs |
 | Leaf 14 | **#184** | `fos-demo-literacy-path` | **pending** | |
 | Leaf 15 | **#185** | `fos-word-foundation-honesty` | **pending** | Word-as-foundation deep review (2026-07-26); do **not** auto-activate |
