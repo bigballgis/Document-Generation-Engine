@@ -151,9 +151,11 @@ Write-Lock -Phase "running"
 Write-Host "DEPLOY_QUEUE: acquired lock (pid=$PID) — $Reason"
 
 $deployScript = Join-Path $RepoRoot "scripts\docker-deploy.ps1"
-$deployArgs = @()
-if ($SkipBuild) { $deployArgs += "-SkipBuild" }
-if ($ForceRebuild) { $deployArgs += "-ForceRebuild" }
+# Hashtable splat so [switch] params bind (array @("-SkipBuild") does not).
+$deployArgs = @{
+    SkipBuild    = [bool]$SkipBuild
+    ForceRebuild = [bool]$ForceRebuild
+}
 
 try {
     & $deployScript @deployArgs
