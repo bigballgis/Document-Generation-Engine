@@ -89,6 +89,12 @@ If evidence quality is low, mark the threshold assessment as pending and collect
 - Never bundle unrelated tuning changes in one evolution patch.
 - Always preserve single-entry orchestration and task-id traceability.
 - Keep confirmed facts and pending hypotheses separate.
+- Prefer progressive disclosure for plan context: live sole-active +
+  [module-map.md](./module-map.md) first; treat closed programs as archive via
+  [ARCHIVE.md](../plan/ARCHIVE.md) ([ai-scale-docs-conventions.md](../behavior/ai-scale-docs-conventions.md)).
+- Soft size budgets and peel preference must cite
+  [quality-gate-threshold-baseline.md](./quality-gate-threshold-baseline.md) — do not invent
+  conflicting hard CI numbers during agent tuning.
 
 ## Evolution Log Template
 

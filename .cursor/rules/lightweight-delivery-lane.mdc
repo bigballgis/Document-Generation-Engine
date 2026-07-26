@@ -1,0 +1,21 @@
+---
+description: Eligibility-gated delivery_lane light may skip E2E+Docker only when BDD proves no UI/runtime acceptance surface; never weakens full product leaves; worktree still mandatory.
+alwaysApply: false
+---
+
+# Lightweight Delivery Lane (cite)
+
+Authoritative behavior: `docs/behavior/lightweight-delivery-lane.md`.
+Skill: `.cursor/skills/lightweight-delivery-lane/SKILL.md`.
+Pipeline wiring: `.cursor/skills/delivery-pipeline/SKILL.md`.
+
+## Confirmed
+
+- `delivery_lane: light` may skip stages **5–7** and **10** **only** when BDD proves no
+  user-facing management-UI acceptance **and** no runtime/OpenAPI/Flyway/generation
+  acceptance surface (docs/governance/scaffold or proven N/A unit-only leaves).
+- `delivery_lane: full` remains **default** for product behavior work. Doubt → **full**.
+- Light lane **must not** weaken full leaves, waive worktree, or skip unit/verify gates
+  when code is touched.
+- Worktree isolation remains mandatory for multi-file delivery unless user `main-only` /
+  `no-worktree`. Light ≠ main-only.

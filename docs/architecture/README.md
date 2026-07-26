@@ -12,6 +12,7 @@ dependsOn:
 related:
   - docs/architecture/system-context.md
   - docs/architecture/module-boundaries.md
+  - docs/architecture/module-map.md
   - docs/architecture/technology-stack-decisions.md
   - docs/architecture/agent-evolution-governance.md
   - docs/architecture/implementation-task-plan.md
@@ -41,6 +42,7 @@ Architecture views describe current architectural facts, boundaries, responsibil
 | Document | Purpose | Status |
 | --- | --- | --- |
 | [System Context](system-context.md) | External actors, upstream/downstream systems, and system boundary | Accepted baseline |
+| [Module Map](module-map.md) | Agent retrieval entry — `com.bank.docgen.*` packages + `frontend/src/*` major dirs; prefer over whole-repo grep | Accepted baseline (AI-SCALE-G1) |
 | [Module Boundaries](module-boundaries.md) | Internal bounded modules and responsibility boundaries | Accepted baseline |
 | [Technology Stack Decision Log](technology-stack-decisions.md) | Persistent ledger for confirmed/pending technology choices and ADR synchronization status | Proposed baseline |
 | [Test database strategy (H2 vs Testcontainers)](test-database-strategy.md) | IBL-D1 / F20 **Done** (`1a686938` / `f399489c`) — default H2 verify vs `-Ptestcontainers` Flyway-on PostgreSQL lane | Active baseline (2026-07-19) |
@@ -88,12 +90,12 @@ Architecture views describe current architectural facts, boundaries, responsibil
 | [Checkstyle Baseline Governance Plan](checkstyle-baseline-governance-plan.md) | Confirmed staged checkstyle baseline debt closure governance with explicit transition thresholds | Accepted baseline |
 | [Playwright E2E Stabilization and Agent Plan](e2e-stabilization-and-agent-plan.md) | Documentation-first non-blocking E2E stabilization policy, smoke coverage, cadence, evidence, promotion criteria, and E2E/E2E UIUX/deployment agent rollout mapping (T01-T09) | Proposed baseline |
 | [Fixed TDD Delivery Workflow](tdd-delivery-workflow.md) | Mandatory implementation workflow from task generation through review, commit, and push | Accepted baseline |
-| [Quality Gate Threshold Baseline](quality-gate-threshold-baseline.md) | Fixed default quality thresholds for complexity, dependency, test coverage, and maintainability gates; includes Task Master **#49** hygiene upgrade constraints (Boot 3.3.x / ShedLock 6.x / no major Vue·Vite without ADR) | Accepted baseline |
+| [Quality Gate Threshold Baseline](quality-gate-threshold-baseline.md) | Fixed default quality thresholds for complexity, dependency, test coverage, and maintainability gates; includes soft review artifact budgets (Service/Vue ≤400, Support ≤200) aligned with code-quality-review; Task Master **#49** hygiene constraints | Accepted baseline |
 | [Runtime View](runtime-view.md) | Runtime components, deployment shape, and execution responsibilities | Accepted baseline |
 | [Data and Storage View](data-storage-view.md) | Durable data, cache, object storage, retention, and storage ownership | Accepted baseline |
 | [Async Messaging View](async-messaging-view.md) | Kafka usage, message boundaries, asynchronous processing, retries, and DLQ expectations | Accepted baseline |
 | [Security View](security-view.md) | Authentication, authorization, sensitive data handling, audit, and fail-closed boundaries | Accepted baseline |
-| [AI Development Guide](ai-development-guide.md) | AI reading paths, documentation-first implementation workflow, and rebuildability checklist | Accepted baseline |
+| [AI Development Guide](ai-development-guide.md) | AI reading paths, progressive disclosure, documentation-first workflow, rebuildability checklist | Accepted baseline |
 | [Management UI Constitution](management-ui-constitution.md) | Shell delivery sequence, workspace tab shell, binding-editor page chrome (BEI), entity-display cross-link | Accepted baseline |
 | [UX Entity Display Constitution](ux-entity-display-constitution.md) | Entity columns, navigable links, filter matrix, fluid vs contained layout; **Phases 0–3 Done**, Phase 4 In Progress (2026-07-08) | Accepted baseline |
 

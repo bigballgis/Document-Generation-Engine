@@ -10,9 +10,25 @@ Project-local conventions for `code-quality-reviewer`. Governance rules remain i
 4. **Read top-to-bottom** — imports, types, public API, private helpers; no random section order.
 5. **Tests prove behavior** — not coverage theater; no duplicate assertion blocks.
 
+## Soft size budgets (aligned with quality-gate baseline)
+
+Cite [quality-gate-threshold-baseline.md](../../../docs/architecture/quality-gate-threshold-baseline.md)
+and [ai-scale-docs-conventions.md](../../../docs/behavior/ai-scale-docs-conventions.md):
+
+| Artifact | Soft guidance | Hard / exception SoT |
+| --- | --- | --- |
+| Function length | ≤ 80 lines | > 120 unless decomposition plan approved |
+| File length | ≤ 500 lines | > 800 unless split plan approved |
+| Java `@Service` / Vue SFC | Prefer ≤ 400 LOC (review warn above) | Skill critical bands; file hard still applies |
+| `*Support` | Prefer ≤ 200 LOC; stateless only | Peel/extract when growing or gaining repos |
+
+Parent/implementer agents: when soft budgets are exceeded on manual sources, **prefer a
+peel task** (separate leaf) over continued silent growth.
+
 ## Module coupling (🔴 when violated)
 
-Per `docs/architecture/module-boundaries.md`:
+Per `docs/architecture/module-boundaries.md` and location map
+`docs/architecture/module-map.md`:
 
 - `rendering` must not depend on `template.service` / `template.persistence` for orchestration
 - `authoring` must not read `rendering.persistence` directly

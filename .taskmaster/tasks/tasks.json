@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19 (registry only). Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: cleared (prior NON-CE #165 fix-abandoned-dev-blocks-clone Done c1bb6c77 / cfefbb55; not a CE leaf). Prior NON-CE #164 demo-catalog-keep-bank-letters Done 0e6d0bad. Prior NON-CE #163 pqh-f7-redis-rate-limit PQH Leaf 4 Done b739a38f; PQH program Done Leaf 1–4; docs/plan/post-queue-hardening-program-2026-07.md. Prior NON-CE #162 pqh-n22-catalog-row-actions PQH Leaf 3 Done ef1b505d. Prior NON-CE #161 pqh-n19-n20-entitylink PQH Leaf 2 Done 20c67ac9 / 1e023a35. Prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe (PQH Leaf 1). Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Prior #155+#156 binding-editor-ia Done 9f2378ad / 9e318d9c; #154 Asset library Done c12a0687; #153 Reminder timing Done d213834f; #152 SYS-NORM Wave 8 Done 8aca145b; SYS-NORM Waves 0–8 Done. Do NOT mark #53 Done. Do NOT treat #53 as delivery leaf. Do NOT activate CE-O02 / #119. Do NOT flip #3b/#5a. Formal phase None.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: cleared (prior NON-CE #165 fix-abandoned-dev-blocks-clone Done c1bb6c77 / cfefbb55; not a CE leaf). Prior NON-CE #164 Done 0e6d0bad. Prior NON-CE #163 pqh-f7-redis-rate-limit Done b739a38f; PQH Leaf 4; Batch solo closed; PQH program Done. Prior NON-CE #162 pqh-n22-catalog-row-actions Done ef1b505d (PQH Leaf 3; Batch solo closed). Prior NON-CE #161 pqh-n19-n20-entitylink Done 20c67ac9 / 1e023a35 (PQH Leaf 2; Batch solo closed). Prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe. Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT activate #119.",
+        "description": "IN PROGRESS 2026-07-19 (registry only). Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: NON-CE #166 AI-SCALE-G1 ai-scale-remediation-g1 (In Progress; not a CE leaf). Queued AI-SCALE peels #167–#169 pending. Prior NON-CE #165 fix-abandoned-dev-blocks-clone Done c1bb6c77 / cfefbb55. Prior NON-CE #164 demo-catalog-keep-bank-letters Done 0e6d0bad. Prior NON-CE #163 pqh-f7-redis-rate-limit PQH Leaf 4 Done b739a38f; PQH program Done Leaf 1–4; docs/plan/post-queue-hardening-program-2026-07.md. Prior NON-CE #162 pqh-n22-catalog-row-actions PQH Leaf 3 Done ef1b505d. Prior NON-CE #161 pqh-n19-n20-entitylink PQH Leaf 2 Done 20c67ac9 / 1e023a35. Prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe (PQH Leaf 1). Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Prior #155+#156 binding-editor-ia Done 9f2378ad / 9e318d9c; #154 Asset library Done c12a0687; #153 Reminder timing Done d213834f; #152 SYS-NORM Wave 8 Done 8aca145b; SYS-NORM Waves 0–8 Done. Do NOT mark #53 Done. Do NOT treat #53 as delivery leaf. Do NOT activate CE-O02 / #119. Do NOT flip #3b/#5a. Formal phase None.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: NON-CE #166 AI-SCALE-G1 ai-scale-remediation-g1 (In Progress; not a CE leaf). Queued AI-SCALE peels #167–#169 pending. Prior NON-CE #165 fix-abandoned-dev-blocks-clone Done c1bb6c77 / cfefbb55. Prior NON-CE #164 Done 0e6d0bad. Prior NON-CE #163 pqh-f7-redis-rate-limit Done b739a38f; PQH Leaf 4; Batch solo closed; PQH program Done. Prior NON-CE #162 pqh-n22-catalog-row-actions Done ef1b505d (PQH Leaf 3; Batch solo closed). Prior NON-CE #161 pqh-n19-n20-entitylink Done 20c67ac9 / 1e023a35 (PQH Leaf 2; Batch solo closed). Prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe. Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT activate #119.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-24T04:40:00.000Z"
+        "updatedAt": "2026-07-26T15:10:00.000Z"
       },
       {
         "id": "54",
@@ -2279,17 +2279,71 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-24T04:40:00.000Z"
+      },
+      {
+        "id": "166",
+        "title": "AI-SCALE-G1: governance module-map + light lane + soft budgets + progressive disclosure",
+        "description": "NON-CE AI operability remediation Leaf 1 (slice ai-scale-remediation-g1). Docs/governance/scaffold only: (1) module map SoT docs/architecture/module-map.md + agent retrieval contract; (2) lightweight delivery lane wiring (delivery_lane light|full); (3) soft size budgets wiring aligned with quality-gate-threshold-baseline; (4) progressive disclosure / archive closed programs for parent agents. Batch solo member_task_ids:[\"166\"] proposed_slice_id:ai-scale-remediation-g1. BDD ready: module-map-agent-retrieval.md, lightweight-delivery-lane.md, ai-scale-docs-conventions.md. delivery_lane:light. Product E2E/Docker N/A. Formal phase None. Host sole-active delivery leaf. Do NOT implement Leaf 2-4 peels in this leaf. Do NOT flip #3b/#5a GO; do NOT mark #53/#106 Done; do NOT activate #119; do NOT touch CE-O02.",
+        "details": "IN PROGRESS Leaf 1 / sole-active. Placement ISOLATED worktree D:/working/DGE-ai-scale-remediation-g1 branch feat/ai-scale-remediation-g1. Program: docs/plan/ai-scale-remediation-program-2026-07.md. Detail: docs/plan/detail/ai-scale-remediation-g1.md. Queued later (pending, not activated): #167 TemplateImport peel; #168 i18n en.ts/zh-CN.ts split; #169 mega-test fixture split. Vetoes from Batch Recommendation: unrelated-code-peel, file-cap, risk-domain-split. Umbrella #53 CE remains in-progress registry-only.",
+        "testStrategy": "1. BDD ready MM/LDL/ADC scenarios. 2. module-map.md exists indexed. 3. light lane docs/skills/constitutions wired without weakening full product leaves. 4. soft budgets + progressive disclosure conventions documented. 5. delivery_lane:light — product E2E/Docker N/A; worktree still mandatory. 6. Do not implement #167-#169 in this leaf.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-26T15:10:00.000Z"
+      },
+      {
+        "id": "167",
+        "title": "AI-SCALE Leaf 2 (queued): TemplateImport* peel",
+        "description": "QUEUED ONLY — do not activate while #166 is sole-active. Peel oversized TemplateImport* surfaces into smaller modules per soft size budgets / file-cap veto from AI-SCALE Batch Recommendation. Product FE behavior leaf (expect full delivery lane). Formal phase None.",
+        "details": "Pending serial queue after AI-SCALE-G1 (#166). Slice id TBD at activation (suggested ai-scale-template-import-peel). Program: docs/plan/ai-scale-remediation-program-2026-07.md. Do NOT fold into #166.",
+        "testStrategy": "Activate only after #166 Done + sole-active cleared. Full FE gates + E2E when product UI in scope.",
+        "priority": "medium",
+        "dependencies": [
+          "166"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "updatedAt": "2026-07-26T14:40:00.000Z"
+      },
+      {
+        "id": "168",
+        "title": "AI-SCALE Leaf 3 (queued): i18n en.ts / zh-CN.ts split",
+        "description": "QUEUED ONLY — do not activate while #166 is sole-active. Split mega locale files frontend/src/locales/en.ts and zh-CN.ts into domain modules per soft size budgets. Product FE i18n leaf (expect full delivery lane). Formal phase None.",
+        "details": "Pending serial queue after Leaf 2 (#167). Slice id TBD at activation (suggested ai-scale-i18n-locale-split). Program: docs/plan/ai-scale-remediation-program-2026-07.md. Do NOT fold into #166 or #167.",
+        "testStrategy": "Activate only after prior AI-SCALE leaf Done. Locale import parity + FE lint/type-check/test/build; E2E if user-facing string surfaces change.",
+        "priority": "medium",
+        "dependencies": [
+          "167"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "updatedAt": "2026-07-26T14:40:00.000Z"
+      },
+      {
+        "id": "169",
+        "title": "AI-SCALE Leaf 4 (queued): mega-test fixture split",
+        "description": "QUEUED ONLY — do not activate while #166 is sole-active. Split mega test fixtures / oversized test helpers into focused modules per soft size budgets. Test-infra peel leaf. Formal phase None.",
+        "details": "Pending serial queue after Leaf 3 (#168). Slice id TBD at activation (suggested ai-scale-mega-test-fixture-split). Program: docs/plan/ai-scale-remediation-program-2026-07.md. Do NOT fold into earlier leaves.",
+        "testStrategy": "Activate only after prior AI-SCALE leaf Done. Verify suites still green after fixture peel; no product behavior change claimed.",
+        "priority": "medium",
+        "dependencies": [
+          "168"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "updatedAt": "2026-07-26T14:40:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-24T04:40:00.000Z",
-      "taskCount": 165,
+      "lastModified": "2026-07-26T15:10:00.000Z",
+      "taskCount": 169,
       "completedCount": 162,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-24T04:40:00.000Z"
+      "updated": "2026-07-26T15:10:00.000Z"
     }
   }
 }

@@ -49,6 +49,14 @@ pipeline cost; it is **not** multi-writer parallel. Skill:
 `.cursor/skills/delivery-batch-recommend/SKILL.md`. Behavior:
 `docs/behavior/delivery-batch-recommend.md`.
 
+**Delivery lane (`full` | `light`):** classify from BDD acceptance surfaces after stage 1.
+Default **`full`**. `light` may skip stages **5–7** and **10** **only** when BDD proves
+no user-facing / runtime acceptance surface (docs/governance/scaffold or proven N/A
+unit-only). Skill: `.cursor/skills/lightweight-delivery-lane/SKILL.md`. Behavior:
+`docs/behavior/lightweight-delivery-lane.md`. Rule cite:
+`.cursor/rules/lightweight-delivery-lane.mdc`. **Must not** weaken full product leaves.
+Worktree remains mandatory for multi-file delivery; light ≠ `main-only`.
+
 **Specialist runtime (retry then GP):** when Task enum lacks project specialists or Task API
 fails, follow `.cursor/skills/specialist-runtime-fallback/SKILL.md`: retry named type (≤3),
 then **`FALLBACK_GENERAL_PURPOSE` / `INLINE_CHECKLIST`** with contract injection unless
@@ -63,17 +71,21 @@ Emit `runtime_routing`.
 0b. **Runtime routing — retry then GP** — on Task flake retry named specialist (≤3); then
     GP under contract (unless `禁止降级` / `no-gp-fallback`). Early opt-in via
     `allow-gp-fallback` / `允许降级`.
+0c. **Delivery lane honesty** — emit `delivery_lane` + rationale; `light` only when
+    eligibility holds; record skipped E2E/Docker as **N/A** (never invent greens).
 1. BDD first — no tests/code before spec or `not-applicable`.
 2. TDD always — failing test first.
-3. Frontend E2E mandatory for user-facing changes (stages 5–7).
+3. Frontend E2E mandatory for user-facing changes (stages 5–7) on `delivery_lane: full`.
 4. Bank OA style lock + English-first i18n.
-5. Docker deploy gated and **queued** (`docker-deploy-queue.ps1`); single host.
+5. Docker deploy gated and **queued** (`docker-deploy-queue.ps1`); single host — required
+   when acceptance surfaces need deploy evidence; **N/A** on eligible `light` leaves.
 6. **Mandatory session worktree** via `worktree-router` (stage 0) unless user `main-only` /
    `no-worktree`; merge + cleanup via `integration-merger` (stage 11) when isolated.
-   See `worktree-and-deploy-queue-constitution.mdc`.
+   See `worktree-and-deploy-queue-constitution.mdc`. Light lane does **not** waive this.
 7. End gates 12 then 13 before Done (honor `no-commit` / `no-push`).
 8. Single active plan phase (or Task Master sole-active leaf) — **single-lane serial**: at most **1** delivery leaf In Progress on this host.
-9. Behavior-changing acceptance surfaces require queued deploy evidence (stage 5 and/or 10).
+9. Behavior-changing acceptance surfaces require queued deploy evidence (stage 5 and/or 10)
+   unless `delivery_lane: light` eligibility explicitly marks those stages N/A.
 
 ## Forbidden
 
@@ -82,10 +94,11 @@ Emit `runtime_routing`.
 - Running `mvn verify` / full frontend gates on **MAIN** for active delivery slices
   (unless user `main-only` placement).
 - Skipping behavior spec for behavior-changing work.
-- Frontend Done without E2E functional + UIUX.
+- Frontend Done without E2E functional + UIUX when UI acceptance surface changed (`full`).
+- Using `delivery_lane: light` to skip E2E/Docker for product UI / runtime / authz leaves.
 - Deploy on red gates; secrets in images; parallel compose stacks.
 - **Default parallel CE writers** / multitask fan-out while another leaf is In Progress (unless user `force-parallel`).
-- Treating Batch Recommendation `merge` as permission to spawn a second writer.
+- Treating Batch Recommendation `merge` as permission to spawn a second writer or as light eligibility.
 - Reordering/skipping end gates; leaving worktrees after merge.
 - `generalPurpose` before retry budget without early `allow-gp-fallback` / `允许降级`.
 - Lazy `generalPurpose` while the named specialist is in the enum.
@@ -96,5 +109,7 @@ Emit `runtime_routing`.
 ## Done definition
 
 Done = durable behavior + green gates + (frontend) E2E + UIUX + queued deploy evidence
-when required + **worktree merged and removed** + post-task doc sync + post-task commit
-review (or explicit `no-commit`) + updated plan/Task Master status — all on **MAIN** after merge.
+when required by `delivery_lane: full` / acceptance surfaces + **worktree merged and removed**
++ post-task doc sync + post-task commit review (or explicit `no-commit`) + updated
+plan/Task Master status — all on **MAIN** after merge. On eligible `light` leaves, E2E and
+Docker evidence are honest **N/A**, not skipped silently.

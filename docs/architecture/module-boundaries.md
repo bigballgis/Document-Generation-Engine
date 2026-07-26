@@ -11,6 +11,7 @@ dependsOn:
   - docs/security/permission-matrix.md
   - docs/api/contract-outline.md
 related:
+  - docs/architecture/module-map.md
   - docs/architecture/runtime-view.md
   - docs/architecture/data-storage-view.md
   - docs/architecture/security-view.md
@@ -21,6 +22,9 @@ related:
 ## Purpose
 
 This view defines implementation-facing module boundaries. It is a planning baseline, not source code scaffolding.
+
+For concrete `com.bank.docgen.*` package paths and `frontend/src/*` directories (agent
+retrieval entry), use [module-map.md](./module-map.md).
 
 ## Boundary Principles
 

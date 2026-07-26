@@ -187,7 +187,9 @@ unrelated Given/When/Then into one fuzzy behavior spec.
 
 | Future idea | v1 stance |
 | --- | --- |
-| Selective / partial test execution based on batch membership | **NOT in v1** — always run the normal gates required by the leaf’s surfaces |
+| Selective / partial test execution based on **batch membership** alone | **NOT in v1** — Batch Recommendation never authorizes gate skips by itself |
+| Risk-tier / flaky E2E skip for product UI / runtime leaves | **Forbidden** — `delivery_lane: full` |
+| Eligibility-gated **lightweight delivery lane** (BDD proves UI/runtime N/A) | **Confirmed separately** — [lightweight-delivery-lane.md](./lightweight-delivery-lane.md); not a Batch Recommendation feature |
 | Multi-writer parallel as a “batch” | **Forbidden** — use `force-parallel` skill only when user opts in; still ≠ Batch Recommendation |
 | Auto-merging into parked CE-O01 / Task #81 | **Forbidden** this slice |
 
@@ -204,7 +206,7 @@ These principles are **confirmed requirements** for the skill and orchestrator c
 | **Merge-queue amortize evidence** | When members share one acceptance surface, one leaf may run gates/deploy/E2E **once** for the batch — analogous to merge-queue CI amortization, not parallel CI fans. |
 | **MinimumCD vetoes** | Fail-closed veto list (§6.4); when unsure, **solo**. |
 | **DORA small batch** | Keep batches small and releasable; “small” = clear evidence boundary, not fuzzy multi-BDD soup. |
-| **Future selective tests** | Documented as **Future / NOT in v1** — do not invent partial-gate shortcuts in the skill. |
+| **Future selective tests** | **Partially superseded (2026-07-26):** eligibility-gated **lightweight delivery lane** for leaves whose BDD proves no UI/runtime acceptance surface — see [lightweight-delivery-lane.md](./lightweight-delivery-lane.md). Still **forbidden:** risk-tier E2E skip for product UI / runtime behavior leaves. |
 
 ---
 
@@ -394,13 +396,16 @@ batch_recommendation:
 **And** each distinct behavior remains a separate spec (no fuzzy combined BDD)  
 **And** rationale distinguishes evidence amortization from BDD bundling.
 
-### DBR-14 — Future selective tests not in v1
+### DBR-14 — Batch Recommendation does not invent gate skips
 
 **Given** a merged leaf that touches only a subset of modules  
 **When** gates are selected  
-**Then** v1 still runs the **normal** gate set required by the leaf’s surfaces  
-**And** the skill/docs mark “selective tests” as **Future / NOT in v1**  
-**And** no implementer invents partial-skip as Batch Recommendation behavior.
+**Then** Batch Recommendation alone does **not** authorize partial gate skips  
+**And** E2E/Docker skip is allowed **only** via the separate eligibility-gated
+[lightweight-delivery-lane.md](./lightweight-delivery-lane.md) contract when BDD proves
+no UI/runtime acceptance surface  
+**And** product UI / runtime leaves still run the **full** gate set for their surfaces  
+**And** no implementer treats `merge` as permission to skip E2E/Docker.
 
 ### DBR-15 — Single-lane serial preserved (not multi-writer)
 
@@ -446,6 +451,7 @@ batch_recommendation:
 | `.cursor/skills/cursor-native-parallel/SKILL.md` | Opt-in parallel — **not** Batch Recommendation |
 | Task / slice id | `orch-batch-recommend` |
 | CE-O01 / Task #81 | **Explicitly out of scope — do not activate** |
+| [lightweight-delivery-lane.md](./lightweight-delivery-lane.md) | **2026-07-26** — eligibility-gated skip of E2E+Docker when BDD proves no UI/runtime acceptance surface (narrow confirmation of former “Future selective tests”) |
 
 ```
 bdd_readiness: ready

@@ -111,7 +111,8 @@ Slash commands remain available but are **not required**. Prefer `/deliver` over
   agents are available (if unavailable → retry then GP under contract, not silent ad-hoc edits).
 - Done without doc-sync (+ commit-review when commit in scope).
 - Frontend Done without e2e-test-engineer + e2e-uiux-reviewer when available (or GP under
-  those contracts after retry budget).
+  those contracts after retry budget) — **except** when `delivery_lane: light` and BDD
+  proves no user-facing surface (E2E stages **6–7** recorded N/A).
 - Deep review via ad-hoc grep instead of `explore` / specialists.
 - `generalPurpose` **before** retry budget without early `允许降级` / `allow-gp-fallback`.
 - `generalPurpose` when the named specialist **is present in the Task enum** (lazy routing).
