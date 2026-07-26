@@ -1,5 +1,6 @@
 const TEMPLATE_TESTING_SUB_TABS = [
   'dataSets',
+  'batchRuns',
   'previewRuns',
   'coverage',
   'changeDiff',
@@ -11,6 +12,7 @@ export const DEFAULT_TEMPLATE_TESTING_SUB_TAB: TemplateTestingSubTab = 'dataSets
 
 const TEMPLATE_TESTING_SUB_TAB_LABEL_KEYS: Record<TemplateTestingSubTab, string> = {
   dataSets: 'templates.devWorkspace.testing.subTabs.dataSets',
+  batchRuns: 'templates.devWorkspace.testing.subTabs.batchRuns',
   previewRuns: 'templates.devWorkspace.testing.subTabs.previewRuns',
   coverage: 'templates.devWorkspace.testing.subTabs.coverage',
   changeDiff: 'templates.devWorkspace.testing.subTabs.changeDiff',

@@ -2,7 +2,7 @@
 
 **Program:** [CRCH](../core-render-compute-hardening-program.md)
 **Wave:** W0 (stop the bleeding)
-**Status:** **Not Started**
+**Status:** **Done**
 **Delivered together with:** [CRCH-W1](CRCH-W1-preview-consolidation.md) — one merged slice, one worktree
 **Slice id:** `render-p0-preview-dedupe` · worktree `../DGE-render-p0-preview-dedupe` · branch `feat/render-p0-preview-dedupe`
 **Audit baseline commit:** `df9a5b7d` — all line numbers below are from this commit; **locate code by the quoted snippet, not by line number**

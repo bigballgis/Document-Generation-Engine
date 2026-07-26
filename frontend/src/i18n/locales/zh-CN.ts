@@ -988,6 +988,7 @@ export default {
         title: '模板测试',
         subTabs: {
           dataSets: '测试数据集',
+          batchRuns: '批量测试',
           previewRuns: '预览记录',
           coverage: '覆盖率',
           changeDiff: '变更差异',
@@ -1740,7 +1741,7 @@ export default {
       previewEmptyDescription: '运行试生成或点击刷新，在编辑器旁加载最终链路 DOCX/PDF 制品。',
       previewCollapse: '收起预览',
       previewExpand: '展开预览',
-      inlinePdfTitle: 'PDF 预览',
+
     },
     structuredEditor: {
       bindingHint: '在此编排填充该母版占位符的内容：添加块、内联插入变量，或引用标准条款。',
@@ -1876,6 +1877,7 @@ export default {
       comparisonSummary: '对比摘要',
       testDataSetId: '测试数据集',
       refresh: '刷新预览',
+      reloadDetails: '重新加载详情',
       warningsTitle: '保真警告',
       noWarnings: '暂无保真警告。',
       noMatchingWarnings: '当前筛选条件下没有匹配的警告。',

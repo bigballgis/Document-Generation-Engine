@@ -60,7 +60,7 @@ test.describe('CE-U04 UIUX evidence — inline PDF preview @1920', () => {
         { timeout: 120_000 },
       )
 
-      const inlinePdf = page.getByTestId('authoring-inline-pdf-section')
+      const inlinePdf = page.getByTestId('preview-inline-pdf-section')
       const viewer = inlinePdf.getByTestId('inline-pdf-preview-viewer')
       await expect(viewer).toBeVisible({ timeout: 60_000 })
       await expect(inlinePdf.getByTestId('inline-pdf-preview-canvas')).toBeVisible({ timeout: 120_000 })

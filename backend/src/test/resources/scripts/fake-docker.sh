@@ -2,7 +2,16 @@
 # Test double for `docker cp` / `docker exec` used by DockerExecPdfConversionServiceTest.
 set -euo pipefail
 
-state_root="${DOCGEN_FAKE_DOCKER_STATE:-/tmp/docgen-fake-docker-state}"
+# Prefer per-test pointer (written by DockerExecPdfConversionServiceTest) over env,
+# so a leaked DOCGEN_FAKE_DOCKER_STATE cannot steal profile logs.
+pointer="${DOCGEN_FAKE_DOCKER_STATE_POINTER:-${TMPDIR:-/tmp}/docgen-fake-docker-state.pointer}"
+if [[ -f "$pointer" ]]; then
+  state_root="$(cat "$pointer")"
+elif [[ -n "${DOCGEN_FAKE_DOCKER_STATE:-}" ]]; then
+  state_root="$DOCGEN_FAKE_DOCKER_STATE"
+else
+  state_root="/tmp/docgen-fake-docker-state"
+fi
 mkdir -p "$state_root"
 
 command_name="$1"
@@ -37,10 +46,12 @@ fi
 if [[ "$command_name" == "exec" ]]; then
   container="$1"
   shift
-  if [[ "${1:-}" == "rm" && "${2:-}" == "-rf" && -n "${3:-}" ]]; then
-    target="$3"
-    remapped_target="$state_root/$container$target"
-    rm -rf "$remapped_target"
+  if [[ "${1:-}" == "rm" && "${2:-}" == "-rf" ]]; then
+    shift 2
+    for target in "$@"; do
+      remapped_target="$state_root/$container$target"
+      rm -rf "$remapped_target"
+    done
     exit 0
   fi
   remapped=()

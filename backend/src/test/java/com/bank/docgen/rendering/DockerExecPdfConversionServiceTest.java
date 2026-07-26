@@ -56,6 +56,9 @@ class DockerExecPdfConversionServiceTest {
         properties.setLibreOfficeCommand(fakeLibreOfficeScript.toString());
         properties.setConversionTimeoutSeconds(30);
         System.setProperty("DOCGEN_FAKE_DOCKER_STATE", fakeDockerState.toString());
+        // Bash fake-docker reads env/pointer — Java system properties are not exported.
+        Path pointer = Path.of(System.getProperty("java.io.tmpdir"), "docgen-fake-docker-state.pointer");
+        Files.writeString(pointer, fakeDockerState.toString());
         testPool = pdfConversionPool();
     }
 

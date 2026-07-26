@@ -11,7 +11,8 @@ const FRONTEND_BASE_URL =
   process.env.E2E_BASE_URL ?? `http://127.0.0.1:${process.env.FRONTEND_PORT ?? '4173'}`
 
 function authoringInlinePdf(page: import('@playwright/test').Page) {
-  return page.getByTestId('authoring-inline-pdf-section')
+  // CRCH-W1-1: AuthoringPreviewPane no longer hosts a duplicate viewer; TemplatePreviewPanel owns it.
+  return page.getByTestId('preview-inline-pdf-section')
 }
 
 /**
@@ -65,6 +66,8 @@ test.describe('CE-U04 inline PDF preview (BDD-CE-U04-IPP)', () => {
     })
     await expect(inlinePdf.getByTestId('inline-pdf-preview-canvas')).toBeVisible({ timeout: 120_000 })
     await expect(inlinePdf).toBeVisible()
+    await expect(page.getByTestId('inline-pdf-preview-viewer')).toHaveCount(1)
+    await expect(page.getByTestId('authoring-inline-pdf-section')).toHaveCount(0)
   })
 
   test('BDD-CE-U04-IPP-002 — next page control advances page label', async ({ page, request }) => {

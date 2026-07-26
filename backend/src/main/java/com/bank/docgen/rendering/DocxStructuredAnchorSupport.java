@@ -27,21 +27,17 @@ final class DocxStructuredAnchorSupport {
             StructuredContentDocxWriter writer,
             Pattern anchorPattern
     ) {
-        List<AnchorReplacement> replacements = collectStructuredAnchorReplacements(
-                document.getBodyElements(),
+        // CRCH-W0-1: index against paragraph-only list (same list replaceInParagraphs consumes).
+        replaceInParagraphs(
+                document,
+                document,
+                document.getParagraphs(),
                 bindingJsonByAnchor,
+                variables,
+                pinnedModuleStructures,
+                writer,
                 anchorPattern
         );
-        for (int replacementIndex = replacements.size() - 1; replacementIndex >= 0; replacementIndex--) {
-            AnchorReplacement replacement = replacements.get(replacementIndex);
-            writer.replaceAnchorParagraph(
-                    document,
-                    replacement.paragraphIndex(),
-                    replacement.structuredJson(),
-                    variables,
-                    pinnedModuleStructures
-            );
-        }
     }
 
     static void replaceInParagraphs(

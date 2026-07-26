@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -73,23 +72,28 @@ public class DockerExecPdfConversionService implements PdfConversionService {
         Path hostDir = null;
         String container = renderingProperties.getDockerContainerName();
         String containerProfile = null;
+        String uniqueToken = null;
         try {
             hostDir = Files.createTempDirectory("docgen-docker-pdf-");
             Path inputDocx = hostDir.resolve("input.docx");
             byte[] pdfSourceDocx = pdfConversionPostProcessor.prepareDocxForConversion(docxBytes, options);
             Files.write(inputDocx, pdfSourceDocx);
-            String containerInput = "/tmp/docgen-input.docx";
-            // LR-A1: per-invocation profile isolation inside the LibreOffice sidecar container
-            // (CD-PIT-11). A unique container profile path prevents concurrent conversions from
-            // sharing one soffice user profile and deadlocking on lock files. Derived from the
-            // unique host temp dir name so it cannot collide across pooled invocations.
+            // LR-A1 / CRCH-W0-5: unique token from host temp dir for profile + payload paths.
             Path profileDirName = hostDir.getFileName();
             if (profileDirName == null) {
                 throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
             }
-            containerProfile = "/tmp/docgen-lo-profile-" + profileDirName;
+            uniqueToken = profileDirName.toString();
+            containerProfile = "/tmp/docgen-lo-profile-" + uniqueToken;
+            String containerInput = containerInputPath(uniqueToken);
+            String containerOutDir = containerOutDir(uniqueToken);
+            String containerOutput = containerOutputPath(uniqueToken);
 
             runCommand(renderingProperties.getDockerCliCommand(), "cp", inputDocx.toString(), container + ":" + containerInput);
+            runCommand(
+                    renderingProperties.getDockerCliCommand(), "exec", container,
+                    "mkdir", "-p", containerOutDir
+            );
             runCommand(
                     renderingProperties.getDockerCliCommand(), "exec", container,
                     renderingProperties.getLibreOfficeCommand(),
@@ -100,11 +104,11 @@ public class DockerExecPdfConversionService implements PdfConversionService {
                     "--nodefault",
                     "--nologo",
                     "--convert-to", LibreOfficePdfExportFilters.convertToArgument(options.pdfArchivalProfile()),
-                    "--outdir", "/tmp",
+                    "--outdir", containerOutDir,
                     containerInput
             );
             Path outputPdf = hostDir.resolve("input.pdf");
-            runCommand(renderingProperties.getDockerCliCommand(), "cp", container + ":/tmp/input.pdf", outputPdf.toString());
+            runCommand(renderingProperties.getDockerCliCommand(), "cp", container + ":" + containerOutput, outputPdf.toString());
             if (!Files.exists(outputPdf)) {
                 throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
             }
@@ -128,6 +132,42 @@ public class DockerExecPdfConversionService implements PdfConversionService {
             }
             if (containerProfile != null) {
                 bestEffortContainerProfileCleanup(container, containerProfile);
+            }
+            if (uniqueToken != null) {
+                bestEffortContainerPayloadCleanup(container, uniqueToken);
+            }
+        }
+    }
+
+    static String containerInputPath(String uniqueToken) {
+        return "/tmp/docgen-input-" + uniqueToken + ".docx";
+    }
+
+    static String containerOutDir(String uniqueToken) {
+        return "/tmp/docgen-out-" + uniqueToken;
+    }
+
+    static String containerOutputPath(String uniqueToken) {
+        // LibreOffice names output after input basename.
+        return containerOutDir(uniqueToken) + "/docgen-input-" + uniqueToken + ".pdf";
+    }
+
+    private void bestEffortContainerPayloadCleanup(String container, String uniqueToken) {
+        try {
+            runCommand(
+                    renderingProperties.getDockerCliCommand(),
+                    "exec",
+                    container,
+                    "rm",
+                    "-rf",
+                    containerInputPath(uniqueToken),
+                    containerOutDir(uniqueToken)
+            );
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        } catch (IOException | RuntimeException ex) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Container payload cleanup skipped for {}: {}", uniqueToken, ex.toString());
             }
         }
     }
@@ -157,10 +197,10 @@ public class DockerExecPdfConversionService implements PdfConversionService {
     }
 
     private void runCommand(String... command) throws IOException, InterruptedException {
-        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
-        boolean finished = process.waitFor(renderingProperties.getConversionTimeoutSeconds(), TimeUnit.SECONDS);
-        if (!finished || process.exitValue() != 0) {
-            throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
-        }
+        ExternalProcessRunner.runToCompletion(
+                new ProcessBuilder(command),
+                renderingProperties.getConversionTimeoutSeconds(),
+                "api.error.generation.pdfConversionFailed"
+        );
     }
 }

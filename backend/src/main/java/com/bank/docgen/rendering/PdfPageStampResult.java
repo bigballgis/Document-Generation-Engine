@@ -26,4 +26,12 @@ public record PdfPageStampResult(byte[] pdfBytes, Optional<FidelityWarningCode> 
                 Optional.of(FidelityWarningCode.PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA)
         );
     }
+
+    /** CRCH-W0-4: stamp succeeded with global numbers after unresolved SECTIONPAGES. */
+    public static PdfPageStampResult sectionUnresolved(byte[] pdfBytes) {
+        return new PdfPageStampResult(
+                pdfBytes,
+                Optional.of(FidelityWarningCode.PDF_SECTION_PAGE_NUMBERS_UNRESOLVED)
+        );
+    }
 }

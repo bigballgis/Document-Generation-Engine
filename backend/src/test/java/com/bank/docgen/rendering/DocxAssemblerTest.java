@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.poi.wp.usermodel.HeaderFooterType;
@@ -540,6 +541,44 @@ class DocxAssemblerTest {
                     .count();
             assertThat(pictureCount).isGreaterThanOrEqualTo(2);
             assertThat(containsZipEntry(result, "word/media/image1.png")).isTrue();
+        }
+    }
+
+
+    @Test
+    void assemblesBodyAnchorWhenMasterBodyContainsTableBeforeAnchor() throws Exception {
+        byte[] master = masterWithBodyTableBeforeAnchor("BODY");
+        String structured = """
+                {"nodes":[{"type":"paragraph","children":[{"type":"text","value":"REPLACED BODY"}]}]}
+                """;
+
+        byte[] result = assembler.assembleStructuredFromBytes(
+                master,
+                Map.of("BODY", structured),
+                Map.of(),
+                Map.of()
+        );
+
+        try (XWPFDocument document = new XWPFDocument(new java.io.ByteArrayInputStream(result))) {
+            String bodyText = document.getParagraphs().stream()
+                    .map(XWPFParagraph::getText)
+                    .collect(Collectors.joining("\n"));
+            assertThat(bodyText).contains("REPLACED BODY");
+            assertThat(bodyText).doesNotContain("{{anchor:BODY}}");
+            assertThat(document.getTables()).hasSize(1);
+            assertThat(document.getTables().get(0).getRow(0).getCell(0).getText())
+                    .isEqualTo("HEADER TABLE");
+        }
+    }
+
+    private static byte[] masterWithBodyTableBeforeAnchor(String anchorId) throws Exception {
+        try (XWPFDocument document = new XWPFDocument();
+                java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+            XWPFTable table = document.createTable(1, 1);
+            table.getRow(0).getCell(0).setText("HEADER TABLE");
+            document.createParagraph().createRun().setText("{{anchor:" + anchorId + "}}");
+            document.write(out);
+            return out.toByteArray();
         }
     }
 

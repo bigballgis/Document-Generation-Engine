@@ -11,10 +11,11 @@ const props = withDefaults(
     templateId: string
     bindings: AnchorBinding[]
     preview: PreviewRecord | null
-    compact?: boolean
+    /** Host preview surface owns regenerate; hide reload-details when true. */
+    embedded?: boolean
   }>(),
   {
-    compact: false,
+    embedded: false,
   },
 )
 
@@ -99,8 +100,13 @@ const {
         />
       </section>
 
-      <el-button :loading="loading" @click="refreshPreview">
-        {{ t('templates.preview.refresh') }}
+      <el-button
+        v-if="!embedded"
+        :loading="loading"
+        data-testid="preview-reload-details"
+        @click="refreshPreview"
+      >
+        {{ t('templates.preview.reloadDetails') }}
       </el-button>
 
       <h3>{{ t('templates.preview.comparisonTitle') }}</h3>

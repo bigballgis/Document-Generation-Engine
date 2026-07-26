@@ -12,7 +12,6 @@ describe('templateAuthoringSubTabs', () => {
       'variables',
       'contentModules',
       'bindings',
-      'testPreview',
     ])
   })
 

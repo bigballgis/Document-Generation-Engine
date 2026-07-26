@@ -35,12 +35,26 @@ if [[ -z "$OUTDIR" ]]; then
 fi
 printf '%s\n' "$CONVERT_TO" > "$OUTDIR/convert-to.txt"
 if [[ "$CONVERT_TO" == "docx" ]]; then
+  out_name="assembled-in.docx"
+  if [[ -n "$INPUT" ]]; then
+    out_name="$(basename "$INPUT")"
+  fi
+  out_path="$OUTDIR/$out_name"
   if [[ -n "$INPUT" && -f "$INPUT" ]]; then
-    cp "$INPUT" "$OUTDIR/$(basename "$INPUT")"
+    if [[ "$INPUT" -ef "$out_path" ]]; then
+      : # already in place (normalization writes into the same temp dir)
+    else
+      cp "$INPUT" "$out_path"
+    fi
   else
-    printf 'PK\x03\x04' > "$OUTDIR/assembled-in.docx"
+    printf 'PK\x03\x04' > "$out_path"
   fi
   exit 0
 fi
-printf '%%PDF-1.4\nconvert-to=%s\n' "$CONVERT_TO" > "$OUTDIR/input.pdf"
+pdf_name="input.pdf"
+if [[ -n "$INPUT" ]]; then
+  base="$(basename "$INPUT")"
+  pdf_name="${base%.*}.pdf"
+fi
+printf '%%PDF-1.4\nconvert-to=%s\n' "$CONVERT_TO" > "$OUTDIR/$pdf_name"
 exit 0
