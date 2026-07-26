@@ -22,7 +22,10 @@ final class TemplateAccessGuardSupport {
 
     void assertDraft(TemplateEntity template) {
         if (template.getLifecycleStatus() != TemplateLifecycleStatus.DRAFT) {
-            throw new TemplateValidationException("api.error.template.invalidState");
+            throw new TemplateValidationException(
+                    "api.error.template.invalidState",
+                    template.getLifecycleStatus().name()
+            );
         }
     }
 

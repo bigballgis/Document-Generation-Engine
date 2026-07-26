@@ -133,7 +133,9 @@ public class TemplateExceptionAdvice {
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 ApiErrorCodes.TEMPLATE_VALIDATION_FAILED,
                 ApiErrorCategories.TEMPLATE,
-                ex.messageKey()
+                ex.messageKey(),
+                false,
+                ex.messageArgs()
         );
     }
 

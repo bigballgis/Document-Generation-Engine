@@ -245,7 +245,10 @@ final class TemplateLifecycleApprovalFlowSupport {
     }
 
     TemplateDetailView publish(UUID templateId, PublishTemplateRequest request, ManagementSessionClaims session) {
-        TemplateEntity template = eligibility.requirePublishableTemplate(templateId, session);
+        // FOS-W8-2: row lock serializes concurrent publish before any stamp.
+        TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNullForUpdate(templateId)
+                .orElseThrow(TemplateNotFoundException::new);
+        eligibility.requirePublishableTemplate(templateId, session);
         eligibility.requireStatus(template, TemplateLifecycleStatus.PENDING_RELEASE);
         decisionFormService.validatePublishConfirmation(request.fidelityViewedConfirmed());
         // FOS-W7-2: evaluate publish gate before materializing/auto-satisfying the API-policy skeleton.

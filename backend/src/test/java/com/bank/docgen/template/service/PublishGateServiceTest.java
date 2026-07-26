@@ -189,7 +189,12 @@ class PublishGateServiceTest {
                 .anyMatch(item -> item.checkCode() == PublishGateCheckCode.ANCHOR_INTEGRITY && item.blocker()))
                 .isTrue();
         assertThatThrownBy(() -> service.assertReady(templateId, admin))
-                .isInstanceOf(TemplateValidationException.class);
+                .isInstanceOf(TemplateValidationException.class)
+                .satisfies(ex -> {
+                    TemplateValidationException validation = (TemplateValidationException) ex;
+                    assertThat(validation.messageKey()).isEqualTo("api.error.template.publishGateBlocked");
+                    assertThat(validation.messageArgs()).contains("ANCHOR_INTEGRITY");
+                });
     }
 
     @Test

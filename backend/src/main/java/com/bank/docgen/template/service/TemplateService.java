@@ -244,6 +244,11 @@ public class TemplateService {
         return access.requireWritable(templateId, session);
     }
 
+    /** FOS-W8-5: shared draft guard for authoring mutation services. */
+    void assertDraft(TemplateEntity template) {
+        access.assertDraft(template);
+    }
+
     public TemplateEntity requireTemplateByExternalId(String externalId) {
         return access.requireByExternalId(externalId);
     }

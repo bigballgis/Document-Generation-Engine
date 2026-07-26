@@ -4,7 +4,6 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CompositionInclusionMatchView;
 import com.bank.docgen.template.api.CompositionInclusionRuleView;
 import com.bank.docgen.template.api.CompositionInclusionRulesResultView;
-import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.event.TemplateContentChangedEvent;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
@@ -60,7 +59,7 @@ public class CompositionInclusionRuleService {
     ) {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        assertDraft(template);
+        templateService.assertDraft(template);
         CompositionInclusionRuleValidator.validate(
                 rules,
                 contentModuleReferenceService.listReferenceKeys(version.getId())
@@ -119,12 +118,6 @@ public class CompositionInclusionRuleService {
                         Boolean.valueOf(rule.resolvedRequiredInclusion())
                 ))
                 .toList();
-    }
-
-    private static void assertDraft(TemplateEntity template) {
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.DRAFT) {
-            throw new TemplateValidationException("api.error.template.invalidState");
-        }
     }
 
     private static String blankToNull(String value) {

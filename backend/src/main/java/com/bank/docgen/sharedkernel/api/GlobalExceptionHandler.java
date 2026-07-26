@@ -14,9 +14,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -135,6 +137,38 @@ public class GlobalExceptionHandler {
                 ApiErrorCodes.INTERNAL_ERROR,
                 ApiErrorCategories.GENERATION,
                 "api.error.generation.internalError"
+        );
+    }
+
+    /** FOS-W8-3: unique / FK collisions → conflict envelope (never opaque 500). */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorEnvelope> handleDataIntegrity(
+            HttpServletRequest request,
+            DataIntegrityViolationException ignored
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.CONFLICT,
+                ApiErrorCodes.DATA_INTEGRITY_CONFLICT,
+                ApiErrorCategories.CONFLICT,
+                "api.error.conflict.dataIntegrity",
+                true
+        );
+    }
+
+    /** FOS-W8-1: concurrent authoring aggregate updates. */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorEnvelope> handleOptimisticLock(
+            HttpServletRequest request,
+            ObjectOptimisticLockingFailureException ignored
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.CONFLICT,
+                ApiErrorCodes.TEMPLATE_OPTIMISTIC_LOCK_CONFLICT,
+                ApiErrorCategories.CONFLICT,
+                "api.error.template.optimisticLockConflict",
+                true
         );
     }
 
