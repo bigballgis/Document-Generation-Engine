@@ -10,7 +10,7 @@
 | **Origin** | User-commissioned deep review (2026-07-26): make **existing** core maximally **易用** and **扎实** for a bank frontline employee who must orchestrate the most complex bank template and hand it off for other systems to call — **no new product features** |
 | **Audit baseline commit** | `f29211c5` (MAIN tip when program authored; locate code by quoted snippets, not line numbers) |
 | **Model note** | Program authored with Opus 5–class deep audits; detail sheets are written so a **lower-tier implementer** can execute TDD without improvisation |
-| **Next queue head** | FOS **Leaf 13** `fos-default-verify-honesty` / TM **#183** → **Done** (`b51ff52e` / feat `176f5dc5`); next **Leaf 14** `fos-demo-literacy-path` (TM **#184**) |
+| **Next queue head** | FOS **Leaf 14** `fos-demo-literacy-path` / TM **#184** → **Done** (`8ee0a872` / feat `fe839c7b`); next **Leaf 15** `fos-word-foundation-honesty` (TM **#185**) |
 | **Upstream** | [CRCH](./core-render-compute-hardening-program.md) owns rendering P0 + preview dedupe (W0+W1) and compute/DOCX/harness designs (W2/W3/W5). FOS **supersedes CRCH W4** (authoring IA) — see §6 |
 
 ---
@@ -138,7 +138,7 @@ If a future decision appears, add it here — do not invent product behaviour.
 | **W11** | `fos-policy-impact-troubleshoot` | Policy impact & troubleshooting | C7,C8,C9,C10,C13,C14,C15,C20,C21 | [FOS-W11](detail/FOS-W11-policy-impact-troubleshoot.md) | **Done** |
 | **W12** | `fos-ci-gates-tell-truth` | CI gates tell the truth | E1,E5,E14,E15 | [FOS-W12](detail/FOS-W12-ci-gates-tell-truth.md) | **Done** |
 | **W13** | `fos-default-verify-honesty` | Default verify honesty | E2,E4,E6,E7,E8,E9,E10,E11 — **complements** CRCH W5 (do not duplicate LO pin / perceptual / soak) | [FOS-W13](detail/FOS-W13-default-verify-honesty.md) | **Done** |
-| **W14** | `fos-demo-literacy-path` | Demo literacy path | E19,E20,E13 — docs + entry point only | [FOS-W14](detail/FOS-W14-demo-literacy-path.md) | **Not Started** |
+| **W14** | `fos-demo-literacy-path` | Demo literacy path | E19,E20,E13 — docs + entry point only | [FOS-W14](detail/FOS-W14-demo-literacy-path.md) | **Done** |
 | **W15** | `fos-word-foundation-honesty` | Word foundation honesty | WF-1…WF-8 — typography / letterhead / nested render honesty; evidence [deep review](detail/fos-word-foundation-deep-review-2026-07.md) | [FOS-W15](detail/FOS-W15-word-foundation-honesty.md) | **Not Started** |
 
 Severity: **P0** = cannot complete job / wrong document / data loss / security fail-open / stuck state.
@@ -164,7 +164,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Leaf 11 | **#181** | `fos-policy-impact-troubleshoot` | **done** | `821d0f4a` / `8e5b9a53`; deploy/E2E BLOCKED (0 images) |
 | Leaf 12 | **#182** | `fos-ci-gates-tell-truth` | **done** | `5bc228f8` / `df8ed393`; Playwright Smoke fail-closed/BLOCKED on GHA |
 | Leaf 13 | **#183** | `fos-default-verify-honesty` | **done** | `b51ff52e` / `176f5dc5`; local TC BLOCKED (overlay); default verify PASS |
-| Leaf 14 | **#184** | `fos-demo-literacy-path` | **pending** | |
+| Leaf 14 | **#184** | `fos-demo-literacy-path` | **done** | `8ee0a872` / `fe839c7b`; E2E/deploy BLOCKED |
 | Leaf 15 | **#185** | `fos-word-foundation-honesty` | **pending** | Word-as-foundation deep review (2026-07-26); do **not** auto-activate |
 
 **Host sole-active rule:** FOS shares the host with CRCH / closed AI-SCALE peels. At most **one** delivery writer. AI-SCALE Leaves **#166–#169** → **Done** (peel program **Done**; residual >500 optional backlog only) — **not** FOS work; do **not** invent a new AI-SCALE sole-active leaf.
