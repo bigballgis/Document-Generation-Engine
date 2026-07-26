@@ -188,7 +188,8 @@ class TemplateLifecyclePublishVersionSelectionTest {
         assertThat(candidateVersion.getReleaseVersion()).isEqualTo("1.0.0");
         assertThat(candidateVersion.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
         assertThat(priorPublished.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.STOPPED);
-        assertThat(priorPublished.getReleaseVersion()).isNull();
+        // FOS-W6-5: supersede keeps release_version (disambiguate via max dev_version_number).
+        assertThat(priorPublished.getReleaseVersion()).isEqualTo("1.0.0");
         verify(templateVersionRepository).save(priorPublished);
         verify(templateVersionRepository).save(candidateVersion);
 

@@ -76,8 +76,8 @@ class ContentModuleSelfApprovalBlockTest {
 
         assertThatThrownBy(() -> reviewService.transition("MOD-LOAN",
                 new ContentModuleReviewTransitionRequest(
-                        ContentModuleReviewOperation.APPROVE_REVIEW,
-                        ContentModuleGovernanceActorRole.APPROVER, "approver-a", null, null),
+                        ContentModuleReviewOperation.APPROVE_REVIEW, ContentModuleGovernanceActorRole.APPROVER, "approver-a", null, null,
+                        VERSION_ID, null),
                 alice))
                 .isInstanceOf(LifecycleAuthorizationException.class)
                 .satisfies(ex -> {
@@ -102,9 +102,8 @@ class ContentModuleSelfApprovalBlockTest {
 
         reviewService.transition("MOD-LOAN",
                 new ContentModuleReviewTransitionRequest(
-                        ContentModuleReviewOperation.APPROVE_REVIEW,
-                        ContentModuleGovernanceActorRole.GROUP_ADMIN, "admin-a", null, null,
-                        true, "Solo approval due to approver unavailability", true),
+                        ContentModuleReviewOperation.APPROVE_REVIEW, ContentModuleGovernanceActorRole.GROUP_ADMIN, "admin-a", null, null,
+                        true, "Solo approval due to approver unavailability", true, VERSION_ID, null),
                 alice);
 
         assertThat(submittedVersion.getReviewState()).isEqualTo(ContentModuleReviewState.APPROVED);
@@ -124,8 +123,8 @@ class ContentModuleSelfApprovalBlockTest {
 
         reviewService.transition("MOD-LOAN",
                 new ContentModuleReviewTransitionRequest(
-                        ContentModuleReviewOperation.APPROVE_REVIEW,
-                        ContentModuleGovernanceActorRole.APPROVER, "approver-b", null, null),
+                        ContentModuleReviewOperation.APPROVE_REVIEW, ContentModuleGovernanceActorRole.APPROVER, "approver-b", null, null,
+                        VERSION_ID, null),
                 bob);
 
         assertThat(submittedVersion.getReviewState()).isEqualTo(ContentModuleReviewState.APPROVED);
@@ -140,8 +139,8 @@ class ContentModuleSelfApprovalBlockTest {
 
         assertThatThrownBy(() -> reviewService.transition("MOD-LOAN",
                 new ContentModuleReviewTransitionRequest(
-                        ContentModuleReviewOperation.REJECT_REVIEW,
-                        ContentModuleGovernanceActorRole.APPROVER, "approver-a", null, "needs fix"),
+                        ContentModuleReviewOperation.REJECT_REVIEW, ContentModuleGovernanceActorRole.APPROVER, "approver-a", null, "needs fix",
+                        VERSION_ID, null),
                 alice))
                 .isInstanceOf(LifecycleAuthorizationException.class)
                 .satisfies(ex -> assertThat(((LifecycleAuthorizationException) ex).errorCode())
@@ -159,17 +158,14 @@ class ContentModuleSelfApprovalBlockTest {
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(alice, "RETAIL")).thenReturn(true);
         when(groupAccessService.canAuthorContentModules(alice)).thenReturn(true);
-        when(versionRepository.findByModuleIdAndReviewStateOrderBySemanticVersionDesc(
-                MODULE_ID, ContentModuleReviewState.DRAFT))
-                .thenReturn(List.of(draft));
+        when(versionRepository.findById(VERSION_ID)).thenReturn(java.util.Optional.of(draft));
         when(versionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         reviewService.transition("MOD-LOAN",
                 new ContentModuleReviewTransitionRequest(
-                        ContentModuleReviewOperation.SUBMIT_FOR_REVIEW,
-                        ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR, "author-a",
-                        "Ready for review", null),
+                        ContentModuleReviewOperation.SUBMIT_FOR_REVIEW, ContentModuleGovernanceActorRole.DOCUMENT_AUTHOR, "author-a", "Ready for review", null,
+                        VERSION_ID, null),
                 alice);
 
         assertThat(draft.getReviewState()).isEqualTo(ContentModuleReviewState.SUBMITTED);
@@ -181,9 +177,7 @@ class ContentModuleSelfApprovalBlockTest {
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(session, "RETAIL")).thenReturn(true);
         when(groupAccessService.canDecideContentModuleReviews(session)).thenReturn(true);
-        when(versionRepository.findByModuleIdAndReviewStateOrderBySemanticVersionDesc(
-                MODULE_ID, ContentModuleReviewState.SUBMITTED))
-                .thenReturn(List.of(submittedVersion));
+        when(versionRepository.findById(VERSION_ID)).thenReturn(java.util.Optional.of(submittedVersion));
     }
 
     private ManagementSessionClaims session(String username, List<String> roles) {

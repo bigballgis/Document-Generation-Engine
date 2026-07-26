@@ -9356,6 +9356,18 @@ components:
         secondaryConfirmed:
           type: boolean
           description: Must be true when exceptionIntervention is true.
+        versionId:
+          type: string
+          format: uuid
+          description: >-
+            FOS-W6-3: explicit version target (XOR semanticVersion). Required for
+            SUBMIT_FOR_REVIEW / APPROVE_REVIEW / REJECT_REVIEW.
+        semanticVersion:
+          type: string
+          minLength: 1
+          maxLength: 32
+          description: >-
+            FOS-W6-3: explicit semantic version target when versionId is omitted.
     CreateContentModuleRequest:
       type: object
       additionalProperties: false
@@ -12667,6 +12679,18 @@ components:
         impactSummary:
           description: Required for STOP_USE and DEPRECATE operations.
           $ref: '#/components/schemas/ContentModuleLifecycleImpactSummary'
+        versionId:
+          type: string
+          format: uuid
+          description: >-
+            FOS-W6-3: explicit version target (XOR semanticVersion). Required for
+            STOP_USE / RECOVER / DEPRECATE.
+        semanticVersion:
+          type: string
+          minLength: 1
+          maxLength: 32
+          description: >-
+            FOS-W6-3: explicit semantic version target when versionId is omitted.
     ContentModuleLifecycleImpactSummary:
       type: object
       additionalProperties: false

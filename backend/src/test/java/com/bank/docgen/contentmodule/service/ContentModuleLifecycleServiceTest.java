@@ -84,9 +84,7 @@ class ContentModuleLifecycleServiceTest {
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(groupAdmin, "RETAIL")).thenReturn(true);
-        when(versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
-                MODULE_ID, ContentModuleReviewState.APPROVED, ContentModuleLifecycleState.ACTIVE))
-                .thenReturn(List.of(activeVersion));
+        when(versionRepository.findById(VERSION_ID)).thenReturn(java.util.Optional.of(activeVersion));
         when(groupAccessService.canManageContentModuleLifecycle(groupAdmin)).thenReturn(true);
         when(versionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -100,7 +98,9 @@ class ContentModuleLifecycleServiceTest {
                         "group-admin-a",
                         true,
                         true,
-                        impact
+                        impact,
+                        VERSION_ID,
+                        null
                 ),
                 groupAdmin
         );
@@ -134,9 +134,7 @@ class ContentModuleLifecycleServiceTest {
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(groupAdmin, "RETAIL")).thenReturn(true);
-        when(versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
-                MODULE_ID, ContentModuleReviewState.APPROVED, ContentModuleLifecycleState.STOPPED))
-                .thenReturn(List.of(activeVersion));
+        when(versionRepository.findById(VERSION_ID)).thenReturn(java.util.Optional.of(activeVersion));
         when(groupAccessService.canManageContentModuleLifecycle(groupAdmin)).thenReturn(true);
         when(versionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -149,6 +147,8 @@ class ContentModuleLifecycleServiceTest {
                         "group-admin-a",
                         true,
                         true,
+                        null,
+                        VERSION_ID,
                         null
                 ),
                 groupAdmin
@@ -163,9 +163,7 @@ class ContentModuleLifecycleServiceTest {
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(groupAdmin, "RETAIL")).thenReturn(true);
-        when(versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
-                MODULE_ID, ContentModuleReviewState.APPROVED, ContentModuleLifecycleState.STOPPED))
-                .thenReturn(List.of(activeVersion));
+        when(versionRepository.findById(VERSION_ID)).thenReturn(java.util.Optional.of(activeVersion));
         when(groupAccessService.canManageContentModuleLifecycle(groupAdmin)).thenReturn(true);
         when(versionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -178,7 +176,9 @@ class ContentModuleLifecycleServiceTest {
                         "group-admin-a",
                         true,
                         true,
-                        sampleImpact()
+                        sampleImpact(),
+                        VERSION_ID,
+                        null
                 ),
                 groupAdmin
         );
@@ -192,9 +192,7 @@ class ContentModuleLifecycleServiceTest {
         when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
                 .thenReturn(java.util.Optional.of(module));
         when(groupAccessService.canAccessGroup(groupAdmin, "RETAIL")).thenReturn(true);
-        when(versionRepository.findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
-                MODULE_ID, ContentModuleReviewState.APPROVED, ContentModuleLifecycleState.STOPPED))
-                .thenReturn(List.of());
+        when(versionRepository.findById(VERSION_ID)).thenReturn(java.util.Optional.of(activeVersion));
         when(groupAccessService.canManageContentModuleLifecycle(groupAdmin)).thenReturn(true);
 
         assertThatThrownBy(() -> lifecycleService.apply(
@@ -205,6 +203,8 @@ class ContentModuleLifecycleServiceTest {
                         "group-admin-a",
                         true,
                         true,
+                        null,
+                        VERSION_ID,
                         null
                 ),
                 groupAdmin
@@ -224,6 +224,8 @@ class ContentModuleLifecycleServiceTest {
                         "group-admin-a",
                         true,
                         true,
+                        null,
+                        VERSION_ID,
                         null
                 ),
                 groupAdmin
@@ -248,7 +250,9 @@ class ContentModuleLifecycleServiceTest {
                         "author-a",
                         true,
                         true,
-                        sampleImpact()
+                        sampleImpact(),
+                        VERSION_ID,
+                        null
                 ),
                 author
         ))
@@ -267,6 +271,8 @@ class ContentModuleLifecycleServiceTest {
                         "group-admin-a",
                         true,
                         false,
+                        null,
+                        VERSION_ID,
                         null
                 ),
                 groupAdmin

@@ -304,9 +304,8 @@ final class TemplateLifecycleApprovalFlowSupport {
                 continue;
             }
             other.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
-            // Clear release_version so legacy Optional finders cannot NonUnique-match
-            // STOPPED + PUBLISHED rows that share the same version string.
-            other.setReleaseVersion(null);
+            // FOS-W6-5: keep release_version; runtime/detail resolvers already prefer
+            // findFirst…OrderByDevVersionNumberDesc for duplicate release strings.
             templateVersionRepository.save(other);
             // Same audit shape as TemplateLifecycleVersionSupport.deactivateVersion:
             // DEACTIVATE_VERSION / PUBLISHED → STOPPED, releaseVersion retained on the record.

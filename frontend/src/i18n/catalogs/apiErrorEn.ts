@@ -64,6 +64,7 @@ export const apiErrorEn = {
     revisionInUseByPublishedRelease:
       "The letterhead revision is pinned by one or more published releases and cannot be deleted.",
     revisionDeleteFailed: "Unable to delete the letterhead revision.",
+    cannotDeleteCurrentRevision: "The current letterhead revision cannot be deleted.",
   },
   template: {
     notFound: "The template was not found.",
@@ -316,6 +317,8 @@ export const apiErrorEn = {
     lifecycleRoleDenied: "You do not have permission to perform this content module lifecycle operation.",
     lifecycleStateTransitionDenied: "The content module version is not in a valid state for this lifecycle operation.",
     lifecycleRequestInvalid: "The content module lifecycle request is invalid.",
+    versionTargetRequired: "A content module versionId or semanticVersion is required for this operation.",
+    versionTargetNotFound: "The specified content module version was not found.",
     impactConfirmationRequired: "Impact summary review and secondary confirmation are required for this lifecycle operation.",
     invalidEffectiveRange: "effectiveFrom must be less than or equal to effectiveTo.",
     searchTooLong: "The search string must be at most 200 characters.",

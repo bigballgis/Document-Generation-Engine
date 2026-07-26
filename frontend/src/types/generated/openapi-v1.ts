@@ -3624,6 +3624,13 @@ export interface components {
             exceptionReason?: string;
             /** @description Must be true when exceptionIntervention is true. */
             secondaryConfirmed?: boolean;
+            /**
+             * Format: uuid
+             * @description FOS-W6-3: explicit version target (XOR semanticVersion). Required for SUBMIT_FOR_REVIEW / APPROVE_REVIEW / REJECT_REVIEW.
+             */
+            versionId?: string;
+            /** @description FOS-W6-3: explicit semantic version target when versionId is omitted. */
+            semanticVersion?: string;
         };
         CreateContentModuleRequest: {
             /** @description Stable business identifier (e.g. MOD-LOAN-DISCLOSURE). */
@@ -5129,6 +5136,13 @@ export interface components {
             secondConfirmation: boolean;
             /** @description Required for STOP_USE and DEPRECATE operations. */
             impactSummary?: components["schemas"]["ContentModuleLifecycleImpactSummary"];
+            /**
+             * Format: uuid
+             * @description FOS-W6-3: explicit version target (XOR semanticVersion). Required for STOP_USE / RECOVER / DEPRECATE.
+             */
+            versionId?: string;
+            /** @description FOS-W6-3: explicit semantic version target when versionId is omitted. */
+            semanticVersion?: string;
         };
         ContentModuleLifecycleImpactSummary: {
             referenceTemplateCount: number;

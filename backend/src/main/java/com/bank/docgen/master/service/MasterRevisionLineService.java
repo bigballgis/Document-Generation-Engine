@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,6 +36,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 public class MasterRevisionLineService {
@@ -135,7 +138,11 @@ public class MasterRevisionLineService {
      */
     @Transactional
     public void deleteRevisionLine(UUID masterId, UUID revisionLineId, ManagementSessionClaims session) {
-        requireReadableMaster(masterId, session);
+        MasterDocumentEntity master = requireReadableMaster(masterId, session);
+        // FOS-W6-2: never delete the live current revision line.
+        if (Objects.equals(revisionLineId, master.getCurrentRevisionLineId())) {
+            throw new MasterValidationException("api.error.master.cannotDeleteCurrentRevision");
+        }
         MasterRevisionLineEntity line = requireRevisionLine(masterId, revisionLineId);
         List<TemplateVersionEntity> referencingVersions =
                 templateVersionRepository.findByMasterRevisionIdAndDeletedAtIsNull(revisionLineId);
@@ -144,12 +151,34 @@ public class MasterRevisionLineService {
         }
         line.setDeletedAt(Instant.now());
         masterRevisionLineRepository.save(line);
-        if (objectStoragePort.exists(line.getStorageKey())) {
+        String storageKey = line.getStorageKey();
+        scheduleStorageDeleteAfterCommit(revisionLineId, storageKey);
+    }
+
+    /**
+     * FOS-W6-2: object-storage delete only after the soft-delete commits, so a rolled-back
+     * DB delete cannot orphan the blob or leave a live row without storage.
+     */
+    private void scheduleStorageDeleteAfterCommit(UUID revisionLineId, String storageKey) {
+        Runnable deleteAction = () -> {
+            if (!objectStoragePort.exists(storageKey)) {
+                return;
+            }
             try {
-                objectStoragePort.delete(line.getStorageKey());
+                objectStoragePort.delete(storageKey);
             } catch (RuntimeException ex) {
                 LOG.warn("CE-K01 revision {} object storage cleanup failed: {}", revisionLineId, ex.getMessage());
             }
+        };
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    deleteAction.run();
+                }
+            });
+        } else {
+            deleteAction.run();
         }
     }
 

@@ -158,19 +158,48 @@ class TemplateLifecycleGovernanceServiceTest {
     void restore_fromStopped_setsPublished() {
         template.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
         version.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
+        Instant stopAt = Instant.parse("2026-07-01T12:00:00Z");
+        setUpdatedAt(version, stopAt);
+        TemplateLifecycleRecordEntity stopRecord = stopRecord(stopAt);
         when(groupAccessService.canRestoreOrDeprecateTemplates(groupAdmin)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
         when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.PUBLISHED));
+        when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
+                .thenReturn(List.of(stopRecord));
+        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
+                .thenReturn(List.of(version));
 
         service.restore(templateId, new LifecycleGovernanceRequest("Restore service", true), groupAdmin);
 
         assertThat(template.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
-        verify(templateVersionRepository).bulkUpdateLifecycleStatus(
-                eq(templateId),
-                eq(TemplateLifecycleStatus.STOPPED),
-                eq(TemplateLifecycleStatus.PUBLISHED),
-                any(Instant.class)
-        );
+        assertThat(version.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
+        verify(templateVersionRepository).save(version);
+    }
+
+    @Test
+    void restore_skipsIndividuallyDeactivatedStoppedVersions_fosW6_1() {
+        template.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
+        Instant deactivateAt = Instant.parse("2026-06-01T10:00:00Z");
+        Instant stopAt = Instant.parse("2026-07-01T12:00:00Z");
+        TemplateVersionEntity deactivated = publishedVersion(templateId);
+        deactivated.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
+        setUpdatedAt(deactivated, deactivateAt);
+        TemplateVersionEntity stoppedByTemplate = publishedVersion(templateId);
+        stoppedByTemplate.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
+        setUpdatedAt(stoppedByTemplate, stopAt);
+        when(groupAccessService.canRestoreOrDeprecateTemplates(groupAdmin)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
+        when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.PUBLISHED));
+        when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
+                .thenReturn(List.of(stopRecord(stopAt)));
+        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
+                .thenReturn(List.of(stoppedByTemplate, deactivated));
+
+        service.restore(templateId, new LifecycleGovernanceRequest("Restore service", true), groupAdmin);
+
+        assertThat(stoppedByTemplate.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
+        assertThat(deactivated.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.STOPPED);
+        verify(templateVersionRepository).save(stoppedByTemplate);
     }
 
     @Test
@@ -318,6 +347,42 @@ class TemplateLifecycleGovernanceServiceTest {
         entity.setReleaseVersion("1.0.0");
         entity.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
         return entity;
+    }
+
+    private TemplateLifecycleRecordEntity stopRecord(Instant createdAt) {
+        TemplateLifecycleRecordEntity record = new TemplateLifecycleRecordEntity(
+                UUID.randomUUID(),
+                templateId,
+                LifecycleAction.STOP,
+                TemplateLifecycleStatus.PUBLISHED,
+                TemplateLifecycleStatus.STOPPED,
+                null,
+                "stop",
+                null,
+                "10000001"
+        );
+        setCreatedAt(record, createdAt);
+        return record;
+    }
+
+    private static void setUpdatedAt(TemplateVersionEntity version, Instant updatedAt) {
+        try {
+            var field = TemplateVersionEntity.class.getDeclaredField("updatedAt");
+            field.setAccessible(true);
+            field.set(version, updatedAt);
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    private static void setCreatedAt(TemplateLifecycleRecordEntity record, Instant createdAt) {
+        try {
+            var field = TemplateLifecycleRecordEntity.class.getDeclaredField("createdAt");
+            field.setAccessible(true);
+            field.set(record, createdAt);
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     private TemplateDetailView detail(TemplateLifecycleStatus status) {

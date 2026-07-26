@@ -62,6 +62,7 @@ export const apiErrorZhCn = {
     revisionDiffBaselineUnavailable: "对比需要上一版母版修订。",
     revisionInUseByPublishedRelease: "母版修订版本已被一个或多个已发布版本固定，无法删除。",
     revisionDeleteFailed: "无法删除母版修订版本。",
+    cannotDeleteCurrentRevision: "不能删除当前母版修订版本。",
   },
   template: {
     notFound: "未找到模板。",
@@ -291,6 +292,8 @@ export const apiErrorZhCn = {
     lifecycleRoleDenied: "您无权执行此标准条款生命周期操作。",
     lifecycleStateTransitionDenied: "当前标准条款版本状态不允许此生命周期操作。",
     lifecycleRequestInvalid: "标准条款生命周期请求无效。",
+    versionTargetRequired: "此操作需要提供 content module 的 versionId 或 semanticVersion。",
+    versionTargetNotFound: "指定的 content module 版本不存在。",
     impactConfirmationRequired: "执行此生命周期操作前，必须审阅影响摘要并进行二次确认。",
     invalidEffectiveRange: "effectiveFrom 必须小于或等于 effectiveTo。",
     searchTooLong: "搜索字符串最多 200 个字符。",

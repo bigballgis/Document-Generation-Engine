@@ -2,6 +2,7 @@ package com.bank.docgen.contentmodule.persistence;
 
 import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
+import com.bank.docgen.contentmodule.domain.SemanticVersionParts;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,6 +28,16 @@ public class ContentModuleVersionEntity {
 
     @Column(name = "semantic_version", nullable = false, length = 32)
     private String semanticVersion;
+
+    /** FOS-W6-4: numeric major for order (1.10 &gt; 1.9). */
+    @Column(name = "version_major", nullable = false)
+    private int versionMajor;
+
+    @Column(name = "version_minor", nullable = false)
+    private int versionMinor;
+
+    @Column(name = "version_patch", nullable = false)
+    private int versionPatch;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "review_state", nullable = false, length = 32)
@@ -86,6 +97,10 @@ public class ContentModuleVersionEntity {
         this.id = id;
         this.moduleId = moduleId;
         this.semanticVersion = semanticVersion;
+        SemanticVersionParts parts = SemanticVersionParts.parse(semanticVersion);
+        this.versionMajor = parts.major();
+        this.versionMinor = parts.minor();
+        this.versionPatch = parts.patch();
         this.reviewState = ContentModuleReviewState.DRAFT;
         this.contentStructureJson = contentStructureJson;
         this.changeDescription = changeDescription;
@@ -106,6 +121,18 @@ public class ContentModuleVersionEntity {
 
     public String getSemanticVersion() {
         return semanticVersion;
+    }
+
+    public int getVersionMajor() {
+        return versionMajor;
+    }
+
+    public int getVersionMinor() {
+        return versionMinor;
+    }
+
+    public int getVersionPatch() {
+        return versionPatch;
     }
 
     public ContentModuleReviewState getReviewState() {

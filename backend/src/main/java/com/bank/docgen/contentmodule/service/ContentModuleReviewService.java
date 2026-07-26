@@ -18,7 +18,6 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -63,7 +62,7 @@ public class ContentModuleReviewService {
         ContentModuleEntity module = accessSupport.requireReadableModule(moduleId, session);
         assertOperationRole(request, session);
 
-        ContentModuleVersionEntity version = resolveTargetVersion(module.getId(), request.operation());
+        ContentModuleVersionEntity version = resolveTargetVersion(module.getId(), request);
         SelfApprovalGuard.EnforceOutcome outcome = enforceSelfApproval(version, request, session);
         applyTransition(version, request, session.username());
 
@@ -129,6 +128,13 @@ public class ContentModuleReviewService {
                     HttpStatus.UNPROCESSABLE_ENTITY
             );
         }
+        if (!hasVersionTarget(request.versionId(), request.semanticVersion())) {
+            throw new ContentModuleGovernanceException(
+                    "MODULE_REVIEW_REQUEST_INVALID",
+                    "api.error.contentModule.versionTargetRequired",
+                    HttpStatus.UNPROCESSABLE_ENTITY
+            );
+        }
         if (request.operation() == ContentModuleReviewOperation.SUBMIT_FOR_REVIEW
                 && (request.changeDescription() == null || request.changeDescription().isBlank())) {
             throw new ContentModuleGovernanceException(
@@ -145,6 +151,10 @@ public class ContentModuleReviewService {
                     HttpStatus.UNPROCESSABLE_ENTITY
             );
         }
+    }
+
+    private static boolean hasVersionTarget(UUID versionId, String semanticVersion) {
+        return versionId != null || (semanticVersion != null && !semanticVersion.isBlank());
     }
 
     private void assertOperationRole(ContentModuleReviewTransitionRequest request, ManagementSessionClaims session) {
@@ -183,21 +193,51 @@ public class ContentModuleReviewService {
         );
     }
 
-    private ContentModuleVersionEntity resolveTargetVersion(UUID moduleId, ContentModuleReviewOperation operation) {
-        List<ContentModuleVersionEntity> candidates = switch (operation) {
-            case SUBMIT_FOR_REVIEW -> versionRepository.findByModuleIdAndReviewStateOrderBySemanticVersionDesc(
-                    moduleId, ContentModuleReviewState.DRAFT);
-            case APPROVE_REVIEW, REJECT_REVIEW -> versionRepository.findByModuleIdAndReviewStateOrderBySemanticVersionDesc(
-                    moduleId, ContentModuleReviewState.SUBMITTED);
+    /**
+     * FOS-W6-3: approve / reject / submit must name an explicit version.
+     */
+    private ContentModuleVersionEntity resolveTargetVersion(
+            UUID moduleId,
+            ContentModuleReviewTransitionRequest request
+    ) {
+        ContentModuleVersionEntity version = resolveExplicitVersion(
+                moduleId,
+                request.versionId(),
+                request.semanticVersion()
+        );
+        ContentModuleReviewState expected = switch (request.operation()) {
+            case SUBMIT_FOR_REVIEW -> ContentModuleReviewState.DRAFT;
+            case APPROVE_REVIEW, REJECT_REVIEW -> ContentModuleReviewState.SUBMITTED;
         };
-        if (candidates.isEmpty()) {
-            throw new ContentModuleGovernanceException(
-                    "MODULE_REVIEW_STATE_TRANSITION_DENIED",
-                    "api.error.contentModule.reviewStateTransitionDenied",
-                    HttpStatus.CONFLICT
-            );
+        if (version.getReviewState() != expected) {
+            throw stateDenied();
         }
-        return candidates.getFirst();
+        return version;
+    }
+
+    private ContentModuleVersionEntity resolveExplicitVersion(
+            UUID moduleId,
+            UUID versionId,
+            String semanticVersion
+    ) {
+        if (versionId != null) {
+            ContentModuleVersionEntity version = versionRepository.findById(versionId)
+                    .orElseThrow(this::versionTargetNotFound);
+            if (!moduleId.equals(version.getModuleId())) {
+                throw versionTargetNotFound();
+            }
+            return version;
+        }
+        return versionRepository.findByModuleIdAndSemanticVersion(moduleId, semanticVersion.trim())
+                .orElseThrow(this::versionTargetNotFound);
+    }
+
+    private ContentModuleGovernanceException versionTargetNotFound() {
+        return new ContentModuleGovernanceException(
+                "MODULE_VERSION_NOT_FOUND",
+                "api.error.contentModule.versionTargetNotFound",
+                HttpStatus.UNPROCESSABLE_ENTITY
+        );
     }
 
     private void applyTransition(
