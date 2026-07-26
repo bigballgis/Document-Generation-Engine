@@ -136,7 +136,7 @@ If a future decision appears, add it here — do not invent product behaviour.
 | **W9** | `fos-contract-works-first-time` | Contract works first time | C1,C3,C5,C6,C16,C17,C18 | [FOS-W9](detail/FOS-W9-contract-works-first-time.md) | **Done** |
 | **W10** | `fos-credential-lifecycle` | Credential lifecycle matches ADR | C2,C4,C11,C12,C22 + **28-day grace (D11)** | [FOS-W10](detail/FOS-W10-credential-lifecycle.md) | **Done** |
 | **W11** | `fos-policy-impact-troubleshoot` | Policy impact & troubleshooting | C7,C8,C9,C10,C13,C14,C15,C20,C21 | [FOS-W11](detail/FOS-W11-policy-impact-troubleshoot.md) | **Done** |
-| **W12** | `fos-ci-gates-tell-truth` | CI gates tell the truth | E1,E5,E14,E15 | [FOS-W12](detail/FOS-W12-ci-gates-tell-truth.md) | **Not Started** |
+| **W12** | `fos-ci-gates-tell-truth` | CI gates tell the truth | E1,E5,E14,E15 | [FOS-W12](detail/FOS-W12-ci-gates-tell-truth.md) | **Done** |
 | **W13** | `fos-default-verify-honesty` | Default verify honesty | E2,E4,E6,E7,E8,E9,E10,E11 — **complements** CRCH W5 (do not duplicate LO pin / perceptual / soak) | [FOS-W13](detail/FOS-W13-default-verify-honesty.md) | **Not Started** |
 | **W14** | `fos-demo-literacy-path` | Demo literacy path | E19,E20,E13 — docs + entry point only | [FOS-W14](detail/FOS-W14-demo-literacy-path.md) | **Not Started** |
 | **W15** | `fos-word-foundation-honesty` | Word foundation honesty | WF-1…WF-8 — typography / letterhead / nested render honesty; evidence [deep review](detail/fos-word-foundation-deep-review-2026-07.md) | [FOS-W15](detail/FOS-W15-word-foundation-honesty.md) | **Not Started** |
