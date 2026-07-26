@@ -42,7 +42,7 @@
         <!-- veraPDF gate: required by default on verify; local may set skip + required=false. -->
         <docgen.verapdf.required>true</docgen.verapdf.required>
         <docgen.verapdf.skip>false</docgen.verapdf.skip>
-        <zxing.version>3.5.3</zxing.version>
+        <zxing.version>3.5.4</zxing.version>
         <archunit.version>1.4.2</archunit.version>
         <!-- Quality gates (OPT-B). gate.fail toggles ratchet measure vs enforce. -->
         <gate.fail>true</gate.fail>
