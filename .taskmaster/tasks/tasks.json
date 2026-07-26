@@ -2338,7 +2338,7 @@
         "id": "170",
         "title": "FOS umbrella: Frontline Operability & Solidity program (registry)",
         "description": "PENDING registry-only — FOS program plan registered 2026-07-26 (docs/plan/frontline-operability-solidity-program-2026-07.md). Not a delivery leaf. Never mark Done until program exit. Do not auto-activate. Absorbs CRCH W4. Vetoes: no-new-features; checklist-#3b/#5a; CE-O02; #53/#106; #119; invent-P-phase.",
-        "details": "Umbrella for TM #171–#184 wave leaves. Formal phase None. Sole-active cleared. Preferred serial after CRCH W0+W1: activate #171 first.",
+        "details": "Umbrella for TM #171–#185 wave leaves. Formal phase None. Sole-active cleared. Preferred serial after CRCH W0+W1: activate #171 first. #185 = Word foundation honesty (WF-1…WF-8).",
         "testStrategy": "N/A registry. Do not mark Done until FOS program exit criteria met.",
         "priority": "medium",
         "dependencies": [],
@@ -2513,17 +2513,29 @@
         "status": "pending",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
+      },
+      {
+        "id": "185",
+        "title": "FOS: FOS-W15 Word foundation honesty (fos-word-foundation-honesty)",
+        "description": "PENDING — FOS wave leaf (plan only). Slice `fos-word-foundation-honesty`. Detail docs/plan/detail/FOS-W15-word-foundation-honesty.md. Evidence docs/plan/detail/fos-word-foundation-deep-review-2026-07.md. Program docs/plan/frontline-operability-solidity-program-2026-07.md. Do not auto-activate. No new features. Formal phase None. Vetoes: checklist-#3b/#5a; CE-O02; #53/#106; #119; absolute seals; stamp-default-on.",
+        "details": "WF-1…WF-8: nested table/list fail-closed; child order; clause numbering honesty; demo headerRows; style-manifest wire-or-trim; typography gates on generated DOCX; money formatter demo honesty; one Word-crafted letterhead. Coordinate CRCH W3 (do not duplicate). Execute only when sole-active.",
+        "testStrategy": "See docs/plan/detail/FOS-W15-word-foundation-honesty.md exit criteria. TDD red-first. delivery_lane full when render/demo binaries change.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [],
+        "updatedAt": "2026-07-26T17:00:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-26T16:00:00.000Z",
-      "taskCount": 169,
+      "lastModified": "2026-07-26T17:00:00.000Z",
+      "taskCount": 170,
       "completedCount": 163,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-26T16:00:00.000Z"
+      "updated": "2026-07-26T17:00:00.000Z"
     }
   }
 }

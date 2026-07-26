@@ -41,6 +41,8 @@ FOS Leaf 11 detail/FOS-W11-policy-impact-troubleshoot.md
 FOS Leaf 12 detail/FOS-W12-ci-gates-tell-truth.md
 FOS Leaf 13 detail/FOS-W13-default-verify-honesty.md
 FOS Leaf 14 detail/FOS-W14-demo-literacy-path.md
+FOS Leaf 15 detail/FOS-W15-word-foundation-honesty.md
+            + evidence: detail/fos-word-foundation-deep-review-2026-07.md
 ```
 
 **Single-lane serial:** at most **one** FOS leaf In Progress. Do **not** fold a new leaf into an In Progress leaf. Do **not** auto-activate the next leaf after Done.
@@ -137,6 +139,7 @@ If a future decision appears, add it here — do not invent product behaviour.
 | **W12** | `fos-ci-gates-tell-truth` | CI gates tell the truth | E1,E5,E14,E15 | [FOS-W12](detail/FOS-W12-ci-gates-tell-truth.md) | **Not Started** |
 | **W13** | `fos-default-verify-honesty` | Default verify honesty | E2,E4,E6,E7,E8,E9,E10,E11 — **complements** CRCH W5 (do not duplicate LO pin / perceptual / soak) | [FOS-W13](detail/FOS-W13-default-verify-honesty.md) | **Not Started** |
 | **W14** | `fos-demo-literacy-path` | Demo literacy path | E19,E20,E13 — docs + entry point only | [FOS-W14](detail/FOS-W14-demo-literacy-path.md) | **Not Started** |
+| **W15** | `fos-word-foundation-honesty` | Word foundation honesty | WF-1…WF-8 — typography / letterhead / nested render honesty; evidence [deep review](detail/fos-word-foundation-deep-review-2026-07.md) | [FOS-W15](detail/FOS-W15-word-foundation-honesty.md) | **Not Started** |
 
 Severity: **P0** = cannot complete job / wrong document / data loss / security fail-open / stuck state.
 **P1** = tribal knowledge or undiagnosable failure. **P2** = polish.
@@ -162,6 +165,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Leaf 12 | **#182** | `fos-ci-gates-tell-truth` | **pending** | May run earlier if host CI is blocking all delivery — orchestrator may promote |
 | Leaf 13 | **#183** | `fos-default-verify-honesty` | **pending** | After / with CRCH W5 designs |
 | Leaf 14 | **#184** | `fos-demo-literacy-path` | **pending** | |
+| Leaf 15 | **#185** | `fos-word-foundation-honesty` | **pending** | Word-as-foundation deep review (2026-07-26); do **not** auto-activate |
 
 **Host sole-active rule:** FOS shares the host with CRCH / AI-SCALE peels. At most **one** delivery writer. AI-SCALE **#167–#169** remain pending and are **not** FOS work.
 

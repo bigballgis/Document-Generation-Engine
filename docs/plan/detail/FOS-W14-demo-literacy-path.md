@@ -4,7 +4,8 @@
 **Wave:** W14 · **Status:** **Not Started**
 **Slice id:** `fos-demo-literacy-path` · worktree `../DGE-fos-demo-literacy-path` · branch `feat/fos-demo-literacy-path`
 **Task Master:** **#184** · **delivery_lane:** **full** if scripts/UI touched; **light** only if pure docs (BDD must prove E1–E5)
-**Origin:** E13, E19, E20
+**Origin:** E13, E19, E20  
+**Related:** [FOS-W15](./FOS-W15-word-foundation-honesty.md) extends literacy for letterhead / FOL volume≠layout / money-formatter honesty (WF-4, WF-7, WF-8).
 
 ---
 
