@@ -167,7 +167,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Leaf 14 | **#184** | `fos-demo-literacy-path` | **pending** | |
 | Leaf 15 | **#185** | `fos-word-foundation-honesty` | **pending** | Word-as-foundation deep review (2026-07-26); do **not** auto-activate |
 
-**Host sole-active rule:** FOS shares the host with CRCH / AI-SCALE peels. At most **one** delivery writer. AI-SCALE **#167–#169** remain pending and are **not** FOS work.
+**Host sole-active rule:** FOS shares the host with CRCH / closed AI-SCALE peels. At most **one** delivery writer. AI-SCALE Leaves **#166–#169** → **Done** (peel program **Done**; residual >500 optional backlog only) — **not** FOS work; do **not** invent a new AI-SCALE sole-active leaf.
 
 ---
 
@@ -176,7 +176,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Program | Relation |
 | --- | --- |
 | **CRCH** | W0+W1 = upstream rendering/preview slice. **W4 superseded** by FOS W2–W4. W2/W3/W5 remain CRCH-owned. OD-1/OD-2 **resolved** (D8/D9) — CRCH owns seal-validation re-scope (W0-7) and keeps stamping default off. |
-| **AI-SCALE** | Leaf 1 Done; peels #167–#169 pending — do not auto-activate; do not fold i18n mega-split into FOS W1 |
+| **AI-SCALE** | Peel queue Leaves **#166–#169** → **Done** (`1475caeb`); program **Done**; residual >500 optional backlog only — do not invent new AI-SCALE In Progress leaf; do not fold test peels into FOS |
 | **PQH / SYS-NORM / CDP / LRP waves** | **Done / closed** — do not reopen |
 | **CE (#53)** | Registry-only umbrella — do not mark Done; do not treat as delivery leaf |
 | **IBL (#106 / #119)** | Outside FOS; #119 stays Blocked; do not invent Word numbers |

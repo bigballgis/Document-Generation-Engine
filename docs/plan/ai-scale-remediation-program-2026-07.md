@@ -4,17 +4,17 @@
 | --- | --- |
 | **Program ID** | `ai-scale-remediation-2026-07` (short: **AI-SCALE**) |
 | **Created** | 2026-07-26 |
-| **Status** | **In Progress** (Leaf 1–3 **Done**; Leaf 4 **In Progress**) |
+| **Status** | **Done** (Leaf 1–4 peel queue **Done**; residual >500 LOC tests = optional backlog only) |
 | **Formal phase** | **None** (NON-CE agent/docs operability program — not a P-phase) |
-| **Sole-active leaf** | TM **#169** · slice `ai-scale-peel-mega-tests` (**In Progress**) |
+| **Sole-active leaf** | **none** (cleared after **#169** Done) |
 | **Leaf 1 (Done)** | TM **#166** · `ai-scale-remediation-g1` → **Done** (`c4f1b0d4`; worktree **REMOVED**) |
 | **Leaf 2 (Done)** | TM **#167** · `ai-scale-peel-template-import` → **Done** (`d02aa414` / feat `1f55a420`; worktree **REMOVED**) |
 | **Leaf 3 (Done)** | TM **#168** · slice `ai-scale-peel-i18n` · i18n `en.ts` / `zh-CN.ts` domain split → **Done** (`ce47186a` / `0a5e928e`; BDD **ready**/shipped) |
-| **Leaf 4 (In Progress)** | TM **#169** · slice `ai-scale-peel-mega-tests` · mega-test fixture split → **In Progress** |
+| **Leaf 4 (Done)** | TM **#169** · slice `ai-scale-peel-mega-tests` · mega-test fixture split → **Done** (`1475caeb` / feat `af41410d`; worktree **REMOVED**) |
 | **Batch (Leaf 1)** | **solo** · `member_task_ids: ["166"]` · `proposed_slice_id: ai-scale-remediation-g1` · vetoes: `unrelated-code-peel`, `file-cap`, `risk-domain-split` — **closed** |
 | **Batch (Leaf 2)** | **solo** · `member_task_ids: ["167"]` · `proposed_slice_id: ai-scale-peel-template-import` · `delivery_lane: full` · vetoes: `unrelated-frontend-i18n`, `mega-test-split` — **closed** |
 | **Batch (Leaf 3)** | **solo** · `member_task_ids: ["168"]` · `proposed_slice_id: ai-scale-peel-i18n` · `delivery_lane: light` · vetoes: `mega-test-split`, `backend-domain` — **closed** |
-| **Batch (Leaf 4)** | **solo** · `member_task_ids: ["169"]` · `proposed_slice_id: ai-scale-peel-mega-tests` · `delivery_lane: light` · vetoes: `unrelated-product-peel`, `checklist-#3b/#5a-GO`, `CE-O02`, `mark-#53-CE-Done` — **open** |
+| **Batch (Leaf 4)** | **solo** · `member_task_ids: ["169"]` · `proposed_slice_id: ai-scale-peel-mega-tests` · `delivery_lane: light` · vetoes: `unrelated-product-peel`, `checklist-#3b/#5a-GO`, `CE-O02`, `mark-#53-CE-Done` — **closed** |
 | **delivery_lane (Leaf 1)** | **light** (docs/governance/scaffold; product E2E/Docker **N/A**) |
 | **delivery_lane (Leaf 2)** | **full** (BE verify required; stages **5–7**/10 **N/A** — zero FE + zero OpenAPI/runtime contract change) |
 | **delivery_lane (Leaf 3)** | **light** (structure-only i18n modularization; identical keys/values; FE gates required; E2E/Docker **N/A**; E1–E5) |
@@ -22,13 +22,13 @@
 | **Behavior SoT (G1)** | [module-map-agent-retrieval.md](../behavior/module-map-agent-retrieval.md) · [lightweight-delivery-lane.md](../behavior/lightweight-delivery-lane.md) · [ai-scale-docs-conventions.md](../behavior/ai-scale-docs-conventions.md) — all **ready**/shipped |
 | **Behavior SoT (Leaf 2)** | [ai-scale-template-import-peel.md](../behavior/ai-scale-template-import-peel.md) — **ready**/shipped (**BDD-AI-SCALE-TIP** TIP-01…08) |
 | **Behavior SoT (Leaf 3)** | [ai-scale-i18n-locale-split.md](../behavior/ai-scale-i18n-locale-split.md) — **ready**/shipped (**BDD-AI-SCALE-I18N** I18N-01…09) |
-| **Behavior SoT (Leaf 4)** | [ai-scale-mega-test-fixture-split.md](../behavior/ai-scale-mega-test-fixture-split.md) — **ready** (**BDD-AI-SCALE-MTF** MTF-01…10) |
+| **Behavior SoT (Leaf 4)** | [ai-scale-mega-test-fixture-split.md](../behavior/ai-scale-mega-test-fixture-split.md) — **ready**/shipped (**BDD-AI-SCALE-MTF** MTF-01…10) |
 | **Detail plan (Leaf 1)** | [detail/ai-scale-remediation-g1.md](./detail/ai-scale-remediation-g1.md) |
 | **Detail plan (Leaf 2)** | [detail/ai-scale-template-import-peel.md](./detail/ai-scale-template-import-peel.md) |
 | **Detail plan (Leaf 3)** | [detail/ai-scale-i18n-locale-split.md](./detail/ai-scale-i18n-locale-split.md) |
-| **Detail plan (Leaf 4)** | [detail/ai-scale-mega-test-fixture-split.md](./detail/ai-scale-mega-test-fixture-split.md) — **authored** (Stage 3; leaf remains **In Progress**) |
-| **Worktree (Leaf 4)** | `D:/working/DGE-ai-scale-peel-mega-tests` · `feat/ai-scale-peel-mega-tests` · base `b1bea35d` |
-| **Next queue head** | *(none beyond sole-active #169)* — do **not** activate FOS **#177** or other leaves |
+| **Detail plan (Leaf 4)** | [detail/ai-scale-mega-test-fixture-split.md](./detail/ai-scale-mega-test-fixture-split.md) |
+| **Worktree (Leaf 4)** | **REMOVED** (`D:/working/DGE-ai-scale-peel-mega-tests` · `feat/ai-scale-peel-mega-tests` deleted after merge `1475caeb`) |
+| **Next queue head** | *(none)* — peel queue **Done**; residual >500 LOC tests = **optional backlog** (Not Started; **not** In Progress). Do **not** invent a new AI-SCALE sole-active leaf. |
 | **Upstream** | User confirmation 2026-07-26「按你的建议整改吧»; formal phase remains **None**; do **not** reopen PQH / SYS-NORM waves |
 
 ---
@@ -48,9 +48,10 @@ mega-fixture peels.
 (`delivery_lane: light`; BDD **ready**/shipped) — public facades stay `@/i18n/locales/en` /
 `zh-CN`; agents edit domain modules under `frontend/src/i18n/locales/domains/*`
 (see [module-map.md](../architecture/module-map.md) + i18n-english-first skill).
-**Leaf 4 (In Progress):** mega-test fixture / oversized test-helper peel under soft
+**Leaf 4 (Done):** mega-test fixture / oversized test-helper peel under soft
 budgets (`slice_id: ai-scale-peel-mega-tests`) — test-infra only; no product behavior
-change claimed.
+change claimed. Six baseline hotspots peeled; residual >500 LOC tests remain optional
+backlog only.
 
 ---
 
@@ -61,10 +62,21 @@ change claimed.
 | **Leaf 1** | `ai-scale-remediation-g1` | **#166** | **Done** (`c4f1b0d4`) | Module map SoT + light lane + soft budgets + progressive disclosure |
 | **Leaf 2** | `ai-scale-peel-template-import` | **#167** | **Done** (`d02aa414` / `1f55a420`) | TemplateImport* peel under soft budgets |
 | **Leaf 3** | `ai-scale-peel-i18n` | **#168** | **Done** (`ce47186a` / `0a5e928e`) | i18n facade + `locales/domains/*` split (`delivery_lane: light`) |
-| **Leaf 4** | `ai-scale-peel-mega-tests` | **#169** | **In Progress** | Mega-test fixture split |
+| **Leaf 4** | `ai-scale-peel-mega-tests` | **#169** | **Done** (`1475caeb` / `af41410d`) | Mega-test fixture split |
 
-**Rule:** At most **one** AI-SCALE delivery leaf sole-active at a time. Host sole-active =
-TM **#169** / `ai-scale-peel-mega-tests` only. Do **not** fold other peels into this leaf.
+**Rule:** At most **one** AI-SCALE delivery leaf sole-active at a time. Peel queue Leaves
+**1–4** → **Done**; host sole-active **cleared**. Residual >500 LOC `*Test.java` files are
+**optional backlog** (Not Started) — do **not** auto-activate a follow-on leaf.
+
+### Optional residual backlog (Not Started — not In Progress)
+
+| Hotspot (approx LOC) | Notes |
+| --- | --- |
+| `DocxAssemblerTest` (~564) | Optional further peel |
+| `TemplateBindingConfigurationServiceTest` (~531) | Optional further peel |
+| `ManagementInvocationQueryServiceTest` (~531) | Optional further peel |
+| `ContentModuleServiceTest` (~511) | Optional further peel |
+| `InvocationRegenerationServiceTest` (~510) | Optional further peel |
 
 ---
 
@@ -94,14 +106,13 @@ TM **#169** / `ai-scale-peel-mega-tests` only. Do **not** fold other peels into 
 | **AI-SCALE-G1** | **#166** | **done** | Leaf 1 closed; merge `c4f1b0d4` |
 | **AI-SCALE-L2** | **#167** | **done** | Leaf 2 closed; merge `d02aa414` / feat `1f55a420` |
 | **AI-SCALE-L3** | **#168** | **done** | i18n locale split — BDD **ready**/shipped ([ai-scale-i18n-locale-split.md](../behavior/ai-scale-i18n-locale-split.md)); merge `ce47186a` |
-| **AI-SCALE-L4** | **#169** | **in-progress** | Mega-test fixture split — BDD **ready** ([ai-scale-mega-test-fixture-split.md](../behavior/ai-scale-mega-test-fixture-split.md) **MTF-01…10**); detail [detail/ai-scale-mega-test-fixture-split.md](./detail/ai-scale-mega-test-fixture-split.md); sole-active `ai-scale-peel-mega-tests`; `delivery_lane: light` |
+| **AI-SCALE-L4** | **#169** | **done** | Mega-test fixture split — BDD **ready**/shipped ([ai-scale-mega-test-fixture-split.md](../behavior/ai-scale-mega-test-fixture-split.md) **MTF-01…10**); detail [detail/ai-scale-mega-test-fixture-split.md](./detail/ai-scale-mega-test-fixture-split.md); merge `1475caeb` / feat `af41410d`; `delivery_lane: light` |
 
-**Sole-active statement:** Host delivery sole-active is TM **#169** / slice
-`ai-scale-peel-mega-tests` (worktree `D:/working/DGE-ai-scale-peel-mega-tests` ·
-`feat/ai-scale-peel-mega-tests`; base `b1bea35d`). Leaves **#166–#168** remain **done**.
-Umbrella **#53** stays **in-progress** registry-only (not a delivery leaf; host
-sole-active note → **#169**). **#106** stays **pending** registry-only. **#119** stays
-Blocked/pending. FOS **#177** remains queued — do **not** activate.
+**Sole-active statement:** Host delivery sole-active for AI-SCALE is **cleared** (TM
+**#169** → **done**; worktree removed). Leaves **#166–#169** remain **done**. Umbrella
+**#53** stays **in-progress** registry-only (not a delivery leaf). **#106** stays
+**pending** registry-only. **#119** stays Blocked/pending. Residual >500 peels are
+optional backlog only — do **not** invent a new In Progress AI-SCALE leaf.
 
 ---
 
@@ -121,8 +132,8 @@ on P0–P23 for this work.
 | CE (#53) | Registry-only umbrella — do **not** treat as delivery leaf or mark Done |
 | IBL (#106 / #119) | Outside AI-SCALE; #119 stays Blocked |
 | ORCH light-lane / batch-recommend | Leaf 1 wires eligibility; does not weaken full product leaves |
-| CRCH | Sibling NON-CE; W0+W1 Done — do **not** steal sole-active from an active AI-SCALE leaf |
-| FOS | Sibling NON-CE; **#171–#176** Done; next **#177** queued — do **not** activate while **#169** sole-active |
+| CRCH | Sibling NON-CE; W0+W1 Done |
+| FOS | Sibling NON-CE **In Progress** (product queue); AI-SCALE peel queue closed — do **not** steal sole-active / invent AI-SCALE follow-on |
 
 ---
 
@@ -142,3 +153,4 @@ on P0–P23 for this work.
 | 2026-07-27 | Leaf 4 BDD authored **ready** — [ai-scale-mega-test-fixture-split.md](../behavior/ai-scale-mega-test-fixture-split.md) (**MTF-01…10**); worktree `DGE-ai-scale-peel-mega-tests` · `feat/ai-scale-peel-mega-tests`; `delivery_lane: light`; stages 5–7/10 N/A; evidence `mvn verify`; TM **#169** sole-active **In Progress** |
 | 2026-07-27 | Leaf 4 TM **#169** → **in-progress** sole-active (plan-orchestrator Stage 2); Batch **solo** `ai-scale-peel-mega-tests`; placement **ISOLATED**; worktree `D:/working/DGE-ai-scale-peel-mega-tests` · `feat/ai-scale-peel-mega-tests`; base `b1bea35d`; **#166–#168** remain **done**; formal phase **None**; umbrella **#53** host sole-active note → **#169**; BDD now **ready** (see prior log row); detail plan may still author in Stage 2/3 |
 | 2026-07-27 | Leaf 4 Stage 3 docs-first — detail [detail/ai-scale-mega-test-fixture-split.md](./detail/ai-scale-mega-test-fixture-split.md) authored (hotspot baseline, peel approach, exit criteria, `mvn verify` gate, E2E/Docker **N/A**); program + `docs/README.md` indexes linked; leaf remains **In Progress** (not Done); ready for `backend-engineer` |
+| 2026-07-27 | Leaf 4 TM **#169** → **Done** (MAIN merge `1475caeb`; feat tip `af41410d`; worktree **REMOVED**; branch deleted); Batch **solo** closed; six mega hotspots peeled; `mvn verify` exit **0**; Arch **APPROVE_WITH_NOTES**; CQ **APPROVE_WITH_NOTES**; stages 5–7/10 **N/A**; **sole-active cleared**; peel queue Leaves **1–4** → **Done**; program → **Done**; residual >500 LOC tests = optional backlog (Not Started — not activated) |

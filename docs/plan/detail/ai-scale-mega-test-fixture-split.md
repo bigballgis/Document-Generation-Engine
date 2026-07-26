@@ -3,12 +3,12 @@
 **Program / slice:** `ai-scale-peel-mega-tests` (ad-hoc **NON-CE** AI-SCALE Leaf 4; **not** a formal P-phase)  
 **Program registry:** [ai-scale-remediation-program-2026-07.md](../ai-scale-remediation-program-2026-07.md)  
 **Formal plan phase:** **None**  
-**Task Master:** **#169** (`AI-SCALE-L4` / mega-test fixture split) → **In Progress** (sole-active)  
-**BDD:** [ai-scale-mega-test-fixture-split.md](../../behavior/ai-scale-mega-test-fixture-split.md) — **`ready`** (2026-07-27; **BDD-AI-SCALE-MTF** MTF-01…10)  
-**Placement:** **ISOLATED** · worktree `D:/working/DGE-ai-scale-peel-mega-tests` · branch `feat/ai-scale-peel-mega-tests` · base `b1bea35d`  
+**Task Master:** **#169** (`AI-SCALE-L4` / mega-test fixture split) → **Done**  
+**BDD:** [ai-scale-mega-test-fixture-split.md](../../behavior/ai-scale-mega-test-fixture-split.md) — **`ready`/shipped** (2026-07-27; **BDD-AI-SCALE-MTF** MTF-01…10)  
+**Placement:** **ISOLATED** (closed) · worktree **REMOVED** · branch `feat/ai-scale-peel-mega-tests` **deleted** · merge `1475caeb` · feat tip `af41410d`  
 **Batch recommendation:** **solo** (`member_task_ids: ["169"]`; `proposed_slice_id: ai-scale-peel-mega-tests`;
 `delivery_lane: light`;
-vetoes_applied: `unrelated-product-peel`, `checklist-#3b/#5a-GO`, `CE-O02`, `mark-#53-CE-Done`) — **open**
+vetoes_applied: `unrelated-product-peel`, `checklist-#3b/#5a-GO`, `CE-O02`, `mark-#53-CE-Done`) — **closed**
 
 **Prior (Done, do not reopen):** Leaf 1 **#166** → **Done** (`c4f1b0d4`); Leaf 2 **#167** → **Done** (`d02aa414` / `1f55a420`); Leaf 3 **#168** → **Done** (`ce47186a` / `0a5e928e`)
 
@@ -24,20 +24,21 @@ Split oversized backend `*Test.java` fixtures/helpers that exceed soft size budg
 
 | Item | Value |
 | --- | --- |
-| Leaf status | **In Progress** (sole-active; docs Stage 3 ready for backend-engineer) |
+| Leaf status | **Done** (2026-07-27; sole-active cleared) |
 | Formal phase | **None** |
-| Host sole-active | TM **#169** / `ai-scale-peel-mega-tests` |
-| `bdd_readiness` | **`ready`** |
+| Host sole-active | **none** (cleared after **#169**) |
+| `bdd_readiness` | **`ready`/shipped** |
 | `delivery_lane` | **light** (E1–E5; test-infra only) |
 | `frontend_ui_in_scope` | **false** |
 | `openapi_contract_change` | **false** |
 | `runtime_api_semantics_change` | **false** |
 | `flyway_change` | **false** |
-| `product_main_code_change` | **false** (preferred empty `src/main` diff) |
-| Stages 5–7 / 10 | **N/A** (honest light-lane; do not invent greens) |
+| `product_main_code_change` | **false** (no product `src/main` changes) |
+| Stages 5–7 / 10 | **N/A** (honest light-lane) |
 | Required gate | `mvn -B -ntp -f backend/pom.xml verify` → exit **0** |
-| Queued after this leaf | *(none)* — do **not** activate FOS **#177** or fold product peels |
-| Do **not** | Flip **#3b/#5a GO**; mark **#53** / **#106** Done; activate **#119** / CE-O02; invent P24+; weaken/delete asserts to shrink LOC |
+| Merge | `1475caebf7170b54997a0c7fde6c819cf38f03c9` (feat tip `af41410d`) |
+| Queued after this leaf | *(none)* — peel queue **Done**; residual >500 = optional backlog (Not Started) |
+| Do **not** | Flip **#3b/#5a GO**; mark **#53** / **#106** Done; activate **#119** / CE-O02; invent P24+; invent new AI-SCALE In Progress leaf |
 
 ---
 
@@ -57,50 +58,42 @@ Split oversized backend `*Test.java` fixtures/helpers that exceed soft size budg
 | **MTF-C8** | FE / Playwright / Docker out of scope while light eligibility holds | BDD MTF-07 |
 | **MTF-C9** | At Done (Stage 12): update AI-SCALE plan + ledger; peel queue may close — still do **not** flip **#3b/#5a** or umbrella **#53** | Program vetoes |
 
-### Pending / non-blocking (implementer sequencing — not behavior blockers)
+### Pending / non-blocking (closed for this leaf)
 
-| ID | Question | Resolution rule |
+| ID | Question | Resolution |
 | --- | --- | --- |
-| **MTF-P1** | Exact order among the six baseline hotspots after the two >800 files | Prefer critical (>800) first, then descending LOC; stay within ~25 files |
-| **MTF-P2** | Whether additional >500 LOC `*Test.java` files enter this leaf | Only if peel is safe and attribution stays clear; else leave for a follow-on leaf |
-| **MTF-P3** | Nested `@Nested` vs extracted top-level suite vs support-class split per hotspot | Choose smallest structural move that preserves discovery + asserts and meets soft budgets |
+| **MTF-P1** | Exact order among the six baseline hotspots after the two >800 files | Delivered all six in one leaf (critical >800 first pattern honored) |
+| **MTF-P2** | Whether additional >500 LOC `*Test.java` files enter this leaf | Deferred — residual >500 listed as optional backlog only |
+| **MTF-P3** | Nested `@Nested` vs extracted top-level suite vs support-class split per hotspot | Focused top-level suites + colocated fixtures used |
 
 **Open questions blocking implementation:** **none**.
 
 ---
 
-## Hotspot baseline (pre-peel)
+## Hotspot baseline (pre-peel) → after peel
 
-Measured in worktree `D:/working/DGE-ai-scale-peel-mega-tests` @ base `b1bea35d` (PowerShell `Measure-Object -Line` = non-empty lines):
+Measured pre-peel in worktree @ base `b1bea35d` (PowerShell `Measure-Object -Line` = non-empty lines):
 
-| Priority | Path | LOC | Soft signal |
+| Priority | Hotspot | Before | After |
 | --- | --- | --- | --- |
-| 1 | `backend/src/test/java/com/bank/docgen/template/web/TemplatePlatformSliceTest.java` | **981** | ≫ 500; ≫ 800 |
-| 2 | `backend/src/test/java/com/bank/docgen/sharedkernel/document/compute/VariableComputeEngineTest.java` | **882** | ≫ 500; ≫ 800 |
-| 3 | `backend/src/test/java/com/bank/docgen/rendering/StructuredContentDocxWriterTest.java` | **775** | > 500; near 800 |
-| 4 | `backend/src/test/java/com/bank/docgen/template/service/PublishGateServiceTest.java` | **725** | > 500 |
-| 5 | `backend/src/test/java/com/bank/docgen/library/service/LibraryExportServiceTest.java` | **707** | > 500 |
-| 6 | `backend/src/test/java/com/bank/docgen/template/service/SysNormPromotionPackTest.java` | **605** | > 500 |
+| 1 | `TemplatePlatformSliceTest` | **981** | Lifecycle **298** · Runtime **297** · DatasetContract **169** · Fixtures **276** |
+| 2 | `VariableComputeEngineTest` | **882** | CoreDsl **302** · FormatLocale **381** · SpellAmountSuite **228** |
+| 3 | `StructuredContentDocxWriterTest` | **775** | Core **439** · ModuleMedia **268** · Fixtures **98** |
+| 4 | `PublishGateServiceTest` | **725** | Core **247** · ContentModule **282** · Fixtures **228** |
+| 5 | `LibraryExportServiceTest` | **707** | ZipArtifact **350** · AccessFilter **161** · Fixtures **239** |
+| 6 | `SysNormPromotionPackTest` | **605** | Suite **327** · Fixtures **300** |
 
-**Batch guidance:** Peel the six listed files first (critical >800, then largest >500). Optionally peel other >500 LOC `*Test.java` files **only** when safe within a practical ~25-file change budget; otherwise defer per `on_red_split_hint`.
-
-Existing test support packages (prefer reuse / extend):
-
-- `backend/src/test/java/com/bank/docgen/demo/support`
-- `backend/src/test/java/com/bank/docgen/master/support`
-- Colocated `…/<module>/support` beside the suite when domain-local
+**Optional residual backlog (>500, Not Started — not In Progress):** `DocxAssemblerTest` ~564; `TemplateBindingConfigurationServiceTest` ~531; `ManagementInvocationQueryServiceTest` ~531; `ContentModuleServiceTest` ~511; `InvocationRegenerationServiceTest` ~510.
 
 ---
 
-## Peel approach
+## Peel approach (executed)
 
-1. **Baseline** — re-measure LOC on in-scope hotspots; record pre-peel scenario inventory for attribution.
-2. **TDD Red** — add/extend SoftBudget-style characterization tests (mirror `TemplateImportSoftBudgetTest`) for in-scope hotspot paths so oversized files fail until peeled.
-3. **Extract** — move duplicated setup/builders into support packages; split mega suites via `@Nested` and/or focused top-level test classes; keep assertion bodies intact (move, do not rewrite semantics).
-4. **Budgets** — drive each peeled hotspot to ≤500 LOC prefer; leave none >800 without an explicit further-split plan before Done; if a new helper itself exceeds budgets, peel it further.
-5. **Verify** — targeted Surefire suites for peeled surfaces, then full `mvn verify`.
-6. **Red hygiene** — if verify fails with unclear attribution across many hotspots, split to one hotspot class per sub-leaf (do **not** weaken asserts).
-7. **Lane honesty** — keep stages **5–7** / **10** as **N/A** unless mid-flight product/UI/runtime drift forces upgrade to `full`.
+1. SoftBudget-style characterization + peel of six baseline hotspots.
+2. Extract fixtures / focused suites; preserve assertion semantics.
+3. Drive peeled surfaces under soft budgets (no unexplained >800).
+4. Full `mvn verify` green; Arch/CQ **APPROVE_WITH_NOTES**.
+5. Stages **5–7** / **10** recorded **N/A**.
 
 ---
 
@@ -110,9 +103,9 @@ Existing test support packages (prefer reuse / extend):
 | --- | --- | --- |
 | AI-SCALE-L4-T01 | Sole-active activation + TM/plan/ledger wiring for #169 | **Done** (2026-07-27 Stage 2) |
 | AI-SCALE-L4-T02 | Doc-keeper: detail plan + program/index cross-links (this document) | **Done** (2026-07-27 Stage 3) |
-| AI-SCALE-L4-T03 | TDD Red: SoftBudget-style characterization for in-scope hotspot `*Test.java` | **Not Started** |
-| AI-SCALE-L4-T04 | Peel baseline hotspots (and optional safe >500 others) under soft budgets; preserve coverage semantics | **Not Started** |
-| AI-SCALE-L4-T05 | `mvn verify` + arch/CQ as scheduled + light-lane N/A evidence + merge + MAIN doc-sync | **Not Started** |
+| AI-SCALE-L4-T03 | TDD Red: SoftBudget-style characterization for in-scope hotspot `*Test.java` | **Done** (2026-07-27; `MegaTestFixtureSoftBudgetTest`) |
+| AI-SCALE-L4-T04 | Peel baseline hotspots (and optional safe >500 others) under soft budgets; preserve coverage semantics | **Done** (2026-07-27; six baseline hotspots peeled; residual >500 deferred) |
+| AI-SCALE-L4-T05 | `mvn verify` + arch/CQ as scheduled + light-lane N/A evidence + merge + MAIN doc-sync | **Done** (2026-07-27; merge `1475caeb`; Stage 12 this sync) |
 
 ---
 
@@ -131,26 +124,28 @@ Existing test support packages (prefer reuse / extend):
 
 ## Exit criteria (before Done)
 
-1. Prioritized in-scope hotspot `*Test.java` files meet MTF-C2 (≤500 prefer; no unexplained >800).
-2. Pre-peel scenarios still execute with equivalent or stronger assertions (MTF-02 / MTF-04).
-3. Shared fixtures prefer existing or colocated test support packages (MTF-03).
-4. `git diff` on `backend/src/main` empty (preferred) or any unavoidable visibility tweak explicitly documented (MTF-05).
-5. `mvn -B -ntp -f backend/pom.xml verify` exit **0** (MTF-06).
-6. Stages **5–7** / **10** recorded **N/A** under `delivery_lane: light` (or leaf upgraded to `full` if surfaces appear) (MTF-07).
-7. Program / ledger synced at Stage 12; vetoes honored (MTF-10). Leaf status remains **In Progress** until those gates complete — **do not** mark Done from Stage 3 docs alone.
+1. Prioritized in-scope hotspot `*Test.java` files meet MTF-C2 (≤500 prefer; no unexplained >800). ✅
+2. Pre-peel scenarios still execute with equivalent or stronger assertions (MTF-02 / MTF-04). ✅
+3. Shared fixtures prefer existing or colocated test support packages (MTF-03). ✅
+4. `git diff` on `backend/src/main` empty (preferred) or any unavoidable visibility tweak explicitly documented (MTF-05). ✅ (no product main changes)
+5. `mvn -B -ntp -f backend/pom.xml verify` exit **0** (MTF-06). ✅
+6. Stages **5–7** / **10** recorded **N/A** under `delivery_lane: light` (MTF-07). ✅
+7. Program / ledger synced at Stage 12; vetoes honored (MTF-10). ✅
 
 ---
 
-## Gate evidence (target)
+## Gate evidence (recorded)
 
-| Gate | Result (target) |
+| Gate | Result |
 | --- | --- |
-| SoftBudget / LOC measurement on peeled hotspots | ≤500 prefer; no unexplained >800 |
-| Scenario / discovery equivalence | Preserved (or stricter) |
-| `mvn -B -ntp -f backend/pom.xml verify` | exit **0** |
-| architecture-reviewer / code-quality-reviewer | As scheduled (soft-budget focus on test files) |
+| SoftBudget / LOC measurement on peeled hotspots | Six baseline hotspots peeled; none left as mega >800; see after-peel table |
+| Scenario / discovery equivalence | Preserved (focused suites + fixtures) |
+| `mvn -B -ntp -f backend/pom.xml verify` | exit **0** (feature worktree after rebase; LINE/BRANCH above floors) |
+| architecture-reviewer | **APPROVE_WITH_NOTES** |
+| code-quality-reviewer | **APPROVE_WITH_NOTES** |
 | Stages 5–7 / 10 | **N/A** (`delivery_lane: light`; E1–E5) |
-| FE lint / Playwright / Docker | **N/A** while light eligibility holds |
+| FE lint / Playwright / Docker | **N/A** |
+| Merge SHA | `1475caebf7170b54997a0c7fde6c819cf38f03c9` (feat tip `af41410d`) |
 
 ---
 
@@ -161,4 +156,5 @@ Existing test support packages (prefer reuse / extend):
 - Soft budgets: [ai-scale-docs-conventions.md](../../behavior/ai-scale-docs-conventions.md) · [quality-gate-threshold-baseline.md](../../architecture/quality-gate-threshold-baseline.md)
 - Light lane: [lightweight-delivery-lane.md](../../behavior/lightweight-delivery-lane.md)
 - SoftBudget pattern (mirror): `backend/src/test/java/com/bank/docgen/template/service/TemplateImportSoftBudgetTest.java`
+- SoftBudget leaf test: `backend/src/test/java/com/bank/docgen/sharedkernel/testsupport/MegaTestFixtureSoftBudgetTest.java`
 - User direction: 2026-07-26「按你的建议整改吧»

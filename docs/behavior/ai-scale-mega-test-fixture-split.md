@@ -1,15 +1,17 @@
 ---
 id: BDD-AI-SCALE-MTF
 title: AI-SCALE Leaf 4 — Mega-test fixture / helper split under soft size budgets
-status: ready
+status: shipped
 date: 2026-07-27
 bdd_readiness: ready
 task_ids: [169]
 placement: ISOLATED
-worktree_path: D:/working/DGE-ai-scale-peel-mega-tests
-branch: feat/ai-scale-peel-mega-tests
+worktree_path: REMOVED
+branch: feat/ai-scale-peel-mega-tests (deleted)
 slice: ai-scale-peel-mega-tests
-integration_base: origin/main@b1bea35d298c1c489d8233905cab0a2d7f7a6f03
+integration_base: origin/main@1475caebf7170b54997a0c7fde6c819cf38f03c9
+merge_sha: 1475caebf7170b54997a0c7fde6c819cf38f03c9
+feature_tip: af41410d
 user_confirmation: 2026-07-26 「按你的建议整改吧»; stage-1 handoff confirms test-infra peel only; no product behavior change; prefer light + mvn verify; E2E/Docker N/A
 delivery_lane: light
 frontend_ui_in_scope: false
@@ -26,9 +28,9 @@ kind: test-infra-structural-peel  # preserve coverage semantics; soft-budget acc
 | Field | Value |
 | --- | --- |
 | **Slice** | `ai-scale-peel-mega-tests` (program alias `ai-scale-mega-test-fixture-split`) |
-| **bdd_readiness** | **`ready`** |
+| **bdd_readiness** | **`ready`/shipped** |
 | **Recorded** | 2026-07-27 |
-| **Task Master** | **#169** (AI-SCALE Leaf 4 / `AI-SCALE-L4`) |
+| **Task Master** | **#169** → **Done** (AI-SCALE Leaf 4 / `AI-SCALE-L4`; merge `1475caeb`) |
 | **Program** | [ai-scale-remediation-program-2026-07.md](../plan/ai-scale-remediation-program-2026-07.md) |
 | **Formal phase** | **None** (NON-CE AI-SCALE peel; do not invent P24+) |
 | **Actor** | Platform engineer / `backend-engineer` / `code-quality-reviewer` (test structure); CI / `mvn verify` as regression surface |
