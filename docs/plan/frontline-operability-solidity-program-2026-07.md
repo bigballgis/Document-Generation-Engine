@@ -231,9 +231,9 @@ blanket STOPPED→PUBLISHED), **B2** (`resolvePinnedContentStructures` `ifPresen
 
 Program may move to **Done** only when:
 
-1. Leaves 1–14 are **Done** or explicitly **Deferred** with user confirmation (and OD items resolved or carried).
-2. A bank-persona walkthrough on the acceptance stack completes: create → complex author → publish → copy curl → consumer generate succeeds on first try → invocation record shows failure reason when forced to fail.
-3. Plan indexes + ledger updated; sole-active cleared; vetoes still held.
+1. Leaves 1–15 are **Done** or explicitly **Deferred** with user confirmation (and OD items resolved or carried). **Met** 2026-07-26 (W1–W15 Done).
+2. A bank-persona walkthrough on the acceptance stack completes: create → complex author → publish → copy curl → consumer generate succeeds on first try → invocation record shows failure reason when forced to fail. **BLOCKED** host-wide (Docker container overlay / no acceptance stack) — unit gates + honest deploy BLOCKED evidence accepted for merge per delivery policy; re-run walkthrough when stack available.
+3. Plan indexes + ledger updated; sole-active cleared; vetoes still held. **Met**.
 
 ---
 
