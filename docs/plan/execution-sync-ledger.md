@@ -1,19 +1,6 @@
 # Execution Sync Ledger
 
-**Completion note (2026-07-26, #175 fos-time-locale-honesty / FOS-W5):** **#175** FOS-W5 Time & locale honesty → **Done** (MAIN tip/merge ; feat ; worktree **REMOVED**). Batch **solo** (; ; ). BDD **ready**/shipped ([fos-time-locale-honesty.md](../behavior/fos-time-locale-honesty.md)). Scope W5-1…W5-5. **Gates:** FE lint/type-check/test(1765)/build PASS; BE [[1;34mINFO[m] Scanning for projects...
-[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
-[[1;34mINFO[m] [1;31mBUILD FAILURE[m
-[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
-[[1;34mINFO[m] Total time:  0.039 s
-[[1;34mINFO[m] Finished at: 2026-07-26T18:19:34Z
-[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
-[[1;31mERROR[m] The goal you specified requires a project to execute but there is no POM in this directory (/home/ubuntu/DGE-fos-time-locale-honesty). Please verify you invoked Maven from the correct directory. -> [1m[Help 1][m
-[[1;31mERROR[m] 
-[[1;31mERROR[m] To see the full stack trace of the errors, re-run Maven with the [1m-e[m switch.
-[[1;31mERROR[m] Re-run Maven using the [1m-X[m switch to enable full debug logging.
-[[1;31mERROR[m] 
-[[1;31mERROR[m] For more information about the errors and possible solutions, please read the following articles:
-[[1;31mERROR[m] [1m[Help 1][m http://cwiki.apache.org/confluence/display/MAVEN/MissingProjectException PASS; E2E/UIUX/deploy **BLOCKED** (0 images). Next **#176**. Sole-active **cleared**.
+**Completion note (2026-07-26, #175 fos-time-locale-honesty / FOS-W5):** **#175** FOS-W5 Time & locale honesty → **Done** (MAIN tip/merge `19f4f917`; feat `78a0bf8d`; closeout `3b749d0c`; worktree **REMOVED**). Batch **solo** (`member_task_ids: ["175"]`; `proposed_slice_id: fos-time-locale-honesty`; `delivery_lane: full`). BDD **ready**/shipped ([fos-time-locale-honesty.md](../behavior/fos-time-locale-honesty.md)). Scope W5-1…W5-5. **Gates:** FE lint/type-check/test(1765)/build PASS; BE `mvn verify` PASS; E2E/UIUX/deploy **BLOCKED** (0 images). Next **#176**. Sole-active **cleared**.
 
 
 **Completion note (2026-07-26, #174 fos-gates-explain-themselves / FOS-W4):** **#174** FOS-W4 Gates & actions explain themselves → **Done** (MAIN tip/merge `1960da96`; feat `17c4e396`; worktree **REMOVED**). Batch **solo** (`member_task_ids: ["174"]`; `proposed_slice_id: fos-gates-explain-themselves`; `delivery_lane: full`). BDD **ready**/shipped ([fos-gates-explain-themselves.md](../behavior/fos-gates-explain-themselves.md)). Scope W4-1…W4-11. **Gates:** FE lint/type-check/test(1759)/build PASS; E2E/UIUX/deploy **BLOCKED** (docker+pwsh installed; 0 images). Next **#175**. Sole-active **cleared**.
