@@ -161,7 +161,7 @@ watch(
         <el-date-picker
           v-model="filterDraft.createdAfter"
           type="datetime"
-          value-format="YYYY-MM-DDTHH:mm:ss[Z]"
+          value-format="YYYY-MM-DDTHH:mm:ss"
           data-testid="api-invocations-filter-created-after"
         />
       </el-form-item>
@@ -169,7 +169,7 @@ watch(
         <el-date-picker
           v-model="filterDraft.createdBefore"
           type="datetime"
-          value-format="YYYY-MM-DDTHH:mm:ss[Z]"
+          value-format="YYYY-MM-DDTHH:mm:ss"
           data-testid="api-invocations-filter-created-before"
         />
       </el-form-item>

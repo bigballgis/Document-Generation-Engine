@@ -55,7 +55,7 @@ const { t } = useI18n()
         <el-date-picker
           v-model="eventAtFrom"
           type="datetime"
-          value-format="YYYY-MM-DDTHH:mm:ss[Z]"
+          value-format="YYYY-MM-DDTHH:mm:ss"
           :placeholder="t('audit.filters.eventAtFrom')"
           clearable
         />
@@ -64,7 +64,7 @@ const { t } = useI18n()
         <el-date-picker
           v-model="eventAtTo"
           type="datetime"
-          value-format="YYYY-MM-DDTHH:mm:ss[Z]"
+          value-format="YYYY-MM-DDTHH:mm:ss"
           :placeholder="t('audit.filters.eventAtTo')"
           clearable
         />

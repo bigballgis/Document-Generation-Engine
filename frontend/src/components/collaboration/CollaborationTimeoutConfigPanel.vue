@@ -10,6 +10,7 @@ import type {
   CollaborationTimeoutConfig,
   CollaborationTimeoutScopeType,
 } from '@/types/collaboration'
+import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 
 const props = defineProps<{
   /** Locked IA mode — global page or group dialog (no scope switcher). */
@@ -18,6 +19,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const { formatDateTime } = useLocaleFormatters()
 const { context } = useCapabilities()
 const sessionStore = useSessionStore()
 
@@ -136,8 +138,12 @@ onMounted(() => {
         </div>
       </el-form>
 
-      <p v-if="config?.updatedAt" class="updated-at">
-        {{ t('collaboration.timeoutConfig.lastUpdated', { updatedAt: config.updatedAt }) }}
+      <p v-if="config?.updatedAt" class="updated-at" data-testid="timeout-config-updated-at">
+        {{
+          t('collaboration.timeoutConfig.lastUpdated', {
+            updatedAt: formatDateTime(config.updatedAt),
+          })
+        }}
       </p>
 
       <el-button type="primary" :loading="saving" @click="saveConfig">

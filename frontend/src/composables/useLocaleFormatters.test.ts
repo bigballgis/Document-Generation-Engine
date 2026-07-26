@@ -40,4 +40,10 @@ describe('useLocaleFormatters', () => {
     expect(zhFormatters.formatDateTime(value)).toContain('2026')
     expect(enFormatters.formatNumber(12345.6)).toBe('12,345.6')
   })
+
+  it('FOS-W5-2: includes an explicit UTC/GMT zone marker', () => {
+    const enFormatters = runFormatters('en')
+    const formatted = enFormatters.formatDateTime('2026-06-23T10:00:00Z')
+    expect(formatted.toUpperCase()).toMatch(/UTC|GMT/)
+  })
 })
