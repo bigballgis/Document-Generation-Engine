@@ -1,6 +1,6 @@
 # FOS-W15 — Word foundation honesty (typography / layout / letterhead)
 
-**Status:** In Progress  
+**Status:** Done  
 **Behavior:** [fos-word-foundation-honesty.md](../../behavior/fos-word-foundation-honesty.md)  
  
 **Program:** [frontline-operability-solidity-program-2026-07.md](../frontline-operability-solidity-program-2026-07.md)  
@@ -165,4 +165,4 @@ May split into 2–3 serial commits under one TM parent `#185`.
 - [x] Clause numbering honesty documented (and/or continuity fixed)
 - [x] Demo headerRows + at least one logo letterhead truthful
 - [x] Style-manifest wired or trimmed; typography gate asserts generated DOCX
-- [ ] post-task-doc-sync + commit-review
+- [x] post-task-doc-sync + commit-review

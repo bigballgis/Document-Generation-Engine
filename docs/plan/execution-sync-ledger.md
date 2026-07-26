@@ -1,3 +1,16 @@
+
+### FOS-W15 / #185 `fos-word-foundation-honesty` — Done (2026-07-26)
+
+| Field | Value |
+| --- | --- |
+| Feat | `5645aa3e` |
+| Merge | `04fc0caf` |
+| Gates | `mvn verify` PASS; FE lint/type-check/test(1775)/build PASS |
+| Deploy/E2E | **BLOCKED** (container overlay mount) |
+| Evidence | [gates.md](evidence/fos-word-foundation-honesty/gates.md) |
+| Outcome | WF-1…WF-8 Remediated/Documented; FOS W1–W15 **Done**; program **Done**; sole-active **cleared** |
+
+
 **Completion note (2026-07-26, #184 fos-demo-literacy-path / FOS-W14):** **#184** → **Done** (merge `8ee0a872`; feat `fe839c7b`; worktree REMOVED). Batch solo. BDD [fos-demo-literacy-path.md](../behavior/fos-demo-literacy-path.md). Gates FE PASS; E2E/deploy BLOCKED. Evidence [gates.md](./evidence/fos-demo-literacy-path/gates.md). Next **#185**. Sole-active cleared.
 
 **Completion note (2026-07-26, #183 fos-default-verify-honesty / FOS-W13):** **#183** FOS-W13 Default verify honesty → **Done** (MAIN tip/merge `b51ff52e`; feat `176f5dc5`; worktree **REMOVED**). Batch **solo**. BDD ready/shipped ([fos-default-verify-honesty.md](../behavior/fos-default-verify-honesty.md)). Scope W13-1…W13-8. Gates: BE mvn verify PASS; FE 1775 PASS; local -Ptestcontainers BLOCKED (overlay mount); deploy BLOCKED. Evidence [gates.md](./evidence/fos-default-verify-honesty/gates.md). Next **#184**. Sole-active cleared.
