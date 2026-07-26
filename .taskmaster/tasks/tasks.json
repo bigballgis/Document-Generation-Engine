@@ -2457,14 +2457,14 @@
       {
         "id": "180",
         "title": "FOS: FOS-W10 credential lifecycle matches ADR (fos-credential-lifecycle)",
-        "description": "PENDING — FOS wave leaf (plan only). Slice `fos-credential-lifecycle`. Detail docs/plan/detail/FOS-W10-credential-lifecycle.md. Program docs/plan/frontline-operability-solidity-program-2026-07.md. Do not auto-activate. No new features. Formal phase None. Vetoes: checklist-#3b/#5a; CE-O02; #53/#106; #119.",
-        "details": "Execute only when sole-active and Batch Recommendation selects this leaf. Follow detail sheet TDD/worktree/gates. Prefer CRCH W0+W1 before #171. OD-FOS items may block parts of #176/#180.",
+        "description": "COMPLETED Leaf 10. Slice id: fos-credential-lifecycle. Behavior: docs/behavior/fos-credential-lifecycle.md. Detail: docs/plan/detail/FOS-W10-credential-lifecycle.md. Implementation: W10-1…W10-5. Merge 89ff4d95; feat 3c0bae0e. Deploy/E2E BLOCKED (0 images). Sole-active cleared. Next #181.",
+        "details": "Done on MAIN. merge_sha 89ff4d95; feat_sha 3c0bae0e; worktree REMOVED. Batch solo. Gates: BE verify PASS; FE lint/type-check/test(1772)/build PASS; deploy/E2E BLOCKED (0 images).",
         "testStrategy": "See docs/plan/detail/FOS-W10-credential-lifecycle.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T19:21:55.000Z"
+        "updatedAt": "2026-07-26T19:31:54.000Z"
       },
       {
         "id": "181",
