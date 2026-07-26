@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase / program:** **None** (2026-07-09+). **Delivery focus note (2026-07-27):** **#169** AI-SCALE Leaf 4 mega-test fixture split (`ai-scale-peel-mega-tests`) → **code merge In Progress** (feat tip `af41410d`; plan **Done** sync **pending** stages 12–13 on MAIN — do **not** claim leaf Done here). Prior **#168** Leaf 3 → **Done** (`ce47186a` / `0a5e928e`). **FOS** **In Progress** — **#171–#181** → **Done** (`8dfdb0ba`…`821d0f4a` / `8e5b9a53`); next FOS **#182** `fos-ci-gates-tell-truth`. Prior **CRCH W0+W1** → **Done** (`ad7f6d49`). OD-FOS-1…4 / CRCH OD-1/OD-2 **resolved**. Formal phase **None**; vetoes: checklist-#3b/#5a / CE-O02 / #53 / #106 / #119 / no-new-features.
+**Active formal phase / program:** **None** (2026-07-09+). **Delivery focus note (2026-07-27):** **#169** AI-SCALE Leaf 4 mega-test fixture split (`ai-scale-peel-mega-tests`) → **code merge In Progress** (feat tip `af41410d`; plan **Done** sync **pending** stages 12–13 on MAIN — do **not** claim leaf Done here). Prior **#168** Leaf 3 → **Done** (`ce47186a` / `0a5e928e`). **FOS** **In Progress** — **#171–#182** → **Done** (`8dfdb0ba`…`5bc228f8` / `df8ed393`); next FOS **#183** `fos-default-verify-honesty`. Prior **CRCH W0+W1** → **Done** (`ad7f6d49`). OD-FOS-1…4 / CRCH OD-1/OD-2 **resolved**. Formal phase **None**; vetoes: checklist-#3b/#5a / CE-O02 / #53 / #106 / #119 / no-new-features.
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).

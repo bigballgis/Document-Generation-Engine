@@ -10,7 +10,7 @@
 | **Origin** | User-commissioned deep review (2026-07-26): make **existing** core maximally **易用** and **扎实** for a bank frontline employee who must orchestrate the most complex bank template and hand it off for other systems to call — **no new product features** |
 | **Audit baseline commit** | `f29211c5` (MAIN tip when program authored; locate code by quoted snippets, not line numbers) |
 | **Model note** | Program authored with Opus 5–class deep audits; detail sheets are written so a **lower-tier implementer** can execute TDD without improvisation |
-| **Next queue head** | FOS **Leaf 11** `fos-policy-impact-troubleshoot` / TM **#181** → **Done** (`821d0f4a` / feat `8e5b9a53`); next **Leaf 12** `fos-ci-gates-tell-truth` (TM **#182**) |
+| **Next queue head** | FOS **Leaf 12** `fos-ci-gates-tell-truth` / TM **#182** → **Done** (`5bc228f8` / feat `df8ed393`); next **Leaf 13** `fos-default-verify-honesty` (TM **#183**) |
 | **Upstream** | [CRCH](./core-render-compute-hardening-program.md) owns rendering P0 + preview dedupe (W0+W1) and compute/DOCX/harness designs (W2/W3/W5). FOS **supersedes CRCH W4** (authoring IA) — see §6 |
 
 ---
