@@ -1,3 +1,5 @@
+**Closeout repair (2026-07-26, FOS §5 umbrella):** FOS program **Done** — align §5 TM map umbrella **#170** status **pending→done** (exit criteria met; W1–W15 Done). Deploy/E2E remain host-**BLOCKED** (containerd overlay mount). No product code.
+
 
 ### FOS-W15 / #185 `fos-word-foundation-honesty` — Done (2026-07-26)
 

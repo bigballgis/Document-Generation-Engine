@@ -150,7 +150,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 
 | Leaf | TM | Slice id | Status | Notes |
 | --- | --- | --- | --- | --- |
-| Umbrella | **#170** | `fos-program` | **pending** | Registry only — never mark Done until program exit |
+| Umbrella | **#170** | `fos-program` | **done** | Program exit met 2026-07-26 — W1–W15 Done; tip `24f6258b` |
 | Leaf 1 | **#171** | `fos-screens-tell-truth` | **done** | Merged `8dfdb0ba` / feat `22a4b4ba` |
 | Leaf 2 | **#172** | `fos-author-can-start` | **done** | Merged `f5622e3f` / feat `f6d2903c` | |
 | Leaf 3 | **#173** | `fos-authoring-blocks-work` | **done** | Merged `7418f2e4` / feat `f932a2a3` |
