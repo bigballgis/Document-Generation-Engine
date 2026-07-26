@@ -2433,14 +2433,14 @@
       {
         "id": "178",
         "title": "FOS: FOS-W8 concurrency & integrity (fos-concurrency-integrity)",
-        "description": "PENDING \u2014 FOS wave leaf (plan only). Slice `fos-concurrency-integrity`. Detail docs/plan/detail/FOS-W8-concurrency-integrity.md. Program docs/plan/frontline-operability-solidity-program-2026-07.md. Do not auto-activate. No new features. Formal phase None. Vetoes: checklist-#3b/#5a; CE-O02; #53/#106; #119.",
-        "details": "Execute only when sole-active and Batch Recommendation selects this leaf. Follow detail sheet TDD/worktree/gates. Prefer CRCH W0+W1 before #171. OD-FOS items may block parts of #176/#180.",
+        "description": "DONE \u2014 FOS-W8 concurrency & integrity. Slice `fos-concurrency-integrity`. Merge `b6307d02` / feat `954933cc`. Detail docs/plan/detail/FOS-W8-concurrency-integrity.md. Behavior docs/behavior/fos-concurrency-integrity.md. Evidence docs/plan/evidence/fos-concurrency-integrity/gates.md. Deploy/E2E BLOCKED (0 images). Formal phase None. Vetoes held.",
+        "details": "W8-1\u2026W8-5 shipped. Next FOS #179 fos-contract-works-first-time.",
         "testStrategy": "See docs/plan/detail/FOS-W8-concurrency-integrity.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T19:10:00.000Z"
+        "updatedAt": "2026-07-26T19:20:00.000Z"
       },
       {
         "id": "179",
