@@ -1,6 +1,6 @@
 {
-  "keyCount": 2930,
-  "sha256": "01047a39d4c2104b339fae861ea096410f5baf41376575998a6e8aa0cd568387",
+  "keyCount": 2934,
+  "sha256": "8da2cb70e406017a9326aa70cfe90ae6827e1eeeab249be251c8286f32557696",
   "keys": [
     "api.apimgmt.policyImpact.blocking",
     "api.apimgmt.policyImpact.defaultRouteChanged",
@@ -81,6 +81,8 @@
     "api.error.contentModule.searchTooLong",
     "api.error.contentModule.versionExists",
     "api.error.contentModule.versionRequired",
+    "api.error.contentModule.versionTargetNotFound",
+    "api.error.contentModule.versionTargetRequired",
     "api.error.documentBrand.codeConflict",
     "api.error.documentBrand.codeInvalid",
     "api.error.documentBrand.documentBrandInactive",
@@ -121,6 +123,7 @@
     "api.error.master.accessDenied",
     "api.error.master.anchorExtractionFailed",
     "api.error.master.anchorIntegrityFailed",
+    "api.error.master.cannotDeleteCurrentRevision",
     "api.error.master.currentRevisionUnavailable",
     "api.error.master.docxCorrupt",
     "api.error.master.docxRequired",
@@ -284,6 +287,7 @@
     "api.error.variable.computeFailed",
     "api.publishGate.anchorIntegrity.blocked",
     "api.publishGate.anchorIntegrity.ready",
+    "api.publishGate.apiPolicy.blocked",
     "api.publishGate.apiPolicy.ready",
     "api.publishGate.approvalSummary.missing",
     "api.publishGate.approvalSummary.ready",

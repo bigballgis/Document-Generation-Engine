@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -146,6 +147,92 @@ class TemplateBindingConfigurationServiceTest {
         );
 
         assertThat(status).isEqualTo(BindingValidationStatus.MISSING_ANCHOR);
+    }
+
+    @Test
+    void evaluateBindings_doesNotPersistStaleStatus_fosW7_4() {
+        UUID masterId = UUID.randomUUID();
+        UUID templateId = UUID.randomUUID();
+        UUID versionId = UUID.randomUUID();
+        TemplateVersionEntity version = new TemplateVersionEntity(versionId, templateId, "10000003");
+        MasterDocumentEntity master = new MasterDocumentEntity(
+                masterId, "RETAIL", "Master", null, "key", "m.docx", "10000003"
+        );
+        master.replaceAnchors(List.of(new MasterAnchorEntity(masterId, "BODY", "BODY", 1)));
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)).thenReturn(Optional.of(master));
+        AnchorBindingEntity binding = new AnchorBindingEntity(
+                UUID.randomUUID(),
+                versionId,
+                "UNKNOWN",
+                AnchorContentType.TEXT,
+                null,
+                BindingValidationStatus.VALID
+        );
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
+                .thenReturn(List.of(binding));
+        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
+                .thenReturn(List.of());
+        when(templateViewMapper.toBindingView(any(AnchorBindingEntity.class))).thenAnswer(invocation -> {
+            AnchorBindingEntity entity = invocation.getArgument(0);
+            return new com.bank.docgen.template.api.AnchorBindingView(
+                    entity.getId().toString(),
+                    entity.getAnchorId(),
+                    entity.getDeclaredContentType().name(),
+                    entity.getStructuredContentJson(),
+                    entity.getValidationStatus(),
+                    null
+            );
+        });
+
+        var view = service.evaluateBindings(masterId, version);
+
+        assertThat(view.summary().blocking()).isTrue();
+        assertThat(view.summary().missingAnchorCount()).isEqualTo(1);
+        assertThat(binding.getValidationStatus()).isEqualTo(BindingValidationStatus.VALID);
+        verify(anchorBindingRepository, never()).save(any());
+    }
+
+    @Test
+    void validateBindings_persistsComputedStatus_fosW7_4() {
+        UUID masterId = UUID.randomUUID();
+        UUID templateId = UUID.randomUUID();
+        UUID versionId = UUID.randomUUID();
+        TemplateVersionEntity version = new TemplateVersionEntity(versionId, templateId, "10000003");
+        MasterDocumentEntity master = new MasterDocumentEntity(
+                masterId, "RETAIL", "Master", null, "key", "m.docx", "10000003"
+        );
+        master.replaceAnchors(List.of(new MasterAnchorEntity(masterId, "BODY", "BODY", 1)));
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)).thenReturn(Optional.of(master));
+        AnchorBindingEntity binding = new AnchorBindingEntity(
+                UUID.randomUUID(),
+                versionId,
+                "UNKNOWN",
+                AnchorContentType.TEXT,
+                null,
+                BindingValidationStatus.VALID
+        );
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
+                .thenReturn(List.of(binding));
+        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
+                .thenReturn(List.of());
+        when(anchorBindingRepository.save(any(AnchorBindingEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(templateViewMapper.toBindingView(any(AnchorBindingEntity.class))).thenAnswer(invocation -> {
+            AnchorBindingEntity entity = invocation.getArgument(0);
+            return new com.bank.docgen.template.api.AnchorBindingView(
+                    entity.getId().toString(),
+                    entity.getAnchorId(),
+                    entity.getDeclaredContentType().name(),
+                    entity.getStructuredContentJson(),
+                    entity.getValidationStatus(),
+                    null
+            );
+        });
+
+        var view = service.validateBindings(masterId, version);
+
+        assertThat(view.summary().blocking()).isTrue();
+        assertThat(binding.getValidationStatus()).isEqualTo(BindingValidationStatus.MISSING_ANCHOR);
+        verify(anchorBindingRepository).save(binding);
     }
 
     @Test

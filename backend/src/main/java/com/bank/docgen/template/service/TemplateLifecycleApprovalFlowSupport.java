@@ -248,9 +248,10 @@ final class TemplateLifecycleApprovalFlowSupport {
         TemplateEntity template = eligibility.requirePublishableTemplate(templateId, session);
         eligibility.requireStatus(template, TemplateLifecycleStatus.PENDING_RELEASE);
         decisionFormService.validatePublishConfirmation(request.fidelityViewedConfirmed());
+        // FOS-W7-2: evaluate publish gate before materializing/auto-satisfying the API-policy skeleton.
+        publishGateService.assertReady(templateId, session);
         apiPolicyMaterializationService.ensureApiPolicyOnPublish(
                 templateId, request.releaseVersion(), session.username());
-        publishGateService.assertReady(templateId, session);
         // CE-K01: resolve + pin the current master revision before any state mutation so
         // that a pinning failure (missing revision / unavailable storage) fails closed and
         // the transaction rolls back without leaving a half-published release.

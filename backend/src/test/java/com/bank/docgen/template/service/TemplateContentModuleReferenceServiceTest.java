@@ -226,6 +226,24 @@ class TemplateContentModuleReferenceServiceTest {
     }
 
     @Test
+    void resolvePinnedContentStructures_missingVersion_failsClosed_fosW7_1() {
+        TemplateContentModuleReferenceEntity reference = new TemplateContentModuleReferenceEntity(
+                UUID.randomUUID(),
+                VERSION_ID,
+                "CLAUSE-1",
+                MODULE_VERSION_V1
+        );
+        when(referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(VERSION_ID))
+                .thenReturn(List.of(reference));
+        when(contentModuleVersionRepository.findById(MODULE_VERSION_V1)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.resolvePinnedContentStructures(VERSION_ID))
+                .isInstanceOf(TemplateValidationException.class)
+                .extracting(ex -> ((TemplateValidationException) ex).messageKey())
+                .isEqualTo("api.error.validation.contentModuleStructureMissing");
+    }
+
+    @Test
     void upsert_acceptsApprovedActiveModuleVersion() {
         stubDevVersion();
         when(templateService.requireWritableTemplate(TEMPLATE_ID, author)).thenReturn(template);

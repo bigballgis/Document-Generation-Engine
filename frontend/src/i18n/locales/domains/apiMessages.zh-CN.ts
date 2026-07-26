@@ -33,6 +33,7 @@ export const apiMessagesZhCn = {
       },
       apiPolicy: {
         ready: 'API 接入已配置。',
+        blocked: 'API 访问策略不可调用（缺少默认路由与 AD 组）。',
       },
       blockerStatus: {
         ready: '未检测到未解决的阻塞项。',

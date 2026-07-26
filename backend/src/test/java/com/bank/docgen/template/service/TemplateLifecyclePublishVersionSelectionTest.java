@@ -170,6 +170,32 @@ class TemplateLifecyclePublishVersionSelectionTest {
     }
 
     @Test
+    void publishSkipsSoftDeletedHighestDevVersion_fosW7_3() {
+        TemplateVersionEntity softDeletedHighest = version(3, null, TemplateLifecycleStatus.DRAFT);
+        softDeletedHighest.setDeletedAt(Instant.now());
+        TemplateVersionEntity candidateVersion = version(2, null, TemplateLifecycleStatus.DRAFT);
+        TemplateVersionEntity publishedVersion = version(1, "1.0.0", TemplateLifecycleStatus.PUBLISHED);
+
+        when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
+        org.mockito.Mockito.doNothing().when(publishGateService).assertReady(templateId, groupAdmin);
+        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
+                .thenReturn(List.of(softDeletedHighest, candidateVersion, publishedVersion));
+        when(templateService.toDetail(template)).thenReturn(detail());
+        when(messageResolver.resolve(any(), any())).thenReturn("Published release 2.0.0");
+        stubApprovedMasterPin();
+
+        service.publish(templateId, new PublishTemplateRequest("2.0.0", true), groupAdmin);
+
+        assertThat(candidateVersion.getReleaseVersion()).isEqualTo("2.0.0");
+        assertThat(candidateVersion.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
+        assertThat(softDeletedHighest.getReleaseVersion()).isNull();
+        assertThat(softDeletedHighest.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.DRAFT);
+        verify(templateVersionRepository).save(candidateVersion);
+        verify(contentModuleReferenceService).lockReferencesForPublish(candidateVersion.getId());
+    }
+
+    @Test
     void publishSameReleaseVersionStopsPriorPublishedRow() {
         TemplateVersionEntity priorPublished = version(1, "1.0.0", TemplateLifecycleStatus.PUBLISHED);
         TemplateVersionEntity candidateVersion = version(2, null, TemplateLifecycleStatus.DRAFT);

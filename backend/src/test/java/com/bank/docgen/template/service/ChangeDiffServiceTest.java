@@ -293,6 +293,27 @@ class ChangeDiffServiceTest {
     }
 
     @Test
+    void computeBetween_unparseableRulesJson_failsClosed_fosW7_5() {
+        TemplateVersionEntity baseline = publishedVersion(baselineVersionId, "1.0.0");
+        TemplateVersionEntity candidate = candidateVersion(candidateVersionId);
+        candidate.setRulesJson("{not-valid-json");
+        stubEmptyContentModuleRefs(candidateVersionId, baselineVersionId);
+        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(candidateVersionId))
+                .thenReturn(List.of());
+        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(baselineVersionId))
+                .thenReturn(List.of());
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(candidateVersionId))
+                .thenReturn(List.of());
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(baselineVersionId))
+                .thenReturn(List.of());
+
+        assertThatThrownBy(() -> service.computeBetween(templateId, baseline, candidate))
+                .isInstanceOf(TemplateValidationException.class)
+                .extracting(ex -> ((TemplateValidationException) ex).messageKey())
+                .isEqualTo("api.error.template.invalidRulesJson");
+    }
+
+    @Test
     void computeBetweenReleases_missingRelease_throwsNotFound() {
         when(templateService.requireReadableTemplate(templateId, author)).thenReturn(template);
         when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "9.9.9"))
