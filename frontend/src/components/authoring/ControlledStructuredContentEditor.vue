@@ -49,6 +49,7 @@ const {
   insertNestedBlock,
   insertInline,
   applySelectedStyle,
+  setFocusedPath,
   handlePasteFile,
   removeBlock,
   reorderBlock,
@@ -161,6 +162,7 @@ defineExpose({ markPristine, validateStructure, scrollToBlock })
         :variable-select-options="variableSelectOptions"
         :list-variable-options="listVariableOptions"
         :clause-reference-options="clauseReferenceOptions"
+        :table-component-options="[]"
         :node-label="nodeLabel"
         @remove="removeBlock"
         @reorder-block="reorderBlock"
@@ -169,6 +171,7 @@ defineExpose({ markPristine, validateStructure, scrollToBlock })
         @add-inline="addInlineToBlock"
         @update-block-field="updateBlockField"
         @insert-nested-block="insertNestedBlock"
+        @focus-path="setFocusedPath"
         @end-field-coalesce="endFieldCoalesce"
       />
 

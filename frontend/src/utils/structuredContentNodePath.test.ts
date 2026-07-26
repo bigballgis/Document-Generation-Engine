@@ -41,11 +41,12 @@ describe('structuredContentNodePath', () => {
     expect(getNodeAtPath(nestedDoc, [0, 0, 0])?.children?.[0]?.value).toBe('deep')
   })
 
-  it('enforces max nest depth of 3 layers', () => {
+  it('FOS-W3-4: enforces max nest depth of 3 layers (path length < max)', () => {
     expect(STRUCTURED_CONTENT_MAX_NEST_DEPTH).toBe(3)
     expect(canAddNestedBlockChildren([])).toBe(true)
     expect(canAddNestedBlockChildren([0])).toBe(true)
-    expect(canAddNestedBlockChildren([0, 0])).toBe(false)
+    expect(canAddNestedBlockChildren([0, 0])).toBe(true)
+    expect(canAddNestedBlockChildren([0, 0, 0])).toBe(false)
   })
 
   it('updates nested block fields by path', () => {

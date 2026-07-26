@@ -2,7 +2,7 @@
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
 **Wave:** W3
-**Status:** **Not Started**
+**Status:** **Done**
 **Slice id:** `fos-authoring-blocks-work` · worktree `../DGE-fos-authoring-blocks-work` · branch `feat/fos-authoring-blocks-work`
 **Task Master:** **#173**
 **Audit baseline:** `f29211c5`
@@ -219,3 +219,10 @@ merge; otherwise leave as a written residual pointing at CRCH W4-3.
 ## Closeout
 
 Standard FOS closeout. TM **#173** → done. Do not auto-activate Leaf 4.
+
+
+## Closeout evidence
+
+- Gates: [evidence/fos-authoring-blocks-work/gates.md](../evidence/fos-authoring-blocks-work/gates.md)
+- Behavior: [docs/behavior/fos-authoring-blocks-work.md](../../behavior/fos-authoring-blocks-work.md)
+- E2E/UIUX/deploy: **BLOCKED** (daemon up; stack not built this session).

@@ -156,6 +156,17 @@ export function createNodeTemplate(type: ConfirmedNodeType, styleRef?: string): 
   }
 }
 
+/** Keep insert allow-list aligned with toolbar block types (FOS-W3-1). */
+export const INSERTABLE_BLOCK_NODE_TYPES: ConfirmedNodeType[] = [
+  'sectionHeading',
+  'paragraph',
+  'list',
+  'conditionBlock',
+  'loopBlock',
+  'tableComponentRef',
+  'contentModuleRef',
+]
+
 export function insertBlockNode(
   document: StructuredContentDocument,
   nodeType: ConfirmedNodeType,
@@ -164,15 +175,7 @@ export function insertBlockNode(
   if (!isConfirmedNodeType(nodeType)) {
     return document
   }
-  const blockTypes: ConfirmedNodeType[] = [
-    'sectionHeading',
-    'paragraph',
-    'list',
-    'conditionBlock',
-    'loopBlock',
-    'tableComponentRef',
-  ]
-  if (!blockTypes.includes(nodeType)) {
+  if (!INSERTABLE_BLOCK_NODE_TYPES.includes(nodeType)) {
     return document
   }
   return {
@@ -181,17 +184,89 @@ export function insertBlockNode(
   }
 }
 
+/**
+ * Apply style to the focused paragraph/heading when a path is provided (FOS-W3-3).
+ * Without focus, only top-level nodes matching `applicableNodeTypes` are updated
+ * (never rewrite every paragraph blindly).
+ */
 export function applyStyleToParagraphs(
   document: StructuredContentDocument,
   styleKey: string,
+  options: {
+    focusedPath?: number[] | null
+    applicableNodeTypes?: string[]
+  } = {},
 ): StructuredContentDocument {
+  const { focusedPath, applicableNodeTypes } = options
+  const allowedTypes = applicableNodeTypes?.length
+    ? new Set(applicableNodeTypes)
+    : new Set(['paragraph', 'sectionHeading'])
+
+  function canStyle(node: StructuredContentNode): boolean {
+    return (
+      (node.type === 'paragraph' || node.type === 'sectionHeading') && allowedTypes.has(node.type)
+    )
+  }
+
+  if (focusedPath && focusedPath.length > 0) {
+    // Lazy import avoided — path update lives in structuredContentNodePath; inline walk here
+    // to keep this util free of circular deps with nodePath helpers that import nodes.
+    return applyStyleAtPath(document, focusedPath, styleKey, canStyle)
+  }
+
   return {
     ...document,
-    nodes: document.nodes.map((node) => {
-      if (node.type === 'paragraph' || node.type === 'sectionHeading') {
-        return { ...node, styleRef: styleKey }
-      }
-      return node
-    }),
+    nodes: document.nodes.map((node) => (canStyle(node) ? { ...node, styleRef: styleKey } : node)),
   }
+}
+
+function applyStyleAtPath(
+  document: StructuredContentDocument,
+  path: number[],
+  styleKey: string,
+  canStyle: (node: StructuredContentNode) => boolean,
+): StructuredContentDocument {
+  function updateChildren(
+    children: StructuredContentNode[],
+    depth: number,
+  ): StructuredContentNode[] {
+    const idx = path[depth]!
+    const next = [...children]
+    const current = next[idx]
+    if (!current) {
+      return children
+    }
+    if (depth === path.length - 1) {
+      next[idx] = canStyle(current) ? { ...current, styleRef: styleKey } : current
+      return next
+    }
+    next[idx] = {
+      ...current,
+      children: updateChildren(current.children ?? [], depth + 1),
+    }
+    return next
+  }
+
+  if (path.length === 1) {
+    const idx = path[0]!
+    const nodes = [...document.nodes]
+    const current = nodes[idx]
+    if (!current) {
+      return document
+    }
+    nodes[idx] = canStyle(current) ? { ...current, styleRef: styleKey } : current
+    return { ...document, nodes }
+  }
+
+  const topIdx = path[0]!
+  const nodes = [...document.nodes]
+  const top = nodes[topIdx]
+  if (!top) {
+    return document
+  }
+  nodes[topIdx] = {
+    ...top,
+    children: updateChildren(top.children ?? [], 1),
+  }
+  return { ...document, nodes }
 }
