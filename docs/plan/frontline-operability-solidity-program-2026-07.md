@@ -105,19 +105,17 @@ employee and fail-closed under real complexity.
 | D5 | **CRCH W4 superseded by FOS** | Authoring IA / guide-vs-tab / test-data dialog / path autocomplete live under FOS W2–W4; do not execute CRCH §7 independently |
 | D6 | **CRCH W0+W1 stay first** | Rendering P0 + preview dedupe remain the upstream merged slice; FOS Leaf 1 starts after that slice is Done **or** when the host sole-active is free and the orchestrator chooses FOS first — **never parallel writers** |
 | D7 | AI-SCALE peels **#167–#169** stay queued | Do **not** auto-activate; FOS W1 may **add** i18n keys but must **not** perform the `en.ts` mega-split (that is #168) |
+| D8 | **OD-FOS-1 / CRCH OD-1 → 行内 (inline seals)** (user 2026-07-26) | Do **not** implement absolute/`CTAnchor` seal placement. CRCH must **re-scope** authorized-area BLOCKER validation so it does not imply a coordinate guarantee the renderer does not provide (see CRCH W0-7) |
+| D9 | **OD-FOS-2 / CRCH OD-2 → PDF page-number stamping stays default OFF** (user 2026-07-26) | Do **not** flip `docgen.rendering.pdf-page-number-stamping-enabled` default to `true`. W0-4 still makes stamping correct when enabled |
+| D10 | **OD-FOS-3 → `PENDING_RELEASE → DRAFT` non-destructive return NOT allowed** (user 2026-07-26) | FOS W6-8 is **out of scope / non-goal**. Stuck PENDING_RELEASE remediation remains `abandonInFlightDev` (destructive) — do not invent a return transition |
+| D11 | **OD-FOS-4 → credential rotation grace = 28 days** (user 2026-07-26) | Amends **ADR-0009** (was 7 days). FOS W10-1 implements prior-hash retention + 28-day grace; OpenAPI/`rotationGracePeriodEndsAt` must match |
 
 ---
 
 ## 3. Open decisions — BLOCKED pending user input
 
-Do **not** decide these unilaterally. Surface and wait.
-
-| Id | Topic | Why blocked |
-| --- | --- | --- |
-| **OD-FOS-1** | Same as CRCH **OD-1** — seal absolute placement vs inline | Compliance control vs renderer capability; owned by CRCH §3 |
-| **OD-FOS-2** | Same as CRCH **OD-2** — PDF page-number stamping default | Behaviour change across all render profiles; owned by CRCH §3 |
-| **OD-FOS-3** | Should `PENDING_RELEASE → DRAFT` return be allowed when a gate turns red after approval? (B16) | Governance product decision — FOS W6 designs the safe shape but must not invent the transition without confirmation |
-| **OD-FOS-4** | ADR-0009 7-day rotation grace — confirm still required for v1 | Code has no prior-hash retention; implementing grace is ADR-aligned but touches credential security — confirm before W10 |
+**None.** OD-FOS-1…4 were answered by the user on 2026-07-26 (see D8–D11). Do not re-litigate.
+If a future decision appears, add it here — do not invent product behaviour.
 
 ---
 
@@ -130,11 +128,11 @@ Do **not** decide these unilaterally. Surface and wait.
 | **W3** | `fos-authoring-blocks-work` | Authoring blocks work | A5,A6,A7,A9,A10,A11,A12 | [FOS-W3](detail/FOS-W3-authoring-blocks-work.md) | **Not Started** |
 | **W4** | `fos-gates-explain-themselves` | Gates & actions explain themselves | A3,A8,A13,A14,A15,A19,A20,A27,D10,D12,D13,D14 | [FOS-W4](detail/FOS-W4-gates-explain-themselves.md) | **Not Started** |
 | **W5** | `fos-time-locale-honesty` | Time & locale honesty | D2,D3,D9,D15,D17 | [FOS-W5](detail/FOS-W5-time-locale-honesty.md) | **Not Started** |
-| **W6** | `fos-lifecycle-cannot-corrupt` | Lifecycle cannot corrupt | B1,B3,B4,B5,B6,B13,B16,B19,B23 | [FOS-W6](detail/FOS-W6-lifecycle-cannot-corrupt.md) | **Not Started** |
+| **W6** | `fos-lifecycle-cannot-corrupt` | Lifecycle cannot corrupt | B1,B3,B4,B5,B6,B13,B19,B23 (B16 → **non-goal** per D10) | [FOS-W6](detail/FOS-W6-lifecycle-cannot-corrupt.md) | **Not Started** |
 | **W7** | `fos-generation-fails-closed` | Generation fails closed | B2,B7,B8,B9,B10,B15 | [FOS-W7](detail/FOS-W7-generation-fails-closed.md) | **Not Started** |
 | **W8** | `fos-concurrency-integrity` | Concurrency & integrity | B11,B12,B17,B18,B20 | [FOS-W8](detail/FOS-W8-concurrency-integrity.md) | **Not Started** |
 | **W9** | `fos-contract-works-first-time` | Contract works first time | C1,C3,C5,C6,C16,C17,C18 | [FOS-W9](detail/FOS-W9-contract-works-first-time.md) | **Not Started** |
-| **W10** | `fos-credential-lifecycle` | Credential lifecycle matches ADR | C2,C4,C11,C12,C22 + OD-FOS-4 | [FOS-W10](detail/FOS-W10-credential-lifecycle.md) | **Not Started** |
+| **W10** | `fos-credential-lifecycle` | Credential lifecycle matches ADR | C2,C4,C11,C12,C22 + **28-day grace (D11)** | [FOS-W10](detail/FOS-W10-credential-lifecycle.md) | **Not Started** |
 | **W11** | `fos-policy-impact-troubleshoot` | Policy impact & troubleshooting | C7,C8,C9,C10,C13,C14,C15,C20,C21 | [FOS-W11](detail/FOS-W11-policy-impact-troubleshoot.md) | **Not Started** |
 | **W12** | `fos-ci-gates-tell-truth` | CI gates tell the truth | E1,E5,E14,E15 | [FOS-W12](detail/FOS-W12-ci-gates-tell-truth.md) | **Not Started** |
 | **W13** | `fos-default-verify-honesty` | Default verify honesty | E2,E4,E6,E7,E8,E9,E10,E11 — **complements** CRCH W5 (do not duplicate LO pin / perceptual / soak) | [FOS-W13](detail/FOS-W13-default-verify-honesty.md) | **Not Started** |
@@ -155,11 +153,11 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Leaf 3 | **#173** | `fos-authoring-blocks-work` | **pending** | |
 | Leaf 4 | **#174** | `fos-gates-explain-themselves` | **pending** | |
 | Leaf 5 | **#175** | `fos-time-locale-honesty` | **pending** | |
-| Leaf 6 | **#176** | `fos-lifecycle-cannot-corrupt` | **pending** | OD-FOS-3 may block part of W6 |
+| Leaf 6 | **#176** | `fos-lifecycle-cannot-corrupt` | **pending** | W6-8 non-goal (D10) — do not invent PENDING_RELEASE→DRAFT |
 | Leaf 7 | **#177** | `fos-generation-fails-closed` | **pending** | |
 | Leaf 8 | **#178** | `fos-concurrency-integrity` | **pending** | |
 | Leaf 9 | **#179** | `fos-contract-works-first-time` | **pending** | |
-| Leaf 10 | **#180** | `fos-credential-lifecycle` | **pending** | OD-FOS-4 must be answered first |
+| Leaf 10 | **#180** | `fos-credential-lifecycle` | **pending** | W10-1 unblocked — **28-day** grace (D11 / ADR-0009 amended) |
 | Leaf 11 | **#181** | `fos-policy-impact-troubleshoot` | **pending** | |
 | Leaf 12 | **#182** | `fos-ci-gates-tell-truth` | **pending** | May run earlier if host CI is blocking all delivery — orchestrator may promote |
 | Leaf 13 | **#183** | `fos-default-verify-honesty` | **pending** | After / with CRCH W5 designs |
@@ -173,7 +171,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 
 | Program | Relation |
 | --- | --- |
-| **CRCH** | W0+W1 = upstream rendering/preview slice. **W4 superseded** by FOS W2–W4 (mark in CRCH §7). W2/W3/W5 remain CRCH-owned. OD-1/OD-2 shared. |
+| **CRCH** | W0+W1 = upstream rendering/preview slice. **W4 superseded** by FOS W2–W4. W2/W3/W5 remain CRCH-owned. OD-1/OD-2 **resolved** (D8/D9) — CRCH owns seal-validation re-scope (W0-7) and keeps stamping default off. |
 | **AI-SCALE** | Leaf 1 Done; peels #167–#169 pending — do not auto-activate; do not fold i18n mega-split into FOS W1 |
 | **PQH / SYS-NORM / CDP / LRP waves** | **Done / closed** — do not reopen |
 | **CE (#53)** | Registry-only umbrella — do not mark Done; do not treat as delivery leaf |
@@ -195,7 +193,10 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | invent-P-phase | Formal phase stays **None** |
 | parallel-writer | Never second CE/FOS/CRCH writer while another leaf is In Progress |
 | claim-go-live | Never claim production go-live / IBL Done / CE Done |
-| invent-OD | Never unilaterally decide OD-FOS-1…4 / CRCH OD-1/OD-2 |
+| invent-OD | OD-FOS-1…4 are **closed** (D8–D11). Do not re-open or invent contrary behaviour |
+| no-PENDING_RELEASE-to-DRAFT | Per D10 — never add that transition |
+| no-absolute-seals | Per D8 — never implement CTAnchor absolute seal placement in FOS/CRCH without a new user decision |
+| no-stamp-default-on | Per D9 — never flip PDF page-number stamping default to true without a new user decision |
 | duplicate-CRCH-W5 | Do not re-plan LO version pin, default-verify LO smoke, PDF→PNG lane, Word-vs-LO baseline, or conversion soak inside FOS — those stay CRCH W5 |
 | ai-scale-peel | Do not perform TemplateImport / en.ts mega-split / mega-fixture peels inside FOS |
 

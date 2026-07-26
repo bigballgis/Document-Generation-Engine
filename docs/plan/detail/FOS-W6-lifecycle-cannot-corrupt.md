@@ -4,8 +4,8 @@
 **Wave:** W6 · **Status:** **Not Started**
 **Slice id:** `fos-lifecycle-cannot-corrupt` · worktree `../DGE-fos-lifecycle-cannot-corrupt` · branch `feat/fos-lifecycle-cannot-corrupt`
 **Task Master:** **#176** · **delivery_lane:** **full** (backend lifecycle / Flyway may apply)
-**Origin:** B1, B3, B4, B5, B6, B13, B16, B19, B23
-**Open decision:** **OD-FOS-3** blocks any new `PENDING_RELEASE → DRAFT` transition — implement everything else first; leave B16 as a documented residual if OD unanswered
+**Origin:** B1, B3, B4, B5, B6, B13, B19, B23
+**Confirmed non-goal (FOS D10 / OD-FOS-3):** **`PENDING_RELEASE → DRAFT` non-destructive return is NOT allowed.** Do not implement W6-8 as a transition. Stuck PENDING_RELEASE remediation remains `abandonInFlightDev` only.
 
 ---
 
@@ -29,7 +29,7 @@ TDD against Spring tests under `backend/src/test/java/com/bank/docgen/template` 
 | W6-5 | **P1** | Stop supersede from nulling `release_version` |
 | W6-6 | **P2** | Bulk lifecycle updates ignore soft-deleted rows |
 | W6-7 | **P2** | Master review decision enum + `statusSnapshot` honesty |
-| W6-8 | **blocked** | PENDING_RELEASE non-destructive exit — **OD-FOS-3** |
+| W6-8 | **non-goal** | PENDING_RELEASE→DRAFT — **forbidden by D10** |
 
 ---
 
@@ -161,12 +161,15 @@ mentions rejection.
 ---
 
 <a id="w6-8"></a>
-## W6-8 — PENDING_RELEASE has no non-destructive exit — OD-FOS-3
+## W6-8 — PENDING_RELEASE non-destructive exit — **NON-GOAL (D10)**
 
-**Status:** **Blocked** until user answers OD-FOS-3.
+**Status:** **Out of scope.** User confirmed 2026-07-26: do **not** allow
+`PENDING_RELEASE → DRAFT`.
 
-Document the proposed transition (reuse rejection lifecycle record shape) in the leaf
-report; do **not** implement without confirmation.
+The only exit from a red-gate PENDING_RELEASE remains the existing destructive
+`abandonInFlightDev` path. Do **not** invent a return transition in this leaf or as a
+drive-by. Optional polish (separate leaf, only if later requested): clearer UI copy that
+abandon is the remediation path — still not a state-machine change.
 
 ---
 
@@ -174,5 +177,6 @@ report; do **not** implement without confirmation.
 
 W6-1…W6-7 green (`mvn verify`); FE updates for explicit module version ids covered by
 Vitest/E2E where UI changed; deploy evidence; architecture review (lifecycle/authz focus).
+W6-8 not implemented (non-goal).
 
-TM **#176** → done. Carry OD-FOS-3 residual explicitly.
+TM **#176** → done.

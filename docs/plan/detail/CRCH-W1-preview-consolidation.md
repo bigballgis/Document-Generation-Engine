@@ -443,5 +443,5 @@ After both waves are green, in this order:
    [the plan index](../README.md), and `execution-sync-ledger.md` with gate evidence
 5. `post-task-commit-review` **on MAIN** — commit and push
 
-Report OD-1 and OD-2 to the user as still open. Do not mark the CRCH program Done — W2 through W5
-remain Not Started.
+OD-1 / OD-2 are **resolved** (inline seals; stamping default OFF) — see CRCH program D4/D5 and
+W0-7. Do not mark the CRCH program Done — W2, W3, W5 remain Not Started (W4 superseded by FOS).

@@ -18,7 +18,7 @@ Everything needed is written down. Do not improvise.
 ### 0.1 Execution order — strictly sequential
 
 ```
-W0  detail/CRCH-W0-rendering-correctness.md    ← START HERE (6 tasks)
+W0  detail/CRCH-W0-rendering-correctness.md    ← START HERE (7 tasks; includes W0-7 after OD-1)
 W1  detail/CRCH-W1-preview-consolidation.md    ← then this (6 tasks)
 W2  design in §5 of this file — NOT yet decomposed; needs a detail sheet first
 W3  design in §6 — NOT yet decomposed
@@ -105,6 +105,8 @@ These are **confirmed** per the document-as-code source-of-truth order
 | D1 | Deliver **W0 + W1 merged as one slice** | One worktree, one gate run, one deploy evidence set |
 | D2 | Compute DSL gets the **full extension** (arithmetic + row context + aggregation + logic) | Amends **ADR-0056**; scheduled as W2; see §5 |
 | D3 | Money rounding becomes **configurable per render profile, default `HALF_UP`** | Part of W2; today `HALF_UP` is hardcoded and `HALF_EVEN` appears nowhere |
+| D4 | **OD-1 → inline seals** (user 2026-07-26; same as FOS D8) | Do **not** implement absolute/`CTAnchor` placement. Re-scope authorized-area BLOCKER validation so it does not claim a coordinate guarantee the renderer does not provide — **W0-7** |
+| D5 | **OD-2 → PDF page-number stamping default stays OFF** (user 2026-07-26; same as FOS D9) | Do **not** flip `docgen.rendering.pdf-page-number-stamping-enabled` default. W0-4 still makes stamping correct when enabled |
 
 **D2 safety constraint (non-negotiable):** the existing security envelope must survive the
 extension — whitelist-only evaluation, no scripting engine, and the caps in `ComputeDslLimits`
@@ -116,43 +118,22 @@ Extending capability must not widen the attack surface.
 
 ## 3. Open decisions — BLOCKED pending user input
 
-Do not implement these. Surface them and wait.
+**None.** Former **OD-1** / **OD-2** were answered 2026-07-26 (D4 / D5). Historical context:
 
-### OD-1 — Seal placement is validated but never rendered (compliance gap)
+### OD-1 (RESOLVED → inline) — former compliance gap
 
-`ReferenceNodeService.validateSealPlacementGeometry` enforces, as a **BLOCKER**, that a seal's
-`placement.sealBox` (`pageIndex`, `xPt`, `yPt`, optional `widthPt`/`heightPt`) lies fully
-inside a declared `authorizedSealAreas[]` region. Three distinct fidelity warning codes exist
-for violations (`SEAL_OUTSIDE_AUTHORIZED_AREA`, `SEAL_AUTHORIZED_AREA_UNKNOWN`,
-`SEAL_AUTHORIZED_AREA_INVALID`).
+`ReferenceNodeService.validateSealPlacementGeometry` still enforces authorized-area geometry
+as a **BLOCKER**, while the renderer writes seals as **inline** runs. With D4, absolute
+positioning is out of scope; **W0-7** must re-scope that validation (demote/remove/relabel)
+so publish gates stop implying a page-coordinate guarantee.
 
-The rendering package contains **zero** references to `placement`, `CTAnchor`, `positionH`, or
-`positionV`. `StructuredContentDocxInlineSupport.writeReferenceNode` writes the seal as an
-**inline run** at the anchor's position, wherever that happens to be on the page.
+W0-3 remains size-only (`widthPt`/`heightPt`); seals stay inline.
 
-So the "seal must fall inside its authorized area" control is enforced against a coordinate
-model that the renderer does not implement. For a bank this is a paper-only control.
+### OD-2 (RESOLVED → default OFF)
 
-**Question for the user:** is inline seal placement acceptable (in which case the authorized-area
-validation should be re-scoped or removed so it stops implying a guarantee it does not provide),
-or must the renderer implement absolutely-positioned floating seals honouring `sealBox`?
-
-The second option is a substantial piece of OOXML work (`CTAnchor` drawing with
-`positionH`/`positionV` relative to page, plus per-page targeting) and must be its own slice.
-
-**W0-3 deliberately does NOT resolve this.** It only stops the renderer from silently ignoring
-the author's declared `widthPt`/`heightPt`. Positioning remains inline until OD-1 is answered.
-
-### OD-2 — Should PDF page-number stamping be ON by default?
-
-`docgen.rendering.pdf-page-number-stamping-enabled` defaults to `false`, yet the stamper exists
-precisely because headless LibreOffice frequently fails to evaluate Word `PAGE` fields. Bank
-letter masters that rely on footer `PAGE` / `SECTIONPAGES` fields may therefore ship PDFs with
-missing or wrong page numbers under the default configuration.
-
-Turning it on globally is a behaviour change across every existing render profile, so it needs
-an explicit decision. W0-4 makes the stamping **correct or honestly degraded** but does not
-change the default.
+`docgen.rendering.pdf-page-number-stamping-enabled` stays **`false` by default**. Operators
+who need the stamper enable it explicitly. W0-4 still makes the enabled path correct or
+honestly degraded.
 
 ---
 
@@ -160,7 +141,7 @@ change the default.
 
 | Wave | Name | Tasks | Detail sheet | Status |
 | --- | --- | --- | --- | --- |
-| **W0** | Rendering & conversion correctness | 6 | [CRCH-W0-rendering-correctness.md](detail/CRCH-W0-rendering-correctness.md) | **Not Started** |
+| **W0** | Rendering & conversion correctness | 7 | [CRCH-W0-rendering-correctness.md](detail/CRCH-W0-rendering-correctness.md) | **Not Started** |
 | **W1** | Preview consolidation | 6 | [CRCH-W1-preview-consolidation.md](detail/CRCH-W1-preview-consolidation.md) | **Not Started** |
 | **W2** | Compute DSL capability | ~6 | not yet written — see §5 | **Not Started** |
 | **W3** | DOCX fidelity depth | ~6 | not yet written — see §6 | **Not Started** |

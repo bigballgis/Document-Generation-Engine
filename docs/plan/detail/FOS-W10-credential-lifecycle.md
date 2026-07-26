@@ -5,7 +5,7 @@
 **Slice id:** `fos-credential-lifecycle` · worktree `../DGE-fos-credential-lifecycle` · branch `feat/fos-credential-lifecycle`
 **Task Master:** **#180** · **delivery_lane:** **full** (security-sensitive — never light)
 **Origin:** C2, C4, C11, C12, C22
-**Open decision:** **OD-FOS-4** — confirm ADR-0009 7-day grace still required before implementing W10-1
+**Confirmed (FOS D11 / OD-FOS-4):** rotation grace period = **28 days** (amends ADR-0009; was 7). W10-1 is **unblocked**.
 
 ---
 
@@ -15,14 +15,13 @@
 git worktree add "..\DGE-fos-credential-lifecycle" -b feat/fos-credential-lifecycle origin/main
 ```
 
-Read `docs/adr/api-management/0009-api-credential-lifecycle.md` end-to-end. If OD-FOS-4 is
-unanswered, implement W10-2…W10-5 only and leave W10-1 **Blocked**.
+Read amended `docs/adr/api-management/0009-api-credential-lifecycle.md` (28-day grace).
 
 ### Tasks
 
 | Id | Sev | Task |
 | --- | --- | --- |
-| W10-1 | **P0** | Rotation grace period (prior hash usable until deadline) — **OD-FOS-4** |
+| W10-1 | **P0** | Rotation grace period — prior hash usable for **28 days** |
 | W10-2 | **P0** | Rotate gates on effective status; rebase `expiresAt` |
 | W10-3 | **P1** | Surface `expiresAt` in UI + create/rotate responses |
 | W10-4 | **P1** | Optional shorter expiry on create + tiered alerts |
@@ -30,17 +29,27 @@ unanswered, implement W10-2…W10-5 only and leave W10-1 **Blocked**.
 
 ---
 
-## W10-1 — Rotate instantly kills the old secret
+## W10-1 — Rotate instantly kills the old secret → 28-day grace
 
-**Severity:** P0 · **Blocked on OD-FOS-4**
+**Severity:** P0 · **Unblocked** (D11)
 **File:** `ApiCredentialEntity#rotateSecret` — single `secret_hash`, no prior retention.
-ADR-0009 requires 7-day grace; OpenAPI even defines `rotationGracePeriodEndsAt`.
+OpenAPI defines `rotationGracePeriodEndsAt`.
 
-### Implement (after confirmation)
+### Implement
 
-Retain previous hash + grace deadline; auth filter accepts either hash until deadline;
-surface deadline on rotate response + contract summary. Flyway for new columns.
-Tests: old secret works during grace; fails after; new secret always works.
+1. Flyway: retain previous secret hash + `rotation_grace_period_ends_at` (or equivalent).
+2. On rotate: store new hash as current; keep prior hash; set grace deadline = now + **28 days**.
+3. Auth filter accepts **either** hash until the deadline; after deadline, only the new hash.
+4. Surface `rotationGracePeriodEndsAt` on rotate response + contract credential summary.
+5. Constants/docs/tests must say **28 days**, not 7.
+
+Red tests: old secret works during grace; fails after; new secret always works; deadline
+is ~28 days from rotation instant.
+
+### Do NOT
+
+- Do not invent a credential-level `ROTATING` status (ADR-0009 already rejected that).
+- Do not keep a 7-day constant anywhere for rotation grace after this leaf.
 
 ---
 
@@ -68,7 +77,8 @@ Red tests for past-expiry rotate behaviour.
 ### Implement
 
 Add `expiresAt` end-to-end (API views already have it on summary — extend create/rotate
-DTOs). Column in panel; show in one-time secret dialog.
+DTOs). Column in panel; show in one-time secret dialog. Also show
+`rotationGracePeriodEndsAt` after rotate when present.
 
 ---
 
@@ -77,8 +87,9 @@ DTOs). Column in panel; show in one-time secret dialog.
 **Files:** `ApiCredentialCommandSupport#createCredential`,
 `ApiAccessAlertQueryService`
 
-ADR allows shorter expiry and 30/7/1 day reminders. Implement optional `expiryDays`
-bounded by `MAX_EXPIRY_DAYS`; escalate alert severity at 7 and 1 day.
+ADR allows shorter expiry and 30/7/1 day **expiry** reminders (unchanged by D11 — those
+are not the rotation grace). Implement optional `expiryDays` bounded by `MAX_EXPIRY_DAYS`;
+escalate alert severity at 7 and 1 day before **credential expiry**.
 
 ---
 
@@ -87,11 +98,12 @@ bounded by `MAX_EXPIRY_DAYS`; escalate alert severity at 7 and 1 day.
 **File:** `CredentialsPanel.vue`
 
 Add copy button via existing `copyText` helper; `ElMessageBox` confirm on Rotate/Revoke;
-guard re-revoke.
+guard re-revoke. Confirm copy should mention the **28-day** old-secret grace when rotating.
 
 ---
 
 ## Exit
 
 Security-focused architecture review mandatory. `mvn verify` + FE gates + E2E credential
-issue/rotate happy path; deploy. TM **#180** → done (or Done-with-OD residual).
+issue/rotate happy path (assert grace field present); deploy. ADR-0009 already amended to
+28 days before/with this leaf. TM **#180** → done.
