@@ -4,13 +4,13 @@
 | --- | --- |
 | **Program ID** | `frontline-operability-solidity-2026-07` (short: **FOS**) |
 | **Created** | 2026-07-26 |
-| **Status** | **Not Started** (plan only — no product code written) |
+| **Status** | **In Progress** (W1 Done; product remediation serial) |
 | **Formal phase** | **None** (NON-CE remediation program — not a P-phase) |
-| **Sole-active leaf** | **none** (cleared; do **not** auto-activate) |
+| **Sole-active leaf** | **none** (cleared after FOS-W1 merge; next Batch may activate Leaf 2) |
 | **Origin** | User-commissioned deep review (2026-07-26): make **existing** core maximally **易用** and **扎实** for a bank frontline employee who must orchestrate the most complex bank template and hand it off for other systems to call — **no new product features** |
 | **Audit baseline commit** | `f29211c5` (MAIN tip when program authored; locate code by quoted snippets, not line numbers) |
 | **Model note** | Program authored with Opus 5–class deep audits; detail sheets are written so a **lower-tier implementer** can execute TDD without improvisation |
-| **Next queue head** | CRCH W0+W1 `render-p0-preview-dedupe` → **Done** (`ad7f6d49` / `9d8e1a16`); FOS plan on main this leaf — next product leaf FOS **Leaf 1** `fos-screens-tell-truth` (TM **#171**; umbrella **#170** registry-only) |
+| **Next queue head** | FOS **Leaf 1** `fos-screens-tell-truth` / TM **#171** → **Done** (`8dfdb0ba` / `22a4b4ba`); next **Leaf 2** `fos-author-can-start` (TM **#172**) |
 | **Upstream** | [CRCH](./core-render-compute-hardening-program.md) owns rendering P0 + preview dedupe (W0+W1) and compute/DOCX/harness designs (W2/W3/W5). FOS **supersedes CRCH W4** (authoring IA) — see §6 |
 
 ---
@@ -125,7 +125,7 @@ If a future decision appears, add it here — do not invent product behaviour.
 
 | Wave | Leaf / slice id | Name | Focus (audit ids) | Detail | Status |
 | --- | --- | --- | --- | --- | --- |
-| **W1** | `fos-screens-tell-truth` | Screens tell the truth | D1,D4,D5,D6,D7,D16,A4,A22,A23,A24 | [FOS-W1](detail/FOS-W1-screens-tell-truth.md) | **Not Started** |
+| **W1** | `fos-screens-tell-truth` | Screens tell the truth | D1,D4,D5,D6,D7,D16,A4,A22,A23,A24 | [FOS-W1](detail/FOS-W1-screens-tell-truth.md) | **Done** |
 | **W2** | `fos-author-can-start` | Author can start & navigate | A1,A2,A16,A17,A18,A21,A25,A26 | [FOS-W2](detail/FOS-W2-author-can-start.md) | **Not Started** |
 | **W3** | `fos-authoring-blocks-work` | Authoring blocks work | A5,A6,A7,A9,A10,A11,A12 | [FOS-W3](detail/FOS-W3-authoring-blocks-work.md) | **Not Started** |
 | **W4** | `fos-gates-explain-themselves` | Gates & actions explain themselves | A3,A8,A13,A14,A15,A19,A20,A27,D10,D12,D13,D14 | [FOS-W4](detail/FOS-W4-gates-explain-themselves.md) | **Not Started** |
@@ -151,7 +151,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Leaf | TM | Slice id | Status | Notes |
 | --- | --- | --- | --- | --- |
 | Umbrella | **#170** | `fos-program` | **pending** | Registry only — never mark Done until program exit |
-| Leaf 1 | **#171** | `fos-screens-tell-truth` | **pending** | Next FOS head after CRCH W0+W1 |
+| Leaf 1 | **#171** | `fos-screens-tell-truth` | **done** | Merged `8dfdb0ba` / feat `22a4b4ba` |
 | Leaf 2 | **#172** | `fos-author-can-start` | **pending** | |
 | Leaf 3 | **#173** | `fos-authoring-blocks-work` | **pending** | |
 | Leaf 4 | **#174** | `fos-gates-explain-themselves` | **pending** | |
