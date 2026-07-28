@@ -32,9 +32,16 @@ final class TemplateReadQuerySupport {
     }
 
     BindingValidationView validateBindings(UUID templateId, ManagementSessionClaims session) {
-        TemplateEntity template = access.requireReadable(templateId, session);
+        TemplateEntity template = access.requireWritable(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
         return bindingConfigurationService.validateBindings(template.getMasterId(), version);
+    }
+
+    /** FOS-W7-4: compute-only for publish-gate / read-only callers. */
+    BindingValidationView evaluateBindings(UUID templateId, ManagementSessionClaims session) {
+        TemplateEntity template = access.requireReadable(templateId, session);
+        TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
+        return bindingConfigurationService.evaluateBindings(template.getMasterId(), version);
     }
 
     BindingValidationView validateBindingsForVersion(
@@ -43,7 +50,7 @@ final class TemplateReadQuerySupport {
             ManagementSessionClaims session
     ) {
         TemplateEntity template = access.requireReadable(templateId, session);
-        return bindingConfigurationService.validateBindings(template.getMasterId(), version);
+        return bindingConfigurationService.evaluateBindings(template.getMasterId(), version);
     }
 
     MasterStyleCatalogView getMasterStyleCatalog(UUID templateId, ManagementSessionClaims session) {

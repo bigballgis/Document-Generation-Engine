@@ -2,9 +2,10 @@
   "id": "attachment-list",
   "theme": "Attachment list numbered paragraphs (attachmentListRef)",
   "maturity": "ACTIVE",
-  "title": "Attachment list — attachmentListRef string[] ordered list (CE-K06c)",
+  "title": "Attachment list \u2014 attachmentListRef string[] ordered list (CE-K06c)",
   "renderMode": "STRUCTURED_ASSEMBLE",
   "pdfSource": "LIBREOFFICE",
   "description": "ACTIVE CE-K06c sample: attachmentListRef with variables string[] payload emits ordered numbered list paragraphs (w:numPr). DOCX assertions require numPr presence and annex text order. PDF half deferred (no soffice required). No pixel comparison.",
-  "owningFutureSlice": "CE-K06c"
+  "owningFutureSlice": "CE-K06c",
+  "productPdf": "pending-CRCH-W5"
 }

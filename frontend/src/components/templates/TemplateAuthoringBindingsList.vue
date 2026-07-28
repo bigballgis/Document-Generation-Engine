@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import type { MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
 import type { BindingValidationResult } from '@/types/template'
+import { listInvalidBindings } from '@/utils/templateBindingGateDisplay'
 
-defineProps<{
+const props = defineProps<{
   loadingMaster: boolean
   validating: boolean
   configuredBindingCount: number
@@ -32,6 +34,17 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+const invalidBindings = computed(() =>
+  props.validationResult ? listInvalidBindings(props.validationResult.bindings) : [],
+)
+
+function focusInvalidBinding(anchorId: string) {
+  const row = props.filteredAnchorRows.find((item) => item.anchorId === anchorId)
+  if (row) {
+    emit('edit', row)
+  }
+}
 </script>
 
 <template>
@@ -42,14 +55,22 @@ const { t } = useI18n()
       :help-content="t('templates.authoring.bindingsHelpDescription')"
     >
       <template #actions>
-        <el-button
-          type="primary"
-          :loading="validating"
-          :disabled="configuredBindingCount === 0"
-          @click="emit('validate')"
+        <el-tooltip
+          :content="t('templates.authoring.validateBindingsEmptyTooltip')"
+          :disabled="configuredBindingCount > 0"
+          placement="bottom"
         >
-          {{ t('templates.authoring.validateBindings') }}
-        </el-button>
+          <span>
+            <el-button
+              type="primary"
+              :loading="validating"
+              :disabled="configuredBindingCount === 0"
+              @click="emit('validate')"
+            >
+              {{ t('templates.authoring.validateBindings') }}
+            </el-button>
+          </span>
+        </el-tooltip>
       </template>
     </SectionPanelHeader>
 
@@ -148,13 +169,37 @@ const { t } = useI18n()
           total: validationResult.summary.totalBindings,
         })
       "
-    />
+      data-testid="binding-validation-summary"
+    >
+      <ul v-if="invalidBindings.length" class="validation-issue-list" data-testid="binding-validation-issues">
+        <li v-for="binding in invalidBindings" :key="`${binding.anchorId}-${binding.validationStatus}`">
+          <el-button
+            link
+            type="primary"
+            data-testid="binding-validation-issue-link"
+            @click="focusInvalidBinding(binding.anchorId)"
+          >
+            {{
+              t('templates.bindingGate.invalidBindingLine', {
+                anchorId: binding.anchorId,
+                statusLabel: resolveValidationStatusLabel(binding.validationStatus),
+              })
+            }}
+          </el-button>
+        </li>
+      </ul>
+    </el-alert>
   </div>
 </template>
 
 <style scoped lang="scss">
 .validation-summary {
   margin-top: 1rem;
+}
+
+.validation-issue-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
 }
 
 .binding-status-cell {

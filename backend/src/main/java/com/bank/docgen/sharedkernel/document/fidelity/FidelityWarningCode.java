@@ -36,6 +36,8 @@ public enum FidelityWarningCode {
     PDF_PAGE_NUMBER_STAMP_FAILED,
     /** CE-O01: PDFBox page-number stamp skipped to preserve PDF/A-2b archival bytes. */
     PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA,
+    /** CRCH-W0-4: SECTIONPAGES requested but true section pagination unresolved; global page numbers only. */
+    PDF_SECTION_PAGE_NUMBERS_UNRESOLVED,
     /** CE-C06: DOCX requested encryption.permissions; permissions apply only to PDF. */
     DOCX_PERMISSIONS_NOT_APPLIED
 }

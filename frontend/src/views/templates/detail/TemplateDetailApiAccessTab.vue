@@ -80,8 +80,12 @@ const domainAnchor = computed((): ApiPolicyDomain | null => {
   return resolveDomainAnchor(route.query.domain)
 })
 
-function revealCredentialSecret(externalId: string, secret: string) {
-  credentialsPanelRef.value?.revealSecret(externalId, secret)
+function revealCredentialSecret(
+  externalId: string,
+  secret: string,
+  meta?: { expiresAt?: string | null; rotationGracePeriodEndsAt?: string | null },
+) {
+  credentialsPanelRef.value?.revealSecret(externalId, secret, meta)
 }
 
 defineExpose({ revealCredentialSecret })

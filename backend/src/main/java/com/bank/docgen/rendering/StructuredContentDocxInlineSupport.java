@@ -1,6 +1,10 @@
 package com.bank.docgen.rendering;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.apache.poi.util.Units;
@@ -159,9 +163,14 @@ final class StructuredContentDocxInlineSupport {
         }
     }
 
+    private static final int IMAGE_BOX_PT = 48;
+    /** Mirrors SealGeometryRules.DEFAULT_SEAL_*_PT (48pt); local to avoid authoring dependency. */
+    private static final double DEFAULT_SEAL_PT = 48.0d;
+
     void writeReferenceNode(JsonNode node, XWPFParagraph paragraph) {
+        boolean seal = "sealRef".equals(node.path("type").asText(""));
         StructuredContentImageResolver.ResolvedImage image;
-        if ("sealRef".equals(node.path("type").asText(""))) {
+        if (seal) {
             image = imageResolver.resolveSealRef(node.path("referenceKey").asText(""));
         } else {
             image = imageResolver.resolveImageRef(node.path("imageRef").asText(""));
@@ -169,15 +178,54 @@ final class StructuredContentDocxInlineSupport {
         try {
             XWPFRun run = paragraph.createRun();
             styles.applyDefaultRunStyle(run);
+            int widthPt;
+            int heightPt;
+            if (seal) {
+                double declaredWidth = node.path("placement").path("sealBox").path("widthPt").asDouble(DEFAULT_SEAL_PT);
+                double declaredHeight = node.path("placement").path("sealBox").path("heightPt").asDouble(DEFAULT_SEAL_PT);
+                if (!Double.isFinite(declaredWidth) || declaredWidth <= 0) {
+                    declaredWidth = DEFAULT_SEAL_PT;
+                }
+                if (!Double.isFinite(declaredHeight) || declaredHeight <= 0) {
+                    declaredHeight = DEFAULT_SEAL_PT;
+                }
+                widthPt = (int) Math.round(declaredWidth);
+                heightPt = (int) Math.round(declaredHeight);
+            } else {
+                int[] fitted = fitImageBoxPt(image.bytes());
+                widthPt = fitted[0];
+                heightPt = fitted[1];
+            }
             run.addPicture(
-                    new java.io.ByteArrayInputStream(image.bytes()),
+                    new ByteArrayInputStream(image.bytes()),
                     XWPFDocument.PICTURE_TYPE_PNG,
                     image.fileName(),
-                    Units.toEMU(48),
-                    Units.toEMU(48)
+                    Units.toEMU(widthPt),
+                    Units.toEMU(heightPt)
             );
         } catch (Exception ex) {
             throw new DocxAssemblyException(ex);
+        }
+    }
+
+    /** CRCH-W0-2: fit inside 48pt box preserving aspect ratio; unreadable → 48×48. */
+    private static int[] fitImageBoxPt(byte[] bytes) {
+        try {
+            BufferedImage buffered = ImageIO.read(new ByteArrayInputStream(bytes));
+            if (buffered == null || buffered.getWidth() <= 0 || buffered.getHeight() <= 0) {
+                return new int[] {IMAGE_BOX_PT, IMAGE_BOX_PT};
+            }
+            int widthPx = buffered.getWidth();
+            int heightPx = buffered.getHeight();
+            double scale = Math.min(
+                    (double) IMAGE_BOX_PT / widthPx,
+                    (double) IMAGE_BOX_PT / heightPx
+            );
+            int widthPt = Math.max(1, (int) Math.round(widthPx * scale));
+            int heightPt = Math.max(1, (int) Math.round(heightPx * scale));
+            return new int[] {widthPt, heightPt};
+        } catch (IOException | RuntimeException ex) {
+            return new int[] {IMAGE_BOX_PT, IMAGE_BOX_PT};
         }
     }
 }

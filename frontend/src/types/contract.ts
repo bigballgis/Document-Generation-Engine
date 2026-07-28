@@ -6,9 +6,23 @@ export interface CallerContractErrorCode {
   message: string
 }
 
+export interface CallerContractVariable {
+  variableKey: string
+  variableType: string
+  required: boolean
+  computed?: boolean
+  piiCategory?: string
+  enumValues?: string[] | null
+  description?: string | null
+}
+
 export interface CallerContractVersion {
   releaseVersion: string
   explicitVersionUrl: string
+  deprecated?: boolean
+  sunsetAt?: string | null
+  /** FOS-W9-4: always present on GET contract (may be empty). */
+  variables?: CallerContractVariable[]
 }
 
 export interface CallerContractDefaultRoute {
@@ -42,9 +56,13 @@ export interface CallerContractPolicy {
     effectivePolicyDescription: string
   }
   credentialSummary: {
-    credentialExternalId: string
+    /** OpenAPI CredentialSummary.credentialId (FOS-W9-6). */
+    credentialId?: string | null
+    /** Legacy wire name — prefer credentialId. */
+    credentialExternalId?: string | null
     status: string
-    fingerprintSummary: string
+    fingerprintSummary?: string | null
+    expiresAt?: string | null
   } | null
 }
 

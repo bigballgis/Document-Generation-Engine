@@ -8,8 +8,11 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -116,13 +119,36 @@ final class TemplateLifecycleTransitionSupport {
         );
     }
 
+    /**
+     * FOS-W6-1: republish only versions stopped by the latest template-level {@code STOP}.
+     * Versions that were already STOPPED (individual {@code DEACTIVATE_VERSION}) keep their
+     * older {@code updatedAt} and must not be blanket-restored.
+     */
     void syncStoppedVersionsToPublished(UUID templateId) {
-        templateVersionRepository.bulkUpdateLifecycleStatus(
-                templateId,
-                TemplateLifecycleStatus.STOPPED,
-                TemplateLifecycleStatus.PUBLISHED,
-                Instant.now()
-        );
+        Optional<Instant> lastTemplateStopAt = lifecycleRecordRepository
+                .findByTemplateIdOrderByCreatedAtDesc(templateId)
+                .stream()
+                .filter(record -> record.getAction() == LifecycleAction.STOP)
+                .map(TemplateLifecycleRecordEntity::getCreatedAt)
+                .findFirst();
+        List<TemplateVersionEntity> versions =
+                templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId);
+        for (TemplateVersionEntity version : versions) {
+            if (version.isDeleted()) {
+                continue;
+            }
+            if (version.getLifecycleStatus() != TemplateLifecycleStatus.STOPPED) {
+                continue;
+            }
+            if (lastTemplateStopAt.isPresent()
+                    && version.getUpdatedAt() != null
+                    && version.getUpdatedAt().isBefore(lastTemplateStopAt.get())) {
+                // Stopped before the template STOP (typically individual deactivate) — leave alone.
+                continue;
+            }
+            version.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
+            templateVersionRepository.save(version);
+        }
     }
 
     void syncAllVersionsToDeprecated(UUID templateId) {

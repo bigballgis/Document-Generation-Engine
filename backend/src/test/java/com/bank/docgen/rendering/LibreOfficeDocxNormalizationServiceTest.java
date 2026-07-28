@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
-import com.bank.docgen.rendering.RenderingOperationException;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import java.io.IOException;
@@ -12,25 +11,32 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
- * F4-A3 / BDD-F4-A3-003: DOCX normalization profile isolation and cleanup regression.
+ * F4-A3 / FOS-W12-1: DOCX normalization profile isolation — scoped to {@code @TempDir}
+ * so Linux CI cannot race on a shared {@code java.io.tmpdir}.
  */
 class LibreOfficeDocxNormalizationServiceTest {
 
+    @TempDir
+    Path isolatedTempRoot;
+
+    private String previousTmpDir;
     private DocgenRenderingProperties properties;
     private Path fakeLibreOfficeScript;
     private ThreadPoolTaskExecutor testPool;
 
     @BeforeEach
     void setUp() throws URISyntaxException, IOException {
+        previousTmpDir = System.getProperty("java.io.tmpdir");
+        System.setProperty("java.io.tmpdir", isolatedTempRoot.toAbsolutePath().toString());
         properties = new DocgenRenderingProperties();
         fakeLibreOfficeScript = resolveFakeLibreOfficeScript("fake-libreoffice");
         ensureExecutable(fakeLibreOfficeScript);
@@ -40,12 +46,15 @@ class LibreOfficeDocxNormalizationServiceTest {
     }
 
     @AfterEach
-    void tearDown() throws IOException {
+    void tearDown() {
         if (testPool != null) {
             testPool.shutdown();
         }
-        cleanupTempDirs("docgen-docx-normalize-");
-        cleanupTempDirs("docgen-lo-norm-profile-");
+        if (previousTmpDir != null) {
+            System.setProperty("java.io.tmpdir", previousTmpDir);
+        } else {
+            System.clearProperty("java.io.tmpdir");
+        }
     }
 
     @Test
@@ -120,30 +129,8 @@ class LibreOfficeDocxNormalizationServiceTest {
     }
 
     private long countTempDirs(String prefix) throws IOException {
-        Path tempRoot = Path.of(System.getProperty("java.io.tmpdir"));
-        try (Stream<Path> paths = Files.list(tempRoot)) {
+        try (Stream<Path> paths = Files.list(isolatedTempRoot)) {
             return paths.filter(path -> path.getFileName().toString().startsWith(prefix)).count();
-        }
-    }
-
-    private void cleanupTempDirs(String prefix) throws IOException {
-        Path tempRoot = Path.of(System.getProperty("java.io.tmpdir"));
-        try (Stream<Path> paths = Files.list(tempRoot)) {
-            paths.filter(path -> path.getFileName().toString().startsWith(prefix))
-                    .sorted(Comparator.reverseOrder())
-                    .forEach(path -> {
-                        try (Stream<Path> children = Files.walk(path)) {
-                            children.sorted(Comparator.reverseOrder()).forEach(child -> {
-                                try {
-                                    Files.deleteIfExists(child);
-                                } catch (IOException ignored) {
-                                    // Best-effort cleanup for tests.
-                                }
-                            });
-                        } catch (IOException ignored) {
-                            // Best-effort cleanup for tests.
-                        }
-                    });
         }
     }
 }

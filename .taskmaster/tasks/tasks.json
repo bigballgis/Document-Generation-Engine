@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-19 (registry only). Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1–4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 → Done. NON-CE PRR Wave A–D residuals + #136 D01c + #137 PRR-P2 → Done. Host sole-active delivery leaf: cleared (prior NON-CE #166 AI-SCALE-G1 ai-scale-remediation-g1 Done c4f1b0d4; not a CE leaf). Queued AI-SCALE peels #167–#169 pending (not auto-activated). Prior NON-CE #165 fix-abandoned-dev-blocks-clone Done c1bb6c77 / cfefbb55. Prior NON-CE #164 demo-catalog-keep-bank-letters Done 0e6d0bad. Prior NON-CE #163 pqh-f7-redis-rate-limit PQH Leaf 4 Done b739a38f; PQH program Done Leaf 1–4; docs/plan/post-queue-hardening-program-2026-07.md. Prior NON-CE #162 pqh-n22-catalog-row-actions PQH Leaf 3 Done ef1b505d. Prior NON-CE #161 pqh-n19-n20-entitylink PQH Leaf 2 Done 20c67ac9 / 1e023a35. Prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe (PQH Leaf 1). Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Prior #155+#156 binding-editor-ia Done 9f2378ad / 9e318d9c; #154 Asset library Done c12a0687; #153 Reminder timing Done d213834f; #152 SYS-NORM Wave 8 Done 8aca145b; SYS-NORM Waves 0–8 Done. Do NOT mark #53 Done. Do NOT treat #53 as delivery leaf. Do NOT activate CE-O02 / #119. Do NOT flip #3b/#5a. Formal phase None.",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54–#97 Done (CE-O02 deferred). Tooling #50 Done — not a CE leaf; do NOT treat #53 as delivery leaf. PRR Wave A–D residuals Done outside this umbrella. Host sole-active: cleared (prior NON-CE #166 AI-SCALE-G1 Done c4f1b0d4; not a CE leaf). Queued AI-SCALE peels #167–#169 pending. Prior NON-CE #165 fix-abandoned-dev-blocks-clone Done c1bb6c77 / cfefbb55. Prior NON-CE #164 Done 0e6d0bad. Prior NON-CE #163 pqh-f7-redis-rate-limit Done b739a38f; PQH Leaf 4; Batch solo closed; PQH program Done. Prior NON-CE #162 pqh-n22-catalog-row-actions Done ef1b505d (PQH Leaf 3; Batch solo closed). Prior NON-CE #161 pqh-n19-n20-entitylink Done 20c67ac9 / 1e023a35 (PQH Leaf 2; Batch solo closed). Prior NON-CE #159+#160 pqh-f8-format-date-tz Done ab382c02 / ee0893fe. Prior NON-CE #157+#158 sys-norm-n18-role-l1 Done a4f59c4d / b54281b1. Do NOT claim CE program Done (CE-O02 deferred per D5). Do NOT auto-activate CE-O02. Do NOT mark #53 Done. Do NOT flip #3b/#5a. Do NOT activate #119.",
+        "description": "IN PROGRESS 2026-07-19 (registry only). Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1-D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. CD-3 Done (#140 b933965c). Batch 1-4 Done. P3 queue empty (#96/#97/#80/#77 all Done). Hygiene #50 Vitest 3.2.7 -> Done. Host sole-active cleared after #169 AI-SCALE-L4 Done 1475caeb / af41410d (not a CE leaf; AI-SCALE peel program Done). Prior NON-CE #168 AI-SCALE-L3 Done ce47186a0b949495e4a74dda8711bb910e877dcc. Prior NON-CE #167 AI-SCALE-L2 Done d02aa414 / 1f55a420. Do NOT treat #53 as delivery leaf or mark Done.",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54-#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None. CE leaves #54-#97 Done (CE-O02 deferred). Tooling #50 Done — do NOT treat #53 as delivery leaf. PRR Wave A-D residuals Done outside this umbrella. Host sole-active cleared: #169 AI-SCALE-L4 ai-scale-peel-mega-tests Done 1475caeb / af41410d (not a CE leaf; AI-SCALE peel queue Leaves 1-4 Done / program Done). Prior NON-CE #168 AI-SCALE-L3 Done ce47186a0b949495e4a74dda8711bb910e877dcc (delivery_lane:light). Prior NON-CE #167 AI-SCALE-L2 Done d02aa414 / 1f55a420. Prior NON-CE #166 AI-SCALE-G1 Done c4f1b0d4. Prior NON-CE #165 Done c1bb6c77 / cfefbb55. Prior NON-CE #164 Done 0e6d0bad. Prior NON-CE #163 pqh-f7-redis-rate-limit Done b739a38f; PQH program Done. Do NOT mark #53 Done while CE program registry remains open.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:00:00.000Z"
+        "updatedAt": "2026-07-27T02:55:00.000Z"
       },
       {
         "id": "54",
@@ -2283,56 +2283,56 @@
       {
         "id": "166",
         "title": "AI-SCALE-G1: governance module-map + light lane + soft budgets + progressive disclosure",
-        "description": "DONE 2026-07-26. NON-CE AI operability remediation Leaf 1 (slice ai-scale-remediation-g1). Docs/governance/scaffold: module-map SoT + light delivery lane + soft size budgets + progressive disclosure/ARCHIVE. Merge c4f1b0d4; worktree REMOVED; sole-active cleared. Batch solo closed. delivery_lane:light; stages 5-7/10 N/A; architecture PASS. Queued peels #167-#169 remain pending (not auto-activated). Do NOT flip #3b/#5a GO; do NOT mark #53/#106 Done; do NOT activate #119; do NOT touch CE-O02.",
-        "details": "DONE Leaf 1. MAIN tip/merge c4f1b0d4. Program: docs/plan/ai-scale-remediation-program-2026-07.md (Leaf 1 Done; program In Progress). Detail: docs/plan/detail/ai-scale-remediation-g1.md. BDD ready/shipped: module-map-agent-retrieval.md, lightweight-delivery-lane.md, ai-scale-docs-conventions.md. Next queue head #167 pending — not activated. Umbrella #53 CE remains in-progress registry-only.",
+        "description": "DONE 2026-07-26. NON-CE AI operability remediation Leaf 1 (slice ai-scale-remediation-g1). Docs/governance/scaffold: module-map SoT + light delivery lane + soft size budgets + progressive disclosure/ARCHIVE. Merge c4f1b0d4; worktree REMOVED; sole-active cleared. Batch solo closed. delivery_lane:light; stages 5-7/10 N/A; architecture PASS. Leaf 2 #167 subsequently Done d02aa414; queued #168-#169 remain pending (not auto-activated). Do NOT flip #3b/#5a GO; do NOT mark #53/#106 Done; do NOT activate #119; do NOT touch CE-O02.",
+        "details": "DONE Leaf 1. MAIN tip/merge c4f1b0d4. Program: docs/plan/ai-scale-remediation-program-2026-07.md (Leaf 1 Done; program In Progress). Detail: docs/plan/detail/ai-scale-remediation-g1.md. BDD ready/shipped: module-map-agent-retrieval.md, lightweight-delivery-lane.md, ai-scale-docs-conventions.md. Next queue head #167 subsequently Done d02aa414 (2026-07-27) — see #167. Next pending #168 (not activated). Umbrella #53 CE remains in-progress registry-only.",
         "testStrategy": "1. BDD ready/shipped MM/LDL/ADC scenarios. 2. module-map.md exists indexed. 3. light lane docs/skills/constitutions wired without weakening full product leaves. 4. soft budgets + progressive disclosure conventions documented. 5. delivery_lane:light — product E2E/Docker N/A. 6. Do not implement #167-#169 in this leaf.",
         "priority": "high",
         "dependencies": [],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:00:00.000Z"
+        "updatedAt": "2026-07-26T17:09:13.000Z"
       },
       {
         "id": "167",
-        "title": "AI-SCALE Leaf 2 (queued): TemplateImport* peel",
-        "description": "QUEUED ONLY — next queue head after #166 Done; do not auto-activate. Peel oversized TemplateImport* surfaces into smaller modules per soft size budgets / file-cap veto from AI-SCALE Batch Recommendation. Product FE behavior leaf (expect full delivery lane). Formal phase None.",
-        "details": "Pending serial queue after AI-SCALE-G1 (#166 Done c4f1b0d4; sole-active cleared). Slice id TBD at activation (suggested ai-scale-template-import-peel). Program: docs/plan/ai-scale-remediation-program-2026-07.md. Do NOT fold into #166.",
-        "testStrategy": "Activate only after #166 Done + sole-active cleared (satisfied) and explicit deliver activation. Full FE gates + E2E when product UI in scope.",
+        "title": "AI-SCALE Leaf 2: TemplateImport* peel",
+        "description": "DONE 2026-07-27. NON-CE AI-SCALE Leaf 2 (slice ai-scale-peel-template-import). Structural peel TemplateImportService 553→351 + TemplateImportDependencyPrecheck 508→156 into package-private Supports ≤200; import semantics unchanged. Merge d02aa414; feat 1f55a420; worktree REMOVED; sole-active cleared. Batch solo closed. delivery_lane:full; stages 5-7/10 N/A; mvn verify exit 0; architecture PASS; CQ PASS (non-blocking deferred). Next queue head #168 pending (not activated). Do NOT flip #3b/#5a GO; do NOT mark #53/#106 Done; do NOT activate #119; do NOT touch CE-O02.",
+        "details": "DONE Leaf 2. MAIN tip/merge d02aa414; feat 1f55a420. Slice id: ai-scale-peel-template-import. Program: docs/plan/ai-scale-remediation-program-2026-07.md (Leaf 2 Done; program In Progress). Detail: docs/plan/detail/ai-scale-template-import-peel.md. BDD ready/shipped: docs/behavior/ai-scale-template-import-peel.md (TIP-01…08). Supports: MaterializeSupport 175; AssetMaterialize 84; MasterPin 127; Clause 161; Nesting 92; AssetPrecheck 117. SoftBudgetTest + module-map hint. Gates: mvn verify exit 0; Arch PASS; CQ PASS; stages 5–7/10 N/A. Next queue head #168 pending — do not activate. Umbrella #53 CE remains in-progress registry-only (sole-active note cleared).",
+        "testStrategy": "1. Characterization/regression for dry-run, apply, dependency precheck before peel. 2. Peel TemplateImport* under soft budgets without semantic change. 3. module-map update if public entry points move. 4. mvn verify GREEN; architecture review. 5. FE/OpenAPI N/A evidence when zero FE + zero contract delta. 6. Do not implement #168/#169 in this leaf.",
         "priority": "medium",
         "dependencies": [
           "166"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:00:00.000Z"
+        "updatedAt": "2026-07-26T17:09:13.000Z"
       },
       {
         "id": "168",
-        "title": "AI-SCALE Leaf 3 (queued): i18n en.ts / zh-CN.ts split",
-        "description": "QUEUED ONLY — do not activate while prior AI-SCALE leaf is sole-active. Split mega locale files frontend/src/locales/en.ts and zh-CN.ts into domain modules per soft size budgets. Product FE i18n leaf (expect full delivery lane). Formal phase None.",
-        "details": "Pending serial queue after Leaf 2 (#167). Slice id TBD at activation (suggested ai-scale-i18n-locale-split). Program: docs/plan/ai-scale-remediation-program-2026-07.md. Do NOT fold into #166 or #167.",
-        "testStrategy": "Activate only after prior AI-SCALE leaf Done. Locale import parity + FE lint/type-check/test/build; E2E if user-facing string surfaces change.",
+        "title": "AI-SCALE Leaf 3: i18n en.ts / zh-CN.ts domain split",
+        "description": "DONE 2026-07-27. NON-CE AI-SCALE Leaf 3 (slice ai-scale-peel-i18n). Split mega locale files frontend/src/i18n/locales/en.ts and zh-CN.ts into domain modules under locales/domains/*; thin public facades @/i18n/locales/en and zh-CN. Structure-only: identical keys/values; English-first preserved. Merge ce47186a0b949495e4a74dda8711bb910e877dcc; worktree REMOVED. delivery_lane:light (E1-E5; stages 5-7/10 N/A). Batch solo closed. Formal phase None. Do NOT flip #3b/#5a GO; do NOT mark #53/#106 Done; do NOT activate #119; do NOT touch CE-O02; do NOT auto-activate #169.",
+        "details": "COMPLETED 2026-07-27 Stage 12. Slice id: ai-scale-peel-i18n. Merge: ce47186a0b949495e4a74dda8711bb910e877dcc (feat/ai-scale-peel-i18n -> main); worktree DGE-ai-scale-peel-i18n REMOVED (stage 11). Batch recommendation solo (member_task_ids:[\"168\"]; proposed_slice_id:ai-scale-peel-i18n; delivery_lane:light; vetoes_applied: mega-test-split, backend-domain) closed. BDD ready/shipped: docs/behavior/ai-scale-i18n-locale-split.md (I18N-01...09). Program: docs/plan/ai-scale-remediation-program-2026-07.md (Leaf 3 Done; program In Progress). Detail: docs/plan/detail/ai-scale-i18n-locale-split.md (T01-T05 Done). Gates: pnpm lint/type-check/test/build PASS (pre-merge worktree); localeDomainSplit.test.ts 5/5 PASS after rebase; architecture PASS; code-quality PASS; stages 5-7/10 N/A (light). Sole-active cleared. Next queue head #169 pending — do not auto-activate. Umbrella #53 CE remains in-progress registry-only (sole-active note cleared).",
+        "testStrategy": "1. Key completeness/parity unit tests across en + zh-CN after domain split. 2. FE lint, type-check, test, build GREEN. 3. No dotted key path or copy-meaning change. 4. Stages 5–7/10 N/A evidence (light lane; frontend_ui_in_scope=false). 5. Do not implement #169 in this leaf.",
         "priority": "medium",
         "dependencies": [
           "167"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:00:00.000Z"
+        "updatedAt": "2026-07-27T02:35:00.000Z"
       },
       {
         "id": "169",
-        "title": "AI-SCALE Leaf 4 (queued): mega-test fixture split",
-        "description": "QUEUED ONLY — do not activate while prior AI-SCALE leaf is sole-active. Split mega test fixtures / oversized test helpers into focused modules per soft size budgets. Test-infra peel leaf. Formal phase None.",
-        "details": "Pending serial queue after Leaf 3 (#168). Slice id TBD at activation (suggested ai-scale-mega-test-fixture-split). Program: docs/plan/ai-scale-remediation-program-2026-07.md. Do NOT fold into earlier leaves.",
-        "testStrategy": "Activate only after prior AI-SCALE leaf Done. Verify suites still green after fixture peel; no product behavior change claimed.",
+        "title": "AI-SCALE Leaf 4: mega-test fixture split",
+        "description": "COMPLETED 2026-07-27. NON-CE AI-SCALE Leaf 4 (slice ai-scale-peel-mega-tests). Split 6 mega *Test.java hotspots into focused suites + fixtures; no product main changes. Merge 1475caeb; feat tip af41410d. Batch solo closed. delivery_lane:light; stages 5–7/10 N/A. AI-SCALE peel queue Leaves 1–4 Done; residual >500 optional backlog only (not In Progress). Formal phase None. Do NOT flip #3b/#5a GO; do NOT mark #53/#106 Done; do NOT activate #119; do NOT touch CE-O02.",
+        "details": "DONE 2026-07-27. Slice id: ai-scale-peel-mega-tests. Merge: 1475caebf7170b54997a0c7fde6c819cf38f03c9 (feat tip af41410d); worktree REMOVED; branch deleted. Program: docs/plan/ai-scale-remediation-program-2026-07.md Leaf 4 → Done; peel program/queue → Done. BDD ready/shipped: docs/behavior/ai-scale-mega-test-fixture-split.md (MTF-01…10); detail docs/plan/detail/ai-scale-mega-test-fixture-split.md. Peeled: TemplatePlatformSliceTest, VariableComputeEngineTest, StructuredContentDocxWriterTest, PublishGateServiceTest, LibraryExportServiceTest, SysNormPromotionPackTest. Gates: mvn -B -ntp -f backend/pom.xml verify exit 0; architecture APPROVE_WITH_NOTES; code-quality APPROVE_WITH_NOTES; stages 5–7/10 N/A. Sole-active cleared. Residual >500 (DocxAssemblerTest etc.) = optional backlog Not Started — do not invent new In Progress AI-SCALE leaf.",
+        "testStrategy": "1. BDD ready MTF-01…10 (characterization; no product behavior change). 2. Peel mega fixtures under soft budgets; suites stay green. 3. mvn verify GREEN; stages 5–7/10 N/A (light; test-infra-only). 4. Do not implement unrelated peels in this leaf.",
         "priority": "medium",
         "dependencies": [
           "168"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:00:00.000Z"
+        "updatedAt": "2026-07-27T04:05:00.000Z"
       },
       {
         "id": "170",
@@ -2342,7 +2342,7 @@
         "testStrategy": "N/A registry. Do not mark Done until FOS program exit criteria met.",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
@@ -2354,7 +2354,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W1-screens-tell-truth.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
@@ -2366,7 +2366,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W2-author-can-start.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
@@ -2378,7 +2378,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W3-authoring-blocks-work.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
@@ -2390,7 +2390,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W4-gates-explain-themselves.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
@@ -2402,7 +2402,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W5-time-locale-honesty.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
@@ -2414,57 +2414,57 @@
         "testStrategy": "See docs/plan/detail/FOS-W6-lifecycle-cannot-corrupt.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
       {
         "id": "177",
         "title": "FOS: FOS-W7 generation fails closed (fos-generation-fails-closed)",
-        "description": "PENDING — FOS wave leaf (plan only). Slice `fos-generation-fails-closed`. Detail docs/plan/detail/FOS-W7-generation-fails-closed.md. Program docs/plan/frontline-operability-solidity-program-2026-07.md. Do not auto-activate. No new features. Formal phase None. Vetoes: checklist-#3b/#5a; CE-O02; #53/#106; #119.",
-        "details": "Execute only when sole-active and Batch Recommendation selects this leaf. Follow detail sheet TDD/worktree/gates. Prefer CRCH W0+W1 before #171. OD-FOS items may block parts of #176/#180.",
+        "description": "DONE — FOS-W7 generation fails closed. Slice `fos-generation-fails-closed`. Merge `d251381f` / feat `c5244720`. Detail docs/plan/detail/FOS-W7-generation-fails-closed.md. Behavior docs/behavior/fos-generation-fails-closed.md. Evidence docs/plan/evidence/fos-generation-fails-closed/gates.md. Deploy/E2E BLOCKED (0 images). Formal phase None. Vetoes held.",
+        "details": "W7-1…W7-6 shipped. Next FOS #178 fos-concurrency-integrity.",
         "testStrategy": "See docs/plan/detail/FOS-W7-generation-fails-closed.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:30:00.000Z"
+        "updatedAt": "2026-07-26T19:00:00.000Z"
       },
       {
         "id": "178",
         "title": "FOS: FOS-W8 concurrency & integrity (fos-concurrency-integrity)",
-        "description": "PENDING — FOS wave leaf (plan only). Slice `fos-concurrency-integrity`. Detail docs/plan/detail/FOS-W8-concurrency-integrity.md. Program docs/plan/frontline-operability-solidity-program-2026-07.md. Do not auto-activate. No new features. Formal phase None. Vetoes: checklist-#3b/#5a; CE-O02; #53/#106; #119.",
-        "details": "Execute only when sole-active and Batch Recommendation selects this leaf. Follow detail sheet TDD/worktree/gates. Prefer CRCH W0+W1 before #171. OD-FOS items may block parts of #176/#180.",
+        "description": "DONE — FOS-W8 concurrency & integrity. Slice `fos-concurrency-integrity`. Merge `b6307d02` / feat `954933cc`. Detail docs/plan/detail/FOS-W8-concurrency-integrity.md. Behavior docs/behavior/fos-concurrency-integrity.md. Evidence docs/plan/evidence/fos-concurrency-integrity/gates.md. Deploy/E2E BLOCKED (0 images). Formal phase None. Vetoes held.",
+        "details": "W8-1…W8-5 shipped. Next FOS #179 fos-contract-works-first-time.",
         "testStrategy": "See docs/plan/detail/FOS-W8-concurrency-integrity.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:30:00.000Z"
+        "updatedAt": "2026-07-26T19:20:00.000Z"
       },
       {
         "id": "179",
         "title": "FOS: FOS-W9 contract works first time (fos-contract-works-first-time)",
-        "description": "PENDING — FOS wave leaf (plan only). Slice `fos-contract-works-first-time`. Detail docs/plan/detail/FOS-W9-contract-works-first-time.md. Program docs/plan/frontline-operability-solidity-program-2026-07.md. Do not auto-activate. No new features. Formal phase None. Vetoes: checklist-#3b/#5a; CE-O02; #53/#106; #119.",
-        "details": "Execute only when sole-active and Batch Recommendation selects this leaf. Follow detail sheet TDD/worktree/gates. Prefer CRCH W0+W1 before #171. OD-FOS items may block parts of #176/#180.",
+        "description": "COMPLETED Leaf 9. Slice id: fos-contract-works-first-time. Behavior: docs/behavior/fos-contract-works-first-time.md. Detail: docs/plan/detail/FOS-W9-contract-works-first-time.md. Implementation: W9-1…W9-6. Merge d8fe2b03; feat 0d4a6dd1. Deploy/E2E BLOCKED (0 images). Sole-active cleared. Next #180.",
+        "details": "Done on MAIN. merge_sha d8fe2b03; feat_sha 0d4a6dd1; worktree REMOVED. Batch solo. Gates: BE verify PASS; FE lint/type-check/test(1771)/build PASS; deploy/E2E BLOCKED (0 images).",
         "testStrategy": "See docs/plan/detail/FOS-W9-contract-works-first-time.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:30:00.000Z"
+        "updatedAt": "2026-07-26T19:21:06.000Z"
       },
       {
         "id": "180",
         "title": "FOS: FOS-W10 credential lifecycle matches ADR (fos-credential-lifecycle)",
-        "description": "PENDING — FOS wave leaf (plan only). Slice `fos-credential-lifecycle`. Detail docs/plan/detail/FOS-W10-credential-lifecycle.md. Program docs/plan/frontline-operability-solidity-program-2026-07.md. Do not auto-activate. No new features. Formal phase None. Vetoes: checklist-#3b/#5a; CE-O02; #53/#106; #119.",
-        "details": "Execute only when sole-active and Batch Recommendation selects this leaf. Follow detail sheet TDD/worktree/gates. Prefer CRCH W0+W1 before #171. OD-FOS items may block parts of #176/#180.",
+        "description": "COMPLETED Leaf 10. Slice id: fos-credential-lifecycle. Behavior: docs/behavior/fos-credential-lifecycle.md. Detail: docs/plan/detail/FOS-W10-credential-lifecycle.md. Implementation: W10-1…W10-5. Merge 89ff4d95; feat 3c0bae0e. Deploy/E2E BLOCKED (0 images). Sole-active cleared. Next #181.",
+        "details": "Done on MAIN. merge_sha 89ff4d95; feat_sha 3c0bae0e; worktree REMOVED. Batch solo. Gates: BE verify PASS; FE lint/type-check/test(1772)/build PASS; deploy/E2E BLOCKED (0 images).",
         "testStrategy": "See docs/plan/detail/FOS-W10-credential-lifecycle.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:30:00.000Z"
+        "updatedAt": "2026-07-26T19:31:54.000Z"
       },
       {
         "id": "181",
@@ -2474,9 +2474,9 @@
         "testStrategy": "See docs/plan/detail/FOS-W11-policy-impact-troubleshoot.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T16:30:00.000Z"
+        "updatedAt": "2026-07-26T19:32:10.000Z"
       },
       {
         "id": "182",
@@ -2486,7 +2486,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W12-ci-gates-tell-truth.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
@@ -2498,7 +2498,7 @@
         "testStrategy": "See docs/plan/detail/FOS-W13-default-verify-honesty.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
@@ -2510,32 +2510,32 @@
         "testStrategy": "See docs/plan/detail/FOS-W14-demo-literacy-path.md exit criteria. TDD red-first. delivery_lane full unless BDD proves light.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-26T16:30:00.000Z"
       },
       {
         "id": "185",
         "title": "FOS: FOS-W15 Word foundation honesty (fos-word-foundation-honesty)",
-        "description": "PENDING — FOS wave leaf (plan only). Slice `fos-word-foundation-honesty`. Detail docs/plan/detail/FOS-W15-word-foundation-honesty.md. Evidence docs/plan/detail/fos-word-foundation-deep-review-2026-07.md. Program docs/plan/frontline-operability-solidity-program-2026-07.md. Do not auto-activate. No new features. Formal phase None. Vetoes: checklist-#3b/#5a; CE-O02; #53/#106; #119; absolute seals; stamp-default-on.",
-        "details": "WF-1…WF-8: nested table/list fail-closed; child order; clause numbering honesty; demo headerRows; style-manifest wire-or-trim; typography gates on generated DOCX; money formatter demo honesty; one Word-crafted letterhead. Coordinate CRCH W3 (do not duplicate). Execute only when sole-active.",
+        "description": "DONE 2026-07-26. FOS-W15 Word foundation honesty. Feat 5645aa3e; merge 04fc0caf. sole-active cleared. FOS program Done.",
+        "details": "DONE 2026-07-26. Slice fos-word-foundation-honesty. Feat 5645aa3e; merge 04fc0caf. WF-1…WF-8 Remediated/Documented. Gates: mvn verify PASS; FE lint/type-check/test(1775)/build PASS. Docker/E2E BLOCKED (container overlay). Worktree REMOVED after closeout. FOS W1–W15 Done; program Done; sole-active cleared. WF-1…WF-8: nested table/list fail-closed; child order; clause numbering honesty; demo headerRows; style-manifest wire-or-trim; typography gates on generated DOCX; money formatter demo honesty; one Word-crafted letterhead. Coordinate CRCH W3 (do not duplicate). Execute only when sole-active.",
         "testStrategy": "See docs/plan/detail/FOS-W15-word-foundation-honesty.md exit criteria. TDD red-first. delivery_lane full when render/demo binaries change.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-26T17:00:00.000Z"
+        "updatedAt": "2026-07-26T20:36:18.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-26T17:00:00.000Z",
-      "taskCount": 170,
-      "completedCount": 163,
+      "lastModified": "2026-07-27T02:30:00.000Z",
+      "taskCount": 185,
+      "completedCount": 165,
       "tags": [
         "master"
       ],
-      "updated": "2026-07-26T17:00:00.000Z"
+      "updated": "2026-07-27T02:30:00.000Z"
     }
   }
 }

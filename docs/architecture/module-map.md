@@ -85,6 +85,7 @@ Single Maven module; business boundaries are **package** boundaries.
 | DOCX/PDF/LibreOffice/preview worker | `rendering-engineer` → `rendering` |
 | Generation task / runtime API | `backend-engineer` → `runtime` (+ `apimgmt` if policy) |
 | Template lifecycle / composition | `backend-engineer` → `template` |
+| Template import dry-run / apply / dependency precheck | `backend-engineer` → `template.web.TemplateImportController` + `template.service.TemplateImportService` (package-private `TemplateImport*Support` collaborators; orchestration stays outside `rendering`) |
 | Authz / fail-closed | `backend-engineer` → `authorization` |
 
 ## Frontend — `frontend/src/*`
@@ -99,7 +100,7 @@ Canonical root: `frontend/src/`. One Vue application; split further only when ow
 | `frontend/src/composables` | Stateful `use*` logic for views | `composables/**` (e.g. template detail controllers) | Must not duplicate Pinia fetch/error parsing |
 | `frontend/src/config` | App/runtime config | `config/**` | No secrets in source |
 | `frontend/src/constants` | Shared constants | `constants/**` | No i18n copy here |
-| `frontend/src/i18n` | English-first locales | `i18n/locales/en.ts` (base), `zh-CN.ts` | No divergent hard-coded English in templates |
+| `frontend/src/i18n` | English-first locales | Public facades `@/i18n/locales/en` + `zh-CN` (`locales/en.ts`, `locales/zh-CN.ts`); domain modules under `locales/domains/*` (or sibling peel); `catalogs/apiError*` for `api.error.*` | Edit domain modules for copy; keep facade path stable; no hard-coded English in templates |
 | `frontend/src/navigation` | Nav model / menu wiring | `navigation/**` | Must not bypass router permission gates |
 | `frontend/src/router` | Vue Router instance / registration | `router/**` | Keep route tables coherent with `routing` |
 | `frontend/src/routing` | Route table / meta helpers | `routing/**` | Must not embed server permission SoT |

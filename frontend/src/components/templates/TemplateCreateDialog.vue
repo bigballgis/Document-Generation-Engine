@@ -46,6 +46,7 @@ defineExpose({
     :title="t('templates.create.title')"
     width="560px"
     destroy-on-close
+    :close-on-click-modal="false"
   >
     <el-alert
       v-if="apiErrorMessage"
@@ -75,6 +76,13 @@ defineExpose({
             :value="option.value"
           />
         </AppSearchSelect>
+        <p
+          v-if="form.groupCode && masterOptions.length === 0"
+          class="create-master-empty-hint"
+          data-testid="create-no-approved-masters"
+        >
+          {{ t('templates.create.noApprovedMasters') }}
+        </p>
       </el-form-item>
       <el-form-item :label="t('templates.create.externalId')" prop="externalId">
         <el-input v-model="form.externalId" :placeholder="t('templates.create.externalIdPlaceholder')" />

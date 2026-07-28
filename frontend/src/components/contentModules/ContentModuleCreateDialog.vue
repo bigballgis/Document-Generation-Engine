@@ -201,6 +201,7 @@ defineExpose({
     :title="t('contentModules.create.title')"
     width="900px"
     destroy-on-close
+    :close-on-click-modal="false"
     @closed="resetForm"
   >
     <el-alert

@@ -12,10 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -163,6 +165,42 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().error().message())
                 .isEqualTo("The uploaded DOCX exceeds the maximum allowed size.");
         assertThat(response.getBody().error().retryable()).isFalse();
+    }
+
+    @Test
+    void dataIntegrityViolationMapsToConflictEnvelope_fosW8_3() {
+        when(messageResolver.resolve("api.error.conflict.dataIntegrity"))
+                .thenReturn("The change conflicts with an existing unique record. Reload and retry.");
+
+        ResponseEntity<ErrorEnvelope> response = handler.handleDataIntegrity(
+                request,
+                new DataIntegrityViolationException("unique")
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.DATA_INTEGRITY_CONFLICT);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.CONFLICT);
+        assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.conflict.dataIntegrity");
+        assertThat(response.getBody().error().retryable()).isTrue();
+    }
+
+    @Test
+    void optimisticLockMapsToConflictEnvelope_fosW8_1() {
+        when(messageResolver.resolve("api.error.template.optimisticLockConflict"))
+                .thenReturn("This template version was updated elsewhere. Reload, then try again.");
+
+        ResponseEntity<ErrorEnvelope> response = handler.handleOptimisticLock(
+                request,
+                new ObjectOptimisticLockingFailureException("TemplateVersionEntity", "id")
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.TEMPLATE_OPTIMISTIC_LOCK_CONFLICT);
+        assertThat(response.getBody().error().messageKey())
+                .isEqualTo("api.error.template.optimisticLockConflict");
+        assertThat(response.getBody().error().retryable()).isTrue();
     }
 
     @Test

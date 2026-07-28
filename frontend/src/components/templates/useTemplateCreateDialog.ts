@@ -130,7 +130,10 @@ export function useTemplateCreateDialog(deps: {
       templatesStore.lastErrorMessageKey = null
       await ensureGroupCatalog()
       resetForm()
+      // FOS-W2-1 — Dashboard workflow fetch must not starve the create picker.
+      await mastersStore.fetchAllMasters({ status: 'APPROVED', sort: 'groupCodeAsc' })
     },
+    { immediate: true },
   )
 
   watch(

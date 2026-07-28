@@ -1,0 +1,20 @@
+{
+  "slice": "fos-crch-runtime-e2e-verification",
+  "captured_at": "2026-07-26T21:04:36Z",
+  "feature_tip": "93a38001a8c444c815266c25d730f1f8d07f6dcf",
+  "base": "origin/main 93a38001",
+  "backend_jar": "docgen-backend-0.1.0-SNAPSHOT.jar",
+  "backend_jar_sha256": "639f4a2b894124f20f16ce7976c78c90d9342266266467b9c538a0d5f0083d77",
+  "healthz": "{"status":"UP"}",
+  "frontend_url": "http://localhost:4173",
+  "backend_url": "http://localhost:8080",
+  "storage_driver": "vfs",
+  "host_docker_fixes": [
+    "/etc/docker/daemon.json: containerd-snapshotter=false, storage-driver=vfs (nested overlay-on-overlay invalid argument)",
+    "sysctl net.bridge.bridge-nf-call-iptables=0 (inter-container connect timed out on threaded/nftables host)",
+    "docker-compose.lab-no-rlimits.yml via DOCGEN_LAB_NO_RLIMITS=true (cgroup v2 threaded subtree cannot apply memory controller)"
+  ],
+  "deploy_exit_code": 0,
+  "containers_healthy": ["docgen-backend","docgen-frontend","docgen-kafka","docgen-minio","docgen-postgres","docgen-redis"],
+  "catalog": "1 master / 1 template (default seed; DOCGEN_IMPORT_FOL_DEMO=false)"
+}

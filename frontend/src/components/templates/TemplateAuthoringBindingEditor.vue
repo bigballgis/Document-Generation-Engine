@@ -58,7 +58,11 @@ function markPristine() {
   structuredEditorRef.value?.markPristine()
 }
 
-defineExpose({ markPristine })
+function validateStructure() {
+  return structuredEditorRef.value?.validateStructure?.() ?? []
+}
+
+defineExpose({ markPristine, validateStructure })
 </script>
 
 <template>

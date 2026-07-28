@@ -11,6 +11,20 @@ import org.junit.jupiter.api.Test;
 class ApiCredentialLifecycleSupportTest {
 
     @Test
+    void rotationGracePeriod_isTwentyEightDaysPerAdr0009Amendment() {
+        Instant rotatedAt = Instant.parse("2026-07-08T00:00:00Z");
+        assertThat(ApiCredentialLifecycleSupport.ROTATION_GRACE_DAYS).isEqualTo(28);
+        assertThat(ApiCredentialLifecycleSupport.rotationGracePeriodEndsAt(rotatedAt))
+                .isEqualTo(rotatedAt.plus(28, ChronoUnit.DAYS));
+        assertThat(ApiCredentialLifecycleSupport.expiryAlertSeverity(
+                rotatedAt.plus(25, ChronoUnit.DAYS), rotatedAt))
+                .isEqualTo(ApiAccessAlertSeverity.INFO);
+        assertThat(ApiCredentialLifecycleSupport.expiryAlertSeverity(
+                rotatedAt.plus(5, ChronoUnit.DAYS), rotatedAt))
+                .isEqualTo(ApiAccessAlertSeverity.WARNING);
+    }
+
+    @Test
     void resolveExpiresAt_usesPersistedColumnNotCreatedAtDerivation() {
         Instant now = Instant.parse("2026-07-08T00:00:00Z");
         Instant earlyCreated = now.minus(400, ChronoUnit.DAYS);

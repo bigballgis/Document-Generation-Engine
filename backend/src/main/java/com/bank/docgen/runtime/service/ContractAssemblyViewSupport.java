@@ -151,14 +151,27 @@ final class ContractAssemblyViewSupport {
         );
     }
 
+    /**
+     * FOS-W9-3: catalogue retryable flags + categories match exception advice / rate-limit filter.
+     * Includes RATE_LIMIT_EXCEEDED / GENERATION_TIMEOUT / GENERATION_SERVICE_UNAVAILABLE.
+     * REQUEST_BODY_INVALID uses VALIDATION (C18), not RUNTIME.
+     */
     List<ErrorCodeSummaryView> standardErrorCodes() {
         return List.of(
                 errorCode(ApiErrorCategories.AUTHENTICATION, ApiErrorCodes.INVALID_CREDENTIALS,
                         "api.error.runtime.invalidCredentials", false),
                 errorCode(ApiErrorCategories.AUTHORIZATION, ApiErrorCodes.ACCESS_DENIED,
                         "api.error.authorization.accessDenied", false),
-                errorCode(ApiErrorCategories.RUNTIME, ApiErrorCodes.REQUEST_BODY_INVALID,
+                errorCode(ApiErrorCategories.VALIDATION, ApiErrorCodes.REQUEST_BODY_INVALID,
                         "api.error.validation.requestBodyInvalid", false),
+                errorCode(ApiErrorCategories.RUNTIME, ApiErrorCodes.RATE_LIMIT_EXCEEDED,
+                        "api.error.runtime.rateLimitExceeded", true),
+                errorCode(ApiErrorCategories.RUNTIME, ApiErrorCodes.RATE_LIMIT_BACKEND_UNAVAILABLE,
+                        "api.error.runtime.rateLimitBackendUnavailable", true),
+                errorCode(ApiErrorCategories.GENERATION, ApiErrorCodes.GENERATION_TIMEOUT,
+                        "api.error.generation.generationTimeout", true),
+                errorCode(ApiErrorCategories.GENERATION, ApiErrorCodes.GENERATION_SERVICE_UNAVAILABLE,
+                        "api.error.generation.generationServiceUnavailable", true),
                 errorCode(ApiErrorCategories.RUNTIME, ApiErrorCodes.BATCH_LIMIT_EXCEEDED,
                         "api.error.runtime.batchLimitExceeded", false),
                 errorCode(ApiErrorCategories.RUNTIME, ApiErrorCodes.ITEM_ID_DUPLICATED,
@@ -194,7 +207,8 @@ final class ContractAssemblyViewSupport {
                 null,
                 credentialSummary.status(),
                 null,
-                credentialSummary.expiresAt()
+                credentialSummary.expiresAt(),
+                credentialSummary.rotationGracePeriodEndsAt()
         );
     }
 

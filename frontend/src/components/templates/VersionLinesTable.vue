@@ -40,7 +40,7 @@ function openApiPerspective(row: TemplateVersionLineSummary) {
   void router.push(
     apiPackageSettingsPath(props.templateId, {
       releaseVersion: row.releaseVersion,
-      panel: 'route',
+      panel: 'routes',
     }),
   )
 }

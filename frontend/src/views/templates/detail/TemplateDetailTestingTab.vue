@@ -126,14 +126,16 @@ function handleOpenPreview(payload: { previewId: string }) {
         />
       </el-tab-pane>
 
-      <el-tab-pane :label="t(templateTestingSubTabLabelKey('previewRuns'))" name="previewRuns">
+      <el-tab-pane :label="t(templateTestingSubTabLabelKey('batchRuns'))" name="batchRuns">
         <BatchTestHistoryPanel
           :template-id="templateId"
           :refresh-token="coverageRefreshToken"
           @open-data-set="handleOpenDataSet"
           @open-preview="handleOpenPreview"
         />
+      </el-tab-pane>
 
+      <el-tab-pane :label="t(templateTestingSubTabLabelKey('previewRuns'))" name="previewRuns">
         <TemplatePreviewRunHistoryPanel
           :template-id="templateId"
           :refresh-token="coverageRefreshToken"
@@ -143,7 +145,6 @@ function handleOpenPreview(payload: { previewId: string }) {
 
         <TemplatePreviewPanel
           v-if="lastPreview"
-          compact
           class="preview-detail-panel"
           :template-id="templateId"
           :bindings="bindings"

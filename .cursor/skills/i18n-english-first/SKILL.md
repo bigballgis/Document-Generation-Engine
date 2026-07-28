@@ -27,9 +27,14 @@ Every user-facing string is translatable; nothing is hardcoded.
 
 ## Frontend (Vue 3)
 
-- Base bundle: `frontend/src/i18n/locales/en.ts` (~2500 lines, domain-first namespaces:
-  `app`, `login`, `nav`, `templates`, `masters`, `audit`, `identity`, `contentModules`, …).
-- `zh-CN.ts` is lazy-loaded and must mirror `en.ts` structure manually; only `api.error.*`
+- Public entry (stable): `@/i18n/locales/en` and `@/i18n/locales/zh-CN` — thin facades at
+  `frontend/src/i18n/locales/en.ts` / `zh-CN.ts` that compose domain modules. Prefer these
+  paths for loaders, `localeRegistry`, and tests; do not invent a second public entry.
+- Domain modules (edit target after AI-SCALE Leaf 3 / #168): under
+  `frontend/src/i18n/locales/domains/*` (or equivalent sibling peel under `locales/`),
+  split by domain-first namespaces (`app`, `login`, `nav`, `templates`, `masters`,
+  `audit`, `identity`, `contentModules`, …). Soft budgets apply to domain files; facades stay thin.
+- `zh-CN` is lazy-loaded and must mirror English structure manually; only `api.error.*`
   is test-guarded (`src/i18n/catalogs/apiErrorCatalog.test.ts`).
 - API error strings live in `src/i18n/catalogs/apiErrorEn.ts` / `apiErrorZhCn.ts`, merged
   under `api.error.*`.
@@ -37,7 +42,7 @@ Every user-facing string is translatable; nothing is hardcoded.
   `login.validation.usernameRequired`). Tab/config TS files export `*_LABEL_KEYS` maps.
 - Components: `const { t } = useI18n()` then `t('key')`; error keys resolved via
   `resolveApiErrorMessageKey(error, 'fallback.key')` from `src/api/errorEnvelope.ts`.
-- Add the English key first; components reference keys, never literals.
+- Add the English key first (in the owning domain module); components reference keys, never literals.
 - Locale switching must not change information architecture, layout, or component structure.
 - Locale persistence: localStorage `docgen.app.locale`; registry `src/i18n/localeRegistry.ts`.
 - **Brand marks (`brands.ts` `logoSlotLabel`):** `REDBC` / `GREENBC` are proper-noun brand codes — leave as literal slot identifiers (not message keys). Human-readable brand names use `labelKey` (`brand.redbc` / `brand.greenbc`). Recorded under LR-C11 docs-first (2026-07-11).

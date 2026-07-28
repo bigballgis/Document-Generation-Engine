@@ -32,6 +32,15 @@ final class StructuredContentDocxCursorSupport {
         }
     }
 
+    /** Inserts an empty paragraph after a table so later blocks are not re-anchored before it (FOS-W15-2). */
+    XWPFParagraph insertParagraphAfter(XWPFTable table) {
+        try (XmlCursor cursor = table.getCTTbl().newCursor()) {
+            cursor.toEndToken();
+            cursor.toNextToken();
+            return document.insertNewParagraph(cursor);
+        }
+    }
+
     static boolean isBlockLevelType(String type) {
         return switch (type) {
             case "paragraph", "sectionHeading", "conditionBlock", "loopBlock", "tableComponentRef",

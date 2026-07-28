@@ -191,4 +191,47 @@ describe('TemplatePreviewPanel', () => {
 
     expect(wrapper.text()).toContain('Run preview on a test data set to generate downloadable DOCX and PDF artifacts.')
   })
+
+  it('hides its own refresh action when embedded in a host preview surface', async () => {
+    vi.mocked(templatesApi.downloadPreviewArtifact).mockResolvedValue({
+      blob: new Blob(['%PDF'], { type: 'application/pdf' }),
+      filename: 'preview.pdf',
+    })
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const router = createTestRouter()
+    await router.push('/templates/tpl-1/dev/ver-1')
+    const wrapper = mount(TemplatePreviewPanel, {
+      props: {
+        templateId: 'tpl-1',
+        bindings: [],
+        preview,
+        embedded: true,
+      },
+      global: { plugins: [createPinia(), i18n, ElementPlus, router] },
+    })
+    await flushPromises()
+    expect(wrapper.find('[data-testid="preview-reload-details"]').exists()).toBe(false)
+  })
+
+  it('offers reload-details when standalone', async () => {
+    vi.mocked(templatesApi.downloadPreviewArtifact).mockResolvedValue({
+      blob: new Blob(['%PDF'], { type: 'application/pdf' }),
+      filename: 'preview.pdf',
+    })
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const router = createTestRouter()
+    await router.push('/templates/tpl-1/dev/ver-1')
+    const wrapper = mount(TemplatePreviewPanel, {
+      props: {
+        templateId: 'tpl-1',
+        bindings: [],
+        preview,
+      },
+      global: { plugins: [createPinia(), i18n, ElementPlus, router] },
+    })
+    await flushPromises()
+    expect(wrapper.find('[data-testid="preview-reload-details"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Reload details')
+  })
+
 })

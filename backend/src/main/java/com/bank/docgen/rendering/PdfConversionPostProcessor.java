@@ -1,6 +1,8 @@
 package com.bank.docgen.rendering;
 
 import com.bank.docgen.sharedkernel.document.PdfArchivalProfile;
+import com.bank.docgen.sharedkernel.document.fidelity.FidelityWarningCode;
+import java.util.Optional;
 import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import org.springframework.stereotype.Component;
@@ -43,7 +45,14 @@ public class PdfConversionPostProcessor {
         PdfPageNumberStampPlan plan = options.stampPlan() == null
                 ? PdfPageNumberStampPlan.globalOnly()
                 : options.stampPlan();
-        return PdfPageNumberStamper.stampPageNumbers(pdfBytes, plan);
+        PdfPageStampResult stamped = PdfPageNumberStamper.stampPageNumbers(pdfBytes, plan);
+        if (plan.sectionPaginationUnresolved() && stamped.warning().isEmpty()) {
+            return new PdfPageStampResult(
+                    stamped.pdfBytes(),
+                    Optional.of(FidelityWarningCode.PDF_SECTION_PAGE_NUMBERS_UNRESOLVED)
+            );
+        }
+        return stamped;
     }
 
     /**

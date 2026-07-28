@@ -14,6 +14,8 @@ export interface RotatedCredential {
   externalId: string
   secret: string
   rotatedAt: string
+  expiresAt?: string | null
+  rotationGracePeriodEndsAt?: string | null
 }
 
 interface RoutesSummaryApiView {
@@ -108,3 +110,28 @@ export async function revokeCredential(
   )
   return unwrapEnvelope(response.data)
 }
+
+export async function previewPolicyRollback(
+  templateId: string,
+  policyVersion: number,
+): Promise<import('@/types/template').ApiPolicyImpactPreview> {
+  const response = await http.post<ApiEnvelope<import('@/types/template').ApiPolicyImpactPreview>>(
+    `/templates/${templateId}/api/policy/rollback/preview`,
+    null,
+    { params: { policyVersion } },
+  )
+  return unwrapEnvelope(response.data)
+}
+
+export async function rollbackPolicy(
+  templateId: string,
+  policyVersion: number,
+  confirmed: boolean,
+): Promise<import('@/types/template').ApiPolicy> {
+  const response = await http.post<ApiEnvelope<import('@/types/template').ApiPolicy>>(
+    `/templates/${templateId}/api/policy/rollback`,
+    { policyVersion, confirmed },
+  )
+  return unwrapEnvelope(response.data)
+}
+

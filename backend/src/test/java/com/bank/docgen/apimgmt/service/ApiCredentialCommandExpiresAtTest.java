@@ -106,7 +106,7 @@ class ApiCredentialCommandExpiresAtTest {
     }
 
     @Test
-    void rotateCredential_doesNotResetExpiresAt() {
+    void rotateCredential_rebasesExpiresAtAndSetsTwentyEightDayGrace() {
         Instant fixedExpiry = Instant.parse("2026-12-01T00:00:00Z");
         ApiCredentialEntity credential = new ApiCredentialEntity(
                 CREDENTIAL_ID, "CRED-ROTATE", TEMPLATE_ID, "hash", "admin"
@@ -116,11 +116,45 @@ class ApiCredentialCommandExpiresAtTest {
         when(apiCredentialRepository.save(any(ApiCredentialEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(passwordHashService.hash(any())).thenReturn("hash-rotated");
 
+        Instant before = Instant.now().minusSeconds(2);
         RotateCredentialResponse response = service.rotateCredential(TEMPLATE_ID, CREDENTIAL_ID, admin);
+        Instant after = Instant.now().plusSeconds(2);
 
-        assertThat(credential.getExpiresAt()).isEqualTo(fixedExpiry);
+        assertThat(credential.getExpiresAt()).isNotEqualTo(fixedExpiry);
+        assertThat(credential.getExpiresAt())
+                .isAfterOrEqualTo(before.plus(ApiCredentialLifecycleSupport.DEFAULT_EXPIRY_DAYS, ChronoUnit.DAYS));
+        assertThat(credential.getExpiresAt())
+                .isBeforeOrEqualTo(after.plus(ApiCredentialLifecycleSupport.DEFAULT_EXPIRY_DAYS, ChronoUnit.DAYS));
+        assertThat(credential.getPreviousSecretHash()).isEqualTo("hash");
+        assertThat(credential.getRotationGracePeriodEndsAt())
+                .isAfterOrEqualTo(before.plus(ApiCredentialLifecycleSupport.ROTATION_GRACE_DAYS, ChronoUnit.DAYS));
+        assertThat(response.rotationGracePeriodEndsAt()).isEqualTo(credential.getRotationGracePeriodEndsAt());
+        assertThat(response.expiresAt()).isEqualTo(credential.getExpiresAt());
         assertThat(response.secret()).isNotBlank();
         verify(apiCredentialRepository).save(credential);
+    }
+
+    @Test
+    void createCredential_honorsOptionalExpiryDays() {
+        when(apiCredentialRepository.save(any(ApiCredentialEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Instant before = Instant.now().minusSeconds(2);
+        ApiCredentialCreatedView created = service.createCredential(TEMPLATE_ID, admin, 30);
+        Instant after = Instant.now().plusSeconds(2);
+        assertThat(created.expiresAt()).isAfterOrEqualTo(before.plus(30, ChronoUnit.DAYS));
+        assertThat(created.expiresAt()).isBeforeOrEqualTo(after.plus(30, ChronoUnit.DAYS));
+    }
+
+    @Test
+    void rotateCredential_rejectsEffectivelyExpired() {
+        ApiCredentialEntity credential = new ApiCredentialEntity(
+                CREDENTIAL_ID, "CRED-EXPIRED", TEMPLATE_ID, "hash", "admin"
+        );
+        setExpiresAt(credential, Instant.now().minus(1, ChronoUnit.DAYS));
+        when(apiCredentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(credential));
+        org.junit.jupiter.api.Assertions.assertThrows(
+                com.bank.docgen.template.service.TemplateValidationException.class,
+                () -> service.rotateCredential(TEMPLATE_ID, CREDENTIAL_ID, admin)
+        );
     }
 
     private static void setExpiresAt(ApiCredentialEntity credential, Instant expiresAt) {

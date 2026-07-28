@@ -47,8 +47,9 @@ class FolExecutiveDemoBindingAuditTest {
         String overlaysJson = Files.readString(FOL_ROOT.resolve("config/fol-binding-overlays.json"));
         assertThat(overlaysJson).contains("\"emphasis\"");
         assertThat(overlaysJson).contains("\"styleRef\"");
-        assertThat(overlaysJson).contains("\"type\":  \"list\"");
-        assertThat(overlaysJson).contains("\"ordered\":  true");
+        // FOS-W15-4: accept Compact JSON or PowerShell ConvertTo-Json spacing ("type":  "list").
+        assertThat(overlaysJson).containsPattern("\"type\"\\s*:\\s*\"list\"");
+        assertThat(overlaysJson).containsPattern("\"ordered\"\\s*:\\s*true");
         assertThat(overlaysJson).contains("\"contentModuleRef\"");
         assertThat(overlaysJson).contains("\"conditionBlock\"");
         assertThat(overlaysJson).contains("\"loopBlock\"");

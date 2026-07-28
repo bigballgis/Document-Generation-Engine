@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -87,15 +86,11 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
                     tempDir,
                     options
             ));
-            processBuilder.redirectErrorStream(true);
-            Process process = processBuilder.start();
-            boolean finished = process.waitFor(
+            ExternalProcessRunner.runToCompletion(
+                    processBuilder,
                     renderingProperties.getConversionTimeoutSeconds(),
-                    TimeUnit.SECONDS
+                    "api.error.generation.pdfConversionFailed"
             );
-            if (!finished || process.exitValue() != 0) {
-                throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
-            }
             Path outputPdf = tempDir.resolve("input.pdf");
             if (!Files.exists(outputPdf)) {
                 throw new RenderingOperationException("api.error.generation.pdfConversionFailed");

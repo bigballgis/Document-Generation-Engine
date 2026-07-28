@@ -64,6 +64,7 @@ const {
   batchDialogStreamUrl,
   batchRunning,
   isEligible,
+  submitEligibilityLoadError,
   submitTooltipContent,
   submitTooltipDisabled,
   handleSubmitForTestConfirm,
@@ -104,8 +105,10 @@ function resolveStepperSubTab(query: TemplateJourneyWorkspaceQuery): TemplateDev
 }
 
 function onLifecycleStepperNavigate(query: TemplateJourneyWorkspaceQuery) {
+  // FOS-W2-2 — escape post-create guide so lifecycle/workspace nav is not a no-op.
+  const base = stripAuthoringPathGuideQuery(route.query)
   void router.replace({
-    query: buildDevWorkspaceQuery(route.query, query.workspaceTab, resolveStepperSubTab(query)),
+    query: buildDevWorkspaceQuery(base, query.workspaceTab, resolveStepperSubTab(query)),
   })
 }
 
@@ -172,11 +175,15 @@ function onAuthoringPathDismiss() {
           :is-eligible="isEligible"
           :submit-tooltip-content="submitTooltipContent"
           :submit-tooltip-disabled="submitTooltipDisabled"
+          :submit-eligibility-load-error="submitEligibilityLoadError"
           :submit-gate-ready="submitGateReady"
           :loading-submit-gate="loadingSubmitGate"
           :submit-gate-load-error="submitGateLoadError"
+          :submit-gate-items="submitGateItems"
           :publish-gate-ready="publishGateReady"
           :loading-publish-gate="loadingPublishGate"
+          :publish-gate-load-error="publishGateLoadError"
+          :publish-gate-items="publishGateItems"
           @run-full-test="handleRunFullTest"
           @request-submit-for-test="requestSubmitForTestDialog"
           @test-decision="emit('test-decision', $event)"

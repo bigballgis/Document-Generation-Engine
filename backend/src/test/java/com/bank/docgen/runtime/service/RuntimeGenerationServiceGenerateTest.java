@@ -310,7 +310,7 @@ class RuntimeGenerationServiceGenerateTest {
         );
 
         assertThatThrownBy(() -> service.generateSync(template, session, RELEASE_VERSION, request))
-                .isInstanceOf(TemplateValidationException.class)
+                .isInstanceOf(RuntimeBatchValidationException.class)
                 .hasMessage("api.error.runtime.outputModeUnsupported");
     }
 
@@ -340,7 +340,7 @@ class RuntimeGenerationServiceGenerateTest {
         );
 
         assertThatThrownBy(() -> service.generateSync(template, session, RELEASE_VERSION, request))
-                .isInstanceOf(TemplateValidationException.class)
+                .isInstanceOf(RuntimeBatchValidationException.class)
                 .hasMessage("api.error.runtime.outputModeUnsupported");
     }
 

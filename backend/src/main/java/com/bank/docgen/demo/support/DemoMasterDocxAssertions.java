@@ -3,6 +3,8 @@ package com.bank.docgen.demo.support;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -26,6 +28,18 @@ public final class DemoMasterDocxAssertions {
 
     public static String readZipEntry(byte[] docxBytes, String entryName) throws IOException {
         return readZipEntryMatching(docxBytes, entryName::equals);
+    }
+
+    public static List<String> zipEntryNames(byte[] docxBytes) throws IOException {
+        List<String> names = new ArrayList<>();
+        try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(docxBytes))) {
+            ZipEntry entry = zip.getNextEntry();
+            while (entry != null) {
+                names.add(entry.getName());
+                entry = zip.getNextEntry();
+            }
+        }
+        return List.copyOf(names);
     }
 
     private static String readZipEntryMatching(byte[] docxBytes, Predicate<String> matcher) throws IOException {

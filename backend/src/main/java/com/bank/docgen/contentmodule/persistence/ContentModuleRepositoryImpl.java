@@ -83,12 +83,15 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
                           )
                           AND v.review_state = 'APPROVED'
                           AND v.lifecycle_state = 'ACTIVE'
-                          AND v.semantic_version = (
-                            SELECT MAX(aa2.semantic_version)
+                          AND v.id = (
+                            SELECT aa2.id
                             FROM content_module_version aa2
                             WHERE aa2.module_id = m.id
                               AND aa2.review_state = 'APPROVED'
                               AND aa2.lifecycle_state = 'ACTIVE'
+                            ORDER BY aa2.version_major DESC, aa2.version_minor DESC,
+                                     aa2.version_patch DESC, aa2.semantic_version DESC
+                            LIMIT 1
                           )
                         )
                         OR (
@@ -98,10 +101,13 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
                               AND aa.review_state = 'APPROVED'
                               AND aa.lifecycle_state = 'ACTIVE'
                           )
-                          AND v.semantic_version = (
-                            SELECT MAX(aa3.semantic_version)
+                          AND v.id = (
+                            SELECT aa3.id
                             FROM content_module_version aa3
                             WHERE aa3.module_id = m.id
+                            ORDER BY aa3.version_major DESC, aa3.version_minor DESC,
+                                     aa3.version_patch DESC, aa3.semantic_version DESC
+                            LIMIT 1
                           )
                         )
                       )
@@ -218,12 +224,15 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
                         )
                         AND lv.review_state = 'APPROVED'
                         AND lv.lifecycle_state = 'ACTIVE'
-                        AND lv.semantic_version = (
-                          SELECT MAX(aa2.semantic_version)
+                        AND lv.id = (
+                          SELECT aa2.id
                           FROM content_module_version aa2
                           WHERE aa2.module_id = m.id
                             AND aa2.review_state = 'APPROVED'
                             AND aa2.lifecycle_state = 'ACTIVE'
+                          ORDER BY aa2.version_major DESC, aa2.version_minor DESC,
+                                   aa2.version_patch DESC, aa2.semantic_version DESC
+                          LIMIT 1
                         )
                       )
                       OR (
@@ -233,10 +242,13 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
                             AND aa.review_state = 'APPROVED'
                             AND aa.lifecycle_state = 'ACTIVE'
                         )
-                        AND lv.semantic_version = (
-                          SELECT MAX(aa3.semantic_version)
+                        AND lv.id = (
+                          SELECT aa3.id
                           FROM content_module_version aa3
                           WHERE aa3.module_id = m.id
+                          ORDER BY aa3.version_major DESC, aa3.version_minor DESC,
+                                   aa3.version_patch DESC, aa3.semantic_version DESC
+                          LIMIT 1
                         )
                       )
                     )
@@ -347,7 +359,7 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
 
     /**
      * CE-U20 — match badge-aligned display status of the module head version
-     * (max {@code updatedAt}, tie → greater {@code semanticVersion}).
+     * (max {@code updatedAt}, tie → greater numeric semver tuple).
      */
     private Predicate buildHeadDisplayStatusPredicate(
             CriteriaBuilder cb,
@@ -381,11 +393,31 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
                         cb.greaterThan(other.get("updatedAt"), version.get("updatedAt")),
                         cb.and(
                                 cb.equal(other.get("updatedAt"), version.get("updatedAt")),
-                                cb.greaterThan(other.get("semanticVersion"), version.get("semanticVersion"))
+                                isNumericallyNewerSemver(cb, other, version)
                         )
                 )
         );
         return cb.not(cb.exists(newer));
+    }
+
+    /** FOS-W6-4: (major, minor, patch) tuple greater-than. */
+    private Predicate isNumericallyNewerSemver(
+            CriteriaBuilder cb,
+            Root<ContentModuleVersionEntity> other,
+            Root<ContentModuleVersionEntity> version
+    ) {
+        return cb.or(
+                cb.greaterThan(other.get("versionMajor"), version.get("versionMajor")),
+                cb.and(
+                        cb.equal(other.get("versionMajor"), version.get("versionMajor")),
+                        cb.greaterThan(other.get("versionMinor"), version.get("versionMinor"))
+                ),
+                cb.and(
+                        cb.equal(other.get("versionMajor"), version.get("versionMajor")),
+                        cb.equal(other.get("versionMinor"), version.get("versionMinor")),
+                        cb.greaterThan(other.get("versionPatch"), version.get("versionPatch"))
+                )
+        );
     }
 
     private Predicate matchesDisplayStatus(
@@ -464,31 +496,48 @@ public class ContentModuleRepositoryImpl implements ContentModuleRepositoryCusto
                 cb.equal(approvedCountRoot.get("lifecycleState"), ContentModuleLifecycleState.ACTIVE)
         );
 
-        Subquery<String> maxApprovedSemver = outer.subquery(String.class);
-        Root<ContentModuleVersionEntity> maxApprovedRoot = maxApprovedSemver.from(ContentModuleVersionEntity.class);
-        maxApprovedSemver.select(cb.greatest(maxApprovedRoot.<String>get("semanticVersion")));
-        maxApprovedSemver.where(
-                cb.equal(maxApprovedRoot.get("moduleId"), moduleRoot.get("id")),
-                cb.equal(maxApprovedRoot.get("reviewState"), ContentModuleReviewState.APPROVED),
-                cb.equal(maxApprovedRoot.get("lifecycleState"), ContentModuleLifecycleState.ACTIVE)
-        );
-
-        Subquery<String> maxAnySemver = outer.subquery(String.class);
-        Root<ContentModuleVersionEntity> maxAnyRoot = maxAnySemver.from(ContentModuleVersionEntity.class);
-        maxAnySemver.select(cb.greatest(maxAnyRoot.<String>get("semanticVersion")));
-        maxAnySemver.where(cb.equal(maxAnyRoot.get("moduleId"), moduleRoot.get("id")));
-
         Predicate useApprovedActive = cb.and(
                 cb.greaterThan(approvedActiveCount, 0L),
                 cb.equal(version.get("reviewState"), ContentModuleReviewState.APPROVED),
                 cb.equal(version.get("lifecycleState"), ContentModuleLifecycleState.ACTIVE),
-                cb.equal(version.get("semanticVersion"), maxApprovedSemver)
+                isLatestNumericSemverAmong(
+                        cb,
+                        outer,
+                        moduleRoot,
+                        version,
+                        true
+                )
         );
         Predicate useLatestAny = cb.and(
                 cb.equal(approvedActiveCount, 0L),
-                cb.equal(version.get("semanticVersion"), maxAnySemver)
+                isLatestNumericSemverAmong(cb, outer, moduleRoot, version, false)
         );
         return cb.or(useApprovedActive, useLatestAny);
+    }
+
+    /**
+     * FOS-W6-4: version is latest by numeric semver among module versions
+     * (optionally restricted to APPROVED+ACTIVE).
+     */
+    private Predicate isLatestNumericSemverAmong(
+            CriteriaBuilder cb,
+            Subquery<?> outer,
+            Root<ContentModuleEntity> moduleRoot,
+            Root<ContentModuleVersionEntity> version,
+            boolean approvedActiveOnly
+    ) {
+        Subquery<Integer> newer = outer.subquery(Integer.class);
+        Root<ContentModuleVersionEntity> other = newer.from(ContentModuleVersionEntity.class);
+        newer.select(cb.literal(1));
+        List<Predicate> preds = new ArrayList<>();
+        preds.add(cb.equal(other.get("moduleId"), moduleRoot.get("id")));
+        if (approvedActiveOnly) {
+            preds.add(cb.equal(other.get("reviewState"), ContentModuleReviewState.APPROVED));
+            preds.add(cb.equal(other.get("lifecycleState"), ContentModuleLifecycleState.ACTIVE));
+        }
+        preds.add(isNumericallyNewerSemver(cb, other, version));
+        newer.where(preds.toArray(Predicate[]::new));
+        return cb.not(cb.exists(newer));
     }
 
     private List<Order> buildOrders(CriteriaBuilder cb, Root<ContentModuleEntity> root, CatalogSortKey sort) {

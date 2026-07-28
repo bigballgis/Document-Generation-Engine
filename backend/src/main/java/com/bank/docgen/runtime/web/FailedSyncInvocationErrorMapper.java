@@ -167,7 +167,14 @@ final class FailedSyncInvocationErrorMapper {
         if (generationEnvelope != null) {
             return generationEnvelope;
         }
-        return null;
+        // FOS-W11-3: never drop the invocation row — fall back to INTERNAL_ERROR.
+        return envelope(
+                ApiErrorCodes.INTERNAL_ERROR,
+                ApiErrorCategories.RUNTIME,
+                "api.error.generation.internalError",
+                true,
+                messageResolver
+        );
     }
 
     /**

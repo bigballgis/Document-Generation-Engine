@@ -26,10 +26,8 @@ import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -126,8 +124,27 @@ public class TemplateBindingConfigurationService {
         return mutations.saveRules(version, rules);
     }
 
+    /**
+     * FOS-W7-4: authoring validate endpoint — compute + persist status writes.
+     */
     @Transactional
     public BindingValidationView validateBindings(UUID masterId, TemplateVersionEntity version) {
+        return evaluateBindings(masterId, version, true);
+    }
+
+    /**
+     * FOS-W7-4: publish-gate / read-only evaluation — compute validity without persisting.
+     */
+    @Transactional(readOnly = true)
+    public BindingValidationView evaluateBindings(UUID masterId, TemplateVersionEntity version) {
+        return evaluateBindings(masterId, version, false);
+    }
+
+    private BindingValidationView evaluateBindings(
+            UUID masterId,
+            TemplateVersionEntity version,
+            boolean persistStatus
+    ) {
         MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)
                 .orElseThrow(MasterNotFoundException::new);
         Set<String> masterAnchors = new HashSet<>();
@@ -135,8 +152,6 @@ public class TemplateBindingConfigurationService {
         List<AnchorBindingEntity> bindings = anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(
                 version.getId()
         );
-        Map<String, Integer> anchorCounts = new HashMap<>();
-        bindings.forEach(binding -> anchorCounts.merge(binding.getAnchorId(), 1, Integer::sum));
 
         List<AnchorBindingView> views = new ArrayList<>();
         int valid = 0;
@@ -144,18 +159,19 @@ public class TemplateBindingConfigurationService {
         int duplicate = 0;
         int incompatible = 0;
         Set<String> declaredVariableKeys = statusSupport.loadDeclaredVariableKeys(version.getId());
+        List<String> allAnchorIds = bindings.stream().map(AnchorBindingEntity::getAnchorId).toList();
         for (AnchorBindingEntity binding : bindings) {
             BindingValidationStatus status = computeBindingStatus(
                     binding.getAnchorId(),
                     binding.getDeclaredContentType(),
                     masterAnchors,
-                    bindings.stream().map(AnchorBindingEntity::getAnchorId).toList(),
+                    allAnchorIds,
                     binding.getStructuredContentJson(),
                     declaredVariableKeys,
                     masterId,
                     binding.getPasteCleaningEvidenceJson()
             );
-            if (status != binding.getValidationStatus()) {
+            if (persistStatus && status != binding.getValidationStatus()) {
                 binding.update(
                         binding.getDeclaredContentType(),
                         binding.getStructuredContentJson(),

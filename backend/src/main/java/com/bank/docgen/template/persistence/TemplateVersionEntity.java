@@ -7,6 +7,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -78,6 +79,11 @@ public class TemplateVersionEntity {
 
     @Column(name = "deleted_at")
     private Instant deletedAt;
+
+    /** FOS-W8-1: JPA optimistic lock for concurrent authoring / publish stamps. */
+    @Version
+    @Column(name = "row_version", nullable = false)
+    private long rowVersion;
 
     protected TemplateVersionEntity() {
     }
@@ -199,6 +205,10 @@ public class TemplateVersionEntity {
 
     public boolean isDeleted() {
         return deletedAt != null;
+    }
+
+    public long getRowVersion() {
+        return rowVersion;
     }
 
     public void setDeletedAt(Instant deletedAt) {

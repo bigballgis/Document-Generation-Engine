@@ -2100,7 +2100,7 @@ export interface components {
          * @description Caller-visible fidelity warning codes for runtime success paths (JSON `fidelityWarnings[].warningCode` and SYNC_STREAM `fidelityWarningCodes` header). Baseline ADR-0019 codes plus engine-emitted codes that may appear on the formal runtime success path (CE-C03 honest enum). Includes DOCX_PERMISSIONS_NOT_APPLIED (CE-C06) when DOCX requests non-empty encryption.permissions; JSON path `messageKey` for that code is generation.warning.fidelity.docxPermissionsNotApplied.
          * @enum {string}
          */
-        FidelityWarningCode: "OPTIONAL_CONTENT_EMPTY" | "LOW_RISK_PAGINATION_DIFFERENCE" | "LOW_RISK_TABLE_PAGE_BREAK" | "CONTROLLED_STYLE_FALLBACK" | "IMAGE_SCALING_ADJUSTED" | "MASTER_STYLE_FALLBACK" | "PARTIAL_TABLE_LAYOUT_ADJUSTMENT" | "UNRESOLVED_VARIABLE" | "INVALID_CONDITION_EXPRESSION" | "MISSING_ANCHOR_CONTENT" | "UNSUPPORTED_NODE" | "MISSING_STYLE_REFERENCE" | "INAPPLICABLE_STYLE" | "DIRECT_FORMAT_OUT_OF_WHITELIST" | "DIRECT_FORMAT_GLOBAL_LAYOUT" | "DIRECT_FORMAT_INVALID_VALUE" | "NESTED_TABLE" | "UNRELIABLE_TABLE_LAYOUT" | "INVALID_TABLE_COMPONENT" | "SEAL_OUTSIDE_AUTHORIZED_AREA" | "SEAL_AUTHORIZED_AREA_UNKNOWN" | "SEAL_AUTHORIZED_AREA_INVALID" | "SEAL_PLACEMENT_GEOMETRY_INVALID" | "SEAL_SCALING_NOT_ALLOWED" | "MISSING_REFERENCE_KEY" | "DUPLICATE_NUMBER" | "BROKEN_NUMBER_CROSS_REFERENCE" | "PDF_PAGE_NUMBER_STAMP_FAILED" | "PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA" | "DOCX_PERMISSIONS_NOT_APPLIED";
+        FidelityWarningCode: "OPTIONAL_CONTENT_EMPTY" | "LOW_RISK_PAGINATION_DIFFERENCE" | "LOW_RISK_TABLE_PAGE_BREAK" | "CONTROLLED_STYLE_FALLBACK" | "IMAGE_SCALING_ADJUSTED" | "MASTER_STYLE_FALLBACK" | "PARTIAL_TABLE_LAYOUT_ADJUSTMENT" | "UNRESOLVED_VARIABLE" | "INVALID_CONDITION_EXPRESSION" | "MISSING_ANCHOR_CONTENT" | "UNSUPPORTED_NODE" | "MISSING_STYLE_REFERENCE" | "INAPPLICABLE_STYLE" | "DIRECT_FORMAT_OUT_OF_WHITELIST" | "DIRECT_FORMAT_GLOBAL_LAYOUT" | "DIRECT_FORMAT_INVALID_VALUE" | "NESTED_TABLE" | "UNRELIABLE_TABLE_LAYOUT" | "INVALID_TABLE_COMPONENT" | "SEAL_OUTSIDE_AUTHORIZED_AREA" | "SEAL_AUTHORIZED_AREA_UNKNOWN" | "SEAL_AUTHORIZED_AREA_INVALID" | "SEAL_PLACEMENT_GEOMETRY_INVALID" | "SEAL_SCALING_NOT_ALLOWED" | "MISSING_REFERENCE_KEY" | "DUPLICATE_NUMBER" | "BROKEN_NUMBER_CROSS_REFERENCE" | "PDF_PAGE_NUMBER_STAMP_FAILED" | "PDF_PAGE_NUMBER_STAMP_SKIPPED_FOR_PDFA" | "PDF_SECTION_PAGE_NUMBERS_UNRESOLVED" | "DOCX_PERMISSIONS_NOT_APPLIED";
         /** @enum {string} */
         IdempotencyStatus: "IDEMPOTENCY_NEW" | "IDEMPOTENCY_REPLAYED" | "IDEMPOTENCY_CONFLICTED";
         /** @enum {string} */
@@ -2721,7 +2721,10 @@ export interface components {
             expiresAt?: string;
             fingerprintSummary?: string;
             authorizedTemplateSummary?: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Instant when the previous secret stops being accepted after rotation (ISO 8601 with timezone offset). Per ADR-0009 (amended 2026-07-26), the rotation grace period is 28 days from the rotation instant. Absent when the credential has never been rotated or grace has ended.
+             */
             rotationGracePeriodEndsAt?: string;
         };
         /**
@@ -3621,6 +3624,13 @@ export interface components {
             exceptionReason?: string;
             /** @description Must be true when exceptionIntervention is true. */
             secondaryConfirmed?: boolean;
+            /**
+             * Format: uuid
+             * @description FOS-W6-3: explicit version target (XOR semanticVersion). Required for SUBMIT_FOR_REVIEW / APPROVE_REVIEW / REJECT_REVIEW.
+             */
+            versionId?: string;
+            /** @description FOS-W6-3: explicit semantic version target when versionId is omitted. */
+            semanticVersion?: string;
         };
         CreateContentModuleRequest: {
             /** @description Stable business identifier (e.g. MOD-LOAN-DISCLOSURE). */
@@ -5126,6 +5136,13 @@ export interface components {
             secondConfirmation: boolean;
             /** @description Required for STOP_USE and DEPRECATE operations. */
             impactSummary?: components["schemas"]["ContentModuleLifecycleImpactSummary"];
+            /**
+             * Format: uuid
+             * @description FOS-W6-3: explicit version target (XOR semanticVersion). Required for STOP_USE / RECOVER / DEPRECATE.
+             */
+            versionId?: string;
+            /** @description FOS-W6-3: explicit semantic version target when versionId is omitted. */
+            semanticVersion?: string;
         };
         ContentModuleLifecycleImpactSummary: {
             referenceTemplateCount: number;

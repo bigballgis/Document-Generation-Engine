@@ -2,7 +2,7 @@
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
 **Wave:** W4
-**Status:** **Not Started**
+**Status:** **Done**
 **Slice id:** `fos-gates-explain-themselves` · worktree `../DGE-fos-gates-explain-themselves` · branch `feat/fos-gates-explain-themselves`
 **Task Master:** **#174**
 **Audit baseline:** `f29211c5`

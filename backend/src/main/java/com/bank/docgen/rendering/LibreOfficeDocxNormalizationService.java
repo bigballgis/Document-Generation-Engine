@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
@@ -81,15 +80,11 @@ public class LibreOfficeDocxNormalizationService implements DocxNormalizationSer
                     tempDir.toString(),
                     inputDocx.toString()
             );
-            processBuilder.redirectErrorStream(true);
-            Process process = processBuilder.start();
-            boolean finished = process.waitFor(
+            ExternalProcessRunner.runToCompletion(
+                    processBuilder,
                     renderingProperties.getConversionTimeoutSeconds(),
-                    TimeUnit.SECONDS
+                    "api.error.generation.docxNormalizationFailed"
             );
-            if (!finished || process.exitValue() != 0) {
-                throw new RenderingOperationException("api.error.generation.docxNormalizationFailed");
-            }
             Path outputDocx = tempDir.resolve("assembled-in.docx");
             if (!Files.exists(outputDocx) || Files.size(outputDocx) == 0) {
                 throw new RenderingOperationException("api.error.generation.docxNormalizationFailed");

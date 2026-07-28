@@ -1,0 +1,86 @@
+export const assetLibraryEn = {
+    list: {
+      title: 'Asset library',
+      description:
+        'Browse group-scoped image and seal assets used by template bindings. Filter by group, class, or status; upload into an authorized group; or disable keys that should no longer resolve.',
+      help: 'Asset keys are logical binding refs within a group. Prefer IMG-… for images and SEAL-… for seals. Global admins may clear the group filter to see all groups.',
+      empty: 'No assets yet.',
+      emptyDescription:
+        'No managed library assets are registered yet. Select an authorized group and upload a PNG or JPEG asset for template bindings.',
+      emptyDescriptionReadOnly:
+        'No managed library assets are in scope right now. Assets appear here after an authorized user uploads them for an authorized group.',
+      filters: {
+        group: 'Group',
+        groupPlaceholder: 'All groups',
+      },
+      columns: {
+        group: 'Group',
+        assetKey: 'Asset key',
+        assetClass: 'Class',
+        status: 'Status',
+        contentType: 'Type',
+        size: 'Size',
+        uploadedBy: 'Uploaded by',
+        uploadedAt: 'Uploaded at',
+      },
+      sort: {
+        assetKeyAsc: 'Asset key (A–Z)',
+      },
+      sizeBytes: '{size} B',
+      sizeKiB: '{size} KiB',
+      sizeMiB: '{size} MiB',
+    },
+    assetClass: {
+      IMAGE: 'Image',
+      SEAL: 'Seal',
+      OTHER: 'Other',
+    },
+    status: {
+      ACTIVE: 'Active',
+      DISABLED: 'Disabled',
+      ALL: 'All statuses',
+    },
+    upload: {
+      open: 'Upload asset',
+      title: 'Upload library asset',
+      groupCode: 'Group',
+      groupCodePlaceholder: 'Select group',
+      assetClass: 'Asset class',
+      assetClassPlaceholder: 'Select class',
+      assetKey: 'Asset key',
+      assetKeyPlaceholder: 'e.g. IMG-LOGO-BANK',
+      keyHintDefault: 'Keys must start with a letter and may include letters, digits, ., _, or -.',
+      keyHintImage: 'Recommended prefix: IMG-…',
+      keyHintSeal: 'Recommended prefix: SEAL-…',
+      keyHintOther: 'Use any valid key that matches the binding reference.',
+      file: 'File',
+      dragHint: 'Drop a PNG or JPEG here, or click to browse',
+      fileHint: 'PNG or JPEG only. Maximum {maxMb} MiB.',
+      submit: 'Upload',
+      success: 'Asset uploaded.',
+      validation: {
+        groupCodeRequired: 'Select a group before uploading.',
+        assetKeyInvalid: 'Enter a valid asset key (1–128 characters; start with a letter).',
+        assetClassRequired: 'Select an asset class.',
+        fileRequired: 'Choose a PNG or JPEG file.',
+        fileEmpty: 'The selected file is empty.',
+        fileTooLarge: 'The file exceeds the 5 MiB limit.',
+        contentTypeUnsupported: 'Only PNG and JPEG files are supported.',
+        sealNotAllowed: 'You do not have permission to upload seal assets.',
+        uploadNotAllowed: 'You do not have permission to upload this asset class.',
+      },
+    },
+    disable: {
+      action: 'Disable',
+      confirmTitle: 'Disable asset',
+      confirmMessage:
+        'Disabling {assetKey} in group {groupCode} removes the resolvable object. Templates in that group that still reference this key will fail closed. Continue?',
+      confirm: 'Disable',
+      success: 'Asset disabled.',
+    },
+    error: {
+      loadList: 'Unable to load the asset library.',
+      upload: 'Unable to upload the asset.',
+      disable: 'Unable to disable the asset.',
+    },
+  }

@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "includeRow": true,
+      "label": "Alpha"
+    },
+    {
+      "includeRow": false,
+      "label": "BetaHidden"
+    },
+    {
+      "includeRow": true,
+      "label": "Gamma"
+    }
+  ]
+}

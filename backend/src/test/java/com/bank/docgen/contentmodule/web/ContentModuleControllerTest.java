@@ -131,6 +131,7 @@ class ContentModuleControllerTest {
     @Test
     void reviewWorkflow_submitApproveAndStop() throws Exception {
         seedApprovedModuleViaWorkflow();
+        String versionId = seededVersionId();
 
         mockMvc.perform(post("/api/management/v1/content-modules/" + MODULE_CODE + "/lifecycle/operation/apply")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
@@ -142,6 +143,7 @@ class ContentModuleControllerTest {
                                   "actorId":"group-admin-a",
                                   "impactSummaryViewed":true,
                                   "secondConfirmation":true,
+                                  "versionId":"%s",
                                   "impactSummary":{
                                     "referenceTemplateCount":2,
                                     "referenceTemplateListHint":"TPL-LOAN-NOTICE,TPL-RENEWAL-NOTICE",
@@ -153,7 +155,7 @@ class ContentModuleControllerTest {
                                     "releaseStopRequired":true
                                   }
                                 }
-                                """))
+                                """.formatted(versionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.applied").value(true))
                 .andExpect(jsonPath("$.result.snapshot.state").value("STOPPED"));
@@ -276,6 +278,7 @@ class ContentModuleControllerTest {
     @Test
     void submitWithoutChangeDescriptionReturns422() throws Exception {
         seedDraftModule();
+        String versionId = seededVersionId();
 
         mockMvc.perform(post("/api/management/v1/content-modules/" + MODULE_CODE + "/review/transition")
                         .with(authentication(new ManagementAuthentication(author)))
@@ -284,9 +287,10 @@ class ContentModuleControllerTest {
                                 {
                                   "operation":"SUBMIT_FOR_REVIEW",
                                   "actorRole":"DOCUMENT_AUTHOR",
-                                  "actorId":"author-a"
+                                  "actorId":"author-a",
+                                  "versionId":"%s"
                                 }
-                                """))
+                                """.formatted(versionId)))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.error.code").value("MODULE_CHANGE_DESCRIPTION_REQUIRED"));
     }
@@ -351,8 +355,14 @@ class ContentModuleControllerTest {
         ));
     }
 
+    private String seededVersionId() {
+        ContentModuleEntity module = moduleRepository.findByModuleCodeAndDeletedAtIsNull(MODULE_CODE).orElseThrow();
+        return versionRepository.findByModuleIdOrderBySemanticVersionDesc(module.getId()).getFirst().getId().toString();
+    }
+
     private void seedApprovedModuleViaWorkflow() throws Exception {
         seedDraftModule();
+        String versionId = seededVersionId();
 
         mockMvc.perform(post("/api/management/v1/content-modules/" + MODULE_CODE + "/review/transition")
                         .with(authentication(new ManagementAuthentication(author)))
@@ -362,9 +372,10 @@ class ContentModuleControllerTest {
                                   "operation":"SUBMIT_FOR_REVIEW",
                                   "actorRole":"DOCUMENT_AUTHOR",
                                   "actorId":"author-a",
-                                  "changeDescription":"ready for review"
+                                  "changeDescription":"ready for review",
+                                  "versionId":"%s"
                                 }
-                                """))
+                                """.formatted(versionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.snapshot.state").value("SUBMITTED"));
 
@@ -375,9 +386,10 @@ class ContentModuleControllerTest {
                                 {
                                   "operation":"APPROVE_REVIEW",
                                   "actorRole":"APPROVER",
-                                  "actorId":"approver-a"
+                                  "actorId":"approver-a",
+                                  "versionId":"%s"
                                 }
-                                """))
+                                """.formatted(versionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.snapshot.state").value("APPROVED"));
     }

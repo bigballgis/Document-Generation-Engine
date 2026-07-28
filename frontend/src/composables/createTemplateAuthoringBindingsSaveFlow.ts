@@ -147,6 +147,12 @@ export function createTemplateAuthoringBindingsSaveFlow(options: {
   }
 
   async function saveBindingDraft() {
+    // FOS-W3-7 — block save when client structure validation reports issues.
+    const structureIssues = structuredEditorRef.value?.validateStructure?.() ?? []
+    if (structureIssues.length > 0) {
+      throw new Error('STRUCTURED_CONTENT_VALIDATION_FAILED')
+    }
+
     const payload = buildBindingUpsertWithPasteEvidence(
       {
         anchorId: bindingForm.anchorId,

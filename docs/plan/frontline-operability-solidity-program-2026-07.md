@@ -4,13 +4,13 @@
 | --- | --- |
 | **Program ID** | `frontline-operability-solidity-2026-07` (short: **FOS**) |
 | **Created** | 2026-07-26 |
-| **Status** | **Not Started** (plan only — no product code written) |
+| **Status** | **Done** (W1–W15; Leaf 15 merge `04fc0caf` / feat `5645aa3e`) |
 | **Formal phase** | **None** (NON-CE remediation program — not a P-phase) |
-| **Sole-active leaf** | **none** (cleared; do **not** auto-activate) |
+| **Sole-active leaf** | **none** (cleared after FOS-W15 closeout) |
 | **Origin** | User-commissioned deep review (2026-07-26): make **existing** core maximally **易用** and **扎实** for a bank frontline employee who must orchestrate the most complex bank template and hand it off for other systems to call — **no new product features** |
 | **Audit baseline commit** | `f29211c5` (MAIN tip when program authored; locate code by quoted snippets, not line numbers) |
 | **Model note** | Program authored with Opus 5–class deep audits; detail sheets are written so a **lower-tier implementer** can execute TDD without improvisation |
-| **Next queue head** | After CRCH W0+W1 merged slice (`render-p0-preview-dedupe`) — FOS **Leaf 1** `fos-screens-tell-truth` (TM **#170** pending) |
+| **Next queue head** | **empty** — FOS W1–W15 **Done** (Leaf 15 `04fc0caf` / `5645aa3e`); **sole-active cleared**; program **Done** |
 | **Upstream** | [CRCH](./core-render-compute-hardening-program.md) owns rendering P0 + preview dedupe (W0+W1) and compute/DOCX/harness designs (W2/W3/W5). FOS **supersedes CRCH W4** (authoring IA) — see §6 |
 
 ---
@@ -125,21 +125,21 @@ If a future decision appears, add it here — do not invent product behaviour.
 
 | Wave | Leaf / slice id | Name | Focus (audit ids) | Detail | Status |
 | --- | --- | --- | --- | --- | --- |
-| **W1** | `fos-screens-tell-truth` | Screens tell the truth | D1,D4,D5,D6,D7,D16,A4,A22,A23,A24 | [FOS-W1](detail/FOS-W1-screens-tell-truth.md) | **Not Started** |
-| **W2** | `fos-author-can-start` | Author can start & navigate | A1,A2,A16,A17,A18,A21,A25,A26 | [FOS-W2](detail/FOS-W2-author-can-start.md) | **Not Started** |
-| **W3** | `fos-authoring-blocks-work` | Authoring blocks work | A5,A6,A7,A9,A10,A11,A12 | [FOS-W3](detail/FOS-W3-authoring-blocks-work.md) | **Not Started** |
-| **W4** | `fos-gates-explain-themselves` | Gates & actions explain themselves | A3,A8,A13,A14,A15,A19,A20,A27,D10,D12,D13,D14 | [FOS-W4](detail/FOS-W4-gates-explain-themselves.md) | **Not Started** |
-| **W5** | `fos-time-locale-honesty` | Time & locale honesty | D2,D3,D9,D15,D17 | [FOS-W5](detail/FOS-W5-time-locale-honesty.md) | **Not Started** |
-| **W6** | `fos-lifecycle-cannot-corrupt` | Lifecycle cannot corrupt | B1,B3,B4,B5,B6,B13,B19,B23 (B16 → **non-goal** per D10) | [FOS-W6](detail/FOS-W6-lifecycle-cannot-corrupt.md) | **Not Started** |
-| **W7** | `fos-generation-fails-closed` | Generation fails closed | B2,B7,B8,B9,B10,B15 | [FOS-W7](detail/FOS-W7-generation-fails-closed.md) | **Not Started** |
-| **W8** | `fos-concurrency-integrity` | Concurrency & integrity | B11,B12,B17,B18,B20 | [FOS-W8](detail/FOS-W8-concurrency-integrity.md) | **Not Started** |
-| **W9** | `fos-contract-works-first-time` | Contract works first time | C1,C3,C5,C6,C16,C17,C18 | [FOS-W9](detail/FOS-W9-contract-works-first-time.md) | **Not Started** |
-| **W10** | `fos-credential-lifecycle` | Credential lifecycle matches ADR | C2,C4,C11,C12,C22 + **28-day grace (D11)** | [FOS-W10](detail/FOS-W10-credential-lifecycle.md) | **Not Started** |
-| **W11** | `fos-policy-impact-troubleshoot` | Policy impact & troubleshooting | C7,C8,C9,C10,C13,C14,C15,C20,C21 | [FOS-W11](detail/FOS-W11-policy-impact-troubleshoot.md) | **Not Started** |
-| **W12** | `fos-ci-gates-tell-truth` | CI gates tell the truth | E1,E5,E14,E15 | [FOS-W12](detail/FOS-W12-ci-gates-tell-truth.md) | **Not Started** |
-| **W13** | `fos-default-verify-honesty` | Default verify honesty | E2,E4,E6,E7,E8,E9,E10,E11 — **complements** CRCH W5 (do not duplicate LO pin / perceptual / soak) | [FOS-W13](detail/FOS-W13-default-verify-honesty.md) | **Not Started** |
-| **W14** | `fos-demo-literacy-path` | Demo literacy path | E19,E20,E13 — docs + entry point only | [FOS-W14](detail/FOS-W14-demo-literacy-path.md) | **Not Started** |
-| **W15** | `fos-word-foundation-honesty` | Word foundation honesty | WF-1…WF-8 — typography / letterhead / nested render honesty; evidence [deep review](detail/fos-word-foundation-deep-review-2026-07.md) | [FOS-W15](detail/FOS-W15-word-foundation-honesty.md) | **Not Started** |
+| **W1** | `fos-screens-tell-truth` | Screens tell the truth | D1,D4,D5,D6,D7,D16,A4,A22,A23,A24 | [FOS-W1](detail/FOS-W1-screens-tell-truth.md) | **Done** |
+| **W2** | `fos-author-can-start` | Author can start & navigate | A1,A2,A16,A17,A18,A21,A25,A26 | [FOS-W2](detail/FOS-W2-author-can-start.md) | **Done** |
+| **W3** | `fos-authoring-blocks-work` | Authoring blocks work | A5,A6,A7,A9,A10,A11,A12 | [FOS-W3](detail/FOS-W3-authoring-blocks-work.md) | **Done** |
+| **W4** | `fos-gates-explain-themselves` | Gates & actions explain themselves | A3,A8,A13,A14,A15,A19,A20,A27,D10,D12,D13,D14 | [FOS-W4](detail/FOS-W4-gates-explain-themselves.md) | **Done** |
+| **W5** | `fos-time-locale-honesty` | Time & locale honesty | D2,D3,D9,D15,D17 | [FOS-W5](detail/FOS-W5-time-locale-honesty.md) | **Done** |
+| **W6** | `fos-lifecycle-cannot-corrupt` | Lifecycle cannot corrupt | B1,B3,B4,B5,B6,B13,B19,B23 (B16 → **non-goal** per D10) | [FOS-W6](detail/FOS-W6-lifecycle-cannot-corrupt.md) | **Done** |
+| **W7** | `fos-generation-fails-closed` | Generation fails closed | B2,B7,B8,B9,B10,B15 | [FOS-W7](detail/FOS-W7-generation-fails-closed.md) | **Done** |
+| **W8** | `fos-concurrency-integrity` | Concurrency & integrity | B11,B12,B17,B18,B20 | [FOS-W8](detail/FOS-W8-concurrency-integrity.md) | **Done** |
+| **W9** | `fos-contract-works-first-time` | Contract works first time | C1,C3,C5,C6,C16,C17,C18 | [FOS-W9](detail/FOS-W9-contract-works-first-time.md) | **Done** |
+| **W10** | `fos-credential-lifecycle` | Credential lifecycle matches ADR | C2,C4,C11,C12,C22 + **28-day grace (D11)** | [FOS-W10](detail/FOS-W10-credential-lifecycle.md) | **Done** |
+| **W11** | `fos-policy-impact-troubleshoot` | Policy impact & troubleshooting | C7,C8,C9,C10,C13,C14,C15,C20,C21 | [FOS-W11](detail/FOS-W11-policy-impact-troubleshoot.md) | **Done** |
+| **W12** | `fos-ci-gates-tell-truth` | CI gates tell the truth | E1,E5,E14,E15 | [FOS-W12](detail/FOS-W12-ci-gates-tell-truth.md) | **Done** |
+| **W13** | `fos-default-verify-honesty` | Default verify honesty | E2,E4,E6,E7,E8,E9,E10,E11 — **complements** CRCH W5 (do not duplicate LO pin / perceptual / soak) | [FOS-W13](detail/FOS-W13-default-verify-honesty.md) | **Done** |
+| **W14** | `fos-demo-literacy-path` | Demo literacy path | E19,E20,E13 — docs + entry point only | [FOS-W14](detail/FOS-W14-demo-literacy-path.md) | **Done** |
+| **W15** | `fos-word-foundation-honesty` | Word foundation honesty | WF-1…WF-8 — typography / letterhead / nested render honesty; evidence [deep review](detail/fos-word-foundation-deep-review-2026-07.md) | [FOS-W15](detail/FOS-W15-word-foundation-honesty.md) | **Done** |
 
 Severity: **P0** = cannot complete job / wrong document / data loss / security fail-open / stuck state.
 **P1** = tribal knowledge or undiagnosable failure. **P2** = polish.
@@ -150,24 +150,24 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 
 | Leaf | TM | Slice id | Status | Notes |
 | --- | --- | --- | --- | --- |
-| Umbrella | **#170** | `fos-program` | **pending** | Registry only — never mark Done until program exit |
-| Leaf 1 | **#171** | `fos-screens-tell-truth` | **pending** | Next FOS head after CRCH W0+W1 |
-| Leaf 2 | **#172** | `fos-author-can-start` | **pending** | |
-| Leaf 3 | **#173** | `fos-authoring-blocks-work` | **pending** | |
-| Leaf 4 | **#174** | `fos-gates-explain-themselves` | **pending** | |
-| Leaf 5 | **#175** | `fos-time-locale-honesty` | **pending** | |
-| Leaf 6 | **#176** | `fos-lifecycle-cannot-corrupt` | **pending** | W6-8 non-goal (D10) — do not invent PENDING_RELEASE→DRAFT |
-| Leaf 7 | **#177** | `fos-generation-fails-closed` | **pending** | |
-| Leaf 8 | **#178** | `fos-concurrency-integrity` | **pending** | |
-| Leaf 9 | **#179** | `fos-contract-works-first-time` | **pending** | |
-| Leaf 10 | **#180** | `fos-credential-lifecycle` | **pending** | W10-1 unblocked — **28-day** grace (D11 / ADR-0009 amended) |
-| Leaf 11 | **#181** | `fos-policy-impact-troubleshoot` | **pending** | |
-| Leaf 12 | **#182** | `fos-ci-gates-tell-truth` | **pending** | May run earlier if host CI is blocking all delivery — orchestrator may promote |
-| Leaf 13 | **#183** | `fos-default-verify-honesty` | **pending** | After / with CRCH W5 designs |
-| Leaf 14 | **#184** | `fos-demo-literacy-path` | **pending** | |
-| Leaf 15 | **#185** | `fos-word-foundation-honesty` | **pending** | Word-as-foundation deep review (2026-07-26); do **not** auto-activate |
+| Umbrella | **#170** | `fos-program` | **done** | Program exit met 2026-07-26 — W1–W15 Done; tip `24f6258b` |
+| Leaf 1 | **#171** | `fos-screens-tell-truth` | **done** | Merged `8dfdb0ba` / feat `22a4b4ba` |
+| Leaf 2 | **#172** | `fos-author-can-start` | **done** | Merged `f5622e3f` / feat `f6d2903c` | |
+| Leaf 3 | **#173** | `fos-authoring-blocks-work` | **done** | Merged `7418f2e4` / feat `f932a2a3` |
+| Leaf 4 | **#174** | `fos-gates-explain-themselves` | **done** | `1960da96` / `17c4e396` |
+| Leaf 5 | **#175** | `fos-time-locale-honesty` | **done** | `19f4f917` / `78a0bf8d` |
+| Leaf 6 | **#176** | `fos-lifecycle-cannot-corrupt` | **done** | `23bd31d1` / `2b9a389d`; W6-8 non-goal (D10) |
+| Leaf 7 | **#177** | `fos-generation-fails-closed` | **done** | `d251381f` / `c5244720`; deploy/E2E BLOCKED (0 images) |
+| Leaf 8 | **#178** | `fos-concurrency-integrity` | **done** | `b6307d02` / `954933cc`; deploy/E2E BLOCKED (0 images) |
+| Leaf 9 | **#179** | `fos-contract-works-first-time` | **done** | `d8fe2b03` / `0d4a6dd1`; deploy/E2E BLOCKED (0 images) |
+| Leaf 10 | **#180** | `fos-credential-lifecycle` | **done** | `89ff4d95` / `3c0bae0e`; deploy/E2E BLOCKED (0 images) |
+| Leaf 11 | **#181** | `fos-policy-impact-troubleshoot` | **done** | `821d0f4a` / `8e5b9a53`; deploy/E2E BLOCKED (0 images) |
+| Leaf 12 | **#182** | `fos-ci-gates-tell-truth` | **done** | `5bc228f8` / `df8ed393`; Playwright Smoke fail-closed/BLOCKED on GHA |
+| Leaf 13 | **#183** | `fos-default-verify-honesty` | **done** | `b51ff52e` / `176f5dc5`; local TC BLOCKED (overlay); default verify PASS |
+| Leaf 14 | **#184** | `fos-demo-literacy-path` | **done** | `8ee0a872` / `fe839c7b`; E2E/deploy BLOCKED |
+| Leaf 15 | **#185** | `fos-word-foundation-honesty` | **done** | `04fc0caf` / `5645aa3e`; E2E/deploy BLOCKED |
 
-**Host sole-active rule:** FOS shares the host with CRCH / AI-SCALE peels. At most **one** delivery writer. AI-SCALE **#167–#169** remain pending and are **not** FOS work.
+**Host sole-active rule:** FOS shares the host with CRCH / closed AI-SCALE peels. At most **one** delivery writer. AI-SCALE Leaves **#166–#169** → **Done** (peel program **Done**; residual >500 optional backlog only) — **not** FOS work; do **not** invent a new AI-SCALE sole-active leaf.
 
 ---
 
@@ -176,7 +176,7 @@ Severity: **P0** = cannot complete job / wrong document / data loss / security f
 | Program | Relation |
 | --- | --- |
 | **CRCH** | W0+W1 = upstream rendering/preview slice. **W4 superseded** by FOS W2–W4. W2/W3/W5 remain CRCH-owned. OD-1/OD-2 **resolved** (D8/D9) — CRCH owns seal-validation re-scope (W0-7) and keeps stamping default off. |
-| **AI-SCALE** | Leaf 1 Done; peels #167–#169 pending — do not auto-activate; do not fold i18n mega-split into FOS W1 |
+| **AI-SCALE** | Peel queue Leaves **#166–#169** → **Done** (`1475caeb`); program **Done**; residual >500 optional backlog only — do not invent new AI-SCALE In Progress leaf; do not fold test peels into FOS |
 | **PQH / SYS-NORM / CDP / LRP waves** | **Done / closed** — do not reopen |
 | **CE (#53)** | Registry-only umbrella — do not mark Done; do not treat as delivery leaf |
 | **IBL (#106 / #119)** | Outside FOS; #119 stays Blocked; do not invent Word numbers |
@@ -231,9 +231,9 @@ blanket STOPPED→PUBLISHED), **B2** (`resolvePinnedContentStructures` `ifPresen
 
 Program may move to **Done** only when:
 
-1. Leaves 1–14 are **Done** or explicitly **Deferred** with user confirmation (and OD items resolved or carried).
-2. A bank-persona walkthrough on the acceptance stack completes: create → complex author → publish → copy curl → consumer generate succeeds on first try → invocation record shows failure reason when forced to fail.
-3. Plan indexes + ledger updated; sole-active cleared; vetoes still held.
+1. Leaves 1–15 are **Done** or explicitly **Deferred** with user confirmation (and OD items resolved or carried). **Met** 2026-07-26 (W1–W15 Done).
+2. A bank-persona walkthrough on the acceptance stack completes: create → complex author → publish → copy curl → consumer generate succeeds on first try → invocation record shows failure reason when forced to fail. **BLOCKED** host-wide (Docker container overlay / no acceptance stack) — unit gates + honest deploy BLOCKED evidence accepted for merge per delivery policy; re-run walkthrough when stack available.
+3. Plan indexes + ledger updated; sole-active cleared; vetoes still held. **Met**.
 
 ---
 

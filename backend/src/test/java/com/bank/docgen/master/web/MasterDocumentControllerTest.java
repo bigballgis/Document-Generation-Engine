@@ -99,7 +99,7 @@ class MasterDocumentControllerTest {
                                 {"decision":"REJECTED","commentSummary":"Fix anchors"}
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.status").value("DRAFT"))
+                .andExpect(jsonPath("$.result.status").value("REJECTED"))
                 .andExpect(jsonPath("$.result.reviewHistory[0].decision").value("REJECTED"));
     }
 

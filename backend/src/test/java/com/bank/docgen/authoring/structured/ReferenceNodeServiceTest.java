@@ -96,13 +96,14 @@ class ReferenceNodeServiceTest {
     }
 
     @Test
-    void bddIblB5_003_outOfAreaFixture_isBlocker() {
+    void bddIblB5_003_outOfAreaFixture_isWarningOnly_crchW07() {
         ReferenceNodeValidationResult result = service.validateStructuredContent(OUT_OF_AREA_FIXTURE);
 
-        assertThat(result.fidelity().blockers()).isNotEmpty();
-        assertThat(result.fidelity().blockers().getFirst().code())
-                .isEqualTo(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
-        assertThat(result.fidelity().blockers().getFirst().messageKey())
+        assertThat(result.fidelity().blockers()).isEmpty();
+        assertThat(warningCodes(result)).contains(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
+        assertThat(result.fidelity().warnings().stream()
+                .filter(issue -> issue.code() == FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA)
+                .findFirst().orElseThrow().messageKey())
                 .isEqualTo(ReferenceNodeService.MESSAGE_KEY_SEAL_OUTSIDE_AUTHORIZED_AREA);
     }
 
@@ -136,7 +137,8 @@ class ReferenceNodeServiceTest {
 
         ReferenceNodeValidationResult result = service.validateStructuredContent(json);
 
-        assertThat(blockerCodes(result)).contains(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
+        assertThat(blockerCodes(result)).doesNotContain(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
+        assertThat(warningCodes(result)).contains(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
     }
 
     @Test
@@ -202,8 +204,9 @@ class ReferenceNodeServiceTest {
 
         ReferenceNodeValidationResult result = service.validateStructuredContent(json);
 
-        assertThat(blockerCodes(result)).contains(FidelityWarningCode.SEAL_AUTHORIZED_AREA_UNKNOWN);
-        assertThat(blockerCodes(result)).doesNotContain(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
+        assertThat(blockerCodes(result)).doesNotContain(FidelityWarningCode.SEAL_AUTHORIZED_AREA_UNKNOWN);
+        assertThat(warningCodes(result)).contains(FidelityWarningCode.SEAL_AUTHORIZED_AREA_UNKNOWN);
+        assertThat(warningCodes(result)).doesNotContain(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
     }
 
     @Test
@@ -272,11 +275,14 @@ class ReferenceNodeServiceTest {
                 }
                 """;
 
-        assertThat(blockerCodes(service.validateStructuredContent(missingXy)))
+        assertThat(warningCodes(service.validateStructuredContent(missingXy)))
                 .contains(FidelityWarningCode.SEAL_PLACEMENT_GEOMETRY_INVALID);
+        assertThat(blockerCodes(service.validateStructuredContent(missingXy)))
+                .doesNotContain(FidelityWarningCode.SEAL_PLACEMENT_GEOMETRY_INVALID);
+        // Catalog-invalid area entry remains a catalog integrity blocker.
         assertThat(blockerCodes(service.validateStructuredContent(nonPositiveAreaHeight)))
                 .contains(FidelityWarningCode.SEAL_AUTHORIZED_AREA_INVALID);
-        assertThat(blockerCodes(service.validateStructuredContent(legacyBooleanOnlyPlacement)))
+        assertThat(warningCodes(service.validateStructuredContent(legacyBooleanOnlyPlacement)))
                 .contains(FidelityWarningCode.SEAL_PLACEMENT_GEOMETRY_INVALID);
         assertThat(blockerCodes(service.validateStructuredContent(legacyBooleanOnlyPlacement)))
                 .doesNotContain(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
@@ -338,17 +344,19 @@ class ReferenceNodeServiceTest {
 
         ReferenceNodeValidationResult result = service.validateStructuredContent(json);
 
-        assertThat(blockerCodes(result)).contains(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
+        assertThat(blockerCodes(result)).doesNotContain(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
+        assertThat(warningCodes(result)).contains(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
     }
 
     @Test
-    void bddIblB5_010_outOfAreaBlocker_isPublishGateSeverity() {
+    void bddIblB5_010_outOfArea_isWarningNotPublishBlocker_crchW07() {
         ReferenceNodeValidationResult result = service.validateStructuredContent(OUT_OF_AREA_FIXTURE);
 
-        assertThat(result.fidelity().hasBlockers()).isTrue();
-        assertThat(result.fidelity().blockers())
-                .allMatch(issue -> issue.severity() == StructuredContentFidelitySeverity.BLOCKER);
-        assertThat(blockerCodes(result)).contains(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
+        assertThat(result.fidelity().hasBlockers()).isFalse();
+        assertThat(result.fidelity().warnings())
+                .filteredOn(issue -> issue.code() == FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA)
+                .allMatch(issue -> issue.severity() == StructuredContentFidelitySeverity.WARNING);
+        assertThat(warningCodes(result)).contains(FidelityWarningCode.SEAL_OUTSIDE_AUTHORIZED_AREA);
     }
 
     @Test
@@ -448,6 +456,12 @@ class ReferenceNodeServiceTest {
         assertThat(result.attachmentLists()).hasSize(1);
         assertThat(result.attachmentLists().getFirst().referenceKey()).isEqualTo("ATT-1");
         assertThat(result.attachmentLists().getFirst().location()).isEqualTo("nodes[0]");
+    }
+
+    private static Set<FidelityWarningCode> warningCodes(ReferenceNodeValidationResult result) {
+        return result.fidelity().warnings().stream()
+                .map(StructuredContentFidelityIssue::code)
+                .collect(Collectors.toSet());
     }
 
     private static Set<FidelityWarningCode> blockerCodes(ReferenceNodeValidationResult result) {

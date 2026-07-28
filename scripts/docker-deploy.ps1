@@ -93,9 +93,26 @@ $env:KAFKA_IMAGE = $kafkaImage
 $composeArgs = @(
     "-f", "docker-compose.yml",
     "-f", "docker-compose.prod.yml",
-    "-f", "docker-compose.lab.yml",
-    "--profile", "prod"
+    "-f", "docker-compose.lab.yml"
 )
+
+# LAB ONLY (opt-in) — nested-host cgroup v2 *threaded* subtree accommodation.
+# Some single-host acceptance runners run Docker inside a threaded cgroup subtree where the
+# `memory` domain controller cannot be applied, so runc rejects any container with mem_limit
+# ("cannot enter cgroupv2 ... with domain controllers -- it is in threaded mode"). When
+# DOCGEN_LAB_NO_RLIMITS=true, stack an overlay that drops the LR-B8 cpu/mem limits (which the
+# host cannot enforce anyway) for the two app containers. Never a claimed-production entry.
+$labNoRlimits = if (-not [string]::IsNullOrWhiteSpace($env:DOCGEN_LAB_NO_RLIMITS)) {
+    $env:DOCGEN_LAB_NO_RLIMITS.Trim()
+} else {
+    Get-DotEnvValue -Key 'DOCGEN_LAB_NO_RLIMITS'
+}
+if ($labNoRlimits -match '(?i)^(true|1|yes)$') {
+    Write-Warning "DOCGEN_LAB_NO_RLIMITS=true — dropping cpu/mem limits for app containers (LAB nested-host cgroup accommodation; NOT a production coordinate)."
+    $composeArgs += @("-f", "docker-compose.lab-no-rlimits.yml")
+}
+
+$composeArgs += @("--profile", "prod")
 
 $runtimeImages = @(
     # Task #51 / ADR-0028: Temurin 25 (docs: deploy/container-hardening.md).

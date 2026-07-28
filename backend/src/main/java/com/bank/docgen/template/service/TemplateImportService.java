@@ -2,15 +2,9 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
-import com.bank.docgen.contentmodule.api.ContentModuleDetailView;
-import com.bank.docgen.contentmodule.api.CreateContentModuleRequest;
-import com.bank.docgen.contentmodule.api.CreateContentModuleVersionRequest;
-import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.contentmodule.service.ContentModuleService;
-import com.bank.docgen.contentmodule.service.ContentModuleValidationException;
-import com.bank.docgen.library.domain.AssetLibraryAssetClass;
 import com.bank.docgen.library.service.AssetLibraryService;
 import com.bank.docgen.master.api.MasterDocumentDetailView;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
@@ -18,30 +12,22 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.service.MasterDocumentService;
 import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.api.ImportTemplateRequest;
-import com.bank.docgen.template.api.TemplateExportAssetKeyManifestItemView;
 import com.bank.docgen.template.api.TemplateExportBundleView;
-import com.bank.docgen.template.api.TemplateExportClauseSnapshotView;
 import com.bank.docgen.template.api.TemplateExportMetadataView;
 import com.bank.docgen.template.api.TemplateImportDependencyReportView;
 import com.bank.docgen.template.api.TemplateImportDryRunResult;
 import com.bank.docgen.template.api.TemplateImportResult;
 import com.bank.docgen.template.api.TemplateImportSummaryView;
-import com.bank.docgen.template.domain.TemplateExportAssetKeyUsage;
 import com.bank.docgen.template.domain.TemplateImportConflictPolicy;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
-import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -55,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class TemplateImportService {
 
     private final TemplateRepository templateRepository;
-    private final TemplateVersionRepository templateVersionRepository;
     private final MasterDocumentRepository masterDocumentRepository;
     private final TemplateService templateService;
     private final ManagementAuditRecorder managementAuditRecorder;
@@ -63,11 +48,9 @@ public class TemplateImportService {
     private final TemplateImportBundleValidator bundleValidator;
     private final TemplateImportTargetResolutionSupport targetResolution;
     private final TemplateImportApplySupport applySupport;
+    private final TemplateImportMaterializeSupport materializeSupport;
+    private final TemplateImportAssetMaterializeSupport assetMaterializeSupport;
     private final TemplateImportDependencyPrecheck dependencyPrecheck;
-    private final ContentModuleService contentModuleService;
-    private final ContentModuleRepository contentModuleRepository;
-    private final ContentModuleVersionRepository contentModuleVersionRepository;
-    private final AssetLibraryService assetLibraryService;
     private final MasterDocumentService masterDocumentService;
     private final ObjectMapper objectMapper;
 
@@ -92,7 +75,6 @@ public class TemplateImportService {
             MasterDocumentService masterDocumentService
     ) {
         this.templateRepository = templateRepository;
-        this.templateVersionRepository = templateVersionRepository;
         this.masterDocumentRepository = masterDocumentRepository;
         this.templateService = templateService;
         this.managementAuditRecorder = managementAuditRecorder;
@@ -100,10 +82,6 @@ public class TemplateImportService {
         this.bundleValidator = bundleValidator;
         this.objectMapper = objectMapper;
         this.dependencyPrecheck = dependencyPrecheck;
-        this.contentModuleService = contentModuleService;
-        this.contentModuleRepository = contentModuleRepository;
-        this.contentModuleVersionRepository = contentModuleVersionRepository;
-        this.assetLibraryService = assetLibraryService;
         this.masterDocumentService = masterDocumentService;
         this.targetResolution = new TemplateImportTargetResolutionSupport(
                 templateRepository,
@@ -117,6 +95,15 @@ public class TemplateImportService {
                 compositionInclusionRuleService,
                 apiPolicyRepository,
                 objectMapper
+        );
+        this.materializeSupport = new TemplateImportMaterializeSupport(
+                contentModuleService,
+                contentModuleRepository,
+                contentModuleVersionRepository
+        );
+        this.assetMaterializeSupport = new TemplateImportAssetMaterializeSupport(
+                assetLibraryService,
+                templateVersionRepository
         );
     }
 
@@ -274,11 +261,15 @@ public class TemplateImportService {
         int materializedClauseCount = 0;
         TemplateExportBundleView artifactsBundle = bundle;
         if (TemplateExportV2Support.EXPORT_FORMAT_V2.equals(bundle.format())) {
-            materializeAssets(bundle, embeddedAssetBinaries, session);
-            MaterializeResult materializeResult = materializeClauses(bundle, metadata, session);
+            assetMaterializeSupport.materializeAssets(bundle, embeddedAssetBinaries, session);
+            TemplateImportMaterializeSupport.MaterializeResult materializeResult =
+                    materializeSupport.materializeClauses(bundle, metadata, session);
             materializedClauseCount = materializeResult.materializedCount();
-            artifactsBundle = remapContentModuleReferences(bundle, materializeResult.remappedBySourceModuleId());
-            applyRenderProfile(target.templateId(), bundle);
+            artifactsBundle = materializeSupport.remapContentModuleReferences(
+                    bundle,
+                    materializeResult.remappedBySourceModuleId()
+            );
+            assetMaterializeSupport.applyRenderProfile(target.templateId(), bundle);
         }
 
         applySupport.applyBundleArtifacts(
@@ -364,207 +355,7 @@ public class TemplateImportService {
         );
     }
 
-    private void materializeAssets(
-            TemplateExportBundleView bundle,
-            Map<String, byte[]> embeddedAssetBinaries,
-            ManagementSessionClaims session
-    ) {
-        if (embeddedAssetBinaries == null || embeddedAssetBinaries.isEmpty()) {
-            return;
-        }
-        Map<String, TemplateExportAssetKeyUsage> usageByKey = new LinkedHashMap<>();
-        List<TemplateExportAssetKeyManifestItemView> manifest =
-                bundle.assetKeyManifest() == null ? List.of() : bundle.assetKeyManifest();
-        for (TemplateExportAssetKeyManifestItemView item : manifest) {
-            if (item != null && item.referenceKey() != null && !item.referenceKey().isBlank()) {
-                usageByKey.put(item.referenceKey().trim(), item.usage());
-            }
-        }
-        for (Map.Entry<String, byte[]> entry : embeddedAssetBinaries.entrySet()) {
-            if (entry.getValue() == null || entry.getValue().length == 0) {
-                continue;
-            }
-            TemplateExportAssetKeyUsage usage = usageByKey.getOrDefault(
-                    entry.getKey(),
-                    TemplateExportAssetKeyUsage.IMAGE
-            );
-            AssetLibraryAssetClass assetClass = usage == TemplateExportAssetKeyUsage.IMAGE
-                    ? AssetLibraryAssetClass.IMAGE
-                    : AssetLibraryAssetClass.OTHER;
-            assetLibraryService.materializeImportedAsset(
-                    session,
-                    bundle.metadata() == null ? null : bundle.metadata().groupCode(),
-                    entry.getKey(),
-                    assetClass,
-                    entry.getValue(),
-                    "application/octet-stream",
-                    entry.getKey()
-            );
-        }
-    }
-
-    private MaterializeResult materializeClauses(
-            TemplateExportBundleView bundle,
-            TemplateExportMetadataView metadata,
-            ManagementSessionClaims session
-    ) {
-        List<TemplateExportClauseSnapshotView> snapshots =
-                bundle.clauseSnapshots() == null ? List.of() : bundle.clauseSnapshots();
-        Map<String, RemappedClause> remappedBySourceModuleId = new LinkedHashMap<>();
-        int count = 0;
-        for (TemplateExportClauseSnapshotView snapshot : snapshots) {
-            if (snapshot == null || snapshot.moduleCode() == null || snapshot.moduleCode().isBlank()) {
-                continue;
-            }
-            String moduleCode = snapshot.moduleCode().trim().toUpperCase(Locale.ROOT);
-            String semanticVersion = resolveSemanticVersion(snapshot);
-            String targetModuleId;
-            Optional<ContentModuleEntity> existing =
-                    contentModuleRepository.findByModuleCodeAndDeletedAtIsNull(moduleCode);
-            if (existing.isEmpty()) {
-                ContentModuleDetailView created = contentModuleService.create(
-                        new CreateContentModuleRequest(
-                                moduleCode,
-                                metadata.groupCode(),
-                                moduleCode,
-                                "Imported clause snapshot",
-                                List.of(),
-                                semanticVersion,
-                                snapshot.contentStructureJson(),
-                                "Materialized from template export bundle v2",
-                                metadata.locale() == null || metadata.locale().isBlank()
-                                        ? "zh-CN"
-                                        : metadata.locale(),
-                                null
-                        ),
-                        session
-                );
-                targetModuleId = created.moduleId();
-                count++;
-            } else {
-                ContentModuleEntity module = existing.get();
-                targetModuleId = module.getId().toString();
-                if (!contentModuleVersionRepository.existsByModuleIdAndSemanticVersion(
-                        module.getId(), semanticVersion)) {
-                    try {
-                        contentModuleService.createVersion(
-                                module.getId().toString(),
-                                new CreateContentModuleVersionRequest(
-                                        semanticVersion,
-                                        snapshot.contentStructureJson(),
-                                        "Materialized from template export bundle v2",
-                                        snapshot.jurisdiction(),
-                                        null,
-                                        null,
-                                        snapshot.legalReviewRef()
-                                ),
-                                session
-                        );
-                        count++;
-                    } catch (ContentModuleValidationException ex) {
-                        if (!"api.error.contentModule.versionExists".equals(ex.messageKey())) {
-                            throw ex;
-                        }
-                    }
-                }
-            }
-            if (snapshot.sourceModuleId() != null && !snapshot.sourceModuleId().isBlank()) {
-                remappedBySourceModuleId.put(
-                        snapshot.sourceModuleId().trim(),
-                        new RemappedClause(targetModuleId, semanticVersion)
-                );
-            }
-        }
-        return new MaterializeResult(count, remappedBySourceModuleId);
-    }
-
-    private static String resolveSemanticVersion(TemplateExportClauseSnapshotView snapshot) {
-        if (snapshot.semanticVersion() != null && !snapshot.semanticVersion().isBlank()) {
-            return snapshot.semanticVersion().trim();
-        }
-        return Math.max(1, snapshot.versionNumber()) + ".0.0";
-    }
-
-    private TemplateExportBundleView remapContentModuleReferences(
-            TemplateExportBundleView bundle,
-            Map<String, RemappedClause> remappedBySourceModuleId
-    ) {
-        List<ContentModuleReferenceView> sourceRefs =
-                bundle.contentModuleReferences() == null ? List.of() : bundle.contentModuleReferences();
-        if (sourceRefs.isEmpty() || remappedBySourceModuleId.isEmpty()) {
-            return bundle;
-        }
-        List<ContentModuleReferenceView> remapped = new ArrayList<>(sourceRefs.size());
-        for (ContentModuleReferenceView reference : sourceRefs) {
-            if (reference == null) {
-                continue;
-            }
-            RemappedClause mapped = null;
-            if (reference.moduleId() != null && !reference.moduleId().isBlank()) {
-                mapped = remappedBySourceModuleId.get(reference.moduleId().trim());
-            }
-            if (mapped == null) {
-                remapped.add(reference);
-                continue;
-            }
-            remapped.add(new ContentModuleReferenceView(
-                    reference.referenceKey(),
-                    mapped.targetModuleId(),
-                    mapped.semanticVersion(),
-                    reference.locked(),
-                    false,
-                    null
-            ));
-        }
-        return new TemplateExportBundleView(
-                bundle.format(),
-                bundle.metadata(),
-                bundle.variables(),
-                bundle.bindings(),
-                bundle.rules(),
-                remapped,
-                bundle.policySnapshot(),
-                bundle.masterPin(),
-                bundle.clauseSnapshots(),
-                bundle.renderProfile(),
-                bundle.assetKeyManifest(),
-                bundle.compositionInclusionRules(),
-                bundle.clauseNestingGraph(),
-                bundle.dependencyClosure()
-        );
-    }
-
-    private void applyRenderProfile(UUID templateId, TemplateExportBundleView bundle) {
-        if (bundle.renderProfile() == null
-                || bundle.renderProfile().json() == null
-                || bundle.renderProfile().json().isBlank()) {
-            return;
-        }
-        List<TemplateVersionEntity> versions =
-                templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId);
-        if (versions.isEmpty()) {
-            return;
-        }
-        TemplateVersionEntity version = versions.get(0);
-        version.setRenderProfileJson(bundle.renderProfile().json());
-        version.setRenderProfileVersion(
-                bundle.renderProfile().version() == null ? "rp-v1" : bundle.renderProfile().version()
-        );
-        templateVersionRepository.save(version);
-    }
-
     record ImportTarget(UUID templateId, int devVersionNumber) {
-    }
-
-    private record RemappedClause(String targetModuleId, String semanticVersion) {
-    }
-
-    private record MaterializeResult(int materializedCount, Map<String, RemappedClause> remappedBySourceModuleId) {
-        private MaterializeResult {
-            remappedBySourceModuleId = remappedBySourceModuleId == null
-                    ? Map.of()
-                    : Map.copyOf(remappedBySourceModuleId);
-        }
     }
 
     public record ParsedZipImport(

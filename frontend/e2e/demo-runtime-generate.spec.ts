@@ -1,17 +1,14 @@
 /**
- * P23-T13 — Runtime generate E2E for all published bank-grade demos.
- *
- * BDD: BDD-DEMO-TYP-011 (all demo families import + generate),
- *      BDD-DEMO-TYP-012 (DOCX size floor per template).
+ * KEEP-8 runtime generate E2E (FOS-W14-1 / BDD-DEMO-TYP-011/012).
  *
  * Prerequisite: Docker stack up and demos imported + published.
- *   .\\scripts\\docker-deploy.ps1
- *   .\\deploy\\import-all-demos.ps1 -BackendUrl http://localhost:8080
- *   .\\deploy\\publish-all-demos.ps1 -BackendUrl http://localhost:8080
+ *   pwsh ./scripts/docker-deploy-queue.ps1
+ *   ./deploy/import-all-demos.sh   # or pwsh ./deploy/import-all-demos.ps1
+ *   ./deploy/publish-all-demos.sh
  *
  * Canonical run: pnpm -C frontend test:e2e:docker:demos
  *
- * Tests skip (not fail) when a template is missing or not PUBLISHED.
+ * FOS-W14-1: KEEP-8 templates **fail** (not skip) when missing / not PUBLISHED.
  */
 import { expect, test } from '@playwright/test'
 
@@ -42,8 +39,10 @@ test.describe('Demo bank-grade runtime generate (BDD-DEMO-TYP-011/012)', () => {
     test(`runtime generate — ${demoCase.externalId}`, async ({ request }) => {
       const published = await ensurePublishedDemoWithCredential(request, demoCase.externalId)
       if (!published.ok) {
-        test.skip(true, published.reason)
-        return
+        throw new Error(
+          `FOS-W14-1 KEEP-8 fail-closed: ${published.reason}. `
+            + 'Import/publish KEEP-8 demos before running test:e2e:docker:demos.',
+        )
       }
 
       const idempotencyKey = `e2e-demo-runtime-${demoCase.externalId}-${Date.now()}`

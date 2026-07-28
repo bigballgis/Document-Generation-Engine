@@ -1,8 +1,9 @@
 package com.bank.docgen.runtime.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -13,8 +14,12 @@ class OutputModePolicyValidatorTest {
         List<String> allowed = List.of("SYNC_STREAM", "ASYNC_TASK");
 
         assertThatThrownBy(() -> OutputModePolicyValidator.validateSyncGenerate("ASYNC_TASK", allowed))
-                .isInstanceOf(TemplateValidationException.class)
-                .hasMessage("api.error.runtime.outputModeUnsupported");
+                .isInstanceOf(RuntimeBatchValidationException.class)
+                .satisfies(ex -> {
+                    RuntimeBatchValidationException typed = (RuntimeBatchValidationException) ex;
+                    assertThat(typed.errorCode()).isEqualTo(ApiErrorCodes.OUTPUT_MODE_NOT_ALLOWED);
+                    assertThat(typed.messageKey()).isEqualTo("api.error.runtime.outputModeUnsupported");
+                });
     }
 
     @Test
@@ -22,8 +27,11 @@ class OutputModePolicyValidatorTest {
         List<String> allowed = List.of("SYNC_STREAM");
 
         assertThatThrownBy(() -> OutputModePolicyValidator.validateBatchEndpoint("ASYNC_TASK", allowed, false))
-                .isInstanceOf(TemplateValidationException.class)
-                .hasMessage("api.error.runtime.outputModeUnsupported");
+                .isInstanceOf(RuntimeBatchValidationException.class)
+                .satisfies(ex -> {
+                    RuntimeBatchValidationException typed = (RuntimeBatchValidationException) ex;
+                    assertThat(typed.errorCode()).isEqualTo(ApiErrorCodes.OUTPUT_MODE_NOT_ALLOWED);
+                });
     }
 
     @Test
@@ -33,7 +41,10 @@ class OutputModePolicyValidatorTest {
                 List.of("SYNC_DOWNLOAD_URL", "SYNC_STREAM"),
                 true
         ))
-                .isInstanceOf(TemplateValidationException.class)
-                .hasMessage("api.error.runtime.outputModeUnsupported");
+                .isInstanceOf(RuntimeBatchValidationException.class)
+                .satisfies(ex -> {
+                    RuntimeBatchValidationException typed = (RuntimeBatchValidationException) ex;
+                    assertThat(typed.errorCode()).isEqualTo(ApiErrorCodes.OUTPUT_MODE_NOT_ALLOWED);
+                });
     }
 }

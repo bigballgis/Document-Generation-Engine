@@ -48,7 +48,7 @@ public class ContractAssemblyService {
                 views.buildCallableVersions(template, environment, true),
                 List.of("GenerateRequest", "BatchGenerateRequest", "OutputOptions", "EncryptionOptions"),
                 views.standardErrorCodes(),
-                List.of("generate-sync-docx", "batch-generate-sync", "batch-generate-async")
+                List.of()
         );
     }
 

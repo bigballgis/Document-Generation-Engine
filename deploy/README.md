@@ -32,6 +32,11 @@ via `ConfigMap` / `Secret`; it does not deploy in-cluster StatefulSets for those
 
 See also [Production runbook](../docs/operations/runbook.md) for release-gate and compose health checks.
 
+## Demo literacy (KEEP-8)
+
+- Learner walkthrough: [docs/operations/demo-learner-walkthrough.md](../docs/operations/demo-learner-walkthrough.md)
+- Linux/macOS wrappers: `./deploy/import-all-demos.sh`, `publish-all-demos.sh`, `generate-all-demos.sh` (require `pwsh`)
+
 ## Topic documentation index
 
 | Document | Scope |

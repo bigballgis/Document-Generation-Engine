@@ -135,6 +135,7 @@ const { formatDateTime } = useLocaleFormatters()
     <MasterReviewDialog
       v-model="reviewDialogOpen"
       :mode="reviewMode"
+      :submitting="mastersStore.submitting"
       @submit="handleReviewDecision"
     />
     <MasterAnchorDisplayLabelDialog

@@ -139,10 +139,8 @@ final class RuntimeTemplateSyncSupport {
             GenerateRequestBody body,
             Throwable failure
     ) {
+        // FOS-W11-3: mapper always returns an envelope (INTERNAL_ERROR fallback).
         InvocationErrorEnvelope errorEnvelope = FailedSyncInvocationErrorMapper.from(failure, messageResolver);
-        if (errorEnvelope == null) {
-            return null;
-        }
         try {
             ApiPolicyEntity policy = apiPolicyRepository.findByTemplateId(template.getId()).orElse(null);
             if (policy == null) {

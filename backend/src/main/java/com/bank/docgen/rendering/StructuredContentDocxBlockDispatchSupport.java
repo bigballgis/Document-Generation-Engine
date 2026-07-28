@@ -56,6 +56,14 @@ final class StructuredContentDocxBlockDispatchSupport {
     void writeBlockNode(JsonNode node, XWPFParagraph paragraph) {
         String type = node.path("type").asText("");
         rejectIfUnrenderable(type);
+        // FOS-W15-1: table/list must not silent-empty via inline fallthrough.
+        if ("tableComponentRef".equals(type) || "tableComponent".equals(type) || "list".equals(type)) {
+            throw new DocxAssemblyException(
+                    "api.error.rendering.unsupportedNodeType",
+                    "Structured node type '" + type + "' must be rendered via writeBlockNodes "
+                            + "(e.g. nested under conditionBlock/loopBlock all-block children path)."
+            );
+        }
         if ("conditionBlock".equals(type)) {
             if (CONDITION_EVALUATOR.evaluate(node.path("conditionExpression").asText(""), variables)) {
                 writeInlineOrBlockChildren.accept(node, paragraph);

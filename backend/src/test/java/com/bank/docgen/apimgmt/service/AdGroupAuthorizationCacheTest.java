@@ -99,6 +99,8 @@ class AdGroupAuthorizationCacheTest {
                         2,
                         "api.apimgmt.policyImpact.safe",
                         null,
+                        null,
+                        null,
                         null
                 )
         );

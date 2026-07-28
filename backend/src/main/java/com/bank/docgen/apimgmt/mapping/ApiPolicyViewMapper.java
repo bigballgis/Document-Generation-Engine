@@ -24,16 +24,26 @@ public interface ApiPolicyViewMapper {
     @Mapping(target = "credentialId", source = "id", qualifiedByName = "uuidToString")
     @Mapping(target = "status", source = ".", qualifiedByName = "effectiveCredentialStatus")
     @Mapping(target = "expiresAt", source = "expiresAt")
+    @Mapping(target = "rotationGracePeriodEndsAt", source = ".", qualifiedByName = "activeRotationGraceEndsAt")
     ApiCredentialSummaryView toCredentialSummary(ApiCredentialEntity credential);
 
     @Mapping(target = "credentialExternalId", source = "externalId")
     @Mapping(target = "status", source = ".", qualifiedByName = "effectiveCredentialStatus")
     @Mapping(target = "fingerprintSummary", source = "externalId", qualifiedByName = "runtimeFingerprint")
     @Mapping(target = "expiresAt", source = "expiresAt")
+    @Mapping(target = "rotationGracePeriodEndsAt", source = ".", qualifiedByName = "activeRotationGraceEndsAt")
     RuntimeCredentialSummaryView toRuntimeCredentialSummary(ApiCredentialEntity credential);
 
     @Named("effectiveCredentialStatus")
     default String effectiveCredentialStatus(ApiCredentialEntity credential) {
         return ApiCredentialLifecycleSupport.resolveEffectiveStatus(credential, Instant.now()).name();
+    }
+
+    @Named("activeRotationGraceEndsAt")
+    default Instant activeRotationGraceEndsAt(ApiCredentialEntity credential) {
+        if (!ApiCredentialLifecycleSupport.isPreviousSecretWithinGrace(credential, Instant.now())) {
+            return null;
+        }
+        return credential.getRotationGracePeriodEndsAt();
     }
 }

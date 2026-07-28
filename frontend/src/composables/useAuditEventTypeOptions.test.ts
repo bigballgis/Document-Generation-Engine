@@ -9,7 +9,7 @@ import {
 } from '@/composables/useAuditEventTypeOptions'
 
 describe('useAuditEventTypeOptions', () => {
-  it('builds labeled options from audit.eventTypes i18n keys', () => {
+  function mountOptions() {
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     let options: ReturnType<typeof useAuditEventTypeOptions>['value'] = []
 
@@ -25,11 +25,26 @@ describe('useAuditEventTypeOptions', () => {
         plugins: [i18n],
       },
     })
+    return options
+  }
 
+  it('builds labeled options from audit.eventTypes i18n keys', () => {
+    const options = mountOptions()
     expect(options).toHaveLength(AUDIT_EVENT_TYPE_CODES.length)
     expect(options.find((option) => option.value === 'PUBLISH')?.label).toBe('Template go-live')
     expect(options.find((option) => option.value === 'COLLABORATION_TIMEOUT_ESCALATION')?.label).toBe(
       'Overdue reminder sent',
     )
+  })
+
+  it('includes ManagementAuditEventTypes catalogue codes with human labels (FOS-W1-3)', () => {
+    const options = mountOptions()
+    expect(AUDIT_EVENT_TYPE_CODES.length).toBeGreaterThanOrEqual(45)
+    for (const code of ['USER_DELETED', 'LEGAL_HOLD_CREATED', 'API_POLICY_UPDATED'] as const) {
+      expect(AUDIT_EVENT_TYPE_CODES).toContain(code)
+      const opt = options.find((o) => o.value === code)
+      expect(opt?.label).toBeTruthy()
+      expect(opt?.label).not.toBe(code)
+    }
   })
 })

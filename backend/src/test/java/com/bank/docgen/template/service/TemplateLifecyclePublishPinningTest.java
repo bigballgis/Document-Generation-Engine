@@ -221,7 +221,9 @@ class TemplateLifecyclePublishPinningTest {
     }
 
     private void stubPublishBasics() {
+        when(templateRepository.findByIdAndDeletedAtIsNullForUpdate(TEMPLATE_ID)).thenReturn(Optional.of(template));
         when(eligibility.requirePublishableTemplate(TEMPLATE_ID, publisher)).thenReturn(template);
+        org.mockito.Mockito.lenient().doNothing().when(publishGateService).assertReady(TEMPLATE_ID, publisher);
         // Called only after successful pinning — lenient for fail-closed pin tests.
         org.mockito.Mockito.lenient().when(eligibility.requireReleaseCandidateVersion(TEMPLATE_ID))
                 .thenReturn(version);

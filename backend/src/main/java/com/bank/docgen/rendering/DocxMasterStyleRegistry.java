@@ -41,7 +41,10 @@ public final class DocxMasterStyleRegistry {
                     entry.styleKey(),
                     fontSizeHalfPoints,
                     fontFamily,
-                    bold
+                    bold,
+                    typography == null ? null : typography.eastAsia(),
+                    0,
+                    0
             );
         }
     }
@@ -53,7 +56,32 @@ public final class DocxMasterStyleRegistry {
             String fontFamily,
             boolean bold
     ) {
-        registerParagraphStyle(styles, styleKey, fontSizeHalfPoints, fontFamily, bold);
+        registerBankParagraphStyle(styles, styleKey, fontSizeHalfPoints, fontFamily, bold, null, 0, 0);
+    }
+
+    /**
+     * FOS-W15-5: optional eastAsia font + paragraph spacing twips from bank style manifest.
+     */
+    public static void registerBankParagraphStyle(
+            XWPFStyles styles,
+            String styleKey,
+            int fontSizeHalfPoints,
+            String fontFamily,
+            boolean bold,
+            String eastAsiaFontFamily,
+            int spacingBeforeTwips,
+            int spacingAfterTwips
+    ) {
+        registerParagraphStyle(
+                styles,
+                styleKey,
+                fontSizeHalfPoints,
+                fontFamily,
+                bold,
+                eastAsiaFontFamily,
+                spacingBeforeTwips,
+                spacingAfterTwips
+        );
     }
 
     /**
@@ -110,7 +138,10 @@ public final class DocxMasterStyleRegistry {
             String styleKey,
             int fontSizeHalfPoints,
             String fontFamily,
-            boolean bold
+            boolean bold,
+            String eastAsiaFontFamily,
+            int spacingBeforeTwips,
+            int spacingAfterTwips
     ) {
         String styleId = resolveWordStyleId(styleKey);
         if (styles.styleExist(styleId)) {
@@ -127,15 +158,28 @@ public final class DocxMasterStyleRegistry {
         if (fontSizeHalfPoints > 0) {
             runProperties.addNewSz().setVal(BigInteger.valueOf(fontSizeHalfPoints));
         }
-        if (fontFamily != null && !fontFamily.isBlank()) {
+        boolean hasLatin = fontFamily != null && !fontFamily.isBlank();
+        boolean hasEastAsia = eastAsiaFontFamily != null && !eastAsiaFontFamily.isBlank();
+        if (hasLatin || hasEastAsia) {
             var fonts = runProperties.addNewRFonts();
-            fonts.setAscii(fontFamily);
-            fonts.setHAnsi(fontFamily);
-            fonts.setCs(fontFamily);
-            fonts.setEastAsia(fontFamily);
+            String latin = hasLatin ? fontFamily : eastAsiaFontFamily;
+            fonts.setAscii(latin);
+            fonts.setHAnsi(latin);
+            fonts.setCs(latin);
+            fonts.setEastAsia(hasEastAsia ? eastAsiaFontFamily : latin);
         }
         if (bold) {
             runProperties.addNewB();
+        }
+        if (spacingBeforeTwips > 0 || spacingAfterTwips > 0) {
+            var paragraphProperties = ctStyle.addNewPPr();
+            var spacing = paragraphProperties.addNewSpacing();
+            if (spacingBeforeTwips > 0) {
+                spacing.setBefore(BigInteger.valueOf(spacingBeforeTwips));
+            }
+            if (spacingAfterTwips > 0) {
+                spacing.setAfter(BigInteger.valueOf(spacingAfterTwips));
+            }
         }
         styles.addStyle(new XWPFStyle(ctStyle));
     }

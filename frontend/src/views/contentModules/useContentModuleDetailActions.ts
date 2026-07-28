@@ -68,6 +68,7 @@ export function useContentModuleDetailActions(options: UseContentModuleDetailAct
   const reviewActions = createContentModuleReviewActions({
     t,
     moduleId,
+    versions,
     errorMessage,
     authorActorRole,
     approverActorRole,
@@ -78,6 +79,7 @@ export function useContentModuleDetailActions(options: UseContentModuleDetailAct
   const lifecycleActions = createContentModuleLifecycleActions({
     t,
     moduleId,
+    versions,
     errorMessage,
     lifecycleActorRole,
     impactDialogOpen,

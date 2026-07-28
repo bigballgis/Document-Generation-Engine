@@ -265,8 +265,10 @@ class ApiPolicyDomainSaveServiceTest {
                         2,
                         3,
                         "api.apimgmt.policyImpact.warning",
-                        "currentTarget=1.0.0,candidateTarget=2.0.0",
-                        "api.apimgmt.policyImpact.idempotencyDefaultRouteGuard"
+                        null,
+                        "api.apimgmt.policyImpact.idempotencyDefaultRouteGuard",
+                        "1.0.0",
+                        "2.0.0"
                 )
         );
         when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "2.0.0"))
@@ -297,6 +299,8 @@ class ApiPolicyDomainSaveServiceTest {
                         2,
                         3,
                         "api.apimgmt.policyImpact.blocking",
+                        null,
+                        null,
                         null,
                         null
                 )
@@ -366,6 +370,8 @@ class ApiPolicyDomainSaveServiceTest {
                 1,
                 2,
                 "api.apimgmt.policyImpact.safe",
+                null,
+                null,
                 null,
                 null
         );

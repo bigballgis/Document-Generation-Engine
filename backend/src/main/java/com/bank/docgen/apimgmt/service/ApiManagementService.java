@@ -143,7 +143,16 @@ public class ApiManagementService {
 
     @Transactional
     public ApiCredentialCreatedView createCredential(UUID templateId, ManagementSessionClaims session) {
-        return credentials.createCredential(templateId, session);
+        return credentials.createCredential(templateId, session, null);
+    }
+
+    @Transactional
+    public ApiCredentialCreatedView createCredential(
+            UUID templateId,
+            ManagementSessionClaims session,
+            Integer expiryDays
+    ) {
+        return credentials.createCredential(templateId, session, expiryDays);
     }
 
     @Transactional

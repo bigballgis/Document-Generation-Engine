@@ -97,11 +97,13 @@ class StructuredContentDocxWriteSession {
                 if (!paragraphAvailable) {
                     currentParagraph = cursor.insertParagraphAfter(currentParagraph);
                 } else {
-                    paragraphAvailable = false;
                     StructuredContentDocxWriter.clearParagraph(currentParagraph);
                 }
                 XWPFTable table = cursor.insertTableAfter(currentParagraph);
                 tableSupport.populateTable(tableDefinition, table, variables);
+                // FOS-W15-2: advance past the table so the next block is not inserted before it.
+                currentParagraph = cursor.insertParagraphAfter(table);
+                paragraphAvailable = true;
                 continue;
             }
             if ("list".equals(type)) {
@@ -159,8 +161,12 @@ class StructuredContentDocxWriteSession {
     private void writeLoopBlock(JsonNode node, XWPFParagraph paragraph) {
         String loopVariable = node.path("loopVariable").asText("");
         Object rawItems = variables.get(loopVariable);
-        if (!(rawItems instanceof List<?> items) || items.isEmpty()) {
+        // FOS-W13-4: missing/non-list keeps single-pass compat; empty list emits nothing.
+        if (!(rawItems instanceof List<?> items)) {
             expandSupport.writeInlineOrBlockChildren(node, paragraph);
+            return;
+        }
+        if (items.isEmpty()) {
             return;
         }
         XWPFParagraph current = paragraph;

@@ -211,19 +211,28 @@ final class PublishGateCheckItemSupport {
     }
 
     private PublishGateItemView callableReadyApiPolicyItem(ApiPolicyEntity policy) {
-        // Skeleton presence is sufficient for publish; empty AD groups do not block (runtime fail-closed).
+        // FOS-W7-2: skeleton alone is not enough — require a callable default route or AD groups.
+        boolean adGroupsConfigured = hasConfiguredAdGroups(policy);
+        boolean defaultRouteConfigured = hasConfiguredDefaultRoute(policy);
+        boolean callable = adGroupsConfigured || defaultRouteConfigured;
         return new PublishGateItemView(
                 PublishGateCheckCode.API_POLICY,
-                true,
-                false,
-                "api.publishGate.apiPolicy.ready",
-                "skeletonPresent=true,adGroupsConfigured=" + hasConfiguredAdGroups(policy)
+                callable,
+                !callable,
+                callable ? "api.publishGate.apiPolicy.ready" : "api.publishGate.apiPolicy.blocked",
+                "skeletonPresent=true,adGroupsConfigured=" + adGroupsConfigured
+                        + ",defaultRouteConfigured=" + defaultRouteConfigured
         );
     }
 
     private boolean hasConfiguredAdGroups(ApiPolicyEntity policy) {
         String json = policy.getAllowedAdGroupsJson();
         return json != null && !json.isBlank() && !"[]".equals(json.trim());
+    }
+
+    private boolean hasConfiguredDefaultRoute(ApiPolicyEntity policy) {
+        String route = policy.getDefaultRouteReleaseVersion();
+        return route != null && !route.isBlank();
     }
 
     PublishGateItemView contentModuleReferencesItem(UUID versionId) {

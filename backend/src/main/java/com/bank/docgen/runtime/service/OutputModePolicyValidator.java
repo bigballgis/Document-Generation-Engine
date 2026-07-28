@@ -1,5 +1,6 @@
 package com.bank.docgen.runtime.service;
 
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.template.service.TemplateValidationException;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public final class OutputModePolicyValidator {
         rejectSyncDownloadUrl(mode);
         requireAllowed(mode, allowedModes);
         if (!"SYNC_STREAM".equalsIgnoreCase(mode)) {
-            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
+            throw modeNotAllowed();
         }
     }
 
@@ -26,10 +27,10 @@ public final class OutputModePolicyValidator {
         requireAllowed(mode, allowedModes);
         if (syncEndpoint) {
             if (!"SYNC_STREAM".equalsIgnoreCase(mode)) {
-                throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
+                throw modeNotAllowed();
             }
         } else if (!"ASYNC_TASK".equalsIgnoreCase(mode)) {
-            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
+            throw modeNotAllowed();
         }
     }
 
@@ -41,13 +42,21 @@ public final class OutputModePolicyValidator {
 
     private static void rejectSyncDownloadUrl(String mode) {
         if ("SYNC_DOWNLOAD_URL".equalsIgnoreCase(mode)) {
-            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
+            throw modeNotAllowed();
         }
     }
 
     private static void requireAllowed(String mode, List<String> allowedModes) {
         if (allowedModes.stream().noneMatch(item -> item.equalsIgnoreCase(mode))) {
-            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
+            throw modeNotAllowed();
         }
+    }
+
+    /** FOS-W11-6: sync + batch share {@code OUTPUT_MODE_NOT_ALLOWED}. */
+    private static RuntimeBatchValidationException modeNotAllowed() {
+        return new RuntimeBatchValidationException(
+                ApiErrorCodes.OUTPUT_MODE_NOT_ALLOWED,
+                "api.error.runtime.outputModeUnsupported"
+        );
     }
 }

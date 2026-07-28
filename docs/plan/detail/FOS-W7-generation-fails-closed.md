@@ -1,10 +1,12 @@
 # FOS-W7 — Generation fails closed
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
-**Wave:** W7 · **Status:** **Not Started**
+**Wave:** W7 · **Status:** **Done** (`d251381f` / `c5244720`)
 **Slice id:** `fos-generation-fails-closed` · worktree `../DGE-fos-generation-fails-closed` · branch `feat/fos-generation-fails-closed`
 **Task Master:** **#177** · **delivery_lane:** **full**
 **Origin:** B2, B7, B8, B9, B10, B15
+**Evidence:** [fos-generation-fails-closed/gates.md](../evidence/fos-generation-fails-closed/gates.md)
+**Behavior:** [fos-generation-fails-closed.md](../../behavior/fos-generation-fails-closed.md)
 
 ---
 

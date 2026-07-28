@@ -129,6 +129,11 @@ public class MasterRevisionLineEntity {
         return statusSnapshot;
     }
 
+    public void setStatusSnapshot(MasterDocumentStatus statusSnapshot) {
+        this.statusSnapshot = statusSnapshot;
+        this.updatedAt = Instant.now();
+    }
+
     public int getRevisionSequence() {
         return revisionSequence;
     }

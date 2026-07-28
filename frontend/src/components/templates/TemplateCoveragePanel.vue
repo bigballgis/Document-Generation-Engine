@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
+import { buildDevWorkspaceQuery } from '@/views/templates/templateDevWorkspaceTabs'
 import { ElMessage } from 'element-plus'
 
 const props = withDefaults(
@@ -20,12 +23,15 @@ const props = withDefaults(
   },
 )
 
-const { t } = useI18n()
+const { t, te } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const panelDataStore = useTemplatePanelDataStore()
 const entry = computed(() => panelDataStore.getEntry(props.templateId))
 const loading = computed(() => entry.value.loadingCoverage)
 const summary = computed(() => entry.value.coverage)
 const eligibility = computed(() => entry.value.submitTestEligibility)
+const loadError = ref(false)
 
 const dimensionLabelKey = computed(() => ({
   REQUIRED_VARIABLES: 'templates.coverage.dimensions.requiredVariables',
@@ -45,10 +51,18 @@ const uncoveredAnchors = computed(() => eligibility.value?.uncoveredAnchors ?? [
 const uncoveredVariables = computed(() => eligibility.value?.uncoveredVariables ?? [])
 const hasUncoveredAnchors = computed(() => uncoveredAnchors.value.length > 0)
 const hasUncoveredVariables = computed(() => uncoveredVariables.value.length > 0)
+const uncoveredCollapseActive = computed(() => {
+  const names: string[] = []
+  if (hasUncoveredAnchors.value) names.push('anchors')
+  if (hasUncoveredVariables.value) names.push('variables')
+  return names
+})
 
 async function loadCoverage() {
+  loadError.value = false
   const result = await panelDataStore.fetchCoverage(props.templateId)
   if (!result.coverage) {
+    loadError.value = true
     ElMessage.error(t('templates.coverage.error.load'))
   }
 }
@@ -56,6 +70,29 @@ async function loadCoverage() {
 function dimensionLabel(code: string): string {
   const key = dimensionLabelKey.value[code as keyof typeof dimensionLabelKey.value]
   return key ? t(key) : code
+}
+
+function scopeTypeLabel(scopeType: string): string {
+  const key = `templates.coverage.scopeType.${scopeType}`
+  return te(key) ? t(key) : scopeType
+}
+
+function navigateToBinding(anchorId: string) {
+  void router.replace({
+    query: {
+      ...buildDevWorkspaceQuery(route.query, 'design', 'bindings'),
+      anchorId,
+    },
+  })
+}
+
+function navigateToVariable(variableKey: string) {
+  void router.replace({
+    query: {
+      ...buildDevWorkspaceQuery(route.query, 'design', 'variables'),
+      variableKey,
+    },
+  })
 }
 
 onMounted(() => {
@@ -90,7 +127,11 @@ watch(
       </el-button>
     </div>
 
-    <template v-if="summary">
+    <div v-if="loadError && !summary" data-testid="coverage-load-error">
+      <LoadErrorPanel message-key="templates.coverage.error.load" @retry="loadCoverage" />
+    </div>
+
+    <template v-else-if="summary">
       <el-alert
         :type="summary.belowThreshold ? 'warning' : 'success'"
         :closable="false"
@@ -109,7 +150,7 @@ watch(
       <p class="threshold-hint" :class="{ 'threshold-hint--compact': compact }">
         {{
           t('templates.coverage.thresholdHint', {
-            scope: summary.appliedThreshold.scopeType,
+            scope: scopeTypeLabel(summary.appliedThreshold.scopeType),
             variablePct: summary.appliedThreshold.minRequiredVariablePct,
             samplePct: summary.appliedThreshold.minRequiredSamplePct,
             anchorPct: summary.appliedThreshold.minAnchorBindingPct,
@@ -157,7 +198,7 @@ watch(
       />
 
       <div v-if="hasUncoveredAnchors || hasUncoveredVariables" class="coverage-uncovered">
-        <el-collapse>
+        <el-collapse :model-value="uncoveredCollapseActive">
           <el-collapse-item
             v-if="hasUncoveredAnchors"
             :title="t('templates.coverage.uncoveredAnchors.title') + ` (${uncoveredAnchors.length})`"
@@ -165,7 +206,14 @@ watch(
           >
             <ul class="coverage-uncovered__list">
               <li v-for="anchor in uncoveredAnchors" :key="anchor" class="coverage-uncovered__item">
-                {{ anchor }}
+                <el-button
+                  link
+                  type="primary"
+                  data-testid="coverage-uncovered-anchor-link"
+                  @click="navigateToBinding(anchor)"
+                >
+                  {{ anchor }}
+                </el-button>
               </li>
             </ul>
           </el-collapse-item>
@@ -177,7 +225,14 @@ watch(
           >
             <ul class="coverage-uncovered__list">
               <li v-for="varKey in uncoveredVariables" :key="varKey" class="coverage-uncovered__item">
-                {{ varKey }}
+                <el-button
+                  link
+                  type="primary"
+                  data-testid="coverage-uncovered-variable-link"
+                  @click="navigateToVariable(varKey)"
+                >
+                  {{ varKey }}
+                </el-button>
               </li>
             </ul>
           </el-collapse-item>

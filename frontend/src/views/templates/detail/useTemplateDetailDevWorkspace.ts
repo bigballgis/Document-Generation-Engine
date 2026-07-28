@@ -11,6 +11,8 @@ import {
   templateDevWorkspaceTabLabelKey,
   type TemplateDevWorkspaceTab,
 } from '@/views/templates/templateDevWorkspaceTabs'
+import { requestWorkspaceTabLeave } from '@/composables/workspaceTabDirtyLeave'
+import { stripAuthoringPathGuideQuery } from '@/utils/templateAuthoringPathGuide'
 
 export type UseTemplateDetailDevWorkspaceOptions = {
   templateId: MaybeRefOrGetter<string>
@@ -37,18 +39,27 @@ export function useTemplateDetailDevWorkspace(options: UseTemplateDetailDevWorks
   const batchDialogStreamUrl = ref('')
   const batchRunning = ref(false)
 
-  const { isEligible, tooltipContent, refresh: refreshEligibility } = useSubmitTestEligibility(
-    toValue(options.templateId),
-  )
+  const {
+    isEligible,
+    tooltipContent,
+    loadError: submitEligibilityLoadError,
+    refresh: refreshEligibility,
+  } = useSubmitTestEligibility(toValue(options.templateId))
 
   const submitTooltipContent = computed(() => {
+    if (submitEligibilityLoadError.value) {
+      return submitEligibilityLoadError.value
+    }
     if (testDataSetCount.value === 0) {
       return t('templates.testPreview.workflow.noDataSetsTooltip')
     }
     return tooltipContent.value
   })
 
-  const submitTooltipDisabled = computed(() => isEligible.value && testDataSetCount.value > 0)
+  const submitTooltipDisabled = computed(
+    () =>
+      !submitEligibilityLoadError.value && isEligible.value && testDataSetCount.value > 0,
+  )
 
   const workspaceTabs = computed(() =>
     TEMPLATE_DEV_WORKSPACE_TABS.map((name) => ({
@@ -68,11 +79,28 @@ export function useTemplateDetailDevWorkspace(options: UseTemplateDetailDevWorks
     { deep: true },
   )
 
+  let suppressingWorkspaceTabSync = false
+
   watch(activeWorkspaceTab, (tab) => {
+    if (suppressingWorkspaceTabSync) {
+      return
+    }
     if (resolveTemplateDevWorkspaceTabFromQuery(route.query) === tab) {
       return
     }
-    void router.replace({ query: buildDevWorkspaceQuery(route.query, tab) })
+    // FOS-W2-8 — revert v-model until dirty-guard leave callback applies the switch.
+    const previous = resolveTemplateDevWorkspaceTabFromQuery(route.query)
+    suppressingWorkspaceTabSync = true
+    activeWorkspaceTab.value = previous
+    suppressingWorkspaceTabSync = false
+    void requestWorkspaceTabLeave(() => {
+      suppressingWorkspaceTabSync = true
+      activeWorkspaceTab.value = tab
+      suppressingWorkspaceTabSync = false
+      void router.replace({
+        query: buildDevWorkspaceQuery(stripAuthoringPathGuideQuery(route.query), tab),
+      })
+    })
   })
 
   watch(
@@ -141,7 +169,7 @@ export function useTemplateDetailDevWorkspace(options: UseTemplateDetailDevWorks
         void refreshEligibility()
       }
     },
-    { immediate: false },
+    { immediate: true },
   )
 
   return {
@@ -154,6 +182,7 @@ export function useTemplateDetailDevWorkspace(options: UseTemplateDetailDevWorks
     batchDialogStreamUrl,
     batchRunning,
     isEligible,
+    submitEligibilityLoadError,
     submitTooltipContent,
     submitTooltipDisabled,
     handleSubmitForTestConfirm,

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, provide, toRef, watch } from 'vue'
+import { computed, provide, ref, toRef, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { API_POLICY_DOMAIN_EDITOR_KEY } from '@/components/api/apiPolicyDomainEditorContext'
 import ApiPolicyAdGroupsDefaultRouteSections from '@/components/api/ApiPolicyAdGroupsDefaultRouteSections.vue'
 import ApiPolicyAdvancedSettingsCard from '@/components/api/ApiPolicyAdvancedSettingsCard.vue'
@@ -8,6 +10,8 @@ import ApiPolicyRetentionSection from '@/components/api/ApiPolicyRetentionSectio
 import { useApiPolicyDomainAnchor } from '@/composables/useApiPolicyDomainAnchor'
 import { useApiPolicyDomainEditorActions } from '@/composables/useApiPolicyDomainEditorActions'
 import { useApiPolicyDomainForms } from '@/composables/useApiPolicyDomainForms'
+import { useConfirmAction } from '@/composables/useConfirmAction'
+import { useApiPolicyStore } from '@/stores/apiPolicy'
 import type { ApiPolicyDomain } from '@/types/apiPolicyDomain'
 import type { ApiPolicy } from '@/types/template'
 
@@ -42,10 +46,18 @@ const emit = defineEmits<{
   formEdited: []
 }>()
 
+const { t } = useI18n()
+const { confirmAction } = useConfirmAction()
+const apiPolicyStore = useApiPolicyStore()
+const rollbackTargetVersion = ref<number | null>(null)
+
 const apiPolicyRef = toRef(props, 'apiPolicy')
 const templateIdRef = toRef(props, 'templateId')
 const canEditRef = computed(() => props.canEdit)
 const initialDomainAnchorRef = toRef(props, 'initialDomainAnchor')
+const canRollback = computed(
+  () => props.canEdit && (props.apiPolicy?.policyVersion ?? 0) > 1,
+)
 
 const {
   adGroupsForm,
@@ -125,6 +137,30 @@ watch(
   },
 )
 
+async function handleRollback() {
+  const target = rollbackTargetVersion.value
+  if (!target || !canRollback.value) {
+    return
+  }
+  const confirmed = await confirmAction({
+    titleKey: 'apiPolicy.detail.impact.rollbackTitle',
+    messageKey: 'apiPolicy.detail.impact.rollbackHint',
+    type: 'warning',
+  })
+  if (!confirmed) {
+    return
+  }
+  try {
+    await apiPolicyStore.previewPolicyRollback(props.templateId, target)
+    await apiPolicyStore.rollbackPolicy(props.templateId, target, true)
+    await apiPolicyStore.fetchPolicy(props.templateId)
+    syncFormsFromPolicy()
+    ElMessage.success(t('apiPolicy.detail.impact.rollbackSuccess'))
+  } catch {
+    ElMessage.error(resolveErrorMessage('templates.error.savePolicy'))
+  }
+}
+
 defineExpose({
   adGroupsForm,
   defaultRouteForm,
@@ -148,6 +184,29 @@ defineExpose({
       @save-ad-groups="saveAdGroupsDomain"
       @save-default-route="saveDefaultRouteDomain"
     />
+    <section v-if="canRollback && apiPolicy" class="policy-rollback" data-testid="api-policy-rollback">
+      <h3>{{ t('apiPolicy.detail.impact.rollbackTitle') }}</h3>
+      <p class="field-hint">{{ t('apiPolicy.detail.impact.rollbackHint') }}</p>
+      <el-form label-position="top" inline>
+        <el-form-item :label="t('apiPolicy.detail.impact.rollbackVersion')">
+          <el-input-number
+            v-model="rollbackTargetVersion"
+            :min="1"
+            :max="Math.max(1, apiPolicy.policyVersion - 1)"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="warning"
+            :loading="submitting"
+            :disabled="!rollbackTargetVersion"
+            @click="handleRollback"
+          >
+            {{ t('apiPolicy.detail.impact.rollbackAction') }}
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </section>
     <ApiPolicyRetentionSection
       :can-edit="canEdit"
       :submitting="submitting"

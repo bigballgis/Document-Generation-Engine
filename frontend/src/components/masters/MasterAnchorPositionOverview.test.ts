@@ -35,7 +35,7 @@ describe('MasterAnchorPositionOverview', () => {
     expect(wrapper.find('[data-testid="master-anchor-position-HEADER"]').text()).toBe('1')
     expect(wrapper.find('[data-testid="master-anchor-position-BODY"]').text()).toBe('2')
     expect(wrapper.find('[data-testid="master-anchor-position-FOOTER"]').text()).toBe('3')
-    expect(wrapper.text()).toMatch(/Document-order anchor list/)
+    expect(wrapper.text()).toMatch(/Document-order layout placeholder list/)
     expect(wrapper.html()).not.toMatch(/docx-canvas|wysiwyg/i)
   })
 

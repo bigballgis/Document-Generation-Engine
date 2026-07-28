@@ -1,7 +1,7 @@
 # FOS-W6 — Lifecycle cannot corrupt
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
-**Wave:** W6 · **Status:** **Not Started**
+**Wave:** W6 · **Status:** **Done**
 **Slice id:** `fos-lifecycle-cannot-corrupt` · worktree `../DGE-fos-lifecycle-cannot-corrupt` · branch `feat/fos-lifecycle-cannot-corrupt`
 **Task Master:** **#176** · **delivery_lane:** **full** (backend lifecycle / Flyway may apply)
 **Origin:** B1, B3, B4, B5, B6, B13, B19, B23
@@ -180,3 +180,5 @@ Vitest/E2E where UI changed; deploy evidence; architecture review (lifecycle/aut
 W6-8 not implemented (non-goal).
 
 TM **#176** → done.
+
+Evidence: [gates.md](../evidence/fos-lifecycle-cannot-corrupt/gates.md).

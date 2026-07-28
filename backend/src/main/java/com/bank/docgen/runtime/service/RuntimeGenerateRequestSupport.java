@@ -2,9 +2,11 @@ package com.bank.docgen.runtime.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
+import com.bank.docgen.sharedkernel.api.FieldError;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,8 +21,21 @@ final class RuntimeGenerateRequestSupport {
     }
 
     void validateGenerateRequest(GenerateRequestBody request, ApiPolicyEntity policy) {
-        if (request.output() == null || request.variables() == null) {
-            throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
+        List<FieldError> shapeErrors = new ArrayList<>();
+        if (request.output() == null) {
+            shapeErrors.add(new FieldError("output", "REQUIRED", "output"));
+        }
+        if (request.variables() == null) {
+            shapeErrors.add(new FieldError("variables", "REQUIRED", "variables"));
+        }
+        if (request.requestId() == null || request.requestId().isBlank()) {
+            shapeErrors.add(new FieldError("requestId", "REQUIRED", "requestId"));
+        }
+        if (request.idempotencyKey() == null || request.idempotencyKey().isBlank()) {
+            shapeErrors.add(new FieldError("idempotencyKey", "REQUIRED", "idempotencyKey"));
+        }
+        if (!shapeErrors.isEmpty()) {
+            throw new GenerateRequestShapeException(shapeErrors);
         }
         String format = request.output().format();
         if (!"DOCX".equalsIgnoreCase(format) && !"PDF".equalsIgnoreCase(format)) {
@@ -28,9 +43,6 @@ final class RuntimeGenerateRequestSupport {
         }
         if (readStringList(policy.getOutputFormatsJson()).stream().noneMatch(item -> item.equalsIgnoreCase(format))) {
             throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
-        }
-        if (request.idempotencyKey() == null || request.idempotencyKey().isBlank()) {
-            throw new TemplateValidationException("api.error.runtime.idempotencyKeyRequired");
         }
         OutputModePolicyValidator.validateSyncGenerate(
                 request.output().mode(),

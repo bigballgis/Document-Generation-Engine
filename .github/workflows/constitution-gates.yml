@@ -51,3 +51,18 @@ jobs:
           pnpm type-check
           pnpm test
           pnpm build
+
+  backend-testcontainers:
+    name: Backend testcontainers lane (FOS-W13)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: mvn -Ptestcontainers test
+        run: mvn -B -ntp -f backend/pom.xml -Ptestcontainers,dev-fast test
+

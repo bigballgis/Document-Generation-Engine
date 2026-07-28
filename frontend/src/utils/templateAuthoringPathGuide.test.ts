@@ -17,8 +17,8 @@ describe('templateAuthoringPathGuide', () => {
     sessionStorage.clear()
   })
 
-  it('BDD-CE-U16-APC: orders Master → Bindings → Variables → Preview', () => {
-    expect(AUTHORING_PATH_GUIDE_STEPS).toEqual(['master', 'bindings', 'variables', 'preview'])
+  it('FOS-W2-3 / BDD-CE-U16-APC: orders Master → Variables → Bindings → Preview', () => {
+    expect(AUTHORING_PATH_GUIDE_STEPS).toEqual(['master', 'variables', 'bindings', 'preview'])
   })
 
   it('BDD-CE-U16-APC-003: post-create path lands on dev with guide at Master', () => {
@@ -76,7 +76,8 @@ describe('templateAuthoringPathGuide', () => {
   })
 
   it('advances Next through steps and strips guide markers on dismiss query', () => {
-    expect(nextAuthoringPathGuideStep('master')).toBe('bindings')
+    expect(nextAuthoringPathGuideStep('master')).toBe('variables')
+    expect(nextAuthoringPathGuideStep('variables')).toBe('bindings')
     expect(nextAuthoringPathGuideStep('preview')).toBeNull()
     expect(
       stripAuthoringPathGuideQuery({

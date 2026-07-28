@@ -3,7 +3,7 @@
 **Program id:** `CRCH` (Core Rendering & Compute Hardening)
 **Type:** Ad-hoc NON-CE remediation program — **not** a formal P-phase, **not** an IBL/CE wave
 **Formal plan phase:** **None** (single-active-phase discipline unaffected)
-**Status:** **Not Started** (plan only — no code written)
+**Status:** **In Progress** (W0+W1 leaf `render-p0-preview-dedupe` Done; W2+ Not Started)
 **Created:** 2026-07-26
 **Origin:** User-commissioned deep audit of AI-authored core functionality (template orchestration, rendering fidelity, compute formulas, PDF conversion)
 **Audit baseline commit:** `df9a5b7d`
@@ -18,7 +18,7 @@ Everything needed is written down. Do not improvise.
 ### 0.1 Execution order — strictly sequential
 
 ```
-W0  detail/CRCH-W0-rendering-correctness.md    ← START HERE (7 tasks; includes W0-7 after OD-1)
+W0  detail/CRCH-W0-rendering-correctness.md    ← START HERE (6 tasks)
 W1  detail/CRCH-W1-preview-consolidation.md    ← then this (6 tasks)
 W2  design in §5 of this file — NOT yet decomposed; needs a detail sheet first
 W3  design in §6 — NOT yet decomposed
@@ -105,8 +105,6 @@ These are **confirmed** per the document-as-code source-of-truth order
 | D1 | Deliver **W0 + W1 merged as one slice** | One worktree, one gate run, one deploy evidence set |
 | D2 | Compute DSL gets the **full extension** (arithmetic + row context + aggregation + logic) | Amends **ADR-0056**; scheduled as W2; see §5 |
 | D3 | Money rounding becomes **configurable per render profile, default `HALF_UP`** | Part of W2; today `HALF_UP` is hardcoded and `HALF_EVEN` appears nowhere |
-| D4 | **OD-1 → inline seals** (user 2026-07-26; same as FOS D8) | Do **not** implement absolute/`CTAnchor` placement. Re-scope authorized-area BLOCKER validation so it does not claim a coordinate guarantee the renderer does not provide — **W0-7** |
-| D5 | **OD-2 → PDF page-number stamping default stays OFF** (user 2026-07-26; same as FOS D9) | Do **not** flip `docgen.rendering.pdf-page-number-stamping-enabled` default. W0-4 still makes stamping correct when enabled |
 
 **D2 safety constraint (non-negotiable):** the existing security envelope must survive the
 extension — whitelist-only evaluation, no scripting engine, and the caps in `ComputeDslLimits`
@@ -116,24 +114,52 @@ Extending capability must not widen the attack surface.
 
 ---
 
-## 3. Open decisions — BLOCKED pending user input
+## 3. Open decisions — RESOLVED (user 2026-07-26)
 
-**None.** Former **OD-1** / **OD-2** were answered 2026-07-26 (D4 / D5). Historical context:
+Previously blocked OD-1 / OD-2 were confirmed in the full-auto remediation session:
 
-### OD-1 (RESOLVED → inline) — former compliance gap
+| Former | Resolution | Consequence |
+| --- | --- | --- |
+| OD-1 | **Inline seals** (D4) | No `CTAnchor`. W0-7 demotes dishonest authorized-area geometry BLOCKERs. |
+| OD-2 | Stamping **default OFF** (D5) | Do not flip `pdf-page-number-stamping-enabled` default. |
 
-`ReferenceNodeService.validateSealPlacementGeometry` still enforces authorized-area geometry
-as a **BLOCKER**, while the renderer writes seals as **inline** runs. With D4, absolute
-positioning is out of scope; **W0-7** must re-scope that validation (demote/remove/relabel)
-so publish gates stop implying a page-coordinate guarantee.
+No remaining open decisions for W0+W1. W2+ still require detail sheets before execution.
 
-W0-3 remains size-only (`widthPt`/`heightPt`); seals stay inline.
+### OD-1 — Seal placement is validated but never rendered (compliance gap)
 
-### OD-2 (RESOLVED → default OFF)
+`ReferenceNodeService.validateSealPlacementGeometry` enforces, as a **BLOCKER**, that a seal's
+`placement.sealBox` (`pageIndex`, `xPt`, `yPt`, optional `widthPt`/`heightPt`) lies fully
+inside a declared `authorizedSealAreas[]` region. Three distinct fidelity warning codes exist
+for violations (`SEAL_OUTSIDE_AUTHORIZED_AREA`, `SEAL_AUTHORIZED_AREA_UNKNOWN`,
+`SEAL_AUTHORIZED_AREA_INVALID`).
 
-`docgen.rendering.pdf-page-number-stamping-enabled` stays **`false` by default**. Operators
-who need the stamper enable it explicitly. W0-4 still makes the enabled path correct or
-honestly degraded.
+The rendering package contains **zero** references to `placement`, `CTAnchor`, `positionH`, or
+`positionV`. `StructuredContentDocxInlineSupport.writeReferenceNode` writes the seal as an
+**inline run** at the anchor's position, wherever that happens to be on the page.
+
+So the "seal must fall inside its authorized area" control is enforced against a coordinate
+model that the renderer does not implement. For a bank this is a paper-only control.
+
+**Question for the user:** is inline seal placement acceptable (in which case the authorized-area
+validation should be re-scoped or removed so it stops implying a guarantee it does not provide),
+or must the renderer implement absolutely-positioned floating seals honouring `sealBox`?
+
+The second option is a substantial piece of OOXML work (`CTAnchor` drawing with
+`positionH`/`positionV` relative to page, plus per-page targeting) and must be its own slice.
+
+**W0-3 deliberately does NOT resolve this.** It only stops the renderer from silently ignoring
+the author's declared `widthPt`/`heightPt`. Positioning remains inline until OD-1 is answered.
+
+### OD-2 — Should PDF page-number stamping be ON by default?
+
+`docgen.rendering.pdf-page-number-stamping-enabled` defaults to `false`, yet the stamper exists
+precisely because headless LibreOffice frequently fails to evaluate Word `PAGE` fields. Bank
+letter masters that rely on footer `PAGE` / `SECTIONPAGES` fields may therefore ship PDFs with
+missing or wrong page numbers under the default configuration.
+
+Turning it on globally is a behaviour change across every existing render profile, so it needs
+an explicit decision. W0-4 makes the stamping **correct or honestly degraded** but does not
+change the default.
 
 ---
 
@@ -141,11 +167,11 @@ honestly degraded.
 
 | Wave | Name | Tasks | Detail sheet | Status |
 | --- | --- | --- | --- | --- |
-| **W0** | Rendering & conversion correctness | 7 | [CRCH-W0-rendering-correctness.md](detail/CRCH-W0-rendering-correctness.md) | **Not Started** |
-| **W1** | Preview consolidation | 6 | [CRCH-W1-preview-consolidation.md](detail/CRCH-W1-preview-consolidation.md) | **Not Started** |
+| **W0** | Rendering & conversion correctness | 7 | [CRCH-W0-rendering-correctness.md](detail/CRCH-W0-rendering-correctness.md) | **Done** |
+| **W1** | Preview consolidation | 6 | [CRCH-W1-preview-consolidation.md](detail/CRCH-W1-preview-consolidation.md) | **Done** |
 | **W2** | Compute DSL capability | ~6 | not yet written — see §5 | **Not Started** |
 | **W3** | DOCX fidelity depth | ~6 | not yet written — see §6 | **Not Started** |
-| **W4** | Authoring information architecture | ~4 | **Superseded by FOS W2–W4** — see §7 | **Superseded** |
+| **W4** | Authoring information architecture | ~4 | not yet written — see §7 | **Not Started** |
 | **W5** | Fidelity verification harness | ~5 | not yet written — see §8 | **Not Started** |
 
 Severity legend used throughout: **P0** = produces a wrong document, a wrong recipient, or a
@@ -229,21 +255,9 @@ product position rather than an accident.
 
 ---
 
-## 7. W4 — Authoring information architecture — **SUPERSEDED by FOS**
+## 7. W4 — Authoring information architecture (design)
 
-**Do not execute this section as a CRCH leaf.** On 2026-07-26 the user commissioned a
-broader frontline operability program that absorbs authoring IA:
-
-| CRCH item | Absorbed by |
-| --- | --- |
-| W4-1 Flatten navigation / escape traps | [FOS-W2](detail/FOS-W2-author-can-start.md) (A2, A21, A25, A26) |
-| W4-2 Reconcile guide order with tab order | [FOS-W2](detail/FOS-W2-author-can-start.md) W2-3 |
-| W4-3 Split the test-data dialog | Residual noted under [FOS-W3](detail/FOS-W3-authoring-blocks-work.md) optional W3-X |
-| W4-4 Variable-path autocomplete | Residual noted under FOS-W3 optional W3-Y |
-
-Program: [frontline-operability-solidity-program-2026-07.md](./frontline-operability-solidity-program-2026-07.md).
-
-| Id | Item | Current state (kept for history) |
+| Id | Item | Current state |
 | --- | --- | --- |
 | W4-1 | Flatten navigation | An author simultaneously tracks a lifecycle stepper, an optional authoring-path guide, a workspace tab, and a sub-tab — four concurrent position indicators, up to five levels deep when editing a binding |
 | W4-2 | Reconcile guide order with tab order | The path guide sequences `master → bindings → variables → preview` while Design defaults to landing on `bindings` and lists `variables` first |

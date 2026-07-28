@@ -85,7 +85,8 @@ public class PublishGateService {
     ) {
         templateService.requireReadableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
-        BindingValidationView bindings = templateService.validateBindings(templateId, session);
+        // FOS-W7-4: gate is read-only — do not persist binding validation statuses.
+        BindingValidationView bindings = templateService.evaluateBindings(templateId, session);
         CoverageSummaryView coverage = coverageComputationService.compute(templateId, session);
         ChangeDiffView changeDiff = changeDiffService.compute(templateId, session);
         TemplateRuleValidationView ruleValidation = validateCurrentRules(templateId, version, session);
@@ -133,10 +134,15 @@ public class PublishGateService {
     public void assertReady(UUID templateId, ManagementSessionClaims session, PublishGatePhase phase) {
         PublishGateChecklistView gateChecklist = evaluate(templateId, session, phase);
         if (!gateChecklist.ready()) {
+            String firstBlocking = gateChecklist.items().stream()
+                    .filter(item -> item.blocker())
+                    .map(item -> item.checkCode().name())
+                    .findFirst()
+                    .orElse("UNKNOWN");
             String messageKey = phase == PublishGatePhase.SUBMIT_FOR_APPROVAL
                     ? "api.error.template.submitForApprovalGateBlocked"
                     : "api.error.template.publishGateBlocked";
-            throw new TemplateValidationException(messageKey);
+            throw new TemplateValidationException(messageKey, firstBlocking);
         }
     }
 

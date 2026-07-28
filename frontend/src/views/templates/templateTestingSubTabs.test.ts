@@ -7,6 +7,7 @@ import {
 describe('templateTestingSubTabs', () => {
   it('resolves known testing sub-tabs', () => {
     expect(resolveTemplateTestingSubTab('dataSets')).toBe('dataSets')
+    expect(resolveTemplateTestingSubTab('batchRuns')).toBe('batchRuns')
     expect(resolveTemplateTestingSubTab('previewRuns')).toBe('previewRuns')
     expect(resolveTemplateTestingSubTab('coverage')).toBe('coverage')
     expect(resolveTemplateTestingSubTab('changeDiff')).toBe('changeDiff')

@@ -2,7 +2,7 @@
 
 **Program:** [CRCH](../core-render-compute-hardening-program.md)
 **Wave:** W1
-**Status:** **Not Started**
+**Status:** **Done**
 **Delivered together with:** [CRCH-W0](CRCH-W0-rendering-correctness.md) — one merged slice, one worktree
 **Slice id:** `render-p0-preview-dedupe` (same worktree as W0 — do **not** create a second one)
 **Audit baseline commit:** `df9a5b7d` — locate code by the quoted snippet, not by line number

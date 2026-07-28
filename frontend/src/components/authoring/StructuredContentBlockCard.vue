@@ -21,17 +21,24 @@ import {
 } from '@/utils/structuredContentDragState'
 import type { ConfirmedNodeType, StructuredContentNode } from '@/utils/structuredContentNodes'
 
-const props = defineProps<{
-  node: StructuredContentNode
-  path: NodePath
-  siblingIndex: number
-  siblingCount: number
-  readonly: boolean
-  variableSelectOptions: Array<{ value: string; label: string }>
-  listVariableOptions: Array<{ value: string; label: string }>
-  clauseReferenceOptions: Array<{ value: string; label: string }>
-  nodeLabel: (type: ConfirmedNodeType | string) => string
-}>()
+const props = withDefaults(
+  defineProps<{
+    node: StructuredContentNode
+    path: NodePath
+    siblingIndex: number
+    siblingCount: number
+    readonly: boolean
+    variableSelectOptions: Array<{ value: string; label: string }>
+    listVariableOptions: Array<{ value: string; label: string }>
+    clauseReferenceOptions: Array<{ value: string; label: string }>
+    /** Optional catalogue keys for tableComponentRef (FOS-W3-6). */
+    tableComponentOptions?: Array<{ value: string; label: string }>
+    nodeLabel: (type: ConfirmedNodeType | string) => string
+  }>(),
+  {
+    tableComponentOptions: () => [],
+  },
+)
 
 const emit = defineEmits<{
   remove: [path: NodePath]
@@ -41,6 +48,7 @@ const emit = defineEmits<{
   'insert-nested-block': [parentPath: NodePath, type: ConfirmedNodeType]
   'reorder-block': [path: NodePath, toIndex: number]
   'copy-block': [path: NodePath]
+  'focus-path': [path: NodePath]
   'end-field-coalesce': []
 }>()
 
@@ -178,8 +186,16 @@ function onDragEnd() {
       </div>
     </header>
 
+    <p
+      v-if="node.type === 'sectionHeading'"
+      class="section-heading-numbering-honesty"
+      data-testid="section-heading-numbering-honesty"
+    >
+      {{ t('templates.structuredEditor.sectionHeadingNumberingHonesty') }}
+    </p>
+
     <template v-if="node.type === 'paragraph' || node.type === 'sectionHeading'">
-      <div class="inline-row">
+      <div class="inline-row" @focusin="emit('focus-path', path)">
         <div
           v-for="(child, childIndex) in node.children ?? []"
           :key="`${child.type}-${childIndex}`"
@@ -191,6 +207,7 @@ function onDragEnd() {
             data-testid="paragraph-input"
             :readonly="readonly"
             :placeholder="t('templates.structuredEditor.textPlaceholder')"
+            @focus="emit('focus-path', path)"
             @update:model-value="(value: string) => emit('update-inline-child', path, childIndex, { ...child, type: 'textRun', value })"
             @blur="emit('end-field-coalesce')"
           />
@@ -200,6 +217,7 @@ function onDragEnd() {
             filterable
             :disabled="readonly"
             :placeholder="t('templates.structuredEditor.variablePlaceholder')"
+            @focus="emit('focus-path', path)"
             @update:model-value="(value: string) => emit('update-inline-child', path, childIndex, { ...child, type: 'variable', key: value })"
           >
             <el-option
@@ -251,13 +269,25 @@ function onDragEnd() {
     </template>
 
     <template v-else-if="node.type === 'tableComponentRef'">
-      <el-input
+      <!-- FOS-W3-6 — search select (allow-create when no catalogue options). -->
+      <AppSearchSelect
         :model-value="node.tableComponentRef ?? ''"
-        :readonly="readonly"
+        filterable
+        allow-create
+        default-first-option
+        :disabled="readonly"
+        data-testid="table-component-ref-select"
         :placeholder="t('templates.structuredEditor.tableRefPlaceholder')"
+        @focus="emit('focus-path', path)"
         @update:model-value="(value: string) => emit('update-block-field', path, 'tableComponentRef', value)"
-        @blur="emit('end-field-coalesce')"
-      />
+      >
+        <el-option
+          v-for="option in tableComponentOptions"
+          :key="option.value"
+          :label="option.label"
+          :value="option.value"
+        />
+      </AppSearchSelect>
     </template>
 
     <template v-else-if="node.type === 'contentModuleRef'">
@@ -306,6 +336,7 @@ function onDragEnd() {
         :variable-select-options="variableSelectOptions"
         :list-variable-options="listVariableOptions"
         :clause-reference-options="clauseReferenceOptions"
+        :table-component-options="tableComponentOptions"
         :node-label="nodeLabel"
         @remove="emit('remove', $event)"
         @update-inline-child="(childPathValue, inlineIndex, nextChild) => emit('update-inline-child', childPathValue, inlineIndex, nextChild)"
@@ -314,6 +345,7 @@ function onDragEnd() {
         @insert-nested-block="(parentPath, type) => emit('insert-nested-block', parentPath, type)"
         @reorder-block="(childPathValue, toIndex) => emit('reorder-block', childPathValue, toIndex)"
         @copy-block="(childPathValue) => emit('copy-block', childPathValue)"
+        @focus-path="(childPathValue) => emit('focus-path', childPathValue)"
         @end-field-coalesce="emit('end-field-coalesce')"
       />
 
@@ -373,6 +405,13 @@ function onDragEnd() {
   justify-content: space-between;
   margin-bottom: 0.5rem;
   gap: 0.5rem;
+}
+
+.section-heading-numbering-honesty {
+  margin: 0 0 0.5rem;
+  font-size: var(--font-size-sm, 0.8125rem);
+  line-height: 1.4;
+  color: var(--text-secondary, #5c6570);
 }
 
 .block-card__title {

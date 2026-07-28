@@ -13,7 +13,39 @@ $E2eFixturesDir = Join-Path $RepoRoot 'frontend/e2e/fixtures'
 function Write-JsonFile([string]$Path, [object]$Data) {
     $Null = New-Item -ItemType Directory -Force -Path (Split-Path $Path)
     $json = $Data | ConvertTo-Json -Depth 100 -Compress:$false
+    # FOS-W15-4: ConvertTo-Json flattens single-element nested arrays (@(@(...)) → [...]).
+    # Re-nest headerRows / footerRows when the first element is a cell object.
+    $json = Repair-DemoTableHeaderRowsJson -Json $json
     Set-Content -Path $Path -Value $json -Encoding UTF8
+}
+
+function Repair-DemoTableHeaderRowsJson([string]$Json) {
+    try {
+        $obj = $Json | ConvertFrom-Json
+    } catch {
+        return $Json
+    }
+    function Repair-Node($Node) {
+        if ($null -eq $Node) { return }
+        if ($Node -is [System.Collections.IEnumerable] -and -not ($Node -is [string])) {
+            foreach ($child in @($Node)) { Repair-Node $child }
+            return
+        }
+        if ($Node -isnot [pscustomobject] -and $Node -isnot [hashtable]) { return }
+        foreach ($propName in @('headerRows', 'footerRows')) {
+            $rows = $Node.$propName
+            if ($null -eq $rows) { continue }
+            $asArray = @($rows)
+            if ($asArray.Count -gt 0 -and $null -ne $asArray[0].columnKey) {
+                $Node.$propName = @(, $asArray)
+            }
+        }
+        foreach ($p in $Node.PSObject.Properties) {
+            Repair-Node $p.Value
+        }
+    }
+    Repair-Node $obj
+    return ($obj | ConvertTo-Json -Depth 100 -Compress:$false)
 }
 
 function New-Var([string]$Key, [string]$Type, [bool]$Required = $false, $Default = $null, $Enum = $null, [string]$Desc = '') {

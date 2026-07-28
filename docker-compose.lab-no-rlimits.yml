@@ -1,0 +1,20 @@
+# LAB ONLY — nested-host cgroup accommodation (opt-in via DOCGEN_LAB_NO_RLIMITS=true).
+#
+# Some single-host acceptance runners execute Docker inside a cgroup v2 *threaded* subtree
+# (root `cgroup.type` = "domain threaded"; only cpuset/cpu/pids delegated — no `memory`).
+# In a threaded subtree the `memory` domain controller cannot be applied, so runc fails a
+# container that requests `mem_limit` with:
+#   "cannot enter cgroupv2 '/sys/fs/cgroup/docker' with domain controllers -- it is in threaded mode".
+#
+# This overlay drops the LR-B8 kernel resource limits (which cannot be enforced on such a host
+# anyway) for the two application containers so the acceptance stack can boot. It is NEVER a
+# claimed-production entry: production compose (docker-compose.prod.yml) keeps its cpu/mem limits.
+# Applied only when scripts/docker-deploy.ps1 sees DOCGEN_LAB_NO_RLIMITS=true.
+
+services:
+  docgen-backend:
+    mem_limit: 0
+    cpus: 0
+  docgen-frontend:
+    mem_limit: 0
+    cpus: 0

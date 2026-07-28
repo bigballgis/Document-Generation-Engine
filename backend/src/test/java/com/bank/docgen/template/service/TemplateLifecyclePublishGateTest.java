@@ -24,6 +24,7 @@ import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -155,6 +156,7 @@ class TemplateLifecyclePublishGateTest {
     @Test
     void publishBlockedWhenPublishGateNotReady() {
         when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateRepository.findByIdAndDeletedAtIsNullForUpdate(templateId)).thenReturn(Optional.of(template));
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
         org.mockito.Mockito.doThrow(new TemplateValidationException("api.error.template.publishGateBlocked"))
                 .when(publishGateService).assertReady(templateId, groupAdmin);
@@ -168,6 +170,7 @@ class TemplateLifecyclePublishGateTest {
     @Test
     void publishBlockedWhenFidelityViewedNotConfirmed() {
         when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateRepository.findByIdAndDeletedAtIsNullForUpdate(templateId)).thenReturn(Optional.of(template));
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
 
         assertThatThrownBy(() ->
@@ -182,6 +185,7 @@ class TemplateLifecyclePublishGateTest {
     @Test
     void publishBlockedWhenFidelityViewedMissing() {
         when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateRepository.findByIdAndDeletedAtIsNullForUpdate(templateId)).thenReturn(Optional.of(template));
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
 
         assertThatThrownBy(() ->

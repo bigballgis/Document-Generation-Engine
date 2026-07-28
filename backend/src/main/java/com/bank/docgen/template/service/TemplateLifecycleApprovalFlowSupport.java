@@ -245,12 +245,16 @@ final class TemplateLifecycleApprovalFlowSupport {
     }
 
     TemplateDetailView publish(UUID templateId, PublishTemplateRequest request, ManagementSessionClaims session) {
-        TemplateEntity template = eligibility.requirePublishableTemplate(templateId, session);
+        // FOS-W8-2: row lock serializes concurrent publish before any stamp.
+        TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNullForUpdate(templateId)
+                .orElseThrow(TemplateNotFoundException::new);
+        eligibility.requirePublishableTemplate(templateId, session);
         eligibility.requireStatus(template, TemplateLifecycleStatus.PENDING_RELEASE);
         decisionFormService.validatePublishConfirmation(request.fidelityViewedConfirmed());
+        // FOS-W7-2: evaluate publish gate before materializing/auto-satisfying the API-policy skeleton.
+        publishGateService.assertReady(templateId, session);
         apiPolicyMaterializationService.ensureApiPolicyOnPublish(
                 templateId, request.releaseVersion(), session.username());
-        publishGateService.assertReady(templateId, session);
         // CE-K01: resolve + pin the current master revision before any state mutation so
         // that a pinning failure (missing revision / unavailable storage) fails closed and
         // the transaction rolls back without leaving a half-published release.
@@ -304,9 +308,8 @@ final class TemplateLifecycleApprovalFlowSupport {
                 continue;
             }
             other.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
-            // Clear release_version so legacy Optional finders cannot NonUnique-match
-            // STOPPED + PUBLISHED rows that share the same version string.
-            other.setReleaseVersion(null);
+            // FOS-W6-5: keep release_version; runtime/detail resolvers already prefer
+            // findFirst…OrderByDevVersionNumberDesc for duplicate release strings.
             templateVersionRepository.save(other);
             // Same audit shape as TemplateLifecycleVersionSupport.deactivateVersion:
             // DEACTIVATE_VERSION / PUBLISHED → STOPPED, releaseVersion retained on the record.

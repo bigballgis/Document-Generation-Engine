@@ -64,6 +64,7 @@ export const apiErrorEn = {
     revisionInUseByPublishedRelease:
       "The letterhead revision is pinned by one or more published releases and cannot be deleted.",
     revisionDeleteFailed: "Unable to delete the letterhead revision.",
+    cannotDeleteCurrentRevision: "The current letterhead revision cannot be deleted.",
   },
   template: {
     notFound: "The template was not found.",
@@ -80,7 +81,9 @@ export const apiErrorEn = {
     changeDiffReleaseVersionsRequired:
       "Both releaseVersionA and releaseVersionB are required for release change-diff comparison.",
     confirmationRequired: "Secondary confirmation is required for this operation.",
-    invalidState: "The template is not in a valid state for this operation.",
+    invalidState: "The template is not in a valid state for this operation (current status: {0}).",
+    optimisticLockConflict: "This template version was updated elsewhere. Reload, then try again.",
+    invalidRulesJson: "The composition or binding rules JSON is invalid and could not be parsed.",
     devLineInFlight: "A development version line is already in progress. Finish or abandon it before cloning a published release.",
     versionImmutable: "Published template version content cannot be modified.",
     defaultRouteTargetCannotDeactivate: "The release version configured as the default API route cannot be deactivated.",
@@ -117,8 +120,8 @@ export const apiErrorEn = {
       "This binding was updated elsewhere. Reload the binding, then save again.",
     bindingExpectedUpdatedAtRequired:
       "expectedUpdatedAt is required when updating an existing anchor binding.",
-    publishGateBlocked: "Publish is blocked until binding validation passes.",
-    submitForApprovalGateBlocked: "Submit for approval is blocked until pre-release checks pass.",
+    publishGateBlocked: "Publish is blocked by gate check {0}.",
+    submitForApprovalGateBlocked: "Submit for approval is blocked by gate check {0}.",
     decisionReasonCategoryRequired: "A reason category is required for failed or rejected decisions.",
     decisionImpactSummaryRequired: "An impact summary is required for failed or rejected decisions.",
     decisionFidelityConfirmationRequired: "Fidelity evidence must be confirmed before recording a passing test decision.",
@@ -214,6 +217,8 @@ export const apiErrorEn = {
     accessDenied: "You do not have permission to manage API settings for this template.",
     templateNotPublished: "API policy can only be configured for published templates.",
     credentialNotActive: "The API credential is not active.",
+    credentialExpiryDaysInvalid: "Credential expiry days must be between 1 and 365.",
+    credentialAlreadyRevoked: "The API credential is already revoked.",
     defaultRouteTargetNotCallable: "The default route target release version is not callable.",
     policyVersionNotFound: "The requested API policy version was not found.",
     policyImpactBlocked: "The candidate API policy has blocking impacts and cannot be applied.",
@@ -286,7 +291,8 @@ export const apiErrorEn = {
   conflict: {
     usernameAlreadyExists: "A user with this username already exists.",
     groupCodeAlreadyExists: "A business group with this code already exists.",
-    legalHoldAlreadyReleased: "The legal hold has already been released."
+    legalHoldAlreadyReleased: "The legal hold has already been released.",
+    dataIntegrity: "The change conflicts with an existing unique record. Reload and retry.",
   },
   contentModule: {
     notFound: "The content module was not found.",
@@ -315,6 +321,8 @@ export const apiErrorEn = {
     lifecycleRoleDenied: "You do not have permission to perform this content module lifecycle operation.",
     lifecycleStateTransitionDenied: "The content module version is not in a valid state for this lifecycle operation.",
     lifecycleRequestInvalid: "The content module lifecycle request is invalid.",
+    versionTargetRequired: "A content module versionId or semanticVersion is required for this operation.",
+    versionTargetNotFound: "The specified content module version was not found.",
     impactConfirmationRequired: "Impact summary review and secondary confirmation are required for this lifecycle operation.",
     invalidEffectiveRange: "effectiveFrom must be less than or equal to effectiveTo.",
     searchTooLong: "The search string must be at most 200 characters.",

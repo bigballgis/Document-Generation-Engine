@@ -4,15 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
-import com.bank.docgen.rendering.RenderingOperationException;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -24,19 +24,19 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
 /**
- * Tests the docker-exec conversion path against a fake-docker.sh test double. The fake scripts
- * are bash-only (no .cmd variants), so the test is disabled on Windows: Windows ProcessBuilder
- * cannot launch .sh files directly. The path is exercised on Linux CI; the sibling
- * LibreOfficePdfConversionServiceTest covers the cli mode on both OSes via .cmd/.sh pairs.
+ * Docker-exec conversion path against OS-native fake-docker doubles (FOS-W12-1).
+ * Temp roots are {@code @TempDir}-scoped so parallel Surefire cannot race on shared tmp.
  */
-@DisabledOnOs(OS.WINDOWS)
 class DockerExecPdfConversionServiceTest {
 
+    @TempDir
+    Path isolatedTempRoot;
+
+    private String previousTmpDir;
     private DocgenRenderingProperties properties;
     private Path fakeDockerScript;
     private Path fakeLibreOfficeScript;
@@ -45,38 +45,38 @@ class DockerExecPdfConversionServiceTest {
 
     @BeforeEach
     void setUp() throws URISyntaxException, IOException {
+        previousTmpDir = System.getProperty("java.io.tmpdir");
+        System.setProperty("java.io.tmpdir", isolatedTempRoot.toAbsolutePath().toString());
         properties = new DocgenRenderingProperties();
-        fakeDockerScript = scriptPath("fake-docker.sh");
-        fakeLibreOfficeScript = scriptPath("fake-libreoffice.sh");
-        fakeDockerState = Files.createTempDirectory("docgen-fake-docker-state-");
-        fakeDockerScript.toFile().setExecutable(true);
-        fakeLibreOfficeScript.toFile().setExecutable(true);
+        fakeDockerScript = resolveScript("fake-docker");
+        fakeLibreOfficeScript = resolveScript("fake-libreoffice");
+        fakeDockerState = Files.createTempDirectory(isolatedTempRoot, "docgen-fake-docker-state-");
+        ensureExecutable(fakeDockerScript);
+        ensureExecutable(fakeLibreOfficeScript);
         properties.setDockerCliCommand(fakeDockerScript.toString());
         properties.setDockerContainerName("docgen-libreoffice-test");
         properties.setLibreOfficeCommand(fakeLibreOfficeScript.toString());
         properties.setConversionTimeoutSeconds(30);
         System.setProperty("DOCGEN_FAKE_DOCKER_STATE", fakeDockerState.toString());
+        // Bash double reads TMPDIR/env, not Java system properties — pin pointer where the child looks.
+        String processTmp = System.getenv().getOrDefault("TMPDIR", "/tmp");
+        Path pointer = Path.of(processTmp, "docgen-fake-docker-state.pointer");
+        Files.writeString(pointer, fakeDockerState.toString());
+        Files.writeString(isolatedTempRoot.resolve("docgen-fake-docker-state.pointer"), fakeDockerState.toString());
         testPool = pdfConversionPool();
     }
 
     @AfterEach
-    void tearDown() throws IOException {
+    void tearDown() {
         System.clearProperty("DOCGEN_FAKE_DOCKER_STATE");
         if (testPool != null) {
             testPool.shutdown();
         }
-        if (fakeDockerState != null) {
-            try (Stream<Path> paths = Files.walk(fakeDockerState)) {
-                paths.sorted(Comparator.reverseOrder()).forEach(path -> {
-                    try {
-                        Files.deleteIfExists(path);
-                    } catch (IOException ignored) {
-                        // Best-effort cleanup for tests.
-                    }
-                });
-            }
+        if (previousTmpDir != null) {
+            System.setProperty("java.io.tmpdir", previousTmpDir);
+        } else {
+            System.clearProperty("java.io.tmpdir");
         }
-        cleanupHostTempDirs("docgen-docker-pdf-");
     }
 
     @Test
@@ -93,7 +93,9 @@ class DockerExecPdfConversionServiceTest {
 
     @Test
     void rejectsFailedDockerExec() throws URISyntaxException, IOException {
-        properties.setLibreOfficeCommand(scriptPath("fake-libreoffice-fail.sh").toString());
+        Path fail = resolveScript("fake-libreoffice-fail");
+        ensureExecutable(fail);
+        properties.setLibreOfficeCommand(fail.toString());
         DockerExecPdfConversionService service = service();
 
         assertThatThrownBy(() -> service.convert(minimalDocxBytes()))
@@ -157,8 +159,22 @@ class DockerExecPdfConversionServiceTest {
         );
     }
 
-    private static Path scriptPath(String name) throws URISyntaxException {
-        return Path.of(DockerExecPdfConversionServiceTest.class.getResource("/scripts/" + name).toURI());
+    private static Path resolveScript(String baseName) throws URISyntaxException {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        String suffix = os.contains("win") ? ".cmd" : ".sh";
+        return Path.of(DockerExecPdfConversionServiceTest.class
+                .getResource("/scripts/" + baseName + suffix)
+                .toURI());
+    }
+
+    private static void ensureExecutable(Path script) throws IOException {
+        if (!System.getProperty("os.name", "").toLowerCase().contains("win")) {
+            Files.setPosixFilePermissions(script, EnumSet.of(
+                    PosixFilePermission.OWNER_READ,
+                    PosixFilePermission.OWNER_WRITE,
+                    PosixFilePermission.OWNER_EXECUTE
+            ));
+        }
     }
 
     private static byte[] minimalDocxBytes() throws IOException {
@@ -209,30 +225,8 @@ class DockerExecPdfConversionServiceTest {
     }
 
     private long countHostTempDirs(String prefix) throws IOException {
-        Path tempRoot = Path.of(System.getProperty("java.io.tmpdir"));
-        try (Stream<Path> paths = Files.list(tempRoot)) {
+        try (Stream<Path> paths = Files.list(isolatedTempRoot)) {
             return paths.filter(path -> path.getFileName().toString().startsWith(prefix)).count();
-        }
-    }
-
-    private void cleanupHostTempDirs(String prefix) throws IOException {
-        Path tempRoot = Path.of(System.getProperty("java.io.tmpdir"));
-        try (Stream<Path> paths = Files.list(tempRoot)) {
-            paths.filter(path -> path.getFileName().toString().startsWith(prefix))
-                    .sorted(Comparator.reverseOrder())
-                    .forEach(path -> {
-                        try (Stream<Path> children = Files.walk(path)) {
-                            children.sorted(Comparator.reverseOrder()).forEach(child -> {
-                                try {
-                                    Files.deleteIfExists(child);
-                                } catch (IOException ignored) {
-                                    // Best-effort cleanup for tests.
-                                }
-                            });
-                        } catch (IOException ignored) {
-                            // Best-effort cleanup for tests.
-                        }
-                    });
         }
     }
 }

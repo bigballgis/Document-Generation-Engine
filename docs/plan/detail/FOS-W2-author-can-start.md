@@ -2,7 +2,7 @@
 
 **Program:** [FOS](../frontline-operability-solidity-program-2026-07.md)
 **Wave:** W2
-**Status:** **Not Started**
+**Status:** **Done**
 **Slice id:** `fos-author-can-start` · worktree `../DGE-fos-author-can-start` · branch `feat/fos-author-can-start`
 **Task Master:** **#172**
 **Audit baseline:** `f29211c5` — locate by snippet
@@ -251,3 +251,10 @@ cancelled when user rejects.
 
 Same as W1 (deploy → reviews → merge → MAIN doc-sync → commit-review). Mark TM **#172** Done.
 Do not auto-activate Leaf 3.
+
+
+## Closeout evidence
+
+- Gates: [evidence/fos-author-can-start/gates.md](../evidence/fos-author-can-start/gates.md)
+- Behavior: [docs/behavior/fos-author-can-start.md](../../behavior/fos-author-can-start.md)
+- Docker/E2E/UIUX: **BLOCKED** (no docker/pwsh).

@@ -165,7 +165,7 @@ public class TemplateContentModuleReferenceService {
     ) {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        assertDraft(template);
+        templateService.assertDraft(template);
         String referenceKey = referenceSupport.normalizeReferenceKey(request.referenceKey());
         var existing = referenceRepository.findByTemplateVersionIdAndReferenceKey(version.getId(), referenceKey);
         if (existing.isPresent() && existing.get().isLockedFlag()) {
@@ -362,11 +362,13 @@ public class TemplateContentModuleReferenceService {
         Map<String, String> pinnedStructures = new LinkedHashMap<>();
         for (TemplateContentModuleReferenceEntity reference
                 : referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(templateVersionId)) {
-            contentModuleVersionRepository.findById(reference.getContentModuleVersionId())
-                    .ifPresent(version -> pinnedStructures.put(
-                            reference.getReferenceKey(),
-                            version.getContentStructureJson()
+            // FOS-W7-1: missing pinned clause versions fail closed (no silent omission).
+            ContentModuleVersionEntity version = contentModuleVersionRepository
+                    .findById(reference.getContentModuleVersionId())
+                    .orElseThrow(() -> new TemplateValidationException(
+                            "api.error.validation.contentModuleStructureMissing"
                     ));
+            pinnedStructures.put(reference.getReferenceKey(), version.getContentStructureJson());
         }
         return pinnedStructures;
     }
@@ -406,9 +408,4 @@ public class TemplateContentModuleReferenceService {
         return jurisdictions;
     }
 
-    private void assertDraft(TemplateEntity template) {
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.DRAFT) {
-            throw new TemplateValidationException("api.error.template.invalidState");
-        }
-    }
 }

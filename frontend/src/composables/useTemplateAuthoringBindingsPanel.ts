@@ -117,6 +117,8 @@ export function useTemplateAuthoringBindingsPanel(
     }
     const row = edit.anchorRowsSource.value.find((candidate) => candidate.anchorId === anchorId)
     if (!row) {
+      // FOS-W2-6 — do not fail silently on deep links.
+      ElMessage.warning(t('templates.authoring.anchorDeepLinkNotFound', { anchorId }))
       return
     }
     edit.openEditPanel(row)

@@ -7,6 +7,7 @@ import { useAuditTemplateFilterOptions } from '@/composables/useAuditTemplateFil
 import { useLegalHoldsStore } from '@/stores/legalHolds'
 import type { CreateLegalHoldPayload, LegalHoldScopeType } from '@/types/legalHold'
 import { parseLegalHoldInvocationIds } from '@/utils/legalHoldInvocationIds'
+import { localWallClockToUtcIso } from '@/utils/localWallClockToUtcIso'
 
 const props = defineProps<{
   modelValue: boolean
@@ -111,8 +112,10 @@ async function performCreate() {
 
   if (form.scopeType === 'TEMPLATE_WINDOW') {
     payload.templateId = form.templateId
-    payload.effectiveFrom = form.effectiveFrom
-    payload.effectiveTo = form.effectiveTo || null
+    payload.effectiveFrom = localWallClockToUtcIso(form.effectiveFrom) ?? form.effectiveFrom
+    payload.effectiveTo = form.effectiveTo
+      ? localWallClockToUtcIso(form.effectiveTo)
+      : null
   } else {
     payload.invocationExternalIds = parseLegalHoldInvocationIds(form.invocationExternalIdsText)
   }
@@ -154,6 +157,7 @@ defineExpose({
     :title="t('legalHold.create.title')"
     width="560px"
     destroy-on-close
+    :close-on-click-modal="false"
     data-testid="legal-hold-create-dialog"
     @closed="resetForm"
   >
@@ -217,7 +221,7 @@ defineExpose({
           <el-date-picker
             v-model="form.effectiveFrom"
             type="datetime"
-            value-format="YYYY-MM-DDTHH:mm:ss[Z]"
+            value-format="YYYY-MM-DDTHH:mm:ss"
             data-testid="legal-hold-effective-from"
             :placeholder="t('legalHold.create.placeholders.effectiveFrom')"
           />
@@ -226,7 +230,7 @@ defineExpose({
           <el-date-picker
             v-model="form.effectiveTo"
             type="datetime"
-            value-format="YYYY-MM-DDTHH:mm:ss[Z]"
+            value-format="YYYY-MM-DDTHH:mm:ss"
             clearable
             data-testid="legal-hold-effective-to"
             :placeholder="t('legalHold.create.placeholders.effectiveTo')"

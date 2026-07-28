@@ -3,7 +3,10 @@ import type {
   PasteCleaningEvidence,
   VariableSchema,
 } from '@/types/template'
-import type { ConfirmedNodeType } from '@/utils/structuredContentNodes'
+import {
+  INSERTABLE_BLOCK_NODE_TYPES,
+  type ConfirmedNodeType,
+} from '@/utils/structuredContentNodes'
 
 export interface ControlledStructuredContentEditorProps {
   modelValue: string
@@ -40,12 +43,5 @@ export const DEFAULT_STYLE_CATALOG: MasterStyleCatalog = {
   ],
 }
 
-export const STRUCTURED_BLOCK_NODE_TYPES: ConfirmedNodeType[] = [
-  'sectionHeading',
-  'paragraph',
-  'list',
-  'conditionBlock',
-  'loopBlock',
-  'tableComponentRef',
-  'contentModuleRef',
-]
+/** Toolbar + nested insert allow-list — derived from insertable util (FOS-W3-1). */
+export const STRUCTURED_BLOCK_NODE_TYPES: ConfirmedNodeType[] = [...INSERTABLE_BLOCK_NODE_TYPES]

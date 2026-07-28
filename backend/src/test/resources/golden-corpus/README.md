@@ -26,7 +26,9 @@ Harness: `com.bank.docgen.rendering.goldencorpus` (executed by `mvn verify`).
 | en + zh themes | `english-locale-letter` (`en-US`) + `chinese-uppercase-amount` (`zh-CN`) |
 | Multi-currency | `multi-currency-amount` (EUR / USD / CNY) — not Chinese-amount-only |
 | `LIBREOFFICE` honesty | PDF half labeled `LIBREOFFICE` is converted via `soffice` in the harness **or** the PDF half is **Assumptions.skip** when `soffice` is absent — never a forged LO binary |
-| `SYNTHETIC` honesty | PDFBox text projection from assembled DOCX; packages that cannot claim LO keep `pdfSource: SYNTHETIC` |
+| `SYNTHETIC` honesty | PDFBox text projection from assembled DOCX; packages that cannot claim LO keep `pdfSource: SYNTHETIC` + `harnessSelfTest: true` (**FOS-W13-2** — harness self-test, not product PDF proof) |
+| `productPdf` | Optional honesty label (e.g. `pending-CRCH-W5`) when multi-page/QR/attachment PDF product claims await CRCH W5 |
+| condition-inside-loop | Theme `condition-inside-loop` (**FOS-W13-4**) — real `conditionBlock` inside `loopBlock` |
 | No invented LO PDFs | No `expected/*.pdf` baselines checked in; do not relabel `SYNTHETIC` → `LIBREOFFICE` without real LO conversion |
 
 **Host / CI note:** without `soffice` on `PATH`, `LIBREOFFICE` PDF halves **SKIP** under default `mvn verify` (DOCX half still runs). New IBL-C3 themes use **honest SYNTHETIC** PDF halves so the locale/currency matrix stays green without inventing LO PDFs. Mandatory LO CI lane: **`-Plibreoffice-ci`** (IBL-D2 / F21) — fail-closed when soffice is absent; see [libreoffice-ci-lane.md](../../../../../docs/architecture/libreoffice-ci-lane.md).

@@ -15,6 +15,7 @@ import {
 } from '@/composables/externalServicesOpsCompose'
 import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import type { ManagementInvocationFilters, TemplateSummary } from '@/types/template'
+import { localWallClockToUtcIso } from '@/utils/localWallClockToUtcIso'
 
 export type CrossPackageInvocationFilters = {
   status: string
@@ -90,6 +91,17 @@ function assertCompositionFetchHonesty(batches: PackageInvocationBatch[]): void 
   }
 }
 
+/** Raw status enum values — views translate via `apiPolicy.invocationsPage.statusLabels.*`. */
+export const CROSS_PACKAGE_INVOCATION_STATUS_VALUES = [
+  'SUCCEEDED',
+  'FAILED',
+  'PARTIAL_SUCCEEDED',
+  'PROCESSING',
+  'ACCEPTED',
+  'EXPIRED',
+  'CANCELLED',
+] as const
+
 export function useCrossPackageInvocations(options: { autoLoad?: boolean } = {}) {
   const autoLoad = options.autoLoad !== false
   const pageSize = SERVER_TABLE_PAGE_SIZE
@@ -123,9 +135,10 @@ export function useCrossPackageInvocations(options: { autoLoad?: boolean } = {})
   const selectedRow = ref<CrossPackageInvocationRow | null>(null)
 
   const statusFilterOptions = computed(() =>
-    ['SUCCEEDED', 'FAILED', 'PARTIAL_SUCCEEDED', 'PROCESSING', 'ACCEPTED', 'EXPIRED', 'CANCELLED'].map(
-      (value) => ({ label: value, value }),
-    ),
+    CROSS_PACKAGE_INVOCATION_STATUS_VALUES.map((value) => ({
+      label: value,
+      value,
+    })),
   )
 
   const uiPage = computed({
@@ -261,8 +274,10 @@ export function useCrossPackageInvocations(options: { autoLoad?: boolean } = {})
     appliedFilters.status = filterDraft.status
     appliedFilters.requestId = filterDraft.requestId
     appliedFilters.templateId = filterDraft.templateId
-    appliedFilters.createdAfter = filterDraft.createdAfter
-    appliedFilters.createdBefore = filterDraft.createdBefore
+    appliedFilters.createdAfter =
+      localWallClockToUtcIso(filterDraft.createdAfter) ?? filterDraft.createdAfter
+    appliedFilters.createdBefore =
+      localWallClockToUtcIso(filterDraft.createdBefore) ?? filterDraft.createdBefore
     currentPage.value = 1
     void loadInvocations()
   }
