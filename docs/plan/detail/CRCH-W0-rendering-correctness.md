@@ -46,6 +46,7 @@ land before W0-6.
 | 4 | [W0-4](#w0-4) Section page-number plan is invented | **P0** | `DocxPdfPageNumberStampPlanResolver.java` |
 | 5 | [W0-5](#w0-5) docker-exec cross-contamination | **P0** | `DockerExecPdfConversionService.java` |
 | 6 | [W0-6](#w0-6) Orphan soffice + pipe deadlock | **P0** | 3 conversion services |
+| 7 | [W0-7](#w0-7) Re-scope seal authorized-area BLOCKER (OD-1 → inline) | **P0** | `ReferenceNodeService` / publish-gate seal checks |
 
 ---
 
@@ -406,10 +407,44 @@ private static final double DEFAULT_SEAL_PT = 48.0d;
 
 ### Do NOT
 
-- Do not implement absolute seal positioning (`pageIndex` / `xPt` / `yPt`). That is **OD-1**, an
-  open decision in the program document, and is explicitly out of scope. This task changes size
-  only; the seal stays inline.
-- Do not remove or weaken any seal validation in the authoring module.
+- Do not implement absolute seal positioning (`pageIndex` / `xPt` / `yPt`). **OD-1 is resolved:
+  inline** (program D4). Absolute/`CTAnchor` placement stays out of scope. This task changes
+  size only; the seal stays inline.
+- Do not re-scope authorized-area validation here — that is **W0-7**.
+
+---
+
+<a id="w0-7"></a>
+## W0-7 — Re-scope seal authorized-area BLOCKER (OD-1 → inline)
+
+**Severity:** P0 — publish gate implies a coordinate guarantee the renderer does not provide
+**Files:** `ReferenceNodeService.validateSealPlacementGeometry` (and any publish-gate /
+fidelity path that elevates `SEAL_OUTSIDE_AUTHORIZED_AREA` /
+`SEAL_AUTHORIZED_AREA_UNKNOWN` / `SEAL_AUTHORIZED_AREA_INVALID` to BLOCKER)
+**Confirmed decision:** program **D4** / FOS **D8** — seals remain **inline**
+
+### Why this exists
+
+Authorized-area geometry was written for absolute page placement. The renderer never
+implements `placement` / `CTAnchor`. Keeping a BLOCKER on coordinates the engine ignores
+is a paper-only control that blocks go-live dishonestly.
+
+### Chosen resolution (minimal — no new feature)
+
+1. Stop treating authorized-area geometry mismatches as **publish BLOCKERs**.
+2. Prefer one of: (a) demote to a non-blocking fidelity **warning** whose copy states that
+   seals are placed inline at the anchor, or (b) remove the geometry check entirely and
+   keep only checks that still mean something for inline seals (e.g. missing seal asset).
+3. Update i18n / fidelity message copy so a frontline author is not told the seal "must
+   fall inside" a page box the product does not honour.
+4. Tests: a template that would formerly BLOCK on `SEAL_OUTSIDE_AUTHORIZED_AREA` must
+   either warn-only or pass the gate under the chosen option — document which in the
+   task report.
+
+### Do NOT
+
+- Do not implement absolute positioning to "make the old BLOCKER true".
+- Do not silently leave the BLOCKER in place after D4.
 
 ---
 
@@ -503,7 +538,8 @@ new warning transport. Steps 1–4 alone already remove the wrong output, which 
 - Do not attempt to compute real section boundaries from `document.xml`. It is not derivable
   there. Guessing is the bug.
 - Do not disable stamping altogether — global page numbering must keep working.
-- Do not change the `docgen.rendering.pdf-page-number-stamping-enabled` default. That is **OD-2**,
+- Do not change the `docgen.rendering.pdf-page-number-stamping-enabled` default. **OD-2 is
+  resolved: default stays OFF** (program D5).
   an open decision.
 
 ---
@@ -754,9 +790,9 @@ Then replace the inline process handling at all three call sites with a call to
 
 | # | Criterion |
 | --- | --- |
-| 1 | All six tasks have a test that was observed **red first**, then green |
+| 1 | All **seven** tasks (W0-1…W0-7) have a test that was observed **red first**, then green (W0-7 may be a gate/unit test) |
 | 2 | `mvn -B -ntp -f backend/pom.xml verify` green |
 | 3 | `mvn -B -ntp -f backend/pom.xml verify -Plibreoffice-ci` run, with skips recorded honestly if `soffice` is absent |
-| 4 | No change to any public API contract, error code, or configuration default (except the new `FidelityWarningCode` constant from W0-4) |
-| 5 | OD-1 (seal absolute positioning) and OD-2 (stamping default) remain **unresolved and reported**, not silently decided |
+| 4 | No change to any public API contract or configuration default (except the new `FidelityWarningCode` constant from W0-4). Stamping default stays **OFF** (D5). Absolute seals stay **out of scope** (D4) |
+| 5 | W0-7 landed: authorized-area geometry is no longer a dishonest publish BLOCKER |
 | 6 | A short evidence note per task: what was red, what made it green |
